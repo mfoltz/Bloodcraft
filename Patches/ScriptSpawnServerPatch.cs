@@ -96,10 +96,6 @@ internal static class ScriptSpawnServerPatch
     {
         if (!Core._initialized) return;
 
-        // NativeArray<Entity> entities = _query.ToEntityArray(Allocator.Temp);
-        // NativeArray<PrefabGUID> prefabGuids = _query.ToComponentDataArray<PrefabGUID>(Allocator.Temp);
-        // NativeArray<Buff> buffs = _query.ToComponentDataArray<Buff>(Allocator.Temp);
-
         using NativeAccessor<Entity> entities = _query.ToEntityArrayAccessor();
         using NativeAccessor<PrefabGUID> prefabGuids = _query.ToComponentDataArrayAccessor<PrefabGUID>();
         using NativeAccessor<Buff> buffs = _query.ToComponentDataArrayAccessor<Buff>();
@@ -177,12 +173,9 @@ internal static class ScriptSpawnServerPatch
                 }
             }
         }
-        finally
+        catch (Exception e)
         {
-            // entities.Dispose();
-            // prefabGuids.Dispose();
-            // buffs.Dispose();
-            // entityOwners.Dispose();
+            Core.Log.LogWarning($"[ScriptSpawnServer.OnUpdatePrefix] - {e}");
         }
     }
     static int GetBuffType(
@@ -239,22 +232,19 @@ internal static class ScriptSpawnServerPatch
     }
     static void ApplyPlayerBonusStats(Entity buffEntity, Entity playerCharacter)
     {
-        // Core.Log.LogWarning($"[ApplyPlayerStats]");
         ulong steamId = playerCharacter.GetSteamId();
 
+        /*
         buffEntity.With((ref Buff buff) =>
         {
             buff.BuffType = BuffType.Parallel;
         });
+        */
 
         if (buffEntity.TryGetBuffer<SyncToUserBuffer>(out var syncToUsers))
         {
-            // Core.Log.LogWarning($"[ApplyPlayerStats] - SyncToUserBuffer ({syncToUsers.Length})");
-
             if (syncToUsers.IsEmpty)
             {
-                // Core.Log.LogWarning($"[ApplyPlayerStats] - SyncToUserBuffer empty, adding userEntity...");
-
                 SyncToUserBuffer syncToUserBuffer = new()
                 {
                     UserEntity = playerCharacter.GetUserEntity()
@@ -262,14 +252,6 @@ internal static class ScriptSpawnServerPatch
 
                 syncToUsers.Add(syncToUserBuffer);
             }
-            else
-            {
-                // Core.Log.LogWarning($"[ApplyPlayerStats] - SyncToUserBuffer not empty!");
-            }
-        }
-        else
-        {
-            // Core.Log.LogWarning($"[ApplyPlayerStats] - SyncToUserBuffer not found!");
         }
 
         /*
@@ -291,69 +273,12 @@ internal static class ScriptSpawnServerPatch
 
         BloodManager.UpdateBloodStats(buffEntity, playerCharacter, steamId);
         WeaponManager.UpdateWeaponStats(buffEntity, playerCharacter, steamId);
-
-        /*
-        if (!buffEntity.TryGetBufferAccessor<ModifyUnitStatBuff_DOTS>(out var buffer)) return;
-
-        ModificationsRegistry _modificationsRegistry = ModificationSystem._Registry;
-
-        for (int i = 0; i < buffer.Length; i++)
-        {
-            ModifyUnitStatBuff_DOTS modifyUnitStatBuff = buffer[i];
-            // ModifyUnitStatsDetour.ApplyUnitStats(ref _modificationsRegistry, ref modifyUnitStatBuff, buffEntity, playerCharacter);
-            ModifyUnitStatsDetour.ApplyUnitStats(ref _modificationsRegistry, ref modifyUnitStatBuff, buffEntity, playerCharacter);
-        }
-
-        // ClassManager.UpdateClassStats(buffEntity, playerCharacter, steamId);
-        // apply stats to player
-        // Progression.ApplyPlayerStats(buffEntity, playerCharacter);
-
-        // apply stats to sheet..?
-        if (!playerCharacter.TryGetComponent(out VampireAttributeCaps caps) 
-            || !playerCharacter.TryGetComponent(out VampireAttributeCapModificationsSource capModificationsSource) 
-            || !capModificationsSource.ModificationsEntity.TryGetComponent(out VampireAttributeCapModifications capModIds))
-        {
-            Core.Log.LogWarning($"[ApplyPlayerStats] - VampireAttributeCaps/Source/Modifications not found!");
-            return;
-        }
-
-        // increase the attribute cap start value?
-        VampireAttributeSetupUtility.SetupOrUpdateAttributes(EntityManager, playerCharacter, ref _modificationsRegistry, caps, ref capModIds, ServerGameBalanceSettings);
-        */
-    }
-    public static void RemovePlayerBonusStats(Entity buffEntity, Entity playerCharacter)
-    {
-        // Core.Log.LogWarning($"[RemovePlayerStats]");
-
-        if (!buffEntity.TryGetBufferAccessor<ModifyUnitStatBuff_DOTS>(out var buffer)) return;
-
-        ModificationsRegistry _modificationsRegistry = ModificationSystem._Registry;
-
-        for (int i = 0; i < buffer.Length; i++)
-        {
-            ModifyUnitStatBuff_DOTS modifyUnitStatBuff = buffer[i];
-            // ModifyUnitStatsDetour.RemoveUnitStats(ref _modificationsRegistry, ref modifyUnitStatBuff, playerCharacter);
-        }
-
-        buffEntity.TryDestroyBuff();
-        // apply stats to sheet..?
-        if (!playerCharacter.TryGetComponent(out VampireAttributeCaps caps)
-            || !playerCharacter.TryGetComponent(out VampireAttributeCapModificationsSource capModificationsSource)
-            || !capModificationsSource.ModificationsEntity.TryGetComponent(out VampireAttributeCapModifications capModIds))
-        {
-            Core.Log.LogWarning($"[RemovePlayerStats] - VampireAttributeCaps/Source/Modifications not found!");
-            return;
-        }
-
-        // increase the attribute cap start value?
-        VampireAttributeSetupUtility.SetupOrUpdateAttributes(EntityManager, playerCharacter, ref _modificationsRegistry, caps, ref capModIds, _serverGameBalanceSettings);
     }
     static void ApplyFamiliarBonusStats(Entity buffEntity, Entity familiar)
     {
         if (!familiar.TryGetFollowedPlayer(out Entity playerCharacter)) return;
         Entity servant = Familiars.GetFamiliarServant(playerCharacter);
 
-        // Core.Log.LogWarning($"[ApplyFamiliarStats]");
         buffEntity.TryRemove<Buff_Persists_Through_Death>();
 
         if (servant.TryGetComponent(out ServantEquipment servantEquipment))
@@ -480,12 +405,7 @@ internal static class ScriptSpawnServerPatch
                     foreach (ModifyUnitStatBuff_DOTS modifyUnitStatBuff in modifyUnitStatBuffs)
                     {
                         targetBuffer.Add(modifyUnitStatBuff);
-                        // Core.Log.LogWarning($"[ApplyFamiliarStats] - {modifyUnitStatBuff.AttributeCapType} | {modifyUnitStatBuff.StatType} | {modifyUnitStatBuff.ModificationType} | {modifyUnitStatBuff.Value} | {modifyUnitStatBuff.Modifier}");
                     }
-                }
-                else
-                {
-                    // Core.Log.LogWarning("[ApplyFamiliarStats] - modifyUnitStatBuffs empty!");
                 }
 
                 if (magicSourceBuff.HasValue())
@@ -499,26 +419,9 @@ internal static class ScriptSpawnServerPatch
                 equippableBuffs.Dispose();
             }
 
-            // Progression.ApplyFamiliarStats(buffEntity, familiar); does it work without?
             Familiars.FamiliarSyncDelayRoutine(familiar, servant).Start();
         }
     }
-
-    /*
-    static void ApplyStats(Entity buffEntity, Entity playerCharacter)
-    {
-        ulong steamId = playerCharacter.GetSteamId();
-
-        buffEntity.With((ref BloodBuff_VBlood_0_DataShared bloodBuff_VBlood_0_DataShared) =>
-        {
-            bloodBuff_VBlood_0_DataShared.DrainIncreaseFactor = 0f;
-            bloodBuff_VBlood_0_DataShared.ModificationId = ModificationIDs.Create().NewModificationId();
-        });
-
-        BloodManager.UpdateBloodStats(buffEntity, playerCharacter, steamId);
-        WeaponManager.UpdateWeaponStats(buffEntity, playerCharacter, steamId);
-    }
-    */
 
     [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
     [HarmonyPostfix]
@@ -526,9 +429,6 @@ internal static class ScriptSpawnServerPatch
     {
         if (!Core._initialized) return;
         else if (!_leveling) return;
-
-        // NativeArray<Entity> entities = _query.ToEntityArray(Allocator.Temp);
-        // NativeArray<Buff> buffs = _query.ToComponentDataArray<Buff>(Allocator.Temp);
 
         using NativeAccessor<Entity> entities = _query.ToEntityArrayAccessor();
         using NativeAccessor<Buff> buffs = _query.ToComponentDataArrayAccessor<Buff>();
@@ -540,18 +440,15 @@ internal static class ScriptSpawnServerPatch
                 Entity buffEntity = entities[i];
                 Entity buffTarget = buffs[i].Target;
 
-                // Core.Log.LogWarning($"[ScriptSpawnServer Postfix] - {buffEntity.GetPrefabGuid().GetPrefabName()}");
-
                 if (buffEntity.HasSpellLevel() && buffTarget.IsPlayer())
                 {
                     LevelingSystem.SetLevel(buffTarget);
                 }
             }
         }
-        finally
+        catch (Exception e)
         {
-            // entities.Dispose();
-            // buffs.Dispose();
+            Core.Log.LogWarning($"[ScriptSpawnServer.OnUpdatePostfix] - {e}");
         }
     }
 }

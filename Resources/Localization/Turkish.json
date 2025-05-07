@@ -1,41 +1,41 @@
 {
-  "Codes": [],
-  "Nodes": [
+  "codes": [],
+  "nodes": [
     {
       "guid": "de5768be-d168-42f3-b253-9f0422772f17",
-      "text": "Kalelerimiz asırlar boyu unutuldu ve harabeye döndü..."
+      "text": "Yüzyıllarca kalelerimiz harabelere dönüştürülmüş ve unutulmuştu…"
     },
     {
       "guid": "efe43767-3ddf-4339-8d9e-e4d4c2c566e7",
-      "text": "Türümüz karanlıkta gizlendi…"
+      "text": "Türümüz karanlığa gizlenmiş…"
     },
     {
       "guid": "8266cf94-bc99-4193-9327-44b30d6a1d8c",
-      "text": "Ta ki şimdiye dek…"
+      "text": "Ta ki şu ana dek…"
     },
     {
       "guid": "49b8e6d5-30f4-459a-8416-34dea7ab508f",
-      "text": "Gölgelerden yükseleceğiz…"
+      "text": "Gölgelerin içinden yükseleceğiz…"
     },
     {
       "guid": "44285b4f-0094-46ee-95a7-cadc42fdab82",
-      "text": "Onların kanıyla güç bulacağız"
+      "text": "Onların kanı... bizim gücümüz olacak"
     },
     {
       "guid": "092545af-8297-4fe9-8d11-06e763e95a5f",
-      "text": "Vampirler geceyi ve bize karşı gelen herkesi fethedecek!"
+      "text": "Vampirler geceyi ve bize karşı çıkan herkesi fethedecek!"
     },
     {
       "guid": "5958089e-2a12-431a-abca-e0d6c2c14c6c",
-      "text": "Ey hükmüme karşı çıkmaya cüret edenler…"
+      "text": "Hükümdarlığıma karşı koymaya cüret eden sen…"
     },
     {
       "guid": "7041a561-2f4a-4890-8781-2b36c84149c0",
-      "text": "Bana başkaldırdığınız için perişan olacaksınız!"
+      "text": "Hükümdarlığıma diren, ve mahvol!"
     },
     {
       "guid": "95e17778-f69b-46e3-9d12-03b62c760322",
-      "text": "Adımı bilin… Gazabımdan korkun!"
+      "text": "Adımı bil… Hiddetimden kork…!"
     },
     {
       "guid": "e9b22e9f-2673-46d6-bc6c-53810042b71d",
@@ -47,7 +47,7 @@
     },
     {
       "guid": "bb330fca-3710-4fe8-8377-6e0deea929f3",
-      "text": "Mükemmel evrim"
+      "text": "Mükemmelleştirilmiş evrim"
     },
     {
       "guid": "cc716787-ac62-4499-906b-173aa7e05872",
@@ -67,27 +67,27 @@
     },
     {
       "guid": "91e44cf1-d83c-4a2f-8d76-6a3841fae974",
-      "text": "Yüksel... Yüksel!"
+      "text": "Uyan… Uyan!"
     },
     {
       "guid": "a09066a3-5ae7-44d6-834c-450308301e77",
-      "text": "Bu bizimdi"
+      "text": "Buralar bizimdi"
     },
     {
       "guid": "e6fafd36-06fe-41e8-b793-270a63cb3eb7",
-      "text": "Bu diyara hükmettik"
+      "text": "Bu diyarı yönettik"
     },
     {
       "guid": "34fa659f-ca2b-4765-be18-33318956269d",
-      "text": "Gece bize aitti"
+      "text": "Geceye hükmettik"
     },
     {
       "guid": "98980d2c-9703-42cb-aa04-5c00cdeacd91",
-      "text": "Lakin insanlar bize isyan etti"
+      "text": "Ancak insanlar bize karşı ayaklandı"
     },
     {
       "guid": "6c31bff2-e775-4353-bfe9-293426ae67e7",
-      "text": "Tahtımızdan edildik"
+      "text": "Tahtımızdan edilmiştik"
     },
     {
       "guid": "12fb7523-490a-455e-8aa8-6ee0f0fd6cb4",
@@ -155,7 +155,7 @@
     },
     {
       "guid": "0c4bbb0f-01c8-4870-af06-6b3ad5d0bd86",
-      "text": "Müttefikleri, senin büyü gücünün <skillcolor>{healing}</c> kadarı iyileştiren bir kandan sütun çağır. Sütun, <skillcolor>{delay} sn.</c> sonra patlayarak <blood>Yaşam Emme</c> etkisi uygular ve düşmanlara <skillcolor>{damage}</c> büyü hasarı verip müttefikleri, senin büyü gücünün <skillcolor>{healing2}</c> kadarı iyileştirir."
+      "text": "Müttefikleri, senin yetenek gücünün <skillcolor>{healing}</c> kadarı iyileştiren kandan bir sütun çağır. Sütun, <skillcolor>{delay} sn.</c> sonra patlayarak <blood>Sömürü</c> etkisi uygular ve düşmanlara <skillcolor>{damage}</c> büyü hasarı verip müttefikleri, senin büyü gücünün <skillcolor>{healing2}</c> kadarı tekrar iyileştirir.<blood>."
     },
     {
       "guid": "566dd54c-313d-4619-9d32-d844ca50bc25",
@@ -167,7 +167,7 @@
     },
     {
       "guid": "9ab105e7-9c7c-47a3-8006-f0fc2f3fa5a7",
-      "text": "Kan Fırtınası"
+      "text": "Kan Kasırgası"
     },
     {
       "guid": "d5084787-3fe2-40ea-8075-8000dc65bd1f",
@@ -203,7 +203,7 @@
     },
     {
       "guid": "5137fa78-9d11-4960-9e2a-34db681d95e4",
-      "text": "Müttefikleri <skillcolor>{duration} sn.</c> boyunca her saniye büyü gücünün <skillcolor>{healing}</c> kadarı iyileştirirken vurulan düşmanlara <skillcolor>{damage}</c> büyü hasarı veren ve <blood>Yaşam Emme</c> etkisi uygulayan bir enerji ışını saç. Işının vurduğu her hedef kendini büyü gücünün <skillcolor>{selfhealing}</c> kadarı iyileştirir."
+      "text": "Odaklanarak <skillcolor>{duration}sn.</c> süren bir kan ışını gönderirsin, bu ışın düşmanlara yetenek gücünün <skillcolor>{damage}</c> kadarı büyü hasarı verir ve <blood>Sömürü</c>  uygular. Müttefikleri ise yetenek gücünün <skillcolor>{healing}</c> kadarı iyileştirir.  Bu ışın ile vurulan her hedef başına kedini yetenek gücünün <skillcolor>{selfhealing}</c> kadarı iyileştirir."
     },
     {
       "guid": "8abf33e8-3236-4f57-931b-bf149307a8c4",
@@ -215,7 +215,7 @@
     },
     {
       "guid": "a67298e8-b5ec-4dd1-a8d6-d810e339cf74",
-      "text": "İleri doğru atılarak düşmanlara bir hat boyunca vur. <skillcolor>{dotdamage}</c> büyü hasarı verir ve kendini <skillcolor>{duration} sn.</c> boyunca senin büyü gücünün <skillcolor>{dothealing}</c> kadarı iyileştirir. Etki sona erdiğinde kurbana ve yakındaki düşmanlara <skillcolor>{damage}</c> büyü hasarı veren ve <blood>Yaşam Emme</c> etkisi uygulayan bir kan novası oluşur."
+      "text": "İleri doğru atılarak düşmanlara bir hat boyunca vurur. <skillcolor>{dotdamage}</c> büyü hasarı verir ve kendini <skillcolor>{duration}sn</c> boyunca senin büyü gücünün <skillcolor>{dothealing}</c> kadarı iyileştirir. Etki sona erdiğinde kurbana ve yakındaki düşmanlara <skillcolor>{damage}</c> büyü hasarı veren ve <blood>Sömürü</c> etkisi uygulayan bir kan novası oluşur."
     },
     {
       "guid": "0d882673-4e3f-4cec-9310-1e089aab544c",
@@ -231,7 +231,7 @@
     },
     {
       "guid": "4ed94733-9a5d-49e5-ab36-8986be6d0c0d",
-      "text": "<skillcolor>{damage}</c> büyü hasarı veren ve <blood>Yaşam Emme</c> etkisi uygulayan bir mermi fırlat."
+      "text": "<skillcolor>{damage}</c> büyü hasarı veren ve <blood>Sömürü</c> etkisi uygulayan bir mermi fırlat."
     },
     {
       "guid": "298cd476-0bd2-4145-8ef0-6f4a98fb1c9c",
@@ -243,7 +243,7 @@
     },
     {
       "guid": "823b70d3-4d61-4e3b-9e17-4b37361785cf",
-      "text": "Vurulan düşmanı lanetleyen ve <blood>Yaşam Emme</c> uygulayan bir mermi at. Lanet <skillcolor>{delay} sn.</c> sonra <skillcolor>{damage}</c> büyü hasarı verir ve <skillcolor>{drain}</c> can emer."
+      "text": "İsabet eden düşmanı lanetleyen ve <blood>Sömürü</c> etkisi uygulayan bir mermi fırlat. Lanet, <skillcolor>{damage}</c> büyü hasarı verir ve <skillcolor>{delay}sn.</c> sonra <skillcolor>{drain}</c> can tüketir."
     },
     {
       "guid": "ae2dcdee-a6b7-4ffa-8ca2-2c06707be8bb",
@@ -255,7 +255,7 @@
     },
     {
       "guid": "07ab96b1-5b36-4739-b917-3fcb9f01b23d",
-      "text": "Kan Yanması"
+      "text": "Kan Yanığı"
     },
     {
       "guid": "a6480848-87ea-4f09-973b-0f470a2aa87b",
@@ -283,7 +283,7 @@
     },
     {
       "guid": "f3ee333c-4c9d-4ab4-bd5c-57c9a90ae1b1",
-      "text": "<blood>Yaşam Emme</c>"
+      "text": "<blood>Sömürü</c>"
     },
     {
       "guid": "d5344c6f-f384-4546-9e28-2efd6eacee18",
@@ -299,11 +299,11 @@
     },
     {
       "guid": "a08782bd-67d3-43d2-b355-096628fa017d",
-      "text": "Patlama darbesi, <blood>Yaşam Emme</c> etkisini tüketerek <skillcolor>%{Damage}</c> hasar verir."
+      "text": "Patlama darbesi, <blood>Sömürü</c> etkisini tüketerek <skillcolor>%{Damage}</c> hasar verir."
     },
     {
       "guid": "d99ed242-2ace-4ff4-850b-04fc241c6c47",
-      "text": "İlk darbe, <blood>Yaşam Emme</c> uygular."
+      "text": "İlk darbe, <blood>Sömürü</c> uygular."
     },
     {
       "guid": "e4ba6501-3b66-4b4a-b640-e02f51dc259e",
@@ -315,7 +315,7 @@
     },
     {
       "guid": "8dbbd7f6-0c55-4ce6-ab7a-251bf591b235",
-      "text": "İlk darbe kendinin ve yakındaki müttefiklerin üzerindeki tüm olumsuz etkileri ortadan kaldırır."
+      "text": "İlk darbenin kendin ve yakındaki müttefikler üzerindeki tüm olumsuz etkilerini ortadan kaldırır."
     },
     {
       "guid": "4420acad-7c44-45e8-84ac-96b6696dedc6",
@@ -387,11 +387,11 @@
     },
     {
       "guid": "749d5798-a2e3-4b8c-8e12-c59d8450485b",
-      "text": "Tetiklendiğinde en fazla <skillcolor>{Count}</c> hedefin <blood>Yaşam Emme</c> etkisini tüketerek hedef başına maksimum canının <skillcolor>%{Healing}</c> kadarı seni iyileştirir."
+      "text": "Tetiklendiğinde en fazla <skillcolor>{Count}</c> hedefin <blood>Sömürü</c> etkisini tüketerek hedef başına maksimum canının <skillcolor>%{Healing}</c> kadarı seni iyileştirir."
     },
     {
       "guid": "1fe36dbe-e80f-4b5c-b539-02ff4b97e96e",
-      "text": "Tetiklendiğinde en fazla <skillcolor>{Count}</c> hedefin <blood>Yaşam Emme</c> etkisini tüketerek hedef başına bekleme süresini <skillcolor>{CooldownReduction} sn.</c> azaltır."
+      "text": "Tetiklendiğinde en fazla <skillcolor>{Count}</c> hedefin <blood>Sömürü</c> etkisini tüketerek hedef başına bekleme süresini <skillcolor>{CooldownReduction}sn</c> azaltır."
     },
     {
       "guid": "1e8d8db5-fe78-4606-96c2-9b95a89eaa0a",
@@ -471,11 +471,11 @@
     },
     {
       "guid": "20ec01c5-0da9-4e16-bc7a-590b7fd6d2ec",
-      "text": "Darbe sonrası patlayarak yakındaki düşmanlara <skillcolor>%{Damage}</c> hasar verir ve <blood>Yaşam Emme</c> etkisi uygular."
+      "text": "Darbe sonrası patlayarak yakındaki düşmanlara <skillcolor>%{Damage}</c> hasar verir ve <blood>Sömürü</c> etkisi uygular."
     },
     {
       "guid": "06a5e047-9ac3-48b2-b17d-619b89a62347",
-      "text": "Darbe sonrası iki küçük mermiye bölünür. Her mermi <skillcolor>%{Damage}</c> hasar verir ve <blood>Yaşam Emme</c> etkisi uygular."
+      "text": "Darbe sonrası iki küçük mermiye bölünür. Her mermi <skillcolor>%{Damage}</c> hasar verir ve <blood>Sömürü</c> etkisi uygular."
     },
     {
       "guid": "5903327c-4914-4bea-b780-4e634f37335a",
@@ -507,11 +507,11 @@
     },
     {
       "guid": "477e26ff-56f9-4d0d-aa98-d50cb2435fc5",
-      "text": "Bir sonraki birincil saldırı, yakındaki düşmanlara <skillcolor>%{Damage}</c> hasar veren ve <blood>Yaşam Emme</c> etkisi uygulayan bir kan novası oluşturur."
+      "text": "Bir sonraki birincil saldırı, yakındaki düşmanlara <skillcolor>%{Damage}</c> hasar veren ve <blood>Sömürü</c> etkisi uygulayan bir kan novası oluşturur."
     },
     {
       "guid": "c87dbd84-76b6-43f6-bf05-9380024273cd",
-      "text": "Bir düşmanın üzerinden atıldığında <blood>Yaşam Emme</c> etkisi uygulanır."
+      "text": "Bir düşmanın içinden geçmek <blood>Sömürü</c> etkisi uygular."
     },
     {
       "guid": "39d9012b-e768-4e58-a18e-a8ceb2281081",
@@ -659,7 +659,7 @@
     },
     {
       "guid": "bc3f401d-750d-4cc8-885f-a29e66337083",
-      "text": "Darbe sonrasında patlayarak yakındaki düşmanlara <skillcolor>%{Damage}</c> hasar verir ve <blood>Yakma</c> etkisi uygular."
+      "text": "Darbe sonrası patlayarak yakındaki düşmanlara <skillcolor>%{Damage}</c> hasar verir ve <chaos>Yakma</c> etkisi uygular."
     },
     {
       "guid": "39686ca4-e75a-4b04-9348-dc255790e46e",
@@ -803,7 +803,7 @@
     },
     {
       "guid": "1d4dfd8f-95de-4ea5-ad27-73c6ab43975d",
-      "text": "Donmuş Zırh"
+      "text": "Buzlu Zırh"
     },
     {
       "guid": "94cc61ca-9f46-41b5-8bbe-666c263586a0",
@@ -823,7 +823,7 @@
     },
     {
       "guid": "3f7c843d-1b7c-4a4b-81a1-41e9273a0fd8",
-      "text": "Hedef müttefiki veya kendini <skillcolor>{duration} sn.</c> boyunca buza dönüştür ve bir buz anaforu çağır. Buz bloğu, hedefe büyü gücünün <skillcolor>{absorb}</c> kadarı kalkan sağlar, kitle kontrol etkilerine karşı bağışıklık kazandırır ve hedefin maksimum canının en fazla <skillcolor>{healing}</c> kadarını iyileştirir.\\n\\nAnafor başta <skillcolor>{initdamage} büyü hasarı verir ve </c><frost>Ürperti</c> etkisi uygular. Anafor, etki süresince fazladan <skillcolor>{damage}</c> hasar verir."
+      "text": "Hedef müttefiki veya kendini <skillcolor>{duration} sn.</c> boyunca buza dönüştür ve bir buz anaforu çağır. Buz bloğu, hedefe büyü gücünün <skillcolor>{absorb}</c> kadarı kalkan sağlar, kitle kontrol etkilerine karşı bağışıklık kazandırır ve hedefin maksimum canının en fazla <skillcolor>{healing}</c> kadarını iyileştirir.\\n\\nAnafor başta <skillcolor>{initdamage}</c> büyü hasarı verir ve <frost>Ürperti</c> etkisi uygular. Anafor, etki süresince fazladan <skillcolor>{damage}</c> hasar verir."
     },
     {
       "guid": "98aa6faa-ba15-4f7d-91f0-5374792121ae",
@@ -871,7 +871,7 @@
     },
     {
       "guid": "2bc802a8-0efa-471e-9602-52e55e3ffdbb",
-      "text": "Düşmanlarını <frost>dondurarak</c> taş kesilmelerini sağlar, hareket kabiliyetlerini engeller ve eylemlerini durdurur.\\n\\nHedef <frost>Dondurma</c> etkisine karşı bağışıksa <skillcolor>{frostdamage}</c> büyü hasarı verir, <frost>Ürperti</c> etkisi uygular ve hedefi <skillcolor>{staggerduration} sn.</c> boyunca sendeletir.\\n\\nVampirler <skillcolor>normal sürenin yarısı</c> kadar dondurulmuş halde kalır.\\n"
+      "text": "Düşmanlarını <frost>dondurarak</c> taş kesilmelerini sağlar, hareket kabiliyetlerini engeller ve eylemlerini durdurur.\\n\\nHedef <frost>Dondurma</c> etkisine karşı bağışıksa <skillcolor>{frostdamage}</c> büyü hasarı verir, <frost>Ürperti</c> etkisi uygular ve hedefi <skillcolor>{staggerduration} sn.</c> boyunca sendeletir.\\n\\n<i>Vampirler <skillcolor>normal sürenin yarısı</c> kadar dondurulmuş halde kalır.\\n"
     },
     {
       "guid": "dc9fec6c-87a0-4634-8bbf-50c90f382cd7",
@@ -1011,7 +1011,7 @@
     },
     {
       "guid": "60cec9f0-cd10-4c0f-b1ac-4fbf061d25b8",
-      "text": "Yaşam emmeyi <skillcolor>%{Leech}</c> artırır."
+      "text": "Can sömürüsünü <skillcolor>%{Leech}</c> artırır."
     },
     {
       "guid": "ab92c3ea-89d2-48db-8bc2-c21c8f9f94a3",
@@ -1187,7 +1187,7 @@
     },
     {
       "guid": "df4583e8-466c-479a-92cb-e8e1c010ef80",
-      "text": "<blood>Kan İşlenmiş</c> darbeler <blood>Yaşam Emme</c> etkisi uygular."
+      "text": "<blood>Kanla İşlenmiş</c> - vuruşlar <blood>Sömürü</c> etkisi uygular."
     },
     {
       "guid": "1dbd5abe-3e9e-4fbf-b090-c09a415b214d",
@@ -1383,7 +1383,7 @@
     },
     {
       "guid": "286fe114-59a4-46c7-8ea5-86312165851d",
-      "text": "Birincil Saldırı Hızını <skillcolor>{factor1}</c> artırır ve <storm>Statik</c> <skillcolor>{factor2}</c> artırılmış hasar verir."
+      "text": "Birincil Saldırı Hızını <skillcolor>{factor1}</c> artırır ve <storm>Statik</c> tetiklemeleri <skillcolor>{factor2}</c> daha fazla hasar verir."
     },
     {
       "guid": "019d86b9-d17f-468e-9231-1ce8f8a99907",
@@ -1987,7 +1987,7 @@
     },
     {
       "guid": "6321f865-8617-4209-b403-962ad28f6286",
-      "text": "Her etkin <storm>fırtına kalkanı</c> <skillcolor>%</c{Factor}> büyüyle yaşam emme kazandırır."
+      "text": "Her etkin <storm>fırtına kalkanı</c> <skillcolor>%{Factor}</c> büyüyle yaşam emme kazandırır."
     },
     {
       "guid": "fad7fccd-208e-48aa-946a-5c017c9f7979",
@@ -2070,6 +2070,10 @@
       "text": "Kötücül Zincirler"
     },
     {
+      "guid": "d069e19e-8bc1-4588-a8b5-10aef5649261",
+      "text": "Vurulan düşmanı bağlayarak hareket hızını hedefe olan mesafeye göre <skillcolor>{speedfactor}-{speedfactor2}</c> azaltan bir zincir fırlat. Büyüyü maksimum <skillcolor>{duration} sn.</c> olacak şekilde aktif tut. <skillcolor>{damage}</c> büyü hasarı verir ve etki sona erdiğinde <unholy>Suçluluk</c> etkisi uygular.\\n\\nSeninle hedef arasındaki mesafe <skillcolor>{distance}</c> metreyi aşarsa bağ kopar ve <skillcolor>{slowduration} sn.</c> soluk kapan uygular."
+    },
+    {
       "guid": "090f5547-c30d-42ef-b353-7da661826a4c",
       "text": "Kemik Patlaması"
     },
@@ -2091,7 +2095,7 @@
     },
     {
       "guid": "eeb65ceb-0f36-4ff6-b045-bdec5ad76304",
-      "text": "Bir alandaki düşmanları {slowduration} sn. boyunca yavaşlatan ve müttefikleri, senin büyü gücünün {healing} kadarı iyileştiren bir enerji sütunu getir. Sütun, {delay} sn. sonra patlayarak güçlü bir enerji saçar ve düşmanlara {damage} büyü hasarı verip müttefikleri, senin büyü gücünün {healing2} oranında iyileştirir."
+      "text": "Bir alandaki düşmanları {slowduration} sn. boyunca yavaşlatan ve müttefikleri, senin büyü gücünün {healing} kadarı iyileştiren bir enerji sütunu getir. Sütun, {delay} sn. sonra patlayarak güçlü bir enerji saçar ve düşmanlara {damage} büyü hasarı verip müttefikleri, senin büyü gücünün {healing2} kadarı iyileştirir."
     },
     {
       "guid": "8a5b4d1a-82fe-409e-9ca1-1b73c8dc1270",
@@ -2147,7 +2151,7 @@
     },
     {
       "guid": "5afb8251-53f1-488e-9205-8f8695f3d4e4",
-      "text": "Düşmanını kovalayan ve yakınına geldiğinde patlayarak <skillcolor>{impactdamage}</c> büyü hasarı veren, <unholy>Suçluluk</c> etkisi uygulayan ve örümcek yavruları yaratan dev bir örümcek çağır. Her örümcek yavrusu patlayarak <skillcolor>{minordamage}</c> büyü hasarı verir ve <unholy>Suçluluk</c> etkisi uygular."
+      "text": "Düşmanını kovalayan ve yakınına geldiğinde patlayarak <skillcolor>{impactdamage}</c> büyü hasarı veren, <unholy>Suçluluk</c> etkisi uygulayan ve <skillcolor>{count}</c> örümcek yavrusu yaratan dev bir örümcek çağır. Her örümcek yavrusu patlayarak <skillcolor>{minordamage}</c> büyü hasarı verir ve <unholy>Suçluluk</c> etkisi uygular."
     },
     {
       "guid": "4dd23ad7-f810-4be5-8a07-1332216ea39c",
@@ -2187,7 +2191,7 @@
     },
     {
       "guid": "c48555ea-db5d-4855-a1ea-c3f5095b3354",
-      "text": "Şeytani"
+      "text": "Kötücül"
     },
     {
       "guid": "3448ce98-0141-4cef-b1c4-38d6dcf29eb1",
@@ -2196,6 +2200,10 @@
     {
       "guid": "1a514ac7-58f3-4564-be9d-2db97bb20feb",
       "text": "Hedefin etrafında dolaşan bir kemik ruh yaratır. Bu ruh, darbe uyguladığı düşmanlara <skillcolor>%{Damage}</c> hasar verip <unholy>Suçluluk</c> etkisi uygular."
+    },
+    {
+      "guid": "6095e639-ab8f-4244-ac5a-79c40da480cb",
+      "text": "Büyü kullanırken her <skillcolor>0,7 saniyede</c> bir <skillcolor>%{Damage}</c> hasar verir ama darbe hasarını <skillcolor>%{Reduction}</c> azaltır."
     },
     {
       "guid": "eadda732-e4f2-4ff0-a764-dd4a09518994",
@@ -2328,6 +2336,10 @@
     {
       "guid": "de0f2381-afff-4871-9748-44bbbcf5bcd1",
       "text": "Bir düşmanın üzerinden geçmek <unholy>Suçluluk</c> etkisi uygular."
+    },
+    {
+      "guid": "e0ffd6d4-96c1-4a9b-bf04-5127137fe81d",
+      "text": "Doğan iskelet <skillcolor>{Duration} sn.</c> sonra patlar. Patlama <skillcolor>%{Damage}</c> hasar verir ve yakındaki düşmanlara <unholy>Suçluluk</c> etkisi uygular."
     },
     {
       "guid": "67735373-35da-49a0-ad69-965b2aa9e8ec",
@@ -3139,7 +3151,7 @@
     },
     {
       "guid": "20552ba7-00de-4012-994b-9dfa334cc6bc",
-      "text": "Yere indiğinde daha az etkili bir artçı şok yaratarak bir hat boyunca <skillcolor>{damage}</c> hasar verir ve <chaos>Yakma</c> etkisi uygular."
+      "text": "Yere indiğinde daha az etkili bir artçı şok yaratarak bir hat boyunca <skillcolor>%{Damage}</c> hasar verir ve <chaos>Yakma</c> etkisi uygular."
     },
     {
       "guid": "c7470bbf-079f-496d-8c67-cc9cf3c2dd47",
@@ -3231,7 +3243,7 @@
     },
     {
       "guid": "a4cdef61-3c99-4eae-9aac-c1c82652d7f8",
-      "text": "İmlece doğru sıçra ve gürzünü yere vurarak <skillcolor>{damage}</c> fiziksel hasar ver ve <skillcolor>{duration}</c> saniyelik soluk kapan uygula."
+      "text": "İmlece doğru sıçra ve gürzünü yere vurarak <skillcolor>{damage}</c> fiziksel hasar ver ve <skillcolor>{duration} saniyelik</c> soluk kapan uygula."
     },
     {
       "guid": "6a1ac649-16f2-426d-8686-3c7f594bcfcd",
@@ -3495,7 +3507,7 @@
     },
     {
       "guid": "73e462c6-2956-478c-9645-b9da907014ea",
-      "text": "Dolanan Kamçı"
+      "text": "Örgü Kırbaç"
     },
     {
       "guid": "0d3b4868-fcf2-4ab6-b641-010fe7f7edbb",
@@ -3691,7 +3703,7 @@
     },
     {
       "guid": "b85302e9-d1e2-4316-b4e6-3745e0e1148e",
-      "text": "Geceleri Hareket Hızı <teal1>%{value}</c> artar."
+      "text": "Gece Vakti Hareket Hızı <teal1>%{value}</c> artar."
     },
     {
       "guid": "4b9a30d6-5cee-4257-8adc-bdf12805e4b5",
@@ -3746,8 +3758,16 @@
       "text": "Büyü Gücü <teal1>%{value}</c> ve Şekil Değiştirmişken Hız <teal1>%{shapeshiftSpeed}</c> artar."
     },
     {
+      "guid": "488f0cf3-4b1f-4151-8239-ae21fde6cdc4",
+      "text": "Ulti Bekleme Süresi Hızı <teal1>%{value}</c> artar ve Ulti kullanıldığında yanında savaşacak <teal1>2</c> Mutant Sıçan doğar."
+    },
+    {
       "guid": "c8230dea-52aa-4114-9801-6320c8557602",
       "text": "Ulti Gücü <teal1>%{value}</c> ve Yardakçı Hasarı <teal1>%{minionDamage}</c> artar."
+    },
+    {
+      "guid": "cabcc8c5-4c75-47c5-a846-3227ffee03f2",
+      "text": "Örtü Bekleme Süresi Hızı <teal1>%{value}</c> artar ve bir Örtü saldırısı isabet ettiğinde Ulti Bekleme Süresi <teal1>{cooldownreduction} sn.</c> azalır."
     },
     {
       "guid": "cbf3eeea-1160-4f65-a3d8-78eba3df24bf",
@@ -3846,6 +3866,10 @@
       "text": "Ulti Güç <teal1>%{value}</c> artar ve bir Ulti kullanırken Büyü Bekleme Sürelerini sıfırlar."
     },
     {
+      "guid": "65219c1f-c7c0-43fc-bb07-27165a8b59d7",
+      "text": "Büyü Yükleme Kazancı <teal1>{value}</c> artar."
+    },
+    {
       "guid": "48abfa07-1bfa-46cf-9091-d75175401926",
       "text": "Şekil Değiştirmişken hareket hızı <teal1>%{value}</c> artar."
     },
@@ -3886,6 +3910,10 @@
       "text": "Silah Yeteneği Gücü <teal1>%{value}</c> ve canı tam olan düşmanlara saldırırken verilen hasar <teal1>%{extraDamage}</c> artar."
     },
     {
+      "guid": "a99ddb9b-e06a-422a-861c-0fd2501cc8b6",
+      "text": "<teal1>{chance}</c> ihtimalle bir saldırıyı savuşturarak alınan hasarı <teal1>{damagereudction}</c> azaltır. Bir saldırıyı savuşturmak, kendi fiziksel gücünü <teal1>{duration} sn.</c> boyunca <teal1>{factor}</c> artırır."
+    },
+    {
       "guid": "42035506-824b-4f41-ab2c-33b2f8a3d7a0",
       "text": "Silah Bekleme Süresi Hızı <teal1>%{value}</c> artar."
     },
@@ -3919,7 +3947,7 @@
     },
     {
       "guid": "32ac8110-34c8-43d9-bb09-09d6410f7748",
-      "text": "<teal2>+%15</c> Yaşam Emme."
+      "text": "<teal2>+%15</c> Can Sömürüsü."
     },
     {
       "guid": "27ceafc1-3cdb-4716-a53e-dcf69296b2fc",
@@ -3947,7 +3975,7 @@
     },
     {
       "guid": "17f307ee-5115-4bc3-b7d4-d96e892b5522",
-      "text": "Kan Emme"
+      "text": "Kan Sömürüsü"
     },
     {
       "guid": "60dbfd76-9c14-4308-bd16-376326231a9d",
@@ -4275,7 +4303,7 @@
     },
     {
       "guid": "ce3122a0-d795-45e0-9ce9-8981f2cb21f1",
-      "text": "Yaşam Emme"
+      "text": "Sömürü"
     },
     {
       "guid": "d5d032fc-ff95-40ed-ace1-1136f46f650c",
@@ -4434,8 +4462,48 @@
       "text": "Verilen hasar <skillcolor>{weakenfactor}</c> azalır."
     },
     {
+      "guid": "6c2b5f1f-ee10-4022-a4f6-4e4b2724d51f",
+      "text": "Kırmızı Takım"
+    },
+    {
+      "guid": "f785ee2a-7632-4180-b74a-3c98530d4c25",
+      "text": "Mavi Takım"
+    },
+    {
+      "guid": "79070767-638f-471b-9f90-ebd2a707eb0b",
+      "text": "Yeşil Takım"
+    },
+    {
+      "guid": "587bf5ad-620b-46a5-8f51-82cc0184a18c",
+      "text": "Mor Takım"
+    },
+    {
+      "guid": "3ffd469d-fbaa-4efb-b794-2ff8c4dfdecc",
+      "text": "Bir <teal1>Arena Takımını</c> Kale Arenasına eklemek için bir Takım Flaması yerleştir. Yerleştirildiğinde vampirler Takım Flamasını kullanarak ilgili takıma katılabilir.\\n\\nAynı arenaya birden fazla Takım Flaması yerleştirilebilir. Bu da vampirlerin farklı takımlara katılmasını mümkün kılar."
+    },
+    {
+      "guid": "09755304-443f-4a12-9a2e-ff7751d6f2d0",
+      "text": "Arena Küresi"
+    },
+    {
+      "guid": "098042d4-0536-48af-9274-fe7517610291",
+      "text": "Düzenli olarak yeniden doğan kırılabilir bir küreyi arenaya yerleştir.\\n\\nKüre kırıldığında son darbeyi vuran oyuncunun takımı <teal1>iyileşir</c>."
+    },
+    {
+      "guid": "40328b82-16d8-46e8-a260-c5cd0abe2641",
+      "text": "Arena Merkezi"
+    },
+    {
+      "guid": "5e2c39ce-72a7-4d7b-ad54-124e0cdfe6b0",
+      "text": "Arena için bir merkez konum yerleştir.\\n\\n<teal1>Ani Ölüm</c> sırasında savaş meydanı bu noktaya doğru küçülecektir."
+    },
+    {
       "guid": "51c4337a-94eb-456e-9ee7-b000d06cec84",
       "text": "Arena İstasyonu"
+    },
+    {
+      "guid": "fea1a71c-a832-4311-83ce-cd21b6c0cac0",
+      "text": "Kalene <teal1>Arena</c> ekleyen bir istasyon. Bu istasyonu kullanarak Arena Mücadelelerini başlat veya iptal et ve arena kurallarını değiştir.\\n\\nİstasyon yerleştirmek, mücadelenin sınırlarını belirleyen bağlantılı bir <teal1>Arena Bölgesi</c> oluşturur. Bu bölgeyi kendi Arena yerleşimini oluşturmak için özelleştirebilirsin."
     },
     {
       "guid": "a764c0d4-b7c8-4aa9-9a4e-980f8278bf0b",
@@ -5990,6 +6058,10 @@
       "text": "Köylü Hedef Manken"
     },
     {
+      "guid": "2d00e9f3-2ac5-436f-9ea6-0cd0113f88f3",
+      "text": "Kale Kapı Zilleri"
+    },
+    {
       "guid": "8525d8e1-fbc4-4652-a986-2c29c43c67b1",
       "text": "Kraliyet Tahtı"
     },
@@ -6330,6 +6402,10 @@
       "text": "Gecenin Serveti Tabloları"
     },
     {
+      "guid": "5777c8c4-4ae5-4c9e-8d13-ea0737dd3abd",
+      "text": "Rahatlamak ve yıkanmak için kullanılan havuzlar."
+    },
+    {
       "guid": "8f45c617-82c6-4923-87eb-f4c958177737",
       "text": "Gecenin Serveti Havuzları"
     },
@@ -6519,19 +6595,19 @@
     },
     {
       "guid": "508c3110-e864-4844-8442-3ea24787bb19",
-      "text": "“Gece” Duvar Flaması"
+      "text": "“Alacakaranlık” Duvar Flaması"
     },
     {
       "guid": "94848814-dfc1-46db-91f0-044b188c8e26",
-      "text": "“Gece” Duvar Levhası"
+      "text": "“Alacakaranlık” Duvar Levhası"
     },
     {
       "guid": "733a413b-a9ee-408f-8360-2a5e8a7e2380",
-      "text": "“Gece” Flama"
+      "text": "“Alacakaranlık” Flama"
     },
     {
       "guid": "6514ad25-e8e3-406b-ba4c-eb75427e30c1",
-      "text": "“Gece” Düz Flama"
+      "text": "“Alacakaranlık” Düz Flama"
     },
     {
       "guid": "3e695ca7-c4b8-476b-97ec-6a9a9c8e7903",
@@ -7223,11 +7299,11 @@
     },
     {
       "guid": "b66e6121-6e3c-49a8-8f04-8901a8c864fa",
-      "text": "Castle Art Benchmark Room"
+      "text": "Kale Sanatı Kıyaslama Odası"
     },
     {
       "guid": "3b83143b-bcda-467e-9471-26d9399b0b6d",
-      "text": "Castle Art Quality Standard Examples"
+      "text": "Kale Sanatı Kalite Standartı Örnekleri"
     },
     {
       "guid": "0b95cadf-8bb6-409c-ba2f-14a5e2b380dc",
@@ -7331,7 +7407,7 @@
     },
     {
       "guid": "22865d34-a6ed-4982-ac71-c50c3cd694c5",
-      "text": "“Yeşillikli” Kapı"
+      "text": "'Yemyeşil' Kapı"
     },
     {
       "guid": "d8220346-904c-416c-aae5-958a4c150145",
@@ -8922,14 +8998,6 @@
       "text": "Hatıralar Sunağında büyü kitabı seçimlerini sıfırlayabilirsin."
     },
     {
-      "guid": "db058eb8-bed8-4254-8761-98b90a65b614",
-      "text": "Kan Bankası"
-    },
-    {
-      "guid": "f9659cc7-ffcc-4658-b06d-f2290ee1e803",
-      "text": "Kanın saklandığı bir kap. Bir veya birden fazla kan çıkarıcıyla boru hattı bağlantısı sağlayarak farklı kan kaynaklarını doldurup birbiriyle karıştır."
-    },
-    {
       "guid": "8b2257a3-f137-4e28-a036-4988a703d2fe",
       "text": "Kan Homojenleştirici"
     },
@@ -8992,6 +9060,10 @@
     {
       "guid": "b14514d9-5513-4a7a-b353-7baa9355b3eb",
       "text": "Birleştirme sürecine başlamak için <teal1>Atadan Kalma Silah</c>, <teal1>Parçalanmış Silah</c> veya <teal1>Büyü Mücevheri</c> yerleştir."
+    },
+    {
+      "guid": "e4b171e0-a34a-4df7-880c-a7293e57425e",
+      "text": "Birleştirme sürecine devam etmek için ikincil yuvaya eşleşen bir <teal1>Büyü Mücevheri</c> yerleştir.\\n\\nBirleştirme sonrasında ortaya çıkan <teal1>Büyü Mücevheri</c> birincil <teal1>Büyü Mücevherinin</c> ismini taşır.\\n\\nİkincil eşya süreç sırasında tüketilir."
     },
     {
       "guid": "c706ffa0-c322-4448-8d43-99a1e88dc609",
@@ -9155,7 +9227,7 @@
     },
     {
       "guid": "27bbd136-05ff-43b5-b13c-c9c9799bafb7",
-      "text": "Seher Gözünü inşa ettiğin zaman <teal1>Ruh Parçacıklarının</c> mevcut konumunu görebilirsin.\\n\\n<teal1>Bir PvP sunucuda her tipten yalnızca bir ruh parçacığı varken PvE sunucularda birden çok bulunabilir.</c>"
+      "text": "Seher Gözünü inşa ettiğin zaman <teal1>Ruh Parçacıklarının</c> mevcut konumunu görebilirsin.\\n\\n<red1>Bir PvP sunucuda her tipten yalnızca bir ruh parçacığı varken PvE sunucularda birden çok bulunabilir.</c>"
     },
     {
       "guid": "c1bb3647-d5ae-4cd9-91c6-8df8342c870b",
@@ -9203,7 +9275,7 @@
     },
     {
       "guid": "51f1b499-f896-47fe-8d43-d47e7cce8ca5",
-      "text": "Geri Dönüşüm - <yellow2>{name}"
+      "text": "Geri dönüştürülüyor - <yellow2>{name}"
     },
     {
       "guid": "a5597738-8a46-4a12-b8ed-e4e6c47765d6",
@@ -9799,7 +9871,7 @@
     },
     {
       "guid": "50b9ecb1-2331-4a88-88e7-82db2868f0ef",
-      "text": "SilahBekleme Süresi Hızı <teal2>{SetBonusValue}</c> artar."
+      "text": "Silah Bekleme Süresi Hızı <teal2>{SetBonusValue}</c> artar."
     },
     {
       "guid": "bf25df09-f6a6-4366-a796-1b81909c9d0c",
@@ -10299,11 +10371,11 @@
     },
     {
       "guid": "956a6356-62fa-4e97-bfa6-5bc9d3e9faff",
-      "text": "Hakimiyet altında olan bir hedef gerekir"
+      "text": "Hakimiyet altındaki hedefi diyarında bulunan en yakın boş zindan hücresine göndermek için bir yarasa sürüsü çağır.\\n\\n<teal1>Simya Laboratuvarında</c> üretilir."
     },
     {
       "guid": "3a933056-c2c4-4596-958e-5bdeb171711d",
-      "text": "Hakimiyet altındaki hedefi diyarında bulunan en yakın boş zindan hücresine göndermek için bir yarasa sürüsü çağır.\\n\\n<teal1>Simya Laboratuvarında</c> üretilir."
+      "text": "Halüsinatif Mantar"
     },
     {
       "guid": "e7cc6a73-8059-4bcf-b074-b64e509145be",
@@ -10351,7 +10423,7 @@
     },
     {
       "guid": "75fa5c87-18d2-4117-9b3c-50a944b3f82c",
-      "text": "<teal1>Gelişmiş Kan Presi</c> kullanılarak <teal1>Temel Kan Esansına</c> dönüştürülür. Az miktarda kan kazanmak için de tüketilebilir ve kan tipini narin olarak değiştirir."
+      "text": "<teal1>Gelişmiş Kan Presi</c> kullanılarak <teal1>İlkel Kan Esansına</c> dönüştürülür. Az miktarda kan kazanmak için de tüketilebilir ve kan tipini narin olarak değiştirir."
     },
     {
       "guid": "e36441c3-4503-4fca-9bbd-9e61a26f5b55",
@@ -10531,7 +10603,7 @@
     },
     {
       "guid": "b6b1502a-7f57-4195-975c-2d9449d6a2fc",
-      "text": "Gölgede Yürüyen Yeleği"
+      "text": "Gölge Gezgini Yeleği"
     },
     {
       "guid": "8f88a8d6-a4f8-410c-9529-10cfaa53903d",
@@ -10903,7 +10975,7 @@
     },
     {
       "guid": "9fcdc307-e5e0-4495-97db-aff20f42055f",
-      "text": "Şatafatlı Gece Çehresi"
+      "text": "Ölümsüz Kralın Yüce Miğferi"
     },
     {
       "guid": "78f43368-bc7c-41e5-bbf1-f0cbc4e14ced",
@@ -12167,7 +12239,7 @@
     },
     {
       "guid": "7e656bc3-feef-432a-bf3c-961ea83ed21d",
-      "text": "Kovulmuşun Kanatları"
+      "text": "Yitiklerin Kanatları"
     },
     {
       "guid": "37203186-39b8-4323-a349-4387e6d58e8c",
@@ -12343,11 +12415,11 @@
     },
     {
       "guid": "9996d0b3-1211-45eb-b6ce-03a288945274",
-      "text": "Demir Kamçı"
+      "text": "Demir Kırbaç"
     },
     {
       "guid": "722c2d9e-5965-4054-b822-79151d5d097c",
-      "text": "Merhametsiz Demir Kamçı"
+      "text": "Merhametsiz Demir Kırbaç"
     },
     {
       "guid": "6734838c-3de6-411f-8bfa-fed06ae1c9b5",
@@ -12355,7 +12427,7 @@
     },
     {
       "guid": "50afed52-18c8-477a-84e0-e1f1fa29fc05",
-      "text": "Kara Gümüş Kamçı"
+      "text": "Kara Gümüş Kırbaç"
     },
     {
       "guid": "900119ec-f6c9-407e-940a-c68613282bf7",
@@ -12363,7 +12435,7 @@
     },
     {
       "guid": "f33e7530-1ac3-4c8d-ba31-b5fdc18aeeb8",
-      "text": "Kanlı Kamçı"
+      "text": "Kanlı Kırbaç"
     },
     {
       "guid": "80a22c4b-c4bd-4115-857c-f87a6ecdd7ee",
@@ -12379,7 +12451,7 @@
     },
     {
       "guid": "bc1eab22-617e-4ed6-b9a4-ca162eb14b12",
-      "text": "Gölge Kamçı"
+      "text": "Gölge Kırbacı"
     },
     {
       "guid": "83b084d8-a516-457f-b1d7-89511fa9f1dc",
@@ -12691,11 +12763,11 @@
     },
     {
       "guid": "225c6a2f-d299-413b-b98f-1566fc88d03d",
-      "text": "Bu parşömeni <teal1>Kasvetli Uyanış Sunağına</c> getirerek bir element uyanışının kilidini aç."
+      "text": "Bu parşömeni <teal1>Kasvetli Uyanış Sunağına</c> getirerek bir vampir uyanışının kilidini aç."
     },
     {
       "guid": "259c0f1c-5541-4400-85e0-077175582462",
-      "text": "Bu parşömeni <teal1>Kasvetli Uyanış Sunağına</c> getirerek bir vampir uyanışının kilidini aç."
+      "text": "<teal2>{level}. Seviye Düşman Kale Kalbine</c> eriştiğinde <skillcolor>{level} . Seviye Kale Anahtarı</c> kullanarak çeşitli eylemler gerçekleştirebilirsin.\\n\\n<teal2>Savunmaları Devre Dışı Bırak</c>\\n<skillcolor>{countdisable} Anahtar</c> harcayarak düşman duvarlarını, kapılarını, ışınlayıcılarını ve tabutlarını devre dışı bırak.\\n<skillcolor>Standart PvP</c> Ayarlarında kullanılabilir\\n\\n<teal2>Kaleyi Yok Et</c>\\n<skillcolor>{countdestroy} Anahtar</c> harcayarak kaleyi kalıcı olarak yok et.\\n<skillcolor>Merhametsiz PvP</c> Ayarlarında kullanılabilir\\n\\n<teal2>Kaleyi Ele Geçir</c>\\n<skillcolor>{countclaim} Anahtar</c> harcayarak kalenin kontrolünü ele geçir.\\n<skillcolor>Merhametsiz PvP</c> Ayarlarında kullanılabilir\\n"
     },
     {
       "guid": "9024056e-bc99-4713-ba52-f2c6874acafd",
@@ -12727,7 +12799,7 @@
     },
     {
       "guid": "7932ee26-b39f-4b3d-9981-023287707fdb",
-      "text": "Bir <teal2>4. veya 5. Seviye Düşman Kale Kalbine</c> eriştiğinde <teal2>1 Altın Kale anahtarı</c> harcayarak kaleyi yok edebilir veya <teal2>3 Altın Kale anahtarı</c> harcayarak kalenin kontrolünü ele geçirebilirsin.\\n\\n<red1>Bu eşya yalnızca düşman kalelerinin yok edilmesine ve/veya ele geçirilmesine izin veren sunucularda kullanılabilir.</c>"
+      "text": "Bir <teal2>4. veya 5. Seviye Düşman Kale Kalbine</c> eriştiğinde <teal2>1 Altın Kale anahtarı</c> harcayarak kaleyi yok edebilir veya <teal2>3 Altın Kale anahtarı</c> harcayarak kalenin kontrolünü ele geçirebilirsin.\\n\\n<red1><red1>Bu eşya yalnızca düşman kalelerinin yok edilmesine ve/veya ele geçirilmesine izin veren sunucularda kullanılabilir.</c>"
     },
     {
       "guid": "af3464f6-2662-40e0-babc-6b6074377c30",
@@ -12827,7 +12899,7 @@
     },
     {
       "guid": "617bbb92-0abf-4b87-8b6b-9c833dcb338d",
-      "text": "Darbe aldığında elektromanyetik güç yayan bir cihaz. <teal 3>Elektrik kaynaklarını</c> geçici olarak devre dışı bırakmak için kullanılabilir."
+      "text": "Darbe aldığında elektromanyetik güç yayan bir cihaz. <teal3>Elektrik kaynaklarını</c> geçici olarak devre dışı bırakmak için kullanılabilir."
     },
     {
       "guid": "c8616346-1ed2-4a6e-beb5-e1ddc9d01ef2",
@@ -12855,7 +12927,7 @@
     },
     {
       "guid": "05ba86ad-6e7e-4304-bd70-7b27c8afa236",
-      "text": "Yozlaşmış Balık"
+      "text": "Tombul Kayabalığı"
     },
     {
       "guid": "9234da8f-d502-4cc8-974c-0a2527421b02",
@@ -12903,7 +12975,7 @@
     },
     {
       "guid": "0dc80d29-3af5-46a6-ba05-606499013ec1",
-      "text": "<skillcolor>Kan Presi</c> kullanılarak <teal1>Zehir Özü</c> çıkarılabilen <teal1>yozlaşmış</c> bir balık.\\n\\nBazı balıklar yenebilir ve en azından insanlar üzerinde çeşitli etkilere sahiptir."
+      "text": "<skillcolor>Kan Presi</c> kullanılarak <teal1>Yağı</c> çıkarılabilen <teal1>nadir</c> bir balık.\\n\\nBazı balıklar yenebilir ve en azından insanlar üzerinde çeşitli etkilere sahiptir."
     },
     {
       "guid": "8a1fe020-ef4d-4f69-bc05-6af8326192a2",
@@ -13055,7 +13127,7 @@
     },
     {
       "guid": "d8527851-d793-4c90-9728-e798095bdd81",
-      "text": "Uhrevi enerjiyle dolu kristal.\\n\\n<teal1>Gelişmiş Öğütücüde</c> işlenir."
+      "text": "Ruhani enerji ile dolu kristal.\\n\\n<teal1>Gelişmiş Öğütücü</c>'de işlenir."
     },
     {
       "guid": "291c32e8-d894-4ff2-8715-51ed602caa0c",
@@ -13747,7 +13819,7 @@
     },
     {
       "guid": "57d7bee2-e30d-4611-af4a-5469f8f2564f",
-      "text": "<unholy>Şeytani Büyü</c> esansıyla dolu bir mücevher.\\n\\n<teal1>Büyü Kitabına</c> takıldığında bir <teal1>Büyüyü</c> yükseltebilirsin."
+      "text": "<unholy>Kötücül Büyü</c> esansıyla dolu bir mücevher.\\n\\n<teal1>Büyü Kitabına</c> takıldığında bir <teal1>Büyüyü</c> yükseltebilirsin."
     },
     {
       "guid": "11032e5f-3d52-49f8-964f-96f8d202f3a0",
@@ -13835,19 +13907,19 @@
     },
     {
       "guid": "568ca320-a756-45b2-ad46-6ff7dbf00dbd",
-      "text": "1. Kademe Şeytani Mücevher"
+      "text": "1. Kademe Kötücül Mücevher"
     },
     {
       "guid": "fb13a989-cbed-4476-9055-c2583d028482",
-      "text": "2. Kademe Şeytani Mücevher"
+      "text": "2. Kademe Kötücül Mücevher"
     },
     {
       "guid": "c019e04f-9aff-428c-a5c3-afe3a9ebd488",
-      "text": "3. Kademe Şeytani Mücevher"
+      "text": "3. Kademe Kötücül Mücevher"
     },
     {
       "guid": "ff3ffc1e-4cdd-44c3-9212-182a3d266fc5",
-      "text": "4. Kademe Şeytani Mücevher"
+      "text": "4. Kademe Kötücül Mücevher"
     },
     {
       "guid": "1d50b836-70b0-4339-b1f1-80b64999a7a1",
@@ -14015,11 +14087,11 @@
     },
     {
       "guid": "0484b02e-8ca9-4f80-8dad-e0c4c470622f",
-      "text": "Masa Sandalyesi Çeşitleri"
+      "text": "Masa Çeşitleri"
     },
     {
       "guid": "649cd838-aae7-48f3-b41f-2eae40c814b5",
-      "text": "Masa Çeşitleri"
+      "text": "Basit Mobilya"
     },
     {
       "guid": "ab62970d-b20f-437a-bf05-92f18e3b4ca3",
@@ -14039,7 +14111,7 @@
     },
     {
       "guid": "b6bbf22b-b066-4f3b-8b20-be8ee8e45396",
-      "text": "Bahçe çitleri ve kale duvar yeşillikleri koleksiyonu."
+      "text": "Bahçe Fenerleri"
     },
     {
       "guid": "2ca0f200-ef8f-43c8-81bd-1f5feaee9c00",
@@ -14299,7 +14371,7 @@
     },
     {
       "guid": "71a50a71-4e2d-44ac-bf20-3f63f70b91f6",
-      "text": "Atölye Dekorasyonu Çeşitleri"
+      "text": "Bahçe Dekoru"
     },
     {
       "guid": "ad7c77bc-ba33-4ec3-9050-31711e7dbc63",
@@ -14575,11 +14647,11 @@
     },
     {
       "guid": "17b9c651-89cb-4b8a-ade1-efd381bd46c6",
-      "text": "Kamçı"
+      "text": "Kırbaç"
     },
     {
       "guid": "cf322c3e-e0b6-4001-9cfa-2c2e9eb803fd",
-      "text": "Kamçı üretme yeteneğinin kilidini açar."
+      "text": "Kırbaç üretme yeteneğinin kilidini açar."
     },
     {
       "guid": "35eddf7b-975d-48c4-b86c-bdf20573485f",
@@ -14595,7 +14667,7 @@
     },
     {
       "guid": "1859107d-b6bf-494d-8db7-6ac5b4a95978",
-      "text": "Karazehir Savaş Eyeri"
+      "text": "Binek hızını <skillcolor>{speedincrease}</c> ve hızlanmayı <skillcolor>{acceleration}</c> artıran iyi bir eyer. <skillcolor>Vampir At</c> üzerinde kullanılabilir.\\n\\n<teal1>Vampir Atının görünüşünü değiştirir.</c>"
     },
     {
       "guid": "215334e1-0dd0-46ff-9955-d1d9e191e143",
@@ -14831,7 +14903,7 @@
     },
     {
       "guid": "33ba3e60-dfb9-4fae-837f-25ce145a9675",
-      "text": "Boş veya müttefik bir <teal1>İnşa Konumuna</c> git"
+      "text": "Boş veya müttefik bir <teal1>İnşa Konumu</c>'na git"
     },
     {
       "guid": "9a240913-7766-4806-9c09-5f9524601024",
@@ -14843,7 +14915,7 @@
     },
     {
       "guid": "5360aba3-09b2-47b3-8ca6-fe05484a9430",
-      "text": "<teal1>Farbane Ormanları’nın</c> ötesindeki dünyayı keşfet"
+      "text": "<teal1>Farbane Ormanı</c>'nın ötesindeki dünyayı araştır"
     },
     {
       "guid": "cfd33c4f-a38c-4bb5-8a06-6f32788d1d14",
@@ -14871,7 +14943,7 @@
     },
     {
       "guid": "a7da3ef5-de26-4fcc-bb2b-38c2bbad6333",
-      "text": "<teal1>Kan Ayinini</c> kullanarak düşman saldırılarına karşı koy"
+      "text": "<teal1>Kan Ayini</c>'ni kullanarak düşman saldırılarına karşı koy"
     },
     {
       "guid": "1ebf8fac-2096-41f1-b4f6-2db247cdcdc6",
@@ -14951,11 +15023,11 @@
     },
     {
       "guid": "1de75c47-9367-4c76-a226-c46e419a4d77",
-      "text": "<teal1>Envanteri</c> aç"
+      "text": "<teal1>Envanter</c>'i aç"
     },
     {
       "guid": "e69500be-a103-432f-81b1-10593c3878f0",
-      "text": "<teal1>Haritayı</c> kullanarak ideal <teal1>İnşa Konumlarını</c> keşfet"
+      "text": "İdeal <teal1>İnşa Yerleri</c> keşfetmek için <teal1>Harita</c>'yı kullan"
     },
     {
       "guid": "dc52a240-d11f-4fac-a3fa-9b099cda533c",
@@ -15171,7 +15243,7 @@
     },
     {
       "guid": "dcf341fd-c000-4d4f-9335-ec1e1a2b760a",
-      "text": "<size=20>Takip ediliyor...</size>\\n<teal1>{target}</c>"
+      "text": "Mesafe: <yellow1>{distance}"
     },
     {
       "guid": "24664999-1ec9-4e23-b829-57abd04f12aa",
@@ -15187,7 +15259,7 @@
     },
     {
       "guid": "8304fe13-3974-4f22-8533-2b24df7ea701",
-      "text": "<size=20>Takip ediliyor...</size> <teal1>{target}</c> (<yellow1>{value}</c>)"
+      "text": "Hazine Odası"
     },
     {
       "guid": "2b606faf-a89e-4402-b956-89f97271b6b6",
@@ -15207,7 +15279,7 @@
     },
     {
       "guid": "edce83df-2867-412d-91bd-824e9915b195",
-      "text": "Postları işleyerek <teal1>Deri</c> elde etmenin bir yolunu keşfet"
+      "text": "Postları, <teal1>Deri</c>'ye dönüştürmenin bir yolunu bul"
     },
     {
       "guid": "3f724064-c3ea-4684-aaef-31a7222476c7",
@@ -15215,7 +15287,7 @@
     },
     {
       "guid": "f8b0bd97-1e02-477c-b42f-bdb54621bdbd",
-      "text": "<teal1>Zindan Hücrelerinin</c> kilidini açmanın bir yolunu keşfet"
+      "text": "<teal1>Zindan Hücreleri</c>'ni açmanın bir yolunu keşfet"
     },
     {
       "guid": "c380eaee-efa7-4185-afe8-62d0b3c0b498",
@@ -15527,7 +15599,7 @@
     },
     {
       "guid": "c8a646d2-a729-4bac-a5c7-28bb7d646bd3",
-      "text": "Farbane Ormanları’ndaki başarılı avlardan elde edilen ganimet miktarını <teal2>{value}</c> artırır."
+      "text": "Farbane Ormanı'ndaki başarılı avlardan elde edilen ganimet miktarını <teal2>{value}</c> artırır."
     },
     {
       "guid": "6ceb4c05-ca34-40f0-b4d9-a1539f8b5550",
@@ -15543,7 +15615,7 @@
     },
     {
       "guid": "44f84c0f-77b3-4b97-b08d-6da7022d1f3d",
-      "text": "Ölüm Harabeleri’ndeki başarılı avlardan elde edilen ganimet miktarını <teal2>{value}</c> artırır."
+      "text": "Mortium Harabeleri'ndeki başarılı avlardan elde edilen ganimet miktarını <teal2>{value}</c> artırır."
     },
     {
       "guid": "55b05f82-e1d1-4fdc-8223-7cbddf8bdb41",
@@ -15622,6 +15694,10 @@
       "text": "+{value} <statscolor>Zırh Seviyesi"
     },
     {
+      "guid": "2d7f7adb-12c7-4671-b1e0-ba5ee2201f3c",
+      "text": "Toplam Özellik Bonusu"
+    },
+    {
       "guid": "336f7e32-12ed-4b92-81c0-850f2430fde0",
       "text": "Savunma"
     },
@@ -15679,7 +15755,7 @@
     },
     {
       "guid": "993e8792-ed32-4037-8ae0-3974d225ba08",
-      "text": "+%{value} <statscolor>Kan Tipi Etkinliği"
+      "text": "+%{value} <statscolor>Kan Grubu Verimliliği"
     },
     {
       "guid": "fe098f6f-9b0f-40bd-8143-b5f17f59a3dc",
@@ -15722,6 +15798,10 @@
       "text": "Toplam hareket hızını artırır."
     },
     {
+      "guid": "b2c8d8cb-525b-4382-be89-157e0bb63191",
+      "text": "Bonus Üst Sınırı"
+    },
+    {
       "guid": "5ed66f17-29aa-4005-8170-800941286f33",
       "text": "+%{value} <statscolor>Bonus Fiziksel Güç"
     },
@@ -15747,7 +15827,7 @@
     },
     {
       "guid": "15b9fe2d-f623-4c1f-b64c-b3dfda79be72",
-      "text": "+%{value} <statscolor>Kitle Kontrol Azaltması"
+      "text": "+%{value} <statscolor>Kontrol Etkilerine Karşı Direnç"
     },
     {
       "guid": "4de73d99-1df1-43ac-af03-d72becb7a41b",
@@ -15759,27 +15839,27 @@
     },
     {
       "guid": "2a45aff6-0a45-4847-a486-d6ffd8258441",
-      "text": "Bekleme Süresinin dolum hızını artırır."
-    },
-    {
-      "guid": "cf145c00-90a2-4736-b58a-0a14927df795",
       "text": "Bekleme Süresi Hızı"
     },
     {
-      "guid": "e50cb33d-3ee9-43e3-95ed-2f5f4b270631",
+      "guid": "cf145c00-90a2-4736-b58a-0a14927df795",
       "text": "+%{value} <statscolor>Büyü Bekleme Süresi Hızı"
     },
     {
-      "guid": "278d4abb-a5ac-49f3-93c5-c890f7eba6ce",
+      "guid": "e50cb33d-3ee9-43e3-95ed-2f5f4b270631",
       "text": "+%{value} <statscolor>Örtü Bekleme Süresi Hızı"
     },
     {
-      "guid": "54a3ebd0-d1cc-4c4a-8814-130067a8d72e",
+      "guid": "278d4abb-a5ac-49f3-93c5-c890f7eba6ce",
       "text": "+%{value} <statscolor>Ulti Büyüsü Bekleme Süresi Hızı"
     },
     {
-      "guid": "374de497-648c-49c2-a096-397da0142d31",
+      "guid": "54a3ebd0-d1cc-4c4a-8814-130067a8d72e",
       "text": "+%{value} <statscolor>Silah Yeteneği Bekleme Süresi Hızı"
+    },
+    {
+      "guid": "374de497-648c-49c2-a096-397da0142d31",
+      "text": "Yozlaşma"
     },
     {
       "guid": "da9508fa-a281-40b2-b0e5-b712396169fe",
@@ -15803,7 +15883,7 @@
     },
     {
       "guid": "12b3d7ab-d313-42de-947a-2f8d8ad1836c",
-      "text": "Tüm kaynaklardan alınan hasarı azaltır."
+      "text": "Her türlü kaynaktan alınan hasarı azaltır."
     },
     {
       "guid": "adb34964-868e-4e4e-9fa8-b0309e5d9fef",
@@ -15843,11 +15923,11 @@
     },
     {
       "guid": "10eacc1d-0d3d-4cd2-ad88-bd09cc631e9f",
-      "text": "Beslenme Bekleme Süresi Hızı"
+      "text": "Beslenme Bekleme Süresinin dolum hızını artırır."
     },
     {
       "guid": "96d0e88b-8e3e-40ac-a6a0-a1595f57a242",
-      "text": "Beslenme Bekleme Süresinin dolum hızını artırır."
+      "text": "+{value} <statscolor>Alev Direnci Derecesi"
     },
     {
       "guid": "163458c8-a7d5-485e-b3fa-9a56857649ea",
@@ -15863,7 +15943,7 @@
     },
     {
       "guid": "07c549b1-6da1-41a6-8df7-bbda87924213",
-      "text": "Sarımsak Teşhiri seni zayıflatır ve hasara daha açık hale getirir. Bu etki en fazla <teal2>{maxstack} defa</c> birikebilir. Her birikmede, alınan hasar <teal2>{amplifyfactor}</c> artar ve verilen hasar <teal2>{weakenfactor}</c> azalır.\\n\\nMaruz kalınmadığında etkisi zamanla kaybolur.\\n\\nAyrıca kötü kokmana sebep olduğu için düşmanlarının seni tespit edebildiği menzili artırır.\\n\\n<red1>Etkisi ölümden sonra da devam eder</c>."
+      "text": "Sarımsak Humması"
     },
     {
       "guid": "f84c6b99-3237-4cbb-92d1-5b01399c5073",
@@ -15899,7 +15979,7 @@
     },
     {
       "guid": "4b248819-793a-4cd9-9589-6d6e8fbae182",
-      "text": "+%{value} <statscolor>Alınan İyileştirme"
+      "text": "+%{value} <statscolor>Alınan Şifa Etkileri"
     },
     {
       "guid": "641f6ae6-373f-4fb5-b7d0-38cf0ecbacfa",
@@ -16031,11 +16111,11 @@
     },
     {
       "guid": "6012ebd3-9677-4204-b7e8-22b2428abc72",
-      "text": "+%{value} <statscolor>Fiziksel Kritik İhtimali"
+      "text": "Fiziksel Kritik Gücü"
     },
     {
       "guid": "27102ecd-f4b5-46ee-b7c3-ca34c31c1ed6",
-      "text": "Fiziksel Kritik Gücü"
+      "text": "Silah saldırılarıyla <teal1>Kritik Vuruş</c> yapıldığında geçerli olan hasar değiştirici."
     },
     {
       "guid": "ada9f620-7fc4-49b9-aaed-20626e4fe8fe",
@@ -16043,7 +16123,7 @@
     },
     {
       "guid": "f695c36a-25df-4e2f-9597-be51322174db",
-      "text": "+%{value} <statscolor>Fiziksel Kritik Gücü"
+      "text": "+%{value} <statscolor>Silah Yeteneğiyle Yaşam Emme"
     },
     {
       "guid": "7d1070fb-02fc-4a1a-9369-a81f64ccc4ff",
@@ -16147,7 +16227,7 @@
     },
     {
       "guid": "017c9d41-5dac-4840-845c-030df603e63e",
-      "text": "+%{value} <statscolor>Şekil Değiştirmişken Hız"
+      "text": "Şekil Değiştirmişken Hız"
     },
     {
       "guid": "a7355d97-b772-43db-bc3e-875b7cf8114b",
@@ -16211,7 +16291,7 @@
     },
     {
       "guid": "df9ea662-e60d-46ee-996a-bad455ba0b1d",
-      "text": "Büyü Bekleme Süresinin dolum hızını artırır."
+      "text": "Büyü Kritik İhtimali"
     },
     {
       "guid": "045f241d-26ab-4a76-bef7-43ca8f4a5650",
@@ -16223,11 +16303,11 @@
     },
     {
       "guid": "d6882acf-3f9d-49c5-8a79-b716dcf61a2b",
-      "text": "+%{value} <statscolor>Büyü Kritik İhtimali"
+      "text": "Büyü Kritik Gücü"
     },
     {
       "guid": "dbbc9c03-221d-4b1d-be4f-102a265591af",
-      "text": "Büyü Kritik Gücü"
+      "text": "Büyüyle <teal1>Kritik Vuruş</c> yapıldığında geçerli olan hasar değiştirici."
     },
     {
       "guid": "6c0f3370-c268-4d97-ac8d-58ae05eee4a2",
@@ -16235,11 +16315,11 @@
     },
     {
       "guid": "6513d60d-1b00-4a2c-9bb1-bc6b906ee75e",
-      "text": "+%{value} <statscolor>Büyü Kritik Gücü"
+      "text": "Büyü Yükleme Kazancı"
     },
     {
       "guid": "1a3dbc4e-4d0b-40c4-bb75-055d5c154748",
-      "text": "Büyü Yükleme Kazancı"
+      "text": "Bir büyü kullanıldığında kazanılan büyü yükleme sayısı.\\n\\nBüyü yüklemeleri <teal1>100</c>'e ulaşınca bekleme süresinden etkilenmeden büyü yapabilmeni sağlar."
     },
     {
       "guid": "e9cd4c96-c0c3-4d06-8531-9ea2875a2ba8",
@@ -16311,7 +16391,7 @@
     },
     {
       "guid": "4595fef7-20c5-4283-9301-9b83e4aee95d",
-      "text": "Ulti Bekleme Süresinin dolum hızını artırır."
+      "text": "Ulti Gücü"
     },
     {
       "guid": "8842a273-ac59-45cd-9241-439678ba3a21",
@@ -16328,6 +16408,10 @@
     {
       "guid": "3d9276dd-8159-4365-a83c-3a9109407ae7",
       "text": "Silah Yeteneği Bekleme Süresinin dolum hızını artırır."
+    },
+    {
+      "guid": "9426c79a-3306-4c9c-b6c2-3c67195c0a8c",
+      "text": "Silah Yükleme Kazancı"
     },
     {
       "guid": "def50330-9cf0-4d6e-90d4-9da9024fc78c",
@@ -16679,7 +16763,7 @@
     },
     {
       "guid": "831c00a5-f48a-4041-91d4-4d014dc74a5f",
-      "text": "Revenant"
+      "text": "Hortlak"
     },
     {
       "guid": "8a8deaeb-048c-4c14-8d69-61fdebb357e3",
@@ -16739,7 +16823,7 @@
     },
     {
       "guid": "4e92c37a-42e4-486d-a7b7-acc8dd3d50ca",
-      "text": "Vagon"
+      "text": "Binek Arabası"
     },
     {
       "guid": "9277b654-8567-49b5-8ec6-1e63aeb0184b",
@@ -16819,7 +16903,7 @@
     },
     {
       "guid": "7924eef8-a45e-40de-ae7e-247114eadd77",
-      "text": "Bir zamanlar Gece Lejyonunda sadık bir savaşçıydı. Drakula’ya o kadar bağlıydı ki onun Işıltı Kilisesi’nin ellerinde ölümü üzerine utancından kalkan tuttuğu kolunu kesmiştir. Çılgınlık ve kafa karışıklığı ile ölmeyi bekleyerek Lanetli Orman’ın yabanına koşmuştur. Buna rağmen buradaki yozlaşma onu öldürmemiş ancak daha beter hale getirmiştir."
+      "text": "Bir zamanlar Noctum Lejyonu'nda sadık bir savaşçıydı. Öyle fanatikti ki, Drakula Işıltı Kilisesi'nin ellerinde öldüğünde, ceza olarak kendi kolunu kesti. Delirmiş bir halde, lanetli ormanın vahşi doğasında dolaşarak ölümünü bekledi. Ancak, ormanın kalbindeki yozlaşma ona ölümü değil, çok daha kötü bir şey verdi."
     },
     {
       "guid": "7e2db9cc-0801-4554-9cb7-b4bafa5caad2",
@@ -17111,7 +17195,7 @@
     },
     {
       "guid": "1a23435b-2543-48d0-802e-396b2d5708c3",
-      "text": "Çörten"
+      "text": "Gudubet"
     },
     {
       "guid": "aec2c905-e4a3-4883-8a9f-92a3e3f688e0",
@@ -17195,7 +17279,7 @@
     },
     {
       "guid": "fe70732a-70a1-4b78-be1f-127d5975729c",
-      "text": "Milis Yıkıcısı"
+      "text": "Milis Yok Edici"
     },
     {
       "guid": "d5a1bddc-cf12-464c-bae3-27018898fe6f",
@@ -17379,7 +17463,7 @@
     },
     {
       "guid": "6b24d813-7df2-46c6-acfb-a45f1b6141ea",
-      "text": "Kan Çörteni"
+      "text": "Kanlı Gudubet"
     },
     {
       "guid": "14ad13a5-875b-42e2-a44c-3554cdf320e4",
@@ -17851,11 +17935,11 @@
     },
     {
       "guid": "4ec97a89-7b65-4343-8036-a534785882f6",
-      "text": "Beyaz Kurt Alpha"
+      "text": "Alfa Bozkurt"
     },
     {
       "guid": "626b5a96-bb9a-4980-af6c-9a83a956e653",
-      "text": "Bu kokunun izi, Ölümsüz Kral Drakula’nın açık imzasını taşıyor. Drakula yenildiğinde Vardoran dünyasını kanlı bir yağmurla lanetledi ve bu felaket sonucunda birçok canlı yok oldu. Bu olaydan sağ çıkanlardan bazıları farkında olmadan sağanak yağışın kontrolüne girdi. Onların soyları sonsuza dek Drakula’nın kötülüğüyle güçlendi. O miras bu kudretli avcının damarlarına işlemiştir."
+      "text": "Bu koku, Ölümsüz Kral Drakula'nın özelliklerini taşıyor. Son anlarında Vardoran dünyasını lanetledi ve bir kan yağmuruna tutarak birçok insanı öldürdü. Hayatta kalanlardan bazıları da farkında olmadan bu sağanaktan etkilendi ve kanları onun kötü niyetiyle sonsuza dek güçlendi. Bu korkunç yırtıcı, bu uğursuz mirası üzerinde taşıyor."
     },
     {
       "guid": "edf1df16-b793-491f-8102-323639461a9c",
@@ -17871,7 +17955,7 @@
     },
     {
       "guid": "aed33315-7441-4c9f-85e8-c7c7fe936476",
-      "text": "“Ruh Alan Foultrot” başı kesik atının kendi bedeninde yaşadığını öne süren deli bir tarikatçıdır. Ayrıca şeytani gücü beslemek veya memnun etmek için bıçaklarının kurbanlarını doğrudan “Büyük Karanlığa” gönderdiğini iddia eder. Söyledikleri doğru olsun ya da olmasın aldığı aldığı can sayısı belirsizdir."
+      "text": "“Ruh Alan Foultrot” başı kesik atının kendi bedeninde yaşadığını öne süren deli bir tarikatçıdır. Ayrıca şeytani gücü beslemek veya memnun etmek için bıçaklarının kurbanlarını doğrudan “Büyük Karanlığa” gönderdiğini iddia eder. Söyledikleri doğru olsun ya da olmasın aldığı  can sayısı belirsizdir."
     },
     {
       "guid": "a174902c-6321-4470-ac8c-a0f430ad2ca0",
@@ -17935,11 +18019,11 @@
     },
     {
       "guid": "d9fdac5b-2331-4794-b4d6-80bc44550150",
-      "text": "Envanteri Bırak"
+      "text": "Envanter'i bırak"
     },
     {
       "guid": "254319fe-05dc-4682-981a-50ee165f5bfc",
-      "text": "Belirli bir bırakma ayarına bağlı olanlar dışında tüm envanteri bırak."
+      "text": "Belirli bırakma ayarı hariç tüm envanteri bırak."
     },
     {
       "guid": "eef5ab8e-68b3-40d4-be29-bbba818fb9f2",
@@ -18030,6 +18114,50 @@
       "text": "Yeniden Canlanmak İçin Basılı Tut"
     },
     {
+      "guid": "8918a18c-06a0-4d2a-9022-68acdfd9a05b",
+      "text": "Önceliği Azalt"
+    },
+    {
+      "guid": "08b78c34-bab5-415c-b377-283cd2869e65",
+      "text": "Bu kap için önceliği azalt. Yalnızca <teal1>Tümünü Hızlı Gönder</c> eylemini etkiler."
+    },
+    {
+      "guid": "4c3beb8c-7640-4460-9b95-7e8f73b57819",
+      "text": "Önceliği Artır"
+    },
+    {
+      "guid": "b0230ae0-449a-40ef-9412-7687701b47f0",
+      "text": "Bu kap için önceliği artır. Yalnızca <teal1>Tümünü Hızlı Gönder</c> eylemini etkiler."
+    },
+    {
+      "guid": "311ad076-0fe7-4994-840a-5683bb3377cb",
+      "text": "Bu kapla bağlantıyı kaldır."
+    },
+    {
+      "guid": "ee8abd9e-744a-4b30-9b4a-1eea8c39c09b",
+      "text": "Otomatik Göndermeyi Aç/Kapat"
+    },
+    {
+      "guid": "89a57660-766d-4768-9151-18fdd78020fc",
+      "text": "Bu kapta Otomatik Göndermeyi etkinleştir/devre dışı bırak."
+    },
+    {
+      "guid": "e4fc3ab3-f313-4dc9-be69-e3eeedf808a3",
+      "text": "Bu kapta Otomatik Göndermeyi devre dışı bırak."
+    },
+    {
+      "guid": "201cdb87-c9b0-42b8-8eb1-bf7558313fc1",
+      "text": "Bu kapta Otomatik Göndermeyi etkinleştir."
+    },
+    {
+      "guid": "d4462830-cc5d-451a-b795-174e154ae93b",
+      "text": "<teal1>Genel Depo</c>\\nKaptaki tüm eşyaları bağlantılı kaba gönder.\\n\\n<teal1>İşleme Deposu</c>\\nBu çıkış kabındaki tüm eşyaları bağlantılı kaba gönder."
+    },
+    {
+      "guid": "6a3298b5-9b7e-4928-a698-392ca9d647a2",
+      "text": "<teal1>Genel Depo</c>\\nKaptaki tüm ilgili eşyaları al.\\n\\n<teal1>İşleme Deposu</c>\\nİşleme çıkış kabındaki tüm ilgili eşyaları al."
+    },
+    {
       "guid": "d9867788-54d6-4ba6-9b16-66a428b673fc",
       "text": "Selama Dur"
     },
@@ -18083,7 +18211,7 @@
     },
     {
       "guid": "1f2a802f-1769-47ea-80b0-b920552ccde9",
-      "text": "Kılıcı Fırlat"
+      "text": "Kılıç Fırlat"
     },
     {
       "guid": "e0ca9b23-0b9b-4016-a0df-4010e9583d56",
@@ -18843,7 +18971,7 @@
     },
     {
       "guid": "626863b6-ab11-4aac-95d1-378d703e5cb6",
-      "text": "Dokunmatik Yüzey Sol"
+      "text": "Dokunmatik Sol"
     },
     {
       "guid": "f82ce2e4-c6cf-4386-80b6-a1b9a2685f0a",
@@ -19054,22 +19182,6 @@
       "text": "{value} Kan Esansı"
     },
     {
-      "guid": "df4b6438-2ff9-4253-9623-96aa438163ff",
-      "text": "{value} Deneyim Kazan"
-    },
-    {
-      "guid": "4210316d-23d4-4274-96f5-d6f0944bd0bb",
-      "text": "{value} Deneyim"
-    },
-    {
-      "guid": "4ef370ac-d47d-4da2-bda7-e69b18325ebe",
-      "text": "{value} Ek Maksimum Seviyenin Kilidini Aç"
-    },
-    {
-      "guid": "2f95adc8-c6a7-40e2-9c5d-98dd514c45ef",
-      "text": "{value} Ek Maksimum Seviye"
-    },
-    {
       "guid": "e10b06a3-03d4-4f58-a4a2-ba870a125129",
       "text": "Faydanın kilidini açar: {perk}"
     },
@@ -19152,14 +19264,6 @@
     {
       "guid": "29dd94d6-0351-450b-996c-404cc3b1afd9",
       "text": "Yeni Form Açıldı"
-    },
-    {
-      "guid": "917b37bd-4b8c-44d3-b019-604196543631",
-      "text": "Seviye Sınırı Artırıldı"
-    },
-    {
-      "guid": "a68acedb-b5fe-4d93-9524-dd2f121a73e8",
-      "text": "Seviye Atlandı!"
     },
     {
       "guid": "93bd74a2-2bb6-48ad-9688-1c380d6cf4fb",
@@ -19383,7 +19487,7 @@
     },
     {
       "guid": "25821f0f-daa2-4386-90a5-8f5091c275ef",
-      "text": "{value}/10,0 Litre"
+      "text": "<size=18>{value}</size> / 10,0  Litre"
     },
     {
       "guid": "1a1dcfa5-a17f-41ba-852e-fa075584a6f8",
@@ -19391,7 +19495,7 @@
     },
     {
       "guid": "89ba1ffd-2a4d-41ee-a670-6c583f88e736",
-      "text": "Kan Tipi: <yellow1>{type}</c>\\nKan Kalitesi: <yellow1>{quality}"
+      "text": "Kan Tipi: <yellow>{type}</c>\\nKan Kalitesi:  <yellow>{quality}"
     },
     {
       "guid": "ee9a89f3-d36d-478b-84c3-acb98d2da66c",
@@ -19494,10 +19598,6 @@
       "text": "Bu Kan Tipinin faydalı getirisi yoktur."
     },
     {
-      "guid": "52627c40-9a88-498c-a99e-7cebe69c485a",
-      "text": "{name} Kan Esansı"
-    },
-    {
       "guid": "9e1574ba-173f-444b-9aa9-094c49adf29e",
       "text": "V Kanı Mevcut"
     },
@@ -19523,7 +19623,7 @@
     },
     {
       "guid": "c6c25347-be51-4d63-9152-4fd712b13167",
-      "text": "Parçacık Taşıyıcıları"
+      "text": "Parçacık Taşıyıcı"
     },
     {
       "guid": "10cc7891-b973-44c8-abd8-ac6162735138",
@@ -19627,7 +19727,7 @@
     },
     {
       "guid": "431a7b4a-0e3c-4d7f-b634-6d3042ad8d7d",
-      "text": "Yakınlaştır (Tut)"
+      "text": "Yakınlaştır (Basılı Tut)"
     },
     {
       "guid": "b7b28ebd-0c75-4c2a-98ea-32944a55afa3",
@@ -20355,7 +20455,7 @@
     },
     {
       "guid": "3cbb0735-c783-411d-ad2c-ca8799437ba4",
-      "text": "Bilgi"
+      "text": "Araştırma"
     },
     {
       "guid": "1e7de6ae-29a8-403b-83ec-aac4d935b1ac",
@@ -20823,7 +20923,7 @@
     },
     {
       "guid": "254204f6-8917-45d3-8a6c-af9dfbf5c724",
-      "text": "Masalar"
+      "text": "Küçük Masalar"
     },
     {
       "guid": "c9d3a20d-7ad4-4604-8d0d-577e932e1d4b",
@@ -21171,7 +21271,7 @@
     },
     {
       "guid": "050b472b-059f-4cc9-bac0-3b3003f9d7e2",
-      "text": "Yanma"
+      "text": "Ateşle"
     },
     {
       "guid": "71475e4b-9cb2-4f76-8769-95f47af9ce65",
@@ -21435,7 +21535,7 @@
     },
     {
       "guid": "6f3c8b47-825c-4982-ac50-0f88736bb412",
-      "text": "EmotesDescription"
+      "text": "İfadeAçıklaması"
     },
     {
       "guid": "c0b90ee8-2ed3-4f1e-88f6-54ae92dba980",
@@ -21463,7 +21563,7 @@
     },
     {
       "guid": "dc58b801-7239-4759-8314-e83f240f6756",
-      "text": "VampirePowersDescription"
+      "text": "VampirGüçleriAçıklaması"
     },
     {
       "guid": "53c02de3-993e-462f-8382-41e72f7a8154",
@@ -21819,7 +21919,7 @@
     },
     {
       "guid": "b989761c-1891-4393-87dd-5eb82fdf071f",
-      "text": "Dayanıklılık {value}/{value2}"
+      "text": "Dayanıklılık <size=18>{value}</size>/{value2}"
     },
     {
       "guid": "6285ca80-1280-4c6a-b0a9-bc6902f7f928",
@@ -21974,8 +22074,24 @@
       "text": "Bağlantı Ekle"
     },
     {
+      "guid": "bb74a995-aa3b-46ed-9238-a74ad65b4ff6",
+      "text": "Bu kaptaki eşyaların doğrudan bağlantılı bir kaba <teal1>Hızlı Gönderilmesi</c> için bir bağlantı ekle."
+    },
+    {
       "guid": "dda53117-82f1-408d-b205-77a63713fe7a",
       "text": "Bağlantılı tezgahlarda maksimum sayıya ulaştın. Sınırı artırmak için ek Yeniden Dağıtım Motorları inşa et."
+    },
+    {
+      "guid": "1e9afc93-2fea-4613-978a-f068320a607a",
+      "text": "Bağlantılı Envanterler ({value0}/{value1})"
+    },
+    {
+      "guid": "49d0a5d4-6ca9-471f-a4c3-8847a4bd8843",
+      "text": "Bağlantı Kapasitesi"
+    },
+    {
+      "guid": "d4204218-1a99-426f-9cd0-2eb62d13a8e2",
+      "text": "Bağlantı kapasitesini artırmak için ek <teal1>Yeniden Dağıtım Motorları</c> inşa et."
     },
     {
       "guid": "c782c76a-9e6c-4948-b3cd-bb862513e83b",
@@ -22031,19 +22147,63 @@
     },
     {
       "guid": "3bf1b516-ae75-492b-9b0f-32c39b3eaa0f",
-      "text": "Yukarıya Git"
+      "text": "Yukarı Git"
     },
     {
       "guid": "e8bb262e-db43-479a-ae6a-8bbf915c5441",
       "text": "Bağlantıyı Kaldır"
     },
     {
+      "guid": "2b9db11b-541f-467d-8a2c-d70f77e9840e",
+      "text": "Çıkış kabında eşya yok"
+    },
+    {
+      "guid": "faa8c8f0-b1c1-4427-82fa-58ec36dd945b",
+      "text": "Çıkış tipiyle eşleşen bağlantılı kap yok"
+    },
+    {
+      "guid": "bc6f77f4-af27-4dab-b085-4aaf33a45ac2",
+      "text": "Bağlantılı kaplarda yeterli alan yok."
+    },
+    {
+      "guid": "c9b9a3bd-b9e5-43e5-a418-3f876fe44488",
+      "text": "Tüm uygun eşyaları azalan öncelik sırasıyla bağlantılı depoya <teal1>Hızlı Gönder</c>."
+    },
+    {
+      "guid": "f2770d65-5aa9-4960-9278-f1a235e3a37a",
+      "text": "Tümünü Hızlı Gönder"
+    },
+    {
       "guid": "0a7f4c19-d5a5-45c5-9fde-fff19f92674d",
       "text": "Bağlantıları Göster"
     },
     {
+      "guid": "71d79fba-0b55-4ff1-87a9-797d2041845c",
+      "text": "Kaledeki tüm kap bağlantılarını kaldırmak istediğine emin misin?"
+    },
+    {
       "guid": "bd58776a-d0eb-4e3d-9538-4094e4a78bf7",
       "text": "Kale Bağlantılarını Kaldır"
+    },
+    {
+      "guid": "fd0fa4d1-e3a2-4182-8ca3-a0b955d8f03f",
+      "text": "Eşyaları bağlı kaplara anında aktarmak için üretim ve işleme istasyonlarını yeniden dağıtım ağına bağla."
+    },
+    {
+      "guid": "98fc687e-7eb5-40cc-894e-325bd8425e79",
+      "text": "İstasyon menüsünü görüntüle."
+    },
+    {
+      "guid": "ed7ff809-a62f-4465-80e5-09772e9effba",
+      "text": "İstasyon"
+    },
+    {
+      "guid": "f40a3edc-92e0-4635-b615-785ba1092a5b",
+      "text": "Eşyaları hızlı bir şekilde ve doğrudan diğer kaplara aktarmanı sağlar."
+    },
+    {
+      "guid": "9b72eabe-e2a3-4a8f-8ae6-42f47e9d684b",
+      "text": "Yeniden Dağıtım"
     },
     {
       "guid": "44ec55bc-4db5-41d3-93cd-7108afecbf74",
@@ -22478,12 +22638,32 @@
       "text": "Keşfet"
     },
     {
+      "guid": "b3f34a27-3383-431a-b6a6-6789f125db14",
+      "text": "Rastgele Bir Teknoloji Keşfet"
+    },
+    {
+      "guid": "c34bf0b9-63b5-4108-ace7-47b14955e4ef",
+      "text": "Öğren"
+    },
+    {
+      "guid": "78647022-4eb9-4809-90f4-7ef9176c0721",
+      "text": "Tüm mevcut bilgilerin kilidini açar."
+    },
+    {
       "guid": "826db8e9-0c96-4c71-8c5b-9714b1da8470",
       "text": "Büyü"
     },
     {
       "guid": "7dd1d6ff-1ff0-4443-8523-afde84b4d0d7",
       "text": "Yapılar"
+    },
+    {
+      "guid": "bf30edab-5c8c-4d8d-8200-4ba654c59016",
+      "text": "Kilidini Aç"
+    },
+    {
+      "guid": "ea433f0c-d9c0-490b-85b7-01dea53b2eaa",
+      "text": "Bir eşyayı tüketerek bilginin kilidini aç."
     },
     {
       "guid": "7ada27b5-d4c1-4b7c-8887-b3104bd2c054",
@@ -23683,7 +23863,7 @@
     },
     {
       "guid": "1141bae6-2973-468e-a29a-007cff444c44",
-      "text": "Karşı Koyma Yeteneklerini kullanarak mermileri ve yakın dövüş saldırılarını engelleyebilirsin."
+      "text": "Karşı Atak Yetenekler'ini kullanarak gelen mermileri ve yakın dövüş saldırılarını engelleyebilirsin."
     },
     {
       "guid": "46726499-c61a-4684-9bad-d8c806e78b5d",
@@ -23711,7 +23891,7 @@
     },
     {
       "guid": "cf56127e-e1c2-4131-b4d2-405e5f7ff34c",
-      "text": "Kaybolmaktan kaçın"
+      "text": "Sakın kaybolma"
     },
     {
       "guid": "9b21a846-a868-4a1c-b7e0-4db40c9f72e6",
@@ -23759,7 +23939,7 @@
     },
     {
       "guid": "043922f3-9b7b-4371-9979-2d03b6174cfd",
-      "text": "İdeal inşa konumlarını keşfetmek için Haritayı kullan."
+      "text": "Haritayı kullanarak ideal inşa konumlarını keşfet"
     },
     {
       "guid": "577e67e0-a02a-49dd-b14e-82aafef11862",
@@ -23803,7 +23983,7 @@
     },
     {
       "guid": "de10e742-1c00-4678-a6d9-9204a8e3a271",
-      "text": "Hakimiyet"
+      "text": "İnsana hükmet"
     },
     {
       "guid": "090cb15a-4a38-4c23-b05d-db9cd6c64f4d",
@@ -23932,10 +24112,6 @@
     {
       "guid": "da3673bf-22fb-49f7-885a-2dab9b5036be",
       "text": "Öldürülen Boss: {vBloodKills}"
-    },
-    {
-      "guid": "7c9f0c30-0130-46b1-a9ae-68fdfbb72ac2",
-      "text": "Günlük"
     },
     {
       "guid": "cb199ac0-a94b-447b-98ae-1bc65ff50a42",
@@ -24076,6 +24252,10 @@
     {
       "guid": "0dad60f3-5a15-413b-b087-d91784d054df",
       "text": "Kan Birleşimi"
+    },
+    {
+      "guid": "fc425059-d162-4bf2-b9fb-f70b190a2461",
+      "text": "İkincil Kan Tipi"
     },
     {
       "guid": "a00dc3e0-7fc3-479b-86f8-93b3b9fdf149",
@@ -24247,7 +24427,7 @@
     },
     {
       "guid": "f2f4c46b-92a9-45af-9a15-05be162b5b79",
-      "text": "Bağlantılı Kale Kalbinin bağlantısını kestiğinde tüm yapılar yeni bölgeden kaldırılır. Bağlantılı Kale bu durumdan etkilenmez."
+      "text": "Bağlı Kale Kalbi kapatıldığında, tüm yapılar yeni araziden kaldırılacaktır. Bağlı Kale, etkilenmeden kalacaktır."
     },
     {
       "guid": "3d9ef977-b0dc-443c-af63-d855394b8f0c",
@@ -24423,7 +24603,7 @@
     },
     {
       "guid": "9244c448-4238-4704-b763-b297fb3d51ad",
-      "text": "Ham Değerli Taş"
+      "text": "Ham Cevher"
     },
     {
       "guid": "1937df4e-c37f-4982-9159-03bd43b0386d",
@@ -24566,6 +24746,10 @@
       "text": "Çıkışta yer yok"
     },
     {
+      "guid": "2f59f284-40fa-4f9c-b00a-62be65f11fa6",
+      "text": "Gece vakti duraklatıldı"
+    },
+    {
       "guid": "740d20fc-2c12-4ad3-8eb8-7b4b88e71391",
       "text": "Hizmetkârın yetenekleriyle verdiği hasarı belirler."
     },
@@ -24695,11 +24879,15 @@
     },
     {
       "guid": "9b3d03eb-47da-4905-ab8f-525db01340da",
-      "text": "Kilidini Aç"
+      "text": "Kilidi Aç"
     },
     {
       "guid": "cfb232e9-77ea-4f43-93f1-a9e825cc5eeb",
       "text": "Atletizm"
+    },
+    {
+      "guid": "75794f1e-353f-4cf4-93af-632c75c7380a",
+      "text": "Çevik bir sıçrama ile bineğinden daha hızlı in."
     },
     {
       "guid": "c96dc1e0-2162-4dcc-a8ab-e8312bbe8dbd",
@@ -24720,6 +24908,10 @@
     {
       "guid": "8cd585f5-1eda-49d4-9e41-476d277e43e7",
       "text": "Denge"
+    },
+    {
+      "guid": "a2e456a7-4985-4460-896a-75a74f17094b",
+      "text": "Bir saldırıya maruz kaldığında binekten düşmekten <skillcolor>%{chance}</c> ihtimalle kurtul.\\n\\n<red1>Vampir oyuncu saldırılarına karşı etkisi yoktur.</c>"
     },
     {
       "guid": "7698912a-727a-42b0-9397-f0502aef5dad",
@@ -25519,7 +25711,7 @@
     },
     {
       "guid": "268312d7-f77f-4de7-8b11-dc1792dc3481",
-      "text": "Standart PvP kural seti ancak tüm V Blood birimlerinin yeri, grubu ve yetenek ödülleri karıştırıldı. Lanetlenmek için ne korkunç bir gece!"
+      "text": "Standart PvE kural seti ancak tüm V Blood birimlerinin yeri, grubu ve yetenek ödülleri karıştırıldı. Lanetlenmek için ne korkunç bir gece!"
     },
     {
       "guid": "5ee0be61-7c41-484f-8bf5-ecdaafd34363",
@@ -25591,7 +25783,7 @@
     },
     {
       "guid": "d24c5ebf-dac9-4154-adf0-6baa4e0bab93",
-      "text": "Yarasaya Bağlı Eşyalar"
+      "text": "Yarasa Bağlı Eşyalar"
     },
     {
       "guid": "0e65e122-4fb9-4715-b7ec-94b347e2ec31",
@@ -26052,6 +26244,14 @@
     {
       "guid": "c132db61-25bc-43dc-8066-f0b220628d47",
       "text": "Başarılı hizmetkâr avlarından gelen ganimet miktarını çarpar."
+    },
+    {
+      "guid": "2fd1f87c-e2ad-46c5-a322-7e1c1b31bdce",
+      "text": "Kasvetli Parçacık Ganimet Çarpanı"
+    },
+    {
+      "guid": "0e82d588-5fac-4b80-8866-9ef38b5b3f6a",
+      "text": "Akınlardan, düşmanlardan, varillerden, kutulardan ve sandıklardan düşen kasvetli parçacık miktarını çarpar."
     },
     {
       "guid": "95331135-1720-4ebe-b54f-1027b0137e44",
@@ -26662,6 +26862,14 @@
       "text": "Gümüş eşyalar taşırken alınan hasarı etkiler."
     },
     {
+      "guid": "a75977c0-a062-4bd6-aac6-7ef1ae142a34",
+      "text": "Ruh Parçacığı Dayanıklılık Oranı"
+    },
+    {
+      "guid": "3b62b579-16d7-4e69-9f6c-8e019b0ba4a4",
+      "text": "Ruh parçacıklarının zaman içinde ne kadar hızlı dayanıklılık kaybettiğini gösteren oran."
+    },
+    {
       "guid": "30d96127-b1bc-4c69-b514-6297c8a0eaf1",
       "text": "Büyü Gücü Çarpanı"
     },
@@ -26876,6 +27084,14 @@
     {
       "guid": "90f837fd-1607-4d0e-bc26-75c7acccbadd",
       "text": "Ölüm Yarık Akınlarının ne sıklıkla yapılacağını gösterir"
+    },
+    {
+      "guid": "65521547-8c07-4625-bbf3-d4c689822eea",
+      "text": "Silah Yuvaları"
+    },
+    {
+      "guid": "aacb6713-3012-4761-b943-826d97cd173b",
+      "text": "Eylem çubuğunda silahlar için kullanılabilecek Yuva miktarı."
     },
     {
       "guid": "ce5b8514-397c-446a-8350-b312ad241729",
@@ -27287,7 +27503,7 @@
     },
     {
       "guid": "37a362ba-0628-4aa6-8cec-a393eecad872",
-      "text": "< {1} ms"
+      "text": "< {value}ms"
     },
     {
       "guid": "630425fe-92b5-4d23-9e64-9635592453c2",
@@ -27324,6 +27540,22 @@
     {
       "guid": "2a3563f0-1f07-4663-8cf4-627ba5d9d75f",
       "text": "Gloomrot’a Gir"
+    },
+    {
+      "guid": "92436be0-0f17-4de8-9ada-61636e524eff",
+      "text": "Şimdi Satın Al"
+    },
+    {
+      "guid": "4f1f95e7-1c1f-467a-ae7a-aeaa17fa5cde",
+      "text": "En zengin renkleri kucakla ve lükse doy! Altın detaylara sahip kalen hizmetkarlardan tut efendilere kadar herkesi imrendirecek."
+    },
+    {
+      "guid": "a79ef8ce-5bf7-4965-8527-f19e197d3405",
+      "text": "Meşekubbe’nin zengin doğal arazilerine git, Zehir Bıçaklarıyla yüzleş, zehir özünün karanlık sırlarını öğren ve Yılan Kraliçe Megara’nın büyülü sığınağını işgal et ya da bu uğurda canını ver.\\nV Rising’in yepyeni dünyasını deneyimlemek için yeni bir dünya başlat!"
+    },
+    {
+      "guid": "f0395dcd-caa1-44f0-82d0-00303203d531",
+      "text": "Meşekubbe Ormanı’nı keşfet"
     },
     {
       "guid": "6c0086c5-9916-49e6-a3e2-bed7de7947e6",
@@ -27399,7 +27631,7 @@
     },
     {
       "guid": "277dcc76-95cf-4e76-95fe-8e7251ed6ec1",
-      "text": "Meşekubbe İşgalcileri"
+      "text": "Invaders of Oakveil"
     },
     {
       "guid": "4cd60e11-3093-4651-a217-111e0d93d43e",
@@ -28131,7 +28363,7 @@
     },
     {
       "guid": "16635eb0-4a5b-4f4e-a76c-d301ae5cba54",
-      "text": "Arka Işık"
+      "text": "Kontur Işığı"
     },
     {
       "guid": "13b96e88-9810-48a0-8452-6be2411aeb02",
@@ -28359,7 +28591,7 @@
     },
     {
       "guid": "5160d62b-9b32-4af3-8a72-def913ee922a",
-      "text": "Çıkarma Eylemine İzin Ver"
+      "text": "Çıkar Eylemine İzin Ver"
     },
     {
       "guid": "b3305edd-d3be-45e2-bc8e-584ed3f91699",
@@ -28432,6 +28664,38 @@
     {
       "guid": "30e87e35-b686-46c1-bbbb-7762979c1232",
       "text": "Hoparlör Modu"
+    },
+    {
+      "guid": "a6bb9599-6691-43d1-9bb0-ae6d54b93705",
+      "text": "5.1"
+    },
+    {
+      "guid": "d9cb43ce-9467-421b-a010-aac419168154",
+      "text": "7.1"
+    },
+    {
+      "guid": "b9f053df-8d98-456d-b968-a5daf5ed23e7",
+      "text": "7.1.4"
+    },
+    {
+      "guid": "3e790e72-366b-4f46-9314-5d0961187153",
+      "text": "Varsayılan"
+    },
+    {
+      "guid": "759be497-6038-4ad5-968f-85616c91bd4c",
+      "text": "Mono"
+    },
+    {
+      "guid": "1f38f15a-5f07-4a0d-8046-01c8f565446a",
+      "text": "Quad"
+    },
+    {
+      "guid": "23401c4f-b203-40ca-855a-868757119584",
+      "text": "Stereo"
+    },
+    {
+      "guid": "70d113ef-7660-4d5f-841a-cd472fa387f2",
+      "text": "Surround"
     },
     {
       "guid": "1fa13b8d-edec-42f7-958c-f998df3afb3e",
@@ -28699,7 +28963,7 @@
     },
     {
       "guid": "b1a0a3dd-236a-4df1-9c03-012a0429b806",
-      "text": "Sunucu oyunu kaydedemedi. Hata Tipi: {error_type}, Hata Kodu: {error_code}. Sunucu yöneticileri detaylı bilgiyi sunucu kayıt dosyalarında bulabilirler."
+      "text": "Server oyunu kaydedemedi. Hata Tipi: {error_type}, Hata Kodu: {error_code}. Server yöneticileri detaylı bilgiyi server log dosyalarında bulabilirler."
     },
     {
       "guid": "b3bace92-f12b-4742-85ef-ba009c579c4e",
@@ -28760,10 +29024,6 @@
     {
       "guid": "8d595ca7-9771-4c7d-8cba-106863baf14f",
       "text": "Hizmet Koşullarını Gör"
-    },
-    {
-      "guid": "2414ac41-88e5-480e-a3af-d2686773b056",
-      "text": "Çekişmeli"
     },
     {
       "guid": "f4e6e26a-7ff4-4b9d-b714-aaa2a67c25f3",
@@ -29070,10 +29330,6 @@
       "text": "Karanlık ve bozuk bir şeyin kalıntıları. Kadim bir gölge, bu yerin üzerine inmektedir."
     },
     {
-      "guid": "4c9bcf15-996c-4ef5-8088-a308033317b8",
-      "text": "Bedbaht Kömür Madeni III"
-    },
-    {
       "guid": "33491730-b176-4cfa-9bf0-59902b792730",
       "text": "Haydut Bakır Ocağı"
     },
@@ -29183,7 +29439,7 @@
     },
     {
       "guid": "9fcf5068-5b2b-4bad-8ed1-2e27b524fd6c",
-      "text": "QuartzQuarryDesc text needs to be added"
+      "text": "QuartzQuarryDesc metni eklenmeli"
     },
     {
       "guid": "baa4ab76-de8e-4daa-8024-d3ac39c3f919",
@@ -29711,7 +29967,7 @@
     },
     {
       "guid": "30441c4d-6238-4135-9a6e-d8ae20e5896d",
-      "text": "SilverlightValleyDesc text needs to be added"
+      "text": "SilverlightValleyDesc metini eklenmeli"
     },
     {
       "guid": "94da3604-bce9-4975-b62a-dae8409b9f58",
@@ -29783,7 +30039,7 @@
     },
     {
       "guid": "601c0311-701d-4bd7-ab09-7145bb1c0ca7",
-      "text": "Eski bir Vampir ışınlayıcısı. Işınlama büyüsü için uygun bir hedef."
+      "text": "Eski bir Vampir Işınlayıcısı. Işınlanma büyüsü için uygun bir hedef."
     },
     {
       "guid": "41b12481-c45c-45dd-9a53-42de8074837b",
@@ -29791,7 +30047,7 @@
     },
     {
       "guid": "b77f74ea-f2e0-4cb9-b248-a33ab86aefed",
-      "text": "Eski bir Vampir ışınlayıcısı. Işınlama büyüsü için uygun bir hedef."
+      "text": "Eski bir Vampir Işınlayıcısı. Işınlanma büyüsü için uygun bir hedef."
     },
     {
       "guid": "1f30c16d-55b6-478c-a6f5-6f036514a7cb",

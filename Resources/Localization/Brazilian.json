@@ -1,6 +1,6 @@
 {
-  "Codes": [],
-  "Nodes": [
+  "codes": [],
+  "nodes": [
     {
       "guid": "de5768be-d168-42f3-b253-9f0422772f17",
       "text": "Por séculos, nossos castelos permaneceram esquecidos em ruínas..."
@@ -559,7 +559,7 @@
     },
     {
       "guid": "c0961447-357d-4a9e-b6a1-1db9886a0886",
-      "text": "Oscilação de Energia"
+      "text": "Surto de Energia"
     },
     {
       "guid": "f30a5e14-7758-4782-b8a2-bb0dedc1bebc",
@@ -623,7 +623,7 @@
     },
     {
       "guid": "08ff338a-e0a8-468a-a727-3e168c54db1a",
-      "text": "<chaos>Incendeia</c> seus inimigos com chamas do caos, causando <skillcolor>{damage}</c> dano Mágico ao longo de <skillcolor>{duration}s</c>.\\n\\nAciona uma explosão que causa <skillcolor >{damage}</c> dano mágico quando um alvo <chaos>incendiado</c> morre."
+      "text": "<chaos>Incendeia</c> seus inimigos com chamas do caos, causando <skillcolor>{damage}</c> dano Mágico ao longo de <skillcolor>{duration}s</c>.\\n\\nAciona uma explosão que causa <skillcolor>{damage}</c> de dano mágico quando um alvo <chaos>incendiado</c> morre."
     },
     {
       "guid": "61e83e90-4062-42b6-a8aa-574805d21da8",
@@ -675,7 +675,7 @@
     },
     {
       "guid": "78ef9085-4e2d-4d8f-8a6a-9e5eb3614155",
-      "text": "A flecha do caos atordoa o alvo por <skillcolor>{Duration} s</c>."
+      "text": "A flecha do caos atordoa o alvo ao ser atingido por <skillcolor>{Duration}s</c>."
     },
     {
       "guid": "553c7641-5b3e-49e6-9ae8-f8aafb6adc66",
@@ -823,7 +823,7 @@
     },
     {
       "guid": "3f7c843d-1b7c-4a4b-81a1-41e9273a0fd8",
-      "text": "Transforma a si mesmo e aliados em gelo sólido por até <skillcolor>{duration} s</c> e chama um vórtice de gelo. O gelo protege em <skillcolor>{absorb}</c> do seu poder mágico, concede imunidade aos efeitos de controle de grupo e cura em <skillcolor>{healing}</c> da vida máxima do alvo. \\n\\nO vórtice inicialmente causa <skillcolor>{initdamage}</c> de dano mágico e <frost>Calafrio</c>. O vórtice causa <skillcolor>{damage}</c> de dano adicional enquanto o efeito durar."
+      "text": "Transforma o aliado alvo ou você mesmo em gelo sólido por até <skillcolor>{duration}s</c> e invoca um vórtice gelado. O bloco de gelo protege o alvo em <skillcolor>{absorb}</c> do seu poder mágico, concede imunidade a efeitos de controle de multidão e cura até <skillcolor>{healing}</c> da saúde máxima do alvo. \\n\\nO vórtice inicialmente causa <skillcolor>{initdamage}</c> dano mágico e inflige <frost>Calafrio</c>. O vórtice causa <skillcolor>{damage}</c> dano adicional durante a duração do efeito."
     },
     {
       "guid": "98aa6faa-ba15-4f7d-91f0-5374792121ae",
@@ -1175,11 +1175,11 @@
     },
     {
       "guid": "8ef20b68-6d1c-48b0-9e64-10ddfe679e8b",
-      "text": "Atingir um alvo <unholy>condenado</c> chama um esqueleto mago com <skillcolor>{BonusStats}%</c> de vida extra quando o alvo morre."
+      "text": "Atingir um alvo <unholy>condenado</c> invoca um esqueleto mago com <skillcolor>{BonusStats}%</c> de vida extra quando o alvo morre."
     },
     {
       "guid": "b71b8e59-9451-4a75-aac1-b205fb6a7fea",
-      "text": "Acertar um alvo <unholy>condenado</c> chama um esqueleto mago com <skillcolor>{BonusStats}%</c> de vida extra quando o alvo morre."
+      "text": "Acertar um alvo <unholy>condenado</c> invoca um esqueleto mago com <skillcolor>{BonusStats}%</c> de vida extra quando o alvo morre."
     },
     {
       "guid": "65dee646-d655-4632-8072-3f31e7fb5a6b",
@@ -1211,7 +1211,7 @@
     },
     {
       "guid": "3d88a2d2-2d68-4493-b8d2-a1c35938b303",
-      "text": "Pulverização Sangrenta"
+      "text": "Espalhar Sangue"
     },
     {
       "guid": "8f2834f7-6abc-40d0-93f2-80c98bd35ee4",
@@ -1399,7 +1399,7 @@
     },
     {
       "guid": "ac75c0e3-a09e-4165-a96d-faef40135768",
-      "text": "Há <skillcolor>{factor1}</c> de chance de chamar um <unholy>esqueleto mago</c> quando um alvo <unholy>condenado</c> morre, e os lacaios causam <skillcolor>{factor2}</c> de dano bônus."
+      "text": "Há <skillcolor>{factor1}</c> de chance de invocar um <unholy>Esqueleto Mago</c> quando um alvo <unholy>condenado</c> morre, e os lacaios causam <skillcolor>{factor2}</c> de dano bônus."
     },
     {
       "guid": "88639c52-ccec-4af0-aeda-e82018cfa5e5",
@@ -1695,7 +1695,7 @@
     },
     {
       "guid": "065727f2-e1cf-4672-b926-cd43137e4bad",
-      "text": "Protege aliados nas proximidades em <skillcolor>{Shield}%</c> do seu poder mágico quando o mosquito é chamado."
+      "text": "Protege aliados nas proximidades em <skillcolor>{Shield}%</c> do seu poder mágico quando o mosquito é invocado."
     },
     {
       "guid": "9a478d6a-92f6-4dea-9cd9-2a271a3e81e4",
@@ -1771,7 +1771,7 @@
     },
     {
       "guid": "20cefbb5-ee52-46d9-bf91-4e4e9b7d8513",
-      "text": "Lança um Raio Globular que permanece imóvel, eletrocutando inimigos próximos periodicamente e aplicando <storm>Estática</c>. Causa até <skillcolor>{damage}</c> de dano mágico por <sillcolor>{duration} s</c>. O dano total do Raio Globular não pode exceder <skillcolor>{multtargetdamage}</c> de dano mágico. \\n\\nExplode no final da duração, causando <skillcolor>{areadamage}</c> de dano mágico na área."
+      "text": "Lança um Raio Globular que permanece imóvel, eletrocutando inimigos próximos periodicamente e aplicando <storm>Estática</c>. Causa até <skillcolor>{damage}</c> de dano mágico por <skillcolor>{duration} s</c>. O dano total do Raio Globular não pode exceder <skillcolor>{multtargetdamage}</c> de dano mágico. \\n\\nExplode no final da duração, causando <skillcolor>{areadamage}</c> de dano mágico na área."
     },
     {
       "guid": "40ad7715-1c15-4c7e-af48-5e5514288979",
@@ -1915,7 +1915,7 @@
     },
     {
       "guid": "2735252b-93d1-4b34-8dce-ccf13685378c",
-      "text": "Eletrifica o inimigo por <skillcolor>{duration} s</c>, fazendo com que o dano físico causado a ele desencadeie um choque que causa <skillcolor>{damage}</c> de dano mágico.\\n\\nProvoca uma cadeia de relâmpagos que viaja em direção ao inimigo mais próximo, causando <skillcolor>{chaindamage}</c> de dano mágico, <storm>Estática</c> e ricocheteando até <skillcolor>{times}</c> vezes quando um alvo com <storm>Estática</c> morre."
+      "text": "Eletrifica seu inimigo por <skillcolor>{duration}s</c>, causando dano físico a ele e desencadeando um choque que causa <skillcolor>{damage}</c> de dano mágico.\\n\\nAciona um efeito de corrente de raios que viaja em direção ao inimigo mais próximo, causando <skillcolor>{chaindamage}</c> dano mágico, infligindo <storm>Estática</c> e saltando até <skillcolor>{times}</c> vezes quando um alvo afetado por <storm>Estática</c> morre."
     },
     {
       "guid": "cad6a247-f429-4d6a-9d9c-5a4bcc9824df",
@@ -2063,11 +2063,15 @@
     },
     {
       "guid": "5d973eea-48ce-4d16-87a2-0680dcb3737a",
-      "text": "Causa <unholy>Condenação</c> nos inimigos próximos e chama um exército de <skillcolor>{amount}</c> esqueletos guerreiros e <skillcolor>{amount2}</c> esqueletos magos ao seu redor. Os esqueletos duram até <skillcolor>{lifetime} s</c>."
+      "text": "Causa <unholy>Condenação</c> nos inimigos próximos e invoca um exército de <skillcolor>{amount}</c> esqueletos guerreiros e <skillcolor>{amount2}</c> esqueletos magos ao seu redor. Os esqueletos duram até <skillcolor>{lifetime} s</c>."
     },
     {
       "guid": "3eee37ae-3a44-40cb-9401-a39184e110e2",
       "text": "Corrente Profana"
+    },
+    {
+      "guid": "d069e19e-8bc1-4588-a8b5-10aef5649261",
+      "text": "Lança uma corrente que aprisiona o alvo, reduzindo a velocidade de movimento em <skillcolor>{speedfactor} - {speedfactor2}</c> com base na distância até o alvo. Canalize o feitiço por até <skillcolor>{duration}s</c>. Quando o efeito termina, causa <skillcolor>{damage}</c> de dano mágico e <unholy>Condenação</c>.\\n\\nSe a distância entre você e o alvo ultrapassar <skillcolor>{distance}</c> metros, a corrente quebrará, causando imobilidade por <skillcolor>{slowduration}s</c>."
     },
     {
       "guid": "090f5547-c30d-42ef-b353-7da661826a4c",
@@ -2083,7 +2087,7 @@
     },
     {
       "guid": "f0f2d200-44e2-4864-acfb-52fd2bbb9835",
-      "text": "Lança um projétil que causa <skillcolor>{damage}</c> de dano mágico, <skillcolor>chama um esqueleto</c> e aplica <unholy>Condenação</c>. O ataque causa <skillcolor>{bonusdamage}</c> de dano bônus a inimigos com vida inferior a <skillcolor>30%</c>."
+      "text": "Lança um projétil que causa <skillcolor>{damage}</c> de dano mágico, <skillcolor>invoca um esqueleto</c> e aplica <unholy>Condenação</c>. O ataque causa <skillcolor>{bonusdamage}</c> de dano bônus a inimigos com vida inferior a <skillcolor>30%</c>."
     },
     {
       "guid": "d71e0eaa-7ad8-4fb1-abb3-0ff833c92993",
@@ -2139,7 +2143,7 @@
     },
     {
       "guid": "4b68a345-0230-46b8-be0a-b220aa6d41ff",
-      "text": "Avança na direção indicada e escapa de inimigos nas proximidades por <skillcolor>{duration} s</c>. O seu próximo ataque primário cura você em <skillcolor>{healing}</c> da sua vida máxima, causa <unholy>Condenação</c> e <skillcolor>chama um esqueleto guerreiro</c>."
+      "text": "Avança na direção indicada e escapa de inimigos nas proximidades por <skillcolor>{duration} s</c>. O seu próximo ataque primário cura você em <skillcolor>{healing}</c> da sua vida máxima, causa <unholy>Condenação</c> e <skillcolor>invoca um esqueleto guerreiro</c>."
     },
     {
       "guid": "53cfc5cc-c849-47e1-9d72-140b89dcbd18",
@@ -2147,7 +2151,7 @@
     },
     {
       "guid": "5afb8251-53f1-488e-9205-8f8695f3d4e4",
-      "text": "Chama uma aranha gigante que persegue seu inimigo e explode quando se aproxima dele, causando <skillcolor>{impactdamage}</c> de dano mágico, <unholy>Condenação</c> e gerando <skillcolor>{count}</c> filhotes de aranha. Cada filhote de aranha explode, causando <skillcolor>{minordamage}</c> de dano mágico e <unholy>Condenação</c>."
+      "text": "Invoca uma aranha gigante que persegue seu inimigo e explode quando se aproxima dele, causando <skillcolor>{impactdamage}</c> de dano mágico, infligindo <unholy>condenação</c> e gerando <skillcolor>{count}</c> filhotes de aranha. Cada filhote de aranha explode causando <skillcolor>{minordamage}</c> de dano mágico e infligindo <unholy>condenação</c>."
     },
     {
       "guid": "4dd23ad7-f810-4be5-8a07-1332216ea39c",
@@ -2155,7 +2159,7 @@
     },
     {
       "guid": "1f5f0a0a-47b7-41f7-a5e4-97edaac7e7e5",
-      "text": "Bloqueia ataques corpo a corpo e de projéteis por <skillcolor>{duration} s</c>. Ao absorver um ataque, <skillcolor>chama um esqueleto</c>. Cada ataque absorvido na sequência tem <skillcolor>{chance}</c> de chance de <skillcolor>chamar um esqueleto adicional</c>, até o máximo de <skillcolor>{count}</c>. Inimigos que atacam corpo a corpo são empurrados.\\n\\n<skillcolor>Utilize novamente</c> durante o efeito para lançar uma onda de energia que causa <skillcolor>{conedamage}</c> de dano mágico e <unholy>Condenação</c>."
+      "text": "Bloqueia ataques corpo a corpo e de projéteis por <skillcolor>{duration} s</c>. Ao absorver um ataque, <skillcolor>invoca um esqueleto</c>. Cada ataque absorvido na sequência tem <skillcolor>{chance}</c> de chance de <skillcolor>invocar um esqueleto adicional</c>, até o máximo de <skillcolor>{count}</c>. Inimigos que atacam corpo a corpo são empurrados.\\n\\n<skillcolor>Utilize novamente</c> durante o efeito para lançar uma onda de energia que causa <skillcolor>{conedamage}</c> de dano mágico e <unholy>Condenação</c>."
     },
     {
       "guid": "28b4da55-0886-43f1-833b-beacc06c5e42",
@@ -2198,6 +2202,10 @@
       "text": "Chama um espírito de ossos que circula ao redor do alvo, causando <skillcolor>{Damage}%</c> de dano e <unholy>Condenação</c> a qualquer inimigo que atingir."
     },
     {
+      "guid": "6095e639-ab8f-4244-ac5a-79c40da480cb",
+      "text": "Ao canalizar, causa <skillcolor>{Damage}%</c> de dano a cada <skillcolor>0,7s</c>, mas reduz o dano do impacto em <skillcolor>{Reduction}%</c>."
+    },
+    {
       "guid": "eadda732-e4f2-4ff0-a764-dd4a09518994",
       "text": "Aumenta a duração do efeito em <skillcolor>{Duration}s</c> e o dano causado em <skillcolor>{Factor}%</c>."
     },
@@ -2235,7 +2243,7 @@
     },
     {
       "guid": "2d86896e-d343-4699-aa46-45a46241dc44",
-      "text": "Cura todos os esqueletos aliados atingidos em <skillcolor>{Healing}%</c> da sua vida máxima e reinicia o tempo de vida deles."
+      "text": "Cura todos os esqueletos aliados atingidos em <skillcolor>{Healing}%</c> da sua vida máxima e reinicia sua vida útil."
     },
     {
       "guid": "d62e0ea7-93d1-4e81-8f79-978b9349775d",
@@ -2283,7 +2291,7 @@
     },
     {
       "guid": "60e0edc5-0750-42ee-8e94-5eaa8cd6fd2b",
-      "text": "Causa imobilidade por <skillcolor>{Duration} s</c> a inimigos próximos ao local do chamado."
+      "text": "Causa imobilidade por <skillcolor>{Duration} s</c> a inimigos próximos ao local da invocação."
     },
     {
       "guid": "141722b1-0cee-439c-bb95-c0e37f6ce717",
@@ -2303,7 +2311,7 @@
     },
     {
       "guid": "bd5add88-4951-43f4-a462-81b224c3e07f",
-      "text": "Consome até <skillcolor>{Count}</c> esqueletos aliados, curando em <skillcolor>{Factor}%</c> do seu poder mágico por esqueleto."
+      "text": "Consome até <skillcolor>{Count}</c> esqueletos aliados, curando em <skillcolor>{Healing}%</c> do seu poder mágico por esqueleto."
     },
     {
       "guid": "14dc7665-d889-4c43-a4e8-28feafe5080f",
@@ -2327,11 +2335,15 @@
     },
     {
       "guid": "de0f2381-afff-4871-9748-44bbbcf5bcd1",
-      "text": "Atravessar um inimigo causa <blood>Condenação</c>."
+      "text": "Atravessar um inimigo causa <unholy>Condenação</c>."
+    },
+    {
+      "guid": "e0ffd6d4-96c1-4a9b-bf04-5127137fe81d",
+      "text": "O esqueleto explode depois de <skillcolor>{Duration}s</c>, causando <skillcolor>{Damage}%</c> de dano e <unholy>Condenação</c> nos inimigos próximos."
     },
     {
       "guid": "67735373-35da-49a0-ad69-965b2aa9e8ec",
-      "text": "Cura todos os esqueletos aliados que você atravessar em <skillcolor>{Healing}%</c> da sua vida máxima e reinicia o tempo de vida deles."
+      "text": "Cura todos os esqueletos aliados que você atravessar em <skillcolor>{Healing}%</c> da sua vida máxima e reinicia sua vida útil."
     },
     {
       "guid": "3a34f3f1-9abd-4b61-bc24-556236cd513e",
@@ -2339,11 +2351,11 @@
     },
     {
       "guid": "546bd8d6-fdaa-40b5-bfa9-70aeac3e679f",
-      "text": "Atingir um inimigo chama <skillcolor>{Count}</c> esqueletos guerreiros."
+      "text": "Atingir um inimigo invoca <skillcolor>{Count}</c> esqueletos guerreiros."
     },
     {
       "guid": "7ffc067b-7793-4cb2-873d-27fe93e0b02b",
-      "text": "Atingir um inimigo chama um <skillcolor>esqueleto mago</c> em vez de um esqueleto guerreiro."
+      "text": "Atingir um inimigo invoca um <skillcolor>Esqueleto Mago</c> ao invés de um esqueleto guerreiro."
     },
     {
       "guid": "a994bc5c-ddba-4e4f-bbfb-2df2950ad65d",
@@ -2359,7 +2371,7 @@
     },
     {
       "guid": "e70d6380-7fbd-4cb5-9a0a-bb9ef5dd4be8",
-      "text": "Absorver um projétil repõe <skillcolor>{Healing}%</c> do seu poder mágico."
+      "text": "Absorver um projétil cura você em <skillcolor>{Healing}%</c> do seu poder mágico."
     },
     {
       "guid": "7d62d47e-d4cc-4d0a-95f2-2c7a3caca27e",
@@ -2931,11 +2943,11 @@
     },
     {
       "guid": "84322963-88f8-4123-8f08-741defc91f48",
-      "text": "Esqueleto Berserker"
+      "text": "Esqueleto Furioso"
     },
     {
       "guid": "63137fb0-0927-499a-b97e-d5979ec3a36f",
-      "text": "Invoca um esqueleto berserker para ajudar na batalha por {duration} s. O ataque dele causa {damage} do seu poder mágico.\\n\\nQuando chamado, causa {summondamage} de dano mágico e {snareduration} s de imobilidade a inimigos ao redor dele.\\n\\nQuando morre, reduz o tempo de recarga deste feitiço em {cooldown} s."
+      "text": "Invoca um Esqueleto Furioso para ajudar na batalha por {duration} s. O ataque dele causa {damage} do seu poder mágico.\\n\\nQuando invocado, causa {summondamage} de dano mágico e {snareduration} s de imobilidade a inimigos ao redor dele.\\n\\nQuando morre, reduz o tempo de recarga deste feitiço em {cooldown} s."
     },
     {
       "guid": "f5ce8738-2e50-4d23-9cfe-4a0b40a5cb36",
@@ -3183,7 +3195,7 @@
     },
     {
       "guid": "e051a2b1-1d8a-44f1-8fd1-c8308c302aa1",
-      "text": "Dispara uma flecha que causa <skillcolor>{damage}</c> de dano físico e imobilidade por <skillcolor>{duration} s</c>. A flecha retorna para atingir o alvo novamente após o impacto, causando <skillcolor>{damage2}</c> de dano. Consome <skillcolor>Foco</c> para aumentar o número de vezes que a flecha retorna (<skillcolor>uma</c> vez por acúmulo)."
+      "text": "Dispara uma flecha que causa <skillcolor>{damage}</c> de dano físico inflingindo lentidão por <skillcolor>{duration} s</c>. A flecha retorna para atingir o alvo novamente após o impacto, causando <skillcolor>{damage2}</c> de dano. Consome <skillcolor>Foco</c> aumentando o número de vezes que a flecha retorna (<skillcolor>uma</c> vez por acúmulo)."
     },
     {
       "guid": "0b8738c2-edc6-4ed3-a7fa-f94ff1635762",
@@ -3195,7 +3207,7 @@
     },
     {
       "guid": "949302f3-7394-40c0-a0e3-372040191bf6",
-      "text": "Segure para carregar um projétil que causa <skillcolor>{mindamage}</c> - <skillcolor>{maxdamage}</c> de dano físico e concede <skillcolor>Foco</c>. O <skillcolor>Foco</c> pode ser acumulado até <skillcolor>{count}</c> vezes e aumenta a eficácia de suas outras habilidades de Arco Longo.\\n\\nTiros carregados completamente perfuram até <skillcolor>{piercecount}</c> inimigos. Cada acerto subsequente causa <skillcolor>{damagereduction}</c> do dano do acerto anterior."
+      "text": "Segure para carregar um projétil que causa <skillcolor>{mindamage}</c> - <skillcolor>{maxdamage}</c> de dano físico e concede <skillcolor>Foco</c>. <skillcolor>Foco</c> pode ser acumulado até <skillcolor>{count}</c> vezes e aumenta a eficácia das outras habilidades do Arco Longo.\\n\\nDisparos completamente carregados perfuram até <skillcolor>{piercecount}</c> inimigos, cada acerto subsequente causa <skillcolor>{damagereduction}</c> do dano do acerto anterior."
     },
     {
       "guid": "e349f9be-a7e1-40fb-b6d3-b387867e67a1",
@@ -3303,7 +3315,7 @@
     },
     {
       "guid": "7e3d5165-021b-40b6-8d9b-38976a16c9a1",
-      "text": "Acertos causam <unholy>Condenação</c> e têm <skillcolor>{Chance}%</c> de chance de chamar um <unholy>esqueleto guerreiro</c>."
+      "text": "Acertos causam <unholy>Condenação</c> e têm <skillcolor>{Chance}%</c> de chance de invocar um <unholy>esqueleto guerreiro</c>."
     },
     {
       "guid": "c075a07d-fcf6-4cbe-87c1-47968cd6c762",
@@ -3746,8 +3758,16 @@
       "text": "Aumenta o poder mágico em <teal1>{value}%</c> e a velocidade na metamorfose em <teal1>{shapeshiftSpeed}%</c>."
     },
     {
+      "guid": "488f0cf3-4b1f-4151-8239-ae21fde6cdc4",
+      "text": "Aumenta a velocidade de recarga da suprema em <teal1>{value}%</c> e gera <teal1>2</c> ratos mutantes aliados ao lançar uma suprema."
+    },
+    {
       "guid": "c8230dea-52aa-4114-9801-6320c8557602",
       "text": "Aumenta o poder supremo em <teal1>{value}%</c> e o dano dos lacaios em <teal1>{minionDamage}%</c>."
+    },
+    {
+      "guid": "cabcc8c5-4c75-47c5-a846-3227ffee03f2",
+      "text": "Aumenta a velocidade de recarga do Véu em <teal1>{value}%</c> e acertar um ataque com o Véu reduz o tempo de recarga da suprema em <teal1>{cooldownreduction}s</c>."
     },
     {
       "guid": "cbf3eeea-1160-4f65-a3d8-78eba3df24bf",
@@ -3846,6 +3866,10 @@
       "text": "Aumenta o poder supremo em <teal1>{value}%</c> e redefine o tempo de recarga dos feitiços ao usar uma suprema."
     },
     {
+      "guid": "65219c1f-c7c0-43fc-bb07-27165a8b59d7",
+      "text": "Aumenta o acúmulo de cargas de feitiços em <teal1>{value}</c>."
+    },
+    {
       "guid": "48abfa07-1bfa-46cf-9091-d75175401926",
       "text": "Aumenta a velocidade de movimento em <teal1>{value}%</c> enquanto estiver se transformando."
     },
@@ -3884,6 +3908,10 @@
     {
       "guid": "a6e34899-dd59-4455-a746-4dbb4e6c04c2",
       "text": "Aumenta o poder da habilidade da arma em <teal1>{value}%</c> e o dano ao atingir inimigos que estão com o máximo de vida em <teal1>{extraDamage}%</c>."
+    },
+    {
+      "guid": "a99ddb9b-e06a-422a-861c-0fd2501cc8b6",
+      "text": "<teal1>{chance}</c> de chance de se defender de um ataque, reduzindo o dano recebido em <teal1>{damagereudction}</c>. Defender-se de um ataque aumenta o seu próprio poder físico em <teal1>{factor}</c> por <teal1>{duration}s</c>."
     },
     {
       "guid": "42035506-824b-4f41-ab2c-33b2f8a3d7a0",
@@ -4434,8 +4462,48 @@
       "text": "O dano causado é reduzido em <skillcolor>{weakenfactor}</c>."
     },
     {
+      "guid": "6c2b5f1f-ee10-4022-a4f6-4e4b2724d51f",
+      "text": "Equipe vermelha"
+    },
+    {
+      "guid": "f785ee2a-7632-4180-b74a-3c98530d4c25",
+      "text": "Equipe azul"
+    },
+    {
+      "guid": "79070767-638f-471b-9f90-ebd2a707eb0b",
+      "text": "Equipe verde"
+    },
+    {
+      "guid": "587bf5ad-620b-46a5-8f51-82cc0184a18c",
+      "text": "Equipe roxa"
+    },
+    {
+      "guid": "3ffd469d-fbaa-4efb-b794-2ff8c4dfdecc",
+      "text": "Coloque um estandarte de equipe para adicionar uma <teal1>equipe</c> à arena do castelo. Os vampiros podem usar o estandarte para ingressar na equipe correspondente.\\n\\nÉ possível colocar vários estandartes de equipe na mesma arena, permitindo que os vampiros entrem em diferentes equipes."
+    },
+    {
+      "guid": "09755304-443f-4a12-9a2e-ff7751d6f2d0",
+      "text": "Esfera de Arena"
+    },
+    {
+      "guid": "098042d4-0536-48af-9274-fe7517610291",
+      "text": "Coloca uma esfera quebrável que ressurge periodicamente dentro da arena.\\n\\nA equipe do jogador que quebrar a esfera receberá uma <teal1>cura</c>."
+    },
+    {
+      "guid": "40328b82-16d8-46e8-a260-c5cd0abe2641",
+      "text": "Centro de Arena"
+    },
+    {
+      "guid": "5e2c39ce-72a7-4d7b-ad54-124e0cdfe6b0",
+      "text": "Coloca uma área central na arena.\\n\\nDurante a <teal1>morte súbita</c>, o campo de batalha encolherá em direção à esse ponto."
+    },
+    {
       "guid": "51c4337a-94eb-456e-9ee7-b000d06cec84",
       "text": "Estação de Arena"
+    },
+    {
+      "guid": "fea1a71c-a832-4311-83ce-cd21b6c0cac0",
+      "text": "Um estação que adiciona uma <teal1>arena</c> ao seu castelo. Use para iniciar ou cancelar disputas na arena e ajustar as regras da arena.\\n\\nColocar a estação cria uma <teal1>zona de arena</c> conectada, que define os limites da disputa. Você pode personalizar essa zona para criar sua própria arena."
     },
     {
       "guid": "a764c0d4-b7c8-4aa9-9a4e-980f8278bf0b",
@@ -5990,6 +6058,10 @@
       "text": "Boneco de Treinamento - Aldeão"
     },
     {
+      "guid": "2d00e9f3-2ac5-436f-9ea6-0cd0113f88f3",
+      "text": "Campainhas de Castelo"
+    },
+    {
       "guid": "8525d8e1-fbc4-4652-a986-2c29c43c67b1",
       "text": "Trono Real"
     },
@@ -6328,6 +6400,10 @@
     {
       "guid": "d55574b1-2cb3-46a6-a4dd-7494b9075460",
       "text": "Quadros \"Opulência Noturna\""
+    },
+    {
+      "guid": "5777c8c4-4ae5-4c9e-8d13-ea0737dd3abd",
+      "text": "Piscinas para se banhar e relaxar."
     },
     {
       "guid": "8f45c617-82c6-4923-87eb-f4c958177737",
@@ -7727,7 +7803,7 @@
     },
     {
       "guid": "51705788-6de3-4286-80c0-99aba70f47dd",
-      "text": "Aumenta a resistência a alho e objetos sagrados em <teal2>{resistvalue1}</c>, a velocidade de movimento em <teal2>{movementspeed}</c> e a obtenção de recursos em <teal2>{resourceyield}</c>."
+      "text": "Aumenta a resistência a alho e resistência sagrada em <teal2>{resistvalue1}</c>, a velocidade de movimento em <teal2>{movementspeed}</c> e a obtenção de recursos em <teal2>{resourceyield}</c>."
     },
     {
       "guid": "e2fcee98-60ca-462e-98e6-45278ca603f6",
@@ -8922,14 +8998,6 @@
       "text": "No Altar da Recordação você pode redefinir suas escolhas do grimório."
     },
     {
-      "guid": "db058eb8-bed8-4254-8761-98b90a65b614",
-      "text": "Banco de sangue"
-    },
-    {
-      "guid": "f9659cc7-ffcc-4658-b06d-f2290ee1e803",
-      "text": "Um recipiente para sangue. Conecte uma tubulação de um ou mais extratores de sangue para encher e misturar fontes de sangue diferentes."
-    },
-    {
       "guid": "8b2257a3-f137-4e28-a036-4988a703d2fe",
       "text": "Misturador de Sangue"
     },
@@ -8992,6 +9060,10 @@
     {
       "guid": "b14514d9-5513-4a7a-b353-7baa9355b3eb",
       "text": "Coloque uma <teal1>Arma Ancestral</c>, <teal1>Arma Destruída</c> ou <teal1>Joia de Feitiço</c> para iniciar o processo de fusão."
+    },
+    {
+      "guid": "e4b171e0-a34a-4df7-880c-a7293e57425e",
+      "text": "Coloque uma <teal1>Joia de Feitiço</c> compatível no espaço secundário para continuar o processo de fusão.\\n\\nA <teal1>Joia de Feitiço</c> fundida manterá o nome da <teal1>Joia de Feitiço</c> original.\\n\\nO item secundário será perdido no processo."
     },
     {
       "guid": "c706ffa0-c322-4448-8d43-99a1e88dc609",
@@ -10167,15 +10239,15 @@
     },
     {
       "guid": "4a8f9a35-a7b7-4cb8-b469-82455a00ef15",
-      "text": "Poção de Resistência a Objetos Sagrados"
+      "text": "Poção de Resistência Sagrada"
     },
     {
       "guid": "7b6fc502-7786-4f56-bb92-64c6c6dc1f94",
-      "text": "Uma poção que aumenta a resistência ao fogo em <skillcolor>{value}</c> por <skillcolor>{duration} minutos</c>.\\n\\n<teal1>O efeito persiste após a morte</c>."
+      "text": "Uma poção que aumenta o nível da Resistência Sagrada em <skillcolor>{value}</c> por <skillcolor>{duration} minutos</c>.\\n\\n<teal1>O efeito persiste após a morte</c>."
     },
     {
       "guid": "a29045ba-e8f5-4699-abb4-f090c067cc6d",
-      "text": "Frasco de Resistência a Objetos Sagrados"
+      "text": "Frasco de Resistência Sagrada"
     },
     {
       "guid": "8bcc97e7-d39a-48a1-97d1-be1b408ea51d",
@@ -10255,11 +10327,11 @@
     },
     {
       "guid": "0f329ad1-f8ea-4202-876d-0767a16749de",
-      "text": "Um Golem de Ataque de Enxofre está sendo chamado para este local."
+      "text": "Um Golem Sulfúrico de Cerco está sendo invocado para este local."
     },
     {
       "guid": "81f1bc66-2351-47dc-a0bd-ff9c2f152c6d",
-      "text": "Um Golem de Ataque está sendo chamado para este local."
+      "text": "Um Golem de Cerco está sendo invocado para este local."
     },
     {
       "guid": "b56aaad5-ead6-4e29-aae9-00889df5e0ab",
@@ -15622,6 +15694,10 @@
       "text": "+{value} de <statscolor>Nível de Armadura"
     },
     {
+      "guid": "2d7f7adb-12c7-4671-b1e0-ba5ee2201f3c",
+      "text": "Bônus de atributo total"
+    },
+    {
       "guid": "336f7e32-12ed-4b92-81c0-850f2430fde0",
       "text": "Defesa"
     },
@@ -15720,6 +15796,10 @@
     {
       "guid": "2af14406-cf14-457a-9f07-017e6a2ee989",
       "text": "Aumenta a velocidade de movimento total."
+    },
+    {
+      "guid": "b2c8d8cb-525b-4382-be89-157e0bb63191",
+      "text": "Bônus sobre o limite"
     },
     {
       "guid": "5ed66f17-29aa-4005-8170-800941286f33",
@@ -15931,7 +16011,7 @@
     },
     {
       "guid": "b3de36b0-22f0-496b-a9e6-234cf37f262f",
-      "text": "+{value} de <statscolor>grau de resistência sagrada"
+      "text": "+{value} de <statscolor>grau de Resistência Sagrada"
     },
     {
       "guid": "5d6a1546-4b65-452d-ab1c-3060b36b3484",
@@ -16303,7 +16383,7 @@
     },
     {
       "guid": "7556b939-e662-4440-b042-0f83ea9b9108",
-      "text": "Velocidade de recarga da suprema"
+      "text": "Tempo de recarga da suprema"
     },
     {
       "guid": "ab4fe3be-ed05-4f3f-8d4f-c00d672ddb0e",
@@ -16328,6 +16408,10 @@
     {
       "guid": "3d9276dd-8159-4365-a83c-3a9109407ae7",
       "text": "Aumenta a velocidade de recuperação do tempo de recarga de habilidades da arma."
+    },
+    {
+      "guid": "9426c79a-3306-4c9c-b6c2-3c67195c0a8c",
+      "text": "Acúmulo de cargas da arma"
     },
     {
       "guid": "def50330-9cf0-4d6e-90d4-9da9024fc78c",
@@ -16815,7 +16899,7 @@
     },
     {
       "guid": "15da3e2d-6b6b-49d4-b386-8e4fddd434b4",
-      "text": "Gorecrusher, o Colosso"
+      "text": "Gorecrusher, o Beemote"
     },
     {
       "guid": "7924eef8-a45e-40de-ae7e-247114eadd77",
@@ -18030,6 +18114,50 @@
       "text": "Segure para reviver"
     },
     {
+      "guid": "8918a18c-06a0-4d2a-9022-68acdfd9a05b",
+      "text": "Reduzir prioridade"
+    },
+    {
+      "guid": "08b78c34-bab5-415c-b377-283cd2869e65",
+      "text": "Reduz a prioridade deste recipiente. Afeta apenas a ação <teal1>enviar depressa tudo</c>."
+    },
+    {
+      "guid": "4c3beb8c-7640-4460-9b95-7e8f73b57819",
+      "text": "Aumentar prioridade"
+    },
+    {
+      "guid": "b0230ae0-449a-40ef-9412-7687701b47f0",
+      "text": "Aumenta a prioridade deste recipiente. Afeta apenas a ação <teal1>enviar depressa tudo</c>."
+    },
+    {
+      "guid": "311ad076-0fe7-4994-840a-5683bb3377cb",
+      "text": "Remove a conexão com este recipiente."
+    },
+    {
+      "guid": "ee8abd9e-744a-4b30-9b4a-1eea8c39c09b",
+      "text": "Ativar/Desativar envio automático"
+    },
+    {
+      "guid": "89a57660-766d-4768-9151-18fdd78020fc",
+      "text": "Ativa/desativa o envio automático neste recipiente."
+    },
+    {
+      "guid": "e4fc3ab3-f313-4dc9-be69-e3eeedf808a3",
+      "text": "Desativa o envio automático neste recipiente."
+    },
+    {
+      "guid": "201cdb87-c9b0-42b8-8eb1-bf7558313fc1",
+      "text": "Ativa o envio automático neste recipiente."
+    },
+    {
+      "guid": "d4462830-cc5d-451a-b795-174e154ae93b",
+      "text": "<teal1>Armazém Geral</c>\\nEnvia todos os itens deste recipiente para o recipiente conectado.\\n\\n<teal1>Armazém de Refino</c>\\nEnvia todos os itens deste recipiente de saída para o recipiente conectado."
+    },
+    {
+      "guid": "6a3298b5-9b7e-4928-a698-392ca9d647a2",
+      "text": "<teal1>Armazém Geral</c>\\nRecolhe todos os itens relevantes do recipiente.\\n\\n<teal1>Armazém de Refino</c>\\nRecolhe todos os itens relevantes do recipiente de itens refinados."
+    },
+    {
       "guid": "d9867788-54d6-4ba6-9b16-66a428b673fc",
       "text": "Saudar"
     },
@@ -18675,7 +18803,7 @@
     },
     {
       "guid": "d0cfb8c1-f07e-489b-ac1b-890484148693",
-      "text": "Fechar"
+      "text": "Perto"
     },
     {
       "guid": "440ec5c8-6f9d-46f5-ab70-0c07bd5cf8c5",
@@ -18691,7 +18819,7 @@
     },
     {
       "guid": "8d4a37f0-20d9-4375-b1e2-5ae02772701c",
-      "text": "Muito próximo"
+      "text": "Muito perto"
     },
     {
       "guid": "2a7c2028-931c-4a56-a02a-e7b28010dcfe",
@@ -19055,15 +19183,15 @@
     },
     {
       "guid": "df4b6438-2ff9-4253-9623-96aa438163ff",
-      "text": "Ganha {value} de experiência"
+      "text": "Ganhe {value} de Experiência"
     },
     {
       "guid": "4210316d-23d4-4274-96f5-d6f0944bd0bb",
-      "text": "{value} de experiência"
+      "text": "{value} de Experiência"
     },
     {
       "guid": "4ef370ac-d47d-4da2-bda7-e69b18325ebe",
-      "text": "Desbloqueia {value} níveis máximos adicionais"
+      "text": "Desbloqueie {value} níveis máximos adicionais"
     },
     {
       "guid": "2f95adc8-c6a7-40e2-9c5d-98dd514c45ef",
@@ -19543,7 +19671,7 @@
     },
     {
       "guid": "218618bd-c7de-4330-b5c2-b63045085ee9",
-      "text": "Ponto de Magia: {school}"
+      "text": "Ponto de magia: {school}"
     },
     {
       "guid": "dc2549a0-fa14-43eb-bccf-5d31f90e7e45",
@@ -19623,7 +19751,7 @@
     },
     {
       "guid": "b6e56d2d-9c93-4cd9-917c-de1b73602b7a",
-      "text": "Atribua um feitiço para este espaço no seu Livro de Feitiços."
+      "text": "Atribua uma magia para este espaço do seu grimório."
     },
     {
       "guid": "431a7b4a-0e3c-4d7f-b634-6d3042ad8d7d",
@@ -21255,7 +21383,7 @@
     },
     {
       "guid": "2cbc3370-361f-49aa-9b98-368bb5616f13",
-      "text": "Problemas com uma luta? Teste combinações diferentes de feitiços."
+      "text": "Problemas com uma luta? Teste combinações diferentes de magias."
     },
     {
       "guid": "cb2862b9-66a5-4d3b-a250-1a45e0183ef0",
@@ -21467,7 +21595,7 @@
     },
     {
       "guid": "53c02de3-993e-462f-8382-41e72f7a8154",
-      "text": "Livro de feitiços"
+      "text": "Grimório"
     },
     {
       "guid": "1ca9859c-f7a3-4d7b-b59c-da6a85de001f",
@@ -21479,7 +21607,7 @@
     },
     {
       "guid": "d714c5cd-47f8-4cd9-abc7-3ac52d463e50",
-      "text": "Feitiço básico"
+      "text": "Magia básica"
     },
     {
       "guid": "c70ce478-b995-445e-a99c-d478de339350",
@@ -21515,7 +21643,7 @@
     },
     {
       "guid": "3cdf7fd5-1d6b-40ad-9038-0135b55e4c7b",
-      "text": "Equipar Joia"
+      "text": "Equipar joia"
     },
     {
       "guid": "56ff9666-0378-451a-bf53-23c9cc777dc8",
@@ -21523,7 +21651,7 @@
     },
     {
       "guid": "80f0eeab-5a93-454a-b56b-ba176b796fab",
-      "text": "O feitiço ainda não foi desbloqueado. Desbloqueie o feitiço para equipar a joia."
+      "text": "A magia ainda não foi desbloqueada. Desbloqueie a magia para equipar a joia."
     },
     {
       "guid": "fc1680b9-d34d-446c-bd98-44d4ace38f17",
@@ -21555,7 +21683,7 @@
     },
     {
       "guid": "e7b4a54e-1065-4272-8035-ae8a06508e3f",
-      "text": "Escola de magia seguinte"
+      "text": "Próxima escola de magia"
     },
     {
       "guid": "26fd7266-8059-43cb-88ed-077d48b7055b",
@@ -21591,7 +21719,7 @@
     },
     {
       "guid": "d7d4fbbc-5449-41f3-804f-23575140d501",
-      "text": "Joia de Feitiço"
+      "text": "Joia de magia"
     },
     {
       "guid": "b5bb866b-ae13-4e40-bdac-6a97717a2100",
@@ -21603,11 +21731,11 @@
     },
     {
       "guid": "29a88b3a-a10c-456a-b148-0145f65bc0b8",
-      "text": "Feitiço de Viagem"
+      "text": "Magia de viagem"
     },
     {
       "guid": "7edc20e1-db6a-42ad-865c-6d9b747d82a9",
-      "text": "Feitiço supremo"
+      "text": "Magia suprema"
     },
     {
       "guid": "0fabe3e6-73a4-4217-a8bf-718f17744fd3",
@@ -21619,7 +21747,7 @@
     },
     {
       "guid": "dc171350-ae07-4e7e-b359-bc6132494c56",
-      "text": "Feitiço desconhecido"
+      "text": "Magia desconhecida"
     },
     {
       "guid": "d0bd4a08-5be1-4e5c-87f9-574ce603871b",
@@ -21631,7 +21759,7 @@
     },
     {
       "guid": "7ef885b2-6b67-430e-8741-1b643addfdac",
-      "text": "Nível de feitiço bloqueado"
+      "text": "Nível de magia bloqueado"
     },
     {
       "guid": "d0582dd0-e95c-4cca-a97e-742fc3afa3ed",
@@ -21639,7 +21767,7 @@
     },
     {
       "guid": "86bdb44a-1545-44df-a48c-1f5daabc7de3",
-      "text": "Desbloquear feitiço"
+      "text": "Desbloquear magia"
     },
     {
       "guid": "01d0577b-af14-48cb-bdeb-85dfa2a159c8",
@@ -21895,7 +22023,7 @@
     },
     {
       "guid": "e1e084d2-7ef0-40a8-bf72-ab1e07e9117c",
-      "text": "Recipiente específico para itens da categoria {desc} (<teal1>{name}</c>)"
+      "text": "Recipiente específico para itens da categoria <teal1>{value}</c>"
     },
     {
       "guid": "43735910-75f4-4370-b3a6-11a91e48112e",
@@ -21927,7 +22055,7 @@
     },
     {
       "guid": "524c6841-ca0d-4f6d-b878-287fdb1efeaa",
-      "text": "Tempo de recarga de feitiços"
+      "text": "Tempo de recarga de magias"
     },
     {
       "guid": "a54c64f3-225e-43a7-8274-e9c7ae102636",
@@ -21974,8 +22102,24 @@
       "text": "Adicionar conexão"
     },
     {
+      "guid": "bb74a995-aa3b-46ed-9238-a74ad65b4ff6",
+      "text": "Adicione uma conexão para <teal1>enviar depressa</c> itens deste recipiente diretamente para um recipiente conectado."
+    },
+    {
       "guid": "dda53117-82f1-408d-b205-77a63713fe7a",
       "text": "Você atingiu o número máximo de estações de trabalho conectadas. Construa mais motores de redistribuição para aumentar o limite."
+    },
+    {
+      "guid": "1e9afc93-2fea-4613-978a-f068320a607a",
+      "text": "Inventários conectados ({value0}/{value1})"
+    },
+    {
+      "guid": "49d0a5d4-6ca9-471f-a4c3-8847a4bd8843",
+      "text": "Capacidade de conexão"
+    },
+    {
+      "guid": "d4204218-1a99-426f-9cd0-2eb62d13a8e2",
+      "text": "Construa mais <teal1>motores de redistribuição</c> para aumentar a capacidade de conexão."
     },
     {
       "guid": "c782c76a-9e6c-4948-b3cd-bb862513e83b",
@@ -22038,16 +22182,60 @@
       "text": "Remover conexão"
     },
     {
+      "guid": "2b9db11b-541f-467d-8a2c-d70f77e9840e",
+      "text": "Sem itens no recipiente de saída"
+    },
+    {
+      "guid": "faa8c8f0-b1c1-4427-82fa-58ec36dd945b",
+      "text": "Nenhum recipiente conectado corresponde ao tipo de saída"
+    },
+    {
+      "guid": "bc6f77f4-af27-4dab-b085-4aaf33a45ac2",
+      "text": "Não há espaço suficiente nos recipientes conectados."
+    },
+    {
+      "guid": "c9b9a3bd-b9e5-43e5-a418-3f876fe44488",
+      "text": "<teal1>Envia depressa</c> todos os itens elegíveis para o armazenamento conectado em ordem de prioridade descendente."
+    },
+    {
+      "guid": "f2770d65-5aa9-4960-9278-f1a235e3a37a",
+      "text": "Enviar depressa tudo"
+    },
+    {
       "guid": "0a7f4c19-d5a5-45c5-9fde-fff19f92674d",
       "text": "Mostrar conexões"
+    },
+    {
+      "guid": "71d79fba-0b55-4ff1-87a9-797d2041845c",
+      "text": "Deseja limpar todas as conexões de recipiente do castelo?"
     },
     {
       "guid": "bd58776a-d0eb-4e3d-9538-4094e4a78bf7",
       "text": "Limpar conexões do castelo"
     },
     {
+      "guid": "fd0fa4d1-e3a2-4182-8ca3-a0b955d8f03f",
+      "text": "Conecte estações de fabricação e refino à rede de redistribuição para transferir itens instantaneamente para recipientes conectados."
+    },
+    {
+      "guid": "98fc687e-7eb5-40cc-894e-325bd8425e79",
+      "text": "Exibe o menu da estação."
+    },
+    {
+      "guid": "ed7ff809-a62f-4465-80e5-09772e9effba",
+      "text": "Estação"
+    },
+    {
+      "guid": "f40a3edc-92e0-4635-b615-785ba1092a5b",
+      "text": "Permite que você transfira itens rapidamente para outros recipientes."
+    },
+    {
+      "guid": "9b72eabe-e2a3-4a8f-8ae6-42f47e9d684b",
+      "text": "Redistribuição"
+    },
+    {
       "guid": "44ec55bc-4db5-41d3-93cd-7108afecbf74",
-      "text": "Complete objetivos e cace Sangue V para desbloquear novas tecnologias e feitiços poderosos."
+      "text": "Complete objetivos e cace Sangue V para desbloquear novas tecnologias e magias poderosas."
     },
     {
       "guid": "5f152f9f-02d4-460a-bd90-0770f7d85aaf",
@@ -22415,7 +22603,7 @@
     },
     {
       "guid": "85f1681a-4751-40d1-b731-c8874cb9f2e5",
-      "text": "O servidor foi pausado pelo hospedeiro."
+      "text": "O servidor foi pausado pelo anfitrião."
     },
     {
       "guid": "89d07865-aaaa-46d2-90d5-829a693cd6aa",
@@ -22478,12 +22666,32 @@
       "text": "Descobrir"
     },
     {
+      "guid": "b3f34a27-3383-431a-b6a6-6789f125db14",
+      "text": "Descobre conhecimento aleatório dentro desta categoria."
+    },
+    {
+      "guid": "c34bf0b9-63b5-4108-ace7-47b14955e4ef",
+      "text": "Aprender"
+    },
+    {
+      "guid": "78647022-4eb9-4809-90f4-7ef9176c0721",
+      "text": "Desbloqueia todo o conhecimento disponível."
+    },
+    {
       "guid": "826db8e9-0c96-4c71-8c5b-9714b1da8470",
       "text": "Magia"
     },
     {
       "guid": "7dd1d6ff-1ff0-4443-8523-afde84b4d0d7",
       "text": "Estruturas"
+    },
+    {
+      "guid": "bf30edab-5c8c-4d8d-8200-4ba654c59016",
+      "text": "Desbloquear"
+    },
+    {
+      "guid": "ea433f0c-d9c0-490b-85b7-01dea53b2eaa",
+      "text": "Desbloqueia conhecimento consumindo um item."
     },
     {
       "guid": "7ada27b5-d4c1-4b7c-8887-b3104bd2c054",
@@ -22495,11 +22703,11 @@
     },
     {
       "guid": "90b80f1b-2165-4b8f-bdae-e44e1321be91",
-      "text": "Feitiços avançados desbloqueados: {remaining}/{total}"
+      "text": "Magias avançadas desbloqueadas: {remaining}/{total}"
     },
     {
       "guid": "8f38ac81-df1e-4719-a0cb-62c92eb531b2",
-      "text": "Feitiços básicos desbloqueados: {remaining}/{total}"
+      "text": "Magias básicas desbloqueadas: {remaining}/{total}"
     },
     {
       "guid": "cc549d1b-c0c1-4bfa-bc38-280b6117d85c",
@@ -22523,7 +22731,7 @@
     },
     {
       "guid": "b5fa90ff-054d-4b5b-848d-c9f6a4def999",
-      "text": "Feitiços supremos desbloqueados: {remaining}/{total}"
+      "text": "Magias supremas desbloqueadas: {remaining}/{total}"
     },
     {
       "guid": "a6e5a832-42d3-4b56-b0ff-a5326f0e152c",
@@ -23435,7 +23643,7 @@
     },
     {
       "guid": "b93947ba-be35-4b53-91e2-3a874e6c5663",
-      "text": "Ajusta o volume da saída de som no Bate-papo de Voz por Proximidade."
+      "text": "Ajusta o volume do bate-papo de voz por proximidade."
     },
     {
       "guid": "55b499c9-f24f-47a9-aa49-00bb47748ffc",
@@ -23507,11 +23715,11 @@
     },
     {
       "guid": "2156635c-40d8-4eac-aa63-f1200476247b",
-      "text": "Usa o feitiço atribuído a este espaço"
+      "text": "Usa a magia atribuída a este espaço"
     },
     {
       "guid": "4a38025f-2a30-4815-b333-f69e2d655d00",
-      "text": "Usa o feitiço atribuído a este espaço (desbloqueável)"
+      "text": "Usa a magia atribuída a este espaço (desbloqueável)"
     },
     {
       "guid": "7c92360e-a70a-46f4-9c39-b21668b416ce",
@@ -23571,7 +23779,7 @@
     },
     {
       "guid": "70a4eb57-9913-425c-80c8-f49249e11b23",
-      "text": "Modificações de feitiços"
+      "text": "Modificações de magias"
     },
     {
       "guid": "9ca52f90-69a0-463a-89d9-27938aef9ee8",
@@ -23623,11 +23831,11 @@
     },
     {
       "guid": "ae6b33da-d186-4421-9c87-f582e8499cca",
-      "text": "Aprender um novo feitiço"
+      "text": "Aprenda uma nova magia"
     },
     {
       "guid": "44da28d9-3c7e-425c-bfe4-bfea733f7353",
-      "text": "Abre o Grimório para desbloquear um novo feitiço"
+      "text": "Abra o Grimório para desbloquear uma nova magia"
     },
     {
       "guid": "6c71ec98-376f-41b7-ae84-2d9377ee47ae",
@@ -23639,11 +23847,11 @@
     },
     {
       "guid": "f867b3aa-9497-4152-85e5-da71be70b4b0",
-      "text": "Mirando feitiços e ataques"
+      "text": "Mirando magias e ataques"
     },
     {
       "guid": "a318801f-1d36-4fb8-8c4a-17b525963b54",
-      "text": "Pressione e segure o botão superior esquerdo {Button1}\\nMire com o controle direito {Button2}\\nSolte para atirar."
+      "text": "Mantenha pressionado o botão superior esquerdo {Button1}\\nMire com o analógico direito {Button2}\\nSolte para atirar."
     },
     {
       "guid": "ab4e4e02-5fed-4411-b7fa-0be2b6d92507",
@@ -24078,6 +24286,10 @@
       "text": "Infusão sanguínea"
     },
     {
+      "guid": "fc425059-d162-4bf2-b9fb-f70b190a2461",
+      "text": "Tipo sanguíneo secundário"
+    },
+    {
       "guid": "a00dc3e0-7fc3-479b-86f8-93b3b9fdf149",
       "text": "Escolha uma característica de infusão sanguínea:"
     },
@@ -24267,7 +24479,7 @@
     },
     {
       "guid": "526fc7cb-d3c2-4b18-88f8-7f7c99712bd0",
-      "text": "Os objetos obrigatórios não foram posicionados:\\n{structure}"
+      "text": "Os objetos obrigatórios não foram posicionados!"
     },
     {
       "guid": "2ffd9341-099d-4dc6-9dc1-453409bfe581",
@@ -24566,6 +24778,10 @@
       "text": "Sem espaço na saída"
     },
     {
+      "guid": "2f59f284-40fa-4f9c-b00a-62be65f11fa6",
+      "text": "Em pausa durante a noite"
+    },
+    {
       "guid": "740d20fc-2c12-4ad3-8eb8-7b4b88e71391",
       "text": "Determina o dano que o servo causa com as habilidades."
     },
@@ -24702,6 +24918,10 @@
       "text": "Atletismo"
     },
     {
+      "guid": "75794f1e-353f-4cf4-93af-632c75c7380a",
+      "text": "Salta rapidamente da montaria."
+    },
+    {
       "guid": "c96dc1e0-2162-4dcc-a8ab-e8312bbe8dbd",
       "text": "Salto enganador"
     },
@@ -24720,6 +24940,10 @@
     {
       "guid": "8cd585f5-1eda-49d4-9e41-476d277e43e7",
       "text": "Estabilidade"
+    },
+    {
+      "guid": "a2e456a7-4985-4460-896a-75a74f17094b",
+      "text": "Tem <skillcolor>{chance}%</c> de chance de não desmontar ao ser atingido por um ataque.\\n\\n<red1>Não funciona contra ataques de jogadores vampiros.</c>"
     },
     {
       "guid": "7698912a-727a-42b0-9397-f0502aef5dad",
@@ -25095,7 +25319,7 @@
     },
     {
       "guid": "735dd361-7381-4f78-afed-cdbb5d28dcdb",
-      "text": "Último salvamento"
+      "text": "Último jogo salvo"
     },
     {
       "guid": "62875a46-2167-4892-8017-13f827734267",
@@ -25259,7 +25483,7 @@
     },
     {
       "guid": "ccf73a66-8f92-4988-b09d-2eb401d70a36",
-      "text": "Salvar e Sair"
+      "text": "Salvar e sair"
     },
     {
       "guid": "d58d87f2-ac81-44f6-ab98-1effe34f7cd5",
@@ -25599,11 +25823,11 @@
     },
     {
       "guid": "20169471-a0be-4a93-a6ad-3d0f3e7a6b4a",
-      "text": "Fragmentos de Alma Vinculados a Morcegos"
+      "text": "Fragmentos de Alma vinculados a forma de morcego"
     },
     {
       "guid": "ab0cdb03-a846-4548-bd75-604cce91c502",
-      "text": "Quando ativado, ter Soul Shards impedirá que você se transforme em um morcego."
+      "text": "Quando ativado, ter Fragmentos de Alma impedirá que você se transforme em morcego."
     },
     {
       "guid": "91530129-2e12-499d-89ed-16c3cbd8ea13",
@@ -26052,6 +26276,14 @@
     {
       "guid": "c132db61-25bc-43dc-8066-f0b220628d47",
       "text": "Multiplica a quantidade de espólios recebidos em caçadas de servos bem-sucedidas."
+    },
+    {
+      "guid": "2fd1f87c-e2ad-46c5-a322-7e1c1b31bdce",
+      "text": "Multiplicador de espólios de fragmento assustador"
+    },
+    {
+      "guid": "0e82d588-5fac-4b80-8866-9ef38b5b3f6a",
+      "text": "Multiplica a quantidade de fragmentos assustadores deixados por incursões, inimigos, barris, caixas e baús."
     },
     {
       "guid": "95331135-1720-4ebe-b54f-1027b0137e44",
@@ -26662,6 +26894,14 @@
       "text": "Afeta o dano recebido ao transportar itens de prata."
     },
     {
+      "guid": "a75977c0-a062-4bd6-aac6-7ef1ae142a34",
+      "text": "Taxa de Durabilidade do Fragmento de Alma"
+    },
+    {
+      "guid": "3b62b579-16d7-4e69-9f6c-8e019b0ba4a4",
+      "text": "Taxa de quão rápido os fragmentos de alma perdem durabilidade ao longo do tempo."
+    },
+    {
       "guid": "30d96127-b1bc-4c69-b514-6297c8a0eaf1",
       "text": "Multiplicador de poder mágico"
     },
@@ -26876,6 +27116,14 @@
     {
       "guid": "90f837fd-1607-4d0e-bc26-75c7acccbadd",
       "text": "A frequência com que ocorrem as Incursões às Fendas de Mortium."
+    },
+    {
+      "guid": "65521547-8c07-4625-bbf3-d4c689822eea",
+      "text": "Espaços de Arma"
+    },
+    {
+      "guid": "aacb6713-3012-4761-b943-826d97cd173b",
+      "text": "Quantidade de espaços na barra de ação que podem ser usados para armas."
     },
     {
       "guid": "ce5b8514-397c-446a-8350-b312ad241729",
@@ -27326,6 +27574,22 @@
       "text": "Entrar em Gloomrot"
     },
     {
+      "guid": "92436be0-0f17-4de8-9ada-61636e524eff",
+      "text": "Comprar agora"
+    },
+    {
+      "guid": "4f1f95e7-1c1f-467a-ae7a-aeaa17fa5cde",
+      "text": "Explore os tons mais requintados e mergulhe na luxúria absoluta! Do servo ao mestre, seu castelo dourado despertará a inveja em todas as cores."
+    },
+    {
+      "guid": "a79ef8ce-5bf7-4965-8527-f19e197d3405",
+      "text": "Explore as exuberantes terras de Oakveil, enfrente os Lâminas Venenosas, descubra os segredos sombrios da seiva tóxica e invada o santuário mágico de Megara, a Rainha Serpente... ou morra tentando.\\nInicie um novo mundo e viva uma nova experiência em V Rising!"
+    },
+    {
+      "guid": "f0395dcd-caa1-44f0-82d0-00303203d531",
+      "text": "Explore as Florestas de Oakveil"
+    },
+    {
       "guid": "6c0086c5-9916-49e6-a3e2-bed7de7947e6",
       "text": "Devido às alterações realizadas no jogo e no mundo de Vardoran, o progresso de vampiros e castelos foi reiniciado."
     },
@@ -27399,7 +27663,7 @@
     },
     {
       "guid": "277dcc76-95cf-4e76-95fe-8e7251ed6ec1",
-      "text": "Invasores de Oakveil"
+      "text": "Invaders of Oakveil"
     },
     {
       "guid": "4cd60e11-3093-4651-a217-111e0d93d43e",
@@ -28159,7 +28423,7 @@
     },
     {
       "guid": "e95bab18-3055-4d4b-9996-35131192c73b",
-      "text": "Ative a Sincronização vertical para minimizar problemas de tela quebrada, mas você pode ter problemas de travamento"
+      "text": "Ative a Sincronização vertical para minimizar problemas de quebra de imagem, mas você pode ter problemas de travamento"
     },
     {
       "guid": "0c1835fd-2f51-4657-83b7-6b262b24686f",
@@ -28255,7 +28519,7 @@
     },
     {
       "guid": "0683d9bc-8c23-4a62-96e7-a4551014e4e3",
-      "text": "Permite ativar a Habilidade da arma 1 pressionando {Button1}."
+      "text": "Permite ativar a habilidade da arma 1 pressionando {Button1}."
     },
     {
       "guid": "7946f9ea-5309-42bd-b48c-b9e5cd74d11b",
@@ -28267,27 +28531,27 @@
     },
     {
       "guid": "87122929-f927-4a67-af12-da12db2add1b",
-      "text": "<skillcolor>Configuração de entrada 1</c>\\nCom esta configuração, a câmera é controlada usando {Button1}.\\n\\n<skillcolor>Configuração de entrada 2</c>\\nCom esta configuração, a câmera é controlada usando {Button2} / {Button3}."
+      "text": "<skillcolor>Configuração de entrada 1</c>\\nCom esta configuração, a câmera é controlada usando {Button1}.\\n\\n<skillcolor>Configuração de entrada 2</c>\\nCom esta configuração, a câmera é controlada usando {Button2} / {Button3}"
     },
     {
       "guid": "453acdf6-442e-4538-8ccd-7600a605f8d4",
-      "text": "Configuração de entrada 1"
+      "text": "Layout de controle 1"
     },
     {
       "guid": "28d6f4fd-6509-4841-82b1-740ff68c88aa",
-      "text": "Configuração de entrada 2"
+      "text": "Layout de controle 2"
     },
     {
       "guid": "5783824b-0574-45a2-b9a3-9056255d8a63",
-      "text": "Configuração de entrada do controle"
+      "text": "Mapeamento do controle"
     },
     {
       "guid": "ecc88833-0e87-4754-aac9-34466fce9a15",
-      "text": "Permitir inclinação da câmera no modo Câmera"
+      "text": "Permitir inclinação da câmera no modo câmera"
     },
     {
       "guid": "b9e5d346-685e-4d60-993a-39b1da7929b3",
-      "text": "Permite que você incline a câmera com {Button1} enquanto está no modo Câmera."
+      "text": "Permite que você incline a câmera com {Button1} enquanto está no modo câmera."
     },
     {
       "guid": "355de635-bacd-474a-a2f6-366cb07c0dbb",
@@ -28432,6 +28696,38 @@
     {
       "guid": "30e87e35-b686-46c1-bbbb-7762979c1232",
       "text": "Modo alto-falante"
+    },
+    {
+      "guid": "a6bb9599-6691-43d1-9bb0-ae6d54b93705",
+      "text": "5.1"
+    },
+    {
+      "guid": "d9cb43ce-9467-421b-a010-aac419168154",
+      "text": "7.1"
+    },
+    {
+      "guid": "b9f053df-8d98-456d-b968-a5daf5ed23e7",
+      "text": "7.1.4"
+    },
+    {
+      "guid": "3e790e72-366b-4f46-9314-5d0961187153",
+      "text": "Padrão"
+    },
+    {
+      "guid": "759be497-6038-4ad5-968f-85616c91bd4c",
+      "text": "Mono"
+    },
+    {
+      "guid": "1f38f15a-5f07-4a0d-8046-01c8f565446a",
+      "text": "Quadrifônico"
+    },
+    {
+      "guid": "23401c4f-b203-40ca-855a-868757119584",
+      "text": "Estéreo"
+    },
+    {
+      "guid": "70d113ef-7660-4d5f-841a-cd472fa387f2",
+      "text": "Surround"
     },
     {
       "guid": "1fa13b8d-edec-42f7-958c-f998df3afb3e",
@@ -31358,10 +31654,6 @@
       "text": "[m]Mangual de Aço"
     },
     {
-      "guid": "2414ac41-88e5-480e-a3af-d2686773b056",
-      "text": "Disputado"
-    },
-    {
       "guid": "f4e6e26a-7ff4-4b9d-b714-aaa2a67c25f3",
       "text": "Castelo do Drácula"
     },
@@ -31827,7 +32119,7 @@
     },
     {
       "guid": "9226cd68-6b1a-4a11-8b76-68602c4ee414",
-      "text": "Camp de Comerciantes Suspeitos"
+      "text": "Acampamento de Comerciantes Suspeitos"
     },
     {
       "guid": "147a467b-ec15-40b9-adcc-b14331071512",
@@ -32371,7 +32663,7 @@
     },
     {
       "guid": "06f058d2-0003-4c3a-8038-9c29194099fa",
-      "text": "Foi aqui os Lâminas Venenosas pisaram em Vardoran pela primeira vez. Hoje, o local serve como seu cais, além de ser uma excelente fonte de materiais de construção que auxiliam a expansão de seu domínio sobre Vardoran."
+      "text": "Foi aqui que os Lâminas Venenosas pisaram em Vardoran pela primeira vez. Hoje, o local serve como seu cais, além de ser uma excelente fonte de materiais de construção que auxiliam a expansão de seu domínio sobre Vardoran."
     },
     {
       "guid": "1b3c4256-2bb0-497c-82fb-99eb0d00f8a0",

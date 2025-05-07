@@ -1,6 +1,6 @@
 {
-  "Codes": [],
-  "Nodes": [
+  "codes": [],
+  "nodes": [
     {
       "guid": "de5768be-d168-42f3-b253-9f0422772f17",
       "text": "Przez wieki nasze opuszczone zamki popadały w ruinę..."
@@ -139,7 +139,7 @@
     },
     {
       "guid": "7be7c516-299a-4ec6-ac8d-c83930828be2",
-      "text": "Specjalne"
+      "text": "Specjalna"
     },
     {
       "guid": "0de61da6-32b5-4e57-b433-1f04e8061180",
@@ -171,11 +171,11 @@
     },
     {
       "guid": "d5084787-3fe2-40ea-8075-8000dc65bd1f",
-      "text": "Otrzymujesz niewrażliwość na obrażenia i wywołujesz krwawą burzę krwi, wystrzeliwując do <skillcolor>{count}</c> naprowadzanych pocisków krwi w kierunku pobliskich wrogów przez <skillcolor>{duration} s</c>. Każdy pocisk zadaje <skillcolor>{damage}</c> obrażeń magicznych i wywołuje <blood>wysysanie</c>. \\n\\nZakończ burzę i wyzwól potężny wybuch krwi, który zadaje <skillcolor>{novadamage}</c> obrażeń magicznych i odpycha wrogów."
+      "text": "Otrzymujesz niewrażliwość na obrażenia i wywołujesz krwawą burzę krwi, wystrzeliwując do <skillcolor>{count}</c> naprowadzanych pocisków krwi w kierunku pobliskich wrogów przez <skillcolor>{duration} s</c>. Każdy pocisk zadaje <skillcolor>{damage}</c> obrażeń magicznych i wywołuje <blood>wysysanie</c>. \\n\\nZakończ burzę, wyzwalając potężny wybuch krwi, który zadaje <skillcolor>{novadamage}</c> obrażeń magicznych i odpycha wrogów."
     },
     {
       "guid": "1bc02a7d-5d95-466e-9f79-5637d7db51bf",
-      "text": "Rój krwiopijców"
+      "text": "Rój padlinożerny"
     },
     {
       "guid": "c39aa7b3-d08a-4236-9452-f26c6db3fbb7",
@@ -203,7 +203,7 @@
     },
     {
       "guid": "5137fa78-9d11-4960-9e2a-34db681d95e4",
-      "text": "Wyzwól promień energii, który zadaje <skillcolor>{damage}</c> obrażeń magicznych i wywołuje <blood>wysysanie</c> u trafionych wrogów, a także leczy sojuszników za <skillcolor>{healing}</c> twojej mocy czarów co sekundę przez maks. <skillcolor>{duration} s.</c> Każde trafienie celu leczy za <skillcolor>{selfhealing}</c> twojej mocy czarów."
+      "text": "Wyzwól utrzymywany promień energii, który zadaje <skillcolor>{damage}</c> obrażeń magicznych i wywołuje <blood>wysysanie</c> u trafionych wrogów, a także leczy sojuszników za <skillcolor>{healing}</c> twojej mocy czarów co sekundę przez maks. <skillcolor>{duration} s.</c> Każde trafienie celu leczy za <skillcolor>{selfhealing}</c> twojej mocy czarów."
     },
     {
       "guid": "8abf33e8-3236-4f57-931b-bf149307a8c4",
@@ -439,7 +439,7 @@
     },
     {
       "guid": "df936352-8532-4d25-b680-f6bd08df132e",
-      "text": "Pierwsze trafienie wywołuje <blood>mniejszą klątwę wampiryczną</c>, zadając <skillcolor>{damage}%</c> obrażeń i wysysając <skillcolor>{Leech}%</c> zdrowia po <skillcolor>{Duration}s</c>."
+      "text": "Pierwsze trafienie wywołuje <blood>Mniejszą Klątwę Wampiryczną</c>, zadając <skillcolor>{damage}%</c> obrażeń i wysysając <skillcolor>{Leech}%</c> zdrowia po <skillcolor>{Duration}s</c>."
     },
     {
       "guid": "09183101-93e1-439a-8740-812c99bf0b57",
@@ -531,7 +531,7 @@
     },
     {
       "guid": "908962de-acbe-4245-8685-5befc01c9d3e",
-      "text": "Wystrzel<skillcolor>4</c> pociski chaosu, które zadają <skillcolor>{damage}</c> obrażeń magicznych przy trafieniu, <skillcolor>{damage2}</c> obrażeń magicznych wrogom na danym obszarze i wywołują <chaos>podpalenie</c>."
+      "text": "Wystrzel <skillcolor>4</c> pociski chaosu, które zadają <skillcolor>{damage}</c> obrażeń magicznych przy trafieniu, <skillcolor>{damage2}</c> obrażeń magicznych wrogom na danym obszarze i wywołują <chaos>podpalenie</c>."
     },
     {
       "guid": "5cb62386-cefe-4e3f-b73e-02fb011eec75",
@@ -567,7 +567,7 @@
     },
     {
       "guid": "c4c430a1-d6e9-436c-babc-4a8372f44940",
-      "text": "Deszcz chaosu"
+      "text": "Deszcz Chaosu"
     },
     {
       "guid": "6e72eab1-22fe-4b33-a193-db220d1cd9f2",
@@ -615,7 +615,7 @@
     },
     {
       "guid": "883d146c-c14b-4353-a212-5207643df60c",
-      "text": "Mistrzostwo chaosu"
+      "text": "Mistrzostwo Chaosu"
     },
     {
       "guid": "f37a5e95-4cdd-48a7-a567-d7f0be985c40",
@@ -631,7 +631,7 @@
     },
     {
       "guid": "9f928b35-9558-4eb6-8c03-686b1b0fd017",
-      "text": "Płomieni pustki nie da się ugasić. Ich iskrzące energie podpalają twoich przeciwników, ciebie z kolei obdarzając niesłychaną mocą."
+      "text": "Płomieni pustki nie da się ugasić. Ich iskrzące energie podpalają twoich przeciwników, ciebie z kolei obdarzając niesłychaną moc."
     },
     {
       "guid": "e0c4daee-3353-44f8-aaec-85811ca64d96",
@@ -675,7 +675,7 @@
     },
     {
       "guid": "78ef9085-4e2d-4d8f-8a6a-9e5eb3614155",
-      "text": "Pocisk chaosu po trafieniu ogłusza cel na <skillcolor>{Duration} s</c>."
+      "text": "Naładowany pocisk chaosu po trafieniu ogłusza cel na <skillcolor>{Duration} s</c>."
     },
     {
       "guid": "553c7641-5b3e-49e6-9ae8-f8aafb6adc66",
@@ -787,7 +787,7 @@
     },
     {
       "guid": "d873d8cc-4b2e-474e-a3fe-dd623d50f265",
-      "text": "Arktyczna burza"
+      "text": "Arktyczna Burza"
     },
     {
       "guid": "9039a356-84c9-413b-959e-d2aef3031b08",
@@ -851,7 +851,7 @@
     },
     {
       "guid": "f1d3bdf5-ff6f-4a97-941b-68a5ad2b23b2",
-      "text": "Wzmacnia efekt wszystkich tarcz, które stosujesz, o<skillcolor>{factor}</c>."
+      "text": "Wzmacnia efekt wszystkich tarcz, które stosujesz, o <skillcolor>{factor}</c>."
     },
     {
       "guid": "8039b88c-e71f-41d5-90eb-c4c096da06eb",
@@ -859,7 +859,7 @@
     },
     {
       "guid": "719a7f08-1ecc-4ce6-9f0e-d97a58a20b30",
-      "text": "Mistrzostwo mrozu"
+      "text": "Mistrzostwo Mrozu"
     },
     {
       "guid": "0940351e-d48b-475a-a050-5cf4e9d9475a",
@@ -867,7 +867,7 @@
     },
     {
       "guid": "bdcc6c12-a7be-48dd-8fd8-b814d30214b8",
-      "text": "<frost>Wychładzaj</c> przeciwników do szpiku kości, spowalniając ich ruchy o <skillcolor>{slowfactor}</c> na czas <skillcolor>{duration} s</c>."
+      "text": "<frost>Wyziębiaj</c> przeciwników do szpiku kości, spowalniając ich ruchy o <skillcolor>{slowfactor}</c> na czas <skillcolor>{duration} s</c>."
     },
     {
       "guid": "2bc802a8-0efa-471e-9602-52e55e3ffdbb",
@@ -1027,7 +1027,7 @@
     },
     {
       "guid": "3897447a-4abd-4066-923d-2e84b04d49f6",
-      "text": "Zużywa <chaos>podpalenie</c> i powoduje eksplozję, która zadaje <skillcolor>{Damage}%</c> obrażeń obszarowych."
+      "text": "Zużywa <chaos>podpal</c> i powoduje eksplozję, która zadaje <skillcolor>{Damage}%</c> obrażeń obszarowych."
     },
     {
       "guid": "8e0f77a2-3c82-44fc-8a2d-ca3c6a9be238",
@@ -1083,7 +1083,7 @@
     },
     {
       "guid": "8ad09cb4-ac52-494f-990c-422524ee49d6",
-      "text": "Trafienie <frost>wychłodzonego</c> lub <frost>zamrożonego</c> celu rozbija pociski na (<skillcolor>{Count}</c>) odłamki, z których każdy zadaje <skillcolor>{Damage}%</c> obrażeń i wywołuje <frost>wychłodzenie</c>."
+      "text": "Trafienie <frost>wychłodzonego</c> lub <frost>zamrożonego</c> celu rozbija pociski na odłamki (<skillcolor>{Count}</c>), z których każdy zadaje <skillcolor>{Damage}%</c> obrażeń i wywołuje <frost>wychłodzenie</c>."
     },
     {
       "guid": "4bb56c99-c858-4a1b-9b1d-c7ef94e56fa1",
@@ -1227,7 +1227,7 @@
     },
     {
       "guid": "752549aa-06f5-4836-aab3-62f6e3b59a5f",
-      "text": "Amok"
+      "text": "Szał"
     },
     {
       "guid": "28c7d018-5378-43a4-b812-11e9467d9213",
@@ -1263,7 +1263,7 @@
     },
     {
       "guid": "bee20477-d83f-4209-bfe5-75fc9ff192ab",
-      "text": "Supermoc"
+      "text": "Przytłaczająca siła"
     },
     {
       "guid": "2f99e409-221c-4695-8ee3-6840d09bf32d",
@@ -1275,7 +1275,7 @@
     },
     {
       "guid": "06d890b5-b8cd-4011-8d1b-efe911e83ed1",
-      "text": "Zwiększa umiejętność walki bronią o <skillcolor>{attribute}</c> oraz wysysanie życia z umiejętności broni o <skillcolor>{factor}</c>."
+      "text": "Zwiększa siłę umiejętności broni o <skillcolor>{attribute}</c> oraz wysysanie życia z umiejętności broni o <skillcolor>{factor}</c>."
     },
     {
       "guid": "b3b95a9e-b249-4eca-b1c0-8afd1ebc8808",
@@ -1295,7 +1295,7 @@
     },
     {
       "guid": "2be08eb9-734a-4e51-8e44-deb49acc4b23",
-      "text": "Splot chłodu"
+      "text": "Splot Chłodu"
     },
     {
       "guid": "767fd224-ef94-428b-a0e9-76f040d1fac0",
@@ -1311,7 +1311,7 @@
     },
     {
       "guid": "b7a0e7e7-25ac-48fb-b51e-c2a820e93ed1",
-      "text": "Nikczemna moc"
+      "text": "Nikczemna Moc"
     },
     {
       "guid": "e3d747cb-d92d-4730-8d67-b304c518cbe3",
@@ -1327,7 +1327,7 @@
     },
     {
       "guid": "f235ea4c-d65d-434e-960d-ed833bbdb922",
-      "text": "Dziki pośpiech"
+      "text": "Dziki Pośpiech"
     },
     {
       "guid": "970d8ef5-4246-4045-af55-91ee36ada62b",
@@ -1367,7 +1367,7 @@
     },
     {
       "guid": "858b0ef0-ca9d-4dc0-a22d-04c7c4032e82",
-      "text": "Pragnienie mocy"
+      "text": "Pragnienie Mocy"
     },
     {
       "guid": "3fb995a5-e946-4ee4-93fa-310b88e0ed7d",
@@ -1427,7 +1427,7 @@
     },
     {
       "guid": "22fd06f6-30dd-4751-8236-1cf8feb5919d",
-      "text": "Peleryna cieni"
+      "text": "Całun cieni"
     },
     {
       "guid": "8aec8a7f-3b8b-4ae3-a551-fe0e7f70eb3b",
@@ -1535,7 +1535,7 @@
     },
     {
       "guid": "3cab0a1c-1645-4856-8e5d-a43bafb3c53b",
-      "text": "Pocałunek węża"
+      "text": "Pocałunek Węża"
     },
     {
       "guid": "3f3a9232-ca9f-40f9-b799-82b49da8e806",
@@ -1603,7 +1603,7 @@
     },
     {
       "guid": "a5d8f811-540e-48a4-b738-c4ceaca35de0",
-      "text": "Mistrzostwo iluzji"
+      "text": "Mistrzostwo Iluzji"
     },
     {
       "guid": "5db3475a-75f5-4ffa-ae6c-8b5a912b58bd",
@@ -1651,7 +1651,7 @@
     },
     {
       "guid": "aa462aa5-9296-4fc3-91a4-c93673625601",
-      "text": "Przyzywa <illusion>ognik</c>, który leczy ciebie lub sojusznika za <skillcolor>{Healing}%</c> twojej mocy czaru po zakończeniu efektu <illusion>klątwy</c>."
+      "text": "Przyzywa <illusion>ognika</c>, który leczy ciebie lub sojusznika za <skillcolor>{Healing}%</c> twojej mocy czaru po zakończeniu efektu <illusion>klątwy</c>."
     },
     {
       "guid": "208420b5-d1bb-4cd0-9add-5dd90abe1bc3",
@@ -1659,7 +1659,7 @@
     },
     {
       "guid": "4f5c2208-5123-4eb7-ac2b-acd95009f4d2",
-      "text": "Po aktywacji zapewnia (<skillcolor>{Stacks}</c>) ładunki <illusion>fantazmatu</c>."
+      "text": "Po aktywacji zapewnia ładunki (<skillcolor>{Stacks}</c>) <illusion>fantazmatu</c>."
     },
     {
       "guid": "e54a155f-9f90-47e9-bbb1-fbc485f786bf",
@@ -1699,7 +1699,7 @@
     },
     {
       "guid": "9a478d6a-92f6-4dea-9cd9-2a271a3e81e4",
-      "text": "Przywołuje (<skillcolor>{Count}</c>) ogniki, które leczą ciebie lub sojusznika za <skillcolor>{Healing}proc.</c> twojej mocy czarów po wybuchu komara."
+      "text": "Przywołuje ogniki (<skillcolor>{Count}</c>), które leczą ciebie lub sojusznika za <skillcolor>{Healing}%</c> twojej mocy czarów po wybuchu komara."
     },
     {
       "guid": "aa96c3f6-9c6b-42d9-b31b-e699c2d083ed",
@@ -1735,7 +1735,7 @@
     },
     {
       "guid": "1aaa3f5d-d7fa-4d81-a288-1e5fc13826b4",
-      "text": "Trafienie wroga będącego pod wpływem <illusion>osłabienia</c> daje (<skillcolor>{Stacks}</c>) ładunki <illusion>fantazmatu</c>."
+      "text": "Trafienie wroga będącego pod wpływem <illusion>osłabienia</c> daje ładunki (<skillcolor>{Stacks}</c>) <illusion>fantazmatu</c>."
     },
     {
       "guid": "f1e3528e-0114-49a0-8317-b48590fcd577",
@@ -1751,7 +1751,7 @@
     },
     {
       "guid": "1908e44e-c281-4532-8afe-83a9ef7dcdf9",
-      "text": "Kolejny atak podstawowy zapewnia (<skillcolor>{Stacks}</c>) ładunki <illusion>fantazmatu</c>."
+      "text": "Kolejny atak podstawowy zapewnia ładunki (<skillcolor>{Stacks}</c>) <illusion>fantazmatu</c>."
     },
     {
       "guid": "f6acbc44-ea31-44e8-80da-e58482a54e2e",
@@ -1891,7 +1891,7 @@
     },
     {
       "guid": "9fcd437c-b1e1-469c-9ae3-f1ae6740d328",
-      "text": "Zasłona burzy"
+      "text": "Całun burzy"
     },
     {
       "guid": "ac3405cb-61f7-45f1-b6a5-12ae6ec7f727",
@@ -1907,7 +1907,7 @@
     },
     {
       "guid": "f027e671-7d64-476f-a8de-4d273c868c2e",
-      "text": "Mistrzostwo burzy"
+      "text": "Mistrzostwo Burzy"
     },
     {
       "guid": "fb03f3ff-c5c1-434f-8133-1b53cd6fb897",
@@ -2070,6 +2070,10 @@
       "text": "Nieczyste łańcuchy"
     },
     {
+      "guid": "d069e19e-8bc1-4588-a8b5-10aef5649261",
+      "text": "Wystrzeliwuje łańcuch, który pęta trafiony cel, zmniejszając prędkość ruchu o <skillcolor>{speedfactor} - {speedfactor2}</c> w zależności od odległości od celu. Podtrzymuj czar do <skillcolor>{duration}s</c>, zadając <skillcolor>{damage}</c> obrażeń magicznych i wywołując <unholy>potępienie</c> po zakończeniu efektu.\\n\\nZerwanie łańcucha zarzuca znikające sidła trwające <skillcolor>{slowduration}s</c>, jeśli odległość między tobą a celem przekracza <skillcolor>{distance}</c> metrów."
+    },
+    {
       "guid": "090f5547-c30d-42ef-b353-7da661826a4c",
       "text": "Wybuchające kości"
     },
@@ -2196,6 +2200,10 @@
     {
       "guid": "1a514ac7-58f3-4564-be9d-2db97bb20feb",
       "text": "Przywołuje kościanego ducha, który krąży wokół celu, zadając każdemu trafionemu wrogowi <skillcolor>{Damage}%</c> obrażeń i wywołując <unholy>potępienie</c>."
+    },
+    {
+      "guid": "6095e639-ab8f-4244-ac5a-79c40da480cb",
+      "text": "Zadaje <skillcolor>{Damage}%</c> obrażeń co <skillcolor>0,7s</c> podczas podtrzymywania czaru, ale zmniejsza siłę obrażeń o <skillcolor>{Reduction}%</c>."
     },
     {
       "guid": "eadda732-e4f2-4ff0-a764-dd4a09518994",
@@ -2330,6 +2338,10 @@
       "text": "Przeskakiwanie przez przeciwników wywołuje <unholy>potępienie</c>."
     },
     {
+      "guid": "e0ffd6d4-96c1-4a9b-bf04-5127137fe81d",
+      "text": "Pojawiający się szkielet wybucha po <skillcolor>{Duration}s</c>, zadając <skillcolor>{Damage}%</c> obrażeń i wywołując u pobliskich wrogów <unholy>potępienie</c>."
+    },
+    {
       "guid": "67735373-35da-49a0-ad69-965b2aa9e8ec",
       "text": "Leczy wszystkie sojusznicze szkielety, przez które przeskoczysz, za <skillcolor>{Healing}%</c> ich maksymalnego zdrowia i resetuje czas ich trwania."
     },
@@ -2391,7 +2403,7 @@
     },
     {
       "guid": "2b1a7fce-37c8-44c9-a022-0370b533d12e",
-      "text": "Oklaszcz czyjeś osiągnięcie."
+      "text": "Oklaskujesz czyjeś osiągnięcie."
     },
     {
       "guid": "02997d12-30d2-4e3b-af6a-15bf57814f9f",
@@ -2791,7 +2803,7 @@
     },
     {
       "guid": "3b5f134b-fed2-43ee-988c-5d424476cb47",
-      "text": "Nie można używać w konkursach"
+      "text": "Nie można używać podczas rywalizacji"
     },
     {
       "guid": "518754dd-12cb-4661-bb6d-2d96c57db62b",
@@ -2807,7 +2819,7 @@
     },
     {
       "guid": "9ac4e25f-6f73-4eba-ac23-0dbf885a4427",
-      "text": "Zakopanie"
+      "text": "Pod ziemię"
     },
     {
       "guid": "df31f9b0-7be6-4cf4-b109-cd7e185c3cdf",
@@ -2875,7 +2887,7 @@
     },
     {
       "guid": "e8d7e584-b387-4032-9866-b4acbab8112c",
-      "text": "Postać stygijskiego wilka"
+      "text": "Postać styksowego wilka"
     },
     {
       "guid": "814356f3-35d5-48a1-964c-3287c0c74833",
@@ -2987,7 +2999,7 @@
     },
     {
       "guid": "f5de6c27-2090-490d-b9eb-16e245e4d4e4",
-      "text": "Wykonaj kombinację ataków wręcz, zadając <skillcolor>{damage1}</c>/<skillcolor>{damage2}</c>/<skillcolor>{damage3}</c> fizycznych obrażeń. Trzeci atak powoduje <skillcolor>przebicie</c> kumulujące się do <skillcolor>{stacks}</c> razy.\\n\\n Powoduje rozerwanie, zadając <skillcolor>{rupturedamage}</c> obrażeń twojemu celowi i <skillcolor>{ruptureareadamage}</c> obrażeń pobliskim wrogom po osiągnięciu maksymalnej liczby ładunków."
+      "text": "Wykonaj kombinację ataków wręcz, zadając <skillcolor>{damage1}</c>/<skillcolor>{damage2}</c>/<skillcolor>{damage3}</c> fizycznych obrażeń. Trzeci atak powoduje <skillcolor>przebicie</c> kumulujące się do <skillcolor>{stacks}</c> razy.\\n\\nPowoduje rozerwanie, zadając <skillcolor>{rupturedamage}</c> obrażeń twojemu celowi i <skillcolor>{ruptureareadamage}</c> obrażeń pobliskim wrogom po osiągnięciu maksymalnej liczby ładunków."
     },
     {
       "guid": "be089b44-8746-4290-b01f-2e2dd740f833",
@@ -3035,7 +3047,7 @@
     },
     {
       "guid": "22de1495-5119-4351-8b1f-eb3494733c5d",
-      "text": "Pocisk rozdziela się na <skillcolor>{Count}</c> kolejne pociski."
+      "text": "Pocisk rozdziela się na kolejne pociski w liczbie <skillcolor>{Count}</c>."
     },
     {
       "guid": "37b019c6-c203-4e6a-bf83-c90e8ee6d6a7",
@@ -3179,7 +3191,7 @@
     },
     {
       "guid": "bfc1ad69-7bcf-4acd-afd0-22f9dee33358",
-      "text": "Naprowadzana strzała"
+      "text": "Strzała naprowadzana"
     },
     {
       "guid": "e051a2b1-1d8a-44f1-8fd1-c8308c302aa1",
@@ -3283,7 +3295,7 @@
     },
     {
       "guid": "ba5c8777-4b68-4139-98c1-96b765b35b7f",
-      "text": "Umożliwia poruszanie się z <skillcolor>{Speed}%</c> szybkością ruchu podczas ładowania. Trafienia wywołują <chaos>podpalenie</c>."
+      "text": "Umożliwia poruszanie się z <skillcolor>{Speed}%</c> szybkość ruchu podczas ładowania. Trafienia wywołują <chaos>podpalenie</c>."
     },
     {
       "guid": "080b91b9-e96e-4754-944a-ffc46f84b2bb",
@@ -3591,7 +3603,7 @@
     },
     {
       "guid": "4ab138a7-d2e3-443a-b8c6-6f802fadf79e",
-      "text": "Obrażenia otrzymywane ze spaczonych ataków są zmniejszone o <teal1>{reduce1}-{reduce2}</c> i zyskują <teal1>{leechMin}</c> wysysanie życia, ale ponosisz <teal1>{amplifyMin}</c> więcej obrażeń ze wszystkich innych źródeł."
+      "text": "Obrażenia otrzymywane ze spaczonych ataków są zmniejszone o <teal1>{reduce1}-{reduce2}</c>. Zyskujesz <teal1>{leechMin}</c> wysysanie życia, ale ponosisz <teal1>{amplifyMin}</c> więcej obrażeń ze wszystkich innych źródeł."
     },
     {
       "guid": "f973ff72-1619-48f2-b767-e6ea2b408b6d",
@@ -3647,7 +3659,7 @@
     },
     {
       "guid": "6c0be856-4c60-4902-b37e-1ca55595efb0",
-      "text": "Redukcja obrażeń o <teal1>{value}%</c>."
+      "text": "<teal1>{value}%</c> redukcji obrażeń."
     },
     {
       "guid": "7e267c4b-e935-4f3b-865c-0a6bab4eed23",
@@ -3746,8 +3758,16 @@
       "text": "Moc czarów zwiększona o <teal1>{value}%</c>, a szybkość przybierania postaci zwiększona o <teal1>{shapeshiftSpeed}%</c>."
     },
     {
+      "guid": "488f0cf3-4b1f-4151-8239-ae21fde6cdc4",
+      "text": "Szybkość odnowienia umiejętności specjalnej zwiększona o <teal1>{value}%</c>. Po użyciu umiejętności specjalnej przywołuje <teal1>2</c> zmutowane szczury, które walczą po twojej stronie."
+    },
+    {
       "guid": "c8230dea-52aa-4114-9801-6320c8557602",
       "text": "Ostateczna moc zwiększona o <teal1>{value}%</c>, a obrażenia zadawane przez pomocników zwiększone o <teal1>{minionDamage}%</c>."
+    },
+    {
+      "guid": "cabcc8c5-4c75-47c5-a846-3227ffee03f2",
+      "text": "Szybkość odnawiania zasłony zwiększona o <teal1>{value}%</c>. Trafienie ataku zza zasłony skraca czas odnowienia umiejętności specjalnej o <teal1>{cooldownreduction}s</c>."
     },
     {
       "guid": "cbf3eeea-1160-4f65-a3d8-78eba3df24bf",
@@ -3787,7 +3807,7 @@
     },
     {
       "guid": "4c4588c1-225c-4cbe-a129-68574dfdfbff",
-      "text": "Szanse na fizyczne trafienie krytyczne zwiększone o <teal1>{value}%</c>, a siła fizycznego trafienia krytycznego zwiększona o <teal1>{critPower}%</c>."
+      "text": "Szansa na fizyczne trafienie krytyczne zwiększona o <teal1>{value}%</c>, a siła fizycznego trafienia krytycznego zwiększona o <teal1>{critPower}%</c>."
     },
     {
       "guid": "3c2e7b0f-157d-4e32-90dc-e7a69745123a",
@@ -3795,7 +3815,7 @@
     },
     {
       "guid": "ea430342-efd3-4908-83ba-93e300602dde",
-      "text": "Szybkość odnawiania zasłony zwiększona o <teal1>{value}%</c>. <teal1>{critbonus}</c> więcej szans na fizyczne trafienie krytyczne po użyciu zasłony."
+      "text": "Szybkość odnawiania zasłony zwiększona o <teal1>{value}%</c>. Szansa na fizyczne trafienie krytyczne po użyciu zasłony zwiększona o <teal1>{critbonus}</c>."
     },
     {
       "guid": "0c2ca516-dfaf-4014-b311-51e0898c6881",
@@ -3827,7 +3847,7 @@
     },
     {
       "guid": "3f953240-3fef-4b26-a842-4fed02a8ea47",
-      "text": "Wychowanek uczonego"
+      "text": "Ochrona uczonego"
     },
     {
       "guid": "e5f64a24-0d46-4f0a-98d7-a13a316fc96d",
@@ -3844,6 +3864,10 @@
     {
       "guid": "3fc1c52c-81ca-45ce-9dce-b814ec4a5336",
       "text": "<teal1>{value}%</c> ostatecznej mocy i resetuje czas odnowienia czarów po użyciu umiejętności specjalnej."
+    },
+    {
+      "guid": "65219c1f-c7c0-43fc-bb07-27165a8b59d7",
+      "text": "Szybkość ładowania czarów zwiększona o <teal1>{value}</c>."
     },
     {
       "guid": "48abfa07-1bfa-46cf-9091-d75175401926",
@@ -3871,7 +3895,7 @@
     },
     {
       "guid": "5b2eecfc-1eb0-4a01-8c73-37c3d0b7df2b",
-      "text": "Redukcja obrażeń o <teal1>{value}%</c>."
+      "text": "<teal1>{value}%</c> redukcji obrażeń."
     },
     {
       "guid": "fc4d354c-2e35-4cf0-a610-fee111fbc354",
@@ -3883,7 +3907,11 @@
     },
     {
       "guid": "a6e34899-dd59-4455-a746-4dbb4e6c04c2",
-      "text": "Umiejętność walki bronią zwiększona o <teal1>{value}%</c>, a obrażenia zadawane wrogom z pełnym zdrowiem zwiększone o <teal1>{extraDamage}%</c>."
+      "text": "Siła umiejętności broni o <teal1>{value}%</c>, a obrażenia zadawane wrogom z pełnym zdrowiem zwiększone o <teal1>{extraDamage}%</c>."
+    },
+    {
+      "guid": "a99ddb9b-e06a-422a-861c-0fd2501cc8b6",
+      "text": "<teal1>{chance}</c> szansy na sparowanie ataku i zmniejszenie otrzymanych obrażeń o <teal1>{damagereudction}</c>. Sparowanie ataku zwiększa twoją siłę fizyczną o <teal1>{factor}</c> na <teal1>{duration}s</c>."
     },
     {
       "guid": "42035506-824b-4f41-ab2c-33b2f8a3d7a0",
@@ -3975,7 +4003,7 @@
     },
     {
       "guid": "28a54bf1-d9ca-4d15-8b16-43d7f94bd2ce",
-      "text": "Niszczycielski lód"
+      "text": "Niegościnny lód"
     },
     {
       "guid": "41f1aa92-af12-40ee-9147-51a0e45fbb8d",
@@ -3995,7 +4023,7 @@
     },
     {
       "guid": "091a9b0d-6a1d-4f0b-82a5-6fa196527c85",
-      "text": "Czas odnowienia zmniejszony o 75%.\\nPodczas skakania do przodu nie pozostawiasz już atrap."
+      "text": "Czas odnowienia zmniejszony o 75%.\\nPodczas skakania do przodu nie pozostawiasz już fałszywych manekinów."
     },
     {
       "guid": "9ed6d6a6-2435-4cdc-a2e4-2132e71a0bb1",
@@ -4183,7 +4211,7 @@
     },
     {
       "guid": "cff1614d-8f4b-4e2f-9a4a-a2a1156f9d1b",
-      "text": "Naładowany!"
+      "text": "Naładowana!"
     },
     {
       "guid": "f684018e-3a2b-405a-a7e5-99597ea87b2a",
@@ -4307,7 +4335,7 @@
     },
     {
       "guid": "221ea006-3047-4ea2-a399-2049240106c4",
-      "text": "Przenikanie"
+      "text": "Przechodzenie"
     },
     {
       "guid": "bfd68035-7706-4c9a-9907-1b89cc110240",
@@ -4391,7 +4419,7 @@
     },
     {
       "guid": "16b8091d-0613-434a-8af7-a4d9c308cb2f",
-      "text": "Zmora"
+      "text": "Zguba"
     },
     {
       "guid": "cf630fb7-ef64-4837-b706-de2a8741466b",
@@ -4434,8 +4462,48 @@
       "text": "Zmniejsza zadawane obrażenia o <skillcolor>{weakenfactor}</c>."
     },
     {
+      "guid": "6c2b5f1f-ee10-4022-a4f6-4e4b2724d51f",
+      "text": "Drużyna czerwona"
+    },
+    {
+      "guid": "f785ee2a-7632-4180-b74a-3c98530d4c25",
+      "text": "Drużyna niebieska"
+    },
+    {
+      "guid": "79070767-638f-471b-9f90-ebd2a707eb0b",
+      "text": "Drużyna zielona"
+    },
+    {
+      "guid": "587bf5ad-620b-46a5-8f51-82cc0184a18c",
+      "text": "Drużyna fioletowa"
+    },
+    {
+      "guid": "3ffd469d-fbaa-4efb-b794-2ff8c4dfdecc",
+      "text": "Umieść sztandar drużyny, aby dodać <teal1>drużynę</c> do areny zamkowej. Po umieszczeniu sztandaru drużyny wampiry mogą do niej dołączać.\\n\\nNa tej samej arenie można umieścić kilka sztandarów, umożliwiając wampirom dołączenie do różnych drużyn."
+    },
+    {
+      "guid": "09755304-443f-4a12-9a2e-ff7751d6f2d0",
+      "text": "Kula areny"
+    },
+    {
+      "guid": "098042d4-0536-48af-9274-fe7517610291",
+      "text": "Umieść na arenie kulę, która co jakiś czas będzie się odradzać.\\n\\nRozbicie kuli <teal1>leczy</c> drużynę tego gracza, który zadał ostateczny cios."
+    },
+    {
+      "guid": "40328b82-16d8-46e8-a260-c5cd0abe2641",
+      "text": "Centrum areny"
+    },
+    {
+      "guid": "5e2c39ce-72a7-4d7b-ad54-124e0cdfe6b0",
+      "text": "Wyznacz centralny punkt areny.\\n\\nPodczas <teal1>nagłej śmierci</c> pole bitwy będzie się kurczyć w kierunku tego punktu."
+    },
+    {
       "guid": "51c4337a-94eb-456e-9ee7-b000d06cec84",
       "text": "Stanowisko areny"
+    },
+    {
+      "guid": "fea1a71c-a832-4311-83ce-cd21b6c0cac0",
+      "text": "Stanowisko, które dodaje <teal1>arenę</c> do twojego zamku. Używaj go do rozpoczynania lub anulowania zmagań na arenie oraz aby dostosować zasady areny.\\n\\nUmieszczenie stanowiska tworzy połączoną z nim <teal1>strefę areny</c>, która określa granicę terenu zmagań. Możesz dostosować tę strefę, aby stworzyć swój własny układ areny."
     },
     {
       "guid": "a764c0d4-b7c8-4aa9-9a4e-980f8278bf0b",
@@ -4543,11 +4611,11 @@
     },
     {
       "guid": "a58042b9-4804-4cd8-8ed6-18df85899a51",
-      "text": "Szklane okno – Wampir"
+      "text": "Szklane okno – wampir"
     },
     {
       "guid": "3fd2c674-0c9a-45e9-b818-3efef110beae",
-      "text": "Szklane okno – Upiór"
+      "text": "Szklane okno – upiór"
     },
     {
       "guid": "29906660-bf5e-454d-8519-26389e4e13bc",
@@ -4691,7 +4759,7 @@
     },
     {
       "guid": "67ce42a4-ae92-4e2d-b4ca-b8a8bebb9554",
-      "text": "Regały na broń"
+      "text": "Wieszaki na broń"
     },
     {
       "guid": "92455726-a299-4681-8784-dd27a17e9427",
@@ -5027,27 +5095,27 @@
     },
     {
       "guid": "6426ad78-034a-499a-8257-79d1f73dfaec",
-      "text": "Róg dywanu Sanktuarium Zarazy"
+      "text": "Róg dywanu sanktuarium zarazy"
     },
     {
       "guid": "54536000-55bc-4fd0-8b8c-c307f24b3f71",
-      "text": "Dywan Sanktuarium Zarazy"
+      "text": "Dywan sanktuarium zarazy"
     },
     {
       "guid": "6e0bab44-3d2a-4fbe-936f-b72642278022",
-      "text": "Dywan Sanktuarium Zarazy – zakończenie"
+      "text": "Dywan sanktuarium zarazy – zakończenie"
     },
     {
       "guid": "e1f521a6-eb47-498e-a0c5-8dc56f9f118b",
-      "text": "Dywan Sanktuarium Zarazy – prosty"
+      "text": "Dywan sanktuarium zarazy – prosty"
     },
     {
       "guid": "a7deea2e-46d3-49e8-965c-3e5e53bd6171",
-      "text": "Dywan Sanktuarium Zarazy w kształcie litery T"
+      "text": "Dywan sanktuarium zarazy w kształcie litery T"
     },
     {
       "guid": "2c4064ef-52fc-4d48-9bb8-d7816d0a7a7c",
-      "text": "Dywan Sanktuarium Zarazy w kształcie litery X"
+      "text": "Dywan sanktuarium zarazy w kształcie litery X"
     },
     {
       "guid": "69699634-be92-4c27-8ba9-e3404cbfb56d",
@@ -5307,7 +5375,7 @@
     },
     {
       "guid": "4053a384-6f17-41ff-8b88-f736fd1b7be7",
-      "text": "Niezbędny, by rozgrzać zziębnięte kości."
+      "text": "Niezbędne, by rozgrzać zziębnięte kości."
     },
     {
       "guid": "0e9443ea-0be3-4e17-ab3d-c532611b0fa6",
@@ -5379,7 +5447,7 @@
     },
     {
       "guid": "dfc72751-f186-4a0b-8f97-54ba6376381b",
-      "text": "Eleganckie rozwiązanie na organizację przestrzeni w pomieszczeniach."
+      "text": "Eleganckie rozwiązanie organizujące przestrzeń w pomieszczeniach."
     },
     {
       "guid": "290fa8d5-0b2b-4517-8178-d8d385895e7a",
@@ -5990,8 +6058,12 @@
       "text": "Manekin treningowy – wieśniak"
     },
     {
+      "guid": "2d00e9f3-2ac5-436f-9ea6-0cd0113f88f3",
+      "text": "Dzwonki do drzwi zamku"
+    },
+    {
       "guid": "8525d8e1-fbc4-4652-a986-2c29c43c67b1",
-      "text": "Królewski tron"
+      "text": "Tron królewski"
     },
     {
       "guid": "d7d6c566-4be2-48cb-baf3-216de8f3550f",
@@ -5999,7 +6071,7 @@
     },
     {
       "guid": "090566e0-7cd2-4980-a8e9-258f5681011e",
-      "text": "Zamkowe trony"
+      "text": "Trony zamkowe"
     },
     {
       "guid": "1bff629e-19a9-4f6b-8eac-02f78be0722a",
@@ -6027,11 +6099,11 @@
     },
     {
       "guid": "8d90d8cf-86ed-40b6-b3d8-134008e3ed05",
-      "text": "Roślina – czerwony bodziszek"
+      "text": "Roślina – czerwone geranium"
     },
     {
       "guid": "8676c0f1-1050-4bb0-a279-92f78d125212",
-      "text": "Roślina – biały bodziszek"
+      "text": "Roślina – białe geranium"
     },
     {
       "guid": "7e34342e-8738-48cb-af0e-81051670da6f",
@@ -6067,7 +6139,7 @@
     },
     {
       "guid": "6814e2ba-3a10-4f1c-965a-176859116418",
-      "text": "Duży schowek na mikstury krwi"
+      "text": "Schowek na dużą miksturę krwi"
     },
     {
       "guid": "274fb38c-033f-4cb9-a19a-badbc201fdab",
@@ -6283,7 +6355,7 @@
     },
     {
       "guid": "52e70063-4062-48ee-811a-6c8710dc890b",
-      "text": "Puf nocnego przepychu"
+      "text": "Pufa nocnego przepychu"
     },
     {
       "guid": "f1622418-546e-4fa1-a50c-e38db361956c",
@@ -6328,6 +6400,10 @@
     {
       "guid": "d55574b1-2cb3-46a6-a4dd-7494b9075460",
       "text": "Obrazy nocnego przepychu"
+    },
+    {
+      "guid": "5777c8c4-4ae5-4c9e-8d13-ea0737dd3abd",
+      "text": "Baseny do relaksu i utrzymania higieny."
     },
     {
       "guid": "8f45c617-82c6-4923-87eb-f4c958177737",
@@ -6619,7 +6695,7 @@
     },
     {
       "guid": "71581a56-aabd-4186-81d2-f9c6a004a62d",
-      "text": "Rozświetli każde pomieszczenie."
+      "text": "Rozświetlą każde pomieszczenie."
     },
     {
       "guid": "231b6bb5-0d6c-4e4d-8928-65468e294320",
@@ -6675,7 +6751,7 @@
     },
     {
       "guid": "6e4b2c9e-c314-4d46-b6b4-2cb5b97abc72",
-      "text": "Małe rozświetlone lustro ścienne"
+      "text": "Małe promieniujące lustro ścienne"
     },
     {
       "guid": "d42fec7c-f8ed-4589-9e03-bf3106e12a61",
@@ -6755,7 +6831,7 @@
     },
     {
       "guid": "88dab23e-13e1-448b-ad60-60fd1c5a6f58",
-      "text": "Baronowa Hardedge"
+      "text": "Ostre krawędzie baronowej"
     },
     {
       "guid": "fc04ec66-d1ed-4939-a53a-13d90682586a",
@@ -6815,7 +6891,7 @@
     },
     {
       "guid": "d30a0ad2-5386-4378-855b-73c14afea06b",
-      "text": "Pojedyncza złowieszcza półka ścienna – literatura"
+      "text": "Podwójna złowieszcza półka ścienna – literatura"
     },
     {
       "guid": "249ba8e6-da46-4cc0-8ec4-143ad4a7723c",
@@ -6835,7 +6911,7 @@
     },
     {
       "guid": "0810057c-989d-4d8a-8f0b-4ffa3b94b706",
-      "text": "Błyskający kinkiet"
+      "text": "Kinkiet flara"
     },
     {
       "guid": "f4c4cdb7-12ad-4ed3-bbbb-1ec1fc8749e2",
@@ -6863,7 +6939,7 @@
     },
     {
       "guid": "5324d5c8-7fa3-4561-95c9-b398bdfdf184",
-      "text": "Przykładny wzór"
+      "text": "Przykładowy wzór"
     },
     {
       "guid": "21ab7f3a-0a64-4e31-81e1-6c807cc82664",
@@ -6871,7 +6947,7 @@
     },
     {
       "guid": "ebffd0a1-b12b-4de1-9a8d-1745d2910a5d",
-      "text": "Wykrwawiony wzór"
+      "text": "Wzór wykrwawiony"
     },
     {
       "guid": "1b71dc2e-4f91-485a-a161-d395dfa9a732",
@@ -6959,11 +7035,11 @@
     },
     {
       "guid": "d08dc60b-5028-41e3-8b78-1c273a264d29",
-      "text": "Fragmenty podłogi, które dają premie konstrukcjom biblioteki."
+      "text": "Fragmenty podłogi, które premie konstrukcjom biblioteki."
     },
     {
       "guid": "44d8389d-b10a-4461-9801-04692f6e2f72",
-      "text": "Duże bloki kamienia brukowego"
+      "text": "Duże bloki kamienia bukowego"
     },
     {
       "guid": "c96318e0-1389-4cad-92f3-060471e9c379",
@@ -6971,7 +7047,7 @@
     },
     {
       "guid": "2c31d245-e315-41a9-938c-4a1787b1e9db",
-      "text": "Małe bloki kamienia brukowego"
+      "text": "Małe bloki kamienia bukowego"
     },
     {
       "guid": "2cb4be22-b849-4ec2-a8a3-3ed666b87fc9",
@@ -7019,7 +7095,7 @@
     },
     {
       "guid": "2498aa2d-9735-4c7d-acea-568c74d2b48f",
-      "text": "Fragmenty podłogi, które dają premie konstrukcjom więzienia."
+      "text": "Fragmenty podłogi, które premie konstrukcjom więzienia."
     },
     {
       "guid": "bb223fb8-be3e-4a9c-9f28-b9c4b3c7e6a8",
@@ -7039,7 +7115,7 @@
     },
     {
       "guid": "efa884f3-b8cc-45d8-b76b-474a8d122cb9",
-      "text": "Fragmenty podłogi, które dają premie konstrukcjom zakładu krawieckiego."
+      "text": "Fragmenty podłogi, które premie konstrukcjom zakładu krawieckiego."
     },
     {
       "guid": "88e6b8fb-bf88-485d-8310-d3fdd46c5ac0",
@@ -7303,11 +7379,11 @@
     },
     {
       "guid": "948de5b2-a881-429a-9f1b-aef86230e613",
-      "text": "Wrota Sanktuarium Zarazy"
+      "text": "Wrota sanktuarium zarazy"
     },
     {
       "guid": "2c1b294a-7f9b-460e-910f-eca866e2a349",
-      "text": "Wrota Sanktuarium Zarazy – wejście dla sług"
+      "text": "Wrota sanktuarium zarazy – wejście dla sług"
     },
     {
       "guid": "736f2011-8327-455d-9aba-34876b72997c",
@@ -7315,11 +7391,11 @@
     },
     {
       "guid": "921335b5-bb4e-4113-bd93-3902132a2558",
-      "text": "Brama warowna"
+      "text": "Warowna brama"
     },
     {
       "guid": "98e6d073-4f05-4632-b86a-a352f336355c",
-      "text": "Brama warowna – wejście dla sług"
+      "text": "Warowna brama – wejście dla sług"
     },
     {
       "guid": "380c22bd-3f18-47d4-bb4f-df6158ebbd96",
@@ -7451,7 +7527,7 @@
     },
     {
       "guid": "b009c962-35e8-4a82-961a-68fa4763599b",
-      "text": "Podłoga zamkowa."
+      "text": "Podłoga zamkowa"
     },
     {
       "guid": "1e724094-890e-4d54-863e-c33a42630b81",
@@ -7467,7 +7543,7 @@
     },
     {
       "guid": "23f4971a-f1e9-4b8f-ad0e-01770d4648f6",
-      "text": "Płytki Sanktuarium Zarazy"
+      "text": "Płytki sanktuarium zarazy"
     },
     {
       "guid": "2d347830-6cc9-4639-8ddb-399559fdb9a8",
@@ -7483,7 +7559,7 @@
     },
     {
       "guid": "91c155f6-c866-4e31-9131-f6f1f97cd56f",
-      "text": "Podłoga do zakładu krawieckiego"
+      "text": "Podłoga do zakład krawieckiego"
     },
     {
       "guid": "8609c024-ad63-42f4-88dc-310ed475b9d9",
@@ -7551,15 +7627,15 @@
     },
     {
       "guid": "8773bd32-6b48-42c4-860c-c16bb6761ea1",
-      "text": "Schody Sanktuarium Zarazy"
+      "text": "Schody sanktuarium zarazy"
     },
     {
       "guid": "a849a1a8-d6a0-46f0-853d-72bdc8d7f3cc",
-      "text": "Wejście na górę Sanktuarium Zarazy"
+      "text": "Wejście na górę sanktuarium zarazy"
     },
     {
       "guid": "7cc4b623-73d6-4d1a-b658-626e1cfc05a2",
-      "text": "Klatka schodowa Sanktuarium Zarazy"
+      "text": "Klatka schodowa sanktuarium zarazy"
     },
     {
       "guid": "3c519f86-1c05-4313-95aa-af142088ef0e",
@@ -7739,7 +7815,7 @@
     },
     {
       "guid": "a7e02b2f-4171-4257-9148-32387cbff763",
-      "text": "Odłamek duszy Skrzydlatego Straszydła"
+      "text": "Odłamek duszy Skrzydlatego straszydła"
     },
     {
       "guid": "5cae0cfd-e696-42e6-8824-e25e91925d43",
@@ -7855,7 +7931,7 @@
     },
     {
       "guid": "4459b281-64c0-468a-8534-a3e4fb768973",
-      "text": "Możesz zdobyć moc zdobytego odłamka duszy poprzez umieszczenie go w zamku"
+      "text": "Zdobywając odłamek duszy i umieszczając go w zamku, można pozyskać jego moc"
     },
     {
       "guid": "cf27856b-c5df-4b2d-a70c-762930e3f350",
@@ -8155,7 +8231,7 @@
     },
     {
       "guid": "cac19bbe-5767-4a80-961f-d19f8e3c63a2",
-      "text": "Wiejska wisząca latarnia"
+      "text": "Wiejska latarnia wisząca"
     },
     {
       "guid": "5cdeacec-43e3-4e42-8f99-362485e64469",
@@ -8427,7 +8503,7 @@
     },
     {
       "guid": "d4737d85-dd46-4860-b6a7-5b52f194bc81",
-      "text": "Dzięki ogrodzeniu można stworzyć elegancki projekt ogrodu."
+      "text": "Dzięki ogrodzeniu można stworzyć elegancki projekt ogrody."
     },
     {
       "guid": "342021ea-a0dd-4eed-bfd0-df5fe5902b41",
@@ -8922,14 +8998,6 @@
       "text": "Przy ołtarzu pamięci możesz zresetować swoje wybory w księdze zaklęć."
     },
     {
-      "guid": "db058eb8-bed8-4254-8761-98b90a65b614",
-      "text": "Bank krwi"
-    },
-    {
-      "guid": "f9659cc7-ffcc-4658-b06d-f2290ee1e803",
-      "text": "Pojemnik na krew. Można podłączyć rurociąg z jednego lub kilku ekstraktorów krwi, aby napełniać i mieszać różne źródła krwi."
-    },
-    {
       "guid": "8b2257a3-f137-4e28-a036-4988a703d2fe",
       "text": "Homogenizator krwi"
     },
@@ -8992,6 +9060,10 @@
     {
       "guid": "b14514d9-5513-4a7a-b353-7baa9355b3eb",
       "text": "Umieść <teal1>broń przodków</c> , <teal1>zniszczoną broń</c> lub <teal1>klejnot czaru</c>, aby rozpocząć fuzję."
+    },
+    {
+      "guid": "e4b171e0-a34a-4df7-880c-a7293e57425e",
+      "text": "Umieść odpowiedni <teal1>klejnot czaru</c> w gnieździe dodatkowym, aby kontynuować fuzję.\\n\\nPowstały w wyniku fuzji <teal1>klejnot czaru</c> zachowa nazwę <teal1>klejnotu czaru</c> z głównego gniazda.\\n\\nPrzedmiot z gniazda dodatkowego zostanie zużyty w procesie fuzji."
     },
     {
       "guid": "c706ffa0-c322-4448-8d43-99a1e88dc609",
@@ -9367,7 +9439,7 @@
     },
     {
       "guid": "72697036-8ca7-4eea-ba71-dcfc7ae915c5",
-      "text": "Dołącz do drużyny"
+      "text": "Dołączono do drużyny"
     },
     {
       "guid": "98dbf9f7-ec93-45ae-ab80-0bfb2acb0cf8",
@@ -9579,7 +9651,7 @@
     },
     {
       "guid": "8166c89b-694b-477a-8ec3-4acf4e30a3de",
-      "text": "Przytrzymaj, by wejść"
+      "text": "Przytrzymaj, aby wejść"
     },
     {
       "guid": "037480d3-3e4e-4f94-8fbc-ccaf3c6b0996",
@@ -9591,7 +9663,7 @@
     },
     {
       "guid": "2ddb02b8-b354-47c4-bcdb-afcbd557db56",
-      "text": "Przytrzymaj, by otworzyć bramę"
+      "text": "Przytrzymaj, aby otworzyć bramę"
     },
     {
       "guid": "4051ab6a-8484-4ae7-bd78-58fe42053197",
@@ -9631,7 +9703,7 @@
     },
     {
       "guid": "3755cb71-c0d1-42a8-b6e7-f463d4327fc7",
-      "text": "Nie można teleportować się, gdy zamek został sforsowany"
+      "text": "Nie można teleportować, gdy zamek został sforsowany"
     },
     {
       "guid": "0476d60c-2128-43d1-a854-717c4067dd7e",
@@ -9691,7 +9763,7 @@
     },
     {
       "guid": "85fba0cf-4fe6-427a-bf27-5fc8cbc1ef06",
-      "text": "Zwiększa poziom wyposażenia o <teal2>1</c>."
+      "text": "Zwiększ poziom wyposażenia o <teal2>1</c>."
     },
     {
       "guid": "6819a7da-fa7c-48e6-aeb0-33f9d6ffeef5",
@@ -9711,7 +9783,7 @@
     },
     {
       "guid": "bda197d6-e176-4d91-a0ce-5b0c8b2da39b",
-      "text": "Zwiększ szybkość ruchu o <teal2>{SetBonusValue}</c> i zwiększ szansę na fizyczne trafienie krytyczne o <teal2>{SetBonusValue2}</c>."
+      "text": "Zwiększa szybkość ruchu o <teal2>{SetBonusValue}</c> i zwiększa szansę na fizyczne trafienie krytyczne o <teal2>{SetBonusValue2}</c>."
     },
     {
       "guid": "0069f330-056b-4b00-95d2-f69037e0d1da",
@@ -9719,11 +9791,11 @@
     },
     {
       "guid": "357e08c3-6014-4bd5-a642-10b6c0fcc381",
-      "text": "Zwiększ szansę na fizyczne trafienie krytyczne o <teal2>{SetBonusValue}</c>."
+      "text": "Zwiększa szansę na fizyczne trafienie krytyczne o <teal2>{SetBonusValue}</c>."
     },
     {
       "guid": "ff040ef4-3d25-44e1-94f2-c952a6c767c8",
-      "text": "Zwiększ siłę fizycznego trafienia krytycznego o <teal2>{SetBonusValue}</c>."
+      "text": "Zwiększa siłę fizycznego trafienia krytycznego o <teal2>{SetBonusValue}</c>."
     },
     {
       "guid": "68f3770c-79de-45ec-ad60-014387e0c3e0",
@@ -9743,7 +9815,7 @@
     },
     {
       "guid": "44a9c357-8d23-4f41-8ba6-045e7fba4462",
-      "text": "Zwiększ szybkość odnawiania się czarów o <teal2>{SetBonusValue}</c>."
+      "text": "Zwiększa szybkość odnawiania się czarów o <teal2>{SetBonusValue}</c>."
     },
     {
       "guid": "77316140-4201-40b6-b403-fa594089180f",
@@ -9767,7 +9839,7 @@
     },
     {
       "guid": "0ea4c73a-3155-4b11-b661-beb3b44644df",
-      "text": "Zwiększ szybkość odnawiania się zasłony o <teal2>{SetBonusValue}</c>."
+      "text": "Zwiększa szybkość odnawiania się zasłony o <teal2>{SetBonusValue}</c>."
     },
     {
       "guid": "5366067e-671a-418c-847d-4e8518afe9fa",
@@ -9799,11 +9871,11 @@
     },
     {
       "guid": "50b9ecb1-2331-4a88-88e7-82db2868f0ef",
-      "text": "Zwiększ szybkość odnawiania się broni o <teal2>{SetBonusValue}</c>."
+      "text": "Zwiększa szybkość odnawiania się broni o <teal2>{SetBonusValue}</c>."
     },
     {
       "guid": "bf25df09-f6a6-4366-a796-1b81909c9d0c",
-      "text": "Zwiększa umiejętność broni o <teal2>{SetBonusValue}</c>."
+      "text": "Zwiększa siłę umiejętności broni o <teal2>{SetBonusValue}</c>."
     },
     {
       "guid": "9e2ea30c-6aab-494f-9969-f9c7a40f5b56",
@@ -9931,7 +10003,7 @@
     },
     {
       "guid": "ac25c76d-e3b2-4ca8-808a-edb38ed3b4c7",
-      "text": "Lek na czosnkową gorączkę, łagodzący skutki kontaktu z czosnkiem. Nie działa w polu rażenia czosnku."
+      "text": "Lek na czosnkową gorączkę, łagodzący skutki kontaktu czosnek. Nie działa w polu rażenia czosnku."
     },
     {
       "guid": "3b643892-b58b-4071-aefa-db598cd67571",
@@ -10095,7 +10167,7 @@
     },
     {
       "guid": "81271bdd-a081-47e5-8949-d5cf1869174e",
-      "text": "Eliksir zwiększający szybkość ataku o <skillcolor>{attribute1}</c> i siłę uderzeń bronią o <skillcolor>{attribute2}</c> przez <skillcolor>{duration} min</c>.\\n\\n<teal1>W danym momencie aktywny może być tylko jeden eliksir</c>.\\n<teal1>Efekt utrzymuje się nawet po śmierci</c>."
+      "text": "Eliksir zwiększający szybkość ataku o <skillcolor>{attribute1}</c> i siłę umiejętności broni o <skillcolor>{attribute2}</c> przez <skillcolor>{duration} min</c>.\\n\\n<teal1>W danym momencie aktywny może być tylko jeden eliksir</c>.\\n<teal1>Efekt utrzymuje się nawet po śmierci</c>."
     },
     {
       "guid": "ea6b8deb-a386-4a18-be0e-75489a09b0b4",
@@ -10615,7 +10687,7 @@
     },
     {
       "guid": "4ba1d63d-33cc-4461-ad0b-cd24a34a9465",
-      "text": "Północna suknia balowa"
+      "text": "Suknia balowa Północ"
     },
     {
       "guid": "8e6ed644-2f0d-4e87-b311-5bd0c215663c",
@@ -10623,7 +10695,7 @@
     },
     {
       "guid": "9d1b74f1-18e8-4a02-b277-8ca2480290b1",
-      "text": "Północny garnitur szlachcica"
+      "text": "Garnitur szlachcica Północ"
     },
     {
       "guid": "c9d6def6-0081-4416-9542-e57d8eaa3530",
@@ -11103,7 +11175,7 @@
     },
     {
       "guid": "ab9c0d10-3287-4aa4-8dcf-c5fa938de06f",
-      "text": "Północne spodnie szlachcica"
+      "text": "Spodnie szlachcica Północ"
     },
     {
       "guid": "5a81ec1a-21df-4c94-a4fd-1e6a47ed1dc0",
@@ -11159,7 +11231,7 @@
     },
     {
       "guid": "6055ea8e-85c2-4f3a-81e0-6f62be45e8d5",
-      "text": "Szaty nasączone chemikaliami"
+      "text": "Nasączone szaty chemika"
     },
     {
       "guid": "0d1d420b-e239-4a64-9f3e-42f822d4197a",
@@ -11183,7 +11255,7 @@
     },
     {
       "guid": "ce45f05e-e816-4aa1-97a7-14551ac9ad47",
-      "text": "Peleryna Nieśmiertelnego Króla"
+      "text": "Peleryna króla nieśmiertelnych"
     },
     {
       "guid": "5afd9112-b03d-4fea-9117-f978076743a8",
@@ -11207,7 +11279,7 @@
     },
     {
       "guid": "3edbb990-fcf8-4ed9-a4bb-57493c19dc87",
-      "text": "Peleryna nasączona chemikaliami"
+      "text": "Nasączona peleryna chemika"
     },
     {
       "guid": "994efb5d-29e4-4652-94d2-1ead98220c9e",
@@ -11243,11 +11315,11 @@
     },
     {
       "guid": "186ec0bb-fd46-451b-8272-3e4bc1446d0a",
-      "text": "Królewska opończa błazna"
+      "text": "Opończa królewskiego błazna"
     },
     {
       "guid": "9898d06d-1af1-44ea-8fd9-bb6f91d9ee59",
-      "text": "Insygnia nasączone chemikaliami"
+      "text": "Nasączone insygnia chemika"
     },
     {
       "guid": "ebef14a8-70da-46ae-9423-f81935351d57",
@@ -11307,7 +11379,7 @@
     },
     {
       "guid": "4ace25f5-6f86-48d8-9e11-196ef20238de",
-      "text": "Odblokowuje zdolność wytwarzania źródła magii – wisiorka z kamieniem utrapienia."
+      "text": "Odblokowuje zdolność wytwarzania wisiorka z kamieniem utrapienia (źródło magii)."
     },
     {
       "guid": "f9c04101-5d90-4604-8b30-e10f7248654d",
@@ -11779,11 +11851,11 @@
     },
     {
       "guid": "71517a9e-6370-4e04-8dfd-02d6022771bf",
-      "text": "Kościany miecz dwuręczny"
+      "text": "Miecz dwuręczny z kości"
     },
     {
       "guid": "a2bbe5ce-8bc6-42e9-aa5a-1ecc71104933",
-      "text": "Wzmocniony kościany miecz dwuręczny"
+      "text": "Miecz dwuręczny ze wzmocnionych kości"
     },
     {
       "guid": "f7209135-314b-4d70-81c9-2fa57c032c25",
@@ -11815,7 +11887,7 @@
     },
     {
       "guid": "92463350-1d10-4d0b-8615-e8d45465cdb4",
-      "text": "Krwisty miecz dwuręczny"
+      "text": "Sangwiniczny miecz dwuręczny"
     },
     {
       "guid": "ef559449-7c2a-4d62-a1f4-05f2b13008d5",
@@ -11887,7 +11959,7 @@
     },
     {
       "guid": "563d2334-ea8d-4701-af21-0cb4a6fb5898",
-      "text": "Cienisty długi łuk"
+      "text": "Długi łuk cienia"
     },
     {
       "guid": "adf4fc0a-e6a9-441a-8959-002c4e7a573f",
@@ -13259,7 +13331,7 @@
     },
     {
       "guid": "b4e5a6a6-bb70-406e-a9fd-19ace68c3a78",
-      "text": "Świecące włókno"
+      "text": "Włókno promieniujące"
     },
     {
       "guid": "85d14204-5113-4440-85aa-47a77eb83e4d",
@@ -13395,7 +13467,7 @@
     },
     {
       "guid": "87a2c485-5353-4d63-89c7-f5690e949d86",
-      "text": "Nasiono krwawiącego serca"
+      "text": "Nasiono krwawiącego sera"
     },
     {
       "guid": "4196d5de-1eff-4950-be07-84013a7fb347",
@@ -13431,7 +13503,7 @@
     },
     {
       "guid": "8c7d76d1-a803-4eb7-a8a2-b4c3ebc4af47",
-      "text": "Nasiona świętych winogron"
+      "text": "Święte nasiona winogron"
     },
     {
       "guid": "5e76e327-f275-4fe2-a8d4-77d10bf59cf8",
@@ -13471,11 +13543,11 @@
     },
     {
       "guid": "70f39466-b4e3-4912-a15d-33084f0071bd",
-      "text": "Imperialna nić"
+      "text": "Nić imperialna"
     },
     {
       "guid": "5cab027f-8492-4652-a529-c6073dc6299f",
-      "text": "Świecąca nić"
+      "text": "Nić promieniująca"
     },
     {
       "guid": "05773351-6677-48f7-a7e9-e43ea55847c1",
@@ -13515,7 +13587,7 @@
     },
     {
       "guid": "36f8ed2f-92be-4775-ab29-3b7b9caced22",
-      "text": "Chitynowy pancerz owada."
+      "text": "Pancerz chitynowy owada."
     },
     {
       "guid": "cb5cb21e-c3d1-4f5e-a7b1-2f34f2efc319",
@@ -14667,7 +14739,7 @@
     },
     {
       "guid": "d8da6375-d2b7-45db-93d4-c8cd71651de8",
-      "text": "Odpowiedniejsze miejsce, by odpocząć, by odzyskać siły, by rządzić."
+      "text": "Bardziej odpowiednie miejsce, by odpocząć, by odzyskać siły, by rządzić."
     },
     {
       "guid": "e6067df1-ce0c-4eb2-b333-72d94209ce36",
@@ -14771,7 +14843,7 @@
     },
     {
       "guid": "6f9e3699-ab9d-4b33-a8bd-132580f7e640",
-      "text": "Pozyskaj krew od więźnia"
+      "text": "Pozyskaj krew od więźnia."
     },
     {
       "guid": "e20ef2fb-eddd-488c-88b1-d1d83f9a473b",
@@ -14879,7 +14951,7 @@
     },
     {
       "guid": "1251b1b5-1083-4c2d-9a22-d9c691a632af",
-      "text": "Pokonaj strażnika relikwii, zabierz relikwię i użyj jej, by zyskać jej moc."
+      "text": "Pokonaj strażnika relikwii, zabierz relikwię i użyj ją, by zyskać jej moc."
     },
     {
       "guid": "9da9fcbb-9523-47e3-b85e-501281578932",
@@ -15223,7 +15295,7 @@
     },
     {
       "guid": "f4264738-e441-43ce-8360-0de91bc63d27",
-      "text": "Napełnij ołtarz krwi esencją krwi <teal1>Quinceya, Króla Bandytów</c>."
+      "text": "Napełnij ołtarz krwi esencją krwi <teal1>Quinceya Króla Bandytów</c>."
     },
     {
       "guid": "94b5eb4e-5263-446b-ba2a-3859bab75e90",
@@ -15251,7 +15323,7 @@
     },
     {
       "guid": "f82b005b-43ea-4f96-86d0-5f624610ab28",
-      "text": "Powiększanie moich włości"
+      "text": "Poszerzanie mojej domeny"
     },
     {
       "guid": "3fbcbbb5-60f0-4e15-9432-c16ca7686ac1",
@@ -15487,7 +15559,7 @@
     },
     {
       "guid": "07d6e96f-ce95-4a38-9431-8821dbf8d313",
-      "text": "Ktoś mi wbił kołek"
+      "text": "Ktoś mnie przebił kołkiem"
     },
     {
       "guid": "c6485e1f-e60c-4f6f-bdc9-1b489518f067",
@@ -15622,6 +15694,10 @@
       "text": "+{value} <statscolor>poziom zbroi"
     },
     {
+      "guid": "2d7f7adb-12c7-4671-b1e0-ba5ee2201f3c",
+      "text": "Suma Bonusów za Atrybuty."
+    },
+    {
       "guid": "336f7e32-12ed-4b92-81c0-850f2430fde0",
       "text": "Obrona"
     },
@@ -15722,6 +15798,10 @@
       "text": "Zwiększa szybkość ruchu."
     },
     {
+      "guid": "b2c8d8cb-525b-4382-be89-157e0bb63191",
+      "text": "Bonusy Poza Limitem."
+    },
+    {
       "guid": "5ed66f17-29aa-4005-8170-800941286f33",
       "text": "+{value}% <statscolor>premii do siły fizycznej"
     },
@@ -15775,7 +15855,7 @@
     },
     {
       "guid": "54a3ebd0-d1cc-4c4a-8814-130067a8d72e",
-      "text": "+{value}% <statscolor>szybkości odnawiania umiejętności walki bronią"
+      "text": "+{value}% <statscolor>szybkości odnawiania umiejętności broni"
     },
     {
       "guid": "374de497-648c-49c2-a096-397da0142d31",
@@ -16255,7 +16335,7 @@
     },
     {
       "guid": "a38651e4-89b5-4d19-90df-cf336fdec979",
-      "text": "+{value} do <statscolor>poziomu czarów"
+      "text": "+{value} <statscolor>poziom czarów"
     },
     {
       "guid": "6db88edb-2f54-4f87-9497-f4b605e7bd55",
@@ -16327,7 +16407,11 @@
     },
     {
       "guid": "3d9276dd-8159-4365-a83c-3a9109407ae7",
-      "text": "Zwiększa szybkość odnawiania umiejętności walki bronią."
+      "text": "Zwiększa szybkość odnawiania umiejętności broni."
+    },
+    {
+      "guid": "9426c79a-3306-4c9c-b6c2-3c67195c0a8c",
+      "text": "Szybkość ładowania broni"
     },
     {
       "guid": "def50330-9cf0-4d6e-90d4-9da9024fc78c",
@@ -16347,7 +16431,7 @@
     },
     {
       "guid": "ece08929-0b56-4090-afce-1abb8f198b4f",
-      "text": "+{value} do <statscolor>poziomu broni"
+      "text": "+{value} <statscolor>poziom broni"
     },
     {
       "guid": "43d00ac5-877b-4149-a4df-80fea28f1711",
@@ -16359,7 +16443,7 @@
     },
     {
       "guid": "a250b326-e8fc-4dfd-a432-1f784364f40e",
-      "text": "Siła uderzeń bronią"
+      "text": "Siła umiejętności broni"
     },
     {
       "guid": "d958df1f-d479-4e8f-a22b-148a00f6f5db",
@@ -16379,7 +16463,7 @@
     },
     {
       "guid": "bcf8aff4-f6e4-4f91-8c17-34fb5db544cd",
-      "text": "Wiejski handlarz księgami"
+      "text": "Wiejski handlarz książkami"
     },
     {
       "guid": "68eb266c-017b-4d8f-9b46-cd0d24dd242c",
@@ -16395,7 +16479,7 @@
     },
     {
       "guid": "0f21c81c-b8b2-47ab-94fa-1d059fa4324a",
-      "text": "Szemrany handlarz księgami"
+      "text": "Szemrany handlarz książkami"
     },
     {
       "guid": "0e9f8446-9ee1-4991-93f0-482c27f003d6",
@@ -16451,7 +16535,7 @@
     },
     {
       "guid": "4c841f64-06a7-41f8-bf7a-dc9c067bc4f0",
-      "text": "Miejski sprzedawca ksiąg"
+      "text": "Miejski sprzedawca książek"
     },
     {
       "guid": "f7950d49-516f-4b3b-8cd1-159f4b2dd4ca",
@@ -16463,7 +16547,7 @@
     },
     {
       "guid": "846528ce-861c-4516-8260-5d8147fd7c1a",
-      "text": "Mairwyn, Elementalistka"
+      "text": "Mairwyn Elementalistka"
     },
     {
       "guid": "ee361e87-d84e-471c-a0fa-15582cf04605",
@@ -16503,7 +16587,7 @@
     },
     {
       "guid": "033181b8-c4ce-4ea8-bea4-45420555e4b4",
-      "text": "Lidia, Łuczniczka Chaosu"
+      "text": "Lidia Łuczniczka Chaosu"
     },
     {
       "guid": "2d3ffc40-cad2-441b-b773-b15a9591f07f",
@@ -16527,11 +16611,11 @@
     },
     {
       "guid": "f80809c6-e397-4859-8919-1b0715e17bbd",
-      "text": "Grabarz Boris"
+      "text": "Boris Grabarz"
     },
     {
       "guid": "79906aad-0041-4cdd-9812-12eaa018c27d",
-      "text": "Rabuś Quincey"
+      "text": "Quincey Rabuś"
     },
     {
       "guid": "d2cde96f-3f2b-4df6-9e76-6043583fa79d",
@@ -16571,7 +16655,7 @@
     },
     {
       "guid": "0d2e3f54-23b5-4ffd-b787-8c7a32235621",
-      "text": "Quincey, Król Bandytów"
+      "text": "Quincey Król Bandytów"
     },
     {
       "guid": "381ad812-8a9f-4a2c-95e8-82a5dd78ad90",
@@ -16615,7 +16699,7 @@
     },
     {
       "guid": "b8977486-8c0f-48dc-b451-dbd0422dd81d",
-      "text": "Leandra, Kapłanka Cienia"
+      "text": "Leandra Kapłanka Cienia"
     },
     {
       "guid": "ca65e9df-5cdd-47ac-ba58-226daba3922b",
@@ -16647,7 +16731,7 @@
     },
     {
       "guid": "e3a817b1-c662-4543-ba43-6688f75bcc7d",
-      "text": "Jakira Łowczyni Cieni"
+      "text": "Jakira, Łowczyni Cieni"
     },
     {
       "guid": "64c90f37-d891-4f28-8cd2-66feb13f3f0f",
@@ -16655,11 +16739,11 @@
     },
     {
       "guid": "3e228167-88a2-410d-a13c-c4ca323ff414",
-      "text": "Lucile Alchemiczka Jadu"
+      "text": "Lucile, Alchemiczka Jadu"
     },
     {
       "guid": "5aef493e-ad17-4259-9a14-1b3371bed80d",
-      "text": "Energiczna, maniakalna alchemiczka ciesząca się niezwykłą wytrzymałością. Lucile ma obsesję na punkcie tworzenia idealnych eliksirów z jadowego soku na każdą okazję. Lucile twierdzi, że swój geniusz zawdzięcza swojej królowej, Megarze, która dostarcza jej boskiego natchnienia. Zupełnie przypadkiem natchnienie to pojawia się, gdy Lule zapomina wymienić filtry w swojej masce ochronnej."
+      "text": "Energiczna, maniakalna alchemiczka ciesząca się niezwykłą wytrzymałością. Lucile ma obsesję na punkcie tworzenia idealnych eliksirów z jadowego soku na każdą okazję. Lucile twierdzi, że swój geniusz zawdzięcza swojej królowej, Megarze, która dostarcza jej boskiego natchnienia. Zupełnie przypadkiem natchnienie to pojawia się, gdy Lucile zapomina wymienić filtry w swojej masce ochronnej."
     },
     {
       "guid": "740edb57-0a6c-4919-b70f-906cdc3544bb",
@@ -16667,7 +16751,7 @@
     },
     {
       "guid": "3f1dada3-dbf3-48fe-9bff-6b214a797a30",
-      "text": "Megara Wężowa Królowa"
+      "text": "Megara, Wężowa Królowa"
     },
     {
       "guid": "7ab80942-4e10-4b24-8d07-b2334bfb77df",
@@ -16743,7 +16827,7 @@
     },
     {
       "guid": "9277b654-8567-49b5-8ec6-1e63aeb0184b",
-      "text": "Sir Magnus, Nadzorca"
+      "text": "Sir Magnus Nadzorca"
     },
     {
       "guid": "135c2359-4e70-4694-9f8e-c4c0ba3f00fe",
@@ -16815,11 +16899,11 @@
     },
     {
       "guid": "15da3e2d-6b6b-49d4-b386-8e4fddd434b4",
-      "text": "Behemot, Łamacz Kości"
+      "text": "Behemot Łamacz Kości"
     },
     {
       "guid": "7924eef8-a45e-40de-ae7e-247114eadd77",
-      "text": "Niegdyś lojalny wojownik Legionu Noctum. Był tak pochłonięty swoim fanatyzmem, że po śmierci Drakuli z rąk Kościoła Oświeconych w akcie wstydu odciął sobie ramię noszące tarczę. W delirycznym amoku udał się na pustkowia Przeklętego Lasu i wyczekiwał śmierci. Spaczenie w jego wnętrzu nie pozwoliło mu jednak umrzeć, skazując go na znacznie gorszy los."
+      "text": "Niegdyś lojalny wojownik Legionu Noctum. Był tak pochłonięty swoim fanatyzmem, że po śmierci Drakuli z rąk Kościoła Oświeconych w akcie wstydu odciął sobie ramię noszące tarczę. W delirycznym amoku udał się na pustkowia Przeklętego Lasu, wyczekując śmierci. Spaczenie w jego wnętrzu nie pozwoliło mu jednak umrzeć, skazując go na znacznie gorszy los."
     },
     {
       "guid": "7e2db9cc-0801-4554-9cb7-b4bafa5caad2",
@@ -16891,7 +16975,7 @@
     },
     {
       "guid": "460f5eef-29f9-4bab-a9b8-6541b24c99aa",
-      "text": "Christina, Kapłanka Słońca"
+      "text": "Christina Kapłanka Słońca"
     },
     {
       "guid": "cc2ef319-3dbf-4178-8457-549d8f9ecde0",
@@ -16911,7 +16995,7 @@
     },
     {
       "guid": "317927db-39ff-47f5-bc98-8a06acc4fea4",
-      "text": "Oddany strażnik porządku w Dunley, który chroni zwykłych obywateli swoimi mrożącym krew w żyłach umiejętnościami. Podobno odkąd jego siostra została wygnana, stał się surowszy i brutalniejszy."
+      "text": "Oddany strażnik porządku w Dunley, który chroni zwykłych obywateli swoimi mrożącym krew w żyłach umiejętnościami. Podobno odkąd jego siostra została wygnana, stał się bardziej surowy i brutalny."
     },
     {
       "guid": "f782e217-dc37-44c1-9a76-c049076eba1c",
@@ -16919,7 +17003,7 @@
     },
     {
       "guid": "10b52efc-9c24-4f0e-8dd1-0d83cfe46fc4",
-      "text": "Terah, Geomantka"
+      "text": "Terah Geomantka"
     },
     {
       "guid": "8636fc21-16f5-4a85-a299-395e285f7660",
@@ -16999,7 +17083,7 @@
     },
     {
       "guid": "848191e8-c0a1-4b6f-baaa-ddc4c24a5557",
-      "text": "Voltacja, która jest prawą ręką Doktora Henry'ego Blackbrew, odpowiada za utrzymanie i ochronę całej sieci elektrycznej Gloomrot, zapewniającej regionowi tak bardzo potrzebnej dostawy energii. Voltacja jest bezwzględną profesjonalistką i urodzoną przywódczynią, działa z psychotyczną skutecznością i poza chęcią wspierania Doktora nie ma wielu innych potrzeb emocjonalnych."
+      "text": "Voltacja, która jest prawą ręką Doktora Henry'ego Blackbrew, odpowiada za utrzymanie i ochronę całej sieci elektrycznej Gloomrot, zapewniającej regionowi tak bardzo potrzebne dostawy energii. Voltacja jest bezwzględną profesjonalistką i urodzoną przywódczynią, działa z psychotyczną skutecznością i poza chęcią wspierania Doktora nie ma wielu innych potrzeb emocjonalnych."
     },
     {
       "guid": "e1d6e9ef-cdfb-403d-ba38-9814ab3e6bdc",
@@ -17027,7 +17111,7 @@
     },
     {
       "guid": "a52b8c47-9562-4119-b3c6-62213e43048b",
-      "text": "Morian, Matrona Rodu"
+      "text": "Morian Matrona Rodu"
     },
     {
       "guid": "6aadd905-a523-4a6a-aae4-d3a50c56137c",
@@ -17063,7 +17147,7 @@
     },
     {
       "guid": "a4631f74-f77e-4bc7-a70a-59d803d0418c",
-      "text": "Brutus, Obserwator"
+      "text": "Brutus Obserwator"
     },
     {
       "guid": "99039d80-5a98-4686-b44e-9cc13ce0d457",
@@ -17071,7 +17155,7 @@
     },
     {
       "guid": "27a5471c-d0fc-410a-a4a6-bcc7785e0b83",
-      "text": "Atramentowy demon"
+      "text": "Demon atramentowy"
     },
     {
       "guid": "5d401243-595e-41da-a1c6-c86a75bc109f",
@@ -17079,11 +17163,11 @@
     },
     {
       "guid": "53d5aebb-d82b-4a94-a070-2d79d42a5760",
-      "text": "Inżynierka Ziva"
+      "text": "Ziva Inżynierka"
     },
     {
       "guid": "b428ed3d-79bd-477a-85df-887c18790a2b",
-      "text": "Ziva, ukochana główna inżynierka broni w Fabryce Maszyn, jest ucieleśnieniem perfekcyjnie rozkosznej destrukcji. Szczerze zakochana w swoich śmiercionośnych eksperymentach, zawsze przoduje w poszukiwaniu coraz to wymyślniejszych sposobów na zadanie odpowiednio bolesnej i spektakularnej śmierci każdemu, kto będzie miał nieszczęście znaleźć się na jej celowniku poszukującym kolejnej ofiary po każdym pociągnięciu za spust ."
+      "text": "Ziva, ukochana główna inżynierka broni w Fabryce Maszyn, jest ucieleśnieniem perfekcyjnie rozkosznej destrukcji. Szczerze zakochana w swoich śmiercionośnych eksperymentach, zawsze przoduje w poszukiwaniu coraz to wymyślniejszych sposobów na zadanie odpowiednio bolesnej i spektakularnej śmierci każdemu, kto będzie miał nieszczęście znaleźć się na jej celowniku, po każdym pociągnięciu za spust poszukującym kolejnej ofiary."
     },
     {
       "guid": "aad74bfa-aff1-4a05-a7a1-fb0e62259f5d",
@@ -17175,7 +17259,7 @@
     },
     {
       "guid": "65bd2953-493b-4699-94bd-a537768a2fc4",
-      "text": "Sir Erwin Dzielny Kawalerzysta"
+      "text": "Sir Erwin, Dzielny Kawalerzysta"
     },
     {
       "guid": "14926fca-ce10-48d9-b389-198563d5a3c9",
@@ -17187,7 +17271,7 @@
     },
     {
       "guid": "2fc6d543-b4ef-46fc-acc8-a3cb3378e498",
-      "text": "Raziel, Pasterz"
+      "text": "Raziel Pasterz"
     },
     {
       "guid": "f644ede7-c422-4f62-bd90-989d5df37b4c",
@@ -17231,7 +17315,7 @@
     },
     {
       "guid": "e7644bef-0106-4ee5-9dec-e07daf4737a8",
-      "text": "Meredith, Łuczniczka Światła"
+      "text": "Meredith Łuczniczka Światła"
     },
     {
       "guid": "2391802b-0405-4df4-bad5-5315ac06658d",
@@ -17247,11 +17331,11 @@
     },
     {
       "guid": "590ff5f7-b82f-47cc-9545-57e2b33996c6",
-      "text": "Adam, Pierworodny"
+      "text": "Adam Pierworodny"
     },
     {
       "guid": "39496750-b093-4ed8-a537-52a84625ed31",
-      "text": "Potwór, szczytowe osiągnięcie doktora Henry'ego Blackbrew, miał być kolejnym krokiem w ewolucji ludzkości, doskonałą maszyną wojenną. Blackbrew nie mógł sobie wyobrazić potężniejszej broni, ale okazało się, że nie sposób go kontrolować. Trancendum zrobiło wszystko, by utrzymać Potwora w ryzach i udało im się... przynajmniej na razie."
+      "text": "Potwór, szczytowe osiągnięcie doktora Henry'ego Blackbrew, miał być kolejnym krokiem w ewolucji ludzkości, doskonałą maszyną wojenną. Blackbrew nie mógł sobie wyobrazić bardziej potężnej broni, ale okazało się, że nie sposób go kontrolować. Trancendum zrobiło wszystko, by utrzymać Potwora w ryzach i udało im się to... przynajmniej na razie."
     },
     {
       "guid": "ff1c75d1-856a-415e-a6b4-f2d4a510be26",
@@ -17403,7 +17487,7 @@
     },
     {
       "guid": "0cfcc410-c923-496e-b17a-0c89f7dece97",
-      "text": "Legendarny paladyn Światła i najstarszy żyjący członek Kościoła Oświeconych. Bez większego zainteresowania przyglądał się upadkowi ludzkości. Pionier z epoki bohaterów, pamięta walkę z zastępami Drakuli aż do utraty wszelkiej nadziei. Pamięta odnalezienie światła... Pamięta również satysfakcję z uniesienia świętego ostrza w stronę Nieśmiertelnego Króla i pokonania największego zła, jakie kiedykolwiek widział świat. \\n\\nTęskni za powrotem do dni swojej największej chwały."
+      "text": "Legendarny paladyn Światła i najstarszy żyjący członek Kościoła Oświeconych. Bez większego zainteresowania przyglądał się upadkowi ludzkości. Pionier z epoki bohaterów, pamięta walkę z zastępami Drakuli aż do utraty wszelkiej nadziei. Pamięta odnalezienie światła... Pamięta również satysfakcję z uniesienia świętego ostrza w stronę Nieśmiertelnego Króla i pokonania największego zła, jakie kiedykolwiek widział świat. \\n\\n\\Tęskni za powrotem do dni swojej największej chwały."
     },
     {
       "guid": "60171a7c-3b8f-444f-9713-8d283665f642",
@@ -17423,11 +17507,11 @@
     },
     {
       "guid": "59af5689-73bc-49cc-ae20-d893a65ecb2b",
-      "text": "Angram, Czyściciel"
+      "text": "Angram Czyściciel"
     },
     {
       "guid": "027607d8-3494-4f94-8821-e0119d2b726f",
-      "text": "Oddany sługa Trancendum, Angram był tępicielem, który wyróżniał się spośród innych naturalnym okrucieństwem i odpornością. Jak na dobrego żołnierza przystało, oddał życie za sprawę... a w każdym razie próbował, gdyż Doktor Henry Blackbrew nie mógł pozwolić na zmarnowanie takiego potencjału i przywrócił go do życia, przeprowadziwszy brutalną operację, którą niewiele innych istot mogłoby przetrwać. Angram okupił dłuższe życie ostatnimi skrawkami człowieczeństwa."
+      "text": "Oddany sługa Trancendum, Angram był tępicielem, który wyróżniał się spośród innych naturalnym okrucieństwem i odpornością. Jak na dobrego żołnierza przystało, oddał życie za sprawę... a w każdym razie próbował, gdyż Doktor Henry Blackbrew nie mógł pozwolić na zmarnowanie takiego potencjału i przywrócił go do życia, przeprowadzając brutalną operację, którą niewiele innych istot mogłoby przetrwać. Dłuższe życie Angram okupił ostatnimi skrawkami człowieczeństwa."
     },
     {
       "guid": "83e1fff6-8b4b-45d8-b5c4-8ef4d0b67c90",
@@ -17459,7 +17543,7 @@
     },
     {
       "guid": "fec53478-9ae5-46d4-92c2-372a693d2e29",
-      "text": "Maja, Mroczna Czarodziejka"
+      "text": "Maja mroczna czarodziejka"
     },
     {
       "guid": "5cfa4349-22a9-4004-9f46-0dc434fc5aa3",
@@ -17575,7 +17659,7 @@
     },
     {
       "guid": "22ffd45f-259a-47a5-95fe-1d8d7849323d",
-      "text": "Ungora, Królowa Pająków"
+      "text": "Ungora Królowa Pająków"
     },
     {
       "guid": "a2c91306-1932-47aa-be4e-6b657595cd29",
@@ -17603,7 +17687,7 @@
     },
     {
       "guid": "98b27507-db6e-494b-9499-04a896c687da",
-      "text": "Zbrojmistrz Grayson"
+      "text": "Grayson Zbrojmistrz"
     },
     {
       "guid": "ee68c94b-29b0-428f-9dc1-e1ce66a402d7",
@@ -17615,7 +17699,7 @@
     },
     {
       "guid": "fb3e731a-933b-4ff8-b5ef-ae1aa49d711b",
-      "text": "Krawcowa Beatrice"
+      "text": "Beatrice Krawcowa"
     },
     {
       "guid": "f30fd840-3a4c-48e3-84dc-f91434ad95e3",
@@ -17635,7 +17719,7 @@
     },
     {
       "guid": "de6bdc63-562d-4441-ac1a-9e5456ea4629",
-      "text": "Azariel, Piewca Słońca"
+      "text": "Azariel Piewca Słońca"
     },
     {
       "guid": "70db2a22-04ec-4810-8f78-a3b73ab567d6",
@@ -17651,7 +17735,7 @@
     },
     {
       "guid": "1d527ada-ec57-4fd8-8409-a857ff7286b0",
-      "text": "Gajusz Przeklęty Czempion"
+      "text": "Gajusz, Przeklęty Czempion"
     },
     {
       "guid": "00f9f925-27bd-43a8-922a-1376c6df78da",
@@ -17659,7 +17743,7 @@
     },
     {
       "guid": "bb37aacd-a44e-43a2-a21c-35d42f51bc80",
-      "text": "Duchowy skrytobójca"
+      "text": "Duch skrytobójca"
     },
     {
       "guid": "659e6763-8e67-4834-a260-f313fdb1da70",
@@ -17667,7 +17751,7 @@
     },
     {
       "guid": "ec7331d7-6fbb-4052-a7e0-1b2d3d90adee",
-      "text": "Duchowy strażnik"
+      "text": "Duch strażnik"
     },
     {
       "guid": "ec81d147-6172-4757-a4c5-b88ee49aac31",
@@ -17699,7 +17783,7 @@
     },
     {
       "guid": "3559ac11-e401-4126-bb75-576f8e82e7c7",
-      "text": "Dantos jest mistrzem broni, zafascynowanym zarówno jej budową, jak i zastosowaniem. Jego nieludzkie wręcz oddanie rzemiosłu sprawiło, że stał się doskonałym narzędziem dla swojej królowej, wielkiej wiedźmy Megary. Po pewnym czasie ich potworne podobieństwo zbliżyły ich do siebie, a Dantos stał się jej osobistym strategiem, a także bliskim powiernikiem. Zainspirowany sekretami Megary, Dantos odkrył, że za pomocą jadowego soku można rozdzielać magiczne stopy, umożliwiając łączenie potężnych artefaktów w jeszcze doskonalsze bronie."
+      "text": "Dantos jest mistrzem broni, zafascynowanym zarówno jej budową, jak i zastosowaniem. Jego nieludzkie wręcz oddanie rzemiosłu sprawiło, że stał się doskonałym narzędziem dla swojej królowej, wielkiej wiedźmy Megary. Po pewnym czasie ich potworne podobieństwo zbliżyło ich do siebie, a Dantos stał się jej osobistym strategiem, a także bliskim powiernikiem. Zainspirowany sekretami Megary, Dantos odkrył, że za pomocą jadowego soku można rozdzielać magiczne stopy, umożliwiając łączenie potężnych artefaktów w jeszcze doskonalsze bronie."
     },
     {
       "guid": "d553ccd2-fb35-49dc-aee6-0a8eb330f124",
@@ -17723,11 +17807,11 @@
     },
     {
       "guid": "cfe4991d-0816-4862-9bbe-3223e236786f",
-      "text": "Wieku temu, gdy Drakula upadł, wydawało się, że Kościół Oświeconych dokonał niemożliwego: zadał śmierć Nieśmiertelnemu Królowi. Jednak w swoich ostatnich chwilach Drakula zesłał na Vardoran chmurę, z której spadł deszcz krwi. Dzięki temu zasiał nasiona woli Drakuli w całym królestwie, wypaczając i wypełniając je jego legendarną esencją. \\n\\nPo śmierci dusza Nieśmiertelnego Króla została zesłana tam, skąd pochodziły jego nieziemskie moce – do Krainy Cieni. Tam pozostał, czekając na swój czas. Teraz ten czas nadszedł. Drakula zalewa świat tabunami potwornego Legionu Noctum, każąc im zebrać krew niezbędną, by ponownie stał się całością i powrócił do Vardoranu."
+      "text": "Wieku temu, gdy Drakula upadł, wydawało się, że Kościół Oświeconych dokonał niemożliwego. Zadał śmierć Nieśmiertelnemu Królowi. Jednak w swoich ostatnich chwilach Drakula wykonał zesłał na Vardoran chmurę. Deszcz krwi, który nastąpił, zasiał nasiona woli Drakuli w całym królestwie, wypaczając i wypełniając je jego legendarną esencją. \\n\\nPo śmierci dusza Nieśmiertelnego Króla została zesłana tam, skąd pochodziły jego nieziemskie moce – do Krainy Cieni. Tam pozostał, czekając na swój czas. Teraz ten czas nadszedł. Drakula zalewa świat tabunami potwornego Legionu Noctum, każąc im zebrać krew niezbędną, by ponownie stał się całością i powrócił do Vardoranu."
     },
     {
       "guid": "c2517a6c-1fa5-4fb5-ace0-951589f1120e",
-      "text": "Generał Elena Pusta"
+      "text": "General Elena, Próżna"
     },
     {
       "guid": "43d9b55d-2996-4d3c-9181-7951ce763037",
@@ -17739,11 +17823,11 @@
     },
     {
       "guid": "bff27151-9d05-45a5-8438-eda9799414be",
-      "text": "Tristan, Łowca Wampirów"
+      "text": "Tristan Łowca Wampirów"
     },
     {
       "guid": "ee2dca04-5c2e-45f8-97c8-1368f2c4be7d",
-      "text": "Bezduszny zabójca wywodzący się z długiej linii łowców wampirów i świetnie przygotowany do walki z rosnącą falą wampiryzmu. Tristan nie spocznie, dopóki nie rozprawi się ze wszystkimi nieczystymi stworzeniami."
+      "text": "Bezduszny zabójca wywodzący się z długiej linii łowców wampirów i świetnie przygotowany do walki z rosnącą falą wampiryzmu. Tristan nie spocznie, dopóki nie rozprawi się z wszystkimi nieczystymi stworzeniami."
     },
     {
       "guid": "7e1a0761-1a1a-4766-9de1-4638156b5970",
@@ -17755,7 +17839,7 @@
     },
     {
       "guid": "d0ff0568-35d0-4194-bc1d-d0f5bead44cc",
-      "text": "Wieśniaczka"
+      "text": "Wieśniak"
     },
     {
       "guid": "b9252b8a-1c90-4f77-b617-e7ed7425573b",
@@ -17771,7 +17855,7 @@
     },
     {
       "guid": "a9c38cae-4d12-44dd-b1d8-876b905baae2",
-      "text": "Frostmaw, Postrach Gór"
+      "text": "Frostmaw Postrach Gór"
     },
     {
       "guid": "b883c187-770f-4619-9829-63626c9e38f6",
@@ -17783,7 +17867,7 @@
     },
     {
       "guid": "78c90492-a9be-4461-9081-feb459181abe",
-      "text": "Willfred, Przywódca Wilkołaków"
+      "text": "Willfred Przywódca Wilkołaków"
     },
     {
       "guid": "b2a03a1f-766c-40b4-a138-4eea06e19cb0",
@@ -17791,7 +17875,7 @@
     },
     {
       "guid": "7f5102ec-fa0d-449d-82c0-b1b29621109d",
-      "text": "Willfred, Starszy Wioski"
+      "text": "Willfred Starszy Wioski"
     },
     {
       "guid": "f5d51130-e5d9-4221-9f8f-63015a9da30c",
@@ -17835,7 +17919,7 @@
     },
     {
       "guid": "a2fd6eb4-9553-4fa3-9553-b7e3e3ba06a7",
-      "text": "Matka, Tkaczka Klątw"
+      "text": "Matka Tkaczka Klątw"
     },
     {
       "guid": "f985018d-760e-4d51-807f-bb89bfc1c60a",
@@ -17867,15 +17951,15 @@
     },
     {
       "guid": "e3e5021f-a812-495c-83c4-2ead6fe8ddae",
-      "text": "Foulrot, Pochłaniacz Dusz"
+      "text": "Foulrot Pochłaniacz Dusz"
     },
     {
       "guid": "aed33315-7441-4c9f-85e8-c7c7fe936476",
-      "text": "Foulrot, Pochłaniacz Dusz, szalony kultysta, który twierdzi, że jest wcieleniem swojego bezgłowego konia. Twierdzi również, że jego ostrza strącają ofiarę prosto do „Wielkiej Ciemności”, aby nakarmić lub zadowolić jakiś piekielny byt. Tak czy inaczej, ma na swoim koncie ogromną liczbę ściętych głów."
+      "text": "Foulrot Pochłaniacz Dusz, szalony kultysta, który twierdzi, że jest wcieleniem swojego bezgłowego konia. Twierdzi również, że jego ostrza strącają ofiarę prosto do „Wielkiej Ciemności”, aby nakarmić lub zadowolić jakiś piekielny byt. Tak czy inaczej, ma na swoim koncie ogromną liczbę ściętych głów."
     },
     {
       "guid": "a174902c-6321-4470-ac8c-a0f430ad2ca0",
-      "text": "Jade, Łowczyni Wampirów"
+      "text": "Jade Łowczyni Wampirów"
     },
     {
       "guid": "14218dcd-c50f-4c18-a8b1-2a13b4587d9b",
@@ -18028,6 +18112,50 @@
     {
       "guid": "677d91fb-6188-4eed-b5ee-d933c9e1249b",
       "text": "Przytrzymaj, by wskrzesić"
+    },
+    {
+      "guid": "8918a18c-06a0-4d2a-9022-68acdfd9a05b",
+      "text": "Zmniejsz priorytet"
+    },
+    {
+      "guid": "08b78c34-bab5-415c-b377-283cd2869e65",
+      "text": "Zmniejsz priorytet dla tego pojemnika. Dotyczy wyłącznie akcji <teal1>Szybko prześlij wszystkie</c>."
+    },
+    {
+      "guid": "4c3beb8c-7640-4460-9b95-7e8f73b57819",
+      "text": "Zwiększ priorytet"
+    },
+    {
+      "guid": "b0230ae0-449a-40ef-9412-7687701b47f0",
+      "text": "Zwiększ priorytet dla tego pojemnika. Dotyczy wyłącznie akcji <teal1>Szybko prześlij wszystkie</c>."
+    },
+    {
+      "guid": "311ad076-0fe7-4994-840a-5683bb3377cb",
+      "text": "Usuń połączenie z tym pojemnikiem."
+    },
+    {
+      "guid": "ee8abd9e-744a-4b30-9b4a-1eea8c39c09b",
+      "text": "Wł./Wył. automatyczne przesyłanie"
+    },
+    {
+      "guid": "89a57660-766d-4768-9151-18fdd78020fc",
+      "text": "Wł./Wył. automatyczne przesyłanie w tym pojemniku."
+    },
+    {
+      "guid": "e4fc3ab3-f313-4dc9-be69-e3eeedf808a3",
+      "text": "Wyłącz automatyczne przesyłanie w tym pojemniku."
+    },
+    {
+      "guid": "201cdb87-c9b0-42b8-8eb1-bf7558313fc1",
+      "text": "Włącz automatyczne przesyłanie w tym pojemniku."
+    },
+    {
+      "guid": "d4462830-cc5d-451a-b795-174e154ae93b",
+      "text": "<teal1>Przechowywanie ogólne</c>\\nPrześlij wszystkie przedmioty z tego pojemnika do podłączonego pojemnika.\\n\\n<teal1>Przechowywanie ulepszonych</c>\\nPrześlij wszystkie przedmioty z tego pojemnika wyjściowego do połączonego pojemnika."
+    },
+    {
+      "guid": "6a3298b5-9b7e-4928-a698-392ca9d647a2",
+      "text": "<teal1>Przechowywanie ogólne</c>\\nZabierz wszystkie stosowne przedmioty z pojemnika.\\n\\n<teal1>Przechowywanie ulepszonych</c>\\nZabierz wszystkie stosowne przedmioty z pojemnika wyjściowego na ulepszone przedmioty."
     },
     {
       "guid": "d9867788-54d6-4ba6-9b16-66a428b673fc",
@@ -18535,7 +18663,7 @@
     },
     {
       "guid": "2d1f4cf0-95b9-420b-86b5-4b84fde754d5",
-      "text": "Menu gestów"
+      "text": "Menu emotikonów"
     },
     {
       "guid": "289513b3-64e0-499a-8edc-c613d6fdf7d1",
@@ -19054,22 +19182,6 @@
       "text": "Esencja krwi: {value}"
     },
     {
-      "guid": "df4b6438-2ff9-4253-9623-96aa438163ff",
-      "text": "Uzyskaj doświadczenie: ({value})"
-    },
-    {
-      "guid": "4210316d-23d4-4274-96f5-d6f0944bd0bb",
-      "text": "Doświadczenie: ({value})"
-    },
-    {
-      "guid": "4ef370ac-d47d-4da2-bda7-e69b18325ebe",
-      "text": "Odblokuj dodatkowe maks. poziomy: ({value})"
-    },
-    {
-      "guid": "2f95adc8-c6a7-40e2-9c5d-98dd514c45ef",
-      "text": "Dodatkowe maks. poziomy: ({value})"
-    },
-    {
       "guid": "e10b06a3-03d4-4f58-a4a2-ba870a125129",
       "text": "Odblokowuje talent: {perk}"
     },
@@ -19154,14 +19266,6 @@
       "text": "Odblokowano nową postać"
     },
     {
-      "guid": "917b37bd-4b8c-44d3-b019-604196543631",
-      "text": "Zwiększono poziom maksymalny"
-    },
-    {
-      "guid": "a68acedb-b5fe-4d93-9524-dd2f121a73e8",
-      "text": "Nowy poziom!"
-    },
-    {
       "guid": "93bd74a2-2bb6-48ad-9688-1c380d6cf4fb",
       "text": "Wschodzi księżyc"
     },
@@ -19243,7 +19347,7 @@
     },
     {
       "guid": "01d16be0-30a7-42b5-9f45-f89881271ed6",
-      "text": "Czas trwania nagłej śmierci: {value}"
+      "text": "Czas rozpoczęcia nagłej śmierci: {value}"
     },
     {
       "guid": "df2aae58-b172-47d1-8180-30feb247f758",
@@ -19492,10 +19596,6 @@
     {
       "guid": "b0aa5538-d816-4093-bfe1-de2b2d800d3d",
       "text": "Ta grupa krwi nie daje żadnych korzyści."
-    },
-    {
-      "guid": "52627c40-9a88-498c-a99e-7cebe69c485a",
-      "text": "Esencja krwi, {name}"
     },
     {
       "guid": "9e1574ba-173f-444b-9aa9-094c49adf29e",
@@ -19843,7 +19943,7 @@
     },
     {
       "guid": "c7028cb1-9af6-460f-8a12-c9fa20d475f8",
-      "text": "Czat globalny"
+      "text": "Globalny czat"
     },
     {
       "guid": "7bbca0c7-dea8-4bb2-a4d3-94b182208c45",
@@ -19951,7 +20051,7 @@
     },
     {
       "guid": "9244e9f2-b3be-49aa-8bf6-7798617b3e15",
-      "text": "Nie możesz dołączyć do klanu, bo już w jednym jesteś!"
+      "text": "Nie możesz dołączyć do klanu, bo już jednym jesteś!"
     },
     {
       "guid": "1d05cbbb-2e85-4733-b36d-4b7d2479f702",
@@ -20083,7 +20183,7 @@
     },
     {
       "guid": "4af3191a-5764-45c1-9f87-f225a18f07c1",
-      "text": "Nie możesz opuścić klanu, bo w żadnym nie jesteś!"
+      "text": "Nie możesz opuścić klanu, bo w żadnych nie jesteś!"
     },
     {
       "guid": "717e04c5-e033-4352-a778-ad4feb53f504",
@@ -20431,39 +20531,39 @@
     },
     {
       "guid": "9e9d9663-600b-455e-af56-8b2c2f1be0ab",
-      "text": "Dekoracyjne meble na ściany."
+      "text": "Dekoracyjne meble na ściany"
     },
     {
       "guid": "bf3f49e0-2f71-40d0-855b-e0ab4e4c091b",
-      "text": "Regał na broń – żelazne miecze dwuręczne"
+      "text": "Wieszaki na broń – żelazne miecze dwuręczne"
     },
     {
       "guid": "6bacec71-05f5-4f9d-94ff-6eaba2c32ce7",
-      "text": "Regał na broń – żelazne topory"
+      "text": "Wieszaki na broń – żelazne topory"
     },
     {
       "guid": "fdce2b5d-f014-4f95-ae3f-9025c02714a9",
-      "text": "Regał na broń – żelazne kusze"
+      "text": "Wieszaki na broń – żelazne kusze"
     },
     {
       "guid": "18690701-fdc5-413b-a364-09df818af80b",
-      "text": "Regał na broń – żelazny miecz dwuręczny"
+      "text": "Wieszaki na broń – żelazny miecz dwuręczny"
     },
     {
       "guid": "580f8e63-9e90-4c6f-a979-8a4e7fe0ffda",
-      "text": "Regał na broń – żelazna kusza"
+      "text": "Wieszaki na broń – żelazna kusza"
     },
     {
       "guid": "1c8f73c5-6845-40aa-8ac4-3cabd0987ad1",
-      "text": "Regał na broń – żelazne długie miecze"
+      "text": "Wieszaki na broń – żelazne długie miecze"
     },
     {
       "guid": "0574f7d9-0cbf-4c8c-a335-7f5cbcd730c3",
-      "text": "Regał na broń – żelazne miecze"
+      "text": "Wieszaki na broń – żelazne miecze"
     },
     {
       "guid": "3c3e2244-869f-4d98-8036-2a848b2decb4",
-      "text": "Ozdobne regały do mocowania broni na ścianie."
+      "text": "Ozdobne wieszaki do mocowania broni na ścianie."
     },
     {
       "guid": "19e6726e-0eb1-4a4e-aa24-940ce5c35ff5",
@@ -20839,7 +20939,7 @@
     },
     {
       "guid": "f6b9ee2f-aee9-43e8-ab9e-15f8c5fabd78",
-      "text": "Kolekcja instrumentów muzycznych."
+      "text": "Kolekcja instrumentów muzycznych"
     },
     {
       "guid": "acbe50e9-efcb-4954-9eca-6e4d44cb8a4c",
@@ -21435,15 +21535,15 @@
     },
     {
       "guid": "6f3c8b47-825c-4982-ac50-0f88736bb412",
-      "text": "Opis gestu"
+      "text": "Opis Emotki"
     },
     {
       "guid": "c0b90ee8-2ed3-4f1e-88f6-54ae92dba980",
-      "text": "Zmienianie postaci"
+      "text": "Zmienianie kształtu"
     },
     {
       "guid": "e79fae48-3d61-4efa-9dff-4bc855f025c9",
-      "text": "Wariant postaci"
+      "text": "Wariant kształtu"
     },
     {
       "guid": "d86dc49d-49e9-49e5-8a1c-37c56be09a41",
@@ -21463,7 +21563,7 @@
     },
     {
       "guid": "dc58b801-7239-4759-8314-e83f240f6756",
-      "text": "Opis mocy wampira"
+      "text": "Opis Wampirzych Mocy"
     },
     {
       "guid": "53c02de3-993e-462f-8382-41e72f7a8154",
@@ -21607,7 +21707,7 @@
     },
     {
       "guid": "7edc20e1-db6a-42ad-865c-6d9b747d82a9",
-      "text": "Czar specjalny"
+      "text": "Najpotężniejszy czar"
     },
     {
       "guid": "0fabe3e6-73a4-4217-a8bf-718f17744fd3",
@@ -21655,7 +21755,7 @@
     },
     {
       "guid": "abf99498-904e-4640-a779-3050825fd1a5",
-      "text": "Akt {value}"
+      "text": "Działanie {value}"
     },
     {
       "guid": "1b2401fc-e43d-49d3-b23c-626e723c6aed",
@@ -21847,7 +21947,7 @@
     },
     {
       "guid": "da820b18-f9bb-4485-9055-7b6f64a080d3",
-      "text": "Zablokowane miejsce"
+      "text": "Zablokowane gniazdo"
     },
     {
       "guid": "09fa0e17-78dd-4880-90f0-3961aa077c8d",
@@ -21974,8 +22074,24 @@
       "text": "Dodaj połączenie"
     },
     {
+      "guid": "bb74a995-aa3b-46ed-9238-a74ad65b4ff6",
+      "text": "Dodaj połączenie, aby umożliwić <teal1>szybkie przesyłanie</c> przedmiotów z tego pojemnika do połączonego pojemnika."
+    },
+    {
       "guid": "dda53117-82f1-408d-b205-77a63713fe7a",
       "text": "Osiągnięto limit połączonych stanowisk roboczych. Zbuduj dodatkowe silniki redystrybucyjne, aby zwiększyć limit."
+    },
+    {
+      "guid": "1e9afc93-2fea-4613-978a-f068320a607a",
+      "text": "Połączone ekwipunki ({value0}/{value1})"
+    },
+    {
+      "guid": "49d0a5d4-6ca9-471f-a4c3-8847a4bd8843",
+      "text": "Pojemność połączenia"
+    },
+    {
+      "guid": "d4204218-1a99-426f-9cd0-2eb62d13a8e2",
+      "text": "Zbuduj dodatkowe <teal1>silniki redystrybucyjne</c>, aby zwiększyć pojemność połączenia."
     },
     {
       "guid": "c782c76a-9e6c-4948-b3cd-bb862513e83b",
@@ -22038,12 +22154,56 @@
       "text": "Usuń połączenie"
     },
     {
+      "guid": "2b9db11b-541f-467d-8a2c-d70f77e9840e",
+      "text": "Brak przedmiotów w pojemniku wyjściowym"
+    },
+    {
+      "guid": "faa8c8f0-b1c1-4427-82fa-58ec36dd945b",
+      "text": "Żaden połączony pojemnik nie pasuje do typu wyjścia"
+    },
+    {
+      "guid": "bc6f77f4-af27-4dab-b085-4aaf33a45ac2",
+      "text": "Za mało miejsca w połączonych pojemnikach."
+    },
+    {
+      "guid": "c9b9a3bd-b9e5-43e5-a418-3f876fe44488",
+      "text": "<teal1>Szybkie przesłanie</c> wszystkich odpowiednich przedmiotów do połączonego pojemnika według priorytetu."
+    },
+    {
+      "guid": "f2770d65-5aa9-4960-9278-f1a235e3a37a",
+      "text": "Szybko prześlij wszystkie"
+    },
+    {
       "guid": "0a7f4c19-d5a5-45c5-9fde-fff19f92674d",
       "text": "Pokaż połączenia"
     },
     {
+      "guid": "71d79fba-0b55-4ff1-87a9-797d2041845c",
+      "text": "Czy chcesz usunąć wszystkie połączenia z pojemnikami w zamku?"
+    },
+    {
       "guid": "bd58776a-d0eb-4e3d-9538-4094e4a78bf7",
       "text": "Usuń połączenia w zamku"
+    },
+    {
+      "guid": "fd0fa4d1-e3a2-4182-8ca3-a0b955d8f03f",
+      "text": "Połącz stanowiska wytwarzania i ulepszania z siecią redystrybucyjną, aby błyskawicznie przenosić przedmioty do połączonych pojemników."
+    },
+    {
+      "guid": "98fc687e-7eb5-40cc-894e-325bd8425e79",
+      "text": "Zobacz menu stanowiska."
+    },
+    {
+      "guid": "ed7ff809-a62f-4465-80e5-09772e9effba",
+      "text": "Stanowisko"
+    },
+    {
+      "guid": "f40a3edc-92e0-4635-b615-785ba1092a5b",
+      "text": "Umożliwia szybkie przenoszenie przedmiotów bezpośrednio do innych pojemników."
+    },
+    {
+      "guid": "9b72eabe-e2a3-4a8f-8ae6-42f47e9d684b",
+      "text": "Redystrybucja"
     },
     {
       "guid": "44ec55bc-4db5-41d3-93cd-7108afecbf74",
@@ -22395,7 +22555,7 @@
     },
     {
       "guid": "3096150a-0916-4c95-91f6-7596ac4842ba",
-      "text": "Jeżeli twój wampirzy rumak zginie, możesz go przywołać i wskrzesić."
+      "text": "Jeżeli twój wampirzy rumak zginie, możesz o przywołać i wskrzesić."
     },
     {
       "guid": "348a2323-3157-4730-8e0d-f2fee91fb37d",
@@ -22471,11 +22631,23 @@
     },
     {
       "guid": "32921591-6802-4be5-ba6a-7ed37d85709d",
-      "text": "Elementy dekoracyjne"
+      "text": "Ozdoby"
     },
     {
       "guid": "2a3fe576-f54e-4d31-b6c0-c0bcdb84f482",
       "text": "Odkryj"
+    },
+    {
+      "guid": "b3f34a27-3383-431a-b6a6-6789f125db14",
+      "text": "Poznaj losową wiedzę z tej kategorii."
+    },
+    {
+      "guid": "c34bf0b9-63b5-4108-ace7-47b14955e4ef",
+      "text": "Naucz się"
+    },
+    {
+      "guid": "78647022-4eb9-4809-90f4-7ef9176c0721",
+      "text": "Odblokowuje całą dostępną wiedzę."
     },
     {
       "guid": "826db8e9-0c96-4c71-8c5b-9714b1da8470",
@@ -22484,6 +22656,14 @@
     {
       "guid": "7dd1d6ff-1ff0-4443-8523-afde84b4d0d7",
       "text": "Konstrukcje"
+    },
+    {
+      "guid": "bf30edab-5c8c-4d8d-8200-4ba654c59016",
+      "text": "Odblokuj"
+    },
+    {
+      "guid": "ea433f0c-d9c0-490b-85b7-01dea53b2eaa",
+      "text": "Odblokuj wiedzę poprzez spożycie przedmiotu."
     },
     {
       "guid": "7ada27b5-d4c1-4b7c-8887-b3104bd2c054",
@@ -22939,7 +23119,7 @@
     },
     {
       "guid": "1bf1cd7d-04f2-4e0a-ba88-68f1c86af4c9",
-      "text": "Włącz okno czatu globalnego"
+      "text": "Włącz globalne okno czatu"
     },
     {
       "guid": "b7d6d886-083f-414e-9372-e98e418ba40e",
@@ -23047,7 +23227,7 @@
     },
     {
       "guid": "5c4fd509-17da-452c-a5e4-ce83677d8eb9",
-      "text": "Włącz lub wyłącz wyświetlanie znajomym informacji typu rich presence na platformie Steam"
+      "text": "Włącz lub wyłącz wyświetlania znajomym informacji typu rich presence na platformie Steam"
     },
     {
       "guid": "06568d41-f7ad-4040-a753-9a4fbd4ed266",
@@ -23327,7 +23507,7 @@
     },
     {
       "guid": "ec8b9b80-b2a4-4d5f-af45-3973a7751eb3",
-      "text": "Ustaw jakość efektu blasku"
+      "text": "Ustaw jakość efektu bloom"
     },
     {
       "guid": "3d2bdd35-e1da-433c-9f1d-a87b337599ce",
@@ -23934,10 +24114,6 @@
       "text": "Zabici bossowie: {vBloodKills}"
     },
     {
-      "guid": "7c9f0c30-0130-46b1-a9ae-68fdfbb72ac2",
-      "text": "Dziennik"
-    },
-    {
       "guid": "cb199ac0-a94b-447b-98ae-1bc65ff50a42",
       "text": "Jest aktywne..."
     },
@@ -23979,7 +24155,7 @@
     },
     {
       "guid": "55774561-66ce-405d-96ac-565932483be3",
-      "text": "Rozpoczęła się inwazja Mortium"
+      "text": "Inwazja Mortium rozpoczęła się"
     },
     {
       "guid": "4372e555-5ff3-4698-9fd5-f534034a956c",
@@ -24027,7 +24203,7 @@
     },
     {
       "guid": "089fe5c4-3a06-4315-b813-1083ee740c46",
-      "text": "Umieść rybę dowolnej jakości. Zwykłe ryby zapewniają <white>{common}</c> oleju, niespotykane ryby – <white>{uncommon}</c> oleju, zaś rzadkie ryby – <white>{rare}</c> oleju."
+      "text": "Umieść rybę dowolnej jakości. Zwykłe ryby zapewniają <white>{common}</c> olej, niespotykane ryby – <white>{uncommon}</c> olej, zaś rzadkie ryby – <white>{rare}</c> olej."
     },
     {
       "guid": "9752a383-ef67-449f-b843-62109944ba79",
@@ -24043,7 +24219,7 @@
     },
     {
       "guid": "cf56942b-c9e3-4745-be97-2ab36166732b",
-      "text": "Umieść tu dowolny kamień szlachetny, by przemielić go w pył. Z surowych kamieni szlachetnych pozyskuje się <white>{crude}</c> pyłu z klejnotów, ze zwykłych kamieni szlachetnych pozyskuje się <white>{regular}</c> pyłu z klejnotów, a z nieskazitelnych kamieni szlachetnych pozyskuje się <white>{flawless}</c> pyłu z klejnotów."
+      "text": "Umieść tu dowolny kamień szlachetny, by przemielić go w pył. Z surowych kamieni szlachetnych pozyskuje się <white>{crude}</c> pył z klejnotów, ze zwykłych kamieni szlachetnych pozyskuje się <white>{regular}</c> pył z klejnotów, a z nieskazitelnych kamieni szlachetnych pozyskuje się <white>{flawless}</c> pył z klejnotów."
     },
     {
       "guid": "19f416d2-e02e-4260-9bbd-8e4cb6486a29",
@@ -24078,12 +24254,16 @@
       "text": "Infuzja krwi"
     },
     {
+      "guid": "fc425059-d162-4bf2-b9fb-f70b190a2461",
+      "text": "Dodatkowa grupa krwi"
+    },
+    {
       "guid": "a00dc3e0-7fc3-479b-86f8-93b3b9fdf149",
       "text": "Wybierz właściwość krwi do infuzji:"
     },
     {
       "guid": "48b23c47-f09d-4961-8f2b-1d8bbbfbe163",
-      "text": "{buffTooltip}\\n\\n<red1>Ta właściwość wymaga jakości krwi na poziomie min.{quality}%.</c>"
+      "text": "{buffTooltip}\\n\\n<red1>Ta właściwość wymaga jakości krwi na poziomie min. {quality}%.</c>"
     },
     {
       "guid": "5738f2c6-ec0f-4f5d-a4ae-33e821b8be57",
@@ -24139,7 +24319,7 @@
     },
     {
       "guid": "3616162b-8cc1-425c-8df8-fd1080397e1b",
-      "text": "Zmniejsza koszt ulepszania materiałów, gdy wszystkie podłogi w tym pomieszczeniu to <teal1>{floor}</c>."
+      "text": "Skraca koszt ulepszania materiałów, gdy wszystkie podłogi w tym pomieszczeniu to <teal1>{floor}</c>."
     },
     {
       "guid": "9049002b-6eb4-4c0d-ab13-5862268188f0",
@@ -24267,7 +24447,7 @@
     },
     {
       "guid": "526fc7cb-d3c2-4b18-88f8-7f7c99712bd0",
-      "text": "Nie umieszczono wymaganych przedmiotów: \\n{structure}"
+      "text": "Nie umieszczono wymaganych przedmiotów!"
     },
     {
       "guid": "2ffd9341-099d-4dc6-9dc1-453409bfe581",
@@ -24275,7 +24455,7 @@
     },
     {
       "guid": "18abc035-d05f-47cc-88a0-198f68a8a103",
-      "text": "Łącz ze sobą serca zamku, by przenosić budowle za pomocą <teal1>menu budowania</c>.\\n\\nPrzeniesienie zamku spowoduje utratę dostępu do poprzedniego terytorium, a wszelkie budowle nieprzeniesione za pomocą <teal1>menu budowania</c> zostaną zamienione na zasoby."
+      "text": "Łącz ze sobą serca zamku, by przenosić budowle za pomocą <teal1>menu budowania</c>.\\n\\nPrzeniesienie zamku spowoduje utratę dostępu do poprzedniego terytorium, a wszelkie budowle nie przeniesione za pomocą <teal1>menu budowania</c> zostaną zamienione na zasoby."
     },
     {
       "guid": "cf62ec86-86a8-442f-8709-d00a9fe052b1",
@@ -24566,6 +24746,10 @@
       "text": "Brak wolnego miejsca na wyjściu"
     },
     {
+      "guid": "2f59f284-40fa-4f9c-b00a-62be65f11fa6",
+      "text": "Wstrzymane w nocy"
+    },
+    {
       "guid": "740d20fc-2c12-4ad3-8eb8-7b4b88e71391",
       "text": "Określa obrażenia, jakie sługa zadaje swoimi umiejętnościami."
     },
@@ -24679,7 +24863,7 @@
     },
     {
       "guid": "53cd03a1-0dea-4f92-be1d-9037f15d1417",
-      "text": "Statystyki konia można zwiększyć, karmiąc go pożywnymi roślinami.\\n\\n<teal2>Maks. prędkość</c>\\nzwiększona o:\\n<skillcolor>{speedItems}</c>\\n\\n<teal2>Przyśpieszenie</c>\\nzwiększone o:\\n<skillcolor>{accelerationItems}</c>\\n\\n<teal2>Zwrotność</c>\\nzwiększona o:\\n<skillcolor>{rotationSpeedItems}</c>"
+      "text": "Statystyki konia można zwiększyć, karmiąc go pożywnymi roślinami.\\n\\n<teal2>Maks. prędkość</c>\\nzwiększana przez:\\n<skillcolor>{speedItems}</c>\\n\\n<teal2>Przyśpieszenie</c>\\nzwiększane przez:\\n<skillcolor>{accelerationItems}</c>\\n\\n<teal2>Zwrotność</c>\\nzwiększana przez:\\n<skillcolor>{rotationSpeedItems}</c>"
     },
     {
       "guid": "49fcb272-ed27-4e1a-87ad-a94457a26a28",
@@ -24702,6 +24886,10 @@
       "text": "Kondycja"
     },
     {
+      "guid": "75794f1e-353f-4cf4-93af-632c75c7380a",
+      "text": "Szybszy zeskok z wierzchowca jednym, zwinnym ruchem."
+    },
+    {
       "guid": "c96dc1e0-2162-4dcc-a8ab-e8312bbe8dbd",
       "text": "Umknięcie skokiem"
     },
@@ -24722,6 +24910,10 @@
       "text": "Stabilność"
     },
     {
+      "guid": "a2e456a7-4985-4460-896a-75a74f17094b",
+      "text": "<skillcolor>{chance}%</c> szans na uniknięcie zrzucenia z wierzchowca podczas ataku.\\n\\n<red1>Nie działa przeciwko atakom innych graczy wampirów.</c>"
+    },
+    {
       "guid": "7698912a-727a-42b0-9397-f0502aef5dad",
       "text": "Natarcie"
     },
@@ -24735,7 +24927,7 @@
     },
     {
       "guid": "85485178-321d-4807-b00d-8738ae016486",
-      "text": "Zwiększanie prędkości obrotu…"
+      "text": "Zwiększanie zwrotności…"
     },
     {
       "guid": "9c2ff9d8-0b12-4679-a554-f71bbea62da5",
@@ -24771,7 +24963,7 @@
     },
     {
       "guid": "24a876d3-734e-43cf-8e16-3a29624497e3",
-      "text": "{statDescription}\\n\\nZwiększono o:\\n<skillcolor>{items}</c>"
+      "text": "{statDescription}\\n\\nZwiększane przez:\\n<skillcolor>{items}</c>"
     },
     {
       "guid": "2180c836-4875-4854-bdab-cd2f2760487c",
@@ -25335,7 +25527,7 @@
     },
     {
       "guid": "1578a414-1d52-4544-b060-e8b4e290fa1e",
-      "text": "Tryb PvP w parze z pełnym łupieniem"
+      "text": "Trybu PvP w parze z pełnym łupieniem"
     },
     {
       "guid": "3706548b-83f3-48cf-b30c-4d062872c5a5",
@@ -25387,7 +25579,7 @@
     },
     {
       "guid": "7035a416-7f09-489f-98ba-3bd47db9fc67",
-      "text": "PvE południe – 40. poziom"
+      "text": "PvE Południe – 40. poziom"
     },
     {
       "guid": "52ca385b-248e-424b-a137-9835149e92d5",
@@ -25395,7 +25587,7 @@
     },
     {
       "guid": "7d93100e-f57d-4d3b-bcfe-8d0bb9491e2d",
-      "text": "PvE popołudnie – 50. poziom"
+      "text": "PvE południe – 50. poziom"
     },
     {
       "guid": "7bad6532-3479-4a70-81ee-4695cd9082e3",
@@ -25475,7 +25667,7 @@
     },
     {
       "guid": "b13328cc-8890-4f80-a3cc-15122d07aa8c",
-      "text": "PvP popołudnie – 50. poziom"
+      "text": "PvP południe – 50. poziom"
     },
     {
       "guid": "3bc597e2-3b19-49b7-8c50-cf909cb8756e",
@@ -25703,11 +25895,11 @@
     },
     {
       "guid": "f7db62f4-5767-412a-a1c8-38fc771b95f1",
-      "text": "Limity stanowiska areny"
+      "text": "Limity Stanowiska Areny"
     },
     {
       "guid": "ce736ab1-8171-47aa-af0f-326d7c1f38d0",
-      "text": "Liczba stanowisk areny, które można zbudować w zamku."
+      "text": "Liczba Stanowisk Areny, które można zbudować w zamku."
     },
     {
       "guid": "0ed5967e-ef79-4c99-9d35-3b37d3ba283d",
@@ -25727,7 +25919,7 @@
     },
     {
       "guid": "83d39923-013b-4a76-b3ff-94f71079732b",
-      "text": "Rodzaj limitu serc zamku"
+      "text": "Limit serc zamku każdego rodzaju"
     },
     {
       "guid": "a8dba0dd-2af0-4389-a995-2b0f30724570",
@@ -26054,6 +26246,14 @@
       "text": "Zwiększa liczbę łupów zebranych przez sługi podczas udanych łowów."
     },
     {
+      "guid": "2fd1f87c-e2ad-46c5-a322-7e1c1b31bdce",
+      "text": "Mnożnik łupów ze styksowych odłamków"
+    },
+    {
+      "guid": "0e82d588-5fac-4b80-8866-9ef38b5b3f6a",
+      "text": "Zwiększa ilość styksowych odłamków, które upuszczają wrogowie, oraz odłamków upuszczanych podczas najazdów z beczek, pojemników i skrzyń."
+    },
+    {
       "guid": "95331135-1720-4ebe-b54f-1027b0137e44",
       "text": "Mnożnik straty wytrzymałości"
     },
@@ -26251,7 +26451,7 @@
     },
     {
       "guid": "4728a5b6-e9b0-4d09-a2c9-ef073c38e59e",
-      "text": "Długość wielkiego wtargnięcia przez szczelinę w Mortium"
+      "text": "Czas trwania wielkiego wtargnięcia przez szczelinę w Mortium"
     },
     {
       "guid": "cbd46753-eb7a-45ae-9850-ed319f1e1898",
@@ -26299,7 +26499,7 @@
     },
     {
       "guid": "3176049a-1f6e-44af-b6ff-e5ac77464cd2",
-      "text": "Długość niewielkiego wtargnięcia przez szczelinę w Mortium"
+      "text": "Czas trwania niewielkiego wtargnięcia przez szczelinę w Mortium"
     },
     {
       "guid": "5221fbfa-34dc-452d-be7c-1023c710d224",
@@ -26371,7 +26571,7 @@
     },
     {
       "guid": "8c5de68f-70ea-43cb-b47c-b76f526d4218",
-      "text": "Gdy włączone, funkcje PvP będą aktywne."
+      "text": "Gdy włączone, funkcje Gracz kontra Gracz będą aktywne"
     },
     {
       "guid": "b17e24ce-944d-4756-b621-9aee7d4fccc1",
@@ -26567,7 +26767,7 @@
     },
     {
       "guid": "9aac1fc1-1533-4403-a2dc-f6b0fc17b162",
-      "text": "Strefa czasowa używana przez różne ustawienia."
+      "text": "Strefa czasowa używana przez różne ustawienia"
     },
     {
       "guid": "3bf7e066-4e49-4ae4-b7a3-6703b7a15dc1",
@@ -26660,6 +26860,14 @@
     {
       "guid": "e6f88962-c6b7-4f27-b90c-58d6b6bfe3d4",
       "text": "Wpływa na obrażenia otrzymywane podczas przenoszenia srebra."
+    },
+    {
+      "guid": "a75977c0-a062-4bd6-aac6-7ef1ae142a34",
+      "text": "Szybkość Utraty Trwałości Odłamków Duszy"
+    },
+    {
+      "guid": "3b62b579-16d7-4e69-9f6c-8e019b0ba4a4",
+      "text": "Ustaw, jak szybko Odłamki Duszy mają tracić swoją wytrzymałość."
     },
     {
       "guid": "30d96127-b1bc-4c69-b514-6297c8a0eaf1",
@@ -26878,6 +27086,14 @@
       "text": "Jak często powinny występować wtargnięcia przez szczelinę w Mortium?"
     },
     {
+      "guid": "65521547-8c07-4625-bbf3-d4c689822eea",
+      "text": "Miejsca na Broń"
+    },
+    {
+      "guid": "aacb6713-3012-4761-b943-826d97cd173b",
+      "text": "Ilość Miejsc na pasku akcji, które mogą być wykorzystane do trzymania broni."
+    },
+    {
       "guid": "ce5b8514-397c-446a-8350-b312ad241729",
       "text": "Dni powszednie (pn.–pt.)"
     },
@@ -27019,11 +27235,11 @@
     },
     {
       "guid": "51a2872a-00cb-4d85-a0f6-20a61b434844",
-      "text": "Ten serwer jest ustawiony na Rozluźniony poziom trudności."
+      "text": "Ten serwer jest ustawiony na Zrelaksowany poziom trudności"
     },
     {
       "guid": "6c50e7be-1497-44d5-93ed-4bd42dcb0795",
-      "text": "Ten serwer jest ustawiony na Brutalny poziom trudności."
+      "text": "Ten serwer jest ustawiony na Brutalny poziom trudności"
     },
     {
       "guid": "8b8c9d38-fd7f-41fc-9b9f-e56e049af05f",
@@ -27326,6 +27542,22 @@
       "text": "Odwiedź Gloomrot"
     },
     {
+      "guid": "92436be0-0f17-4de8-9ada-61636e524eff",
+      "text": "Kup teraz"
+    },
+    {
+      "guid": "4f1f95e7-1c1f-467a-ae7a-aeaa17fa5cde",
+      "text": "Korzystaj z najbogatszej palety barw i rozkoszuj się niezrównanym luksusem! Od pucybuta do milionera! Twój ekskluzywny zamek wzbudzi niezrównaną zazdrość w każdej barwie!"
+    },
+    {
+      "guid": "a79ef8ce-5bf7-4965-8527-f19e197d3405",
+      "text": "Udaj się do bogatych, naturalnych krain Oakveil, zmierz się z Trującymi Ostrzami, poznaj mroczne sekrety jadowego soku i zaatakuj magiczne sanktuarium Wężowej Królowej Megary… lub zgiń próbując.\\nZapoczątkuj nowy świat, by doświadczyć nieznanego wcześniej wymiaru V Rising!"
+    },
+    {
+      "guid": "f0395dcd-caa1-44f0-82d0-00303203d531",
+      "text": "Poznaj Las Oakveil"
+    },
+    {
       "guid": "6c0086c5-9916-49e6-a3e2-bed7de7947e6",
       "text": "Ze względu na znaczne zmiany w grze i świecie Vardoran, wszystkie postępy wampirów i zamków zostały zresetowane."
     },
@@ -27399,7 +27631,7 @@
     },
     {
       "guid": "277dcc76-95cf-4e76-95fe-8e7251ed6ec1",
-      "text": "Najeźdźcy z Oakveil"
+      "text": "Najeźdźcy Oakveil"
     },
     {
       "guid": "4cd60e11-3093-4651-a217-111e0d93d43e",
@@ -27835,11 +28067,11 @@
     },
     {
       "guid": "ab3b1776-79e3-42be-91c5-6f4f02e5a1f3",
-      "text": "Adaptacyjne efekty „Trigger”"
+      "text": "Adaptacyjne triggery"
     },
     {
       "guid": "750ad895-6e23-4824-9ddc-7eed2175a5d9",
-      "text": "Włącza adaptacyjne efekty „Trigger”"
+      "text": "Włącza adaptacyjne triggery"
     },
     {
       "guid": "688d2fc4-f191-473c-8935-198fe6a89314",
@@ -27943,7 +28175,7 @@
     },
     {
       "guid": "61017294-e24a-4f6d-9c6b-98961dfed7af",
-      "text": "Czułość przybliżania/oddalania mapy"
+      "text": "Czułość zoomu mapy"
     },
     {
       "guid": "b44f2c6a-2a3f-4b73-9d7d-aed127b41fe6",
@@ -28159,7 +28391,7 @@
     },
     {
       "guid": "e95bab18-3055-4d4b-9996-35131192c73b",
-      "text": "Włącz Synchronizację pionową, aby zminimalizować problemy z rozrywaniem ekranu, ale zamiast tego mogą wystąpić problemy z zacinaniem się"
+      "text": "Włącz Synchronizację pionową, aby zminimalizować problemy z rozrywaniem ekranu, ale zamiast tego mogą wystąpić problemy z zacinaniem się ekranu."
     },
     {
       "guid": "0c1835fd-2f51-4657-83b7-6b262b24686f",
@@ -28251,7 +28483,7 @@
     },
     {
       "guid": "ed1a4146-59ac-4030-b9e8-ba4415afe0ad",
-      "text": "Adaptacyjne efekty \"Trigger\" umiejętności broni 1"
+      "text": "Adaptacyjne użycie umiejętności broni 1"
     },
     {
       "guid": "0683d9bc-8c23-4a62-96e7-a4551014e4e3",
@@ -28291,7 +28523,7 @@
     },
     {
       "guid": "355de635-bacd-474a-a2f6-366cb07c0dbb",
-      "text": "Powiadomienia o wtargnięciach"
+      "text": "Powiadomienia o Wydarzeniach Najazdu"
     },
     {
       "guid": "e0a8c431-d2d5-4a73-9a35-4a6ddd5be06e",
@@ -28432,6 +28664,38 @@
     {
       "guid": "30e87e35-b686-46c1-bbbb-7762979c1232",
       "text": "Tryb głośników"
+    },
+    {
+      "guid": "a6bb9599-6691-43d1-9bb0-ae6d54b93705",
+      "text": "5.1"
+    },
+    {
+      "guid": "d9cb43ce-9467-421b-a010-aac419168154",
+      "text": "7.1"
+    },
+    {
+      "guid": "b9f053df-8d98-456d-b968-a5daf5ed23e7",
+      "text": "7.1.4"
+    },
+    {
+      "guid": "3e790e72-366b-4f46-9314-5d0961187153",
+      "text": "Domyślny"
+    },
+    {
+      "guid": "759be497-6038-4ad5-968f-85616c91bd4c",
+      "text": "Mono"
+    },
+    {
+      "guid": "1f38f15a-5f07-4a0d-8046-01c8f565446a",
+      "text": "Czterokanałowy"
+    },
+    {
+      "guid": "23401c4f-b203-40ca-855a-868757119584",
+      "text": "Stereo"
+    },
+    {
+      "guid": "70d113ef-7660-4d5f-841a-cd472fa387f2",
+      "text": "Przestrzenny"
     },
     {
       "guid": "1fa13b8d-edec-42f7-958c-f998df3afb3e",
@@ -28899,7 +29163,7 @@
     },
     {
       "guid": "e0f1b4cb-52cc-48a6-b353-e0034dc9af47",
-      "text": "[n]Bestialskie{noun}\\n[f]Bestialska {noun}\\n[m]Bestialski {noun}"
+      "text": "[n]Bestialskie {noun}\\n[f]Bestialska {noun}\\n[m]Bestialski {noun}"
     },
     {
       "guid": "f43fa086-4ef1-4f14-80d7-b97c197f0d06",
@@ -28979,7 +29243,7 @@
     },
     {
       "guid": "01999a27-16c9-4cca-bdbb-fc163db979b1",
-      "text": "[n]Zguba"
+      "text": "[f]Zguba"
     },
     {
       "guid": "62a0410c-8e81-492e-a3ec-0d4b43a887d6",
@@ -28991,7 +29255,7 @@
     },
     {
       "guid": "4cc41d9b-2424-4713-a490-04fb19cbbcfd",
-      "text": "[n]Zaciekłość"
+      "text": "[f]Zaciekłość"
     },
     {
       "guid": "0c5e6324-edcc-413a-af80-1e069ee49cd6",
@@ -28999,11 +29263,11 @@
     },
     {
       "guid": "69ac174a-8e16-44a2-aecf-24435d6d5fba",
-      "text": "[n]Masakra"
+      "text": "[f]Masakra"
     },
     {
       "guid": "07bf9ae8-6473-4a5e-a2cf-c9d7da3d232d",
-      "text": "[n]Paszcza"
+      "text": "[f]Paszcza"
     },
     {
       "guid": "a127769d-84d0-4d3c-8ddb-93f8244b5002",
@@ -29175,15 +29439,15 @@
     },
     {
       "guid": "9817936b-dc47-4479-b93e-2530d76cc9e7",
-      "text": "[n]Krótkie ostrza"
+      "text": "[n]Krótkie Ostrza"
     },
     {
       "guid": "ff27f7b0-b2e2-4874-bd9c-d2146f137981",
-      "text": "[n]Noże obrotowe"
+      "text": "[n]Noże Obrotowe"
     },
     {
       "guid": "52483b89-6864-4870-9a4f-87efdea8464c",
-      "text": "[n]Noże do rzucania"
+      "text": "[n]Noże do Rzucania"
     },
     {
       "guid": "9e5dbc54-efac-4bbc-9802-21fd1603465c",
@@ -29215,7 +29479,7 @@
     },
     {
       "guid": "3b43ca54-99a3-4a91-b5d5-85c03c680fd7",
-      "text": "[n]{noun} oszusta\\n[f]{noun} oszusta\\n[m]{noun} oszusta"
+      "text": "[n]{noun} Oszusta\\n[f]{noun} Oszusta\\n[m]{noun} Oszusta"
     },
     {
       "guid": "e37a734b-5868-44cf-b114-5b1d774b6eab",
@@ -29227,7 +29491,7 @@
     },
     {
       "guid": "9ea41b11-5cec-4f4d-b0e4-1f92c717b7f8",
-      "text": "[n]Fałsz"
+      "text": "[m]Fałsz"
     },
     {
       "guid": "e93790f4-4ebb-4cf9-ba27-d84240e8bdf3",
@@ -29247,11 +29511,11 @@
     },
     {
       "guid": "9c4ac3d5-143f-4e60-bc52-2989b463b54c",
-      "text": "[n]Ostrza oszustwa"
+      "text": "[n]Ostrza Oszustwa"
     },
     {
       "guid": "0119c1e8-8b87-4a70-ac7e-c878afc061c0",
-      "text": "[n]Ostrza prawdy"
+      "text": "[n]Ostrza Prawdy"
     },
     {
       "guid": "94f093a8-f377-40c6-bd60-dc37e6b1ec57",
@@ -29611,7 +29875,7 @@
     },
     {
       "guid": "9f52c6db-56f4-40fc-a687-bd2093755dc8",
-      "text": "[n]Lodowcowe {noun}\\n[f]Lodowcowa {noun}\\n[m]Lodowcowy {noun}"
+      "text": "[n]Lodowcowe {noun}\\n[f]Lodowcowa Glacial {noun}\\n[m]Lodowcowy {noun}"
     },
     {
       "guid": "c3c1afc7-9e34-43b9-879d-61ee1330ffc9",
@@ -29695,7 +29959,7 @@
     },
     {
       "guid": "ced36b96-1f05-4c0d-b525-e19d48a72487",
-      "text": "[n]Mesmeryczne {noun}\\n[f]Mesmeryczna {noun}\\n[m]Mesmeryczny {noun}"
+      "text": "[n]Mezmeryczne {noun}\\n[f]Mezmeryczna {noun}\\n[m]Mezmeryczny {noun}"
     },
     {
       "guid": "81e17b58-a9c4-413b-b6c6-876362e1d2b8",
@@ -29979,7 +30243,7 @@
     },
     {
       "guid": "96733fc4-1c5b-4ed5-acf4-ca23defdffa6",
-      "text": "[n]Pożądanie"
+      "text": "[n]Pożadanie"
     },
     {
       "guid": "f5626341-5191-473c-8ffa-a8f8903db56c",
@@ -30031,7 +30295,7 @@
     },
     {
       "guid": "5f998c5c-2dae-42d0-8ad3-36913b4ee1f5",
-      "text": "[f]Szczelina"
+      "text": "[f]Rozadlina"
     },
     {
       "guid": "429346ea-ccdf-45be-bd43-55143ff98a9f",
@@ -30159,7 +30423,7 @@
     },
     {
       "guid": "b8d6ed27-98ab-4a5c-8fe4-9b3562adafa5",
-      "text": "[f]Mylność"
+      "text": "[n]Niezrozumienie"
     },
     {
       "guid": "d8a54936-6e66-4def-b695-c249501fa2fc",
@@ -30755,7 +31019,7 @@
     },
     {
       "guid": "9a8cedda-f41e-4ee8-a8eb-20f0906e3219",
-      "text": "[n]{noun} Skrytobójcy\\n[f]{noun} Skrytobójcy\\n[m]{noun} Skrytobójcy"
+      "text": "[n]{noun} Asasyna\\n[f]{noun} Asasyna\\n[m]{noun} Asasyna"
     },
     {
       "guid": "4d762f7a-1e7f-48a4-991d-2d375d8309a2",
@@ -30815,7 +31079,7 @@
     },
     {
       "guid": "767b7a4a-6009-4dc6-8046-236402a62178",
-      "text": "[n]{noun} Mistrza Skrytobójcy\\n[f]{noun} Mistrza Skrytobójcy\\n[m]{noun} Mistrza Skrytobójcy"
+      "text": "[n]{noun} Mistrza Asasyna\\n[f]{noun} Mistrza Asasyna\\n[m]{noun} Mistrza Asasyna"
     },
     {
       "guid": "c370d48c-07f2-40ec-9623-98d6fdc135db",
@@ -31023,11 +31287,11 @@
     },
     {
       "guid": "c498db29-2488-472f-951f-00984c1e1136",
-      "text": "[m]Rycerski miecz"
+      "text": "[m]Miecz Rycerski"
     },
     {
       "guid": "a871c07c-1cd0-40bf-ad91-1b40886afb53",
-      "text": "[m]Bękarci Miecz"
+      "text": "[m]Miecz Bękarci"
     },
     {
       "guid": "32fda7fa-0abe-4d97-9525-514716b77453",
@@ -31123,7 +31387,7 @@
     },
     {
       "guid": "84b3bc40-68bd-4389-a171-92342539373c",
-      "text": "[n]{noun} pretendenta\\n[f]{noun} pretendenta\\n[m]{noun} pretendenta"
+      "text": "[n]{noun} Pretendenta\\n[f]{noun} Pretendenta\\n[m]{noun} Pretendenta"
     },
     {
       "guid": "3c9a6766-6607-4998-a81c-497fb19d161d",
@@ -31143,7 +31407,7 @@
     },
     {
       "guid": "b4278622-501d-42e0-915b-5505c5642268",
-      "text": "[n]Podwójne ostrze"
+      "text": "[n]Podwójne Ostrze"
     },
     {
       "guid": "36c63e46-5754-46ee-8a49-3c40f61e7efb",
@@ -31151,23 +31415,23 @@
     },
     {
       "guid": "9b9e6cb5-30e7-4aff-9759-415568690405",
-      "text": "[n]Mieczokij"
+      "text": "[m]Mieczokij"
     },
     {
       "guid": "989eacba-c3f8-44cc-9c8e-b62d302a1d4e",
-      "text": "[n]Bliźniacze ostrze"
+      "text": "[n]Bliźniacze Ostrze"
     },
     {
       "guid": "07415ac6-797f-4c13-9c75-3372b1f839c6",
-      "text": "[n]Dwupałasz"
+      "text": "[m]Dwupałasz"
     },
     {
       "guid": "858a9342-2540-4f88-b2bd-fc1f7a3ac77d",
-      "text": "[n]{noun} mistrza areny\\n[f]{noun} mistrza areny\\n[m]{noun} mistrza areny"
+      "text": "[n]{noun} Mistrza Areny\\n[f]{noun} Mistrza Areny\\n[m]{noun} Mistrza Areny"
     },
     {
       "guid": "349d37f8-eafd-4780-8ca7-7cfb0a8dbd41",
-      "text": "[n]{noun} tancerza z ostrzem\\n[f]{noun} tancerza z ostrzem\\n[m]{noun} tancerza z ostrzem"
+      "text": "[n]{noun} Tancerza z Ostrzem\\n[f]{noun} Tancerza z Ostrzem\\n[m]{noun} Tancerza z Ostrzem"
     },
     {
       "guid": "81c23384-40b6-4b2a-9ba0-93749544867f",
@@ -31179,7 +31443,7 @@
     },
     {
       "guid": "3bcedee9-4774-4d0a-800e-bdb7b7de5c84",
-      "text": "[n]{noun} księżycowego tancerza\\n[f]{noun} księżycowego tancerza\\n[m]{noun} księżycowego tancerza"
+      "text": "[n]{noun} Księżycowego Tancerza\\n[f]{noun} Księżycowego Tancerza\\n[m]{noun} Księżycowego Tancerza"
     },
     {
       "guid": "2990b771-df8b-4b6a-9f01-4be6571a28e9",
@@ -31195,27 +31459,27 @@
     },
     {
       "guid": "9c9e5e46-fbcd-492a-b692-c58b5a6411dd",
-      "text": "[n]{noun} piewcy wojny\\n[f]{noun} piewcy wojny\\n[m]{noun} piewcy wojny"
+      "text": "[n]{noun} Piewcy Wojny\\n[f]{noun} Piewcy Wojny\\n[m]{noun} Piewcy Wojny"
     },
     {
       "guid": "d163075b-cfe4-4c7f-a12f-a7fd3c328bcd",
-      "text": "[n]Splendor"
+      "text": "[m]Splendor"
     },
     {
       "guid": "44f92479-c4f8-4004-b79d-a4f8c607f7f0",
-      "text": "[n]Elegancja"
+      "text": "[f]Elegancja"
     },
     {
       "guid": "d180cae0-12fe-451a-8561-a88548a570b7",
-      "text": "[n]Gracja"
+      "text": "[f]Gracja"
     },
     {
       "guid": "851680ac-cae3-4826-9dfb-aaf1eb964d34",
-      "text": "[n]Okazałość"
+      "text": "[f]Okazałość"
     },
     {
       "guid": "f9cc2f8b-6645-473f-8ebb-2bb25bc2cd81",
-      "text": "[n]Horyzont"
+      "text": "[m]Horyzont"
     },
     {
       "guid": "c0ae803c-5a06-4bf7-9486-41d4d2ba31d2",
@@ -31227,11 +31491,11 @@
     },
     {
       "guid": "2cd3cf83-1af2-4a1f-8296-1c08972bc574",
-      "text": "[n]Bratnie ostrze"
+      "text": "[n]Bratnie Ostrze"
     },
     {
       "guid": "ebeffb41-6257-4b1c-b3f7-c0163e86c04f",
-      "text": "[n]Wspaniałość"
+      "text": "[f]Wspaniałość"
     },
     {
       "guid": "c90c8766-6a33-4cf0-9044-c56a45104132",
@@ -31358,10 +31622,6 @@
       "text": "[n]Stalowy cep"
     },
     {
-      "guid": "2414ac41-88e5-480e-a3af-d2686773b056",
-      "text": "Sporny"
-    },
-    {
       "guid": "f4e6e26a-7ff4-4b9d-b714-aaa2a67c25f3",
       "text": "Zamek Drakuli"
     },
@@ -31371,7 +31631,7 @@
     },
     {
       "guid": "da28570f-9605-408f-b513-63eddcb66c92",
-      "text": "Zaciszne miejsce, w którym podobno można spotkać wróżkę."
+      "text": "Zaciszne miejsce, w który podobno można spotkać wróżkę."
     },
     {
       "guid": "7550d853-24be-42c5-97f6-d231eeedf1b8",
@@ -31399,7 +31659,7 @@
     },
     {
       "guid": "de43f46c-d334-4d7a-968d-0932e8a689da",
-      "text": "Żelazna Jaskinia"
+      "text": "Jaskinia Żelazna"
     },
     {
       "guid": "61b5d05e-e563-43a1-b615-dac15f0e93b9",
@@ -31519,7 +31779,7 @@
     },
     {
       "guid": "a1cfe79c-ef55-419b-9767-593abbf614a1",
-      "text": "Lodowa Jaskinia"
+      "text": "Jaskinia Lodowa"
     },
     {
       "guid": "4c223770-8581-40a3-b873-3035af724ec4",
@@ -31611,7 +31871,7 @@
     },
     {
       "guid": "3f009965-8479-436c-8fcd-b53e7d54ee84",
-      "text": "Wąwóz Królowej Pająków"
+      "text": "Wąwóz królowej pająków"
     },
     {
       "guid": "58cfb2ed-63bc-4cbb-b14d-ba8c0b5763fa",
@@ -31664,10 +31924,6 @@
     {
       "guid": "99c9f3ce-f166-4a7d-8fc8-781ff4402458",
       "text": "Resztki czegoś mrocznego i nienaturalnego. Starożytny cień okrywa to miejsce."
-    },
-    {
-      "guid": "4c9bcf15-996c-4ef5-8088-a308033317b8",
-      "text": "Nawiedzona kopalnia węgla III"
     },
     {
       "guid": "33491730-b176-4cfa-9bf0-59902b792730",
@@ -31776,10 +32032,6 @@
     {
       "guid": "74ed9add-6ac5-400c-81dd-4ad2d1ad74fe",
       "text": "Kopalnia kwarcu"
-    },
-    {
-      "guid": "9fcf5068-5b2b-4bad-8ed1-2e27b524fd6c",
-      "text": "QuartzQuarryDesc text needs to be added"
     },
     {
       "guid": "baa4ab76-de8e-4daa-8024-d3ac39c3f919",
@@ -32155,7 +32407,7 @@
     },
     {
       "guid": "6869c039-91d9-42e8-a665-9658fc3dabcd",
-      "text": "Ruiny starego bastionu w północnym regionie Mortium. Legion Noctum rozbił tu obóz, by przywrócić mu dawną świetność.\\n\\nValencia, Generał Noctum, założyła tu swoją bazę i nadzoruje działania wojenne w Mortium."
+      "text": "Ruiny starego bastionu w północnym regionie Mortium. Legion Noctum rozbił tu obóz, by przywrócić mu dawną świetność.\\n\\nValencia, Generał Noctum, założyła tu swoją bazę, nadzorując działania wojenne w Mortium."
     },
     {
       "guid": "287a1c19-2293-4560-a580-d432e224c0b9",
@@ -32306,10 +32558,6 @@
       "text": "Dolina Silverlight"
     },
     {
-      "guid": "30441c4d-6238-4135-9a6e-d8ae20e5896d",
-      "text": "SilverlightValleyDesc text needs to be added"
-    },
-    {
       "guid": "94da3604-bce9-4975-b62a-dae8409b9f58",
       "text": "Śnieżny las I"
     },
@@ -32327,7 +32575,7 @@
     },
     {
       "guid": "9f242865-3147-4001-9f83-c587ef9ccb70",
-      "text": "Posterunek mieszania jadów"
+      "text": "Posterunek Mieszania Jadów"
     },
     {
       "guid": "0f520465-6615-44ac-9ec3-dbf6735a9db2",
@@ -32351,7 +32599,7 @@
     },
     {
       "guid": "a59283ab-0811-4eb9-9d93-0f544fd72cb3",
-      "text": "Punkt wyrębu – Snycerze"
+      "text": "Posterunek Wycinki Snycerzy"
     },
     {
       "guid": "ecd9910e-4f04-456a-8d0f-57031f421e06",

@@ -73,16 +73,19 @@ internal static class Recipes // pending organization and refactoring, should al
     static readonly PrefabGUID _monsterShardRecipe = new(1791150988);
     static readonly PrefabGUID _manticoreShardRecipe = new(-111826090);
     static readonly PrefabGUID _draculaShardRecipe = new(-414358988);
+    static readonly PrefabGUID _morganaShardRecipe = PrefabGUIDs.Recipe_MagicSource_General_T09_Morgana;
 
     static readonly PrefabGUID _solarusShard = new(-21943750);
     static readonly PrefabGUID _monsterShard = new(-1581189572);
     static readonly PrefabGUID _manticoreShard = new(-1260254082);
     static readonly PrefabGUID _draculaShard = new(666638454);
+    static readonly PrefabGUID _morganaShard = PrefabGUIDs.Item_MagicSource_SoulShard_Morgana;
 
     static readonly PrefabGUID _solarusShardContainer = new(-824445631);
     static readonly PrefabGUID _monsterShardContainer = new(-1996942061);
     static readonly PrefabGUID _manticoreShardContainer = new(653759442);
     static readonly PrefabGUID _draculaShardContainer = new(1495743889);
+    static readonly PrefabGUID _morganaShardContainer = PrefabGUIDs.TM_Castle_Container_Specialized_Soulshards_Morgana;
 
     static readonly PrefabGUID _fakeGemdustRecipe = new(-1105418306);
 
@@ -100,7 +103,8 @@ internal static class Recipes // pending organization and refactoring, should al
         _solarusShardRecipe,
         _monsterShardRecipe,
         _manticoreShardRecipe,
-        _draculaShardRecipe
+        _draculaShardRecipe,
+        _morganaShardRecipe
     ];
 
     static readonly List<PrefabGUID> _soulShards = 
@@ -108,7 +112,8 @@ internal static class Recipes // pending organization and refactoring, should al
         _solarusShard,
         _monsterShard,
         _manticoreShard,
-        _draculaShard
+        _draculaShard,
+        _morganaShard
     ];
 
     static readonly List<PrefabGUID> _shardContainers =
@@ -116,7 +121,8 @@ internal static class Recipes // pending organization and refactoring, should al
         _solarusShardContainer,
         _monsterShardContainer,
         _manticoreShardContainer,
-        _draculaShardContainer
+        _draculaShardContainer,
+        _morganaShardContainer
     ];
     
     static readonly Dictionary<PrefabGUID, PrefabGUID> _recipesToShards = new()
@@ -124,7 +130,8 @@ internal static class Recipes // pending organization and refactoring, should al
         { _solarusShardRecipe, _solarusShard },
         { _monsterShardRecipe, _monsterShard },
         { _manticoreShardRecipe, _manticoreShard },
-        { _draculaShardRecipe, _draculaShard }
+        { _draculaShardRecipe, _draculaShard },
+        { _morganaShardRecipe, _morganaShard }
     };
     public static void ModifyRecipes() // this is already difficult to keep track of, definitely merits refactoring before doing more here
     {
@@ -140,7 +147,7 @@ internal static class Recipes // pending organization and refactoring, should al
         {
             itemEntity.AddWith((ref Salvageable salvageable) =>
             {
-                salvageable.RecipeGUID = PrefabGUID.Empty;
+                salvageable.RecipeGUID = PrefabGUIDs.Recipe_CastleUpkeep_T02;
                 salvageable.SalvageFactor = 1f;
                 salvageable.SalvageTimer = 20f;
             });
@@ -228,7 +235,7 @@ internal static class Recipes // pending organization and refactoring, should al
 
             prefabEntity.With((ref Salvageable salvageable) =>
             {
-                salvageable.RecipeGUID = PrefabGUID.Empty;
+                salvageable.RecipeGUID = PrefabGUIDs.Recipe_CastleUpkeep_T02;
                 salvageable.SalvageFactor = 1f;
                 salvageable.SalvageTimer = 10f;
             });
@@ -251,7 +258,7 @@ internal static class Recipes // pending organization and refactoring, should al
 
             prefabEntity.With((ref Salvageable salvageable) =>
             {
-                salvageable.RecipeGUID = PrefabGUID.Empty;
+                salvageable.RecipeGUID = PrefabGUIDs.Recipe_CastleUpkeep_T02;
                 salvageable.SalvageFactor = 1f;
                 salvageable.SalvageTimer = 15f;
             });
@@ -274,7 +281,7 @@ internal static class Recipes // pending organization and refactoring, should al
 
             prefabEntity.With((ref Salvageable salvageable) =>
             {
-                salvageable.RecipeGUID = PrefabGUID.Empty;
+                salvageable.RecipeGUID = PrefabGUIDs.Recipe_CastleUpkeep_T02;
                 salvageable.SalvageFactor = 1f;
                 salvageable.SalvageTimer = 15f;
             });
@@ -298,7 +305,7 @@ internal static class Recipes // pending organization and refactoring, should al
 
             prefabEntity.With((ref Salvageable salvageable) =>
             {
-                salvageable.RecipeGUID = PrefabGUID.Empty;
+                salvageable.RecipeGUID = PrefabGUIDs.Recipe_CastleUpkeep_T02; // just needs a valid prefabGuid
                 salvageable.SalvageFactor = 1f;
                 salvageable.SalvageTimer = 10f;
             });
@@ -321,7 +328,7 @@ internal static class Recipes // pending organization and refactoring, should al
 
             prefabEntity.With((ref Salvageable salvageable) =>
             {
-                salvageable.RecipeGUID = PrefabGUID.Empty;
+                salvageable.RecipeGUID = PrefabGUIDs.Recipe_CastleUpkeep_T02;
                 salvageable.SalvageFactor = 1f;
                 salvageable.SalvageTimer = 10f;
             });

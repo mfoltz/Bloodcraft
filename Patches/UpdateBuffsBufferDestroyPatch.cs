@@ -141,8 +141,8 @@ internal static class UpdateBuffsBufferDestroyPatch
                         break;
                     case 2:
                         // Core.Log.LogWarning($"[UpdateBuffsBufferDestroyPatch] Triggering stat refresh - {buffTarget.GetPrefabGuid().GetPrefabName()}");
-                        if (playerCharacterLookup.HasComponent(buffTarget)) buffTarget.TryApplyBuff(_bonusStatsBuff);
-                        if (blockFeedBuffLookup.HasComponent(buffTarget) && !buffTarget.HasBuff(_vanishBuff)) buffTarget.TryApplyBuff(_bonusStatsBuff);
+                        // if (playerCharacterLookup.HasComponent(buffTarget)) buffTarget.TryApplyBuff(_bonusStatsBuff);
+                        // if (blockFeedBuffLookup.HasComponent(buffTarget) && !buffTarget.HasBuff(_vanishBuff)) buffTarget.TryApplyBuff(_bonusStatsBuff);
                         break;
                     case 3 when _familiars && isPlayerTarget: // Prevent unending combat music; might have been handled elsewhere by now, noting to check later
                         Entity familiar = Familiars.GetActiveFamiliar(buffTarget);
@@ -238,10 +238,12 @@ internal static class UpdateBuffsBufferDestroyPatch
         {
             return 5; // Handle Stats
         }
+        /*
         else if (prefabGuid.Equals(_bonusStatsBuff))
         {
-            return 2;
+            // return 2;
         }
+        */
         else if (PrestigeBuffs.Contains(prefabGuid))
         {
             return 7;

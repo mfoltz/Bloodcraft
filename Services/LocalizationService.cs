@@ -150,11 +150,35 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         string resourceName = _localizedLanguages.ContainsKey(_language) ? _localizedLanguages[_language] : "Bloodcraft.Resources.Localization.English.json";
         Assembly assembly = Assembly.GetExecutingAssembly();
 
+        // Plugin.LogInstance.LogInfo($"[Localization] Trying to load resource - {resourceName}");
+
         Stream stream = assembly.GetManifestResourceStream(resourceName);
+
+        if (stream == null)
+        {
+            Plugin.LogInstance.LogError($"[Localization] Failed to load resource - {resourceName}");
+        }
+
         using StreamReader localizationReader = new(stream);
 
         string jsonContent = localizationReader.ReadToEnd();
-        var localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
+
+        if (string.IsNullOrWhiteSpace(jsonContent))
+        {
+            Plugin.LogInstance.LogError($"[Localization] No JSON content!");
+        }
+
+        // var localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
+
+        var localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        if (localizationFile.Nodes == null)
+        {
+            Plugin.LogInstance.LogError($"[Localization] Deserialized file is null or missing Nodes!");
+        }
 
         localizationFile.Nodes
             .ToDictionary(x => x.Guid, x => x.Text)

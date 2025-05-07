@@ -139,22 +139,6 @@ internal static class StatChangeSystemPatch
 
                         if (sourcePrefabGuid.Equals(_slashersMeleeHit03))
                         {
-                            /*
-                            if (!damageTakenEvent.Entity.HasBuff(_vargulfBleedBuff))
-                            {
-                                // Core.Log.LogInfo($"Applying Vargulf Bleed to {dealDamageEvent.Target.GetPrefabGuid().GetPrefabName()}");
-                                ServerGameManager.InstantiateBuffEntityImmediate(playerCharacter, damageTakenEvent.Entity, _vargulfBleedBuff);
-                            }
-                            else if (damageTakenEvent.Entity.TryGetBuff(_vargulfBleedBuff, out Entity buffEntity) && buffEntity.TryGetComponent(out Buff buff))
-                            {
-                                int stacks = buff.Stacks + 1;
-                                int newStacks = stacks > buff.MaxStacks ? buff.MaxStacks : stacks;
-
-                                ServerGameManager.InstantiateBuffEntityImmediate(playerCharacter, damageTakenEvent.Entity, _vargulfBleedBuff, null, newStacks);
-                                // Core.Log.LogInfo($"Adding Vargulf Bleed stack to {dealDamageEvent.Target.GetPrefabGuid().GetPrefabName()}");
-                            }
-                            */
-
                             damageTakenEvent.Entity.TryApplyBuff(_vargulfBleedBuff);
                         }
 

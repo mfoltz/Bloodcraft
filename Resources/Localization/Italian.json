@@ -1,6 +1,6 @@
 {
-  "Codes": [],
-  "Nodes": [
+  "codes": [],
+  "nodes": [
     {
       "guid": "de5768be-d168-42f3-b253-9f0422772f17",
       "text": "Per secoli i nostri castelli sono stati dimenticati e in rovina..."
@@ -31,7 +31,7 @@
     },
     {
       "guid": "7041a561-2f4a-4890-8781-2b36c84149c0",
-      "text": "Distruggerò chiunque sfiderà il mio regno!"
+      "text": "Distruggerò chiunque sfiderà mio regno!"
     },
     {
       "guid": "95e17778-f69b-46e3-9d12-03b62c760322",
@@ -359,7 +359,7 @@
     },
     {
       "guid": "f49c6dd6-ca97-4bd9-a2ed-2e4ef958a479",
-      "text": "Protegge te e gli alleati vicini per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
+      "text": "Scuda te e gli alleati vicini per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
     },
     {
       "guid": "fadcf5fb-6def-42af-8243-9949747bdaa9",
@@ -387,11 +387,11 @@
     },
     {
       "guid": "749d5798-a2e3-4b8c-8e12-c59d8450485b",
-      "text": "All'attivazione, consuma <blood>Ritorno vitale</c> da un massimo di <skillcolor>{Count}</c> bersagli, curandoti per un <skillcolor>{Healing}%</c> della tua vitalità massima per ognuno di essi."
+      "text": "All'attivazione, consuma <blood>Ritorno vitale</c> da un massimo di <skillcolor>{Count}</c> obiettivi, curandoti per un <skillcolor>{Healing}%</c> della tua vitalità massima per ognuno di essi."
     },
     {
       "guid": "1fe36dbe-e80f-4b5c-b539-02ff4b97e96e",
-      "text": "All'attivazione, consuma <blood>Ritorno vitale</c> da un massimo di <skillcolor>{Count}</c> bersagli, riducendo di <skillcolor>{CooldownReduction} s</c> il tempo di ricarica per ognuno di essi."
+      "text": "All'attivazione, consuma <blood>Ritorno vitale</c> da un massimo di <skillcolor>{Count}</c> obiettivi, riducendo di <skillcolor>{CooldownReduction} s</c> il tempo di ricarica per ognuno di essi."
     },
     {
       "guid": "1e8d8db5-fe78-4606-96c2-9b95a89eaa0a",
@@ -443,7 +443,7 @@
     },
     {
       "guid": "09183101-93e1-439a-8740-812c99bf0b57",
-      "text": "Dopo il primo colpo rimbalza verso un altro bersaglio, infliggendo un <skillcolor>{Modifier}%</c> dei danni o delle cure iniziali. Può rimbalzare anche verso l'utilizzatore."
+      "text": "Dopo il primo colpo rimbalza verso un altro obiettivo, infliggendo un <skillcolor>{Modifier}%</c> dei danni o delle cure iniziali. Può rimbalzare anche verso l'utilizzatore."
     },
     {
       "guid": "516e0747-f01e-4e51-8323-6cb7356527ea",
@@ -463,11 +463,11 @@
     },
     {
       "guid": "cc8358d7-e553-4c46-8e69-206f21884da0",
-      "text": "Colpire un bersaglio affetto da <blood>Ritorno vitale</c>, ti cura per un <skillcolor>{Healing}%</c> della tua vitalità massima."
+      "text": "Colpire un obiettivo affetto da <blood>Ritorno vitale</c>, ti cura per un <skillcolor>{Healing}%</c> della tua vitalità massima."
     },
     {
       "guid": "c59cbe89-5ff8-4a30-ab43-78264e9b3228",
-      "text": "Colpire un bersaglio affetto da <blood>Ritorno vitale</c>, infligge un <skillcolor>{Damage}%</c> di danno supplementare."
+      "text": "Colpire un obiettivo affetto da <blood>Ritorno vitale</c>, infligge un <skillcolor>{Damage}%</c> di danno supplementare."
     },
     {
       "guid": "20ec01c5-0da9-4e16-bc7a-590b7fd6d2ec",
@@ -479,7 +479,7 @@
     },
     {
       "guid": "5903327c-4914-4bea-b780-4e634f37335a",
-      "text": "Colpire un bersaglio affetto da <blood>Ritorno vitale</c>, ti cura per un <skillcolor>{Healing}%</c> della tua vitalità massima."
+      "text": "Colpire un obiettivo affetto da <blood>Ritorno vitale</c>, ti cura per un <skillcolor>{Healing}%</c> della tua vitalità massima."
     },
     {
       "guid": "751cef9d-6970-4352-8580-3955ea3af808",
@@ -487,7 +487,7 @@
     },
     {
       "guid": "4ba8c176-5698-4263-a0e9-f0fc298562ac",
-      "text": "Aumenta i danni inflitti al bersaglio di un <skillcolor>{Factor}%</c> per tutta la durata della maledizione."
+      "text": "Aumenta i danni inflitti all'obiettivo di un <skillcolor>{Factor}%</c> per tutta la durata della maledizione."
     },
     {
       "guid": "40fbdbaa-0d83-4243-9926-a3865653b1dc",
@@ -499,7 +499,7 @@
     },
     {
       "guid": "169474dd-60bb-46a9-bc09-ff0b53bc256e",
-      "text": "Riduce la velocità di movimento del bersaglio di un <skillcolor>{Factor}%</c> per tutta la durata della maledizione."
+      "text": "Riduce la velocità di movimento dell'obiettivo di un <skillcolor>{Factor}%</c> per tutta la durata della maledizione."
     },
     {
       "guid": "6337292c-b9c6-4582-8285-736102bceacb",
@@ -563,7 +563,7 @@
     },
     {
       "guid": "f30a5e14-7758-4782-b8a2-bb0dedc1bebc",
-      "text": "Potenzia te o un bersaglio alleato. Applica Celerità temporanea per aumentare di un <skillcolor>{hastefactor}</c> la velocità di movimento e di un <skillcolor>{attackspeed}</c> la velocità d'attacco, Inoltre, gli attacchi fisici applicano <chaos>Combustione</c> per <skillcolor>{duration} s</c>."
+      "text": "Potenzia te o un obiettivo alleato. Applica Celerità temporanea per aumentare di un <skillcolor>{hastefactor}</c> la velocità di movimento e di un <skillcolor>{attackspeed}</c> la velocità d'attacco, Inoltre, gli attacchi fisici applicano <chaos>Combustione</c> per <skillcolor>{duration} s</c>."
     },
     {
       "guid": "c4c430a1-d6e9-436c-babc-4a8372f44940",
@@ -587,7 +587,7 @@
     },
     {
       "guid": "30357f01-f2ba-4378-a691-cd6770544eb7",
-      "text": "Evoca una sfera che esplode nella posizione del bersaglio, infliggendo un <skillcolor>{damage}</c> di danno magico, applicando <chaos>Combustione</c> e attirando i nemici verso il centro."
+      "text": "Evoca una sfera che esplode nella posizione dell'obiettivo, infliggendo un <skillcolor>{damage}</c> di danno magico, applicando <chaos>Combustione</c> e attirando i nemici verso il centro."
     },
     {
       "guid": "d84dd5d7-cc8c-4412-b5b4-5cf96299c7c4",
@@ -595,7 +595,7 @@
     },
     {
       "guid": "d1e5a644-b519-4148-aa00-33deefc01189",
-      "text": "Scompari da questa realtà e riappari nella posizione del bersaglio con una violenta esplosione, infliggendo un <skillcolor>{damage}</c> di danno magico, applicando <chaos>Combustione</c> e attirando i nemici verso il centro del vortice.\\ n\\nQuando riappari, ottieni <chaos>Sbalzo di tensione</c>."
+      "text": "Scompari da questa realtà e riappari nella posizione dell'obiettivo con una violenta esplosione, infliggendo un <skillcolor>{damage}</c> di danno magico, applicando <chaos>Combustione</c> e attirando i nemici verso il centro del vortice.\\ n\\nQuando riappari, ottieni <chaos>Sbalzo di tensione</c>."
     },
     {
       "guid": "f9b75cb3-d9cc-42d6-a549-4d8c156cd7b6",
@@ -679,11 +679,11 @@
     },
     {
       "guid": "553c7641-5b3e-49e6-9ae8-f8aafb6adc66",
-      "text": "Colpire un bersaglio diverso con il secondo proiettile infligge un <skillcolor>{Damage}%</c> di danno aggiuntivo."
+      "text": "Colpire un obiettivo diverso con il secondo proiettile infligge un <skillcolor>{Damage}%</c> di danno aggiuntivo."
     },
     {
       "guid": "5d5c9bd2-42e5-461d-83f9-ba73f0a49012",
-      "text": "Protegge il bersaglio per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
+      "text": "Scuda l'obiettivo per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
     },
     {
       "guid": "312119e2-e81d-434e-a162-377d7973b816",
@@ -751,7 +751,7 @@
     },
     {
       "guid": "d81e0768-9816-43e0-9afe-3968238fb99f",
-      "text": "Fai un balzo e scendi in picchiata sulla posizione del bersaglio, infliggendo un <skillcolor>{damage}</c> di danno magico. Nel luogo dell'impatto scoppia una nova di ghiaccio che <frost>congela</c> i nemici colpiti per un massimo di <skillcolor>{duration} s</c>.\\n\\nI vampiri nemici vengono congelati per <skillcolor>{vampireduration} s</c>."
+      "text": "Fai un balzo e scendi in picchiata sulla posizione dell'obiettivo, infliggendo un <skillcolor>{damage}</c> di danno magico. Nel luogo dell'impatto scoppia una nova di ghiaccio che <frost>congela</c> i nemici colpiti per un massimo di <skillcolor>{duration} s</c>.\\n\\nI vampiri nemici vengono congelati per <skillcolor>{vampireduration} s</c>."
     },
     {
       "guid": "ee19bf4f-c169-4831-a8c9-0fe5e01a3b75",
@@ -807,7 +807,7 @@
     },
     {
       "guid": "94cc61ca-9f46-41b5-8bbe-666c263586a0",
-      "text": "Applica a te o al bersaglio alleato uno scudo capace di assorbire una quantità di danni pari a un <skillcolor>{absorb}</c> del potere dei tuoi incantesimi. Questo effetto lascia dietro di sé una scia di brina che infligge un <skillcolor>{damage}</c> di danno magico ogni <skillcolor>{tick} s</c> e applica <frost>Freddo</c> ai nemici che la attraversano."
+      "text": "Applica a te o all'obiettivo alleato uno scudo capace di assorbire una quantità di danni pari a un <skillcolor>{absorb}</c> del potere dei tuoi incantesimi. Questo effetto lascia dietro di sé una scia di brina che infligge un <skillcolor>{damage}</c> di danno magico ogni <skillcolor>{tick} s</c> e applica <frost>Freddo</c> ai nemici che la attraversano."
     },
     {
       "guid": "406b60e0-b987-4826-b627-42471b3ddc61",
@@ -815,7 +815,7 @@
     },
     {
       "guid": "e38dab48-7895-4e01-9549-d42bc36b0a48",
-      "text": "Trasforma te o il bersaglio alleato in ghiaccio solido, impedendo l'azione o il movimento per un massimo di <skillcolor>{duration} s</c>. Mentre è attivo, il ghiaccio protegge per un <skillcolor>{absorb}</c> del potere dei tuoi incantesimi, conferisce immunità agli effetti di controllo e cura fino a un <skillcolor>{healing}</c> della vitalità massima.\\n\\nL'effetto può essere annullato se <skillcolor>interrotto</c>."
+      "text": "Trasforma te o l'obiettivo alleato in ghiaccio solido, impedendo l'azione o il movimento per un massimo di <skillcolor>{duration} s</c>. Mentre è attivo, il ghiaccio scuda per un <skillcolor>{absorb}</c> del potere dei tuoi incantesimi, conferisce immunità agli effetti di controllo e cura fino a un <skillcolor>{healing}</c> della vitalità massima.\\n\\nL'effetto può essere annullato se <skillcolor>interrotto</c>."
     },
     {
       "guid": "b54c0570-7d4d-4971-b936-b9c596dce19b",
@@ -831,7 +831,7 @@
     },
     {
       "guid": "0b75940f-e57a-4057-896c-fc5520fe37ec",
-      "text": "Evoca una nova di ghiaccio sulla posizione del bersaglio che infligge un <skillcolor>{damage}</c> di danno magico, irradiando <frost>Freddo</c> intorno a sé. Colpire un nemico afflitto da <frost>Freddo</c> lo <frost>congela</c> per <skillcolor>{duration} s</c>.\\n"
+      "text": "Evoca una nova di ghiaccio sulla posizione dell'obiettivo che infligge un <skillcolor>{damage}</c> di danno magico, irradiando <frost>Freddo</c> intorno a sé. Colpire un nemico afflitto da <frost>Freddo</c> lo <frost>congela</c> per <skillcolor>{duration} s</c>.\\n"
     },
     {
       "guid": "f436f894-185a-453f-8c48-5d66317cb61e",
@@ -839,7 +839,7 @@
     },
     {
       "guid": "a677cea5-dfd0-4ad6-90f4-0b532da4f51a",
-      "text": "Crea picchi di ghiaccio nella posizione del bersaglio infliggendo un {damage} di danno magico e Freddo ai nemici colpiti."
+      "text": "Crea picchi di ghiaccio nella posizione dell'obiettivo infliggendo un {damage} di danno magico e Freddo ai nemici colpiti."
     },
     {
       "guid": "196003ac-aa44-48dc-b36a-12e57d97cd51",
@@ -847,7 +847,7 @@
     },
     {
       "guid": "9ef877e8-6ba8-4eb7-bf20-1e7e048960b2",
-      "text": "Scatta nella direzione stabilita, eludendo i nemici vicini per <skillcolor>{duration} s</c>. Il tuo prossimo attacco primario ti cura per un <skillcolor>{healing}</c> della tua vitalità massima, ti protegge per un <skillcolor>{shield}</c> del potere dei tuoi incantesimi e applica <frost>Freddo</c>."
+      "text": "Scatta nella direzione stabilita, eludendo i nemici vicini per <skillcolor>{duration} s</c>. Il tuo prossimo attacco primario ti cura per un <skillcolor>{damage}</c> della tua vitalità massima, ti scuda per un <skillcolor>{shield}</c> del potere dei tuoi incantesimi e applica <frost>Freddo</c>."
     },
     {
       "guid": "f1d3bdf5-ff6f-4a97-941b-68a5ad2b23b2",
@@ -871,7 +871,7 @@
     },
     {
       "guid": "2bc802a8-0efa-471e-9602-52e55e3ffdbb",
-      "text": "<frost>Congela</c> i tuoi nemici, impedendo loro di muoversi o agire.\\n\\nInfligge un <skillcolor>{frostdamage}</c> di danno magico e applica <frost>Freddo</c>, facendo barcollare l'obiettivo per <skillcolor>{staggerduration} s</c> se è immune al <frost>Congelamento</c>.\\n\\n<i>I vampiri rimangono congelati per la <skillcolor>metà del tempo</c>.\\n"
+      "text": "<frost>Congela</c> i tuoi nemici, impedendo loro di muoversi o agire.\\n\\nInfligge un <skillcolor>{frostdamage}</c> di danno magico e applica <frost>Freddo</c>, facendo barcollare l'obiettivo per <skillcolor>{staggerduration } s</c> se è immune al <frost>Congelamento</c>.\\n\\n<i>I vampiri rimangono congelati per la <skillcolor>metà del tempo</c>.\\n"
     },
     {
       "guid": "dc9fec6c-87a0-4634-8bbf-50c90f382cd7",
@@ -903,7 +903,7 @@
     },
     {
       "guid": "3cd0902c-d27e-407c-a406-a412c7877e2e",
-      "text": "Trafigge fino a <skillcolor>{Count}</c> bersaglii, riducendo di un <skillcolor>{Damage}%</c> i danni inflitti per ognuno di essi."
+      "text": "Trafigge fino a <skillcolor>{Count}</c> obiettivi, riducendo di un <skillcolor>{Damage}%</c> i danni inflitti per ognuno di essi."
     },
     {
       "guid": "e5e95425-ba45-495b-ad02-f6329f759d4c",
@@ -915,7 +915,7 @@
     },
     {
       "guid": "862b19aa-e278-4060-8165-ddc97934dcb4",
-      "text": "Colpire un bersaglio afflitto da <frost>Freddo</c> o <frost>Congelamento</c> con il cono gelido ti protegge per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
+      "text": "Colpire un obiettivo afflitto da <frost>Freddo</c> o <frost>Congelamento</c> con il cono gelido ti scuda per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
     },
     {
       "guid": "1be4271f-be82-4821-a2da-8573cbba94cd",
@@ -939,7 +939,7 @@
     },
     {
       "guid": "cd01d43e-f486-429d-8e56-6026d6fcb61f",
-      "text": "Al termine dell'effetto, spinge indietro i nemici per <skillcolor>{Range}</c> metri."
+      "text": "Al termine dell'effetto, spinge indietro i nemici di <skillcolor>{Range}</c> metri."
     },
     {
       "guid": "377511d7-5ec0-472f-b623-301c05d5c26a",
@@ -959,7 +959,7 @@
     },
     {
       "guid": "aa537210-e457-441e-82a6-a24d18e0a8d4",
-      "text": "La nova protegge te e gli alleati per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
+      "text": "La nova scuda te e gli alleati per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
     },
     {
       "guid": "75d9c13c-d358-434d-8f96-3f2fbad3ee12",
@@ -987,7 +987,7 @@
     },
     {
       "guid": "32b584ad-c5a8-48bd-bea2-ca3c774d49c9",
-      "text": "All'impatto, spinge indietro i bersagli di <skillcolor>{Range}</c> metri."
+      "text": "All'impatto, spinge indietro gli obiettivi di <skillcolor>{Range}</c> metri."
     },
     {
       "guid": "c1e1e566-d7fe-4379-82e6-2ccf3caa3d0b",
@@ -1071,27 +1071,27 @@
     },
     {
       "guid": "c9676004-7bde-4ed1-a035-c099f5ffc327",
-      "text": "Aumenta di un <skillcolor>{Damage}%</c> i danni inflitti ai bersagli sotto l'effetto di <frost>Freddo</c> e <frost>Congelamento</c>."
+      "text": "Aumenta di un <skillcolor>{Damage}%</c> i danni inflitti agli obiettivi sotto l'effetto di <frost>Freddo</c> e <frost>Congelamento</c>."
     },
     {
       "guid": "97f12151-3a54-4623-bb00-437aaa45ddf3",
-      "text": "Aumenta di <skillcolor>{Duration} s</c> la durata di <frost>Congelamento</c> quando colpisce un bersaglio afflitto da <frost>Freddo</c>."
+      "text": "Aumenta di <skillcolor>{Duration} s</c> la durata di <frost>Congelamento</c> quando colpisce un obiettivo afflitto da <frost>Freddo</c>."
     },
     {
       "guid": "d37606c9-aba6-4438-9535-6b43290f6147",
-      "text": "Colpire un bersaglio afflitto da <frost>Freddo</c> o <frost>Congelamento</c> ti protegge per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
+      "text": "Colpire un obiettivo afflitto da <frost>Freddo</c> o <frost>Congelamento</c> ti scuda per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
     },
     {
       "guid": "8ad09cb4-ac52-494f-990c-422524ee49d6",
-      "text": "Colpire un bersaglio afflitto da <frost>Freddo</c> o <frost>Congelamento</c> frantuma il proiettile in <skillcolor>{Count}</c> schegge, ciascuna delle quali infligge un <skillcolor>{Damage}%</c> di danni e applica <frost>Freddo</c>."
+      "text": "Colpire un obiettivo afflitto da <frost>Freddo</c> o <frost>Congelamento</c> frantuma il proiettile in <skillcolor>{Count}</c> schegge, ciascuna delle quali infligge un <skillcolor>{Damage}%</c> di danni e applica <frost>Freddo</c>."
     },
     {
       "guid": "4bb56c99-c858-4a1b-9b1d-c7ef94e56fa1",
-      "text": "All'attivazione, carica l'arma del bersaglio con energia artica. Il prossimo attacco primario infligge un <skillcolor>{Damage}%</c> di danno supplementare e applica <frost>Freddo</c>."
+      "text": "All'attivazione, carica l'arma dell'obiettivo con energia artica. Il prossimo attacco primario infligge un <skillcolor>{Damage}%</c> di danno supplementare e applica <frost>Freddo</c>."
     },
     {
       "guid": "6736f965-08c1-4559-a67b-a7c57f589462",
-      "text": "Colpire un bersaglio afflitto da <illusion>Indebolimento</c> ti conferisce uno scudo capace di assorbire un <skillcolor>{Shield}%</c> di danni in base al potere dei tuoi incantesimi, per un massimo di <skillcolor>3</c> volte."
+      "text": "Colpire un obiettivo afflitto da <illusion>Indebolimento</c> ti conferisce uno scudo capace di assorbire un <skillcolor>{Shield}%</c> di danni in base al potere dei tuoi incantesimi, per un massimo di <skillcolor>3</c> volte."
     },
     {
       "guid": "ea84990b-6b4d-4464-ada2-bfd806f588a1",
@@ -1099,7 +1099,7 @@
     },
     {
       "guid": "5a7b98a0-b4f0-484b-917e-a60457b9b226",
-      "text": "Consuma <illusion>Indebolimento</c> da un massimo di <skillcolor>{Count}</c> bersagli, riducendo di <skillcolor>{CooldownReduction} s</c> il tempo di ricarica per ciascuno di essi."
+      "text": "Consuma <blood>Indebolimento</c> da un massimo di <skillcolor>{Count}</c> obiettivi, riducendo di <skillcolor>{CooldownReduction} s</c> il tempo di ricarica per ciascuno di essi."
     },
     {
       "guid": "73f2816e-1ead-4f81-8054-631aac2794aa",
@@ -1135,7 +1135,7 @@
     },
     {
       "guid": "1daee1b4-8391-4e2f-800a-d52f4d465adb",
-      "text": "Quando lanci di nuovo l'incantesimo, esplode all'impatto spingendo indietro i bersagli di <skillcolor>{Range}</c> metri."
+      "text": "Quando lanci di nuovo l'incantesimo, esplode all'impatto spingendo indietro gli obiettivi di <skillcolor>{Range}</c> metri."
     },
     {
       "guid": "d2049a15-932b-4d21-b8d9-9c8dc406118c",
@@ -1143,11 +1143,11 @@
     },
     {
       "guid": "8de27c90-342b-4caf-bf42-6528c7778541",
-      "text": "Consuma <storm>Elettrostaticità</c> per stordire il bersaglio per <skillcolor>{Duration} s</c>."
+      "text": "Consuma <storm>Elettrostaticità</c> per stordire l'obiettivo per <skillcolor>{Duration} s</c>."
     },
     {
       "guid": "234dc4b0-e624-4854-b9f2-76034936ad36",
-      "text": "Consuma <storm>Elettrostaticità</c> per stordire il bersaglio per <skillcolor>{Duration} s</c> quando la sfera esplode."
+      "text": "Consuma <storm>Elettrostaticità</c> per stordire l'obiettivo per <skillcolor>{Duration} s</c> quando la sfera esplode."
     },
     {
       "guid": "84e599ea-9276-4437-a7e1-631ab8ce6814",
@@ -1175,11 +1175,11 @@
     },
     {
       "guid": "8ef20b68-6d1c-48b0-9e64-10ddfe679e8b",
-      "text": "Colpire un bersaglio <unholy>condannato</c> evoca un mago scheletrico che ottiene un <skillcolor>{BonusStats}%</c> di vitalità extra quando il bersaglio muore."
+      "text": "Colpire un obiettivo <unholy>condannato</c> evoca un mago scheletrico che ottiene un <skillcolor>{BonusStats}%</c> di vitalità extra quando l'obiettivo muore."
     },
     {
       "guid": "b71b8e59-9451-4a75-aac1-b205fb6a7fea",
-      "text": "Sferrare un colpo in mischia contro un bersaglio <unholy>condannato</c> evoca un mago scheletrico che ottiene un <skillcolor>{BonusStats}%</c> di vitalità extra quando il bersaglio muore."
+      "text": "Sferrare un colpo in mischia contro un obiettivo <unholy>condannato</c> evoca un mago scheletrico che ottiene un <skillcolor>{BonusStats}%</c> di vitalità extra quando l'obiettivo muore."
     },
     {
       "guid": "65dee646-d655-4632-8072-3f31e7fb5a6b",
@@ -1267,7 +1267,7 @@
     },
     {
       "guid": "2f99e409-221c-4695-8ee3-6840d09bf32d",
-      "text": "Aumenta di un <skillcolor>{attribute}</c> il tasso del tempo di ricarica dell'arma e di un <skillcolor>{factor1}</c> l'incremento di carica dell'arma."
+      "text": "Aumenta di un <skillcolor>{attribute}</c> il tasso del tempo di ricarica dell'arma e di <skillcolor>{factor1}</c> l'incremento di carica dell'arma."
     },
     {
       "guid": "f1937a08-3e92-47c5-821e-47844d6b9a27",
@@ -1431,7 +1431,7 @@
     },
     {
       "guid": "8aec8a7f-3b8b-4ae3-a551-fe0e7f70eb3b",
-      "text": "Ti protegge per un <skillcolor>{absorb}</c> del potere dei tuoi incantesimi e scatena una nova d'ombra che infligge un <skillcolor>{damage}</c> di danno magico, che respinge i nemici se lo scudo viene distrutto dopo aver subito troppi danni."
+      "text": "Ti scuda per un <skillcolor>{absorb}</c> del potere dei tuoi incantesimi e scatena una nova d'ombra che infligge un <skillcolor>{damage}</c> di danno magico, che respinge i nemici se lo scudo viene distrutto dopo aver subito troppi danni."
     },
     {
       "guid": "a0729f30-13b7-4368-9d4d-61406a329297",
@@ -1459,7 +1459,7 @@
     },
     {
       "guid": "45ab11af-ee26-4e0e-ae86-254ed40d54e1",
-      "text": "Inserisci la descrizione della scuola di magia d'ombra qui"
+      "text": "Insert description about shadow magic school here"
     },
     {
       "guid": "d9196800-4986-42cb-a1f3-733d16252843",
@@ -1495,7 +1495,7 @@
     },
     {
       "guid": "d6ba1794-ee8d-4094-b0ed-2bfd61584b11",
-      "text": "Evoca un guardiano spettrale che protegge gli alleati all'interno di un'area per un <skillcolor>{smallabsorb}</c> del potere dei tuoi incantesimi e applica <illusion>Indebolimento</c> ai nemici vicini. Il guardiano attacca con fendente poderoso, infliggendo un <skillcolor>{golemdamage}</c> di danno magico. Lo scudo viene riapplicato ogni <skillcolor>{tickduration} s</c>, mentre il guardiano rimane per <skillcolor>{duration} s</c>."
+      "text": "Evoca un guardiano spettrale che scuda gli alleati all'interno di un'area per un <skillcolor>{smallabsorb}</c> del potere dei tuoi incantesimi e applica <illusion>Indebolimento</c> ai nemici vicini. Il guardiano attacca con fendente poderoso, infliggendo un <skillcolor>{golemdamage}</c> di danno magico. Lo scudo viene riapplicato ogni <skillcolor>{tickduration} s</c>, mentre il guardiano rimane per <skillcolor>{duration} s</c>."
     },
     {
       "guid": "e0d9b118-b737-4259-8381-64ba1a346ef9",
@@ -1547,7 +1547,7 @@
     },
     {
       "guid": "858f0625-4313-4d9c-9850-a835497477b7",
-      "text": "Evoca fantasmi nella posizione del bersaglio che infliggono un {damage} di danno magico e provocano paura a tutti i nemici colpiti per {duration} s."
+      "text": "Evoca fantasmi nella posizione dell'obiettivo che infliggono un {damage} di danno magico e provocano paura a tutti i nemici colpiti per {duration} s."
     },
     {
       "guid": "83207940-bb35-43f7-9e5f-8cf6da56fd8b",
@@ -1555,7 +1555,7 @@
     },
     {
       "guid": "7aba4bd6-59c5-49a9-86f6-fe81f84a9b91",
-      "text": "Evoca nella posizione del bersaglio un assassino spettrale che effettua un attacco in mischia pesante, infliggendo un <skillcolor>{damage}</c> di danno magico ai nemici vicini, respingendoli e applicando <skillcolor>Possessione</c>. Colpire un nemico sotto l'effetto di <skillcolor>Possessione</c> ne consuma l'effetto, attivando <skillcolor>Mietitura d'anime</c>. L'assassino spettrale rimane fino a un massimo di <skillcolor>{duration} s</c>."
+      "text": "Evoca nella posizione dell'obiettivo un assassino spettrale che effettua un attacco in mischia pesante, infliggendo un <skillcolor>{damage}</c> di danno magico ai nemici vicini, respingendoli e applicando <skillcolor>Possessione</c>. Colpire un nemico sotto l'effetto di <skillcolor>Possessione</c> ne consuma l'effetto, attivando <skillcolor>Mietitura d'anime</c>. L'assassino spettrale rimane fino a un massimo di <skillcolor>{duration} s</c>."
     },
     {
       "guid": "fa0e4477-3204-4050-8b57-7ee9c30953e9",
@@ -1695,7 +1695,7 @@
     },
     {
       "guid": "065727f2-e1cf-4672-b926-cd43137e4bad",
-      "text": "Quando viene evocata la zanzara, protegge gli alleati vicini per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
+      "text": "Quando viene evocata la zanzara, scuda gli alleati vicini per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
     },
     {
       "guid": "9a478d6a-92f6-4dea-9cd9-2a271a3e81e4",
@@ -1715,7 +1715,7 @@
     },
     {
       "guid": "3500910f-3f92-477e-aee4-d59bd4dd5898",
-      "text": "Aumenta di un <skillcolor>{SpellPower}%</c> il potere degli incantesimi del bersaglio fintanto che la barriera permane."
+      "text": "Aumenta di un <skillcolor>{SpellPower}%</c> il potere degli incantesimi dell'obiettivo fintanto che la barriera permane."
     },
     {
       "guid": "19e326ae-078c-4302-9316-f5b1b0a28857",
@@ -1735,7 +1735,7 @@
     },
     {
       "guid": "1aaa3f5d-d7fa-4d81-a288-1e5fc13826b4",
-      "text": "Colpire un bersaglio afflitto da <illusion>Indebolimento</c> conferisce <skillcolor>{Stacks}</c> accumuli di <illusion>Fantasma</c>."
+      "text": "Colpire un obiettivo afflitto da <illusion>Indebolimento</c> conferisce <skillcolor>{Stacks}</c> accumuli di <illusion>Fantasma</c>."
     },
     {
       "guid": "f1e3528e-0114-49a0-8317-b48590fcd577",
@@ -1763,7 +1763,7 @@
     },
     {
       "guid": "1b3136ae-f6e3-46cb-a790-7f6532731193",
-      "text": "Colpire un alleato lo protegge per il <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
+      "text": "Colpire un alleato lo scuda per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
     },
     {
       "guid": "89a9aa3d-5767-46d5-977c-a0e36f27da3e",
@@ -1771,7 +1771,7 @@
     },
     {
       "guid": "20cefbb5-ee52-46d9-bf91-4e4e9b7d8513",
-      "text": "Lancia una sfera di fulmini che rimane sul posto e fulmina periodicamente un nemico nelle vicinanze, applicando <storm>Elettrostaticità</c>. Infligge fino a un <skillcolor>{damage}</c> di danno magico per bersaglio per <skillcolor>{duration} s</c>. I danni totali della sfera di fulmini non possono superare un <skillcolor>{multtargetdamage}</c> di danno magico.\\n\\nAl termine della sua durata esplode, infliggendo un <skillcolor>{areadamage}</c> di danno magico nell'area."
+      "text": "Lancia una sfera di fulmini che rimane sul posto e fulmina periodicamente un nemico nelle vicinanze, applicando <storm>Elettrostaticità</c>. Infligge fino a un <skillcolor>{damage}</c> di danno magico per obiettivo per <skillcolor>{duration} s</c>. I danni totali della sfera di fulmini non possono superare un <skillcolor>{multtargetdamage}</c> di danno magico.\\n\\nAl termine della sua durata esplode, infliggendo un <skillcolor>{areadamage}</c> di danno magico nell'area."
     },
     {
       "guid": "40ad7715-1c15-4c7e-af48-5e5514288979",
@@ -1787,7 +1787,7 @@
     },
     {
       "guid": "06850ce7-234b-4996-9c09-cb07d7155226",
-      "text": "Blocca i proiettili e gli attacchi in mischia per un massimo di <skillcolor>{duration} s</c>. Quando un attacco viene bloccato, attiri il bersaglio verso di te ottenendo uno <storm>Scudo tempesta</c>. I nemici che attivano Scarica nelle vicinanze vengono storditi per <skillcolor>{stunduration} s</c>.\\n\\nGli <storm>Scudi tempesta</c> girano attorno a te, infliggendo un <skillcolor>{orbitdamage}</c> di danno magico e applicando <storm>Elettrostaticità</c>. L'effetto è cumulabile fino a <skillcolor>{count}</c> volte."
+      "text": "Blocca i proiettili e gli attacchi in mischia per un massimo di <skillcolor>{duration} s</c>. Quando un attacco viene bloccato, attiri l'obiettivo verso di te ottenendo uno <storm>Scudo tempesta</c>. I nemici che attivano Scarica nelle vicinanze vengono storditi per <skillcolor>{stunduration} s</c>.\\n\\nGli <storm>Scudi tempesta</c> girano attorno a te, infliggendo un <skillcolor>{orbitdamage}</c> di danno magico e applicando <storm>Elettrostaticità</c>. L'effetto è cumulabile fino a <skillcolor>{count}</c> volte."
     },
     {
       "guid": "a222648a-6711-470b-b802-d940dc2baceb",
@@ -1839,7 +1839,7 @@
     },
     {
       "guid": "54c55bed-a1c5-4b4f-89d8-995a95f28e6d",
-      "text": "Lancia un proiettile che infligge un <skillcolor>{damage}</c> di danno magico e applica <storm>Elettrostaticità</c>. All'impatto, tu e l'altro bersaglio vi scambiate di posto.\\n\\nSe il bersaglio è immune all'effetto, ti teletrasporti nella sua posizione."
+      "text": "Lancia un proiettile che infligge un <skillcolor>{damage}</c> di danno magico e applica <storm>Elettrostaticità</c>. All'impatto, tu e l'altro obiettivo vi scambiate di posto.\\n\\nSe l'obiettivo è immune all'effetto, ti teletrasporti nella sua posizione."
     },
     {
       "guid": "ad54783a-3d42-4b07-b2ce-f8384ec1338d",
@@ -1863,7 +1863,7 @@
     },
     {
       "guid": "cd1f12b2-020d-4934-b6ef-82eec87f7afc",
-      "text": "Lancia un proiettile che perfora fino a <skillcolor>3</c> bersaglio, infliggendo un <skillcolor>{damage}</c> di danno magico e applicando <storm>Elettrostaticità</c>. Colpire un nemico affetto da <storm>Elettrostaticità</c> ne consuma l'effetto e silenzia il bersaglio."
+      "text": "Lancia un proiettile che perfora fino a <skillcolor>3</c> obiettivi, infliggendo un <skillcolor>{damage}</c> di danno magico e applicando <storm>Elettrostaticità</c>. Colpire un nemico affetto da <storm>Elettrostaticità</c> ne consuma l'effetto e silenzia l'obiettivo."
     },
     {
       "guid": "c144fe08-fd79-4017-bb44-bd793b6ea654",
@@ -1871,7 +1871,7 @@
     },
     {
       "guid": "1a8fad85-a2c6-4efa-bb0f-896c8121afc9",
-      "text": "Blocca i proiettili e gli attacchi in mischia per un massimo di <skillcolor>{duration} s</c>. Quando un attacco viene bloccato, attiri il bersaglio verso di te, stordendolo per <skillcolor>{stunduration} s</c> e ottenendo uno <storm>Scudo tempesta</c>.\\n\\n Gli <storm>Scudi tempesta</c> girano attorno a te, infliggendo un <skillcolor>{orbitdamage}</c> di danno magico e applicando <storm>Elettrostaticità</c>. L'effetto è cumulabile fino a <skillcolor>{count}</c> volte."
+      "text": "Blocca i proiettili e gli attacchi in mischia per un massimo di <skillcolor>{duration} s</c>. Quando un attacco viene bloccato, attiri l'obiettivo verso di te, stordendolo per <skillcolor>{stunduration} s</c> e ottenendo uno <storm>Scudo tempesta</c>.\\n\\n Gli <storm>Scudi tempesta</c> girano attorno a te, infliggendo un <skillcolor>{orbitdamage}</c> di danno magico e applicando <storm>Elettrostaticità</c>. L'effetto è cumulabile fino a <skillcolor>{count}</c> volte."
     },
     {
       "guid": "6f88d5f8-9a39-4c5e-9024-9f8a70abe81b",
@@ -1879,7 +1879,7 @@
     },
     {
       "guid": "45cbadb8-55ce-43c4-911c-013573dcf8de",
-      "text": "Lancia un proiettile che infligge un <skillcolor>{damage}</c> di danno magico e lancia il bersaglio in aria per <skillcolor>{duration} s</c>."
+      "text": "Lancia un proiettile che infligge un <skillcolor>{damage}</c> di danno magico e lancia l'obiettivo in aria per <skillcolor>{duration} s</c>."
     },
     {
       "guid": "1814336a-db08-43e5-b4bb-02a332ed0338",
@@ -1951,7 +1951,7 @@
     },
     {
       "guid": "94042a8e-44ee-45ba-a1e6-53820382fa75",
-      "text": "<skillcolor>{Chance}%</c> di probabilità di generare uno <storm>Scudo tempesta</c> aggiuntivo al ritorno del ciclone."
+      "text": "Garantisce un <skillcolor>{Chance}%</c> di probabilità di generare uno <storm>Scudo tempesta</c> aggiuntivo al ritorno del ciclone."
     },
     {
       "guid": "dd2c6b6e-f24c-42cb-80a6-e8ba1f74ddec",
@@ -2011,7 +2011,7 @@
     },
     {
       "guid": "cccf732a-8b50-45f6-82be-eeac31f787fb",
-      "text": "Ti protegge per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
+      "text": "Ti scuda per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
     },
     {
       "guid": "fdfc9632-b811-4c79-a4bf-efdba3d611a2",
@@ -2027,7 +2027,7 @@
     },
     {
       "guid": "3dbd623f-0365-4a8f-b98a-477287f27309",
-      "text": "Passare attraverso un muro protegge il bersaglio alleato per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
+      "text": "Passare attraverso un muro scuda l'obiettivo alleato per un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi."
     },
     {
       "guid": "212290f4-dbcd-472e-b24c-bd4f6455e1b5",
@@ -2070,12 +2070,16 @@
       "text": "Catene nefande"
     },
     {
+      "guid": "d069e19e-8bc1-4588-a8b5-10aef5649261",
+      "text": "Lancia una catena che intrappola l'obiettivo colpito, riducendone la velocità di movimento di un <skillcolor>{speedfactor} - {speedfactor2}</c> in base alla distanza dell'obiettivo. Canalizza l'incantesimo per un massimo di <skillcolor>{duration} s</c>. Al termine dell'effetto, infligge un <skillcolor>{damage}</c> di danno magico e applica <unholy>Condanna</c>.\\n\\nSe la distanza tra te e l'obiettivo supera <skillcolor>{distance}</c> metri, il vincolo si rompe e applica una morsa temporanea di <skillcolor>{slowduration} s</c>."
+    },
+    {
       "guid": "090f5547-c30d-42ef-b353-7da661826a4c",
       "text": "Esplosione d'ossa"
     },
     {
       "guid": "8d62c1ef-18a6-4949-a2c1-56c95b9571e9",
-      "text": "Innalza una pila d'ossa dal terreno che esplode nella posizione del bersaglio e infligge un <skillcolor>{damage}</c> di danno magico in un'area, applicando <unholy>Condanna</c>."
+      "text": "Innalza una pila d'ossa dal terreno che esplode nella posizione dell'obiettivo e infligge un <skillcolor>{damage}</c> di danno magico in un'area, applicando <unholy>Condanna</c>."
     },
     {
       "guid": "ee5eb912-522d-4ac4-8089-d0f79104e87e",
@@ -2099,7 +2103,7 @@
     },
     {
       "guid": "f8db154b-156c-430b-9a46-d507001cfbe7",
-      "text": "Evoca un cavaliere della morte nella posizione del bersaglio che attacca i nemici vicini. Ogni colpo infligge un <skillcolor>{damage}</c> di danno magico in un'area e applica <unholy>Condanna</c>. Il cavaliere della morte permane per <skillcolor>{duration} s</c>."
+      "text": "Evoca un cavaliere della morte nella posizione dell'obiettivo che attacca i nemici vicini. Ogni colpo infligge un <skillcolor>{damage}</c> di danno magico in un'area e applica <unholy>Condanna</c>. Il cavaliere della morte permane per <skillcolor>{duration} s</c>."
     },
     {
       "guid": "296e8b2b-73ad-4524-9dde-67b06831d4ca",
@@ -2115,7 +2119,7 @@
     },
     {
       "guid": "afae2682-93b1-4a2f-9694-cc868b645e5e",
-      "text": "Lancia un'ondata di <skillcolor>{count}</c> proiettili empi, ciascuno dei quali infligge un <skillcolor>{damage}</c> di danno magico, respinge il bersaglio e applica <skillcolor>Corruzione</c>."
+      "text": "Lancia un'ondata di <skillcolor>{count}</c> proiettili empi, ciascuno dei quali infligge un <skillcolor>{damage}</c> di danno magico, respinge l'obiettivo e applica <skillcolor>Corruzione</c>."
     },
     {
       "guid": "31e7b084-8e34-4105-8dd7-f746adf25842",
@@ -2175,7 +2179,7 @@
     },
     {
       "guid": "58773194-0cc0-4e3a-b5b6-01dc08d12702",
-      "text": "<unholy>Condanna</c> i tuoi nemici, aumentando i danni che infliggi loro di un <skillcolor>{amplifyfactor}</c> per <skillcolor>{duration} s</c>.\\n\\n<skillcolor>Evoca</c> un guerriero empio che combatte al tuo fianco ogni volta che un bersaglio <unholy>condannato</c> muore."
+      "text": "<unholy>Condanna</c> i tuoi nemici, aumentando i danni che infliggi loro di un <skillcolor>{amplifyfactor}</c> per <skillcolor>{duration} s</c>.\\n\\n<skillcolor>Evoca</c> un guerriero empio che combatte al tuo fianco ogni volta che un obiettivo <unholy>condannato</c> muore."
     },
     {
       "guid": "9793f6a5-4fd2-474a-abcc-26d68318fa13",
@@ -2196,6 +2200,10 @@
     {
       "guid": "1a514ac7-58f3-4564-be9d-2db97bb20feb",
       "text": "Evoca uno spirito osseo che gira attorno all'obiettivo, infliggendo un <skillcolor>{Damage}%</c> di danni e applicando <unholy>Condanna</c> a chiunque colpisca."
+    },
+    {
+      "guid": "6095e639-ab8f-4244-ac5a-79c40da480cb",
+      "text": "Infligge un <skillcolor>{Damage}%</c> di danni ogni <skillcolor>0,7 s</c> durante la canalizzazione, ma riduce i danni all'impatto di un <skillcolor>{Reduction}%</c>."
     },
     {
       "guid": "eadda732-e4f2-4ff0-a764-dd4a09518994",
@@ -2251,7 +2259,7 @@
     },
     {
       "guid": "307b2a30-65a8-4bbd-8da4-e91f6876bccf",
-      "text": "Evoca uno spirito osseo che gira attorno al bersaglio, infliggendo un <skillcolor>{Damage}%</c> di danni e applicando <unholy>Condanna</c> a chiunque colpisca."
+      "text": "Evoca uno spirito osseo che gira attorno all'obiettivo, infliggendo un <skillcolor>{Damage}%</c> di danni e applicando <unholy>Condanna</c> a chiunque colpisca."
     },
     {
       "guid": "3725ed68-b78f-4575-b40f-cc3449d4012b",
@@ -2267,7 +2275,7 @@
     },
     {
       "guid": "4bc7a0d0-b3ed-4d75-9153-81bc7d7aeb14",
-      "text": "Aumenta di un <skillcolor>{Damage}%</c> i danni inflitti ai bersagli sotto la soglia critica della vitalità."
+      "text": "Aumenta di un <skillcolor>{Damage}%</c> i danni inflitti agli obiettivi sotto la soglia critica della vitalità."
     },
     {
       "guid": "02e2943e-34c6-4e52-9f15-ebbe01bdfb98",
@@ -2311,11 +2319,11 @@
     },
     {
       "guid": "c09571d0-9f41-4b44-86db-60c551a256a8",
-      "text": "Aumenta di <skillcolor>{TriggerCount}</c> i bersagli colpiti."
+      "text": "Aumenta di <skillcolor>{TriggerCount}</c> gli obiettivi colpiti."
     },
     {
       "guid": "70cb65d1-f8f4-43f8-9e0e-5893816d1a92",
-      "text": "Riduce il tempo di ricarica di <skillcolor>{Cooldown} s</c> per ogni bersaglio silenziato."
+      "text": "Riduce il tempo di ricarica di <skillcolor>{Cooldown} s</c> per ogni obiettivo silenziato."
     },
     {
       "guid": "87a505b0-ca0f-4c1d-9564-31d2716a972a",
@@ -2323,11 +2331,15 @@
     },
     {
       "guid": "11c28b4e-dc0e-4c04-a039-c4a2c39807a0",
-      "text": "Aumenta di un <skillcolor>{Damage}%</c> i danni inflitti ai bersagli sotto la soglia critica della vitalità."
+      "text": "Aumenta di un <skillcolor>{Damage}%</c> i danni inflitti agli obiettivi sotto la soglia critica della vitalità."
     },
     {
       "guid": "de0f2381-afff-4871-9748-44bbbcf5bcd1",
       "text": "Scattare attraverso un nemico mentre si è immateriali applica <unholy>Condanna</c>."
+    },
+    {
+      "guid": "e0ffd6d4-96c1-4a9b-bf04-5127137fe81d",
+      "text": "Lo scheletro generato esplode dopo <skillcolor>{Duration} s</c>, infliggendo un <skillcolor>{Damage}%</c> di danni e applicando <unholy>Condanna</c> ai nemici vicini."
     },
     {
       "guid": "67735373-35da-49a0-ad69-965b2aa9e8ec",
@@ -2363,7 +2375,7 @@
     },
     {
       "guid": "7d62d47e-d4cc-4d0a-95f2-2c7a3caca27e",
-      "text": "Quando lanci di nuovo l'incantesimo, protegge di un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi gli scheletri alleati colpiti . Lo scudo ha una durata di <skillcolor>{Duration} s</c>."
+      "text": "Quando lanci di nuovo l'incantesimo, scuda di un <skillcolor>{Shield}%</c> del potere dei tuoi incantesimi gli scheletri alleati colpiti . Lo scudo ha una durata di <skillcolor>{Duration} s</c>."
     },
     {
       "guid": "83873572-e3f0-42f8-97c9-06a08648c685",
@@ -2575,7 +2587,7 @@
     },
     {
       "guid": "1dc5d0d1-d1ec-4d93-9bcf-febd965c43fc",
-      "text": "Non puoi trasformarti quando hai seguaci"
+      "text": "Non puoi usare poteri o emote quando hai seguaci"
     },
     {
       "guid": "e8b77439-2f72-4951-bcb4-55f5bdee5474",
@@ -2591,7 +2603,7 @@
     },
     {
       "guid": "3ee798f4-d5d8-4a6e-8fb0-f6fb072773cf",
-      "text": "Pesta a terra per infliggere danni al bersaglio di fronte a te. Può essere usata per <teal3>distruggere gli oggetti risorsa più grandi</c>, come ad esempio i macigni.\\n\\n<red1>Il livello d'attacco è influenzato dall'arma equipaggiata.</c>"
+      "text": "Pesta a terra per infliggere danni all'obiettivo di fronte a te. Può essere usata per <teal3>distruggere gli oggetti risorsa più grandi</c>, come ad esempio i macigni.\\n\\n<red1>Il livello d'attacco è influenzato dall'arma equipaggiata.</c>"
     },
     {
       "guid": "7525ec83-7082-4c43-8678-3aaadf50face",
@@ -2647,11 +2659,11 @@
     },
     {
       "guid": "1d70a029-199f-4cc8-b93b-12509d6f7b3f",
-      "text": "Rilascia bersaglio"
+      "text": "Rilascia obiettivo"
     },
     {
       "guid": "df6424d6-3ee4-42c5-bb68-9266767c2661",
-      "text": "<teal1>Premi e tieni premuto</c> per liberare qualsiasi bersaglio sotto il tuo controllo uccidendolo."
+      "text": "<teal1>Premi e tieni premuto</c> per liberare qualsiasi obiettivo sotto il tuo controllo uccidendolo."
     },
     {
       "guid": "f79d6776-0809-4fff-89eb-ba45fd1a8c5a",
@@ -2695,7 +2707,7 @@
     },
     {
       "guid": "2fe898cf-917e-476b-8d25-3f0b5e194779",
-      "text": "Conferisce abilità di comando che permettono di trasformare i cavalli in tuoi compagni per l'eternità. Non puoi usare incantesimi normali mentre usi Sottometti."
+      "text": "Conferisce abilità di comando che permettono di trasformare i cavalli in compagni a te legati per l'eternità. Non puoi usare incantesimi normali mentre usi Sottometti."
     },
     {
       "guid": "08102e93-6821-46dc-ae54-f87089668960",
@@ -2703,7 +2715,7 @@
     },
     {
       "guid": "b770be6c-bd01-4596-a7be-0119832054c5",
-      "text": "Stai dominando la mente di un nemico. Portalo a una bara del servitore per trasformarlo in un servitore di vampiro o trova un modo per imprigionarlo."
+      "text": "Stai dominando la mente di un nemico. Portalo a una bara del servitore per trasformarlo in un servitore vampiro o trova un modo per imprigionarlo."
     },
     {
       "guid": "47ee2b5c-0620-4313-831b-9fd9f30d849c",
@@ -2787,7 +2799,7 @@
     },
     {
       "guid": "a88026e3-9de1-499a-948a-8b472959ab99",
-      "text": "Trasformarti in un umano ti permette di aggirarti senza problemi negli insediamenti umani. Attenzione, però: gli uomini più forti possono scoprire il tuo travestimento. Quando assumi la forma umana puoi interagire con i commercianti."
+      "text": "Trasformarti in un umano ti permette di aggirarti senza problemi negli insediamenti umani. Attenzione, però: gli uomini più irremovibili possono scoprire il tuo travestimento. Quando assumi la forma umana puoi interagire con i commercianti."
     },
     {
       "guid": "3b5f134b-fed2-43ee-988c-5d424476cb47",
@@ -2919,7 +2931,7 @@
     },
     {
       "guid": "b154ce5d-301e-4326-a8b3-583322bd8197",
-      "text": "Lancia un proiettile che infligge un {damage} di danno magico e applica un {amplify} di amplificazione dei danni al bersaglio per {duration} s."
+      "text": "Lancia un proiettile che infligge un {damage} di danno magico e applica un {amplify} di amplificazione dei danni all'obiettivo per {duration} s."
     },
     {
       "guid": "403b5c70-31ba-411d-b1e7-6d2351da0b40",
@@ -2991,11 +3003,11 @@
     },
     {
       "guid": "be089b44-8746-4290-b01f-2e2dd740f833",
-      "text": "Affetta-vento"
+      "text": "Vento Squarciante"
     },
     {
       "guid": "8a84f7f1-31a2-43d5-bbdc-86d8141a1ac5",
-      "text": "Tieni premuto per scattare in avanti, fendendo qualsiasi cosa lungo il tuo cammino."
+      "text": "Tieni premuto per caricare uno scatto in avanti, fendendo qualsiasi cosa lungo il tuo cammino."
     },
     {
       "guid": "5cbde1ea-4d0d-4401-abbf-0cf17581e144",
@@ -3027,7 +3039,7 @@
     },
     {
       "guid": "399b2538-2ccb-490a-95aa-abcde7451688",
-      "text": "Spara un dardo rapido che infligge un <skillcolor>{damage}</c> di danno fisico, interrompe gli attacchi, e applica <skillcolor>Sotto tiro</c> e una morsa temporanea per <skillcolor>{duration} s</c>. Una volta colpito il bersaglio, il dardo si divide in due."
+      "text": "Spara un dardo rapido che infligge un <skillcolor>{damage}</c> di danno fisico, interrompe gli attacchi, e applica <skillcolor>Sotto tiro</c> e una morsa temporanea per <skillcolor>{duration} s</c>. Una volta colpito l'obiettivo, il dardo si divide in due."
     },
     {
       "guid": "d977e48e-cbc5-4d42-8216-638414da0dc4",
@@ -3075,7 +3087,7 @@
     },
     {
       "guid": "76b8f5e6-465f-4716-95c2-536f2b22866a",
-      "text": "<skillcolor>{chance}%</c> di probabilità di ottenere un accumulo di <illusion>Fantasma</c> con ogni pugnale ritornato."
+      "text": "Garantisce un <skillcolor>{chance}%</c> di probabilità di ottenere un accumulo di <illusion>Fantasma</c> con ogni pugnale ritornato."
     },
     {
       "guid": "5f42bea3-1189-4591-a3de-9c7d5a23ba67",
@@ -3083,7 +3095,7 @@
     },
     {
       "guid": "befad820-a0bb-42a2-a639-d8c046faeed7",
-      "text": "Effettua una serie di attacchi in mischia, infliggendo un <skillcolor>{damage1}</c>/<skillcolor>{damage2}</c>/<skillcolor>{damage3}</c>/<skillcolor>{damage4}</c> di danno fisico. Il colpo finale applica o consuma Frenesia per infliggere un <skillcolor>{bonusdamage}</c> di danno fisico aggiuntivo.\\n<skillcolor>Frenesia</c> conferisce un breve aumento della velocità di movimento e potenzia le tue abilità."
+      "text": "Effettua una serie di attacchi in mischia, infliggendo un <skillcolor>{damage1}</c>/<skillcolor>{damage2}</c>/<skillcolor>{damage3}</c>/<skillcolor>{damage4}</c> di danno fisico. Il colpo finale applica Frenesia, oppure la consuma per infliggere un <skillcolor>{bonusdamage}</c> di danno fisico aggiuntivo.\\n<skillcolor>Frenesia</c> conferisce un breve aumento della velocità di movimento e potenzia le tue abilità."
     },
     {
       "guid": "c6bf6d9c-817e-4ace-b14d-889cf893df83",
@@ -3099,7 +3111,7 @@
     },
     {
       "guid": "1fbb2af1-239f-4a15-b7b4-508bb35bf69c",
-      "text": "Fai un balzo in aria, che infligge danni e rallenta tutti i nemici vicini quando atterri. Applica o consuma Frenesia infliggere danno aggiuntivo e respingere ulteriormente i nemici."
+      "text": "Fai un balzo in aria, che infligge danni e rallenta tutti i nemici vicini quando atterri. Applica Frenesia o la consuma per infliggere danno aggiuntivo e respingere ulteriormente i nemici."
     },
     {
       "guid": "61588315-1cbc-43a7-9584-bfa65245fb14",
@@ -3107,7 +3119,7 @@
     },
     {
       "guid": "e051133c-b299-4730-a67d-83a1f49de2c6",
-      "text": "Evidenzia l'acqua con le bolle per iniziare a pescare. Quindi, aspetta il momento giusto e attivala di nuovo per catturare un pesce o altro."
+      "text": "Passa il mouse sopra l'acqua con le bolle per iniziare a pescare. Quindi, aspetta il momento giusto e attivala di nuovo per catturare un pesce o altro."
     },
     {
       "guid": "5ca3073d-9a8a-4c78-b907-b9a6a7901ad4",
@@ -3139,7 +3151,7 @@
     },
     {
       "guid": "20552ba7-00de-4012-994b-9dfa334cc6bc",
-      "text": "Genera una scossa di assestamento minore quando colpisce il bersaglio, infliggendo un <skillcolor>{Damage}%</c> di danni in linea retta e applicando <chaos>Combustione</c>."
+      "text": "Genera una scossa di assestamento minore quando colpisce l'obiettivo, infliggendo un <skillcolor>{Damage}%</c> di danni in linea retta e applicando <chaos>Combustione</c>."
     },
     {
       "guid": "c7470bbf-079f-496d-8c67-cc9cf3c2dd47",
@@ -3151,7 +3163,7 @@
     },
     {
       "guid": "6428fb85-efa4-4c9d-bcd9-1579b1992944",
-      "text": "Balza in aria e scocca una raffica di frecce sulla posizione del bersaglio. Infligge un {damage} di danno fisico e applica una morsa temporanea a tutti i nemici nell'area per {duration} s."
+      "text": "Balza in aria e scocca una raffica di frecce sulla posizione dell'obiettivo. Infligge un {damage} di danno fisico e applica una morsa temporanea a tutti i nemici nell'area per {duration} s."
     },
     {
       "guid": "124d7cf5-d18f-4189-aa2b-3855898c40cb",
@@ -3243,7 +3255,7 @@
     },
     {
       "guid": "24ad3bdb-c7a9-4eeb-b573-64b925e30dc3",
-      "text": "Infligge un <skillcolor>{Damage}%</c> di danno supplementare ai bersagli <frost>congelati</c>."
+      "text": "Infligge un <skillcolor>{Damage}%</c> di danno supplementare agli obiettivi <frost>congelati</c>."
     },
     {
       "guid": "b5fc5340-d738-436e-a46d-2ad94f20bd79",
@@ -3271,7 +3283,7 @@
     },
     {
       "guid": "ea94a563-6143-409a-a114-c1fecebf7d4b",
-      "text": "Spara <skillcolor>{count}</c> proiettili a ventaglio per <skillcolor>{duration} s</c>, ognuno dei quali infligge un <skillcolor>{damage}</c> di danno fisico e respinge indietro il bersaglio."
+      "text": "Spara <skillcolor>{count}</c> proiettili a ventaglio per <skillcolor>{duration} s</c>, ognuno dei quali infligge un <skillcolor>{damage}</c> di danno fisico e respinge indietro l'obiettivo."
     },
     {
       "guid": "960888dc-3f79-4186-a7a1-fc58e06573ef",
@@ -3279,7 +3291,7 @@
     },
     {
       "guid": "010d1521-5e96-4a0a-9e0e-48d6c3c7ffa3",
-      "text": "Mettere a segno Tiro esplosivo ti permette di rilanciare un secondo tiro. Colpire lo stesso bersaglio attiva immediatamente l'esplosione, infliggendo un <skillcolor>{Damage}%</c> di danno aggiuntivo e applicando <chaos>Combustione</c>."
+      "text": "Mettere a segno Tiro esplosivo ti permette di rilanciare un secondo tiro. Colpire lo stesso obiettivo attiva immediatamente l'esplosione, infliggendo un <skillcolor>{Damage}%</c> di danno aggiuntivo e applicando <chaos>Combustione</c>."
     },
     {
       "guid": "ba5c8777-4b68-4139-98c1-96b765b35b7f",
@@ -3323,7 +3335,7 @@
     },
     {
       "guid": "e91f0a28-a403-410a-a23b-c1949edf873b",
-      "text": "Spara un dardo di magia del caos che infligge un <skillcolor> {damage}</c> di danno fisico quando colpisce il bersaglio. Infligge un {damage2} di danno supplementare ai nemici che sono sotto l'effetto di <chaos>Combustione</c>."
+      "text": "Spara un dardo di magia del caos che infligge un <skillcolor> {damage}</c> di danno fisico quando colpisce l'obiettivo. Infligge un {damage2} di danno supplementare ai nemici che sono sotto l'effetto di <chaos>Combustione</c>."
     },
     {
       "guid": "954be3ea-51aa-4dcd-8ded-a184ef7a2da3",
@@ -3331,7 +3343,7 @@
     },
     {
       "guid": "1364b815-2c19-4b36-9c3d-ed6b8da4bc6e",
-      "text": "Lancia una sfera infuocata sulla posizione del bersaglio che crea un muro di fuoco all'impatto, infliggendo un <skillcolor>{damage}</c> di danno fisico ogni <skillcolor>{interval} s</c> ai nemici avvolti dalle fiamme. I nemici colpiti da questo attacco vengono affetti da <chaos>Combustione</c>."
+      "text": "Lancia una sfera infuocata sulla posizione dell'obiettivo che crea un muro di fuoco all'impatto, infliggendo un <skillcolor>{damage}</c> di danno fisico ogni <skillcolor>{interval} s</c> ai nemici avvolti dalle fiamme. I nemici colpiti da questo attacco vengono affetti da <chaos>Combustione</c>."
     },
     {
       "guid": "cee67181-a29a-4436-84eb-465f4236704b",
@@ -3399,7 +3411,7 @@
     },
     {
       "guid": "a40e75da-a271-45d8-a840-1f69baede8e2",
-      "text": "L'arpione ora ti avvicina verso il bersaglio e applica uno Stordimento di <skillcolor>{StunDuration} s</c> all'impatto; il tempo impiegato per lanciare gli incantesimi viene ridotto a <skillcolor>{CastTime} s</c>."
+      "text": "L'arpione ora ti avvicina verso l'obiettivo e applica uno Stordimento di <skillcolor>{StunDuration} s</c> all'impatto; il tempo impiegato per lanciare gli incantesimi viene ridotto a <skillcolor>{CastTime} s</c>."
     },
     {
       "guid": "5301000a-899d-45e9-973f-453b16b428a9",
@@ -3423,7 +3435,7 @@
     },
     {
       "guid": "7af3fb8f-222e-4736-8b5f-f40554dbaeed",
-      "text": "Emana un'onda d'urto che infligge un <skillcolor>{damage}</c> di danno fisico e lancia in aria i nemici colpiti per <skillcolor>{airduration} s</c>.\\n\\nLancia di nuovo l'abilità per teletrasportarti dal bersaglio, colpendolo con <skillcolor>tre</c> fendenti che infliggono un <skillcolor>{recastdamage}</c> di danno fisico ciascuno."
+      "text": "Emana un'onda d'urto che infligge un <skillcolor>{damage}</c> di danno fisico e lancia in aria i nemici colpiti per <skillcolor>{airduration} s</c>.\\n\\nLancia di nuovo l'abilità per teletrasportarti dall'obiettivo, colpendolo con <skillcolor>tre</c> fendenti che infliggono un <skillcolor>{recastdamage}</c> di danno fisico ciascuno."
     },
     {
       "guid": "d7b7f388-796d-41be-93e6-17555fe7ee89",
@@ -3479,7 +3491,7 @@
     },
     {
       "guid": "e9b78463-6b44-4111-b0ed-b3905d314364",
-      "text": "Il colpo iniziale applica <frost>Freddo</c> e il ritorno delle lame gemelle <frost>congela</c> i nemici affetti da <frost>Freddo</c> per <skillcolor>{duration} s</c>."
+      "text": "Il colpo iniziale applica <frost>Freddo</c> e il ritorno della lama gemella <frost>congela</c> i nemici affetti da <frost>Freddo</c> per <skillcolor>{duration} s</c>."
     },
     {
       "guid": "f483f83d-d5d6-43ad-931a-85ace274a58f",
@@ -3575,15 +3587,15 @@
     },
     {
       "guid": "5bfc891d-2042-4507-9008-f3625f8a2a52",
-      "text": "<teal1>{value}%</c> di aumento della velocità dell'attacco primario e <teal1>{physpower}%</c> di aumento della potenza fisica."
+      "text": "Aumento di un <teal1>{value}%</c> della velocità dell'attacco primario e di un <teal1>{physpower}%</c> della potenza fisica."
     },
     {
       "guid": "fad2ff8b-a3e5-41b4-b5fa-6310987e4a4f",
-      "text": "<teal1>{value}%</c> di aumento della vitalità massima. Quando infliggi un colpo mortale, ti cura per un <teal1>{recovery}</c> della vitalità della tua vittima."
+      "text": "Aumento di un <teal1>{value}%</c> della vitalità massima. Quando infliggi un colpo mortale, ti cura per un <teal1>{recovery}</c> della vitalità della tua vittima."
     },
     {
       "guid": "18745919-510c-47da-83d2-30e5e33daec9",
-      "text": "<teal1>{value}</c> di aumento dell'incremento di carica dell'arma."
+      "text": "Aumento di <teal1>{value}</c> dell'incremento di carica dell'arma."
     },
     {
       "guid": "3acb68cf-4b73-4e05-b856-d80fb3667d6c",
@@ -3591,15 +3603,15 @@
     },
     {
       "guid": "4ab138a7-d2e3-443a-b8c6-6f802fadf79e",
-      "text": "<teal1>{reduce1}-{reduce2}</c> di riduzione dei danni subiti dagli attacchi corrotti e ottieni un <teal1>{leechMin}</c> di Ritorno vitale, ma subisci un aumento di un <teal1>{amplifyMin}</c> di tutti gli altri danni subiti."
+      "text": "Riduzione di <teal1>{reduce1}-{reduce2}</c> dei danni subiti dagli attacchi corrotti e ottieni un <teal1>{leechMin}</c> di Ritorno vitale, ma subisci un aumento di un <teal1>{amplifyMin}</c> di tutti gli altri danni subiti."
     },
     {
       "guid": "f973ff72-1619-48f2-b767-e6ea2b408b6d",
-      "text": "<teal1>{value}%</c> di aumento della velocità di movimento e <teal1>{value2}</c> di aumento della velocità d'attacco, ma c'è un <teal1>{snareMin}</c> di probabilità di scatenare un'eruzione quando si subiscono danni, applicando una morsa temporanea di <teal1>{snareduration} s</c>."
+      "text": "Aumento di un <teal1>{value}%</c> della velocità di movimento e di <teal1>{value2}</c> della velocità d'attacco, ma c'è un <teal1>{snareMin}</c> di probabilità di scatenare un'eruzione quando si subiscono danni, applicando una morsa temporanea di <teal1>{snareduration} s</c>."
     },
     {
       "guid": "81bf8f6f-2492-487e-99a0-947d5dfc3dfa",
-      "text": "Aumenta di un <teal1>{value}</c> l'incremento di carica degli incantesimi e dell'arma, con un <teal1>{minionchance}</c> di probabilità di generare un'ombra che ti attacca quando usi un'abilità."
+      "text": "Aumenta di un <teal1>{value}</c> l'incremento di carica degli incantesimi e dell'arma, ma c'è un <teal1>{minionchance}</c> di probabilità di generare un'ombra che ti attacca quando usi un'abilità."
     },
     {
       "guid": "e81bfd68-2789-4b8b-b413-a02797170814",
@@ -3615,15 +3627,15 @@
     },
     {
       "guid": "f891c908-5da0-4220-a2c7-25588704476e",
-      "text": "<teal1>{value}%</c> di aumento della vitalità massima e <teal1>{regen}%</c> di aumento della rigenerazione della vitalità."
+      "text": "Aumento di un <teal1>{value}%</c> della vitalità massima e di un <teal1>{regen}%</c> della rigenerazione della vitalità."
     },
     {
       "guid": "23d9f3b0-2698-4a66-90b6-6ec8e16aab00",
-      "text": "<teal1>{value}%</c> di aumento della velocità di movimento e <teal1>{speed}%</c> di aumento della velocità di movimento in stato Mutaforma."
+      "text": "Aumento di un <teal1>{value}%</c> della velocità di movimento e di un <teal1>{speed}%</c> della velocità di movimento in stato Mutaforma."
     },
     {
       "guid": "0fa61ece-1185-456d-b67e-90fb5606f239",
-      "text": "<teal1>{value}%</c> di aumento delle cure ricevute e <teal1>{sunresistance}</c> di aumento di tutte le resistenze."
+      "text": "Aumento di un <teal1>{value}%</c> delle cure ricevute e di <teal1>{sunresistance}</c> di tutte le resistenze."
     },
     {
       "guid": "48ebf720-bd2b-4148-82dd-9e2131b69147",
@@ -3631,7 +3643,7 @@
     },
     {
       "guid": "45c1548a-0344-4898-89e6-c444e61bbcb2",
-      "text": "<teal1>{value}</c> di aumento della potenza del critico fisico."
+      "text": "Aumento di <teal1>{value}</c> della potenza del critico fisico."
     },
     {
       "guid": "48773477-79b9-4f7a-9836-c6d75e509454",
@@ -3643,31 +3655,31 @@
     },
     {
       "guid": "f7d7e2a0-e9c0-4d94-88ed-5250f1353741",
-      "text": "<teal1>{value}</c> di aumento del tasso di recupero del tempo di ricarica dello scatto e ottieni <teal1>2</c> cariche dell'abilità."
+      "text": "Aumento di <teal1>{value}</c> del tasso di recupero del tempo di ricarica dello scatto e ottieni <teal1>2</c> cariche dell'abilità."
     },
     {
       "guid": "6c0be856-4c60-4902-b37e-1ca55595efb0",
-      "text": "<teal1>{value}%</c> di riduzione dei danni."
+      "text": "Riduzione di un <teal1>{value}%</c> dei danni."
     },
     {
       "guid": "7e267c4b-e935-4f3b-865c-0a6bab4eed23",
-      "text": "<teal1>{value}%</c> di aumento della potenza fisica e del potere degli incantesimi."
+      "text": "Aumento di un <teal1>{value}%</c> della potenza fisica e del potere degli incantesimi."
     },
     {
       "guid": "79b863b1-7819-4b42-9c1f-3e7e9fed5080",
-      "text": "<teal1>{maxFactor}</c> di aumento della velocità di movimento e <teal1>{maxFactor2}</c> di aumento della velocità dell'attacco primario."
+      "text": "Aumento di <teal1>{maxFactor}</c> della velocità di movimento e di <teal1>{maxFactor2}</c> della velocità dell'attacco primario."
     },
     {
       "guid": "885c89a7-e861-49d9-a52e-e6c5119a21f2",
-      "text": "<teal1>{value}</c> di aumento dell'incremento di carica degli incantesimi e dell'arma."
+      "text": "Aumento di <teal1>{value}</c> dell'incremento di carica degli incantesimi e dell'arma."
     },
     {
       "guid": "abcabcd9-e8d7-4cc5-82b9-af24091d1aa7",
-      "text": "<teal1>{maxFactor}</c> di aumento del tasso del tempo di ricarica del Velo."
+      "text": "Aumento di <teal1>{maxFactor}</c> del tasso del tempo di ricarica del Velo."
     },
     {
       "guid": "73288400-74ea-44d5-a6fc-3ec194918da3",
-      "text": "<teal1>{value}%</c> di aumento delle cure ricevute dal rimedio di sangue."
+      "text": "Aumento di un <teal1>{value}%</c> delle cure ricevute dal rimedio di sangue."
     },
     {
       "guid": "f6f675e2-5e27-4d7b-b1cf-103b50db5802",
@@ -3687,7 +3699,7 @@
     },
     {
       "guid": "76b913ab-6955-458d-a160-89372dccb15d",
-      "text": "<teal1>{value}%</c> di aumento dei danni contro i nemici che hanno meno di un <teal1>{health}</c> di vitalità."
+      "text": "Aumento di un <teal1>{value}%</c> dei danni contro i nemici che hanno meno di un <teal1>{health}</c> di vitalità."
     },
     {
       "guid": "b85302e9-d1e2-4316-b4e6-3745e0e1148e",
@@ -3703,15 +3715,15 @@
     },
     {
       "guid": "8e05cce6-afc7-402f-9a95-1f4a11671f28",
-      "text": "<teal1>{value}%</c> di aumento del potere degli incantesimi e <teal1>{spellCritPower}%</c> di aumento della potenza del critico con gli incantesimi."
+      "text": "Aumento di un <teal1>{value}%</c> del potere degli incantesimi e di un <teal1>{spellCritPower}%</c> della potenza del critico con gli incantesimi."
     },
     {
       "guid": "8dd8cb90-7dae-4c2e-9712-6fc06275a01b",
-      "text": "<teal1>{value}%</c> di aumento del tasso di critico con gli incantesimi. I colpi degli incantesimi conferiscono un <teal1>{speed}%</c> di velocità di movimento per <teal1>{duration} s</c>."
+      "text": "Aumento di un <teal1>{value}%</c> del tasso di critico con gli incantesimi. I colpi degli incantesimi conferiscono un <teal1>{speed}%</c> di velocità di movimento per <teal1>{duration} s</c>."
     },
     {
       "guid": "334ad18d-e754-4c64-91e9-0420e9c33e91",
-      "text": "<teal1>{value}%</c> di aumento di Ritorno vitale degli incantesimi e <teal1>{spellFreeCast}%</c> di aumento di incremento di carica degli incantesimi."
+      "text": "Aumento di un <teal1>{value}%</c> di Ritorno vitale degli incantesimi e di un <teal1>{spellFreeCast}%</c> di incremento di carica degli incantesimi."
     },
     {
       "guid": "4f9faefe-3ba9-4e26-80a0-29f638d23bae",
@@ -3719,7 +3731,7 @@
     },
     {
       "guid": "0d4bdae0-3b4a-451d-b176-c5a5ce4398a8",
-      "text": "<teal1>{value}%</c> di riduzione dei danni subiti e <teal1>{firstStrikeValue}</c> di aumento dei danni quando colpisci nemici al massimo della vitalità."
+      "text": "Riduzione di un <teal1>{value}%</c> dei danni subiti e aumento di <teal1>{firstStrikeValue}</c> dei danni quando colpisci nemici al massimo della vitalità."
     },
     {
       "guid": "2885b0d1-1243-4658-bc2f-6612d3423b93",
@@ -3727,7 +3739,7 @@
     },
     {
       "guid": "29b9cdbb-9644-43c4-be9b-6811b654135d",
-      "text": "<teal1>{value}%</c> di aumento della velocità dell'attacco primario e ottieni un equipaggiamento di livello <teal1>{level}</c>."
+      "text": "Aumento di un <teal1>{value}%</c> della velocità dell'attacco primario e ottieni un equipaggiamento di livello <teal1>{level}</c>."
     },
     {
       "guid": "d177bb54-8bec-4dc0-be0b-28b718888dbd",
@@ -3743,11 +3755,19 @@
     },
     {
       "guid": "865d0148-e3df-4a70-b429-139bb5b93408",
-      "text": "<teal1>{value}%</c> di aumento del potere degli incantesimi e <teal1>{shapeshiftSpeed}%</c> di aumento della velocità di movimento in stato Mutaforma."
+      "text": "Aumento di un <teal1>{value}%</c> del potere degli incantesimi e di un <teal1>{shapeshiftSpeed}%</c> della velocità di movimento in stato Mutaforma."
+    },
+    {
+      "guid": "488f0cf3-4b1f-4151-8239-ae21fde6cdc4",
+      "text": "<teal1>{value}%</c> di aumento del tasso del tempo di ricarica delle abilità ultimate e genera <teal1>2</c> ratti mutanti che combattono al tuo fianco quando lanci un'abilità ultimate."
     },
     {
       "guid": "c8230dea-52aa-4114-9801-6320c8557602",
-      "text": "<teal1>{value}%</c> di potenza delle abilità ultimate e un <teal1>{minionDamage}%</c> di aumento di danni dei servi."
+      "text": "<teal1>{value}%</c> di potenza delle abilità ultimate e aumento di un <teal1>{minionDamage}%</c> di danni dei servi."
+    },
+    {
+      "guid": "cabcc8c5-4c75-47c5-a846-3227ffee03f2",
+      "text": "<teal1>{value}%</c> di aumento del tasso del tempo di ricarica del Velo, e mandare a segno un attacco con il Velo riduce di <teal1>{cooldownreduction} s</c> il tempo di ricarica delle abilità ultimate."
     },
     {
       "guid": "cbf3eeea-1160-4f65-a3d8-78eba3df24bf",
@@ -3759,7 +3779,7 @@
     },
     {
       "guid": "821810fe-1b8e-4996-a6e4-298a7f8891ce",
-      "text": "<teal1>{value}%</c> di aumento dei danni degli attacchi a cavallo."
+      "text": "Aumento di un <teal1>{value}%</c> dei danni degli attacchi a cavallo."
     },
     {
       "guid": "ba665ae7-9f66-4e22-8157-e585e7e5fad0",
@@ -3771,7 +3791,7 @@
     },
     {
       "guid": "8a1fa342-4fa6-48e4-8b57-8ad6f4fcd5f2",
-      "text": "<teal1>{chance}</c> di probabilità che un colpo critico esponga l'armatura delle vittime, aumentando i danni subiti da tutte le fonti di un<teal1>{amplifyfactor}</c> per <teal1>{duration} s</c>."
+      "text": "Garantisce un <teal1>{chance}</c> di probabilità che un colpo critico esponga l'armatura delle vittime, aumentando i danni subiti da tutte le fonti di un <teal1>{amplifyfactor}</c> per <teal1>{duration} s</c>."
     },
     {
       "guid": "343e176a-7ccd-4732-84b6-050803de42cb",
@@ -3779,7 +3799,7 @@
     },
     {
       "guid": "cf59ca46-b6a6-4376-9511-db461efd4400",
-      "text": "<skillcolor>{speed}</c> di aumento della velocità di movimento quando sferri un colpo mortale."
+      "text": "Aumento di <skillcolor>{speed}</c> della velocità di movimento quando sferri un colpo mortale."
     },
     {
       "guid": "ce0b87bd-c814-450f-bd2f-c03cbe18a137",
@@ -3787,15 +3807,15 @@
     },
     {
       "guid": "4c4588c1-225c-4cbe-a129-68574dfdfbff",
-      "text": "<teal1>{value}%</c> di aumento del tasso di critico fisico e <teal1>{critPower}%</c> di aumento della potenza del critico fisico."
+      "text": "Aumento di un <teal1>{value}%</c> del tasso di critico fisico e di un <teal1>{critPower}%</c> della potenza del critico fisico."
     },
     {
       "guid": "3c2e7b0f-157d-4e32-90dc-e7a69745123a",
-      "text": "<teal1>{value}%</c> di aumento della velocità di movimento e <teal1>{speed}</c> di velocità aggiuntiva per <teal1>{duration} s</c> quando sferri un colpo mortale."
+      "text": "Aumento di un <teal1>{value}%</c> della velocità di movimento e <teal1>{speed}</c> di velocità aggiuntiva per <teal1>{duration} s</c> quando sferri un colpo mortale."
     },
     {
       "guid": "ea430342-efd3-4908-83ba-93e300602dde",
-      "text": "<teal1>{value}%</c> di aumento del tasso del tempo di ricarica del Velo e <teal1>{critbonus}</c> di aumento del tasso di critico fisico dopo aver usato un Velo."
+      "text": "Aumento di un  <teal1>{value}%</c> del tasso del tempo di ricarica del Velo e di un <teal1>{critbonus}</c> del tasso di critico fisico dopo aver usato un Velo."
     },
     {
       "guid": "0c2ca516-dfaf-4014-b311-51e0898c6881",
@@ -3835,19 +3855,23 @@
     },
     {
       "guid": "50fab683-d0be-4600-9bc3-158f632693e3",
-      "text": "<teal1>{value}%</c> di aumento del potere degli incantesimi e <teal1>{shieldEfficiency}%</c> di aumento di efficienza dello scudo."
+      "text": "Aumento di un <teal1>{value}%</c> del potere degli incantesimi e di un <teal1>{shieldEfficiency}%</c> di efficienza dello scudo."
     },
     {
       "guid": "2d7dba7d-31d3-46dd-a3eb-35f656c4bb7a",
-      "text": "<teal1>{value}%</c> di aumento del tasso del tempo di ricarica degli incantesimi e ti scuda per un <teal1>{shieldvalue}%</c> del potere dei tuoi incantesimi quando lanci un incantesimo."
+      "text": "Aumento di un <teal1>{value}%</c> del tasso del tempo di ricarica degli incantesimi e lanciare un incantesimo ti scuda per un <teal1>{shieldvalue}%</c> del potere dei tuoi incantesimi."
     },
     {
       "guid": "3fc1c52c-81ca-45ce-9dce-b814ec4a5336",
       "text": "<teal1>{value}%</c> di potenza delle abilità ultimate e azzera il tempo di ricarica dei tuoi incantesimi quando usi un'abilità ultimate."
     },
     {
+      "guid": "65219c1f-c7c0-43fc-bb07-27165a8b59d7",
+      "text": "<teal1>{value}</c> di aumento dell'incremento di carica degli incantesimi."
+    },
+    {
       "guid": "48abfa07-1bfa-46cf-9091-d75175401926",
-      "text": "<teal1>{value}%</c> di aumento della velocità di movimento in stato Mutaforma."
+      "text": "Aumento di un <teal1>{value}%</c> della velocità di movimento in stato Mutaforma."
     },
     {
       "guid": "82ce0086-37c9-48a6-a7a2-e675bc97d709",
@@ -3855,11 +3879,11 @@
     },
     {
       "guid": "659317fc-6fd4-457f-82fc-d0b4dd379851",
-      "text": "<teal1>{value}</c> di aumento del tasso di resistenza al sole."
+      "text": "Aumento di <teal1>{value}</c> del tasso di resistenza al sole."
     },
     {
       "guid": "cd6d5d6f-283b-4f2d-89fa-6592fcfa51d1",
-      "text": "<teal1>{value}%</c> di aumento della potenza fisica."
+      "text": "Aumento di un <teal1>{value}%</c> della potenza fisica."
     },
     {
       "guid": "74e666b5-53f9-401b-bec2-8ab07a1e46c6",
@@ -3867,27 +3891,31 @@
     },
     {
       "guid": "808f2cce-a3db-45a0-9826-88a2210a3c30",
-      "text": "<teal1>{value}%</c> di aumento della potenza del critico fisico."
+      "text": "Aumento di un <teal1>{value}%</c> della potenza del critico fisico."
     },
     {
       "guid": "5b2eecfc-1eb0-4a01-8c73-37c3d0b7df2b",
-      "text": "<teal1>{value}%</c> di riduzione dei danni."
+      "text": "Riduzione di <teal1>{value}%</c> dei danni."
     },
     {
       "guid": "fc4d354c-2e35-4cf0-a610-fee111fbc354",
-      "text": "<teal1>{value}%</c> di aumento della potenza fisica e gli attacchi con il Velo infliggono un <teal1>{veilbonus}%</c> di danno supplementare."
+      "text": "Aumento di un <teal1>{value}%</c> della potenza fisica e gli attacchi con il Velo infliggono un <teal1>{veilbonus}%</c> di danno supplementare."
     },
     {
       "guid": "26d3e8dd-af03-4d55-90d7-da1f5239bf88",
-      "text": "<teal1>{value}%</c> di aumento del tasso del tempo di ricarica dell'arma e <teal1>{leech}%</c> di aumento del Ritorno vitale delle tecniche arma."
+      "text": "Aumento di un <teal1>{value}%</c> del tasso del tempo di ricarica dell'arma e di un <teal1>{leech}%</c> del Ritorno vitale delle tecniche arma."
     },
     {
       "guid": "a6e34899-dd59-4455-a746-4dbb4e6c04c2",
-      "text": "<teal1>{value}%</c> di aumento della potenza delle tecniche arma e <teal1>{extraDamage}%</c> di aumento dei danni quando colpisci nemici al massimo della vitalità."
+      "text": "Aumento di un <teal1>{value}%</c> della potenza delle tecniche arma e di un <teal1>{extraDamage}%</c> dei danni quando colpisci nemici al massimo della vitalità."
+    },
+    {
+      "guid": "a99ddb9b-e06a-422a-861c-0fd2501cc8b6",
+      "text": "Garantisce un <teal1>{chance}</c> di probabilità di parare un attacco, riducendo di un <teal1>{damagereudction}</c> i danni subiti. Parare un attacco aumenta di un <teal1>{factor}</c> la tua potenza fisica per <teal1>{duration} s </c>."
     },
     {
       "guid": "42035506-824b-4f41-ab2c-33b2f8a3d7a0",
-      "text": "<teal1>{value}%</c> di aumento del tasso del tempo di ricarica dell'arma."
+      "text": "Aumento di un <teal1>{value}%</c> del tasso del tempo di ricarica dell'arma."
     },
     {
       "guid": "ee7bc7ec-be8f-4fca-b202-1b2b3fb56274",
@@ -3899,19 +3927,19 @@
     },
     {
       "guid": "7221bca2-006e-467d-afbf-09701421eada",
-      "text": "<teal1>{value}%</c> di aumento della produzione di risorse."
+      "text": "Aumento di un <teal1>{value}%</c> della produzione di risorse."
     },
     {
       "guid": "40ae92f8-69f8-4b7b-934a-b94fd2375efc",
-      "text": "<teal1>{value}%</c> di aumento dei danni contro gli oggetti risorsa."
+      "text": "Aumento di un <teal1>{value}%</c> dei danni contro gli oggetti risorsa."
     },
     {
       "guid": "7f3cd97e-ab6e-4ab5-bc58-fcd88f44a609",
-      "text": "<teal1>{value}%</c> di aumento della velocità a cavallo."
+      "text": "Aumento di un <teal1>{value}%</c> della velocità a cavallo."
     },
     {
       "guid": "c12b5d7a-5ecf-42f1-9737-78b8b71284ed",
-      "text": "<teal1>{factor}</c> di probabilità di distruggere istantaneamente un nodo di risorse e innescare un aumento di velocità."
+      "text": "Garantisce un <teal1>{factor}</c> di probabilità di distruggere istantaneamente un nodo di risorse e innescare un aumento di velocità."
     },
     {
       "guid": "ea127147-40d6-40c2-b1fb-5db85a80f21c",
@@ -4035,7 +4063,7 @@
     },
     {
       "guid": "1bf2d97b-d17c-423d-b1c3-9ff44eb3d728",
-      "text": "Aumenta la velocità di movimento di un <skillcolor>{factor1}</c>, i danni inflitti di un <skillcolor>{factor2}</c>, la velocità d'attacco di un <skillcolor>{factor3}</c> e il Ritorno vitale di un <skillcolor>{factor4}</c>."
+      "text": "Aumenta di un <skillcolor>{factor1}</c> la velocità di movimento, di un <skillcolor>{factor2}</c> i danni inflitti, di un <skillcolor>{factor3}</c> la velocità d'attacco e di un <skillcolor>{factor4}</c> il Ritorno vitale."
     },
     {
       "guid": "b8b85ee6-30fe-4c7a-ae35-b81423850e24",
@@ -4395,7 +4423,7 @@
     },
     {
       "guid": "cf630fb7-ef64-4837-b706-de2a8741466b",
-      "text": "Se il bersaglio muore, <skillcolor>evoca</c> un mago empio per combattere al tuo fianco."
+      "text": "Se l'obiettivo muore, <skillcolor>evoca</c> un mago empio per combattere al tuo fianco."
     },
     {
       "guid": "86f5d486-7e73-4f9c-965a-f9ea03cae858",
@@ -4434,8 +4462,48 @@
       "text": "Riduce i danni inflitti di un <skillcolor>{weakenfactor}</c>."
     },
     {
+      "guid": "6c2b5f1f-ee10-4022-a4f6-4e4b2724d51f",
+      "text": "Squadra rossa"
+    },
+    {
+      "guid": "f785ee2a-7632-4180-b74a-3c98530d4c25",
+      "text": "Squadra blu"
+    },
+    {
+      "guid": "79070767-638f-471b-9f90-ebd2a707eb0b",
+      "text": "Squadra verde"
+    },
+    {
+      "guid": "587bf5ad-620b-46a5-8f51-82cc0184a18c",
+      "text": "Squadra viola"
+    },
+    {
+      "guid": "3ffd469d-fbaa-4efb-b794-2ff8c4dfdecc",
+      "text": "Posiziona uno stendardo della squadra per aggiungere una <teal1>squadra</c> all'arena del castello. Una volta posizionato, i vampiri possono usare lo stendardo per unirsi alla squadra corrispondente.\\n\\nÈ possibile posizionare più stendardi della squadra nella stessa arena, permettendo così ai vampiri di scegliere a quale unirsi."
+    },
+    {
+      "guid": "09755304-443f-4a12-9a2e-ff7751d6f2d0",
+      "text": "Sfera dell'arena"
+    },
+    {
+      "guid": "098042d4-0536-48af-9274-fe7517610291",
+      "text": "Posiziona nell'area una sfera distruttibile che si rigenera periodicamente.\\n\\nDistruggere la sfera <teal1>cura</c> la squadra del giocatore che ha inflitto il colpo finale."
+    },
+    {
+      "guid": "40328b82-16d8-46e8-a260-c5cd0abe2641",
+      "text": "Centro dell'arena"
+    },
+    {
+      "guid": "5e2c39ce-72a7-4d7b-ad54-124e0cdfe6b0",
+      "text": "Posiziona un'area centrale nell'arena.\\n\\nDurante la modalità <teal1>Morte improvvisa</c>, il campo di battaglia si restringerà verso questo punto."
+    },
+    {
       "guid": "51c4337a-94eb-456e-9ee7-b000d06cec84",
       "text": "Comando dell'arena"
+    },
+    {
+      "guid": "fea1a71c-a832-4311-83ce-cd21b6c0cac0",
+      "text": "Una postazione che aggiunge un'<teal1>arena</c> al castello. Permette di avviare o annullare i tornei e stabilire le regole dell'arena.\\n\\nUna volta posizionata, genera un'<teal1>area dell'arena</c> collegata che puoi personalizzare per definire i confini e l'aspetto dell'arena."
     },
     {
       "guid": "a764c0d4-b7c8-4aa9-9a4e-980f8278bf0b",
@@ -4827,11 +4895,11 @@
     },
     {
       "guid": "c770c285-9a57-43f4-b337-1c9cc9625be4",
-      "text": "Sedia \"Cordial\""
+      "text": "Sedia \"Cordiale\""
     },
     {
       "guid": "cf7a2dea-3a14-4e28-8452-70804d984ebc",
-      "text": "Scrittoio \"Cordial\""
+      "text": "Scrittoio \"Cordiale\""
     },
     {
       "guid": "dd216b3b-d20d-4c86-a188-0e65072e9d0d",
@@ -4867,7 +4935,7 @@
     },
     {
       "guid": "7997270e-5496-430d-9e7f-25203b03e5c9",
-      "text": "Serie di vasi \"Pelagic\""
+      "text": "Serie di vasi \"Pelagica\""
     },
     {
       "guid": "c8c7b92a-578e-495e-8f90-b4d1a41c0f36",
@@ -5403,7 +5471,7 @@
     },
     {
       "guid": "5c3276ac-a754-46c4-a949-930cbdbdfca0",
-      "text": "Una superficie piana sollevata e sostenuta da dei supporti."
+      "text": "Una superficie piana rialzata e sostenuta da dei supporti."
     },
     {
       "guid": "15ed9eeb-dc14-4018-bd7f-c5dddf5dfd6c",
@@ -5583,11 +5651,11 @@
     },
     {
       "guid": "77f75bd1-f4f7-469b-b006-1f47042a178d",
-      "text": "Sedia \"Erudition\""
+      "text": "Sedia \"Erudizione\""
     },
     {
       "guid": "d2035016-86bf-4e53-8a1c-02624a8939d3",
-      "text": "Scrittoio \"Omen\""
+      "text": "Scrittoio \"Presagio\""
     },
     {
       "guid": "e1ee2b17-3c9e-4613-89f6-37efdc870f36",
@@ -5615,7 +5683,7 @@
     },
     {
       "guid": "2e6f5852-baa8-4d66-a942-7bfe8f49ecbe",
-      "text": "Serie di vasi \"Augur\""
+      "text": "Serie di vasi \"Augure\""
     },
     {
       "guid": "ebd5145e-1e17-45a5-8576-b873793a0d63",
@@ -5751,7 +5819,7 @@
     },
     {
       "guid": "bf464c30-4318-48c7-9990-7bc2275bc6bc",
-      "text": "Sedia \"Elegance\""
+      "text": "Sedia \"Eleganza\""
     },
     {
       "guid": "b13fdbf4-bd22-4423-b061-a37f28a3e5e6",
@@ -5771,7 +5839,7 @@
     },
     {
       "guid": "74b97868-6563-4cd4-908a-318271c64c3a",
-      "text": "Serie di vasi \"Noble\""
+      "text": "Serie di vasi \"Nobile\""
     },
     {
       "guid": "c4c2ad86-13d2-412a-bdb9-c29295eb8e62",
@@ -5819,7 +5887,7 @@
     },
     {
       "guid": "1841de7e-5bbc-4933-96d1-226f46fcad65",
-      "text": "Campana da porta \"Cordial\""
+      "text": "Campana da porta \"Cordiale\""
     },
     {
       "guid": "eadb1493-2550-43f3-9b5d-2d557e3e87b1",
@@ -5988,6 +6056,10 @@
     {
       "guid": "66eaa0c4-28ee-4fc7-aa1e-a22aee77f4cd",
       "text": "Manichino di addestramento paesano"
+    },
+    {
+      "guid": "2d00e9f3-2ac5-436f-9ea6-0cd0113f88f3",
+      "text": "Campane da porta del castello"
     },
     {
       "guid": "8525d8e1-fbc4-4652-a986-2c29c43c67b1",
@@ -6195,11 +6267,11 @@
     },
     {
       "guid": "3a193038-11a9-4e15-952c-f8b9791d5881",
-      "text": "Parete in mattoni delle scuderie"
+      "text": "Muro in mattoni delle scuderie"
     },
     {
       "guid": "79eba15d-be2c-4dbf-a2d8-848037582ec6",
-      "text": "Pareti in mattoni delle scuderie"
+      "text": "Mura in mattoni delle scuderie"
     },
     {
       "guid": "bd977bf3-d82f-40c6-93c0-368bb6bca8a5",
@@ -6328,6 +6400,10 @@
     {
       "guid": "d55574b1-2cb3-46a6-a4dd-7494b9075460",
       "text": "Dipinti \"Opulenza notturna\""
+    },
+    {
+      "guid": "5777c8c4-4ae5-4c9e-8d13-ea0737dd3abd",
+      "text": "Vasche per il benessere e l'igiene."
     },
     {
       "guid": "8f45c617-82c6-4923-87eb-f4c958177737",
@@ -7227,7 +7303,7 @@
     },
     {
       "guid": "3b83143b-bcda-467e-9471-26d9399b0b6d",
-      "text": "Castle Art Quality Standard Examples"
+      "text": "Esempi di standard di qualità artistica del castello"
     },
     {
       "guid": "0b95cadf-8bb6-409c-ba2f-14a5e2b380dc",
@@ -7735,7 +7811,7 @@
     },
     {
       "guid": "d84dee39-45da-41ea-b10e-080b51a5277f",
-      "text": "<skillcolor>{proc}</c> di probabilità del colpo primario di far ottenere <blood>Sete di sangue</c>. Può attivarsi una volta ogni <skillcolor>{cooldown} s</c>.\\n\\nSblocca l'abilità ultimate <blood>Tempesta di sangue</c>.\\n\\nI frammenti d'anima perdono integrità nel tempo e possono essere riparati solo offrendogli <skillcolor>anime sanguinarie primordiali</c> durante le <skillcolor>incursioni nelle spaccature</c>.\\n\\n<teal2>Impostazioni PvP - Frammenti d'anima unici</c>\\nQuando questa impostazione è attiva, può esserci un solo frammento d'anima per tipo e questi vengono permanentemente distrutti se non riparati."
+      "text": "Garantisce un <skillcolor>{proc}</c> di probabilità del colpo primario di far ottenere <blood>Sete di sangue</c>. Può attivarsi una volta ogni <skillcolor>{cooldown} s</c>.\\n\\nSblocca l'abilità ultimate <blood>Tempesta di sangue</c>.\\n\\nI frammenti d'anima perdono integrità nel tempo e possono essere riparati solo offrendogli <skillcolor>anime sanguinarie primordiali</c> durante le <skillcolor>incursioni nelle spaccature</c>.\\n\\n<teal2>Impostazioni PvP - Frammenti d'anima unici</c>\\nQuando questa impostazione è attiva, può esserci un solo frammento d'anima per tipo e questi vengono permanentemente distrutti se non riparati."
     },
     {
       "guid": "a7e02b2f-4171-4257-9148-32387cbff763",
@@ -7747,7 +7823,7 @@
     },
     {
       "guid": "0497f7df-1c6e-430b-8b98-efd28e3070ca",
-      "text": "<skillcolor>{proc}</c> di probabilità del colpo primario di far ottenere <chaos>Sbalzo di tensione</c>. Può attivarsi una volta ogni <skillcolor>{cooldown} s</c>.\\n\\nSblocca l'abilità ultimate <chaos>Vortice del sisma vacuo</c>.\\n\\nI frammenti d'anima perdono integrità nel tempo e possono essere riparati solo offrendogli <skillcolor>anime sanguinarie primordiali</c> durante le <skillcolor>incursioni nelle spaccature</c>.\\n\\n<teal2>Impostazioni PvP - Frammenti d'anima unici</c>\\nQuando questa impostazione è attiva, può esserci un solo frammento d'anima per tipo e questi vengono permanentemente distrutti se non riparati."
+      "text": "Garantisce un <skillcolor>{proc}</c> di probabilità del colpo primario di far ottenere <chaos>Sbalzo di tensione</c>. Può attivarsi una volta ogni <skillcolor>{cooldown} s</c>.\\n\\nSblocca l'abilità ultimate <chaos>Vortice del sisma vacuo</c>.\\n\\nI frammenti d'anima perdono integrità nel tempo e possono essere riparati solo offrendogli <skillcolor>anime sanguinarie primordiali</c> durante le <skillcolor>incursioni nelle spaccature</c>.\\n\\n<teal2>Impostazioni PvP - Frammenti d'anima unici</c>\\nQuando questa impostazione è attiva, può esserci un solo frammento d'anima per tipo e questi vengono permanentemente distrutti se non riparati."
     },
     {
       "guid": "6029af38-711d-4550-b572-64075b574feb",
@@ -7759,7 +7835,7 @@
     },
     {
       "guid": "f56398ef-bbfa-40ca-8caa-1b5cada4090d",
-      "text": "<skillcolor>{proc}</c> di probabilità del colpo primario di far ottenere <storm>Scudo tempesta</c>. Può attivarsi una volta ogni <skillcolor>{cooldown} s</c>.\\n\\nSblocca l'abilità ultimate <storm>Occhio del ciclone</c>.\\n\\nI frammenti d'anima perdono integrità nel tempo e possono essere riparati solo offrendogli <skillcolor>anime sanguinarie primordiali</c> durante le <skillcolor>incursioni nelle spaccature</c>.\\n\\n<teal2>Impostazioni PvP - Frammenti d'anima unici</c>\\nQuando questa impostazione è attiva, può esserci un solo frammento d'anima per tipo e questi vengono permanentemente distrutti se non riparati."
+      "text": "Garantisce un <skillcolor>{proc}</c> di probabilità del colpo primario di far ottenere <storm>Scudo tempesta</c>. Può attivarsi una volta ogni <skillcolor>{cooldown} s</c>.\\n\\nSblocca l'abilità ultimate <storm>Occhio del ciclone</c>.\\n\\nI frammenti d'anima perdono integrità nel tempo e possono essere riparati solo offrendogli <skillcolor>anime sanguinarie primordiali</c> durante le <skillcolor>incursioni nelle spaccature</c>.\\n\\n<teal2>Impostazioni PvP - Frammenti d'anima unici</c>\\nQuando questa impostazione è attiva, può esserci un solo frammento d'anima per tipo e questi vengono permanentemente distrutti se non riparati."
     },
     {
       "guid": "870b62bb-37e1-4433-ac05-0c29775507af",
@@ -7767,7 +7843,7 @@
     },
     {
       "guid": "c81471f7-fab3-464e-af02-4d1acf45eab0",
-      "text": "<skillcolor>{proc}</c> di probabilità del colpo primario di far ottenere <illusion>Egida fantasma</c>. Può attivarsi una volta ogni <skillcolor>{cooldown} s</c>.\\n\\nSblocca l'abilità ultimate <illusion>Bacio del serpente</c>.\\n\\nI frammenti d'anima perdono integrità nel tempo e possono essere riparati solo offrendogli <skillcolor>anime sanguinarie primordiali</c> durante le <skillcolor>incursioni nelle spaccature</c>.\\n\\n<teal2>Impostazioni PvP - Frammenti d'anima unici</c>\\nQuando questa impostazione è attiva, può esserci un solo frammento d'anima per tipo e questi vengono permanentemente distrutti se non riparati."
+      "text": "Garantisce un <skillcolor>{proc}</c> di probabilità del colpo primario di far ottenere <illusion>Egida fantasma</c>. Può attivarsi una volta ogni <skillcolor>{cooldown} s</c>.\\n\\nSblocca l'abilità ultimate <illusion>Bacio del serpente</c>.\\n\\nI frammenti d'anima perdono integrità nel tempo e possono essere riparati solo offrendogli <skillcolor>anime sanguinarie primordiali</c> durante le <skillcolor>incursioni nelle spaccature</c>.\\n\\n<teal2>Impostazioni PvP - Frammenti d'anima unici</c>\\nQuando questa impostazione è attiva, può esserci un solo frammento d'anima per tipo e questi vengono permanentemente distrutti se non riparati."
     },
     {
       "guid": "ad330dd2-1c52-49db-91ac-81a808347b8e",
@@ -7779,7 +7855,7 @@
     },
     {
       "guid": "1edff664-5226-48af-a613-f0d71b6cdbed",
-      "text": "<skillcolor>{proc}</c> di probabilità del colpo primario di generare un <unholy>cavaliere della morte</c>. Può attivarsi una volta ogni <skillcolor>{cooldown} s</c>.\\n\\nSblocca l'abilità ultimate <unholy>Angelo caduto</c>.\\n\\nI frammenti d'anima perdono integrità nel tempo e possono essere riparati solo offrendogli <skillcolor>anime sanguinarie primordiali</c> durante le <skillcolor>incursioni nelle spaccature</c>.\\n\\n<teal2>Impostazioni PvP - Frammenti d'anima unici</c>\\nQuando questa impostazione è attiva, può esserci un solo frammento d'anima per tipo e questi vengono permanentemente distrutti se non riparati."
+      "text": "Garantisce un <skillcolor>{proc}</c> di probabilità del colpo primario di generare un <unholy>cavaliere della morte</c>. Può attivarsi una volta ogni <skillcolor>{cooldown} s</c>.\\n\\nSblocca l'abilità ultimate <unholy>Angelo caduto</c>.\\n\\nI frammenti d'anima perdono integrità nel tempo e possono essere riparati solo offrendogli <skillcolor>anime sanguinarie primordiali</c> durante le <skillcolor>incursioni nelle spaccature</c>.\\n\\n<teal2>Impostazioni PvP - Frammenti d'anima unici</c>\\nQuando questa impostazione è attiva, può esserci un solo frammento d'anima per tipo e questi vengono permanentemente distrutti se non riparati."
     },
     {
       "guid": "046be18d-eb8b-48b9-80bb-3999dbe61e1a",
@@ -8163,7 +8239,7 @@
     },
     {
       "guid": "9ed2fd58-6aa5-4d13-8fde-e89a8bad5cf2",
-      "text": "Colonne a traliccio \"Noble\""
+      "text": "Colonne a traliccio \"Nobile\""
     },
     {
       "guid": "aa7c0c78-9a92-43a7-9b89-e3e7a6db1929",
@@ -8331,7 +8407,7 @@
     },
     {
       "guid": "2e88f2f7-4526-4fc6-acc2-5a1cdcaafc25",
-      "text": "Tralicci \"Noble\""
+      "text": "Tralicci \"Nobile\""
     },
     {
       "guid": "782c9751-5ee5-415a-be4d-f896c8196658",
@@ -8815,11 +8891,11 @@
     },
     {
       "guid": "6e330697-6828-4555-a240-08510ac50926",
-      "text": "Muro dell'arena"
+      "text": "Parete dell'arena"
     },
     {
       "guid": "f6bc6a83-d8c1-4c52-84bc-2353cfcebbc2",
-      "text": "Mura dell'arena"
+      "text": "Pareti dell'arena"
     },
     {
       "guid": "65fd4c78-8192-432d-84c9-5870d58a3fb0",
@@ -8922,14 +8998,6 @@
       "text": "All'altare del raccoglimento puoi azzerare le scelte effettuate nel libro degli incantesimi."
     },
     {
-      "guid": "db058eb8-bed8-4254-8761-98b90a65b614",
-      "text": "Banca del sangue"
-    },
-    {
-      "guid": "f9659cc7-ffcc-4658-b06d-f2290ee1e803",
-      "text": "Un contenitore per il sangue. Collegalo con delle tubature a uno o più estrattori di sangue per riempirlo e mescolare varie fonti ematiche."
-    },
-    {
       "guid": "8b2257a3-f137-4e28-a036-4988a703d2fe",
       "text": "Miscelatore di sangue"
     },
@@ -8992,6 +9060,10 @@
     {
       "guid": "b14514d9-5513-4a7a-b353-7baa9355b3eb",
       "text": "Inserisci un'<teal1>arma ancestrale</c>, un'<teal1>arma in frantumi</c> o un <teal1>gioiello incantato</c> per avviare il processo di fusione."
+    },
+    {
+      "guid": "e4b171e0-a34a-4df7-880c-a7293e57425e",
+      "text": "Inserisci un <teal1>gioiello incantato</c> compatibile nello slot secondario per continuare il processo di fusione.\\n\\nIl <teal1>gioiello incantato</c> ottenuto conserverà il nome del <teal1>gioiello incantato</c> primario.\\n\\nL'oggetto secondario verrà distrutto nel processo."
     },
     {
       "guid": "c706ffa0-c322-4448-8d43-99a1e88dc609",
@@ -9131,7 +9203,7 @@
     },
     {
       "guid": "2b832334-84dd-41b5-a809-315cb6211a29",
-      "text": "Altare del risveglio dello Stige"
+      "text": "Risveglio dell'altare dello Stige"
     },
     {
       "guid": "7480aad6-8886-468c-b30f-2eb70a21c423",
@@ -9399,7 +9471,7 @@
     },
     {
       "guid": "53e7a8b7-a5c8-4a41-8c41-e31c9bebd3a9",
-      "text": "Forfeit"
+      "text": "Arrenditi"
     },
     {
       "guid": "8bb5dab3-aea6-4055-89de-901c1af9416c",
@@ -9475,7 +9547,7 @@
     },
     {
       "guid": "c2b933c8-a9ac-4367-af7a-fedd6bf37df4",
-      "text": "Scatto"
+      "text": "Scatta"
     },
     {
       "guid": "e32095fd-cb3f-4a0d-9360-63458d726504",
@@ -9679,7 +9751,7 @@
     },
     {
       "guid": "1023f5b9-0b55-4ead-a913-21549bf7161f",
-      "text": "Aumenta la velocità d'attacco di un <teal2>{SetBonusValue}</c> e la potenza fisica bonus di <teal2>{SetBonusValue2}</c>."
+      "text": "Aumenta di un <teal2>{SetBonusValue}</c> la velocità d'attacco e di <teal2>{SetBonusValue2}</c> la potenza fisica bonus."
     },
     {
       "guid": "a6b09eb1-fc26-4b24-b5e9-26a0b199886d",
@@ -9699,11 +9771,11 @@
     },
     {
       "guid": "ea048166-f58d-472c-b1c3-1210030c2912",
-      "text": "Aumenta la vitalità massima bonus di <teal2>{SetBonusValue}</c>."
+      "text": "Aumenta di <teal2>{SetBonusValue}</c la vitalità massima bonus>."
     },
     {
       "guid": "de556a6b-0ca1-4470-95ba-06e167ddad97",
-      "text": "Aumenta la vitalità massima bonus di <teal2>{SetBonusValue}</c> e la potenza fisica bonus di <teal2>{SetBonusValue2}</c>."
+      "text": "Aumenta di <teal2>{SetBonusValue}</c> la vitalità massima bonus e di <teal2>{SetBonusValue2}</c> la potenza fisica bonus."
     },
     {
       "guid": "547a6447-0eb1-44a5-a2d5-c41507d17e41",
@@ -9711,19 +9783,19 @@
     },
     {
       "guid": "bda197d6-e176-4d91-a0ce-5b0c8b2da39b",
-      "text": "Aumenta la velocità di movimento di un <teal2>{SetBonusValue}</c> e il tasso di critico fisico di un <teal2>{SetBonusValue2}</c>."
+      "text": "Aumenta di un <teal2>{SetBonusValue}</c> la velocità di movimento e di un <teal2>{SetBonusValue2}</c> il tasso di critico fisico."
     },
     {
       "guid": "0069f330-056b-4b00-95d2-f69037e0d1da",
-      "text": "Aumenta la potenza fisica bonus di un <teal2>{SetBonusValue1}</c> e il potere degli incantesimi bonus di un <teal2>{SetBonusValue2}</c>."
+      "text": "Aumenta di un <teal2>{SetBonusValue1}</c> la potenza fisica bonus e di un <teal2>{SetBonusValue2}</c> il potere degli incantesimi bonus."
     },
     {
       "guid": "357e08c3-6014-4bd5-a642-10b6c0fcc381",
-      "text": "Aumenta il tasso di critico fisico di un <teal2>{SetBonusValue}</c>."
+      "text": "Aumenta di un <teal2>{SetBonusValue}</c> il tasso di critico fisico."
     },
     {
       "guid": "ff040ef4-3d25-44e1-94f2-c952a6c767c8",
-      "text": "Aumenta la potenza del critico fisico di un <teal2>{SetBonusValue}</c>."
+      "text": "Aumenta di un <teal2>{SetBonusValue}</c> la potenza del critico fisico."
     },
     {
       "guid": "68f3770c-79de-45ec-ad60-014387e0c3e0",
@@ -9731,7 +9803,7 @@
     },
     {
       "guid": "b717f62a-84a4-488f-9a37-7303f7fe6b6e",
-      "text": "Aumenta la potenza fisica bonus di <teal2>{SetBonusValue}</c>."
+      "text": "Aumenta di <teal2>{SetBonusValue}</c> la potenza fisica bonus."
     },
     {
       "guid": "b204d921-84ed-445b-b492-4d92d3f906fc",
@@ -9743,11 +9815,11 @@
     },
     {
       "guid": "44a9c357-8d23-4f41-8ba6-045e7fba4462",
-      "text": "Aumenta il tasso del tempo di ricarica degli incantesimi di un <teal2>{SetBonusValue}</c>."
+      "text": "Aumenta di un <teal2>{SetBonusValue}</c> il tasso del tempo di ricarica degli incantesimi."
     },
     {
       "guid": "77316140-4201-40b6-b403-fa594089180f",
-      "text": "Aumenta il tasso di critico con gli incantesimi di un <teal2>{SetBonusValue}</c>."
+      "text": "Aumenta di un <teal2>{SetBonusValue}</c> il tasso di critico con gli incantesimi."
     },
     {
       "guid": "dfcb0ab6-1d64-4556-a257-727015bfe4cb",
@@ -9755,7 +9827,7 @@
     },
     {
       "guid": "b2dc09fb-1a5c-4400-b4e4-ccb313a3c026",
-      "text": "Aumenta il potere degli incantesimi bonus di <teal2>{SetBonusValue}</c>."
+      "text": "Aumenta di <teal2>{SetBonusValue}</c> il potere degli incantesimi bonus."
     },
     {
       "guid": "f33469b5-9346-4ccd-9fd3-5de8d924b27c",
@@ -9767,7 +9839,7 @@
     },
     {
       "guid": "0ea4c73a-3155-4b11-b661-beb3b44644df",
-      "text": "Aumenta il tasso del tempo di ricarica del Velo di un <teal2>{SetBonusValue}</c>."
+      "text": "Aumenta di un <teal2>{SetBonusValue}</c> il tasso del tempo di ricarica del Velo."
     },
     {
       "guid": "5366067e-671a-418c-847d-4e8518afe9fa",
@@ -9799,11 +9871,11 @@
     },
     {
       "guid": "50b9ecb1-2331-4a88-88e7-82db2868f0ef",
-      "text": "Aumenta il tasso del tempo di ricarica dell'arma di un <teal2>{SetBonusValue}</c>."
+      "text": "Aumenta di un <teal2>{SetBonusValue}</c> il tasso del tempo di ricarica dell'arma."
     },
     {
       "guid": "bf25df09-f6a6-4366-a796-1b81909c9d0c",
-      "text": "Aumenta la potenza della tecnica arma di un <teal2>{SetBonusValue}</c>."
+      "text": "Aumenta di un <teal2>{SetBonusValue}</c> la potenza della tecnica arma."
     },
     {
       "guid": "9e2ea30c-6aab-494f-9969-f9c7a40f5b56",
@@ -9963,7 +10035,7 @@
     },
     {
       "guid": "42c45bce-5800-415d-a452-2b8e91d55e36",
-      "text": "Rotola in direzione del bersaglio, stordendo i nemici investiti durante l'azione per <skillcolor>{minduration} s - {maxduration} s</c> proporzionalmente alla distanza percorsa. Ricevere danni di qualunque tipo interrompe l'effetto."
+      "text": "Rotola in direzione dell'obiettivo, stordendo i nemici investiti durante l'azione per <skillcolor>{minduration} s - {maxduration} s</c> proporzionalmente alla distanza percorsa. Ricevere danni di qualunque tipo interrompe l'effetto."
     },
     {
       "guid": "faf99a30-bc16-47ba-aae1-8a0e5db8ae17",
@@ -12695,7 +12767,7 @@
     },
     {
       "guid": "259c0f1c-5541-4400-85e0-077175582462",
-      "text": "Accedendo a un <teal2>cuore del castello nemico di livello {level}</c>, puoi usare delle <skillcolor>chiavi del castello di livello {level}</c> per innescare varie azioni.\\n\\n<teal2>Disabilita le difese</c>\\nUsa <skillcolor>{countdisable} chiave</c> per disattivare mura, porte, portali e bare nemiche.\\nDisponibile nelle impostazioni di <skillcolor>PvP standard</c>.\\n\\n<teal2>Distruggi castello</c>\\nUsa <skillcolor>{countdestroy} chiave</c> per distruggere permanentemente il castello.\\nDisponibile nelle impostazioni di <skillcolor>PvP Senza pietà</c>.\\n\\n<teal2>Rivendica castello</c>\\nUsa <skillcolor>{countclaim} chiavi</c> per prendere il controllo del castello.\\nDisponibile nelle impostazioni di <skillcolor>PvP Senza pietà</c>.\\n"
+      "text": "Accedendo a un <teal2>cuore del castello nemico di livello {level}</c>, puoi usare delle <skillcolor>chiavi del castello di livello {level}</c> per innescare varie azioni.\\n\\n<teal2>Disabilita le difese</c>\\nUsa <skillcolor>{countdisable} chiave</c> per disattivare mura, porte, portali e bare nemiche.\\nDisponibile nelle impostazioni di <skillcolor>PvP standard</c>.\\n\\n<teal2>Distruggi castello</c>\\n Usa <skillcolor>{countdestroy} chiave</c> per distruggere permanentemente il castello.\\nDisponibile nelle impostazioni di <skillcolor>PvP Senza pietà</c>.\\n\\n<teal2>Rivendica castello</c>\\nUsa <skillcolor>{countclaim} chiavi</c> per prendere il controllo del castello\\nDisponibile nelle impostazioni di <skillcolor>PvP Senza pietà</c>.\\n"
     },
     {
       "guid": "9024056e-bc99-4713-ba52-f2c6874acafd",
@@ -13731,23 +13803,23 @@
     },
     {
       "guid": "8c720ba8-1c0f-4b36-8a35-2dc3030d4563",
-      "text": "Un gioiello intriso di <chaos>magia del caos</c>.\\n\\nPuò essere usato per migliorare un <teal1>incantesimo</c> associandolo ad esso nel <teal1>libro degli incantesimi</c>."
+      "text": "Un gioiello intriso di <blood>magia del caos</c>.\\n\\nPuò essere usato per migliorare un <teal1>incantesimo</c> associandolo ad esso nel <teal1>libro degli incantesimi</c>."
     },
     {
       "guid": "d3dab18e-070a-4891-94b7-95a71c035f5e",
-      "text": "Un gioiello intriso di <frost>magia del ghiaccio</c>.\\n\\nPuò essere usato per migliorare un <teal1>incantesimo</c> associandolo ad esso nel <teal1>libro degli incantesimi</c>."
+      "text": "Un gioiello intriso di <blood>magia del ghiaccio</c>.\\n\\nPuò essere usato per migliorare un <teal1>incantesimo</c> associandolo ad esso nel <teal1>libro degli incantesimi</c>."
     },
     {
       "guid": "9aeef38d-25e5-4ef8-945b-8862ea277da3",
-      "text": "Un gioiello intriso di <illusion>magia dell'illusione</c>.\\n\\nPuò essere usato per migliorare un <teal1>incantesimo</c> associandolo ad esso nel <teal1>libro degli incantesimi</c>."
+      "text": "Un gioiello intriso di <blood>magia dell'illusione</c>.\\n\\nPuò essere usato per migliorare un <teal1>incantesimo</c> associandolo ad esso nel <teal1>libro degli incantesimi</c>."
     },
     {
       "guid": "b2713f33-766f-4b36-9da9-d179a7600858",
-      "text": "Un gioiello intriso di <storm>magia della tempesta</c>.\\n\\nPuò essere usato per migliorare un <teal1>incantesimo</c> associandolo ad esso nel <teal1>libro degli incantesimi</c>."
+      "text": "Un gioiello intriso di <blood>magia della tempesta</c>.\\n\\nPuò essere usato per migliorare un <teal1>incantesimo</c> associandolo ad esso nel <teal1>libro degli incantesimi</c>."
     },
     {
       "guid": "57d7bee2-e30d-4611-af4a-5469f8f2564f",
-      "text": "Un gioiello intriso di <unholy>magia empia</c>.\\n\\nPuò essere usato per migliorare un <teal1>incantesimo</c> associandolo ad esso nel <teal1>libro degli incantesimi</c>."
+      "text": "Un gioiello intriso di <blood>magia empia</c>.\\n\\nPuò essere usato per migliorare un <teal1>incantesimo</c> associandolo ad esso nel <teal1>libro degli incantesimi</c>."
     },
     {
       "guid": "11032e5f-3d52-49f8-964f-96f8d202f3a0",
@@ -15255,7 +15327,7 @@
     },
     {
       "guid": "3fbcbbb5-60f0-4e15-9432-c16ca7686ac1",
-      "text": "Ho migliorato il cuore del castello, che mi permetterà di espandere ulteriormente il mio regno."
+      "text": "Ho eseguito l'upgrade del cuore del castello, che mi permetterà di espandere ulteriormente il mio regno."
     },
     {
       "guid": "8247e2dc-befd-4bef-84c8-ff5ad88f9a4d",
@@ -15559,7 +15631,7 @@
     },
     {
       "guid": "fffb284a-857d-4cc2-a1e8-2b1aa657ab7e",
-      "text": "Riduce la difficoltà di <teal2>{value}</c> durante la caccia in aree abitate da mostri e creature."
+      "text": "Riduce la difficoltà di un <teal2>{value}</c> durante la caccia in aree abitate da mostri e creature."
     },
     {
       "guid": "d5a621d0-7058-4727-b8a5-d7833e669be3",
@@ -15939,7 +16011,7 @@
     },
     {
       "guid": "daba72fe-b554-4066-a2e9-4eb89aaf4a4d",
-      "text": "Riduce i danni subiti dagli attacchi sacri di un <yellow1>{damageReduction}%</c> e annulla il danno delle <teal1>Radiazioni sacre</c> fino a <yellow1>{damageAbsorb}</c>."
+      "text": "Riduce i danni subiti dagli attacchi sacri di un <yellow1>{damageReduction}%</c> e annulla il danno delle <teal1>Radiazioni sacre</c> fino a un <yellow1>{damageAbsorb}</c>."
     },
     {
       "guid": "909a9cac-b95a-47d0-b4e0-e38d08a9c136",
@@ -16051,7 +16123,7 @@
     },
     {
       "guid": "c3ae5673-3e09-47b3-bed7-37a9d9149be5",
-      "text": "Vitalità recuperata quando si infliggono danni utilizzando le tecniche arma."
+      "text": "La vitalità recuperata quando si infliggono danni utilizzando le tecniche arma."
     },
     {
       "guid": "f3fd9f1e-aaf3-45df-b430-4fdbda9faa7c",
@@ -16087,7 +16159,7 @@
     },
     {
       "guid": "3b58d63d-4b06-41fc-b3fc-47c568595aaa",
-      "text": "Vitalità recuperata quando si infliggono danni utilizzando gli attacchi con armi primarie."
+      "text": "La vitalità recuperata quando si infliggono danni utilizzando gli attacchi con armi primarie."
     },
     {
       "guid": "73f68829-e778-4c86-8c81-6fb5c7ffe29b",
@@ -16191,7 +16263,7 @@
     },
     {
       "guid": "757a1e68-5da3-4394-8226-f32996964a6c",
-      "text": "Riduce i danni subiti dagli attacchi con l'argento di un <yellow1>{damageReduction}%</c> e ti permette di sopportare fino a <yellow1>{stacksAbsorb}</c> accumuli di <teal1>Esposizione all'argento</c>."
+      "text": "Riduce i danni subiti dagli attacchi con l'argento di un <yellow1>{damageReduction}%</c> e ti permette di sopportare fino a <yellow1>{damageAbsorb}</c> accumuli di <teal1>Esposizione all'argento</c>."
     },
     {
       "guid": "50b43d76-8362-4cec-9b83-264c6a50bec6",
@@ -16328,6 +16400,10 @@
     {
       "guid": "3d9276dd-8159-4365-a83c-3a9109407ae7",
       "text": "Aumenta il tasso di recupero del tempo di ricarica delle tecniche arma."
+    },
+    {
+      "guid": "9426c79a-3306-4c9c-b6c2-3c67195c0a8c",
+      "text": "Incremento di carica dell'arma"
     },
     {
       "guid": "def50330-9cf0-4d6e-90d4-9da9024fc78c",
@@ -16659,11 +16735,11 @@
     },
     {
       "guid": "5aef493e-ad17-4259-9a14-1b3371bed80d",
-      "text": "Un'alchimista instancabile, dal genio caotico e dalla resistenza leggendaria. È ossessionata dall'idea di creare la formula della Linfa velenosa perfetta per ogni occasione e sostiene che la sua genialità sia un dono della regina Megara, che le infonde una sorta di ispirazione divina. Curiosamente, però, questa scintilla creativa arriva sempre quando si dimentica di sostituire i filtri della sua maschera protettiva."
+      "text": "Un'alchimista instancabile, dal genio caotico e dalla resistenza leggendaria. È ossessionata dall'idea di creare la formula della Linfa velenosa perfetta per ogni occasione e sostiene che la sua genialità sia un dono della regina Megara, che le infonde una sorta di ispirazione divina. Curiosamente, però, questa scintilla creativa arriva sempre quando Lucile si dimentica di sostituire i filtri della sua maschera protettiva."
     },
     {
       "guid": "740edb57-0a6c-4919-b70f-906cdc3544bb",
-      "text": "Lurker"
+      "text": "Pedinatore"
     },
     {
       "guid": "3f1dada3-dbf3-48fe-9bff-6b214a797a30",
@@ -16679,7 +16755,7 @@
     },
     {
       "guid": "831c00a5-f48a-4041-91d4-4d014dc74a5f",
-      "text": "Revenant"
+      "text": "Redivivo"
     },
     {
       "guid": "8a8deaeb-048c-4c14-8d69-61fdebb357e3",
@@ -16687,7 +16763,7 @@
     },
     {
       "guid": "d9d28939-23b5-4f91-b53a-1fde1c33f4fd",
-      "text": "Scioperante"
+      "text": "Picchiatore"
     },
     {
       "guid": "9432cd54-b5b8-45b3-b5b9-b3f457356f93",
@@ -16855,7 +16931,7 @@
     },
     {
       "guid": "9f40f653-9303-4ef6-b81d-4a198723737d",
-      "text": "Si dice che questa madre orsa sia estremamente antica e che ogni re dei banditi le abbia lasciato una cicatrice in occasione del rito di accesso al trono. Il fatto che sia ancora in vita dimostra che nessuno di loro è mai riuscito a portare completamente a termine l'incarico affidatogli."
+      "text": "Si dice che questa madre orsa sia estremamente antica e che ogni re dei banditi gli abbia lasciato una cicatrice in occasione del rito di accesso al trono. Il fatto che sia ancora in vita dimostra che nessuno di loro è mai riuscito a portare completamente a termine l'incarico affidatogli."
     },
     {
       "guid": "3b0d06aa-66f3-4a99-a166-2a8349b14782",
@@ -17175,11 +17251,11 @@
     },
     {
       "guid": "65bd2953-493b-4699-94bd-a537768a2fc4",
-      "text": "Sir Erwin, il cavaliere galante"
+      "text": "Sir Erwin, il cavaliere valoroso"
     },
     {
       "guid": "14926fca-ce10-48d9-b389-198563d5a3c9",
-      "text": "Sir Erwin è un cavaliere esperto, noto tanto per la sua maestria a cavallo quanto per la sua sgradevole compagnia durante gli eventi ufficiali. Malvisto dai suoi superiori, ma troppo competente e devoto alla Luce per essere esiliato a Farbane, gli fu affidato il compito di preparare un'offensiva contro il Culto dei Dannati. In sella al suo instancabile destriero, si esercita senza sosta nell'ippodromo di Dunley, in attesa dell'arrivo delle truppe promesse che attende con incrollabile fiducia."
+      "text": "Sir Erwin è un cavaliere esperto, noto tanto per la sua maestria a cavallo quanto per la sua sgradevole compagnia durante gli eventi ufficiali. Malvisto dai suoi superiori, ma troppo competente e devoto alla Luce per essere esiliato a Farbane, gli fu affidato il compito di preparare un'offensiva contro il Culto dei Dannati. In sella al suo instancabile destriero Charger, si esercita senza sosta nell'ippodromo di Dunley, in attesa dell'arrivo delle truppe promesse che attende con incrollabile fiducia."
     },
     {
       "guid": "e683a386-9da5-4362-8c07-fa632c028e35",
@@ -17687,7 +17763,7 @@
     },
     {
       "guid": "2a886dbf-b7a9-4aa7-b760-1fe4cae3ba3f",
-      "text": "Un negromante cacciato dall'alta società di Silverlight per la sua pratica delle arti oscure. Ora vive tra i non morti e si avvale di servitori non viventi per soddisfare i suoi bisogni e trovare soggetti riluttanti per i suoi esperimenti."
+      "text": "Un negromante cacciato dall'alta società di Silverlight per la sua pratica delle arti oscure. Ora vive tra i non morti e si avvale di servitori non viventi per soddisfare i suoi bisogni e trovare soggetti involontari per i suoi esperimenti."
     },
     {
       "guid": "ae34e53c-de67-4f77-9ffd-a8ed33489824",
@@ -18028,6 +18104,50 @@
     {
       "guid": "677d91fb-6188-4eed-b5ee-d933c9e1249b",
       "text": "Tieni premuto per rianimare"
+    },
+    {
+      "guid": "8918a18c-06a0-4d2a-9022-68acdfd9a05b",
+      "text": "Diminuisci priorità"
+    },
+    {
+      "guid": "08b78c34-bab5-415c-b377-283cd2869e65",
+      "text": "Diminuisci la priorità di questo contenitore. Ha effetto solo sull'azione <teal1>Invio rapido (tutto)</c>."
+    },
+    {
+      "guid": "4c3beb8c-7640-4460-9b95-7e8f73b57819",
+      "text": "Aumenta priorità"
+    },
+    {
+      "guid": "b0230ae0-449a-40ef-9412-7687701b47f0",
+      "text": "Aumenta la priorità di questo contenitore. Ha effetto solo sull'azione <teal1>Invio rapido (tutto)</c>."
+    },
+    {
+      "guid": "311ad076-0fe7-4994-840a-5683bb3377cb",
+      "text": "Rimuove il collegamento a questo contenitore."
+    },
+    {
+      "guid": "ee8abd9e-744a-4b30-9b4a-1eea8c39c09b",
+      "text": "Attiva/disattiva invio automatico"
+    },
+    {
+      "guid": "89a57660-766d-4768-9151-18fdd78020fc",
+      "text": "Attiva o disattiva l'invio automatico su questo contenitore."
+    },
+    {
+      "guid": "e4fc3ab3-f313-4dc9-be69-e3eeedf808a3",
+      "text": "Disattiva l'invio automatico su questo contenitore."
+    },
+    {
+      "guid": "201cdb87-c9b0-42b8-8eb1-bf7558313fc1",
+      "text": "Attiva l'invio automatico su questo contenitore."
+    },
+    {
+      "guid": "d4462830-cc5d-451a-b795-174e154ae93b",
+      "text": "<teal1>Stoccaggio generale</c>\\nInvia tutti gli oggetti da questo contenitore a quello collegato.\\n\\n<teal1>Stoccaggio di raffinazione</c>\\nInvia tutti gli oggetti da questo contenitore di raffinazione a quello collegato."
+    },
+    {
+      "guid": "6a3298b5-9b7e-4928-a698-392ca9d647a2",
+      "text": "<teal1>Stoccaggio generale</c>\\nRaccogli tutti gli oggetti rilevanti dal contenitore.\\n\\n<teal1>Stoccaggio di raffinazione</c>\\nRaccogli tutti gli oggetti rilevanti dal contenitore dei risultati di raffinazione."
     },
     {
       "guid": "d9867788-54d6-4ba6-9b16-66a428b673fc",
@@ -19054,22 +19174,6 @@
       "text": "{value} di essenza di sangue"
     },
     {
-      "guid": "df4b6438-2ff9-4253-9623-96aa438163ff",
-      "text": "Ottieni {value} di esperienza"
-    },
-    {
-      "guid": "4210316d-23d4-4274-96f5-d6f0944bd0bb",
-      "text": "{value} di esperienza"
-    },
-    {
-      "guid": "4ef370ac-d47d-4da2-bda7-e69b18325ebe",
-      "text": "Sblocca {value} livelli massimi aggiuntivi"
-    },
-    {
-      "guid": "2f95adc8-c6a7-40e2-9c5d-98dd514c45ef",
-      "text": "{value} livelli massimi aggiuntivi"
-    },
-    {
       "guid": "e10b06a3-03d4-4f58-a4a2-ba870a125129",
       "text": "Sblocca il vantaggio: {perk}"
     },
@@ -19152,14 +19256,6 @@
     {
       "guid": "29dd94d6-0351-450b-996c-404cc3b1afd9",
       "text": "Nuova forma sbloccata"
-    },
-    {
-      "guid": "917b37bd-4b8c-44d3-b019-604196543631",
-      "text": "Limite livello aumentato"
-    },
-    {
-      "guid": "a68acedb-b5fe-4d93-9524-dd2f121a73e8",
-      "text": "Nuovo livello!"
     },
     {
       "guid": "93bd74a2-2bb6-48ad-9688-1c380d6cf4fb",
@@ -19403,7 +19499,7 @@
     },
     {
       "guid": "08555096-a35e-4eb0-81f4-414c12093656",
-      "text": "Gruppo sang."
+      "text": "Gruppo sanguigno"
     },
     {
       "guid": "539a64f6-954b-41dd-8b40-af144b4634ea",
@@ -19492,10 +19588,6 @@
     {
       "guid": "b0aa5538-d816-4093-bfe1-de2b2d800d3d",
       "text": "Questo gruppo sanguigno non conferisce benefici"
-    },
-    {
-      "guid": "52627c40-9a88-498c-a99e-7cebe69c485a",
-      "text": "Essenza di sangue di {name}"
     },
     {
       "guid": "9e1574ba-173f-444b-9aa9-094c49adf29e",
@@ -20591,7 +20683,7 @@
     },
     {
       "guid": "03857e94-864b-4586-a6ba-75e24cd971a7",
-      "text": "Smantellamento in corso"
+      "text": "È in corso di smantellamento"
     },
     {
       "guid": "dd4d1be1-d6c0-43b4-80a7-d0d04f03b2b8",
@@ -21123,7 +21215,7 @@
     },
     {
       "guid": "3aa30377-4e21-47d8-9cf2-e381eff6d11c",
-      "text": "Dipingi (evidenzia un muro, un pilastro o un ingresso)"
+      "text": "Dipingi (passa il mouse su un muro, un pilastro o un ingresso)"
     },
     {
       "guid": "5d88831f-7d71-47c8-bb81-2e1bbeb20de2",
@@ -21139,11 +21231,11 @@
     },
     {
       "guid": "0923f448-e438-4a56-992a-4cdf08d66a58",
-      "text": "No"
+      "text": "Off"
     },
     {
       "guid": "0b739f61-3a5a-4c1d-a37d-ab1d6b1fa469",
-      "text": "Sì"
+      "text": "On"
     },
     {
       "guid": "cb686a92-dfe4-443d-89a4-df69f8349b53",
@@ -21619,7 +21711,7 @@
     },
     {
       "guid": "dc171350-ae07-4e7e-b359-bc6132494c56",
-      "text": "Incantesimo sconosciuto"
+      "text": "Rimuovi incantesimo"
     },
     {
       "guid": "d0bd4a08-5be1-4e5c-87f9-574ce603871b",
@@ -21775,7 +21867,7 @@
     },
     {
       "guid": "80d2cf3a-a69d-44cc-b4c5-1c61b6eded08",
-      "text": "Armature"
+      "text": "Armatura"
     },
     {
       "guid": "edd4cd93-6680-4d82-8465-b43200aa512a",
@@ -21974,8 +22066,24 @@
       "text": "Aggiungi collegamento"
     },
     {
+      "guid": "bb74a995-aa3b-46ed-9238-a74ad65b4ff6",
+      "text": "Aggiunge un collegamento che permette l'<teal1>Invio rapido</c> degli oggetti da questo contenitore a un contenitore collegato."
+    },
+    {
       "guid": "dda53117-82f1-408d-b205-77a63713fe7a",
       "text": "Hai raggiunto il numero massimo di postazioni di lavoro collegate. Costruisci altri motori di ridistribuzione per aumentare il limite."
+    },
+    {
+      "guid": "1e9afc93-2fea-4613-978a-f068320a607a",
+      "text": "Inventari collegati ({value0}/{value1})"
+    },
+    {
+      "guid": "49d0a5d4-6ca9-471f-a4c3-8847a4bd8843",
+      "text": "Capacità di collegamento"
+    },
+    {
+      "guid": "d4204218-1a99-426f-9cd0-2eb62d13a8e2",
+      "text": "Costruisci altri <teal1>motori di ridistribuzione</c> per aumentare la capacità di collegamento."
     },
     {
       "guid": "c782c76a-9e6c-4948-b3cd-bb862513e83b",
@@ -22038,12 +22146,56 @@
       "text": "Rimuovi collegamento"
     },
     {
+      "guid": "2b9db11b-541f-467d-8a2c-d70f77e9840e",
+      "text": "Nessun oggetto nel contenitore di raffinazione"
+    },
+    {
+      "guid": "faa8c8f0-b1c1-4427-82fa-58ec36dd945b",
+      "text": "Nessun contenitore collegato corrisponde al tipo di raffinazione"
+    },
+    {
+      "guid": "bc6f77f4-af27-4dab-b085-4aaf33a45ac2",
+      "text": "Spazio insufficiente nei contenitori collegati."
+    },
+    {
+      "guid": "c9b9a3bd-b9e5-43e5-a418-3f876fe44488",
+      "text": "<teal1>Invia rapidamente</c> tutti gli oggetti idonei ai contenitori collegati in ordine di priorità decrescente."
+    },
+    {
+      "guid": "f2770d65-5aa9-4960-9278-f1a235e3a37a",
+      "text": "Invio rapido (tutto)"
+    },
+    {
       "guid": "0a7f4c19-d5a5-45c5-9fde-fff19f92674d",
       "text": "Mostra collegamenti"
     },
     {
+      "guid": "71d79fba-0b55-4ff1-87a9-797d2041845c",
+      "text": "Vuoi eliminare tutti i collegamenti dei contenitori nel castello?"
+    },
+    {
       "guid": "bd58776a-d0eb-4e3d-9538-4094e4a78bf7",
       "text": "Elimina collegamenti nel castello"
+    },
+    {
+      "guid": "fd0fa4d1-e3a2-4182-8ca3-a0b955d8f03f",
+      "text": "Collega le postazioni di creazione e raffinazione alla rete di ridistribuzione per trasferire istantaneamente gli oggetti ai contenitori collegati."
+    },
+    {
+      "guid": "98fc687e-7eb5-40cc-894e-325bd8425e79",
+      "text": "Vedi il menu della postazione."
+    },
+    {
+      "guid": "ed7ff809-a62f-4465-80e5-09772e9effba",
+      "text": "Postazione"
+    },
+    {
+      "guid": "f40a3edc-92e0-4635-b615-785ba1092a5b",
+      "text": "Ti permette di trasferire rapidamente gli oggetti in altri contenitori."
+    },
+    {
+      "guid": "9b72eabe-e2a3-4a8f-8ae6-42f47e9d684b",
+      "text": "Ridistribuzione"
     },
     {
       "guid": "44ec55bc-4db5-41d3-93cd-7108afecbf74",
@@ -22478,12 +22630,32 @@
       "text": "Scopri"
     },
     {
+      "guid": "b3f34a27-3383-431a-b6a6-6789f125db14",
+      "text": "Scopri conoscenze casuali appartenenti a questa categoria."
+    },
+    {
+      "guid": "c34bf0b9-63b5-4108-ace7-47b14955e4ef",
+      "text": "Impara"
+    },
+    {
+      "guid": "78647022-4eb9-4809-90f4-7ef9176c0721",
+      "text": "Sblocca tutta la conoscenza disponibile."
+    },
+    {
       "guid": "826db8e9-0c96-4c71-8c5b-9714b1da8470",
       "text": "Magia"
     },
     {
       "guid": "7dd1d6ff-1ff0-4443-8523-afde84b4d0d7",
       "text": "Strutture"
+    },
+    {
+      "guid": "bf30edab-5c8c-4d8d-8200-4ba654c59016",
+      "text": "Sblocca"
+    },
+    {
+      "guid": "ea433f0c-d9c0-490b-85b7-01dea53b2eaa",
+      "text": "Sblocca conoscenze consumando un oggetto."
     },
     {
       "guid": "7ada27b5-d4c1-4b7c-8887-b3104bd2c054",
@@ -22611,7 +22783,7 @@
     },
     {
       "guid": "83962ffd-0779-4b44-ab80-1ea2a0b507eb",
-      "text": "Inventario pieno"
+      "text": "Inventario completo"
     },
     {
       "guid": "37c7ea60-50f6-4350-bc78-4861eee491d4",
@@ -22819,7 +22991,7 @@
     },
     {
       "guid": "b4823d94-1752-4ec1-bb8b-b07341c12433",
-      "text": "Nutriti di un umanoide ostile vivo con bassa vitalità premendo (<teal1>F</c>). Completando l'azione, riempirai la tua riserva di sangue. Alimentandoti, modifichi il tuo gruppo sanguigno e la qualità del tuo sangue in quelli del bersaglio. Mentre ti nutri di un nemico, sei vulnerabile agli attacchi.\\n\\nPuoi uccidere istantaneamente il bersaglio premendo il <teal1>pulsante sinistro del mouse</c>. Con questa azione non ottieni sangue e non alteri il tuo gruppo sanguigno e la qualità del tuo sangue."
+      "text": "Nutriti di un umanoide ostile vivo con bassa vitalità premendo (<teal1>F</c>). Completando l'azione, riempirai la tua riserva di sangue. Alimentandoti, modifichi il tuo gruppo sanguigno e la qualità del tuo sangue in quelli dell'obiettivo. Mentre ti nutri di un nemico, sei vulnerabile agli attacchi.\\n\\nPuoi uccidere istantaneamente l'obiettivo premendo il <teal1>pulsante sinistro del mouse</c>. Con questa azione non ottieni sangue e non alteri il tuo gruppo sanguigno e la qualità del tuo sangue."
     },
     {
       "guid": "7d99101c-d7f1-407a-8c36-66fa7290c7dd",
@@ -22923,7 +23095,7 @@
     },
     {
       "guid": "a14fad34-b0d6-437f-9429-51fee3407a72",
-      "text": "Acconsento all'utilizzo dei miei dati per finalità analitiche e per contribuire allo sviluppo di V Rising"
+      "text": "Acconsento all'utilizzo dei miei dati per finalità analitiche e per contribuire allo sviluppo di V Rising."
     },
     {
       "guid": "1695c641-cc6f-4692-9e18-f06472ace147",
@@ -23011,7 +23183,7 @@
     },
     {
       "guid": "8abd8812-d3e4-4c73-ba2a-f8bfae82ddeb",
-      "text": "Attiva/disattiva l'HUD dei vampiri"
+      "text": "Attiva/disattiva l'HUD da vampiro"
     },
     {
       "guid": "923344cc-6f5f-4733-98ce-931f9fe082a7",
@@ -23387,7 +23559,7 @@
     },
     {
       "guid": "b34c7dc1-3bdc-4856-a64a-90fadfbd36ef",
-      "text": "Abilita l'effetto di sfocatura in movimento quando si muove la telecamera. Può avere effetto sulla performance e causare fastidio a chi soffre di chinetosi"
+      "text": "Abilita l'effetto di sfocatura in movimento quando si muove la telecamera. Può avere effetto sulla performance e causare fastidio a chi soffre di chinetosi."
     },
     {
       "guid": "592d4ba5-af62-4f7e-b4b5-bd21c2b865f3",
@@ -23934,10 +24106,6 @@
       "text": "Boss uccisi: {vBloodKills}"
     },
     {
-      "guid": "7c9f0c30-0130-46b1-a9ae-68fdfbb72ac2",
-      "text": "Diario"
-    },
-    {
       "guid": "cb199ac0-a94b-447b-98ae-1bc65ff50a42",
       "text": "In corso..."
     },
@@ -24076,6 +24244,10 @@
     {
       "guid": "0dad60f3-5a15-413b-b087-d91784d054df",
       "text": "Infusione di sangue"
+    },
+    {
+      "guid": "fc425059-d162-4bf2-b9fb-f70b190a2461",
+      "text": "Gruppo sanguigno secondario"
     },
     {
       "guid": "a00dc3e0-7fc3-479b-86f8-93b3b9fdf149",
@@ -24267,7 +24439,7 @@
     },
     {
       "guid": "526fc7cb-d3c2-4b18-88f8-7f7c99712bd0",
-      "text": "Oggetti necessari non posizionati:\\n{structure}"
+      "text": "Oggetti necessari non posizionati!"
     },
     {
       "guid": "2ffd9341-099d-4dc6-9dc1-453409bfe581",
@@ -24566,6 +24738,10 @@
       "text": "Spazio insufficiente in uscita"
     },
     {
+      "guid": "2f59f284-40fa-4f9c-b00a-62be65f11fa6",
+      "text": "In pausa durante la notte"
+    },
+    {
       "guid": "740d20fc-2c12-4ad3-8eb8-7b4b88e71391",
       "text": "Determina i danni inflitti dalle abilità del servitore."
     },
@@ -24647,7 +24823,7 @@
     },
     {
       "guid": "23b4245a-4268-48e4-9f3c-065d1554e1c6",
-      "text": "Conversione: {value}"
+      "text": "Conversione di {value}"
     },
     {
       "guid": "9ae53d1b-8018-4a3f-83c8-33c4a166f47d",
@@ -24702,6 +24878,10 @@
       "text": "Atletica"
     },
     {
+      "guid": "75794f1e-353f-4cf4-93af-632c75c7380a",
+      "text": "Scendi più velocemente dalla tua cavalcatura con un salto agile."
+    },
+    {
       "guid": "c96dc1e0-2162-4dcc-a8ab-e8312bbe8dbd",
       "text": "Salto evasivo"
     },
@@ -24720,6 +24900,10 @@
     {
       "guid": "8cd585f5-1eda-49d4-9e41-476d277e43e7",
       "text": "Stabilità"
+    },
+    {
+      "guid": "a2e456a7-4985-4460-896a-75a74f17094b",
+      "text": "<skillcolor>{chance}%</c> di probabilità di evitare la caduta da cavallo dopo aver subito un attacco.\\n\\n<red1>Non ha effetto contro gli attacchi dei giocatori vampiri.</c>"
     },
     {
       "guid": "7698912a-727a-42b0-9397-f0502aef5dad",
@@ -24743,7 +24927,7 @@
     },
     {
       "guid": "bb688498-9c85-4a7a-bfe7-ba6d857e7cca",
-      "text": "Commestibili per cavalcatura"
+      "text": "Cibo per cavalcatura"
     },
     {
       "guid": "097ce77c-91bf-49fe-b8d0-474a07c700f2",
@@ -25031,7 +25215,7 @@
     },
     {
       "guid": "b570b4a2-628a-4a01-86c1-a8bc6cd3d1bd",
-      "text": "Questa è una versione beta chiusa di <b>V RISING</b>\\n<size=24>Questo software è in <b>fase di lavorazione</b>, e non equivale al prodotto finale per ciò che riguarda la grafica, il gameplay e le prestazioni. <b>Non</b> registrare, trasmettere in streaming o diffondere in qualsiasi modo filmati di questo software nella fase attuale.\\nTi ringraziamo e speriamo che apprezzerai questo gioco in fase di test!</size>"
+      "text": "Questa è una versione beta chiusa di <b>V RISING</b>\\n<size=24>Questo software è un <b>work in progress</b>, e non equivale al prodotto finale per ciò che riguarda la grafica, il gameplay e le prestazioni. <b>Non</b> registrare, trasmettere in streaming o diffondere in qualsiasi modo filmati di questo software nella fase attuale.\\nTi ringraziamo e speriamo che apprezzerai questo gioco in fase di test!</size>"
     },
     {
       "guid": "0fedff48-0046-49ab-b755-6b700a6e9ce2",
@@ -25863,7 +26047,7 @@
     },
     {
       "guid": "02c85f53-5e41-4dc5-8170-3de6a2f19041",
-      "text": "Dimensione casata"
+      "text": "Dimensione della casata"
     },
     {
       "guid": "cc3eb78e-02be-4e24-9bb9-32c04b923c3f",
@@ -26052,6 +26236,14 @@
     {
       "guid": "c132db61-25bc-43dc-8066-f0b220628d47",
       "text": "Moltiplica la quantità di bottino ricevuto dalle cacce dei servitori andate a buon fine."
+    },
+    {
+      "guid": "2fd1f87c-e2ad-46c5-a322-7e1c1b31bdce",
+      "text": "Moltiplicatore di frammenti dello Stige"
+    },
+    {
+      "guid": "0e82d588-5fac-4b80-8866-9ef38b5b3f6a",
+      "text": "Moltiplica la quantità di frammenti dello Stige lasciati cadere da incursioni, nemici, barili, casse e forzieri."
     },
     {
       "guid": "95331135-1720-4ebe-b54f-1027b0137e44",
@@ -26567,7 +26759,7 @@
     },
     {
       "guid": "9aac1fc1-1533-4403-a2dc-f6b0fc17b162",
-      "text": "Fuso orario utilizzato per varie altre impostazioni."
+      "text": "Fuso orario utilizzato per varie altre impostazioni"
     },
     {
       "guid": "3bf7e066-4e49-4ae4-b7a3-6703b7a15dc1",
@@ -26707,7 +26899,7 @@
     },
     {
       "guid": "d4a7b89f-7b82-4b6b-b894-a414e0796394",
-      "text": "Dalle:"
+      "text": "Da:"
     },
     {
       "guid": "ee98fe03-4512-4b1b-8568-c43711b66f47",
@@ -26735,7 +26927,7 @@
     },
     {
       "guid": "1a809236-044f-40c0-a29f-a532f2596908",
-      "text": "Alle:"
+      "text": "a:"
     },
     {
       "guid": "d9857be4-f3f7-4a5f-8f48-9bbaf714cbfc",
@@ -26763,7 +26955,7 @@
     },
     {
       "guid": "1a5218b7-dc74-45d4-9475-512618d6bb89",
-      "text": "Moltiplicatore costo"
+      "text": "Moltiplicatore Costo"
     },
     {
       "guid": "767dddb9-465a-458a-bda9-550bc5f8e2e1",
@@ -27003,7 +27195,7 @@
     },
     {
       "guid": "dee9877c-5384-445c-bffe-077aeffdda32",
-      "text": "Giorni prima della cancellazione: {daysUntilWipe}"
+      "text": "Giorni prima del wipe: {daysUntilWipe}"
     },
     {
       "guid": "84cc3a9e-cb8c-423e-a335-75b44cab16d9",
@@ -27171,7 +27363,7 @@
     },
     {
       "guid": "edd26ded-69ea-43ee-a855-a09215bda534",
-      "text": "Il server ha le cancellazioni programmate"
+      "text": "Il server ha i wipe programmati"
     },
     {
       "guid": "2b742209-5cf1-45a0-a1e5-2c5b27771ecb",
@@ -27235,7 +27427,7 @@
     },
     {
       "guid": "dd486680-5458-4ddb-92d4-8c1055b5bf01",
-      "text": "Cancellazioni programmate"
+      "text": "Wipe programmati"
     },
     {
       "guid": "451d9000-d0f5-4ef1-bd6a-e52bc6f42f62",
@@ -27324,6 +27516,22 @@
     {
       "guid": "2a3563f0-1f07-4663-8cf4-627ba5d9d75f",
       "text": "Entra a Gloomrot"
+    },
+    {
+      "guid": "92436be0-0f17-4de8-9ada-61636e524eff",
+      "text": "Acquista ora"
+    },
+    {
+      "guid": "4f1f95e7-1c1f-467a-ae7a-aeaa17fa5cde",
+      "text": "Abbraccia uno sgargiante insieme di colori e crogiolati nel lusso più sfrenato! Dal più umile servitore al più potente dei signori, il tuo castello dorato susciterà invidia sconfinata in ogni sua sfumatura."
+    },
+    {
+      "guid": "a79ef8ce-5bf7-4965-8527-f19e197d3405",
+      "text": "Addentrati nelle rigogliose terre selvagge di Oakveil, sfida le Lame Velenose, svela i segreti oscuri della Linfa velenosa e irrompi nel santuario arcano di Megara, la regina serpente… o incontra la tua fine tentando.\\nCrea un nuovo mondo per scoprire un altro volto dell'oscurità in V Rising!"
+    },
+    {
+      "guid": "f0395dcd-caa1-44f0-82d0-00303203d531",
+      "text": "Esplora i Boschi di Oakveil"
     },
     {
       "guid": "6c0086c5-9916-49e6-a3e2-bed7de7947e6",
@@ -27679,11 +27887,11 @@
     },
     {
       "guid": "93e22e8d-9bde-44b1-ae09-e3dbc6c85799",
-      "text": "Intestazione del lettore musicale!"
+      "text": "Music player header!"
     },
     {
       "guid": "f7debfc3-b799-40ac-9aef-ee25d7282407",
-      "text": "Prossimo"
+      "text": "Avanti"
     },
     {
       "guid": "452d4cd6-e2d5-487b-949e-c07b0725e1b8",
@@ -28039,7 +28247,7 @@
     },
     {
       "guid": "504498b5-28a7-4b30-aaa3-88d4289ff78a",
-      "text": "Profondità di campo"
+      "text": "Profondità del campo"
     },
     {
       "guid": "171fa54d-d91d-469c-b880-088ec6734c22",
@@ -28419,7 +28627,7 @@
     },
     {
       "guid": "b2681f19-8c84-4b8e-a506-abebef8804e5",
-      "text": "Voci giocatore vampiro"
+      "text": "Voce vampiri giocatore"
     },
     {
       "guid": "88d6d8d0-ebe5-4d4e-a42f-84ac06b8f6b1",
@@ -28432,6 +28640,38 @@
     {
       "guid": "30e87e35-b686-46c1-bbbb-7762979c1232",
       "text": "Modalità altoparlanti"
+    },
+    {
+      "guid": "a6bb9599-6691-43d1-9bb0-ae6d54b93705",
+      "text": "5.1"
+    },
+    {
+      "guid": "d9cb43ce-9467-421b-a010-aac419168154",
+      "text": "7.1"
+    },
+    {
+      "guid": "b9f053df-8d98-456d-b968-a5daf5ed23e7",
+      "text": "7.1.4"
+    },
+    {
+      "guid": "3e790e72-366b-4f46-9314-5d0961187153",
+      "text": "Predefinita"
+    },
+    {
+      "guid": "759be497-6038-4ad5-968f-85616c91bd4c",
+      "text": "Mono"
+    },
+    {
+      "guid": "1f38f15a-5f07-4a0d-8046-01c8f565446a",
+      "text": "Quad"
+    },
+    {
+      "guid": "23401c4f-b203-40ca-855a-868757119584",
+      "text": "Stereo"
+    },
+    {
+      "guid": "70d113ef-7660-4d5f-841a-cd472fa387f2",
+      "text": "Surround"
     },
     {
       "guid": "1fa13b8d-edec-42f7-958c-f998df3afb3e",
@@ -28727,7 +28967,7 @@
     },
     {
       "guid": "7026a34d-58fd-4092-8007-01a090396f21",
-      "text": "Prossimo"
+      "text": "Avanti"
     },
     {
       "guid": "275205ff-ef3e-4dde-b2f1-7f2c16e889b5",
@@ -31358,10 +31598,6 @@
       "text": "[m]Scudiscio d'acciaio"
     },
     {
-      "guid": "2414ac41-88e5-480e-a3af-d2686773b056",
-      "text": "Contestato"
-    },
-    {
       "guid": "f4e6e26a-7ff4-4b9d-b714-aaa2a67c25f3",
       "text": "Il castello di Dracula"
     },
@@ -31666,10 +31902,6 @@
       "text": "Resti di qualcosa di oscuro e contorto. Un'ombra antica si estende su questo luogo."
     },
     {
-      "guid": "4c9bcf15-996c-4ef5-8088-a308033317b8",
-      "text": "Miniera di carbone infestata III"
-    },
-    {
       "guid": "33491730-b176-4cfa-9bf0-59902b792730",
       "text": "Cava di rame dei banditi"
     },
@@ -31779,7 +32011,7 @@
     },
     {
       "guid": "9fcf5068-5b2b-4bad-8ed1-2e27b524fd6c",
-      "text": "QuartzQuarryDesc text needs to be added"
+      "text": "Il testo di QuartzQuarryDesc deve ancora essere aggiunto"
     },
     {
       "guid": "baa4ab76-de8e-4daa-8024-d3ac39c3f919",
@@ -32307,7 +32539,7 @@
     },
     {
       "guid": "30441c4d-6238-4135-9a6e-d8ae20e5896d",
-      "text": "SilverlightValleyDesc text needs to be added"
+      "text": "Il testo di SilverlightValleyDesc deve ancora essere aggiunto"
     },
     {
       "guid": "94da3604-bce9-4975-b62a-dae8409b9f58",

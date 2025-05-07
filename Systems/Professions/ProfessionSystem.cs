@@ -601,11 +601,12 @@ internal static class ProfessionMappings
 {
     static readonly Dictionary<string, int> _fishingMultipliers = new()
     {
-        { "farbane", 1 },
+        { "farbane", 2 },
         { "dunley", 2 },
         { "gloomrot", 3 },
         { "cursed", 4 },
-        { "silverlight", 4 }
+        { "silverlight", 5 },
+        { "strongblade", 4 }
     };
 
     static readonly List<PrefabGUID> _farbaneFishDrops = new()
@@ -667,14 +668,15 @@ internal static class ProfessionMappings
         { "gloomrot", _gloomrotFishDrops},
         { "cursed", _cursedFishDrops},
         { "silverlight", _silverlightFishDrops},
-        { "oakveil", _oakveilFishDrops}
+        { "strongblade", _oakveilFishDrops}
     };
 
     static readonly Dictionary<string, int> _woodcuttingMultipliers = new()
     {
         { "hallow", 2 },
         { "gloom", 3 },
-        { "cursed", 4 }
+        { "cursed", 4 },
+        { "corrupted", 4 }
     };
 
     static readonly Dictionary<string, int> _tierMultiplier = new()

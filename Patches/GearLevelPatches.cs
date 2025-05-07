@@ -90,46 +90,12 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
 
                     if (weaponType.Equals(WeaponType.Unarmed) && steamId.TryGetPlayerUnarmedExpertise(out var expertise))
                     {
-                        float unarmedLevel = expertise.Key * SOURCE_LEVEL_FACTOR;
+                        float unarmedLevel = expertise.Key;
                         entity.With((ref WeaponLevel weaponLevel) =>
                         {
                             weaponLevel.Level = unarmedLevel;
                         });
                     }
-                    
-                    /*
-                    ulong steamId = playerCharacter.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                    int weaponLevel = (int)entity.Read<WeaponLevel>().Level;
-                    int unarmedWeaponLevel = 0;
-
-                    Equipment equipment = playerCharacter.Read<Equipment>(); // fix weapon level on equipment if leveling turned off?
-                    if (equipment.WeaponLevel._Value != 0)
-                    {
-                        equipment.WeaponLevel._Value = 0;
-                        playerCharacter.Write(equipment);
-                    }
-
-                    if (!_playerMaxWeaponLevels.ContainsKey(steamId))
-                    {
-                        _playerMaxWeaponLevels[steamId] = weaponLevel;
-                    }
-                    else
-                    {
-                        int maxWeaponLevel = _playerMaxWeaponLevels[steamId];
-
-                        if (weaponLevel > maxWeaponLevel)
-                        {
-                            _playerMaxWeaponLevels[steamId] = weaponLevel;
-                            unarmedWeaponLevel = weaponLevel;
-                        }
-                    }
-
-                    WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(entity);
-                    if (weaponType.Equals(WeaponType.Unarmed))
-                    {
-                        entity.Write(new WeaponLevel { Level = unarmedWeaponLevel });
-                    }
-                    */
                 }
             }
         }

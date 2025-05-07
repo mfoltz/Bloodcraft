@@ -1,6 +1,6 @@
 {
-  "Codes": [],
-  "Nodes": [
+  "codes": [],
+  "nodes": [
     {
       "guid": "de5768be-d168-42f3-b253-9f0422772f17",
       "text": "Pendant des siècles, nos châteaux sont tombés en ruine..."
@@ -139,7 +139,7 @@
     },
     {
       "guid": "7be7c516-299a-4ec6-ac8d-c83930828be2",
-      "text": "Suprême"
+      "text": "Ultime"
     },
     {
       "guid": "0de61da6-32b5-4e57-b433-1f04e8061180",
@@ -607,11 +607,11 @@
     },
     {
       "guid": "25f4bad5-e902-4aff-9150-d71402004ab1",
-      "text": "Réduit le temps de recharge de Voile de <skillcolor>{factor1}</c>."
+      "text": "Réduit le temps de recharge du Voile de <skillcolor>{factor1}</c>."
     },
     {
       "guid": "a517cf7f-c525-4d5d-8626-cc4fc2ae458c",
-      "text": "Augmente l’effet des sorts suprêmes, ce qui améliore les dégâts, les soins, les effets de bouclier et les dégâts des sbires de <skillcolor>{factor1}</c>."
+      "text": "Augmente l’effet des sorts ultimes, ce qui améliore les dégâts, les soins, les effets de bouclier et les dégâts des sbires de <skillcolor>{factor1}</c>."
     },
     {
       "guid": "883d146c-c14b-4353-a212-5207643df60c",
@@ -623,7 +623,7 @@
     },
     {
       "guid": "08ff338a-e0a8-468a-a727-3e168c54db1a",
-      "text": "<chaos>Brûlez</c> vos ennemis avec des flammes du chaos qui infligent <skillcolor>{damage}</c> de dégâts magiques pendant <skillcolor>{duration}s</c>.\\n\\nDéclenche une explosion qui inflige <skillcolor>{damage}</c> de dégâts magiques aux ennemis proches lorsqu’une cible affectée par <chaos>Brûlure</c> périt."
+      "text": "<chaos>Brûlez</c> vos ennemis avec des flammes du chaos qui infligent <skillcolor>{damage}</c> de dégâts magiques pendant <skillcolor>{duration} s</c>.\\n\\nDéclenche une explosion qui inflige <skillcolor>{damage}</c> de dégâts magiques aux ennemis proches lorsqu’une cible affectée par <chaos>Brûlure</c> périt."
     },
     {
       "guid": "61e83e90-4062-42b6-a8aa-574805d21da8",
@@ -675,7 +675,7 @@
     },
     {
       "guid": "78ef9085-4e2d-4d8f-8a6a-9e5eb3614155",
-      "text": "Le projectile chaotique étourdit la cible touchée pendant <skillcolor>{Duration} s</c>."
+      "text": "Un projectile chargé de chaos étourdit la cible à l'impact pendant <skillcolor>{Duration} s</c>."
     },
     {
       "guid": "553c7641-5b3e-49e6-9ae8-f8aafb6adc66",
@@ -823,7 +823,7 @@
     },
     {
       "guid": "3f7c843d-1b7c-4a4b-81a1-41e9273a0fd8",
-      "text": "Vous transforme en glace pendant <skillcolor>{duration} s</c> et invoque un vortex de givre autour de vous. Le bloc de glace vous protège à hauteur de <skillcolor>{absorb}</c> de votre puissance magique, vous immunise contre les effets de gestion des foules et restaure jusqu’à <skillcolor>{healing}</c> de votre santé max.\\n\\nLe vortex inflige initialement <skillcolor>{initdamage}</c> de dégâts magiques, applique <frost>Gel</c> et attire les ennemis vers vous. Le vortex inflige <skillcolor>{damage}</c> de dégâts supplémentaires pendant la durée de l’effet."
+      "text": "Transforme l'allié ciblé ou soi-même en bloc de glace pendant <skillcolor>{duration}s</c> et invoque un tourbillon de givre. Le bloc de glace protège la cible pour <skillcolor>{absorb}</c> de votre puissance de sort, accorde une immunité aux effets de contrôle des foules et soigne jusqu'à <skillcolor>{healing}</c> de la santé maximale de la cible. \\n\\nLe tourbillon inflige d'abord <skillcolor>{initdamage}</c> de dégâts magiques et inflige <frost>Gel</c>. Le tourbillon inflige <skillcolor>{damage}</c> de dégâts supplémentaires pendant la durée de l'effet."
     },
     {
       "guid": "98aa6faa-ba15-4f7d-91f0-5374792121ae",
@@ -2070,6 +2070,10 @@
       "text": "Chaînes impies"
     },
     {
+      "guid": "d069e19e-8bc1-4588-a8b5-10aef5649261",
+      "text": "Lancez une chaîne qui entrave la cible touchée et réduit sa vitesse de déplacement de <skillcolor>{speedfactor} - {speedfactor2}</c> selon la distance à laquelle elle se trouve. Canalisez le sort jusqu’à <skillcolor>{duration} s</c>. Inflige <skillcolor>{damage}</c> de dégâts magiques et applique <unholy>Malédiction</c> quand l’effet se dissipe.\\n\\nLe lien se rompt alors et applique une entrave évanescente pendant <skillcolor>{slowduration} s</c> si la distance qui vous sépare de la cible est supérieure à <skillcolor>{distance}</c> mètres."
+    },
+    {
       "guid": "090f5547-c30d-42ef-b353-7da661826a4c",
       "text": "Os explosifs"
     },
@@ -2147,7 +2151,7 @@
     },
     {
       "guid": "5afb8251-53f1-488e-9205-8f8695f3d4e4",
-      "text": "Invoque une araignée géante qui pourchasse votre ennemi et explose une fois près de lui pour lui infliger <skillcolor>{impactdamage}</c> de dégâts magiques, lui appliquer <unholy>Malédiction</c> et faire apparaître <skillcolor>{count}</c> jeunes araignées. Chaque jeune araignée explose pour infliger <skillcolor>{minordamage}</c> de dégâts magiques et appliquer <unholy>Malédiction</c>."
+      "text": "Invoque une araignée géante qui pourchasse votre ennemi et explose lorsqu'elle en est proche pour lui infliger <skillcolor>{impactdamage}</c> de dégâts magiques, lui appliquer <unholy>Malédiction</c> et faire apparaître <skillcolor>{count}</c> jeunes araignées. Chaque jeune araignée explose pour infliger <skillcolor>{minordamage}</c> de dégâts magiques et appliquer <unholy>Malédiction</c>."
     },
     {
       "guid": "4dd23ad7-f810-4be5-8a07-1332216ea39c",
@@ -2196,6 +2200,10 @@
     {
       "guid": "1a514ac7-58f3-4564-be9d-2db97bb20feb",
       "text": "Fait apparaître un esprit osseux tournant autour de la cible. L’esprit inflige <skillcolor>{Damage} %</c> de dégâts et applique <unholy>Malédiction</c> à tous les ennemis touchés."
+    },
+    {
+      "guid": "6095e639-ab8f-4244-ac5a-79c40da480cb",
+      "text": "Inflige <skillcolor>{Damage} %</c> de dégâts toutes les <skillcolor>0,7 s</c> lors de la canalisation, mais réduit les dégâts d’impact de <skillcolor>{Reduction} %</c>."
     },
     {
       "guid": "eadda732-e4f2-4ff0-a764-dd4a09518994",
@@ -2328,6 +2336,10 @@
     {
       "guid": "de0f2381-afff-4871-9748-44bbbcf5bcd1",
       "text": "Si vous foncez sur un ennemi, il subit <unholy>Malédiction</c>."
+    },
+    {
+      "guid": "e0ffd6d4-96c1-4a9b-bf04-5127137fe81d",
+      "text": "Le squelette invoqué explose après <skillcolor>{Duration} s</c>, ce qui a pour effet d’infliger <skillcolor>{Damage} %</c> de dégâts et d’appliquer <unholy>Malédiction</c> aux ennemis proches."
     },
     {
       "guid": "67735373-35da-49a0-ad69-965b2aa9e8ec",
@@ -3195,7 +3207,7 @@
     },
     {
       "guid": "949302f3-7394-40c0-a0e3-372040191bf6",
-      "text": "Maintenez la touche enfoncée pour charger un projectile infligeant de <skillcolor>{mindamage}</c> à <skillcolor>{maxdamage}</c> de dégâts physiques à l’impact et conférant <skillcolor>Concentration</c>. L’effet <skillcolor>Concentration</c> peut se cumuler jusqu’à <skillcolor>{count}</c> fois et augmente l’efficacité de vos autres capacités à l’arc long.\\n\\nLes tirs chargés au maximum perforent jusqu’à <skillcolor>{piercecount}</c> ennemis et les coups suivants infligent des dégâts équivalents à <skillcolor>{damagereduction}</c> des dégâts du coup précédent."
+      "text": "Maintenez la touche enfoncée pour charger un projectile infligeant entre <skillcolor>{mindamage}</c> et <skillcolor>{maxdamage}</c> de dégâts physiques à l’impact et conférant <skillcolor>Concentration</c>. L’effet <skillcolor>Concentration</c> peut se cumuler jusqu’à <skillcolor>{count}</c> fois et augmente l’efficacité de vos autres capacités à l’arc long.\\n\\nLes tirs chargés au maximum perforent jusqu’à <skillcolor>{piercecount}</c> ennemis et les coups suivants infligent des dégâts équivalents à <skillcolor>{damagereduction}</c> des dégâts du coup précédent."
     },
     {
       "guid": "e349f9be-a7e1-40fb-b6d3-b387867e67a1",
@@ -3746,8 +3758,16 @@
       "text": "Puissance magique augmentée de <teal1>{value} %</c> et vitesse de déplacement durant la métamorphose augmentée de <teal1>{shapeshiftSpeed} %</c>."
     },
     {
+      "guid": "488f0cf3-4b1f-4151-8239-ae21fde6cdc4",
+      "text": "Temps de recharge du suprême réduit de <teal1>{value} %</c>. De plus, fait apparaître <teal1>2</c> rats mutants qui se battent à vos côtés lorsque vous lancez un suprême."
+    },
+    {
       "guid": "c8230dea-52aa-4114-9801-6320c8557602",
       "text": "<teal1>{value} %</c> de puissance du suprême et dégâts des sbires augmentés de <teal1>{minionDamage} %</c>."
+    },
+    {
+      "guid": "cabcc8c5-4c75-47c5-a846-3227ffee03f2",
+      "text": "Temps de recharge de Voile réduit de <teal1>{value} %</c>. De plus, si vous utilisez une capacité de Voile, le temps de recharge du suprême est réduit de <teal1>{cooldownreduction} s</c>."
     },
     {
       "guid": "cbf3eeea-1160-4f65-a3d8-78eba3df24bf",
@@ -3846,6 +3866,10 @@
       "text": "<teal1>{value} %</c> de puissance du suprême et réinitialise le temps de recharge de vos sorts lorsque vous utilisez un suprême."
     },
     {
+      "guid": "65219c1f-c7c0-43fc-bb07-27165a8b59d7",
+      "text": "Gain de charges de sort augmenté de <teal1>{value}</c>."
+    },
+    {
       "guid": "48abfa07-1bfa-46cf-9091-d75175401926",
       "text": "Vitesse de déplacement augmentée de <teal1>{value} %</c> lorsque vous vous métamorphosez."
     },
@@ -3884,6 +3908,10 @@
     {
       "guid": "a6e34899-dd59-4455-a746-4dbb4e6c04c2",
       "text": "Puissance de la capacité d’arme augmentée de <teal1>{value} %</c> et dégâts augmentés de <teal1>{extraDamage} %</c> lorsque vous touchez les ennemis et que vos PV sont au max."
+    },
+    {
+      "guid": "a99ddb9b-e06a-422a-861c-0fd2501cc8b6",
+      "text": "<teal1>{chance}</c> de chances de parer une attaque, réduisant les dégâts subis de <teal1>{damagereudction}</c>. Les parades augmentent la puissance physique de <teal1>{factor}</c> pendant <teal1>{duration} s</c>."
     },
     {
       "guid": "42035506-824b-4f41-ab2c-33b2f8a3d7a0",
@@ -4434,8 +4462,48 @@
       "text": "Dégâts infligés réduits de <skillcolor>{weakenfactor}</c>."
     },
     {
+      "guid": "6c2b5f1f-ee10-4022-a4f6-4e4b2724d51f",
+      "text": "Équipe rouge"
+    },
+    {
+      "guid": "f785ee2a-7632-4180-b74a-3c98530d4c25",
+      "text": "Équipe bleue"
+    },
+    {
+      "guid": "79070767-638f-471b-9f90-ebd2a707eb0b",
+      "text": "Équipe verte"
+    },
+    {
+      "guid": "587bf5ad-620b-46a5-8f51-82cc0184a18c",
+      "text": "Équipe violette"
+    },
+    {
+      "guid": "3ffd469d-fbaa-4efb-b794-2ff8c4dfdecc",
+      "text": "Placez une bannière d’équipe pour ajouter une <teal1>équipe d’arène</c> dans une arène de château. Ensuite, les vampires peuvent utiliser la bannière d’équipe pour rejoindre l’équipe correspondante.\\n\\nVous pouvez placer plusieurs bannières d’équipe dans une même arène, permettant ainsi aux vampires de rejoindre différentes équipes."
+    },
+    {
+      "guid": "09755304-443f-4a12-9a2e-ff7751d6f2d0",
+      "text": "Orbe d’arène"
+    },
+    {
+      "guid": "098042d4-0536-48af-9274-fe7517610291",
+      "text": "Placez un orbe brisable qui réapparaît régulièrement dans l’arène.\\n\\nUne fois l’orbe brisé, l’équipe du joueur ayant porté le coup fatal se voit <teal1>soignée</c>."
+    },
+    {
+      "guid": "40328b82-16d8-46e8-a260-c5cd0abe2641",
+      "text": "Centre d’arène"
+    },
+    {
+      "guid": "5e2c39ce-72a7-4d7b-ad54-124e0cdfe6b0",
+      "text": "Placez un point central dans l’arène.\\n\\nLors de <teal1>Mort subite</c>, le champ de bataille rétrécira autour de ce point."
+    },
+    {
       "guid": "51c4337a-94eb-456e-9ee7-b000d06cec84",
       "text": "Station d’arène"
+    },
+    {
+      "guid": "fea1a71c-a832-4311-83ce-cd21b6c0cac0",
+      "text": "Une station qui ajoute une <teal1>arène</c> à votre château. Utilisez-la pour lancer ou annuler des tournois d’arène et définir les règles de l’arène.\\n\\nLe placement d’une station crée une <teal1>zone d’arène</c> connectée définissant les limites du tournoi. Vous pouvez personnaliser cette zone pour créer votre propre plan d’arène."
     },
     {
       "guid": "a764c0d4-b7c8-4aa9-9a4e-980f8278bf0b",
@@ -4551,7 +4619,7 @@
     },
     {
       "guid": "29906660-bf5e-454d-8519-26389e4e13bc",
-      "text": "Fenêtre vitrée : Dominus"
+      "text": "Fenêtre de verre : Dominus"
     },
     {
       "guid": "348cbe4d-9131-44a3-aa42-157d00c4f479",
@@ -5990,6 +6058,10 @@
       "text": "Mannequin d’entraînement : villageois"
     },
     {
+      "guid": "2d00e9f3-2ac5-436f-9ea6-0cd0113f88f3",
+      "text": "Cloches de porte de château"
+    },
+    {
       "guid": "8525d8e1-fbc4-4652-a986-2c29c43c67b1",
       "text": "Trône royal"
     },
@@ -6328,6 +6400,10 @@
     {
       "guid": "d55574b1-2cb3-46a6-a4dd-7494b9075460",
       "text": "Tableaux Opulence nocturne"
+    },
+    {
+      "guid": "5777c8c4-4ae5-4c9e-8d13-ea0737dd3abd",
+      "text": "Bassins pour se détendre et se laver."
     },
     {
       "guid": "8f45c617-82c6-4923-87eb-f4c958177737",
@@ -7911,7 +7987,7 @@
     },
     {
       "guid": "2ef9eec7-d3d6-4d56-9e9e-a0f72956f446",
-      "text": "Barrière de jardin Symphonie antique"
+      "text": "Clôture de jardin Symphonie antique"
     },
     {
       "guid": "5680e622-c682-4217-a3bb-1f6d15cf7e03",
@@ -8922,14 +8998,6 @@
       "text": "Vous pouvez réinitialiser vos choix dans le grimoire à l’Autel du souvenir."
     },
     {
-      "guid": "db058eb8-bed8-4254-8761-98b90a65b614",
-      "text": "Banque de sang"
-    },
-    {
-      "guid": "f9659cc7-ffcc-4658-b06d-f2290ee1e803",
-      "text": "Récipient destiné à contenir du sang. Reliez-le à un ou plusieurs extracteurs sanguins à l’aide d’une canalisation, afin de le remplir et de mélanger différentes sources de sang."
-    },
-    {
       "guid": "8b2257a3-f137-4e28-a036-4988a703d2fe",
       "text": "Homogénéisateur de sang"
     },
@@ -8992,6 +9060,10 @@
     {
       "guid": "b14514d9-5513-4a7a-b353-7baa9355b3eb",
       "text": "Introduisez une <teal1>arme ancestrale</c>, une <teal1>arme brisée</c> ou un <teal1>joyau de sort</c> pour lancer le processus de fusion."
+    },
+    {
+      "guid": "e4b171e0-a34a-4df7-880c-a7293e57425e",
+      "text": "Introduisez un <teal1>joyau de sort</c> correspondant dans l’emplacement secondaire pour poursuivre le processus de fusion.\\n\\nLe <teal1>joyau de sort</c> fusionné conservera le nom des <teal1>joyaux de sort</c> principaux.\\n\\nL’objet secondaire sera consommé durant le processus."
     },
     {
       "guid": "c706ffa0-c322-4448-8d43-99a1e88dc609",
@@ -10743,7 +10815,7 @@
     },
     {
       "guid": "7bd8ff00-587a-49c1-8d94-a19cc90fca04",
-      "text": "Vêtement bleu foncé paré de plumes de corbeau, de plaques d’armures noires et d’or.\\n\\n<teal1>Cet ensemble d’armure est purement cosmétique et ne confère aucun attribut.</c>"
+      "text": "Vêtement bleu foncé, orné de plumes de corbeau et de plaques d'armure noires, bordé d'or.\\n\\n<teal1>Cet ensemble d’armure est purement cosmétique et ne confère aucun attribut.</c>"
     },
     {
       "guid": "b9b95431-a251-48ce-8d9d-7703e6a93572",
@@ -12651,7 +12723,7 @@
     },
     {
       "guid": "77c17939-dddf-46a8-b4c3-842d24fdc128",
-      "text": "Essence sanguine élémentaire"
+      "text": "Essence sanguine originelle"
     },
     {
       "guid": "eaf3ce4a-db74-43ed-b37a-8d8308b16912",
@@ -12787,7 +12859,7 @@
     },
     {
       "guid": "3d238524-9be2-4180-a99c-79f5fec35e50",
-      "text": "Résidus obtenus après traitement de la pierre.\\n\\nÀ raffiner dans un <teal1>haut fourneau</c>."
+      "text": "Résidus obtenus après traitement de la pierre.\\n\\nÀ raffiner dans un <teal1>fourneau</c>."
     },
     {
       "guid": "db091b2f-12eb-4134-9818-cbc515cbe6ff",
@@ -13615,7 +13687,7 @@
     },
     {
       "guid": "cace9261-1b54-4d50-ae3d-dbf79d281eba",
-      "text": "Bois sanctifié"
+      "text": "Bois sacré"
     },
     {
       "guid": "c8f24fe8-822e-4695-af2e-28dcdd9b176b",
@@ -15622,6 +15694,10 @@
       "text": "+{value} <statscolor>de niveau d’armure"
     },
     {
+      "guid": "2d7f7adb-12c7-4671-b1e0-ba5ee2201f3c",
+      "text": "Bonus total d'attribut"
+    },
+    {
       "guid": "336f7e32-12ed-4b92-81c0-850f2430fde0",
       "text": "Défense"
     },
@@ -15720,6 +15796,10 @@
     {
       "guid": "2af14406-cf14-457a-9f07-017e6a2ee989",
       "text": "Augmente la vitesse de déplacement totale."
+    },
+    {
+      "guid": "b2c8d8cb-525b-4382-be89-157e0bb63191",
+      "text": "Bonus au-dessus du maximum"
     },
     {
       "guid": "5ed66f17-29aa-4005-8170-800941286f33",
@@ -16328,6 +16408,10 @@
     {
       "guid": "3d9276dd-8159-4365-a83c-3a9109407ae7",
       "text": "Réduit le temps de recharge nécessaire avant de réutiliser une capacité d’arme."
+    },
+    {
+      "guid": "9426c79a-3306-4c9c-b6c2-3c67195c0a8c",
+      "text": "Gain de charges d’arme"
     },
     {
       "guid": "def50330-9cf0-4d6e-90d4-9da9024fc78c",
@@ -18030,6 +18114,50 @@
       "text": "Maintenir pour ranimer"
     },
     {
+      "guid": "8918a18c-06a0-4d2a-9022-68acdfd9a05b",
+      "text": "Réduire la priorité"
+    },
+    {
+      "guid": "08b78c34-bab5-415c-b377-283cd2869e65",
+      "text": "Réduit la priorité de ce conteneur. Affecte uniquement l’action <teal1>Envoi rapide (tout)</c>."
+    },
+    {
+      "guid": "4c3beb8c-7640-4460-9b95-7e8f73b57819",
+      "text": "Augmenter la priorité"
+    },
+    {
+      "guid": "b0230ae0-449a-40ef-9412-7687701b47f0",
+      "text": "Augmente la priorité de ce conteneur. Affecte uniquement l’action <teal1>Envoi rapide (tout)</c>."
+    },
+    {
+      "guid": "311ad076-0fe7-4994-840a-5683bb3377cb",
+      "text": "Supprime la connexion à ce conteneur."
+    },
+    {
+      "guid": "ee8abd9e-744a-4b30-9b4a-1eea8c39c09b",
+      "text": "Activer/Désactiver Envoi auto"
+    },
+    {
+      "guid": "89a57660-766d-4768-9151-18fdd78020fc",
+      "text": "Active/Désactive Envoi auto sur ce conteneur."
+    },
+    {
+      "guid": "e4fc3ab3-f313-4dc9-be69-e3eeedf808a3",
+      "text": "Désactive Envoi auto sur ce conteneur."
+    },
+    {
+      "guid": "201cdb87-c9b0-42b8-8eb1-bf7558313fc1",
+      "text": "Active Envoi auto sur ce conteneur."
+    },
+    {
+      "guid": "d4462830-cc5d-451a-b795-174e154ae93b",
+      "text": "<teal1>Réserve générale</c>\\nEnvoie tous les objets de ce conteneur dans le conteneur connecté.\\n\\n<teal1>Réserve de raffinage</c>\\nEnvoie tous les objets de ce conteneur de production dans le conteneur connecté."
+    },
+    {
+      "guid": "6a3298b5-9b7e-4928-a698-392ca9d647a2",
+      "text": "<teal1>Réserve générale</c>\\nRécupère tous les objets adéquats du conteneur.\\n\\n<teal1>Réserve de raffinage</c>\\nRécupère tous les objets adéquats du conteneur de production de raffinage."
+    },
+    {
       "guid": "d9867788-54d6-4ba6-9b16-66a428b673fc",
       "text": "Saluer"
     },
@@ -18155,7 +18283,7 @@
     },
     {
       "guid": "761d139e-1851-4dee-9e0d-649e15da7ea9",
-      "text": "<i>« J’ai encore du mal à quantifier la chance, mais… si dame Megara affirme que c’est possible, elle a sûrement raison ! »</i>\\n\\n- Notes de recherches de Lucile, Volume I, p. 16"
+      "text": "<i>« J’ai encore du mal à quantifier la chance, mais… si Dame Megara affirme que c’est possible, elle a sûrement raison ! »</i>\\n\\n- Notes de recherches de Lucile, Volume I, p. 16"
     },
     {
       "guid": "972c2a22-8e4a-4bc9-a18d-aacd9b935a2c",
@@ -18675,7 +18803,7 @@
     },
     {
       "guid": "d0cfb8c1-f07e-489b-ac1b-890484148693",
-      "text": "Fermer"
+      "text": "Proche"
     },
     {
       "guid": "440ec5c8-6f9d-46f5-ab70-0c07bd5cf8c5",
@@ -18687,7 +18815,7 @@
     },
     {
       "guid": "4c6bd043-3305-4469-b22b-ed468dffc14d",
-      "text": "Proche"
+      "text": "À proximité"
     },
     {
       "guid": "8d4a37f0-20d9-4375-b1e2-5ae02772701c",
@@ -19063,11 +19191,11 @@
     },
     {
       "guid": "4ef370ac-d47d-4da2-bda7-e69b18325ebe",
-      "text": "Débloquez {value} niveaux max supplémentaires"
+      "text": "Débloque {value} niveaux max. supplémentaires"
     },
     {
       "guid": "2f95adc8-c6a7-40e2-9c5d-98dd514c45ef",
-      "text": "{value} niveaux max supplémentaires"
+      "text": "{value} niveaux max. supplémentaires"
     },
     {
       "guid": "e10b06a3-03d4-4f58-a4a2-ba870a125129",
@@ -19943,7 +20071,7 @@
     },
     {
       "guid": "bfb26ec1-da2a-4209-9680-4d6f6d099e53",
-      "text": "Conquête !"
+      "text": "Obtenir !"
     },
     {
       "guid": "254ca8be-495b-4a2b-9790-a4e035a6bc82",
@@ -20355,7 +20483,7 @@
     },
     {
       "guid": "3cbb0735-c783-411d-ad2c-ca8799437ba4",
-      "text": "Savoir"
+      "text": "Recherche"
     },
     {
       "guid": "1e7de6ae-29a8-403b-83ec-aac4d935b1ac",
@@ -21974,8 +22102,24 @@
       "text": "Ajouter une connexion"
     },
     {
+      "guid": "bb74a995-aa3b-46ed-9238-a74ad65b4ff6",
+      "text": "Ajoute une connexion pour permettre l’<teal1>Envoi rapide</c> d’objets depuis ce conteneur directement vers un conteneur connecté."
+    },
+    {
       "guid": "dda53117-82f1-408d-b205-77a63713fe7a",
       "text": "Vous avez atteint le nombre maximum de stations de travail connectées. Construisez d’autres moteurs de redistribution pour augmenter la limite."
+    },
+    {
+      "guid": "1e9afc93-2fea-4613-978a-f068320a607a",
+      "text": "Inventaires connectés ({value0}/{value1})"
+    },
+    {
+      "guid": "49d0a5d4-6ca9-471f-a4c3-8847a4bd8843",
+      "text": "Capacité de connexion"
+    },
+    {
+      "guid": "d4204218-1a99-426f-9cd0-2eb62d13a8e2",
+      "text": "Fabriquez des <teal1>moteurs de redistribution</c> supplémentaires pour augmenter la capacité de connexion."
     },
     {
       "guid": "c782c76a-9e6c-4948-b3cd-bb862513e83b",
@@ -22038,12 +22182,56 @@
       "text": "Retirer la connexion"
     },
     {
+      "guid": "2b9db11b-541f-467d-8a2c-d70f77e9840e",
+      "text": "Aucun objet dans le conteneur de production"
+    },
+    {
+      "guid": "faa8c8f0-b1c1-4427-82fa-58ec36dd945b",
+      "text": "Aucun conteneur connecté ne correspond au type de production"
+    },
+    {
+      "guid": "bc6f77f4-af27-4dab-b085-4aaf33a45ac2",
+      "text": "Espace insuffisant dans les conteneurs connectés."
+    },
+    {
+      "guid": "c9b9a3bd-b9e5-43e5-a418-3f876fe44488",
+      "text": "Procède à l’<teal1>Envoi rapide</c> de tous les objets adéquats dans le conteneur connecté selon une priorité décroissante."
+    },
+    {
+      "guid": "f2770d65-5aa9-4960-9278-f1a235e3a37a",
+      "text": "Envoi rapide (tout)"
+    },
+    {
       "guid": "0a7f4c19-d5a5-45c5-9fde-fff19f92674d",
       "text": "Afficher les connexions"
     },
     {
+      "guid": "71d79fba-0b55-4ff1-87a9-797d2041845c",
+      "text": "Voulez-vous supprimer toutes les connexions de conteneur du château ?"
+    },
+    {
       "guid": "bd58776a-d0eb-4e3d-9538-4094e4a78bf7",
       "text": "Supprimer les connexions du château"
+    },
+    {
+      "guid": "fd0fa4d1-e3a2-4182-8ca3-a0b955d8f03f",
+      "text": "Connecte les stations d’artisanat et de raffinage au réseau de redistribution pour transférer instantanément les objets dans les conteneurs connectés."
+    },
+    {
+      "guid": "98fc687e-7eb5-40cc-894e-325bd8425e79",
+      "text": "Consultez le menu Station."
+    },
+    {
+      "guid": "ed7ff809-a62f-4465-80e5-09772e9effba",
+      "text": "Station"
+    },
+    {
+      "guid": "f40a3edc-92e0-4635-b615-785ba1092a5b",
+      "text": "Permet de transférer rapidement des objets dans d’autres conteneurs."
+    },
+    {
+      "guid": "9b72eabe-e2a3-4a8f-8ae6-42f47e9d684b",
+      "text": "Redistribution"
     },
     {
       "guid": "44ec55bc-4db5-41d3-93cd-7108afecbf74",
@@ -22478,12 +22666,32 @@
       "text": "Découverte"
     },
     {
+      "guid": "b3f34a27-3383-431a-b6a6-6789f125db14",
+      "text": "Découvrez un savoir aléatoire dans cette catégorie."
+    },
+    {
+      "guid": "c34bf0b9-63b5-4108-ace7-47b14955e4ef",
+      "text": "Apprentissage"
+    },
+    {
+      "guid": "78647022-4eb9-4809-90f4-7ef9176c0721",
+      "text": "Débloque tous les savoirs disponibles."
+    },
+    {
       "guid": "826db8e9-0c96-4c71-8c5b-9714b1da8470",
       "text": "Magie"
     },
     {
       "guid": "7dd1d6ff-1ff0-4443-8523-afde84b4d0d7",
       "text": "Structures"
+    },
+    {
+      "guid": "bf30edab-5c8c-4d8d-8200-4ba654c59016",
+      "text": "Déblocage"
+    },
+    {
+      "guid": "ea433f0c-d9c0-490b-85b7-01dea53b2eaa",
+      "text": "Débloquez un savoir en consommant un objet."
     },
     {
       "guid": "7ada27b5-d4c1-4b7c-8887-b3104bd2c054",
@@ -23934,10 +24142,6 @@
       "text": "Boss éliminés : {vBloodKills}"
     },
     {
-      "guid": "7c9f0c30-0130-46b1-a9ae-68fdfbb72ac2",
-      "text": "Journal"
-    },
-    {
       "guid": "cb199ac0-a94b-447b-98ae-1bc65ff50a42",
       "text": "En cours..."
     },
@@ -24076,6 +24280,10 @@
     {
       "guid": "0dad60f3-5a15-413b-b087-d91784d054df",
       "text": "Infusion de sang"
+    },
+    {
+      "guid": "fc425059-d162-4bf2-b9fb-f70b190a2461",
+      "text": "Groupe sanguin secondaire"
     },
     {
       "guid": "a00dc3e0-7fc3-479b-86f8-93b3b9fdf149",
@@ -24267,7 +24475,7 @@
     },
     {
       "guid": "526fc7cb-d3c2-4b18-88f8-7f7c99712bd0",
-      "text": "Objets requis non placés :\\n{structure}"
+      "text": "Objets requis non placés !"
     },
     {
       "guid": "2ffd9341-099d-4dc6-9dc1-453409bfe581",
@@ -24566,6 +24774,10 @@
       "text": "Pas assez de place en production"
     },
     {
+      "guid": "2f59f284-40fa-4f9c-b00a-62be65f11fa6",
+      "text": "En pause pendant la nuit"
+    },
+    {
       "guid": "740d20fc-2c12-4ad3-8eb8-7b4b88e71391",
       "text": "Définit les dégâts infligés par le serviteur à l’aide de ses capacités."
     },
@@ -24702,6 +24914,10 @@
       "text": "Athlète"
     },
     {
+      "guid": "75794f1e-353f-4cf4-93af-632c75c7380a",
+      "text": "Descendez de votre monture plus rapidement en effectuant un saut avec agilité."
+    },
+    {
       "guid": "c96dc1e0-2162-4dcc-a8ab-e8312bbe8dbd",
       "text": "Saut d’escampette"
     },
@@ -24720,6 +24936,10 @@
     {
       "guid": "8cd585f5-1eda-49d4-9e41-476d277e43e7",
       "text": "Stabilité"
+    },
+    {
+      "guid": "a2e456a7-4985-4460-896a-75a74f17094b",
+      "text": "<skillcolor>{chance} %</c> de chances de ne pas être éjecté de votre monture après avoir subi une attaque.\\n\\n<red1>Ne s’applique pas aux attaques des vampires joueurs.</c>"
     },
     {
       "guid": "7698912a-727a-42b0-9397-f0502aef5dad",
@@ -25095,7 +25315,7 @@
     },
     {
       "guid": "735dd361-7381-4f78-afed-cdbb5d28dcdb",
-      "text": "Dernière sauvegarde"
+      "text": "Sauvegarde récente"
     },
     {
       "guid": "62875a46-2167-4892-8017-13f827734267",
@@ -26054,6 +26274,14 @@
       "text": "Multiplie la quantité de butin reçu lors de chasses de serviteurs réussies."
     },
     {
+      "guid": "2fd1f87c-e2ad-46c5-a322-7e1c1b31bdce",
+      "text": "Multiplicateur de butin de fragments stygiens"
+    },
+    {
+      "guid": "0e82d588-5fac-4b80-8866-9ef38b5b3f6a",
+      "text": "Multiplie la quantité de fragments stygiens obtenus grâce aux incursions, aux ennemis, aux barils, aux coffres et aux coffres-forts."
+    },
+    {
       "guid": "95331135-1720-4ebe-b54f-1027b0137e44",
       "text": "Multiplicateur de perte de durabilité"
     },
@@ -26662,6 +26890,14 @@
       "text": "Affecte les dégâts subis lorsque vous portez des objets en argent."
     },
     {
+      "guid": "a75977c0-a062-4bd6-aac6-7ef1ae142a34",
+      "text": "Taux de durabilité des fragments d'âmes"
+    },
+    {
+      "guid": "3b62b579-16d7-4e69-9f6c-8e019b0ba4a4",
+      "text": "Taux pour la rapidité de perte de durabilité des fragments d'âmes."
+    },
+    {
       "guid": "30d96127-b1bc-4c69-b514-6297c8a0eaf1",
       "text": "Multiplicateur de puissance magique"
     },
@@ -26876,6 +27112,14 @@
     {
       "guid": "90f837fd-1607-4d0e-bc26-75c7acccbadd",
       "text": "La fréquence à laquelle des incursions de faille de Mortium peuvent se dérouler."
+    },
+    {
+      "guid": "65521547-8c07-4625-bbf3-d4c689822eea",
+      "text": "Emplacements d'armes"
+    },
+    {
+      "guid": "aacb6713-3012-4761-b943-826d97cd173b",
+      "text": "Nombre d'emplacements dans la barre d'action utilisés par les armes."
     },
     {
       "guid": "ce5b8514-397c-446a-8350-b312ad241729",
@@ -27326,6 +27570,22 @@
       "text": "Découvrez Pestilombre"
     },
     {
+      "guid": "92436be0-0f17-4de8-9ada-61636e524eff",
+      "text": "Acheter maintenant"
+    },
+    {
+      "guid": "4f1f95e7-1c1f-467a-ae7a-aeaa17fa5cde",
+      "text": "Cédez au luxe le plus ostentatoire et parez-vous de couleurs éblouissantes ! De l’humble serviteur à l’illustre maître, votre splendide château doré suscitera la jalousie de tous."
+    },
+    {
+      "guid": "a79ef8ce-5bf7-4965-8527-f19e197d3405",
+      "text": "Parcourez les luxuriantes terres sauvages de Voilechêne, affrontez les Lames vénéneuses, dévoilez les secrets de la sève vénéneuse et envahissez le sanctuaire magique de Megara la reine serpent... ou périssez de sa main.\\nEmbarquez pour un nouveau monde afin de profiter pleinement d’une aventure inédite dans V Rising !"
+    },
+    {
+      "guid": "f0395dcd-caa1-44f0-82d0-00303203d531",
+      "text": "Explorez les bois de Voilechêne"
+    },
+    {
       "guid": "6c0086c5-9916-49e6-a3e2-bed7de7947e6",
       "text": "En raison de changements importants dans le jeu et le monde de Vardoran, la progression des vampires et des châteaux a été réinitialisée."
     },
@@ -27399,7 +27659,7 @@
     },
     {
       "guid": "277dcc76-95cf-4e76-95fe-8e7251ed6ec1",
-      "text": "Envahisseurs de Voilechêne"
+      "text": "Invaders of Oakveil"
     },
     {
       "guid": "4cd60e11-3093-4651-a217-111e0d93d43e",
@@ -28432,6 +28692,38 @@
     {
       "guid": "30e87e35-b686-46c1-bbbb-7762979c1232",
       "text": "Mode de haut-parleur"
+    },
+    {
+      "guid": "a6bb9599-6691-43d1-9bb0-ae6d54b93705",
+      "text": "5.1"
+    },
+    {
+      "guid": "d9cb43ce-9467-421b-a010-aac419168154",
+      "text": "7.1"
+    },
+    {
+      "guid": "b9f053df-8d98-456d-b968-a5daf5ed23e7",
+      "text": "7.1.4"
+    },
+    {
+      "guid": "3e790e72-366b-4f46-9314-5d0961187153",
+      "text": "Par défaut"
+    },
+    {
+      "guid": "759be497-6038-4ad5-968f-85616c91bd4c",
+      "text": "Mono"
+    },
+    {
+      "guid": "1f38f15a-5f07-4a0d-8046-01c8f565446a",
+      "text": "Quadriphonique"
+    },
+    {
+      "guid": "23401c4f-b203-40ca-855a-868757119584",
+      "text": "Stéréo"
+    },
+    {
+      "guid": "70d113ef-7660-4d5f-841a-cd472fa387f2",
+      "text": "Surround"
     },
     {
       "guid": "1fa13b8d-edec-42f7-958c-f998df3afb3e",
@@ -31358,10 +31650,6 @@
       "text": "[m]Fléau en acier"
     },
     {
-      "guid": "2414ac41-88e5-480e-a3af-d2686773b056",
-      "text": "Contesté"
-    },
-    {
       "guid": "f4e6e26a-7ff4-4b9d-b714-aaa2a67c25f3",
       "text": "Château de Dracula"
     },
@@ -31779,7 +32067,7 @@
     },
     {
       "guid": "9fcf5068-5b2b-4bad-8ed1-2e27b524fd6c",
-      "text": "QuartzQuarryDesc text needs to be added"
+      "text": "Le texte QuartzQuarryDesc doit être ajouté"
     },
     {
       "guid": "baa4ab76-de8e-4daa-8024-d3ac39c3f919",
@@ -32307,7 +32595,7 @@
     },
     {
       "guid": "30441c4d-6238-4135-9a6e-d8ae20e5896d",
-      "text": "SilverlightValleyDesc text needs to be added"
+      "text": "Le texte SilverlightValleyDesc doit être ajouté"
     },
     {
       "guid": "94da3604-bce9-4975-b62a-dae8409b9f58",

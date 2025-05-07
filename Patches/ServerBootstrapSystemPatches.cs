@@ -435,7 +435,8 @@ internal static class ServerBootstrapSystemPatches
 
             if (!playerCharacter.HasBuff(_bonusStatsBuff))
             {
-                playerCharacter.TryApplyBuff(_bonusStatsBuff);
+                // playerCharacter.TryApplyBuff(_bonusStatsBuff);
+                Buffs.RefreshStats(playerInfo.CharEntity);
             }
         }
         else if (_eclipse)
@@ -605,7 +606,8 @@ internal static class ServerBootstrapSystemPatches
 
         if (!playerInfo.CharEntity.HasBuff(_bonusStatsBuff))
         {
-            playerInfo.CharEntity.TryApplyBuff(_bonusStatsBuff);
+            // playerInfo.CharEntity.TryApplyBuff(_bonusStatsBuff);
+            Buffs.RefreshStats(playerInfo.CharEntity);
         }
     } 
 }

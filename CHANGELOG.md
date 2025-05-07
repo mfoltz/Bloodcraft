@@ -1,3 +1,11 @@
+`1.8.6`
+- changed stats buff application, hoping will reduce/eliminate the occasional recursive group errors
+- fixed some recipe/item modifications that require slightly different handling after 1.1 to work as before, added serpent shard related things to places it was missing from
+- corrected name for oakveil fishing stuff (should fix drops issue)
+- localization languages for prefab names working again
+- fixed scaling for unarmed gearscore with expertise no leveling
+- familiar stat buff applied at slight delay when first binding to make sure equipment is ready for processing
+
 `1.8.5`
 - touched up README commands/config option autogeneration, should be accurate now
 - added bleeding edge details to README

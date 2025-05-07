@@ -306,7 +306,12 @@ internal static class EmoteSystemPatch
         Entity familiar = activeFamiliarData.Familiar;
         Entity servant = activeFamiliarData.Servant;
 
-        if (familiar.Exists() && servant.Exists())
+        if (activeFamiliarData.Dismissed)
+        {
+            LocalizationService.HandleServerReply(EntityManager, user, "Can't interact with familiar when dismissed!");
+            return;
+        }
+        else if (familiar.Exists() && servant.Exists())
         {
             if (familiar.HasBuff(_vanishBuff))
             {

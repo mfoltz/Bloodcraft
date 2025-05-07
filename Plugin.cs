@@ -2,7 +2,6 @@ using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
-using Il2CppInterop.Runtime.Injection;
 using System.Reflection;
 using UnityEngine;
 using VampireCommandFramework;
@@ -15,7 +14,7 @@ namespace Bloodcraft;
 internal class Plugin : BasePlugin
 {
     Harmony _harmony;
-    internal static Plugin Instance { get; private set; }
+    internal static Plugin Instance { get; set; }
     public static Harmony Harmony => Instance._harmony;
     internal static ManualLogSource LogInstance => Instance.Log;
     public override void Load()
@@ -32,8 +31,8 @@ internal class Plugin : BasePlugin
         _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
 
         InitializeConfig();
-        CommandRegistry.RegisterAll();
         LoadPlayerData();
+        CommandRegistry.RegisterAll();
 
         Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] loaded!");
     }

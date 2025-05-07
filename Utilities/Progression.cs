@@ -239,7 +239,7 @@ internal static class Progression
             UserBitMask128 userBitMask = userActivityGrid.GetUsersInRadius(position, _shareDistance);
             UserBitMask128.Enumerable usersInRange = userBitMask.GetUsers();
 
-            Core.Log.LogWarning($"Users in range of deathEvent - {usersInRange._Mask.Count}");
+            // Core.Log.LogWarning($"Users in range of deathEvent - {usersInRange._Mask.Count}");
 
             foreach (int userIndex in usersInRange)
             {

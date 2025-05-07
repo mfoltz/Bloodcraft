@@ -229,7 +229,7 @@ internal static class FamiliarBindingSystem
                     EquipFamiliar(steamId, familiarId.GuidHash, servant, familiar);
 
                     Utilities.Familiars.ActiveFamiliarManager.UpdateActiveFamiliarData(steamId, familiar, servant, familiarId.GuidHash);
-                    Buffs.RefreshStats(familiar);
+                    ApplyFamiliarStatsRoutine(familiar).Start();
 
                     return true;
                 }
@@ -938,16 +938,21 @@ internal static class FamiliarBindingSystem
                 follower.Stationary._Value = true;
             });
 
-            DisableFamiliarServantDelayRoutine(servant).Start(); // doing this immediately is reverted by server idk
+            DisableFamiliarServantRoutine(servant).Start(); // doing this immediately is reverted by server idk
 
             return servant;
         }
 
         return Entity.Null;
     }
-    static IEnumerator DisableFamiliarServantDelayRoutine(Entity servant)
+    static IEnumerator DisableFamiliarServantRoutine(Entity servant)
     {
         yield return _delay;
-        servant.Add<Disabled>();
+        servant.TryAdd<Disabled>();
+    }
+    static IEnumerator ApplyFamiliarStatsRoutine(Entity familiar)
+    {
+        yield return _delay;
+        Buffs.RefreshStats(familiar);
     }
 }

@@ -9,6 +9,7 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
+using MagicaCloth;
 using ProjectM;
 using ProjectM.Physics;
 using ProjectM.Scripting;
@@ -18,6 +19,7 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Utilities.EntityQueries;
+using ComponentType = Unity.Entities.ComponentType;
 using WeaponType = Bloodcraft.Interfaces.WeaponType;
 
 namespace Bloodcraft;

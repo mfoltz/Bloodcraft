@@ -1311,7 +1311,7 @@ internal static class DataService
 
                     // CreateLegendaryWeaponDebugEvent
                     // SystemService.DebugEventsSystem.CreateLegendaryWeaponEvent
-                    // would need user to have spare slot to then equip on familiar, could try tryAddItem with the inventoryBuffer option? and haxemptyslot or w/e
+                    // would need user to have spare slot to then equip on familiar, could try tryAddItem with the inventoryBuffer option? and haxemptyslot or w/e idk geez
 
                     /*
                     if (equipmentEntity.IsAncestralWeapon() && equipment is FamiliarEquipmentModel.AncestralWeapon ancestralWeapon)
@@ -1339,7 +1339,8 @@ internal static class DataService
                     if (professionLevel > 0 && equipmentEntity.Exists()) EquipmentQualityManager.ApplyEquipmentStats(professionLevel, equipmentEntity);
                 }
 
-                familiar.TryApplyBuff(_bonusStatsBuff);
+                // familiar.TryApplyBuff(_bonusStatsBuff);
+                // Buffs.RefreshStats(familiar);
             }
             public static List<FamiliarEquipment.EquipmentBase> UnequipFamiliar(Entity servant)
             {

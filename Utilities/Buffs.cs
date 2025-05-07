@@ -86,8 +86,9 @@ internal static class Buffs
         bool hasBuff = entity.HasBuff(prefabGuid);
 
         if (hasBuff && ShouldApplyStack(entity, prefabGuid, out Entity buffEntity, out byte stacks))
-        {    
-            ServerGameManager.CreateStacksIncreaseEvent(buffEntity, stacks, ++stacks);
+        {
+            // ServerGameManager.CreateStacksIncreaseEvent(buffEntity, stacks, ++stacks);
+            ServerGameManager.InstantiateBuffEntityImmediate(entity, entity, prefabGuid, null, stacks);
         }
         else if (!hasBuff)
         {
@@ -104,7 +105,7 @@ internal static class Buffs
             };
 
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-
+            
             // ServerGameManager.InstantiateBuffEntityImmediate(entity, entity, prefabGuid, null, 0); better? worse? who knooooows maybe I'll check later
             return true;
         }
@@ -347,13 +348,21 @@ internal static class Buffs
             entities.Dispose();
         }
     }
-    public static void RefreshStats(Entity character)
+    public static void RefreshStats(Entity entity)
     {
-        // Core.Log.LogWarning($"Refreshing stats - {character.GetPrefabGuid().GetPrefabName()}");
-        // if (character.TryGetBuff(BonusStatsBuff, out Entity buffEntity)) ScriptSpawnServerPatch.RemovePlayerBonusStats(buffEntity, character);
+        ApplyBuffDebugEvent applyBuffDebugEvent = new()
+        {
+            BuffPrefabGUID = BonusStatsBuff,
+            Who = entity.GetNetworkId(),
+        };
 
-        if (character.IsPlayer()) character.TryRemoveBuff(buffPrefabGuid: BonusPlayerStatsBuff);
-        else if (character.IsFamiliar()) character.TryRemoveBuff(buffPrefabGuid: BonusFamiliarStatsBuff);
+        FromCharacter fromCharacter = new()
+        {
+            Character = entity,
+            User = entity.IsPlayer() ? entity.GetUserEntity() : entity
+        };
+
+        DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
     }
 }
 

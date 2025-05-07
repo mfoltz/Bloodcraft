@@ -14,7 +14,7 @@ internal static class UnitSpawnerPatch
     {
         if (!Core._initialized) return;
 
-        NativeArray<Entity> entities = __instance.__query_2099432189_0.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
