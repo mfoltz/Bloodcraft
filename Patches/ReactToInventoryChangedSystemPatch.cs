@@ -248,28 +248,23 @@ internal static class ReactToInventoryChangedSystemPatch
             if (addResponse.Success && addResponse.NewEntity.TryGetComponent(out JewelInstance jewelInstance))
             {
                 Entity jewelEntity = addResponse.NewEntity;
-
+            
                 JewelSpawnSystem.UninitializedJewelAbility uninitializedJewel = new()
                 {
-                    AbilityGuid =  PrefabGUID.Empty,
+                    AbilityGuid = PrefabGUID.Empty,
                     JewelEntity = jewelEntity,
                     JewelTier = jewelInstance.TierIndex
                 };
-
-                JewelSpawnSystem.InitializeSpawnedJewel(uninitializedJewel, false); // no idea why the tooltip only shows up right away when this is outside the try block compared to only after closing-opening gem cutter inventory if using try block but moving on x_x
-
-                /*
+            
                 try
                 {
-                    // Unity.Mathematics.Random random = new();
-                    // JewelSpawnSystem.InitializeJewelOnSpawn(jewelEntity, ref random);
-                    // JewelSpawnSystem.InitializeSpawnedJewel(uninitializedJewel, false);
+                    JewelSpawnSystem.InitializeSpawnedJewel(uninitializedJewel, false);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Core.Log.LogInfo($"InitializeSpawnedJewel() try-catch - {ex}");
+                    string prefabName = primalJewel.GetPrefabName();
+                    Core.Log.LogError($"[Bloodcraft] Failed to initialize spawned jewel '{prefabName}': {ex}");
                 }
-                */
             }
         }
     }
