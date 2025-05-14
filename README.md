@@ -56,10 +56,9 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - `.class c [Class]` (select a class)
   - `.class change [Class]` (change class, costs configured items)
 - Classes provide:
-  - Permanent Buffs unlocked at specific levels based on class
   - Weapon & Blood Stat Synergies which increase the effectiveness for specific stats from expertise and legacies
-  - On-Hit Effect debuffs applied at configured chance when the player deals damage (ignite, weaken, chill, etc. and the respective t08 necklace effect if debuff already present on target)
-  - Extra Spells, one of which unlocks every leveling prestige by default, that can be used on Shift
+  - On-Hit Effect debuffs applied at configured chance when the player deals damage (ignite, weaken, chill, etc. will apply secondary effect that either buffs you or debuffs enemy further if first effect is already present on target)
+  - Extra Spells from the themed spell school of the class, one of which unlocks every leveling prestige by default; these can be used on Shift key
 
 ### Familiars
 - Unlock and summon defeated enemies as your familiar.
