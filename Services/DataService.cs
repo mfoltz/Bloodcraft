@@ -26,6 +26,7 @@ using static Bloodcraft.Services.DataService.PlayerPersistence.JsonFilePaths;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Utilities.Familiars;
 using static Bloodcraft.Utilities.Misc;
+using static Bloodcraft.Utilities.Shapeshifts;
 using WeaponType = Bloodcraft.Interfaces.WeaponType;
 
 namespace Bloodcraft.Services;
@@ -229,6 +230,28 @@ internal static class DataService
         }
 
         return _playerBindingIndex.TryGetValue(steamId, out index);
+    }
+    public static bool TryGetPlayerShapeshift(this ulong steamId, out ShapeshiftType shapeshift)
+    {
+        shapeshift = default;
+
+        if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
+        {
+            Entity playerCharacter = playerInfo.CharEntity;
+            BagHolder bagHolder = playerCharacter.Read<BagHolder>();
+            int bagInstanceIndex = bagHolder.BagInstance2.InventoryIndex;
+
+            foreach (var kvp in ShapeshiftBuffs)
+            {
+                if (kvp.Value.GuidHash == bagInstanceIndex)
+                {
+                    shapeshift = kvp.Key;
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
     public static bool TryGetPlayerQuests(this ulong steamId, out Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)> quests)
     {
@@ -507,6 +530,25 @@ internal static class DataService
     {
         _playerQuests[steamId] = data;
         SavePlayerQuests();
+    }
+    public static void SetPlayerShapeshift(this ulong steamId, ShapeshiftType shapeshiftType)
+    {
+        if (!ShapeshiftBuffs.TryGetValue(shapeshiftType, out PrefabGUID shapeshiftBuff))
+        {
+            Core.Log.LogWarning($"[DataService.SetPlayerShapeshift] ShapeshiftType {shapeshiftType} not found in ShapeshiftBuffs!");
+            return;
+        }
+        else if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
+        {
+            Entity playerCharacter = playerInfo.CharEntity;
+
+            playerCharacter.HasWith((ref BagHolder bagHolder) =>
+            {
+                bagHolder.BagInstance2.InventoryIndex = shapeshiftBuff.GuidHash;
+            });
+
+            ShapeshiftCache.SetShapeshiftBuff(steamId, shapeshiftType);
+        }
     }
     public static class PlayerDictionaries
     {
@@ -1336,7 +1378,7 @@ internal static class DataService
                     }
                     */
 
-                    if (professionLevel > 0 && equipmentEntity.Exists()) EquipmentQualityManager.ApplyEquipmentStats(professionLevel, equipmentEntity);
+                    if (professionLevel > 0 && equipmentEntity.Exists()) EquipmentQualityManager.ApplyFamiliarEquipmentStats(professionLevel, equipmentEntity);
                 }
 
                 // familiar.TryApplyBuff(_bonusStatsBuff);
@@ -1402,6 +1444,78 @@ internal static class DataService
                 }
 
                 return [..Enumerable.Range(0, EQUIPMENT_SLOTS).Select(_ => (FamiliarEquipment.EquipmentBase)new FamiliarEquipment.StandardEquipment { Equipment = 0, Quality = 0 })];
+            }
+            public static List<FamiliarEquipment.EquipmentBase> GetFamiliarEquipment(Entity servant)
+            {
+                List<FamiliarEquipment.EquipmentBase> familiarEquipment = [];
+                bool professions = ConfigService.ProfessionSystem;
+
+                if (servant.TryGetComponent(out ServantEquipment servantEquipment))
+                {
+                    foreach (FamiliarEquipmentType familiarEquipmentType in Enum.GetValues(typeof(FamiliarEquipmentType)))
+                    {
+                        if (FamiliarEquipmentMap.TryGetValue(familiarEquipmentType, out EquipmentType equipmentType) &&
+                            servantEquipment.IsEquipped(equipmentType))
+                        {
+                            Entity equipmentEntity = servantEquipment.GetEquipmentEntity(equipmentType).GetEntityOnServer();
+                            PrefabGUID equipmentPrefabGuid = servantEquipment.GetEquipmentItemId(equipmentType);
+                            int professionLevel = professions
+                                ? EquipmentQualityManager.CalculateProfessionLevelOfEquipmentFromMaxDurability(equipmentEntity)
+                                : 0;
+
+                            if (!equipmentEntity.IsAncestralWeapon())
+                            {
+                                familiarEquipment.Add(new FamiliarEquipment.StandardEquipment
+                                {
+                                    Equipment = equipmentPrefabGuid.GuidHash,
+                                    Quality = professionLevel
+                                });
+
+                                continue;
+                            }
+
+                            // Handle Ancestral Weapon
+                            LegendaryItemInstance legendaryItemInstance = equipmentEntity.Read<LegendaryItemInstance>();
+                            LegendaryItemSpellModSetComponent legendaryItemSpellModSet = equipmentEntity.Read<LegendaryItemSpellModSetComponent>();
+                            SpellModSet statModSet = legendaryItemSpellModSet.StatMods;
+                            PrefabGUID spellSchoolInfusion = legendaryItemSpellModSet.AbilityMods0.Mod0.Id;
+
+                            var statMods = new FamiliarEquipment.StatMods[statModSet.Count];
+                            for (int i = 0; i < statModSet.Count; i++)
+                            {
+                                statMods[i] = new FamiliarEquipment.StatMods
+                                {
+                                    StatMod = statModSet[i].Id.GuidHash,
+                                    Value = statModSet[i].Power
+                                };
+                            }
+
+                            familiarEquipment.Add(new FamiliarEquipment.AncestralWeapon
+                            {
+                                Equipment = equipmentPrefabGuid.GuidHash,
+                                Tier = legendaryItemInstance.TierIndex,
+                                Quality = professionLevel,
+                                Infusion = SpellSchoolInfusionMap.SpellSchoolInfusions[spellSchoolInfusion],
+                                StatMods = statMods
+                            });
+                        }
+                        else
+                        {
+                            familiarEquipment.Add(new FamiliarEquipment.StandardEquipment
+                            {
+                                Equipment = 0,
+                                Quality = 0
+                            });
+                        }
+                    }
+                }
+                else
+                {
+                    familiarEquipment.AddRange(Enumerable.Range(0, EQUIPMENT_SLOTS).Select(_ =>
+                        (FamiliarEquipment.EquipmentBase)new FamiliarEquipment.StandardEquipment { Equipment = 0, Quality = 0 }));
+                }
+
+                return familiarEquipment;
             }
         }
         public static class FamiliarEquipment

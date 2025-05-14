@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
@@ -18,10 +19,10 @@ internal static class ShapeshiftSystemPatch
 
     static readonly bool _familiars = ConfigService.FamiliarSystem;
 
-    static readonly PrefabGUID _psychicFormGroup = new(-1908054166);
-    static readonly PrefabGUID _batFormGroup = new(-104327922);
+    static readonly PrefabGUID _psychicForm = PrefabGUIDs.AB_Shapeshift_DominatingPresence_PsychicForm_Group;
+    static readonly PrefabGUID _batForm = PrefabGUIDs.AB_Shapeshift_Bat_Group;
 
-    static readonly PrefabGUID _vanishBuff = new(1595547018);           // AB_Bandit_Thief_Rush_Buff
+    static readonly PrefabGUID _vanishBuff = Buffs.VanishBuff;
 
     [HarmonyPatch(typeof(ShapeshiftSystem), nameof(ShapeshiftSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -43,7 +44,7 @@ internal static class ShapeshiftSystemPatch
                 User user = playerCharacter.GetUser();
                 ulong steamId = user.PlatformId;
 
-                if (enterShapeshiftEvent.Shapeshift.Equals(_psychicFormGroup))
+                if (enterShapeshiftEvent.Shapeshift.Equals(_psychicForm))
                 {
                     bool hasActive = steamId.HasActiveFamiliar();
                     bool isDismissed = steamId.HasDismissedFamiliar();
@@ -60,7 +61,7 @@ internal static class ShapeshiftSystemPatch
                         Familiars.DismissFamiliar(playerCharacter, familiar, user, steamId);
                     }
                 }
-                else if (enterShapeshiftEvent.Shapeshift.Equals(_batFormGroup))
+                else if (enterShapeshiftEvent.Shapeshift.Equals(_batForm))
                 {
                     bool hasActive = steamId.HasActiveFamiliar();
                     bool isDismissed = steamId.HasDismissedFamiliar();

@@ -604,7 +604,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Legacies", "CorruptionDamageReduction", 0.10f, "The base cap for corruption damage reduction."),
             
             new ConfigEntryDefinition("Professions", "ProfessionSystem", false, "Enable or disable the profession system."),
-            new ConfigEntryDefinition("Professions", "ProfessionFactor", 10f, "The multiplier for profession experience."),
+            new ConfigEntryDefinition("Professions", "ProfessionFactor", 1f, "The multiplier for profession experience."),
             new ConfigEntryDefinition("Professions", "ExtraRecipes", false, "Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well. See 'Recipes' section in README for complete list of changes."), // maybe this should be in general >_>
             
             new ConfigEntryDefinition("Familiars", "FamiliarSystem", false, "Enable or disable the familiar system."),

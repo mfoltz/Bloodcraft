@@ -1,6 +1,7 @@
 ﻿using Bloodcraft.Interfaces;
 using Bloodcraft.Resources;
 using Bloodcraft.Services;
+using Bloodcraft.Systems.Professions;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
@@ -36,7 +37,7 @@ internal static class BuffSystemSpawnPatches
 
     const float FAMILIAR_TRAVEL_DURATION = 7.5f;
     const float MINION_LIFETIME = 30f;
-    const int MAX_PROFESSION_LEVEL = 100;
+    const int MAX_PROFESSION_LEVEL = ProfessionSystem.MAX_PROFESSION_LEVEL;
 
     static readonly PrefabGUID _fallenAngel = PrefabGUIDs.CHAR_Paladin_FallenAngel;
     static readonly PrefabGUID _solarus = PrefabGUIDs.CHAR_ChurchOfLight_Paladin_VBlood;
@@ -711,7 +712,7 @@ internal static class BuffSystemSpawnPatches
     {
         string lowerName = prefabName.ToLower();
 
-        if (lowerName.Contains("consumable"))
+        if (lowerName.Contains("consumable") || lowerName.Contains("elixir"))
             return 11;
         else if (lowerName.Contains("emote_onaggro"))
             return 12;

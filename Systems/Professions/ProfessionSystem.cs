@@ -32,7 +32,7 @@ internal static class ProfessionSystem
     const int GREASE_STEP = 4;
 
     static readonly float _professionMultiplier = ConfigService.ProfessionFactor;
-    const int MAX_PROFESSION_LEVEL = 100;
+    public const int MAX_PROFESSION_LEVEL = 100;
 
     static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
     static readonly AssetGuid _bonusYieldAssetGuid = AssetGuid.FromString("5a8b7a32-c3e3-4794-bd62-ace36c10e89e");

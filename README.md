@@ -281,7 +281,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 ### Prestige Commands
 - `.prestige exoform`
-  - Toggles taunting to enter exo form.
+  - Toggles taunting to enter exoform.
   - Shortcut: *.prestige exoform*
 - `.prestige get [PrestigeType]`
   - Shows information about player's prestige status.
@@ -304,6 +304,9 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - `.prestige reset [Player] [PrestigeType]` 🔒
   - Handles resetting prestiging.
   - Shortcut: *.prestige r [Player] [PrestigeType]*
+- `.prestige selectform [EvolvedVampire|CorruptedSerpent]`
+  - Select active exoform shapeshift.
+  - Shortcut: *.prestige sf [EvolvedVampire|CorruptedSerpent]*
 - `.prestige self [PrestigeType]`
   - Handles player prestiging.
   - Shortcut: *.prestige me [PrestigeType]*
@@ -585,7 +588,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### Professions
 - **Profession System**: `ProfessionSystem` (bool, default: False)
   Enable or disable the profession system.
-- **Profession Factor**: `ProfessionFactor` (float, default: 10)
+- **Profession Factor**: `ProfessionFactor` (float, default: 1)
   The multiplier for profession experience.
 - **Extra Recipes**: `ExtraRecipes` (bool, default: False)
   Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well. See 'Recipes' section in README for complete list of changes.

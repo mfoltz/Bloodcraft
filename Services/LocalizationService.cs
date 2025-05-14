@@ -168,8 +168,6 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
             Plugin.LogInstance.LogError($"[Localization] No JSON content!");
         }
 
-        // var localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
-
         var localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true

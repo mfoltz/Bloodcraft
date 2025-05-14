@@ -41,7 +41,8 @@ internal static class FamiliarUnlockSystem
     static readonly HashSet<PrefabGUID> _defaultPrefabGuidBans =
     [
         PrefabGUIDs.CHAR_Undead_ArenaChampion_VBlood, // absolutely not
-        PrefabGUIDs.CHAR_Militia_Fabian_VBlood        // yes, but need time
+        PrefabGUIDs.CHAR_Militia_Fabian_VBlood,       // yes, but need time
+        PrefabGUIDs.CHAR_GoldGolem                    // nope
     ];
 
     public static readonly Dictionary<PrefabGUID, string> ShinyBuffColorHexes = new()

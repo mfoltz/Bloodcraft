@@ -410,57 +410,7 @@ internal class QuestService
             recipeDatas.Dispose();
         }
 
-        /*
-        yield return QueryResultStreamAsync(
-            _craftableItemQueryDesc,
-            stream =>
-            {
-                try
-                {
-                    using (stream)
-                    {
-                        foreach (QueryResult result in stream.GetResults())
-                        {
-                            Entity entity = result.Entity;
-                            PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
-                            RecipeData recipeData = result.ResolveComponentData<RecipeData>();
-
-                            Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {prefabGuid.GetPrefabName()}");
-
-                            if (!entity.TryGetBufferAccessor<RecipeOutputBuffer>(out var buffer) 
-                            || buffer.IsEmpty || !prefabGuidEntities.TryGetValue(buffer[0].Guid, out Entity prefabEntity)) continue;
-
-                            string prefabName = prefabEntity.GetPrefabGuid().GetPrefabName();
-
-                            Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {prefabName}");
-
-                            if (_filteredCraftableItems.Any(item => prefabName.Contains(item, StringComparison.OrdinalIgnoreCase))) continue;
-
-                            if (entity.Has<Equippable>() && entity.TryGetComponent(out Salvageable salvageable))
-                            {
-                                if (salvageable.RecipeGUID.HasValue())
-                                {
-                                    Core.Log.LogWarning($"[QuestService] Added to CraftPrefabs - {prefabName}");
-                                    CraftPrefabs.Add(prefabGuid);
-                                }
-                            }
-                            else if (entity.Has<ConsumableCondition>())
-                            {
-                                Core.Log.LogWarning($"[QuestService] Added to CraftPrefabs - {prefabName}");
-                                CraftPrefabs.Add(prefabGuid);
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {ex}");
-                }
-            }
-        );
-        */
-
-        Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {CraftPrefabs.Count}");
+        // Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {CraftPrefabs.Count}");
         _craftables = false;
     }
     static IEnumerator InitializeHarvestables()

@@ -12,6 +12,7 @@ using Unity.Entities;
 using static Bloodcraft.Utilities.Familiars;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Shapeshifts;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarEquipmentManager;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
@@ -94,30 +95,8 @@ internal static class EmoteSystemPatch
 
                 if (_exoForm && useEmoteEvent.Action.Equals(_tauntAbilityGroup) && GetPlayerBool(steamId, SHAPESHIFT_KEY))
                 {
-                    if (!playerCharacter.HasBuff(_exoFormBuff))
-                    {
-                        playerCharacter.TryApplyBuff(_phasingBuff);
-
-                        if (playerCharacter.TryGetBuff(_phasingBuff, out Entity buffEntity) && buffEntity.Has<BuffModificationFlagData>())
-                        {
-                            buffEntity.Remove<BuffModificationFlagData>();
-                        }
-                    }
-                    else if (playerCharacter.TryGetBuff(_exoFormBuff, out Entity buffEntity))
-                    {
-                        BlockShapeshift.Add(steamId);
-                        UpdatePartialExoFormChargeUsed(buffEntity, steamId);
-
-                        playerCharacter.TryApplyBuff(_gateBossFeedCompleteBuff);
-                        buffEntity.TryDestroyBuff();
-                    }
+                    if (_emoteActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(user, playerCharacter, steamId);
                 }
-                /*
-                if (useEmoteEvent.Action.Equals(_tauntAbilityGroup) || useEmoteEvent.Action.Equals(_bowAbilityGroup) && GetPlayerBool(steamId, SHAPESHIFT_KEY))
-                {
-                    if (EmoteActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(user, playerCharacter, steamId);
-                }
-                */
                 else if (_familiarBattles && BattleChallenges.TryGetMatch(steamId, out var match) && (useEmoteEvent.Action.Equals(_yesAbilityGroup) || useEmoteEvent.Action.Equals(_noAbilityGroup)))
                 {
                     if (_matchActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(match);
@@ -145,49 +124,14 @@ internal static class EmoteSystemPatch
             entities.Dispose();
         }
     }
-    static void CycleShapeshift(User user, Entity playerCharacter, ulong steamId)
+    static void HandleShapeshift(User user, Entity playerCharacter, ulong steamId)
     {
-        // Get current buff if set
-        if (!ShapeshiftCache.TryGetShapeshiftBuff(steamId, out var currentBuff))
+        if (!ShapeshiftCache.TryGetShapeshiftBuff(steamId, out PrefabGUID shapeshiftBuff))
         {
-            // If none, default to first defined shapeshift
-            var first = ShapeshiftBuffs.First();
-            ShapeshiftCache.SetShapeshiftBuff(steamId, first.Key);
+            BlockShapeshift.Add(steamId);
+            LocalizationService.HandleServerReply(EntityManager, user, "Select a form you've unlocked first! ('<color=white>.prestige sf [<color=orange>EvolvedVampire|CorruptedSerpent</color>]</color>')");
             return;
         }
-
-        // Get current type based on buff GUID
-        var types = ShapeshiftBuffs.Keys.ToList();
-        var currentType = ShapeshiftBuffs.FirstOrDefault(kv => kv.Value.Equals(currentBuff)).Key;
-
-        // If unknown, fallback to first
-        if (!Enum.IsDefined(typeof(ShapeshiftType), currentType))
-        {
-            var fallback = types.First();
-            ShapeshiftCache.SetShapeshiftBuff(steamId, fallback);
-            return;
-        }
-
-        // Get next type in list, loop back if needed
-        int currentIndex = types.IndexOf(currentType);
-        int nextIndex = (currentIndex + 1) % types.Count;
-        var nextType = types[nextIndex];
-
-        // Set the new shapeshift
-        ShapeshiftCache.SetShapeshiftBuff(steamId, nextType);
-        LocalizationService.HandleServerReply(EntityManager, user, $"Shapeshift - <color=white>{nextType}</color>");
-    }
-    static void HandleShapeshift(User _, Entity playerCharacter, ulong steamId)
-    {
-        /*
-        if (!ShapeshiftCache.TryGetShapeshiftBuff(steamId, out var type))
-            return;
-
-        if (!ShapeshiftForms.TryGetValue(type, out var shapeshift))
-            return;
-        */
-
-        PrefabGUID shapeshiftBuff = Buffs.EvolvedVampireBuff;
 
         if (!playerCharacter.HasBuff(shapeshiftBuff))
         {
@@ -323,6 +267,8 @@ internal static class EmoteSystemPatch
 
             if (hasInteractBuff)
             {
+                SaveFamiliarEquipment(steamId, activeFamiliarData.FamiliarId, GetFamiliarEquipment(activeFamiliarData.Servant));
+
                 EnableAggro(familiar);
                 familiar.TryRemoveBuff(buffPrefabGuid: _interactModeBuff);
 

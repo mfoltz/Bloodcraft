@@ -1,3 +1,4 @@
+using Bloodcraft.Interfaces;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
@@ -8,6 +9,7 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Utilities.EntityQueries;
+using PrestigeManager = Bloodcraft.Systems.Leveling.PrestigeManager;
 
 namespace Bloodcraft.Services;
 internal class PlayerService
@@ -15,6 +17,7 @@ internal class PlayerService
     static EntityManager EntityManager => Core.EntityManager;
 
     static readonly bool _leveling = ConfigService.LevelingSystem;
+    static readonly bool _exoForm = ConfigService.ExoPrestiging;
     static readonly bool _eclipse = ConfigService.Eclipse;
 
     // const float START_DELAY = 30f;
@@ -131,8 +134,19 @@ internal class PlayerService
                 {
                     int level = LevelingSystem.GetLevel(steamId);
                     bool hasPrestiged = PrestigeManager.HasPrestiged(steamId);
+
                     // Core.Log.LogWarning($"[PlayerService.BuildPlayerInfoCache] {steamId} - {playerName} - Level: {level} - HasPrestiged: {hasPrestiged}");
                     Progression.PlayerProgressionCacheManager.UpdatePlayerProgression(steamId, level, hasPrestiged);
+                }
+
+                if (_exoForm)
+                {
+                    bool hasExoPrestiged = PrestigeManager.HasExoPrestiged(steamId);
+
+                    if (hasExoPrestiged && steamId.TryGetPlayerShapeshift(out ShapeshiftType shapeshift))
+                    {
+                        Shapeshifts.ShapeshiftCache.SetShapeshiftBuff(steamId, shapeshift);
+                    }
                 }
             }
         }

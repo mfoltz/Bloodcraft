@@ -477,7 +477,7 @@ internal static class PrestigeCommands
         }
     }
 
-    [Command(name: "exoform", adminOnly: false, usage: ".prestige exoform", description: "Toggles taunting to enter exo form.")]
+    [Command(name: "exoform", adminOnly: false, usage: ".prestige exoform", description: "Toggles taunting to enter exoform.")]
     public static void ToggleExoFormEmote(ChatCommandContext ctx)
     {
         if (!ConfigService.ExoPrestiging)
@@ -490,14 +490,55 @@ internal static class PrestigeCommands
 
         if (steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) && exoPrestiges > 0)
         {
-            if (!Progression.ConsumedDracula(ctx.Event.SenderUserEntity))
+            if (!Progression.ConsumedMegara(ctx.Event.SenderUserEntity) && !Progression.ConsumedDracula(ctx.Event.SenderUserEntity))
             {
-                ctx.Reply("You must consume Dracula's essence before manifesting this power...");
+                ctx.Reply("You must consume at least one primordial essence...");
                 return;
             }
 
             TogglePlayerBool(steamId, SHAPESHIFT_KEY);
-            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>, the Immortal King's formidable powers are now yours..." : "<color=red>disabled</color>...")}");
+            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");
+        }
+        else
+        {
+            ctx.Reply("You are not yet worthy...");
+        }
+    }
+
+    [Command(name: "selectform", shortHand: "sf", adminOnly: false, usage: ".prestige sf [EvolvedVampire|CorruptedSerpent]", description: "Select active exoform shapeshift.")]
+    public static void SelectFormCommand(ChatCommandContext ctx, string shapeshift)
+    {
+        if (!ConfigService.ExoPrestiging)
+        {
+            ctx.Reply("Exo prestiging is not enabled.");
+            return;
+        }
+
+        if (!Enum.TryParse<ShapeshiftType>(shapeshift, ignoreCase: true, out var form))
+        {
+            var shapeshifts = string.Join(", ", Enum.GetNames(typeof(ShapeshiftType)).Select(name => $"<color=white>{name}</color>"));
+            ctx.Reply($"Invalid shapeshift! Valid options: {shapeshifts}");
+            return;
+        }
+
+        ulong steamId = ctx.Event.User.PlatformId;
+
+        if (steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) && exoPrestiges > 0)
+        {
+            if (form.Equals(ShapeshiftType.EvolvedVampire) && !Progression.ConsumedDracula(ctx.Event.SenderUserEntity))
+            {
+                ctx.Reply("You must consume Dracula's essence before manifesting his form...");
+                return;
+            }
+
+            if (form.Equals(ShapeshiftType.CorruptedSerpent) && !Progression.ConsumedMegara(ctx.Event.SenderUserEntity))
+            {
+                ctx.Reply("You must consume Megara's essence before manifesting her form...");
+                return;
+            }
+
+            steamId.SetPlayerShapeshift(form);
+            ctx.Reply($"Current Exoform: <color=white>{form}</color>");
         }
         else
         {

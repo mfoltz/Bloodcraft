@@ -6,8 +6,8 @@ namespace Bloodcraft.Interfaces;
 public enum ShapeshiftType
 {
     EvolvedVampire,
-    CorruptedSerpent,
-    AncientGuardian
+    CorruptedSerpent
+    // AncientGuardian
 }
 internal interface IShapeshift
 {
@@ -74,7 +74,7 @@ internal class EvolvedVampire : Shapeshift
         PrefabGUIDs.AB_Vampire_Dracula_SideStepLong_Followup_Abilitygroup,
         PrefabGUIDs.AB_Vampire_Dracula_EtherialSword_Abilitygroup,
         PrefabGUIDs.AB_Vampire_Dracula_RingOfBlood_AbilityGroup,
-        PrefabGUIDs.AB_Vampire_Dracula_BloodBoltSwarm_AbilityGroup
+        PrefabGUIDs.AB_Blood_BloodStorm_AbilityGroup
     ];
 
     static readonly Dictionary<int, PrefabGUID> _abilities = new()
@@ -86,7 +86,7 @@ internal class EvolvedVampire : Shapeshift
         { 4, PrefabGUIDs.AB_Vampire_Dracula_SideStepLong_Followup_Abilitygroup },
         { 5, PrefabGUIDs.AB_Vampire_Dracula_EtherialSword_Abilitygroup },
         { 6, PrefabGUIDs.AB_Vampire_Dracula_RingOfBlood_AbilityGroup },
-        { 7, PrefabGUIDs.AB_Vampire_Dracula_BloodBoltSwarm_AbilityGroup }
+        { 7, PrefabGUIDs.AB_Blood_BloodStorm_AbilityGroup }
     };
 
     static readonly Dictionary<int, float> _cooldowns = new()
@@ -101,8 +101,6 @@ internal class EvolvedVampire : Shapeshift
         { 7, 35f }
     };
 }
-
-/*
 internal class CorruptedSerpent : Shapeshift
 {
     public override ShapeshiftType Type => ShapeshiftType.CorruptedSerpent;
@@ -116,7 +114,7 @@ internal class CorruptedSerpent : Shapeshift
         PrefabGUIDs.AB_Blackfang_Morgana_MeleeAttack_AbilityGroup,
         PrefabGUIDs.AB_Blackfang_Morgana_GroundPiercer_AbilityGroup,
         PrefabGUIDs.AB_Vampire_Dracula_QuickTeleport_AbilityGroup,
-        PrefabGUIDs.AB_Blackfang_Morgana_CorruptionFountain_AbilityGroup,
+        PrefabGUIDs.AB_Blackfang_Morgana_MistSpinners_AbilityGroup,
         PrefabGUIDs.AB_Blackfang_Morgana_CrossWindSlash_AbilityGroup,
         PrefabGUIDs.AB_Blackfang_Morgana_SpectralBlast_AbilityGroup,
         PrefabGUIDs.AB_Blackfang_Morgana_SpectralBeam_AbilityGroup,
@@ -128,7 +126,7 @@ internal class CorruptedSerpent : Shapeshift
         { 0, PrefabGUIDs.AB_Blackfang_Morgana_MeleeAttack_AbilityGroup },
         { 1, PrefabGUIDs.AB_Blackfang_Morgana_GroundPiercer_AbilityGroup },
         { 2, PrefabGUIDs.AB_Vampire_Dracula_QuickTeleport_AbilityGroup },
-        { 3, PrefabGUIDs.AB_Blackfang_Morgana_CorruptionFountain_AbilityGroup },
+        { 3, PrefabGUIDs.AB_Blackfang_Morgana_MistSpinners_AbilityGroup },
         { 4, PrefabGUIDs.AB_Blackfang_Morgana_CrossWindSlash_AbilityGroup },
         { 5, PrefabGUIDs.AB_Blackfang_Morgana_SpectralBlast_AbilityGroup },
         { 6, PrefabGUIDs.AB_Blackfang_Morgana_SpectralBeam_AbilityGroup },
@@ -147,6 +145,8 @@ internal class CorruptedSerpent : Shapeshift
         { 7, 35f }
     };
 }
+
+/*
 internal class AncientGuardian : Shapeshift
 {
     public override ShapeshiftType Type => ShapeshiftType.AncientGuardian;

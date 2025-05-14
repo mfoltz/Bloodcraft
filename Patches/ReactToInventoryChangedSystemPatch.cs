@@ -154,13 +154,16 @@ internal static class ReactToInventoryChangedSystemPatch
                                     float professionXP = BASE_PROFESSION_XP * ProfessionMappings.GetTierMultiplier(itemPrefabGuid);
                                     float delay = SCT_DELAY;
 
+                                    if (itemName.Contains("Elixir")) professionXP *= 2f;
+
+                                    // Core.Log.LogWarning($"Profession Crafting - {itemPrefabGuid.GetPrefabName()}");
                                     IProfession handler = ProfessionFactory.GetProfession(itemPrefabGuid);
 
                                     switch (handler)
                                     {
                                         case BlacksmithingProfession:
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
-                                            EquipmentQualityManager.ApplyEquipmentStats(steamId, itemEntity);
+                                            EquipmentQualityManager.ApplyPlayerEquipmentStats(steamId, itemEntity);
                                             break;
                                         case AlchemyProfession:
                                             if (itemEntity.TryGetComponent(out StoredBlood storedBlood))
@@ -190,11 +193,11 @@ internal static class ReactToInventoryChangedSystemPatch
                                             break;
                                         case EnchantingProfession:
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
-                                            EquipmentQualityManager.ApplyEquipmentStats(steamId, itemEntity);
+                                            EquipmentQualityManager.ApplyPlayerEquipmentStats(steamId, itemEntity);
                                             break;
                                         case TailoringProfession:
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
-                                            EquipmentQualityManager.ApplyEquipmentStats(steamId, itemEntity);
+                                            EquipmentQualityManager.ApplyPlayerEquipmentStats(steamId, itemEntity);
                                             break;
                                         default:
                                             break;

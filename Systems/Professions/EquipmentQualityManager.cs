@@ -15,7 +15,7 @@ internal static class EquipmentQualityManager
     const float MAX_MAGIC_BONUS = 0.1f;
 
     const int MAX_PROFESSION_LEVEL = 100;
-    public static void ApplyEquipmentStats(ulong steamId, Entity equipmentEntity)
+    public static void ApplyPlayerEquipmentStats(ulong steamId, Entity equipmentEntity)
     {
         IProfession handler = ProfessionFactory.GetProfession(equipmentEntity.GetPrefabGuid());
 
@@ -40,12 +40,13 @@ internal static class EquipmentQualityManager
         for (int i = 0; i < buffer.Length; i++)
         {
             ModifyUnitStatBuff_DOTS statBuff = buffer[i];
-            statBuff.Value *= scaledBonus;
+            if (statBuff.StatType.Equals(UnitStatType.InventorySlots)) continue;
 
+            statBuff.Value *= scaledBonus;
             buffer[i] = statBuff;
         }
     }
-    public static void ApplyEquipmentStats(int professionLevel, Entity equipmentEntity)
+    public static void ApplyFamiliarEquipmentStats(int professionLevel, Entity equipmentEntity)
     {
         IProfession handler = ProfessionFactory.GetProfession(equipmentEntity.GetPrefabGuid());
         float scaledBonus = 0f;

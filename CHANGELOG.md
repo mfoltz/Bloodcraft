@@ -1,3 +1,13 @@
+`1.9.7`
+- CHAR_Treant_Corrupted PrefabGuid(1496810447), this will attach mantraps to your character I am not changing it or autobanning it at this time but you may feel free to do so if you're not a fan
+- two exoforms to switch between if both unlocked, will use same duration cooldown ('.prestige sf [EvolvedVampire|CorruptedSerpent]'; these are probably unbalanced and should be considered experimental, variety of jank to smooth out after 1.1 but appear generally functional)
+- fixed exoform application after taunt if unlocked and enabled and a few other parts that were unintentionally moved around while refactoring
+- elixirs and coatings give alchemy experience and elixirs have increased duration from alchemy level, elixirs may also give increased stats but I am not making an effort to show that in Eclipse either way at this time (extra duration on coatings just makes them last forever so leaving that alone for now)
+- inventorySlots on newly crafted bags are no longer affected by tailoring, unsure when this started happening; should eliminate any directly related weirdness
+- familiar equipment saves when exiting interact mode and not just when unbinding, equipment should no longer be lost on death (that will have an appropriate consequence when I have time to implement it)
+- banned gold golems as familiars internally
+- tuned kill quest generation for players at max or above
+
 `1.8.6`
 - changed stats buff application, hoping will reduce/eliminate the occasional recursive group errors
 - fixed some recipe/item modifications that require slightly different handling after 1.1 to work as before, added serpent shard related things to places it was missing from

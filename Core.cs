@@ -9,7 +9,6 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
-using MagicaCloth;
 using ProjectM;
 using ProjectM.Physics;
 using ProjectM.Scripting;
@@ -253,8 +252,8 @@ internal static class Core
         {
             if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Buffs.BonusStatsBuff, out Entity prefabEntity))
             {
-                prefabEntity.Add<ScriptSpawn>();
-                // prefabEntity.TryRemove<BuffModificationFlagData>();
+                prefabEntity.TryAdd<ScriptSpawn>();
+                prefabEntity.TryAdd<BloodBuffScript_Scholar_MovementSpeedOnCast>();
 
                 if (prefabEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var buffer))
                 {
@@ -430,7 +429,7 @@ internal static class Core
     public static void LogEntity(World world, Entity entity)
     {
         Il2CppSystem.Text.StringBuilder sb = new();
-
+        
         try
         {
             EntityDebuggingUtility.DumpEntity(world, entity, true, sb);
@@ -442,6 +441,8 @@ internal static class Core
         }
     }
 }
+
+/*
 public readonly unsafe struct NativeAccessor<T>(NativeArray<T> array) : IDisposable where T : unmanaged
 {
     readonly T* _ptr = (T*)array.m_Buffer;
@@ -454,14 +455,22 @@ public readonly unsafe struct NativeAccessor<T>(NativeArray<T> array) : IDisposa
     public int Length => _length;
     public void Dispose() => array.Dispose();
 }
-public readonly unsafe struct BufferAccessor<T>(DynamicBuffer<T> buffer) where T : unmanaged
+*/
+public readonly struct NativeAccessor<T> : IDisposable where T : unmanaged
 {
-    readonly T* _ptr = (T*)buffer.m_Buffer;
-    readonly int _length = buffer.Length;
+    static NativeArray<T> _array;
+    public NativeAccessor(NativeArray<T> array)
+    {
+        _array = array;
+    }
     public T this[int index]
     {
-        get => _ptr[index];
-        set => _ptr[index] = value;
+        get => _array[index];
+        set => _array[index] = value;
     }
-    public int Length => _length;
+    public int Length => _array.Length;
+
+    public void Dispose() => _array.Dispose();
+
+    public NativeArray<T>.Enumerator GetEnumerator() => _array.GetEnumerator();
 }

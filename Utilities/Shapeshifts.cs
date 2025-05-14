@@ -39,22 +39,22 @@ internal static class Shapeshifts
     static readonly Dictionary<PrefabGUID, IShapeshift> _shapeshiftForms = new()
     {
         [Buffs.EvolvedVampireBuff] = new EvolvedVampire(),
-        // [Buffs.CorruptedSerpentBuff] = new CorruptedSerpent(),
+        [Buffs.CorruptedSerpentBuff] = new CorruptedSerpent(),
         // [Buffs.AncientGuardianBuff] = new AncientGuardian()
     };
     public static IReadOnlyDictionary<ShapeshiftType, PrefabGUID> ShapeshiftBuffs => _shapeshiftBuffs;
     static readonly Dictionary<ShapeshiftType, PrefabGUID> _shapeshiftBuffs = new()
     {
         [ShapeshiftType.EvolvedVampire] = Buffs.EvolvedVampireBuff,
-        [ShapeshiftType.CorruptedSerpent] = Buffs.CorruptedSerpentBuff,
-        [ShapeshiftType.AncientGuardian] = Buffs.AncientGuardianBuff
+        [ShapeshiftType.CorruptedSerpent] = Buffs.CorruptedSerpentBuff
+        // [ShapeshiftType.AncientGuardian] = Buffs.AncientGuardianBuff
     };
     public static class ShapeshiftRegistry
     {
         static readonly Lazy<List<IShapeshift>> _forms = new(() =>
         [
             new EvolvedVampire(),
-            // new CorruptedSerpent(),
+            new CorruptedSerpent(),
             // new AncientGuardian()
         ]);
 
@@ -300,6 +300,12 @@ internal static class Shapeshifts
 
         buffEntity.TryAdd<ReplaceAbilityOnSlotData>();
         buffEntity.TryAdd<Script_Buff_Shapeshift_DataShared>();
+
+        buffEntity.AddWith((ref LifeTime lifeTime) =>
+        {
+            lifeTime.Duration = duration;
+            lifeTime.EndAction = LifeTimeEndAction.Destroy;
+        });
 
         buffEntity.AddWith((ref ChangeKnockbackResistanceBuff knockback) =>
         {

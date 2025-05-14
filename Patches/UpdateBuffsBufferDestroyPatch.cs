@@ -45,16 +45,6 @@ internal static class UpdateBuffsBufferDestroyPatch
     static readonly PrefabGUID _insideStoneCoffin = new(569692162);
 
     static readonly PrefabGUID _bonusStatsBuff = Buffs.BonusStatsBuff;
-    // static readonly PrefabGUID _bonusPlayerStatsBuff = Buffs.BonusPlayerStatsBuff;
-    // static readonly PrefabGUID _bonusFamiliarStatsBuff = Buffs.BonusFamiliarStatsBuff;
-
-    /*
-    static readonly HashSet<PrefabGUID> _bonusStatBuffs =
-    [
-        _bonusPlayerStatsBuff,
-        _bonusFamiliarStatsBuff
-    ];
-    */
 
     public static readonly List<PrefabGUID> PrestigeBuffs = [];
     public static readonly Dictionary<ClassManager.PlayerClass, HashSet<PrefabGUID>> ClassBuffsSet = [];
@@ -129,7 +119,7 @@ internal static class UpdateBuffsBufferDestroyPatch
 
                 PrefabGUID buffPrefabGuid = prefabGuids[i];
                 int buffType = GetBuffType(buffPrefabGuid, isWeaponEquipBuff, isPlayerTarget, isFamiliarTarget, isBloodBuff);
-
+                
                 // Core.Log.LogWarning($"[UpdateBuffsBufferDestroyPatch] - {buffPrefabGuid.GetPrefabName()}");
 
                 switch (buffType)
@@ -164,16 +154,10 @@ internal static class UpdateBuffsBufferDestroyPatch
                             {
                                 EmoteSystemPatch.BlockShapeshift.Remove(steamId);
                             }
-                            // else if (Shapeshifts.CheckExoFormCharge(user, steamId)) ApplyExoFormBuff(buffTarget);
-                            else ApplyShapeshiftBuff(steamId, buffTarget);
+                            else if (Shapeshifts.CheckExoFormCharge(user, steamId)) ApplyShapeshiftBuff(steamId, buffTarget);
+                            // else ApplyShapeshiftBuff(steamId, buffTarget);
                         }
                         break;
-                    /*
-                    case 5 when _shouldHandleStats:
-                        // if (buffTarget.TryGetBuff(_bonusStatsBuff, out Entity buffEntity)) ScriptSpawnServerPatch.RemovePlayerBonusStats(buffEntity, buffTarget);
-                        Buffs.RefreshStats(buffTarget);
-                        break;
-                    */
                     case 7 when _prestige && isPlayerTarget: // Prestige Buffs
                         steamId = buffTarget.GetSteamId();
                         int index = PrestigeBuffs.IndexOf(buffPrefabGuid);
@@ -250,12 +234,12 @@ internal static class UpdateBuffsBufferDestroyPatch
         }
         else return guidHash switch
         {
-            -31099041 => 1,                 // ExoForm Buff
+            -31099041 or -1859425781 => 1,     // ExoForm Buff
             // 20081801 => 2,                  // bonus stats testing
-            // 737485591 => 2,              // Set bonus buff trying for bonus stats
-            581443919 => 3,                 // Combat Buff
-            -508293388 => 4,                // Taunt Emote Buff
-            -1598161201 or -622259665 => 8, // Werewolf Buffs
+            // 737485591 => 2,                 // Set bonus buff trying for bonus stats
+            581443919 => 3,                    // Combat Buff
+            -508293388 => 4,                   // Taunt Emote Buff
+            -1598161201 or -622259665 => 8,    // Werewolf Buffs
             _ => 0,
         };
     }
@@ -263,11 +247,10 @@ internal static class UpdateBuffsBufferDestroyPatch
     {
         if (!Shapeshifts.ShapeshiftCache.TryGetShapeshiftBuff(steamId, out PrefabGUID shapeshiftBuff))
         {
-            // Core.Log.LogWarning($"Shapeshift buff not found for {steamId}");
+            Core.Log.LogWarning($"Shapeshift buff not found for {steamId}");
             return;
         }
 
-        // Core.Log.LogWarning($"Applying shapeshift buff {shapeshiftBuff.GetPrefabName()} for {steamId}");
         playerCharacter.TryApplyBuff(shapeshiftBuff);
         playerCharacter.TryApplyBuff(_phasingBuff);
         playerCharacter.CastAbility(_gateBossFeedCompleteGroup);

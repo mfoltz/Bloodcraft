@@ -47,17 +47,13 @@ internal static class StatChangeSystemPatch
         { Buffs.DivineDebuff }
     };
 
-    static readonly PrefabGUID _stormShield03 = Buffs.StormShieldTertiaryBuff;
-    static readonly PrefabGUID _stormShield02 = Buffs.StormShieldSecondaryBuff;
-    static readonly PrefabGUID _stormShield01 = Buffs.StormShieldPrimaryBuff;
-
     static readonly PrefabGUID _slashersMeleeHit03 = PrefabGUIDs.AB_Vampire_Slashers_Primary_MeleeAttack_Hit03;
-    static readonly PrefabGUID _vargulfBleedBuff = Buffs.VargulfBleedBuff;
     static readonly PrefabGUID _twinBladesSweepingStrikeHit = PrefabGUIDs.AB_Vampire_TwinBlades_SweepingStrike_Hit;
-    static readonly PrefabGUID _twinBladesIceShield = PrefabGUIDs.Frost_Vampire_Buff_IceShield_SpellMod;
+    static readonly PrefabGUID _vargulfBleedBuff = Buffs.VargulfBleedBuff;
+    static readonly PrefabGUID _iceShieldBuff = PrefabGUIDs.Frost_Vampire_Buff_IceShield_SpellMod;
 
-    static readonly bool _slashersBleed = Core.BleedingEdge.Contains(Interfaces.WeaponType.Slashers);
-    static readonly bool _twinBladesShield = Core.BleedingEdge.Contains(Interfaces.WeaponType.TwinBlades);
+    static readonly bool _slashers = Core.BleedingEdge.Contains(Interfaces.WeaponType.Slashers);
+    static readonly bool _twinBlades = Core.BleedingEdge.Contains(Interfaces.WeaponType.TwinBlades);
     static readonly bool _onHitEffects = ConfigService.ClassOnHitEffects;
     static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
@@ -76,8 +72,11 @@ internal static class StatChangeSystemPatch
     {
         if (!Core._initialized) return;
 
-        NativeArray<Entity> entities = __instance._DamageTakenEventQuery.ToEntityArray(Allocator.Temp);
-        NativeArray<DamageTakenEvent> damageTakenEvents = __instance._DamageTakenEventQuery.ToComponentDataArray<DamageTakenEvent>(Allocator.Temp);
+        // NativeArray<Entity> entities = __instance._DamageTakenEventQuery.ToEntityArray(Allocator.Temp);
+        // NativeArray<DamageTakenEvent> damageTakenEvents = __instance._DamageTakenEventQuery.ToComponentDataArray<DamageTakenEvent>(Allocator.Temp);
+
+        using NativeAccessor<Entity> entities = __instance._DamageTakenEventQuery.ToEntityArrayAccessor(Allocator.Temp);
+        using NativeAccessor<DamageTakenEvent> damageTakenEvents = __instance._DamageTakenEventQuery.ToComponentDataArrayAccessor<DamageTakenEvent>(Allocator.Temp);
 
         try
         {
@@ -144,7 +143,7 @@ internal static class StatChangeSystemPatch
 
                         if (sourcePrefabGuid.Equals(_twinBladesSweepingStrikeHit) && damageTakenEvent.Entity.IsVBloodOrGateBoss())
                         {
-                            playerCharacter.TryApplyBuff(_twinBladesIceShield);
+                            playerCharacter.TryApplyBuff(_iceShieldBuff);
                         }
 
                         if (!_onHitEffects || !_classes) continue;
@@ -176,10 +175,14 @@ internal static class StatChangeSystemPatch
                 }
             }
         }
+        catch (Exception e)
+        {
+            Core.Log.LogWarning($"[StatChangeSystem] Exception: {e}");
+        }
         finally
         {
-            entities.Dispose();
-            damageTakenEvents.Dispose();
+            // entities.Dispose();
+            // damageTakenEvents.Dispose();
         }
     }
     public static void RemoveOnItemPickup(ulong steamId)

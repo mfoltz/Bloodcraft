@@ -570,38 +570,9 @@ internal static class ECSExtensions // probably need to organize this soonTM and
         NativeArray<Entity> entities = entityQuery.ToEntityArray(allocator);
         return new(entities);
     }
-    public static NativeAccessor<TKey> GetKeyAccessor<TKey, TValue>(
-        this NativeParallelHashMap<TKey, TValue> nativeParallelHashMap,
-        Allocator allocator = Allocator.Temp)
-        where TKey : unmanaged
-        where TValue : unmanaged
-    {
-        NativeArray<TKey> keys = nativeParallelHashMap.GetKeyArray(allocator);
-        return new(keys);
-    }
-    public static NativeAccessor<TValue> GetValueAccessor<TKey, TValue>(
-    this NativeParallelHashMap<TKey, TValue> nativeParallelHashMap,
-    Allocator allocator = Allocator.Temp)
-    where TKey : unmanaged
-    where TValue : unmanaged
-    {
-        NativeArray<TValue> values = nativeParallelHashMap.GetValueArray(allocator);
-        return new(values);
-    }
-    public static NativeAccessor<T> ToComponentDataArrayAccessor<T>(this EntityQuery entityQuery) where T : unmanaged
+    public static NativeAccessor<T> ToComponentDataArrayAccessor<T>(this EntityQuery entityQuery, Allocator allocator = Allocator.Temp) where T : unmanaged
     {
         NativeArray<T> components = entityQuery.ToComponentDataArray<T>(Allocator.Temp);
         return new(components);
-    }
-    public static bool TryGetBufferAccessor<T>(this Entity entity, out BufferAccessor<T> accessor) where T : unmanaged
-    {
-        if (entity.TryGetBuffer(out DynamicBuffer<T> buffer))
-        {
-            accessor = new(buffer);
-            return true;
-        }
-
-        accessor = default;
-        return false;
     }
 }

@@ -138,7 +138,7 @@ internal static class CraftingSystemPatches
 
                             // Core.Log.LogWarning($"Handling profession xp for {itemPrefab.GetPrefabName()}");
                             ProfessionSystem.SetProfession(entity, user.LocalCharacter.GetEntityOnServer(), steamId, professionValue, handler, ref delay);
-                            EquipmentQualityManager.ApplyEquipmentStats(steamId, itemEntity);
+                            EquipmentQualityManager.ApplyPlayerEquipmentStats(steamId, itemEntity);
                         }
                     }
                 }
@@ -209,7 +209,6 @@ internal static class CraftingSystemPatches
                         }
 
                         QueuedWorkstationCraftAction queuedWorkstationCraftAction = buffer[0];
-
                         ProcessQueuedCraftAction(entity, queuedWorkstationCraftAction, 1f);
                     }
                 }
@@ -258,12 +257,12 @@ internal static class CraftingSystemPatches
 
                     if (!RecipesCrafting.ContainsKey(itemPrefabGUID))
                     {
-                        //Core.Log.LogInfo($"Crafting job added via StartCraftEvent for {itemPrefabGUID.LookupName()}| 1");
+                        // Core.Log.LogInfo($"Crafting job added via StartCraftEvent for {itemPrefabGUID.GetPrefabName()}| 1");
                         RecipesCrafting[itemPrefabGUID] = 1;
                     }
                     else
                     {
-                        //Core.Log.LogInfo($"Crafting job added via StartCraftEvent for {itemPrefabGUID.LookupName()}| {RecipesCrafting[itemPrefabGUID] + 1}");
+                        // Core.Log.LogInfo($"Crafting job added via StartCraftEvent for {itemPrefabGUID.GetPrefabName()}| {RecipesCrafting[itemPrefabGUID] + 1}");
                         RecipesCrafting[itemPrefabGUID] = ++RecipesCrafting[itemPrefabGUID];
                     }
 
@@ -307,7 +306,7 @@ internal static class CraftingSystemPatches
                             int jobs = validatedCraftingJobs[itemPrefabGUID];
                             validatedCraftingJobs[itemPrefabGUID] = --jobs;
 
-                            //Core.Log.LogInfo($"Crafting job removed via StopCraftEvent for {itemPrefabGUID.LookupName()}| {validatedCraftingJobs[itemPrefabGUID]} in ValidatedCraftingJobs");
+                            // Core.Log.LogInfo($"Crafting job removed via StopCraftEvent for {itemPrefabGUID.LookupName()}| {validatedCraftingJobs[itemPrefabGUID]} in ValidatedCraftingJobs");
                             if (validatedCraftingJobs[itemPrefabGUID] <= 0) validatedCraftingJobs.Remove(itemPrefabGUID);
                         }
                     }
@@ -353,7 +352,7 @@ internal static class CraftingSystemPatches
                                 int jobs = craftingJobs[itemPrefabGUID];
                                 craftingJobs[itemPrefabGUID] = --jobs;
 
-                                //Core.Log.LogInfo($"Crafting job removed via exploit prevention for {itemPrefabGUID.LookupName()}| {craftingJobs[itemPrefabGUID]} in playerCraftingJobs");
+                                // Core.Log.LogInfo($"Crafting job removed via exploit prevention for {itemPrefabGUID.GetPrefabName()}| {craftingJobs[itemPrefabGUID]} in playerCraftingJobs");
                                 if (craftingJobs[itemPrefabGUID] <= 0) craftingJobs.Remove(itemPrefabGUID);
                             }
                         }
@@ -365,7 +364,7 @@ internal static class CraftingSystemPatches
                                 int jobs = validatedCraftingJobs[itemPrefabGUID];
                                 validatedCraftingJobs[itemPrefabGUID] = --jobs;
 
-                                //Core.Log.LogInfo($"Crafting job removed via exploit prevention for {itemPrefabGUID.LookupName()}| {validatedCraftingJobs[itemPrefabGUID]} in ValidatedCraftingJobs");
+                                // Core.Log.LogInfo($"Crafting job removed via exploit prevention for {itemPrefabGUID.GetPrefabName()}| {validatedCraftingJobs[itemPrefabGUID]} in ValidatedCraftingJobs");
                                 if (validatedCraftingJobs[itemPrefabGUID] <= 0) validatedCraftingJobs.Remove(itemPrefabGUID);
                             }
                         }
@@ -388,7 +387,7 @@ internal static class CraftingSystemPatches
         Entity recipePrefab = PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(recipeGUID) ? PrefabCollectionSystem._PrefabGuidToEntityMap[recipeGUID] : Entity.Null;
         PrefabGUID itemPrefabGUID = GetItemFromRecipePrefab(recipePrefab);
 
-        //Core.Log.LogInfo($"Processing queued craft action for {itemPrefabGUID.LookupName()}... | {craftAction.ProgressTime}");
+        // Core.Log.LogInfo($"Processing queued craft action for {itemPrefabGUID.GetPrefabName()}... | {craftAction.ProgressTime}");
 
         if (recipePrefab.TryGetComponent(out RecipeData recipeData))
         {
@@ -398,13 +397,13 @@ internal static class CraftingSystemPatches
             float totalTime = (craftDuration * recipeReduction) / _craftRateModifier;
             if (!craftFinished && craftProgress / totalTime >= CRAFT_THRESHOLD)
             {
-                //Core.Log.LogInfo($"Crafting progress finished for {itemPrefabGUID.LookupName()}... | {craftAction.ProgressTime}:{totalTime}");
+                // Core.Log.LogInfo($"Crafting progress finished for {itemPrefabGUID.GetPrefabName()}... | {craftAction.ProgressTime}:{totalTime}");
                 _craftFinished[entity] = true;
                 ValidateCraftingJob(entity, itemPrefabGUID, steamId);
             }
             else if (craftFinished && craftProgress / totalTime < CRAFT_THRESHOLD)
             {
-                //Core.Log.LogInfo($"Crafting progress reset for {itemPrefabGUID.LookupName()}... | {craftAction.ProgressTime}:{totalTime}");
+                // Core.Log.LogInfo($"Crafting progress reset for {itemPrefabGUID.GetPrefabName()}... | {craftAction.ProgressTime}:{totalTime}");
                 _craftFinished[entity] = false;
             }
         }
@@ -452,7 +451,7 @@ internal static class CraftingSystemPatches
                 int jobs = craftingJobs[itemPrefabGUID];
                 craftingJobs[itemPrefabGUID] = --jobs;
 
-                //Core.Log.LogInfo($"Crafting job handled via CraftValidation for {itemPrefabGUID.LookupName()}| {craftingJobs[itemPrefabGUID]}");
+                // Core.Log.LogInfo($"Crafting job handled via CraftValidation for {itemPrefabGUID.GetPrefabName()}| {craftingJobs[itemPrefabGUID]}");
 
                 if (craftingJobs[itemPrefabGUID] <= 0) craftingJobs.Remove(itemPrefabGUID);
             }

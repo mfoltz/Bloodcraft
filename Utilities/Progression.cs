@@ -32,6 +32,7 @@ internal static class Progression
 
     static readonly PrefabGUID _pveCombatBuff = Buffs.PvECombatBuff;
     static readonly PrefabGUID _draculaVBlood = PrefabGUIDs.CHAR_Vampire_Dracula_VBlood;
+    static readonly PrefabGUID _megaraVBlood = PrefabGUIDs.CHAR_Blackfang_Morgana_VBlood;
 
     const float EXP_CONSTANT = 0.1f;
     const float EXP_POWER = 2f;
@@ -342,6 +343,26 @@ internal static class Progression
                 foreach (UnlockedVBlood unlockedVBlood in buffer)
                 {
                     if (unlockedVBlood.VBlood.Equals(_draculaVBlood))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+    public static bool ConsumedMegara(Entity userEntity)
+    {
+        if (userEntity.TryGetComponent(out ProgressionMapper progressionMapper))
+        {
+            Entity progressionEntity = progressionMapper.ProgressionEntity.GetEntityOnServer();
+
+            if (progressionEntity.TryGetBuffer<UnlockedVBlood>(out var buffer))
+            {
+                foreach (UnlockedVBlood unlockedVBlood in buffer)
+                {
+                    if (unlockedVBlood.VBlood.Equals(_megaraVBlood))
                     {
                         return true;
                     }

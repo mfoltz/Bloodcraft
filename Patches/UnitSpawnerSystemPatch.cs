@@ -14,23 +14,26 @@ internal static class UnitSpawnerPatch
     {
         if (!Core._initialized) return;
 
-        NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
+        // NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
+        using NativeAccessor<Entity> entities = __instance.EntityQueries[0].ToEntityArrayAccessor();
+
         try
         {
             foreach (Entity entity in entities)
             {
-                if (entity.Has<IsMinion>())
+                entity.HasWith((ref IsMinion isMinion) =>
                 {
-                    entity.With((ref IsMinion isMinion) =>
-                    {
-                        isMinion.Value = true;
-                    });
-                }
+                    isMinion.Value = true;
+                });
             }
+        }
+        catch (Exception e)
+        {
+            Core.Log.LogWarning($"[UnitSpawnerPatch.OnUpdatePrefix] Exception: {e}");
         }
         finally
         {
-            entities.Dispose();
+            // entities.Dispose();
         }
     }
 }

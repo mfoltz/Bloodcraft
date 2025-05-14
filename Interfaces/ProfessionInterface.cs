@@ -55,7 +55,7 @@ internal static class ProfessionFactory
             return new FishingProfession();
         else if(itemTypeName.Contains("plant") || itemTypeName.Contains("trippyshroom"))
             return new HarvestingProfession();
-        else if(itemTypeName.Contains("canteen") || itemTypeName.Contains("potion") || itemTypeName.Contains("bottle") || itemTypeName.Contains("flask") || itemTypeName.Contains("consumable") || itemTypeName.Contains("duskcaller") || itemTypeName.Contains("elixir"))
+        else if(itemTypeName.Contains("canteen") || itemTypeName.Contains("potion") || itemTypeName.Contains("bottle") || itemTypeName.Contains("flask") || itemTypeName.Contains("consumable") || itemTypeName.Contains("duskcaller") || itemTypeName.Contains("elixir") || itemTypeName.Contains("coating"))
             return new AlchemyProfession();
 
         return null;

@@ -185,7 +185,7 @@ internal static class ClassCommands
         }
     }
 
-    [Command(name: "change", shortHand:"c", adminOnly: false, usage: ".class c [Class]", description: "Change classes.")]
+    [Command(name: "change", shortHand: "c", adminOnly: false, usage: ".class c [Class]", description: "Change classes.")]
     public static void ChangeClassCommand(ChatCommandContext ctx, string input)
     {
         if (!_classes)

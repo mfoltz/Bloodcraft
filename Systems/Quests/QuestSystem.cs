@@ -173,6 +173,28 @@ internal static class QuestSystem
 
         foreach (PrefabGUID prefabGuid in QuestService.TargetCache.Keys)
         {
+            if (!prefabMap.TryGetValue(prefabGuid, out Entity targetEntity)) continue;
+            if (!targetEntity.TryGetComponent(out UnitLevel unitLevel)) continue;
+
+            bool isVBlood = targetEntity.IsVBlood();
+            int level = unitLevel.Level._Value;
+
+            bool isWithinStandardRange = Math.Abs(level - playerLevel) <= 10;
+
+            // For high-level players, widen range to anything down to level 80
+            bool isWithinHighLevelRange = playerLevel >= DEFAULT_MAX_LEVEL && level >= 80;
+
+            // Block over-leveled VBloods for sub-90 players
+            if (isVBlood && level > playerLevel && playerLevel < DEFAULT_MAX_LEVEL)
+                continue;
+
+            if (isWithinStandardRange || isWithinHighLevelRange)
+                yield return prefabGuid;
+        }
+
+        /*
+        foreach (PrefabGUID prefabGuid in QuestService.TargetCache.Keys)
+        {
             if (prefabMap.TryGetValue(prefabGuid, out Entity targetEntity) && targetEntity.TryGetComponent(out UnitLevel unitLevel))
             {
                 bool isVBlood = targetEntity.IsVBlood();
@@ -180,12 +202,13 @@ internal static class QuestSystem
 
                 if (isVBlood && level > playerLevel) continue;
 
-                bool isHighLevel = (playerLevel > DEFAULT_MAX_LEVEL && level > 80);
+                bool isHighLevel = (playerLevel >= DEFAULT_MAX_LEVEL && level > 80);
                 bool isWithinRange = (Math.Abs(level - playerLevel) <= 10);
 
                 if (isHighLevel || isWithinRange) yield return prefabGuid;
             }
         }
+        */
     }
     static IEnumerable<PrefabGUID> GetCraftPrefabsForLevelEnumerable(int playerLevel)
     {
@@ -535,6 +558,7 @@ internal static class QuestSystem
         for (int i = 0; i < questData.Count; i++)
         {
             var quest = questData.ElementAt(i);
+
             if (quest.Value.Objective.Target == target)
             {
                 updated = true;
