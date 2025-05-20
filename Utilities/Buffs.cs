@@ -158,7 +158,7 @@ internal static class Buffs
                 // else if (entity.IsFamiliar()) Progression.RemoveFamiliarStats(buffEntity, entity);
             }
 
-            buffEntity.TryDestroyBuff();
+            buffEntity.DestroyBuff();
         }
     }
     public static bool TryApplyAndGetBuff(this Entity entity, PrefabGUID buffPrefabGuid, out Entity buffEntity)
@@ -251,12 +251,12 @@ internal static class Buffs
     }
     static void ModifyPermanentBuff(Entity buffEntity)
     {
-        buffEntity.TryRemove<RemoveBuffOnGameplayEvent>();
-        buffEntity.TryRemove<RemoveBuffOnGameplayEventEntry>();
-        buffEntity.TryRemove<CreateGameplayEventsOnSpawn>();
-        buffEntity.TryRemove<GameplayEventListeners>();
-        buffEntity.TryRemove<Buff_Persists_Through_Death>(); // not sure why removing this here now that I'm thinking about it but can't afford to FAFO with what apparently works atm
-        buffEntity.TryRemove<DestroyOnGameplayEvent>();
+        buffEntity.Remove<RemoveBuffOnGameplayEvent>();
+        buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
+        buffEntity.Remove<CreateGameplayEventsOnSpawn>();
+        buffEntity.Remove<GameplayEventListeners>();
+        buffEntity.Remove<Buff_Persists_Through_Death>(); // not sure why removing this here now that I'm thinking about it but can't afford to FAFO with what apparently works atm
+        buffEntity.Remove<DestroyOnGameplayEvent>();
 
         if (buffEntity.Has<LifeTime>())
         {
@@ -289,19 +289,19 @@ internal static class Buffs
                 lifeTime.EndAction = LifeTimeEndAction.None;
             });
             
-            buffEntity.TryRemove<CreateGameplayEventsOnSpawn>();
-            buffEntity.TryRemove<GameplayEventListeners>();
-            buffEntity.TryRemove<RemoveBuffOnGameplayEvent>();
-            buffEntity.TryRemove<RemoveBuffOnGameplayEventEntry>();
-            buffEntity.TryRemove<DealDamageOnGameplayEvent>();
-            buffEntity.TryRemove<HealOnGameplayEvent>();
-            buffEntity.TryRemove<BloodBuffScript_ChanceToResetCooldown>();
-            buffEntity.TryRemove<ModifyMovementSpeedBuff>();
-            buffEntity.TryRemove<ApplyBuffOnGameplayEvent>();
-            buffEntity.TryRemove<DestroyOnGameplayEvent>();
-            buffEntity.TryRemove<WeakenBuff>();
-            buffEntity.TryRemove<ReplaceAbilityOnSlotBuff>();
-            buffEntity.TryRemove<AmplifyBuff>();
+            buffEntity.Remove<CreateGameplayEventsOnSpawn>();
+            buffEntity.Remove<GameplayEventListeners>();
+            buffEntity.Remove<RemoveBuffOnGameplayEvent>();
+            buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
+            buffEntity.Remove<DealDamageOnGameplayEvent>();
+            buffEntity.Remove<HealOnGameplayEvent>();
+            buffEntity.Remove<BloodBuffScript_ChanceToResetCooldown>();
+            buffEntity.Remove<ModifyMovementSpeedBuff>();
+            buffEntity.Remove<ApplyBuffOnGameplayEvent>();
+            buffEntity.Remove<DestroyOnGameplayEvent>();
+            buffEntity.Remove<WeakenBuff>();
+            buffEntity.Remove<ReplaceAbilityOnSlotBuff>();
+            buffEntity.Remove<AmplifyBuff>();
         }    
     }
     public static void GetPrestigeBuffs()

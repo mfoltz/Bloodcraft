@@ -24,20 +24,13 @@ internal class QuestService
 
     static readonly bool _leveling = ConfigService.LevelingSystem;
 
-    const float START_DELAY = 30f;
+    const float START_DELAY = 10f;
     const float ROUTINE_DELAY = 60f;
 
     static readonly WaitForSeconds _startDelay = new(START_DELAY);
     static readonly WaitForSeconds _routineDelay = new(ROUTINE_DELAY);
 
     public static DateTime _lastUpdate;
-
-    static readonly ComponentType[] _vBloodUnitAllComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
-        ComponentType.ReadOnly(Il2CppType.Of<VBloodConsumeSource>()),
-        ComponentType.ReadOnly(Il2CppType.Of<VBloodUnit>())
-    ];
 
     static readonly ComponentType[] _targetUnitAllComponents =
     [
@@ -51,23 +44,6 @@ internal class QuestService
 
     ];
 
-    /*
-    static readonly ComponentType[] _craftableItemAllComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
-        ComponentType.ReadOnly(Il2CppType.Of<RecipeData>()),
-        ComponentType.ReadOnly(Il2CppType.Of<RecipeRequirementBuffer>()),
-        ComponentType.ReadOnly(Il2CppType.Of<RecipeOutputBuffer>())
-    ];
-
-    static readonly ComponentType[] _craftableItemAnyComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<Equippable>()),
-        ComponentType.ReadOnly(Il2CppType.Of<ConsumableCondition>()),
-        ComponentType.ReadOnly(Il2CppType.Of<Salvageable>())
-    ];
-    */
-
     static readonly ComponentType[] _harvestableResourceAllComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
@@ -79,24 +55,7 @@ internal class QuestService
         ComponentType.ReadOnly(Il2CppType.Of<YieldResourcesOnDamageTaken>())
     ];
 
-    static readonly ComponentType[] _targetUnitNoneComponents =
-    [
-        new(Il2CppType.Of<SpawnTag>()),
-        new(Il2CppType.Of<Minion>()),
-        new(Il2CppType.Of<DestroyOnSpawn>())
-    ];
-
-    /*
-    static readonly ComponentType[] _craftableItemNoneComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<ShatteredItem>()),
-        ComponentType.ReadOnly(Il2CppType.Of<UpgradeableLegendaryItem>())
-    ];
-    */
-
-    static QueryDesc _vBloodUnitQueryDesc;
     static QueryDesc _targetUnitQueryDesc;
-    // static QueryDesc _craftableItemQueryDesc;
     static QueryDesc _harvestableResourceQueryDesc;
 
     static readonly ConcurrentDictionary<PrefabGUID, HashSet<Entity>> _targetCache = [];
@@ -107,7 +66,7 @@ internal class QuestService
         PrefabGUIDs.CHAR_Manticore_VBlood,
         PrefabGUIDs.CHAR_ChurchOfLight_Paladin_VBlood,
         PrefabGUIDs.CHAR_Gloomrot_Monster_VBlood,
-        // PrefabGUIDs.CHAR_Vampire_Dracula_VBlood,
+        PrefabGUIDs.CHAR_Vampire_Dracula_VBlood,
         PrefabGUIDs.CHAR_Blackfang_Morgana_VBlood
     ];
 
@@ -136,7 +95,9 @@ internal class QuestService
         "Spider_Range",
         "GroundSword",
         "FloatingWeapon",
-        "Airborne"
+        "Airborne",
+        "SpiritDouble",
+        "ValyrCauldron"
     ];
 
     static readonly HashSet<string> _filteredCraftableItems =
@@ -179,53 +140,18 @@ internal class QuestService
         "Thistle"
     ];
 
-    static bool _shouldReset = ConfigService.EliteShardBearers;
     static bool _craftables = true;
     static bool _harvestables = true;
     public QuestService()
     {
-        /*
-        _vBloodUnitQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = _vBloodUnitAllComponents,
-            None = _targetUnitNoneComponents,
-            Options = EntityQueryOptions.IncludeDisabled
-        });
-
-        _targetUnitQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = _targetUnitAllComponents,
-            None = _targetUnitNoneComponents,
-            Options = EntityQueryOptions.IncludeDisabled
-        });
-
-        _craftableItemQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = _craftableItemAllComponents,
-            None = _craftableItemNoneComponents,
-            Options = EntityQueryOptions.IncludeSpawnTag
-        });
-
-        _harvestableResourceQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = _harvestableResourceAllComponents,
-            Options = EntityQueryOptions.IncludeSpawnTag
-        });
-        */
-
-        _vBloodUnitQueryDesc = EntityManager.CreateQueryDesc(_vBloodUnitAllComponents, typeIndices: _typeIndices, options: EntityQueryOptions.IncludeDisabled);
-        _targetUnitQueryDesc = EntityManager.CreateQueryDesc(_targetUnitAllComponents, typeIndices: _typeIndices, options: EntityQueryOptions.IncludeDisabled);
-        // _craftableItemQueryDesc = EntityManager.CreateQueryDesc(_craftableItemAllComponents, typeIndices: [0, 1], options: EntityQueryOptions.IncludeSpawnTag);
-        _harvestableResourceQueryDesc = EntityManager.CreateQueryDesc(allTypes: _harvestableResourceAllComponents, typeIndices: _typeIndices, options: EntityQueryOptions.IncludeSpawnTag);
+        _targetUnitQueryDesc = EntityManager.CreateQueryDesc(_targetUnitAllComponents, typeIndices: [0], options: EntityQueryOptions.IncludeDisabled);
+        _harvestableResourceQueryDesc = EntityManager.CreateQueryDesc(allTypes: _harvestableResourceAllComponents, typeIndices: [0], options: EntityQueryOptions.IncludeSpawnTag);
 
         Configuration.GetQuestRewardItems();
         QuestServiceRoutine().Start();
     }
-
-    static readonly int[] _typeIndices = [0];
     static IEnumerator QuestServiceRoutine()
     {
-        if (_shouldReset) ResetShardBearers().Start();
         if (_craftables) InitializeCraftables();
         if (_harvestables) InitializeHarvestables().Start();
 
@@ -243,12 +169,15 @@ internal class QuestService
                             ComponentLookup<Minion> minionLookup = EntityManager.GetComponentLookup<Minion>(true);
                             ComponentLookup<DestroyOnSpawn> destroyOnSpawnLookup = EntityManager.GetComponentLookup<DestroyOnSpawn>(true);
                             ComponentLookup<Trader> traderLookup = EntityManager.GetComponentLookup<Trader>(true);
+                            ComponentLookup<BlockFeedBuff> blockFeedBuffLookup = EntityManager.GetComponentLookup<BlockFeedBuff>(true);
 
                             foreach (QueryResult result in stream.GetResults())
                             {
                                 if (minionLookup.HasComponent(result.Entity) 
                                     || destroyOnSpawnLookup.HasComponent(result.Entity) 
-                                    || traderLookup.HasComponent(result.Entity)) continue;
+                                    || traderLookup.HasComponent(result.Entity) 
+                                    || blockFeedBuffLookup.HasComponent(result.Entity) 
+                                    || BuffUtility.HasBuff<ImprisonedBuff>(EntityManager, result.Entity)) continue;
 
                                 PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
                                 string prefabName = prefabGuid.GetPrefabName();
@@ -319,34 +248,23 @@ internal class QuestService
 
             _lastUpdate = DateTime.UtcNow;
             yield return _routineDelay;
-        }
-    }
-    static IEnumerator ResetShardBearers()
-    {
-        yield return QueryResultStreamAsync(
-            _vBloodUnitQueryDesc,
-            stream =>
+
+            /*
+            if (_hasReset)
             {
-                try
-                {
-                    using (stream)
-                    {
-                        foreach (QueryResult result in stream.GetResults())
-                        {
-                            PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
-
-                            if (_shardBearers.Contains(prefabGuid)) result.Entity.TryDestroy();
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Core.Log.LogWarning($"[QuestService] ResetShardBearers() - {ex}");
-                }
+                yield return _routineDelay;
             }
-        );
-
-        _shouldReset = false;
+            else if (_shouldReset)
+            {
+                _hasReset = true;
+                yield return _startDelay;
+            }
+            else
+            {
+                yield return _routineDelay;
+            }
+            */
+        }
     }
     static void InitializeCraftables()
     {

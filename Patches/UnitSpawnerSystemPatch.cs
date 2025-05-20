@@ -14,7 +14,6 @@ internal static class UnitSpawnerPatch
     {
         if (!Core._initialized) return;
 
-        // NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         using NativeAccessor<Entity> entities = __instance.EntityQueries[0].ToEntityArrayAccessor();
 
         try
@@ -30,10 +29,6 @@ internal static class UnitSpawnerPatch
         catch (Exception e)
         {
             Core.Log.LogWarning($"[UnitSpawnerPatch.OnUpdatePrefix] Exception: {e}");
-        }
-        finally
-        {
-            // entities.Dispose();
         }
     }
 }

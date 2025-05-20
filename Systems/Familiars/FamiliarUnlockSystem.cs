@@ -3,6 +3,7 @@ using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
+using ProjectM.UI;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
@@ -24,7 +25,7 @@ internal static class FamiliarUnlockSystem
     static readonly bool _shareUnlocks = ConfigService.ShareUnlocks;
     static readonly bool _allowVBloods = ConfigService.AllowVBloods;
 
-    static readonly PrefabGUID _familiarUnlockBuff = Buffs.HighlordDeadBuff;
+    static readonly PrefabGUID _familiarUnlockBuff = PrefabGUIDs.AB_HighLordSword_SelfStun_DeadBuff;
 
     public static readonly HashSet<PrefabGUID> ConfiguredPrefabGuidBans = [];
     public static readonly HashSet<UnitCategory> ConfiguredCategoryBans = [];
@@ -240,10 +241,10 @@ internal static class FamiliarUnlockSystem
                 lifeTime.EndAction = LifeTimeEndAction.Destroy;
             });
 
-            buffEntity.TryRemove<ServerControlsMovementBuff>();
-            buffEntity.TryRemove<ServerControlsRotationBuff>();
-            buffEntity.TryRemove<BuffModificationFlagData>();
-            buffEntity.TryRemove<BlockFeedBuff>();
+            buffEntity.Remove<ServerControlsMovementBuff>();
+            buffEntity.Remove<ServerControlsRotationBuff>();
+            buffEntity.Remove<BuffModificationFlagData>();
+            buffEntity.Remove<BlockFeedBuff>();
         }
     }
 }

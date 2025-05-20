@@ -200,7 +200,7 @@ internal static class FamiliarBindingSystem
                 }
                 else
                 {
-                    familiar.TryDestroy();
+                    familiar.Destroy();
                     Core.Log.LogWarning($"Battle modifications failed, destroying familiar...");
 
                     return false;
@@ -235,7 +235,7 @@ internal static class FamiliarBindingSystem
                 }
                 else
                 {
-                    familiar.TryDestroy();
+                    familiar.Destroy();
                     LocalizationService.HandleServerReply(EntityManager, user, $"Binding failed...");
 
                     return false;
@@ -716,7 +716,7 @@ internal static class FamiliarBindingSystem
                         {
                             if (minion.Entity.Exists())
                             {
-                                minion.Entity.TryDestroy();
+                                minion.Entity.Destroy();
                             }
                         }
                     }
@@ -743,7 +743,7 @@ internal static class FamiliarBindingSystem
                 if (entry.BaseAbilityGroupOnSlot.Equals(_openTheCages))
                 {
                     // buffer.RemoveAt(i);
-                    entry.GroupSlotEntity.GetEntityOnServer().TryDestroy();
+                    entry.GroupSlotEntity.GetEntityOnServer().Destroy();
                     break;
                 }
             }
@@ -926,7 +926,7 @@ internal static class FamiliarBindingSystem
 
             servant.Add<BlockFeedBuff>();
             // servant.TryRemove<OpenDoors>();
-            servant.TryRemove<ServantPowerConstants>();
+            servant.Remove<ServantPowerConstants>();
             // servant.TryRemoveComponent<UnitLevel>(); // console spam - typeIndexInArchetype was -1 for NetworkComponentIndex: 20. networkSnapshotType: 331
 
             RemoveDropTable(servant);
@@ -948,7 +948,7 @@ internal static class FamiliarBindingSystem
     static IEnumerator DisableFamiliarServantRoutine(Entity servant)
     {
         yield return _delay;
-        servant.TryAdd<Disabled>();
+        servant.Add<Disabled>();
     }
     static IEnumerator ApplyFamiliarStatsRoutine(Entity familiar)
     {

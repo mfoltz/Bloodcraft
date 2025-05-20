@@ -84,7 +84,7 @@ internal static class KnockbackSystemSpawnPatch
     {
         if (knockbackBuff.TryGetComponent(out Buff buff) && buff.BuffEffectType.Equals(BuffEffectType.Debuff))
         {
-            knockbackBuff.TryDestroy();
+            knockbackBuff.Destroy();
         }
     }
 }

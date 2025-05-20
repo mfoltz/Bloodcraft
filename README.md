@@ -1,7 +1,5 @@
 ## Table of Contents
 
-- [BepInExRC2](https://github.com/decaprime/VRising-Modding/releases/tag/1.733.2) <--- **REQUIRED**
-- [VCF1.1](https://github.com/Odjit/VampireCommandFramework/releases/tag/1.1) <--- **REQUIRED**
 - [Eclipse](https://new.thunderstore.io/c/v-rising/p/zfolmt/Eclipse/) <--- **RECOMMENDED**
 - [Sponsors](#sponsors)
 - [Features](#features)
@@ -94,7 +92,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - `.prof get [Profession]` (view profession level)
 
 ### Prestige
-- Resets player level, grants a permanent buff, reduces experience gained from units, and increases rate gains for expertise/legacies per prestige.
+- Resets player level, grants a permanent buff (REWORKING), reduces experience gained from units, and increases rate gains for expertise/legacies per prestige.
   - `.prestige me [Type]` (experience and/or various weapons and bloods, the latter variety will see increased bonus stat caps and reduced rate gains per prestige)
   - `.prestige get [Type]` (view prestige progress and details)
 

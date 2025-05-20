@@ -139,6 +139,7 @@ internal static class FamiliarLevelingSystem
 
             FamiliarBindingSystem.ModifyUnitStats(familiar, newLevel, steamId, famKey);
             if (familiar.Has<BloodConsumeSource>()) FamiliarBindingSystem.ModifyBloodSource(familiar, newLevel);
+            Buffs.RefreshStats(familiar);
         }
 
         if (GetPlayerBool(steamId, SCT_FAMILIAR_LVL_KEY))

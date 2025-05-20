@@ -1,3 +1,14 @@
+`1.9.8`
+- better entity existence checks for quest tracking command
+- familiars should retain equipment stats after leveling up
+- can no longer equip ancestral weapons/legendaries on familiars as was intended
+- quest target querying should be more stable, also filtering some targets again that got lost in refactoring but need to keep an eye on that
+- shard bosses should again be elite after restarting without needing to be killed first
+- elite drac works again without crashing at portal
+- familiar equipment remembers durability (data still good with the compromise of durability starting at 0, they can still use the equipment like servants and it will save going forward)
+- replacing invalid familiar equipment that snuck in when a filter wasn't working as it used to with rough equivalents that don't cause issues
+- shards will need to be acquired once more for normal behaviour to return, sorry >_>
+
 `1.9.7`
 - CHAR_Treant_Corrupted PrefabGuid(1496810447), this will attach mantraps to your character I am not changing it or autobanning it at this time but you may feel free to do so if you're not a fan
 - two exoforms to switch between if both unlocked, will use same duration cooldown ('.prestige sf [EvolvedVampire|CorruptedSerpent]'; these are probably unbalanced and should be considered experimental, variety of jank to smooth out after 1.1 but appear generally functional)

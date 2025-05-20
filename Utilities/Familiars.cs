@@ -334,7 +334,7 @@ internal static class Familiars
         {
             foreach (Entity minion in familiarMinions)
             {
-                if (minion.Exists()) minion.TryDestroy();
+                if (minion.Exists()) minion.Destroy();
             }
         }
     }
@@ -479,7 +479,7 @@ internal static class Familiars
     }
     public static void CallFamiliar(Entity playerCharacter, Entity familiar, User user, ulong steamId)
     {
-        familiar.TryRemove<Disabled>();
+        familiar.Remove<Disabled>();
         PreventDisableFamiliar(familiar);
 
         float3 position = playerCharacter.GetPosition();
@@ -726,10 +726,10 @@ internal static class Familiars
         HandleFamiliarMinions(familiar);
         SaveFamiliarEquipment(steamId, famKey, UnequipFamiliar(GetFamiliarServant(playerCharacter)));
 
-        familiar.TryRemove<Disabled>();
+        familiar.Remove<Disabled>();
         if (AutoCallMap.ContainsKey(playerCharacter)) AutoCallMap.TryRemove(playerCharacter, out var _);
 
-        familiar.TryDestroy();
+        familiar.Destroy();
         ResetActiveFamiliarData(steamId);
 
         string message = !string.IsNullOrEmpty(shinyHexColor) ? $"<color=green>{prefabGuid.GetLocalizedName()}</color>{shinyHexColor}*</color> <color=#FFC0CB>unbound</color>!" : $"<color=green>{prefabGuid.GetLocalizedName()}</color> <color=#FFC0CB>unbound</color>!";

@@ -993,8 +993,8 @@ internal static class FamiliarCommands
 
             if (follower.Exists())
             {
-                follower.TryRemove<Disabled>();
-                follower.TryDestroy();
+                follower.Remove<Disabled>();
+                follower.Destroy();
             }
         }
 

@@ -50,8 +50,8 @@ internal static class FamiliarServantPatches
                 {
                     if (InvalidFamiliarEquipment(inventory, slotIndex))
                     {
-                        // Core.Log.LogWarning($"[EquipServantItemFromInventorySystem] isLegendary!");
-                        EntityManager.DestroyEntity(entity);
+                        Core.Log.LogWarning($"[EquipServantItemFromInventorySystem] isLegendary!");
+                        entity.Destroy(true);
                     }
                     else
                     {
@@ -72,14 +72,13 @@ internal static class FamiliarServantPatches
             equipServantItemFromInventoryEvents.Dispose();
         }
     }
-
-    const string LEGENDARY = "Legendary";
     static bool InvalidFamiliarEquipment(Entity inventory, int slotIndex)
     {
         if (InventoryUtilities.TryGetItemAtSlot(EntityManager, inventory, slotIndex, out InventoryBuffer item))
         {
             // bool result = item.ItemType.GetPrefabName().Contains(LEGENDARY);
-            return item.ItemType.GetPrefabName().Contains(LEGENDARY);
+            // return item.ItemType.GetPrefabName().Contains(LEGENDARY) || item.ItemEntity.GetEntityOnServer().IsAncestralWeapon();
+            return item.ItemEntity.GetEntityOnServer().IsAncestralWeapon();
         }
 
         return false;
@@ -117,8 +116,8 @@ internal static class FamiliarServantPatches
                 {
                     if (InvalidFamiliarEquipment(inventory, slotIndex))
                     {
-                        // Core.Log.LogWarning($"[EquipServantItemSystem] isLegendary!");
-                        EntityManager.DestroyEntity(entity);
+                        Core.Log.LogWarning($"[EquipServantItemSystem] isLegendary!");
+                        entity.Destroy(true);
                     }
                     else
                     {
@@ -209,10 +208,10 @@ internal static class FamiliarServantPatches
                     && blockFeedBuffLookup.HasComponent(servant) 
                     && fromCharacter.Character.TryGetComponent(out Equipment equipment))
                 {
-                    if (equipment.GetEquipmentEntity(equipmentType).GetEntityOnServer().IsLegendary())
+                    if (equipment.GetEquipmentEntity(equipmentType).GetEntityOnServer().IsAncestralWeapon())
                     {
                         // Core.Log.LogWarning($"[EquipmentTransferSystem] isLegendary!");
-                        EntityManager.DestroyEntity(entity);
+                        entity.Destroy(true);
                     }
                     else
                     {

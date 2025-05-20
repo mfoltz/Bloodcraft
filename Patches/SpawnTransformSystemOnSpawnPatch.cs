@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
@@ -30,7 +31,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
     static readonly PrefabGUID _fallenAngel = new(-76116724);
 
     static readonly PrefabGUID _manticoreVisual = new(1670636401);
-    static readonly PrefabGUID _draculaVisual = new(-1923843097);
+    static readonly PrefabGUID _draculaVisual = PrefabGUIDs.AB_Shapeshift_BloodHunger_BloodSight_Buff;
     static readonly PrefabGUID _monsterVisual = new(-2067402784);
     static readonly PrefabGUID _solarusVisual = new(178225731);
     static readonly PrefabGUID _megaraVisual = new(-2104035188); // educated guess this is the purple aura for corrupted blood units
@@ -64,7 +65,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
                         HandleManticore(entity);
                         break;
                     case -327335305: // Dracula
-                        // HandleDracula(entity);
+                        HandleDracula(entity);
                         break;
                     case 1233988687: // Monster
                         HandleMonster(entity);

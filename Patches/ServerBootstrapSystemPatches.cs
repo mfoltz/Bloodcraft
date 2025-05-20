@@ -57,6 +57,8 @@ internal static class ServerBootstrapSystemPatches
     static readonly PrefabGUID _shroudCloak = PrefabGUIDs.Item_Cloak_Main_ShroudOfTheForest;
     static readonly PrefabGUID _bonusStatsBuff = Buffs.BonusPlayerStatsBuff;
 
+    static readonly PrefabGUID _relicDebuff = PrefabGUIDs.Buff_General_RelicCarryDebuff;
+
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
     [HarmonyPostfix]
     static void OnUserConnectedPostfix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
@@ -412,6 +414,27 @@ internal static class ServerBootstrapSystemPatches
 
             FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, FamiliarExperienceManager.LoadFamiliarExperienceData(steamId));
             FamiliarUnlocksManager.SaveFamiliarUnlocksData(steamId, FamiliarUnlocksManager.LoadFamiliarUnlocksData(steamId));
+
+            if (playerCharacter.TryGetBuffer<BuffByItemCategoryCount>(out var buffer) && buffer.IsIndexWithinRange(1))
+            {
+                BuffByItemCategoryCount buffByItemCategoryCount = buffer[1];
+
+                if (buffByItemCategoryCount.ItemCategory.Equals(ItemCategory.Relic))
+                {
+                    buffer.RemoveAt(1);
+                    // Core.Log.LogWarning($"[UpdatePlayerData] - BuffByItemCategoryCount Relic entry removed!");
+                }
+            }
+            else
+            {
+                // Core.Log.LogWarning($"[UpdatePlayerData] - BuffByItemCategoryCount buffer index out of range!");
+            }
+
+            if (playerCharacter.HasBuff(_relicDebuff))
+            {
+                playerCharacter.TryRemoveBuff(buffPrefabGuid: _relicDebuff);
+                // Core.Log.LogWarning($"[UpdatePlayerData] - Relic carry debuff removed!");
+            }
         }
 
         if (_classes)

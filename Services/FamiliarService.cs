@@ -6,7 +6,6 @@ using System.Collections;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
-using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Utilities.EntityQueries;
 using static Bloodcraft.Utilities.Familiars;
 

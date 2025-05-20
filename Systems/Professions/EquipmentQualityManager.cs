@@ -46,7 +46,7 @@ internal static class EquipmentQualityManager
             buffer[i] = statBuff;
         }
     }
-    public static void ApplyFamiliarEquipmentStats(int professionLevel, Entity equipmentEntity)
+    public static void ApplyFamiliarEquipmentStats(int professionLevel, int currentDurability, Entity equipmentEntity)
     {
         IProfession handler = ProfessionFactory.GetProfession(equipmentEntity.GetPrefabGuid());
         float scaledBonus = 0f;
@@ -58,7 +58,7 @@ internal static class EquipmentQualityManager
             equipmentEntity.With((ref Durability durability) =>
             {
                 durability.MaxDurability *= scaledBonus;
-                durability.Value = durability.MaxDurability;
+                durability.Value = (float)currentDurability;
             });
         }
 

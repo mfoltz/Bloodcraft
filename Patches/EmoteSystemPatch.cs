@@ -137,14 +137,14 @@ internal static class EmoteSystemPatch
         {
             if (playerCharacter.TryApplyAndGetBuff(_phasingBuff, out Entity buffEntity) && buffEntity.Has<BuffModificationFlagData>())
             {
-                buffEntity.TryRemove<BuffModificationFlagData>();
+                buffEntity.Remove<BuffModificationFlagData>();
             }
         }
         else if (playerCharacter.TryGetBuff(shapeshiftBuff, out Entity buffEntity))
         {
             BlockShapeshift.Add(steamId);
             playerCharacter.TryApplyBuff(_gateBossFeedCompleteBuff);
-            buffEntity.TryDestroyBuff();
+            buffEntity.DestroyBuff();
         }
     }
     public static void BindUnbind(User user, Entity playerCharacter, ulong steamId)
@@ -284,7 +284,7 @@ internal static class EmoteSystemPatch
                 DisableAggro(familiar);
                 familiar.TryApplyBuffInteractMode(_interactModeBuff);
                 
-                servant.TryRemove<Disabled>();
+                servant.Remove<Disabled>();
 
                 servant.With((ref Interactable interactable) =>
                 {

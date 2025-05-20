@@ -11,6 +11,7 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Unity.Entities;
 using UnityEngine;
@@ -304,7 +305,7 @@ internal class EclipseService
 
                     if (bonusStats.Any())
                     {
-                        legacyBonusStats = int.Parse(string.Join("", bonusStats));
+                        legacyBonusStats = int.Parse(string.Join("", bonusStats), CultureInfo.InvariantCulture);
                     }
                 }
             }
@@ -347,7 +348,7 @@ internal class EclipseService
 
                     if (bonusStats.Any())
                     {
-                        expertiseBonusStats = int.Parse(string.Join("", bonusStats));
+                        expertiseBonusStats = int.Parse(string.Join("", bonusStats), CultureInfo.InvariantCulture);
                     }
                 }
             }
@@ -400,13 +401,14 @@ internal class EclipseService
         return (familiarPercent, familiarLevel, familiarPrestige, familiarName, familiarStats);
     }
     public static (int EnchantingProgress, int EnchantingLevel,
-            int AlchemyProgress, int AlchemyLevel,
-            int HarvestingProgress, int HarvestingLevel,
-            int BlacksmithingProgress, int BlacksmithingLevel,
-            int TailoringProgress, int TailoringLevel,
-            int WoodcuttingProgress, int WoodcuttingLevel,
-            int MiningProgress, int MiningLevel,
-            int FishingProgress, int FishingLevel) GetProfessionData(ulong steamId)
+        int AlchemyProgress, int AlchemyLevel,
+        int HarvestingProgress, int HarvestingLevel,
+        int BlacksmithingProgress, int BlacksmithingLevel,
+        int TailoringProgress, int TailoringLevel,
+        int WoodcuttingProgress, int WoodcuttingLevel,
+        int MiningProgress, int MiningLevel,
+        int FishingProgress, int FishingLevel)
+        GetProfessionData(ulong steamId)
     {
         int enchantingProgress = 0;
         int enchantingLevel = 0;

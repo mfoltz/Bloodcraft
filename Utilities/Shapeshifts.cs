@@ -298,8 +298,8 @@ internal static class Shapeshifts
             applyBuffBuffer[0] = applyBuffOnGameplayEvent;
         }
 
-        buffEntity.TryAdd<ReplaceAbilityOnSlotData>();
-        buffEntity.TryAdd<Script_Buff_Shapeshift_DataShared>();
+        buffEntity.Add<ReplaceAbilityOnSlotData>();
+        buffEntity.Add<Script_Buff_Shapeshift_DataShared>();
 
         buffEntity.AddWith((ref LifeTime lifeTime) =>
         {

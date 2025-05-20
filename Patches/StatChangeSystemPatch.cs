@@ -95,7 +95,7 @@ internal static class StatChangeSystemPatch
                 {
                     if (damageTakenEvent.Entity.IsPlayer() && playerCharacter.Equals(damageTakenEvent.Entity))
                     {
-                        entity.TryDestroyImmediate();
+                        entity.Destroy(true);
                     }
                     else if (IsValidTarget(damageTakenEvent.Entity))
                     {
@@ -124,7 +124,7 @@ internal static class StatChangeSystemPatch
                 {
                     if (_gameMode.Equals(GameModeType.PvE) && damageTakenEvent.Entity.HasBuff(_activeCharmedHumanBuff))
                     {
-                        entity.TryDestroyImmediate();
+                        entity.Destroy(true);
                     }
                     else if (_quests && damageTakenEvent.Entity.Has<YieldResourcesOnDamageTaken>() && sourceOwner.TryGetPlayer(out playerCharacter))
                     {

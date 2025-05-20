@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Resources;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
@@ -16,14 +17,15 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.ConfigService;
 using static Bloodcraft.Services.ConfigService.ConfigInitialization;
+using static Bloodcraft.Services.DataService.FamiliarEquipment;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarPrestigeManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarUnlocksManager;
-using static Bloodcraft.Systems.Leveling.ClassManager; 
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.DataService.PlayerPersistence;
 using static Bloodcraft.Services.DataService.PlayerPersistence.JsonFilePaths;
 using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Systems.Leveling.ClassManager;
 using static Bloodcraft.Utilities.Familiars;
 using static Bloodcraft.Utilities.Misc;
 using static Bloodcraft.Utilities.Shapeshifts;
@@ -1271,6 +1273,8 @@ internal static class DataService
                 }
             }
         }
+
+        /*
         public static class FamiliarEquipmentManager
         {
             static SystemService SystemService => Core.SystemService;
@@ -1284,7 +1288,9 @@ internal static class DataService
                 WriteIndented = true,
                 Converters = { new FamiliarEquipment.EquipmentBaseConverter() }
             };
+
             static string GetFilePath(ulong steamId) =>Path.Combine(DirectoryPaths[10], $"{steamId}_familiar_equipment.json");
+
             public static void SaveFamiliarEquipmentData(ulong steamId, FamiliarEquipment.FamiliarEquipmentData data)
             {
                 try
@@ -1296,6 +1302,7 @@ internal static class DataService
                     Core.Log.LogError($"[SaveFamiliarEquipmentData] Failed to save familiar equipment ({steamId}) - {ex.Message}");
                 }
             }
+
             public static FamiliarEquipment.FamiliarEquipmentData LoadFamiliarEquipment(ulong steamId)
             {
                 string filePath = GetFilePath(steamId);
@@ -1312,6 +1319,7 @@ internal static class DataService
                     return new FamiliarEquipment.FamiliarEquipmentData();
                 }
             }
+
             public static List<FamiliarEquipment.EquipmentBase> GetFamiliarEquipment(ulong steamId, int famKey)
             {
                 var equipmentData = LoadFamiliarEquipment(steamId);
@@ -1326,12 +1334,14 @@ internal static class DataService
 
                 return familiarEquipment;
             }
+
             public static void SaveFamiliarEquipment(ulong steamId, int famKey, List<FamiliarEquipment.EquipmentBase> familiarEquipment)
             {
                 var equipmentData = LoadFamiliarEquipment(steamId);
                 equipmentData.FamiliarEquipment[famKey] = familiarEquipment;
                 SaveFamiliarEquipmentData(steamId, equipmentData);
             }
+
             public static void EquipFamiliar(ulong steamId, int famKey, Entity servant, Entity familiar)
             {
                 EntityManager entityManager = Core.EntityManager;
@@ -1355,7 +1365,6 @@ internal static class DataService
                     // SystemService.DebugEventsSystem.CreateLegendaryWeaponEvent
                     // would need user to have spare slot to then equip on familiar, could try tryAddItem with the inventoryBuffer option? and haxemptyslot or w/e idk geez
 
-                    /*
                     if (equipmentEntity.IsAncestralWeapon() && equipment is FamiliarEquipmentModel.AncestralWeapon ancestralWeapon)
                     {
                         equipmentEntity.AddWith((ref LegendaryItemInstance legendaryItem) =>
@@ -1376,7 +1385,6 @@ internal static class DataService
 
                         JewelSpawnSystem.InitializeLegendaryItemData(equipmentEntity); // can save out the powers from 0-1 but still need what that is for the actual stat, ugh
                     }
-                    */
 
                     if (professionLevel > 0 && equipmentEntity.Exists()) EquipmentQualityManager.ApplyFamiliarEquipmentStats(professionLevel, equipmentEntity);
                 }
@@ -1384,6 +1392,7 @@ internal static class DataService
                 // familiar.TryApplyBuff(_bonusStatsBuff);
                 // Buffs.RefreshStats(familiar);
             }
+
             public static List<FamiliarEquipment.EquipmentBase> UnequipFamiliar(Entity servant)
             {
                 servant.TryRemove<Disabled>();
@@ -1439,12 +1448,13 @@ internal static class DataService
                         }
                     }
 
-                    servant.TryDestroy();
+                    servant.Destroy();
                     return familiarEquipment;
                 }
 
                 return [..Enumerable.Range(0, EQUIPMENT_SLOTS).Select(_ => (FamiliarEquipment.EquipmentBase)new FamiliarEquipment.StandardEquipment { Equipment = 0, Quality = 0 })];
             }
+
             public static List<FamiliarEquipment.EquipmentBase> GetFamiliarEquipment(Entity servant)
             {
                 List<FamiliarEquipment.EquipmentBase> familiarEquipment = [];
@@ -1518,67 +1528,614 @@ internal static class DataService
                 return familiarEquipment;
             }
         }
-        public static class FamiliarEquipment
+        */
+
+        static readonly Dictionary<WeaponType, PrefabGUID> _sanguineWeapons = new()
         {
-            [Serializable]
-            public abstract class EquipmentBase
-            {
-                public int Equipment { get; set; }
-                public int Quality { get; set; }
-            }
+            { WeaponType.Sword, new PrefabGUID(-774462329) },
+            { WeaponType.Axe, new PrefabGUID(-2044057823) },
+            { WeaponType.Mace, new PrefabGUID(-126076280) },
+            { WeaponType.Spear, new PrefabGUID(-850142339) },
+            { WeaponType.Crossbow, new PrefabGUID(1389040540) },
+            { WeaponType.GreatSword, new PrefabGUID(147836723) },
+            { WeaponType.Slashers, new PrefabGUID(1322545846) },
+            { WeaponType.Pistols, new PrefabGUID(1071656850) },
+            { WeaponType.Reaper, new PrefabGUID(-2053917766) },
+            { WeaponType.Longbow, new PrefabGUID(1860352606) },
+            { WeaponType.Whip, new PrefabGUID(-655095317) },
+            { WeaponType.TwinBlades, new PrefabGUID(-297349982) },
+            { WeaponType.Daggers, new PrefabGUID(1031107636) },
+            { WeaponType.Claws, new PrefabGUID(-1777908217) }
+        };
 
-            [Serializable]
-            public class StandardEquipment : EquipmentBase { }
+        static readonly List<PrefabGUID> _shardNecklaces =
+        [
+            PrefabGUIDs.Item_MagicSource_SoulShard_Manticore,
+            PrefabGUIDs.Item_MagicSource_SoulShard_Solarus,
+            PrefabGUIDs.Item_MagicSource_SoulShard_Dracula,
+            PrefabGUIDs.Item_MagicSource_SoulShard_Monster,
+            PrefabGUIDs.Item_MagicSource_SoulShard_Morgana
+        ];
+        public static class FamiliarEquipmentManager
+        {
+            static SystemService SystemService => Core.SystemService;
+            static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-            [Serializable]
-            public class AncestralWeapon : EquipmentBase
-            {
-                public int Tier { get; set; }
-                public SpellSchool Infusion { get; set; }
-                public StatMods[] StatMods { get; set; }
-            }
+            static readonly EquipmentBaseV2 _emptySlot = CreateEmpty();
+            const int EQUIPMENT_SLOTS = 6;
 
-            [Serializable]
-            public class StatMods
+            static readonly JsonSerializerOptions _jsonOptions = new()
             {
-                public int StatMod { get; set; }
-                public float Value { get; set; }
-            }
+                WriteIndented = true,
+                Converters = { new EquipmentBaseConverter() }
+            };
 
-            [Serializable]
-            public class FamiliarEquipmentData
+            static readonly JsonSerializerOptions _jsonOptionsV2 = new()
             {
-                public Dictionary<int, List<EquipmentBase>> FamiliarEquipment { get; set; } = [];
-            }
-            public class EquipmentBaseConverter : JsonConverter<EquipmentBase>
+                WriteIndented = true,
+                Converters = { new EquipmentBaseV2Converter() }
+            };
+            static StandardEquipmentV2 CreateEmpty()
+                => new() { Equipment = 0, Quality = 0, Durability = 0 };
+            static string GetFilePath(ulong steamId)
+                => Path.Combine(DirectoryPaths[10], $"{steamId}_familiar_equipment.json");
+            public static void SaveFamiliarEquipmentData(ulong steamId, FamiliarEquipmentDataV2 data)
             {
-                public override EquipmentBase Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+                try
                 {
-                    using JsonDocument doc = JsonDocument.ParseValue(ref reader);
-                    JsonElement root = doc.RootElement;
+                    File.WriteAllText(GetFilePath(steamId), JsonSerializer.Serialize(data, _jsonOptions));
+                }
+                catch (Exception ex)
+                {
+                    Core.Log.LogError($"[SaveFamiliarEquipmentData] ({steamId}) – {ex.Message}");
+                }
+            }
+            public static FamiliarEquipmentDataV2 LoadFamiliarEquipment(ulong steamId)
+            {
+                string path = GetFilePath(steamId);
 
-                    if (!root.TryGetProperty("Equipment", out _))
-                        throw new JsonException("Invalid Equipment data!");
+                // 1️⃣  load – same logic as before
+                var dataV2 =
+                      TryLoad<FamiliarEquipmentDataV2>(path, _jsonOptionsV2)
+                   ?? ConvertFromV1(TryLoad<FamiliarEquipmentData>(path, _jsonOptions) ?? new())
+                   ?? new();
+
+                // 2️⃣  **always** normalise the items we just loaded
+                foreach (var key in dataV2.FamiliarEquipment.Keys.ToArray())   // ToArray → safe copy
+                    dataV2.FamiliarEquipment[key] =
+                        ConvertList(dataV2.FamiliarEquipment[key]);            // ← mapping
+
+                SaveFamiliarEquipmentData(steamId, dataV2);
+                return dataV2;
+            }
+            static T TryLoad<T>(string p, JsonSerializerOptions opts)
+                => File.Exists(p)
+                   ? JsonSerializer.Deserialize<T>(File.ReadAllText(p), opts)
+                   : default;
+            static FamiliarEquipmentDataV2 ConvertFromV1(FamiliarEquipmentData oldData)
+            {
+                var result = new FamiliarEquipmentDataV2();
+
+                foreach (var (famGuid, oldList) in oldData.FamiliarEquipment)
+                    result.FamiliarEquipment[famGuid] = ConvertList(oldList);
+
+                return result;
+            }
+            static List<EquipmentBaseV2> ConvertList<T>(IEnumerable<T> source)
+            {
+                var outList = new List<EquipmentBaseV2>(EQUIPMENT_SLOTS);
+
+                foreach (object item in source)          // iterate as object → single switch
+                {
+                    switch (item)
+                    {
+                        // ─────────────── V1 objects ───────────────
+                        case StandardEquipment std:
+                            outList.Add(ToStdV2(std.Equipment, std.Quality));
+                            break;
+
+                        case AncestralWeapon anc:
+                            outList.Add(ToStdV2(anc.Equipment, anc.Quality));
+                            break;
+
+                        // ─────────────── V2 objects ───────────────
+                        case StandardEquipmentV2 std2:
+                            outList.Add(ToStdV2(std2.Equipment, std2.Quality));
+                            break;
+
+                        case AncestralWeaponV2 anc2:
+                            outList.Add(ToStdV2(anc2.Equipment, anc2.Quality));
+                            break;
+                    }
+                }
+
+                // If you want to guarantee exactly EQUIPMENT_SLOTS length:
+                while (outList.Count < EQUIPMENT_SLOTS)
+                    outList.Add(new StandardEquipmentV2 { Equipment = 0, Quality = 0, Durability = 0 });
+
+                return outList;
+            }
+            static StandardEquipmentV2 ToStdV2(int guidHash, int quality)
+            {
+                guidHash = MapToSanguineOrKey(guidHash);   // same mapper we wrote earlier
+                return new StandardEquipmentV2
+                {
+                    Equipment = guidHash,
+                    Quality = quality,
+                    Durability = 0          // default until you implement real value
+                };
+            }
+            static int MapToSanguineOrKey(int guidHash)
+            {
+                PrefabGUID itemPrefabGuid = new(guidHash);
+                var prefabEntities = PrefabCollectionSystem._PrefabGuidToEntityMap;
+
+                if (_shardNecklaces.Contains(itemPrefabGuid))
+                    return PrefabGUIDs.Item_MagicSource_BloodKey_T01.GuidHash;
+
+                if (itemPrefabGuid.HasValue()
+                    && prefabEntities.TryGetValue(itemPrefabGuid, out var entity) && !entity.Has<ArmorLevelSource>() && entity.IsAncestralWeapon())
+                {
+                    WeaponType wt = WeaponSystem.GetWeaponTypeFromWeaponEntity(entity);
+
+                    if (_sanguineWeapons.TryGetValue(wt, out PrefabGUID sanguine))
+                        return sanguine.GuidHash;
+                }
+
+                return guidHash;
+            }
+
+            /*
+            public static FamiliarEquipmentDataV2 LoadFamiliarEquipment(ulong steamId)
+            {
+                string path = GetFilePath(steamId);
+                FamiliarEquipmentDataV2 dataV2;
+                FamiliarEquipmentData data;
+
+                var prefabEntities = PrefabCollectionSystem._PrefabGuidToEntityMap;
+
+                try
+                {
+                    dataV2 = File.Exists(path)
+                         ? JsonSerializer.Deserialize<FamiliarEquipmentDataV2>(
+                               File.ReadAllText(path), _jsonOptionsV2)
+                           ?? new()
+                         : new();
+
+                    foreach (var kvp in dataV2.FamiliarEquipment)
+                    {
+                        List<EquipmentBaseV2> equipment = kvp.Value;
+
+                        foreach (var item in equipment)
+                        {
+                            if (item is StandardEquipmentV2 standardEquipment)
+                            {
+                                int itemGuidHash = standardEquipment.Equipment;
+                                PrefabGUID itemPrefabGuid = new(itemGuidHash);
+
+                                if (_shardNecklaces.Contains(itemPrefabGuid))
+                                {
+                                    itemGuidHash = PrefabGUIDs.Item_MagicSource_BloodKey_T01.GuidHash;
+                                }
+                                else if (itemPrefabGuid.HasValue() && prefabEntities.TryGetValue(itemPrefabGuid, out Entity itemEntity))
+                                {
+                                    WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(itemEntity);
+                                    PrefabGUID sanguineWeapon = _sanguineWeapons[weaponType];
+                                    itemGuidHash = sanguineWeapon.GuidHash;
+                                }
+
+                                equipment.Add(new StandardEquipmentV2
+                                {
+                                    Equipment = itemGuidHash,
+                                    Quality = standardEquipment.Quality,
+                                    Durability = 0
+                                });
+                            }
+                            else if (item is AncestralWeaponV2 ancestralWeapon)
+                            {
+                                PrefabGUID equipmentPrefabGuid = new(ancestralWeapon.Equipment);
+
+                                if (equipmentPrefabGuid.HasValue() && prefabEntities.TryGetValue(equipmentPrefabGuid, out Entity itemEntity))
+                                {
+                                    WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(itemEntity);
+                                    PrefabGUID sanguineWeapon = _sanguineWeapons[weaponType];
+
+                                    equipment.Add(new StandardEquipmentV2
+                                    {
+                                        Equipment = sanguineWeapon.GuidHash,
+                                        Quality = ancestralWeapon.Quality,
+                                        Durability = 0
+                                    });
+                                }
+                            }
+                        }
+
+                        dataV2.FamiliarEquipment[kvp.Key] = equipment;
+                    }
+                }
+                catch
+                {
+                    // Core.Log.LogWarning($"[LoadFamiliarEquipment] V1 -> V2 ({steamId}) – {primaryEx.Message}");
+
+                    dataV2 = new();
+                    List<EquipmentBaseV2> equipmentV2 = [..Enumerable.Range(0, EQUIPMENT_SLOTS).Select(_ => (EquipmentBaseV2)new StandardEquipmentV2 { Equipment = 0, Quality = 0, Durability = 0 })];
 
                     try
                     {
-                        return root.TryGetProperty("Infusion", out _)
-                            ? JsonSerializer.Deserialize<AncestralWeapon>(root.GetRawText(), options)
-                            : JsonSerializer.Deserialize<StandardEquipment>(root.GetRawText(), options);
+                        data = File.Exists(path)
+                             ? JsonSerializer.Deserialize<FamiliarEquipmentData>(
+                                   File.ReadAllText(path), _jsonOptions)
+                               ?? new()
+                             : new();
+
+                        foreach (var kvp in data.FamiliarEquipment)
+                        {
+                            List<EquipmentBase> equipment = kvp.Value;
+
+                            foreach (var item in equipment)
+                            {
+                                if (item is StandardEquipment standardEquipment)
+                                {
+                                    int itemGuidHash = standardEquipment.Equipment;
+                                    PrefabGUID itemPrefabGuid = new(itemGuidHash);
+
+                                    if (_shardNecklaces.Contains(itemPrefabGuid))
+                                    {
+                                        itemGuidHash = PrefabGUIDs.Item_MagicSource_BloodKey_T01.GuidHash;
+                                    }
+                                    else if (itemPrefabGuid.HasValue() && prefabEntities.TryGetValue(itemPrefabGuid, out Entity itemEntity))
+                                    {
+                                        WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(itemEntity);
+                                        PrefabGUID sanguineWeapon = _sanguineWeapons[weaponType];
+                                        itemGuidHash = sanguineWeapon.GuidHash;
+                                    }
+
+                                    equipmentV2.Add(new StandardEquipmentV2
+                                    {
+                                        Equipment = itemGuidHash,
+                                        Quality = standardEquipment.Quality,
+                                        Durability = 0
+                                    });
+                                }
+                                else if (item is AncestralWeapon ancestralWeapon)
+                                {
+                                    PrefabGUID equipmentPrefabGuid = new(ancestralWeapon.Equipment);
+
+                                    if (equipmentPrefabGuid.HasValue() && prefabEntities.TryGetValue(equipmentPrefabGuid, out Entity itemEntity))
+                                    {
+                                        WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(itemEntity);
+                                        PrefabGUID sanguineWeapon = _sanguineWeapons[weaponType];
+
+                                        equipmentV2.Add(new StandardEquipmentV2
+                                        {
+                                            Equipment = sanguineWeapon.GuidHash,
+                                            Quality = ancestralWeapon.Quality,
+                                            Durability = 0
+                                        });
+                                    }
+                                }
+                            }
+
+                            dataV2.FamiliarEquipment[kvp.Key] = equipmentV2;
+                        }
                     }
-                    catch (Exception ex)
+                    catch (Exception secondaryEx)
                     {
-                        Core.Log.LogError($"[EquipmentBaseConverter] Failed to deserialize familiar equipment - {ex.Message}");
-                        return new StandardEquipment { Equipment = 0, Quality = 0 };
+                        Core.Log.LogWarning($"[LoadFamiliarEquipment] ({steamId}) – {secondaryEx.Message}");
+                        dataV2 = new();
                     }
                 }
-                public override void Write(Utf8JsonWriter writer, EquipmentBase value, JsonSerializerOptions options)
+
+                SaveFamiliarEquipmentData(steamId, dataV2);
+
+                return dataV2;
+            }
+            */
+            public static List<EquipmentBaseV2> GetFamiliarEquipment(ulong steamId, int famKey)
+            {
+                var data = LoadFamiliarEquipment(steamId);
+
+                if (!data.FamiliarEquipment.TryGetValue(famKey, out var equipment))
                 {
-                    if (value is AncestralWeapon ancestralWeapon)
-                        JsonSerializer.Serialize(writer, ancestralWeapon, options);
-                    else if (value is StandardEquipment standardEquipment)
-                        JsonSerializer.Serialize(writer, standardEquipment, options);
+                    equipment = [..Enumerable.Range(0, EQUIPMENT_SLOTS).Select(_ => (EquipmentBaseV2)new StandardEquipmentV2 { Equipment = 0, Quality = 0, Durability = 0 })];
+
+                    data.FamiliarEquipment[famKey] = equipment;
+                    SaveFamiliarEquipmentData(steamId, data);
                 }
+
+                return equipment;
+            }
+            public static void SaveFamiliarEquipment(ulong steamId, int famKey, List<EquipmentBaseV2> equipment)
+            {
+                var data = LoadFamiliarEquipment(steamId);
+                data.FamiliarEquipment[famKey] = equipment;
+                SaveFamiliarEquipmentData(steamId, data);
+            }
+            public static void EquipFamiliar(ulong steamId, int famKey, Entity servant, Entity familiar)
+            {
+                EntityManager entityManager = Core.EntityManager;
+                bool professions = ConfigService.ProfessionSystem;
+                List<EquipmentBaseV2> familiarEquipment = GetFamiliarEquipment(steamId, famKey);
+
+                Entity inventory = InventoryUtilities.TryGetInventoryEntity(entityManager, servant, out inventory) ? inventory : Entity.Null;
+                if (!inventory.Exists()) return;
+
+                foreach (var equipment in familiarEquipment)
+                {
+                    if (equipment.Equipment.Equals(0)) continue;
+
+                    PrefabGUID equipmentPrefabGuid = new(equipment.Equipment);
+                    int professionLevel = professions ? equipment.Quality : 0;
+
+                    AddItemResponse addItemResponse = InventoryUtilitiesServer.TryAddItem(Core.GetAddItemSettings(), inventory, equipmentPrefabGuid, 1);
+                    Entity equipmentEntity = addItemResponse.NewEntity;
+                    int durability = equipment.Durability;
+
+                    if (equipmentEntity.Exists()) EquipmentQualityManager.ApplyFamiliarEquipmentStats(professionLevel, durability, equipmentEntity);
+                }
+            }
+
+            public static List<EquipmentBaseV2> UnequipFamiliar(Entity servant)
+            {
+                servant.Remove<Disabled>();
+
+                List<EquipmentBaseV2> familiarEquipment = [];
+                bool professions = ConfigService.ProfessionSystem;
+
+                if (servant.TryGetComponent(out ServantEquipment servantEquipment))
+                {
+                    foreach (FamiliarEquipmentType familiarEquipmentType in Enum.GetValues<FamiliarEquipmentType>())
+                    {
+                        if (FamiliarEquipmentMap.TryGetValue(familiarEquipmentType, out EquipmentType equipmentType) && servantEquipment.IsEquipped(equipmentType))
+                        {
+                            Entity equipmentEntity = servantEquipment.GetEquipmentEntity(equipmentType).GetEntityOnServer();
+                            PrefabGUID equipmentPrefabGuid = servantEquipment.GetEquipmentItemId(equipmentType);
+                            int professionLevel = professions ? EquipmentQualityManager.CalculateProfessionLevelOfEquipmentFromMaxDurability(equipmentEntity) : 0;
+
+                            if (!equipmentEntity.IsAncestralWeapon())
+                            {
+                                familiarEquipment.Add(
+                                    new StandardEquipmentV2
+                                    {
+                                        Equipment = equipmentPrefabGuid.GuidHash,
+                                        Quality = professionLevel,
+                                        Durability = (int)equipmentEntity.GetDurability()
+                                    });
+                            }
+
+                            /*
+                            else
+                            {
+                                LegendaryItemInstance legendaryItemInstance = equipmentEntity.Read<LegendaryItemInstance>();
+                                LegendaryItemSpellModSetComponent legendaryItemSpellModSet = equipmentEntity.Read<LegendaryItemSpellModSetComponent>();
+                                SpellModSet statModSet = legendaryItemSpellModSet.StatMods;
+                                PrefabGUID spellSchoolInfusion = legendaryItemSpellModSet.AbilityMods0.Mod0.Id;
+
+                                var statMods = new StatMods[statModSet.Count];
+                                for (int i = 0; i < statModSet.Count; i++)
+                                {
+                                    statMods[i] = new StatMods
+                                    {
+                                        StatMod = statModSet[i].Id.GuidHash,
+                                        Value = statModSet[i].Power
+                                    };
+                                }
+
+                                familiarEquipment.Add(new AncestralWeaponV2
+                                {
+                                    Equipment = equipmentPrefabGuid.GuidHash,
+                                    Tier = legendaryItemInstance.TierIndex,
+                                    Quality = professionLevel,
+                                    Infusion = SpellSchoolInfusionMap.SpellSchoolInfusions[spellSchoolInfusion],
+                                    StatMods = statMods,
+                                    Durability = (int)equipmentEntity.GetDurability()
+                                });
+                            }
+                            */
+                        }
+                    }
+
+                    servant.Destroy();
+                    return familiarEquipment;
+                }
+
+                return [..Enumerable.Range(0, EQUIPMENT_SLOTS).Select(_ => (EquipmentBaseV2)new StandardEquipmentV2 { Equipment = 0, Quality = 0, Durability = 0 })];
+            }
+            public static List<EquipmentBaseV2> GetFamiliarEquipment(Entity servant)
+            {
+                List<EquipmentBaseV2> familiarEquipment = [];
+                bool professions = ConfigService.ProfessionSystem;
+
+                if (servant.TryGetComponent(out ServantEquipment servantEquipment))
+                {
+                    foreach (FamiliarEquipmentType familiarEquipmentType in Enum.GetValues(typeof(FamiliarEquipmentType)))
+                    {
+                        if (FamiliarEquipmentMap.TryGetValue(familiarEquipmentType, out EquipmentType equipmentType) &&
+                            servantEquipment.IsEquipped(equipmentType))
+                        {
+                            Entity equipmentEntity = servantEquipment.GetEquipmentEntity(equipmentType).GetEntityOnServer();
+                            PrefabGUID equipmentPrefabGuid = servantEquipment.GetEquipmentItemId(equipmentType);
+                            int professionLevel = professions
+                                ? EquipmentQualityManager.CalculateProfessionLevelOfEquipmentFromMaxDurability(equipmentEntity)
+                                : 0;
+
+                            if (!equipmentEntity.IsAncestralWeapon())
+                            {
+                                familiarEquipment.Add(new StandardEquipmentV2
+                                {
+                                    Equipment = equipmentPrefabGuid.GuidHash,
+                                    Quality = professionLevel,
+                                    Durability = (int)equipmentEntity.GetDurability()
+                                });
+                            }
+
+                            /*
+                            else
+                            {
+                                // Handle Ancestral Weapon
+                                LegendaryItemInstance legendaryItemInstance = equipmentEntity.Read<LegendaryItemInstance>();
+                                LegendaryItemSpellModSetComponent legendaryItemSpellModSet = equipmentEntity.Read<LegendaryItemSpellModSetComponent>();
+                                SpellModSet statModSet = legendaryItemSpellModSet.StatMods;
+                                PrefabGUID spellSchoolInfusion = legendaryItemSpellModSet.AbilityMods0.Mod0.Id;
+
+                                var statMods = new StatMods[statModSet.Count];
+                                for (int i = 0; i < statModSet.Count; i++)
+                                {
+                                    statMods[i] = new StatMods
+                                    {
+                                        StatMod = statModSet[i].Id.GuidHash,
+                                        Value = statModSet[i].Power
+                                    };
+                                }
+
+                                familiarEquipment.Add(new AncestralWeaponV2
+                                {
+                                    Equipment = equipmentPrefabGuid.GuidHash,
+                                    Tier = legendaryItemInstance.TierIndex,
+                                    Quality = professionLevel,
+                                    Infusion = SpellSchoolInfusionMap.SpellSchoolInfusions[spellSchoolInfusion],
+                                    StatMods = statMods,
+                                    Durability = 0
+                                });
+                            }
+                            */
+                        }
+                        else
+                        {
+                            familiarEquipment.Add(new StandardEquipmentV2
+                            {
+                                Equipment = 0,
+                                Quality = 0,
+                                Durability = 0
+                            });
+                        }
+                    }
+                }
+                else
+                {
+                    familiarEquipment.AddRange(Enumerable.Range(0, EQUIPMENT_SLOTS).Select(_ =>
+                        (EquipmentBaseV2)new StandardEquipmentV2 { Equipment = 0, Quality = 0, Durability = 0 }));
+                }
+
+                return familiarEquipment;
+            }
+        }
+    }
+    public static class FamiliarEquipment
+    {
+        [Serializable]
+        public abstract class EquipmentBase
+        {
+            public int Equipment { get; set; }
+            public int Quality { get; set; }
+        }
+
+        [Serializable]
+        public abstract class EquipmentBaseV2
+        {
+            public int Equipment { get; set; }
+            public int Quality { get; set; }
+            public int Durability { get; set; }
+        }
+
+        [Serializable]
+        public class StandardEquipment : EquipmentBase { }
+
+        [Serializable]
+        public class StandardEquipmentV2 : EquipmentBaseV2 { }
+
+        [Serializable]
+        public class AncestralWeapon : EquipmentBase
+        {
+            public int Tier { get; set; }
+            public SpellSchool Infusion { get; set; }
+            public StatMods[] StatMods { get; set; }
+        }
+
+        [Serializable]
+        public class AncestralWeaponV2 : EquipmentBaseV2
+        {
+            public int Tier { get; set; }
+            public SpellSchool Infusion { get; set; }
+            public StatMods[] StatMods { get; set; }
+        }
+
+        [Serializable]
+        public class StatMods
+        {
+            public int StatMod { get; set; }
+            public float Value { get; set; }
+        }
+
+        [Serializable]
+        public class FamiliarEquipmentData
+        {
+            public Dictionary<int, List<EquipmentBase>> FamiliarEquipment { get; set; } = [];
+        }
+
+        [Serializable]
+        public class FamiliarEquipmentDataV2
+        {
+            public Dictionary<int, List<EquipmentBaseV2>> FamiliarEquipment { get; set; } = [];
+        }
+        public class EquipmentBaseConverter : JsonConverter<EquipmentBase>
+        {
+            public override EquipmentBase Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                using JsonDocument doc = JsonDocument.ParseValue(ref reader);
+                JsonElement root = doc.RootElement;
+
+                if (!root.TryGetProperty("Equipment", out _))
+                    throw new JsonException("Invalid Equipment data!");
+
+                try
+                {
+                    return root.TryGetProperty("Infusion", out _)
+                        ? JsonSerializer.Deserialize<AncestralWeapon>(root.GetRawText(), options)
+                        : JsonSerializer.Deserialize<StandardEquipment>(root.GetRawText(), options);
+                }
+                catch (Exception ex)
+                {
+                    Core.Log.LogError($"[EquipmentBaseConverter] Failed to deserialize familiar equipment - {ex.Message}");
+                    return new StandardEquipment { Equipment = 0, Quality = 0 };
+                }
+            }
+            public override void Write(Utf8JsonWriter writer, EquipmentBase value, JsonSerializerOptions options)
+            {
+                if (value is AncestralWeapon ancestralWeapon)
+                    JsonSerializer.Serialize(writer, ancestralWeapon, options);
+                else if (value is StandardEquipment standardEquipment)
+                    JsonSerializer.Serialize(writer, standardEquipment, options);
+            }
+        }
+        public class EquipmentBaseV2Converter : JsonConverter<EquipmentBaseV2>
+        {
+            public override EquipmentBaseV2 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                using JsonDocument doc = JsonDocument.ParseValue(ref reader);
+                JsonElement root = doc.RootElement;
+
+                if (!root.TryGetProperty("Equipment", out _))
+                    throw new JsonException("Invalid Equipment data!");
+
+                try
+                {
+                    return root.TryGetProperty("Infusion", out _)
+                        ? JsonSerializer.Deserialize<AncestralWeaponV2>(root.GetRawText(), options)
+                        : JsonSerializer.Deserialize<StandardEquipmentV2>(root.GetRawText(), options);
+                }
+                catch (Exception ex)
+                {
+                    Core.Log.LogError($"[EquipmentBaseConverter] Failed to deserialize familiar equipment - {ex.Message}");
+                    return new StandardEquipmentV2 { Equipment = 0, Quality = 0, Durability = 0 };
+                }
+            }
+            public override void Write(Utf8JsonWriter writer, EquipmentBaseV2 value, JsonSerializerOptions options)
+            {
+                if (value is AncestralWeaponV2 ancestralWeapon)
+                    JsonSerializer.Serialize(writer, ancestralWeapon, options);
+                else if (value is StandardEquipmentV2 standardEquipment)
+                    JsonSerializer.Serialize(writer, standardEquipment, options);
             }
         }
     }

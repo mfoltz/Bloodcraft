@@ -43,31 +43,48 @@ internal static class Quests
             }
             else if (entities.Count > 0)
             {
-                float3 userPosition = character.Read<Translation>().Value;
+                float3 userPosition = character.GetPosition();
+                Entity closest = entities
+                    .Where(entity =>
+                        entity.Exists()
+                        && !entity.HasBuff(_imprisonedBuff)
+                        && !entity.IsFamiliar())
+                    .Select(entity => new
+                    {
+                        Entity = entity,
+                        Distance = math.distance(userPosition, entity.GetPosition())
+                    })
+                    .Where(x => x.Distance <= MAX_DISTANCE)
+                    .OrderBy(x => x.Distance)
+                    .Select(x => x.Entity)
+                    .FirstOrDefault();
+
+                /*
                 Entity closest = entities
                     .Select(entity => new
                     {
                         Entity = entity,
-                        Distance = math.distance(userPosition, entity.Read<Translation>().Value)
+                        Distance = math.distance(userPosition, entity.GetPosition())
                     })
                     .Where(x => EntityManager.Exists(x.Entity) && !x.Entity.HasBuff(_imprisonedBuff)
                         && !x.Entity.Has<BlockFeedBuff>() && x.Distance <= MAX_DISTANCE)
                     .OrderBy(x => x.Distance)
                     .Select(x => x.Entity)
                     .FirstOrDefault();
+                */
 
                 if (!closest.Exists())
                 {
                     LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn!");
                     return;
                 }
-                else if (closest.Has<VBloodConsumeSource>())
+                else if (closest.IsVBloodOrGateBoss())
                 {
                     LocalizationService.HandleReply(ctx, "Use the VBlood menu to track bosses!");
                     return;
                 }
 
-                float3 targetPosition = closest.Read<Translation>().Value;
+                float3 targetPosition = closest.GetPosition();
                 float distance = math.distance(userPosition, targetPosition);
 
                 float3 direction = math.normalize(targetPosition - userPosition);

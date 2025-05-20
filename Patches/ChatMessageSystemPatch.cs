@@ -19,7 +19,7 @@ internal static class ChatMessageSystemPatch
 
     static readonly Regex _regexMAC = new(@";mac([^;]+)$");
 
-    [HarmonyBefore("CrimsonChatFilter")]
+    [HarmonyBefore("gg.deca.Bloodstone", "CrimsonChatFilter")]
     [HarmonyPatch(typeof(ChatMessageSystem), nameof(ChatMessageSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ChatMessageSystem __instance)

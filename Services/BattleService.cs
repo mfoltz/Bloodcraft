@@ -183,13 +183,13 @@ internal class BattleService
                 foreach (Entity familiar in playerOneFamiliars)
                 {
                     if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
-                    if (familiar.Exists()) familiar.TryDestroy();
+                    if (familiar.Exists()) familiar.Destroy();
                 }
 
                 foreach (Entity familiar in playerTwoFamiliars)
                 {
                     if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
-                    if (familiar.Exists()) familiar.TryDestroy();
+                    if (familiar.Exists()) familiar.Destroy();
                 }
 
                 if (matchPair.TryGetMatchPairInfo(out (PlayerInfo, PlayerInfo) matchPairInfo))
@@ -252,13 +252,13 @@ internal class BattleService
                 foreach (Entity familiar in playerOneFamiliars)
                 {
                     if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
-                    if (familiar.Exists()) familiar.TryDestroy();
+                    if (familiar.Exists()) familiar.Destroy();
                 }
 
                 foreach (Entity familiar in playerTwoFamiliars)
                 {
                     if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
-                    if (familiar.Exists()) familiar.TryDestroy();
+                    if (familiar.Exists()) familiar.Destroy();
                 }
             }
             else
@@ -402,7 +402,7 @@ internal class BattleService
                 foreach (Entity familiar in playerOneFamiliars)
                 {
                     if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
-                    if (familiar.Exists()) familiar.TryDestroy();
+                    if (familiar.Exists()) familiar.Destroy();
                 }
             }
 
@@ -411,7 +411,7 @@ internal class BattleService
                 foreach (Entity familiar in playerTwoFamiliars)
                 {
                     if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
-                    if (familiar.Exists()) familiar.TryDestroy();
+                    if (familiar.Exists()) familiar.Destroy();
                 }
             }
         }

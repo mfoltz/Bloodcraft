@@ -78,15 +78,13 @@ internal static class EntityQueries
         public override object GetValueAt(ArchetypeChunk chunk, int index)
         {
             var handle = EntityManager.GetComponentTypeHandle<T>(true);
-            var array = chunk.GetNativeArray(ref handle);
 
             if (!chunk.Has(ref handle))
             {
-                // var componentType = Il2CppType.Of<T>();
-                // Core.Log.LogWarning($"Chunk {index} missing {componentType.FullName}[{TypeIndex}]!");
                 return default(T);
             }
 
+            var array = chunk.GetNativeArray(ref handle);
             return array[index];
         }
     }
@@ -186,12 +184,10 @@ internal static class EntityQueries
         ComponentType[] types = queryDesc.ComponentTypes;
         int[] indices = queryDesc.TypeIndices;
 
-        // Misc.Performance.Start("QueryResultStreamAsync");
         var chunks = entityQuery.CreateArchetypeChunkArrayAsync(Allocator.TempJob, out var handle);
 
         while (!handle.IsCompleted)
             yield return null;
-        // Misc.Performance.Stop();
 
         handle.Complete();
 
@@ -213,69 +209,13 @@ internal static class EntityQueries
 
         return default;
     }
-
-    /*
     public static QueryDesc CreateQueryDesc(
-    this EntityManager entityManager,
-    ComponentType[] allTypes,
-    ComponentType[] anyTypes = null,
-    ComponentType[] noneTypes = null,
-    int[] typeIndices = null,
-    EntityQueryOptions? options = default)
-    {
-        EntityQuery query;
-
-        if (noneTypes != null && options.HasValue)
-        {
-            query = BuildEntityQuery(entityManager, allTypes, noneTypes, options.Value);
-        }
-        else if (options.HasValue)
-        {
-            query = BuildEntityQuery(entityManager, allTypes, options.Value);
-        }
-        else
-        {
-            query = BuildEntityQuery(entityManager, allTypes);
-        }
-
-        typeIndices ??= GenerateDefaultIndices(allTypes.Length);
-
-        return new QueryDesc(query, allTypes, typeIndices);
-    }
-    public static QueryDesc CreateQueryDesc(
-    this EntityManager entityManager,
-    ComponentType[] allTypes,
-    ComponentType[] noneTypes = null,
-    int[] typeIndices = null,
-    EntityQueryOptions? options = default)
-    {
-        EntityQuery query;
-
-        if (noneTypes != null && options.HasValue)
-        {
-            query = BuildEntityQuery(entityManager, allTypes, noneTypes, options.Value);
-        }
-        else if (options.HasValue)
-        {
-            query = BuildEntityQuery(entityManager, allTypes, options.Value);
-        }
-        else
-        {
-            query = BuildEntityQuery(entityManager, allTypes);
-        }
-
-        typeIndices ??= GenerateDefaultIndices(allTypes.Length);
-
-        return new QueryDesc(query, allTypes, typeIndices);
-    }
-    */
-    public static QueryDesc CreateQueryDesc(
-    this EntityManager entityManager,
-    ComponentType[] allTypes,
-    ComponentType[] anyTypes = null,
-    ComponentType[] noneTypes = null,
-    int[] typeIndices = null,
-    EntityQueryOptions? options = default)
+        this EntityManager entityManager,
+        ComponentType[] allTypes,
+        ComponentType[] anyTypes = null,
+        ComponentType[] noneTypes = null,
+        int[] typeIndices = null,
+        EntityQueryOptions? options = default)
     {
         if (allTypes == null || allTypes.Length == 0)
             throw new ArgumentException("AllTypes must contain at least one component!", nameof(allTypes));
@@ -306,10 +246,15 @@ internal static class EntityQueries
 
         return new QueryDesc(query, allTypes, typeIndices);
     }
-
-    /*
+    static int[] GenerateDefaultIndices(int length)
+    {
+        var indices = new int[length];
+        for (int i = 0; i < length; i++)
+            indices[i] = i;
+        return indices;
+    }
     public static EntityQuery BuildEntityQuery(
-    EntityManager entityManager,
+    this EntityManager entityManager,
     ComponentType[] all)
     {
         var builder = new EntityQueryBuilder(Allocator.Temp);
@@ -320,7 +265,7 @@ internal static class EntityQueries
         return entityManager.CreateEntityQuery(ref builder);
     }
     public static EntityQuery BuildEntityQuery(
-    EntityManager entityManager,
+    this EntityManager entityManager,
     ComponentType[] all,
     EntityQueryOptions options)
     {
@@ -334,7 +279,7 @@ internal static class EntityQueries
         return entityManager.CreateEntityQuery(ref builder);
     }
     public static EntityQuery BuildEntityQuery(
-    EntityManager entityManager,
+    this EntityManager entityManager,
     ComponentType[] all,
     ComponentType[] none,
     EntityQueryOptions options)
@@ -350,36 +295,6 @@ internal static class EntityQueries
         builder.WithOptions(options);
 
         return entityManager.CreateEntityQuery(ref builder);
-    }
-    public static EntityQuery BuildEntityQuery(
-    EntityManager entityManager,
-    ComponentType[] all,
-    ComponentType[] any,
-    ComponentType[] none,
-    EntityQueryOptions options)
-    {
-        var builder = new EntityQueryBuilder(Allocator.Temp);
-
-        foreach (var componentType in all)
-            builder.AddAll(componentType);
-
-        foreach (var componentType in any)
-            builder.AddAny(componentType);
-
-        foreach (var componentType in none)
-            builder.AddNone(componentType);
-
-        builder.WithOptions(options);
-
-        return entityManager.CreateEntityQuery(ref builder);
-    }
-    */
-    static int[] GenerateDefaultIndices(int length)
-    {
-        var indices = new int[length];
-        for (int i = 0; i < length; i++)
-            indices[i] = i;
-        return indices;
     }
 }
 internal static class ComponentRegistry

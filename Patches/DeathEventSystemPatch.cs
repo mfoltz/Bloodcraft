@@ -134,8 +134,8 @@ internal static class DeathEventListenerSystemPatch
                     // FamiliarEquipmentManager.UnequipFamiliar(GetFamiliarServant(playerCharacter));
                     Entity familiarServant = GetFamiliarServant(playerCharacter);
 
-                    familiarServant.TryRemove<Disabled>();
-                    familiarServant.TryDestroy();
+                    familiarServant.Remove<Disabled>();
+                    familiarServant.Destroy();
 
                     ActiveFamiliarManager.ResetActiveFamiliarData(steamId);
                 }
@@ -159,7 +159,7 @@ internal static class DeathEventListenerSystemPatch
                     foreach (Entity familiar in PlayerBattleFamiliars[pairedId])
                     {
                         if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) HandleFamiliarMinions(familiar);
-                        if (familiar.Exists()) familiar.TryDestroy();
+                        if (familiar.Exists()) familiar.Destroy();
                     }
 
                     PlayerBattleFamiliars[pairedId].Clear();

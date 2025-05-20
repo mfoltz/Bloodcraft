@@ -55,7 +55,7 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
                 }
                 else if (entityOwner.Owner.IsDisabled())
                 {
-                    entity.TryDestroy(); // kinda forgot what this is for but scared to touch it >_>
+                    entity.Destroy(); // kinda forgot what this is for but scared to touch it >_>
                 }
             }
         }

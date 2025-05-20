@@ -14,7 +14,7 @@ using static Bloodcraft.Services.LocalizationService;
 using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft;
-internal static class ECSExtensions // probably need to organize this soonTM and at least separate out Bloodcraft specific ones so easier to copy and paste around
+internal static class VExtensions // probably need to organize this soonTM and at least separate out Bloodcraft specific ones so easier to copy and paste around
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
@@ -76,17 +76,6 @@ internal static class ECSExtensions // probably need to organize this soonTM and
 
         return false;
     }
-    public static bool TryRemove<T>(this Entity entity) where T : struct
-    {
-        if (entity.Has<T>())
-        {
-            entity.Remove<T>();
-
-            return true;
-        }
-
-        return false;
-    }
     public static bool Has<T>(this Entity entity) where T : struct
     {
         return EntityManager.HasComponent(entity, new(Il2CppType.Of<T>()));
@@ -97,26 +86,27 @@ internal static class ECSExtensions // probably need to organize this soonTM and
     }
     public static string GetLocalizedName(this PrefabGUID prefabGuid)
     {
-        string localizedName = GetNameFromPrefabGuid(prefabGuid);
+        string prefabName = GetNameFromPrefabGuid(prefabGuid);
 
-        if (!string.IsNullOrEmpty(localizedName))
+        if (!string.IsNullOrEmpty(prefabName))
         {
-            return localizedName;
+            return prefabName;
+        }
+
+        if (PrefabGuidNames.TryGetValue(prefabGuid, out prefabName))
+        {
+            return prefabName;
         }
 
         return EMPTY_KEY;
     }
-    public static void TryAdd<T>(this Entity entity) where T : struct
-    {
-        if (!entity.Has<T>()) entity.Add<T>();
-    }
     public static void Add<T>(this Entity entity) where T : struct
     {
-        EntityManager.AddComponent(entity, new(Il2CppType.Of<T>()));
+        if (!entity.Has<T>()) EntityManager.AddComponent(entity, new(Il2CppType.Of<T>()));
     }
     public static void Remove<T>(this Entity entity) where T : struct
     {
-        EntityManager.RemoveComponent(entity, new(Il2CppType.Of<T>()));
+        if (entity.Has<T>()) EntityManager.RemoveComponent(entity, new(Il2CppType.Of<T>()));
     }
     public static bool TryGetFollowedPlayer(this Entity entity, out Entity player)
     {
@@ -416,9 +406,18 @@ internal static class ECSExtensions // probably need to organize this soonTM and
     }
     public static float GetMaxDurability(this Entity entity)
     {
-        if (entity.TryGetComponent(out Durability maxDurability))
+        if (entity.TryGetComponent(out Durability durability))
         {
-            return maxDurability.Value;
+            return durability.MaxDurability;
+        }
+
+        return 0;
+    }
+    public static float GetDurability(this Entity entity)
+    {
+        if (entity.TryGetComponent(out Durability durability))
+        {
+            return durability.Value;
         }
 
         return 0;
@@ -471,15 +470,31 @@ internal static class ECSExtensions // probably need to organize this soonTM and
 
         return false;
     }
+
+    /*
     public static void TryDestroyImmediate(this Entity entity)
     {
         if (entity.Exists()) EntityManager.DestroyEntity(entity);
     }
-    public static void TryDestroy(this Entity entity)
+    public static void Destroy(this Entity entity)
     {
         if (entity.Exists()) DestroyUtility.Destroy(EntityManager, entity);
     }
-    public static void TryDestroyBuff(this Entity buffEntity)
+    */
+    public static void Destroy(this Entity entity, bool immediate = false)
+    {
+        if (!entity.Exists()) return;
+
+        if (immediate)
+        {
+            EntityManager.DestroyEntity(entity);
+        }
+        else
+        {
+            DestroyUtility.Destroy(EntityManager, entity);
+        }
+    }
+    public static void DestroyBuff(this Entity buffEntity)
     {
         if (buffEntity.Exists()) DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
     }

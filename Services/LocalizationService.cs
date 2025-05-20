@@ -128,23 +128,6 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
             assetData.Dispose();
         }
     }
-
-    /*
-    static void LoadPrefabHashesToGuidStrings()
-    {
-        string resourceName = "Bloodcraft.Resources.Localization.PrefabNames.json";
-        Assembly assembly = Assembly.GetExecutingAssembly();
-
-        Stream stream = assembly.GetManifestResourceStream(resourceName);
-        using StreamReader reader = new(stream);
-
-        string jsonContent = reader.ReadToEnd();
-        var prefabNames = JsonSerializer.Deserialize<Dictionary<int, string>>(jsonContent);
-
-        prefabNames
-            .ForEach(kvp => _guidHashesToGuidStrings[kvp.Key] = kvp.Value);
-    }
-    */
     static void LoadGuidStringsToLocalizedNames()
     {
         string resourceName = _localizedLanguages.ContainsKey(_language) ? _localizedLanguages[_language] : "Bloodcraft.Resources.Localization.English.json";

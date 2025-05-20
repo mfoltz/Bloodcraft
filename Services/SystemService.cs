@@ -126,6 +126,9 @@ internal class SystemService(World world)
     ServantPowerSystem _servantPowerSystem;
     public ServantPowerSystem ServantPowerSystem => _servantPowerSystem ??= GetSystem<ServantPowerSystem>();
 
+    RemoveCharmSourceFromVBloods_Hotfix_0_6 _removeCharmSourceVBloodSystem;
+    public RemoveCharmSourceFromVBloods_Hotfix_0_6 RemoveCharmSourceVBloodSystem => _removeCharmSourceVBloodSystem ??= GetSystem<RemoveCharmSourceFromVBloods_Hotfix_0_6>();
+
     NetworkIdSystem.Singleton _networkIdSystem_Singleton;
     public NetworkIdSystem.Singleton NetworkIdSystem
     {

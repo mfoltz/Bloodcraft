@@ -8,8 +8,10 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
+using HarmonyLib;
 using Il2CppInterop.Runtime;
 using ProjectM;
+using ProjectM.CastleBuilding;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -52,15 +54,6 @@ internal static class Core
         PrefabGUIDs.Buff_Militia_Fabian_Return
     ];
 
-    static readonly List<PrefabGUID> _shardNecklaces =
-    [
-        PrefabGUIDs.Item_MagicSource_SoulShard_Manticore,
-        PrefabGUIDs.Item_MagicSource_SoulShard_Solarus,
-        PrefabGUIDs.Item_MagicSource_SoulShard_Dracula,
-        PrefabGUIDs.Item_MagicSource_SoulShard_Monster,
-        PrefabGUIDs.Item_MagicSource_SoulShard_Morgana
-    ];
-
     static readonly List<PrefabGUID> _bearFormBuffs =
     [
         PrefabGUIDs.AB_Shapeshift_Bear_Buff,       
@@ -80,6 +73,7 @@ internal static class Core
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
+    static readonly bool _resetShardBearers = ConfigService.EliteShardBearers;
     static readonly bool _shouldApplyBonusStats = _legacies || _expertise || _classes || _familiars;
     public static IReadOnlySet<WeaponType> BleedingEdge => _bleedingEdge;
     static HashSet<WeaponType> _bleedingEdge = [];
@@ -140,18 +134,6 @@ internal static class Core
             Misc.GetStatModPrefabs(); // modifier stuff, although... fusion forge, hm
         }
 
-        try
-        {
-            // PlayerCombatBuffSystemAggroDetour.Initialize();
-            // ModifyUnitStatsDetour.InitializeUpdateLookups();
-            // DealDamageSystemDetour.Initialize();
-            // Log.LogWarning($"[Core] Initial EntityManager capacity - {EntityManager.EntityCapacity}");
-        }
-        catch (Exception e)
-        {
-            Log.LogWarning($"Error initializing detours: {e}");
-        }
-
         GetWeaponTypes();
         ModifyPrefabs();
         Buffs.GetStackableBuffs();
@@ -164,6 +146,11 @@ internal static class Core
         catch (Exception e)
         {
             Log.LogWarning($"Error getting attribute soft caps: {e}");
+        }
+
+        if (_resetShardBearers)
+        {
+            ResetShardBearers();
         }
 
         _initialized = true;
@@ -218,9 +205,9 @@ internal static class Core
         {
             Entity prefabEntity = Entity.Null;
 
-            foreach (PrefabGUID prefabGUID in _returnBuffs)
+            foreach (PrefabGUID prefabGuid in _returnBuffs)
             {
-                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGUID, out prefabEntity))
+                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGuid, out prefabEntity))
                 {
                     if (prefabEntity.TryGetBuffer<HealOnGameplayEvent>(out var buffer))
                     {
@@ -231,6 +218,7 @@ internal static class Core
                 }
             }
 
+            /* >_>
             foreach (PrefabGUID shardNecklace in _shardNecklaces)
             {
                 var itemDataHashMap = SystemService.GameDataSystem.ItemHashLookupMap;
@@ -239,11 +227,42 @@ internal static class Core
                 {
                     ItemData itemData = prefabEntity.Read<ItemData>();
 
-                    itemData.ItemCategory &= ~ItemCategory.Soulshard; // Remove Soulshard
-                    itemData.ItemCategory |= ItemCategory.BloodBound | ItemCategory.Magic; // Add BloodBound and Magic
+                    itemData.ItemCategory &= ~ItemCategory.Soulshard;
+                    // itemData.ItemCategory |= ItemCategory.BloodBound | ItemCategory.Magic;
+                    itemData.ItemCategory |= ItemCategory.BloodBound | ItemCategory.Magic | ItemCategory.Relic;
                     prefabEntity.Write(itemData);
 
                     itemDataHashMap[shardNecklace] = itemData;
+                }
+            }
+
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Buffs.GateBossFeedCompleteBuff, out prefabEntity))
+            {
+                if (prefabEntity.TryGetBuffer<ModifyItemDurabilityOnGameplayEvent>(out var buffer))
+                {
+                    ItemCategory itemCategory = ItemCategory.BloodBound | ItemCategory.Magic | ItemCategory.Relic;
+                    ModifyItemDurabilityOnGameplayEvent modifyItemDurabilityOnGameplayEvent = buffer[0];
+                    modifyItemDurabilityOnGameplayEvent.ItemCategory = itemCategory;
+                    buffer[0] = modifyItemDurabilityOnGameplayEvent;
+                }
+            }
+            */
+
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(PrefabGUIDs.CHAR_VampireMale, out prefabEntity))
+            {
+                if (prefabEntity.TryGetBuffer<BuffByItemCategoryCount>(out var buffer) && buffer.IsIndexWithinRange(1))
+                {
+                    BuffByItemCategoryCount buffByItemCategoryCount = buffer[1];
+
+                    if (buffByItemCategoryCount.ItemCategory.Equals(ItemCategory.Relic))
+                    {
+                        buffer.RemoveAt(1);
+                        // Log.LogWarning($"[ModifyPrefabs] - BuffByItemCategoryCount Relic entry removed!");
+                    }
+                }
+                else
+                {
+                    // Log.LogWarning($"[ModifyPrefabs] - BuffByItemCategoryCount buffer index out of range!");
                 }
             }
         }
@@ -252,8 +271,8 @@ internal static class Core
         {
             if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Buffs.BonusStatsBuff, out Entity prefabEntity))
             {
-                prefabEntity.TryAdd<ScriptSpawn>();
-                prefabEntity.TryAdd<BloodBuffScript_Scholar_MovementSpeedOnCast>();
+                prefabEntity.Add<ScriptSpawn>();
+                prefabEntity.Add<BloodBuffScript_Scholar_MovementSpeedOnCast>();
 
                 if (prefabEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var buffer))
                 {
@@ -369,6 +388,45 @@ internal static class Core
             */
         }
     }
+
+    static readonly HashSet<PrefabGUID> _shardBearers =
+    [
+        PrefabGUIDs.CHAR_Manticore_VBlood,
+        PrefabGUIDs.CHAR_ChurchOfLight_Paladin_VBlood,
+        PrefabGUIDs.CHAR_Gloomrot_Monster_VBlood,
+        PrefabGUIDs.CHAR_Vampire_Dracula_VBlood,
+        PrefabGUIDs.CHAR_Blackfang_Morgana_VBlood
+    ];
+    static void ResetShardBearers()
+    {
+        ComponentType[] vBloodAllComponents =
+        [
+            ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+            ComponentType.ReadOnly(Il2CppType.Of<VBloodConsumeSource>()),
+            ComponentType.ReadOnly(Il2CppType.Of<VBloodUnit>())
+        ];
+
+        EntityQuery vBloodQuery = EntityManager.BuildEntityQuery(all: vBloodAllComponents, options: EntityQueryOptions.IncludeDisabled);
+        using NativeAccessor<Entity> entities = vBloodQuery.ToEntityArrayAccessor();
+
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (!entity.TryGetComponent(out PrefabGUID prefabGuid)) continue;
+                else if (_shardBearers.Contains(prefabGuid))
+                {
+                    // Log.LogWarning($"[ResetShardBearers] ({prefabGuid.GetPrefabName()})");
+                    entity.Destroy();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.LogWarning($"[ResetShardBearers] error: {ex}");
+        }
+    }
+
     static IEnumerator BleedingEdgePrimaryProjectileRoutine(QueryDesc projectileQueryDesc)
     {
         bool pistols = BleedingEdge.Contains(WeaponType.Pistols);
@@ -441,21 +499,6 @@ internal static class Core
         }
     }
 }
-
-/*
-public readonly unsafe struct NativeAccessor<T>(NativeArray<T> array) : IDisposable where T : unmanaged
-{
-    readonly T* _ptr = (T*)array.m_Buffer;
-    readonly int _length = array.Length;
-    public T this[int index]
-    {
-        get => _ptr[index];
-        set => _ptr[index] = value;
-    }
-    public int Length => _length;
-    public void Dispose() => array.Dispose();
-}
-*/
 public readonly struct NativeAccessor<T> : IDisposable where T : unmanaged
 {
     static NativeArray<T> _array;
@@ -469,8 +512,6 @@ public readonly struct NativeAccessor<T> : IDisposable where T : unmanaged
         set => _array[index] = value;
     }
     public int Length => _array.Length;
-
-    public void Dispose() => _array.Dispose();
-
     public NativeArray<T>.Enumerator GetEnumerator() => _array.GetEnumerator();
+    public void Dispose() => _array.Dispose();
 }

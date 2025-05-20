@@ -128,7 +128,7 @@ internal static class BuffSystemSpawnPatches
                         break;
                     case 3 when isPlayerTarget: // Familiar and player has PvE Combat Buff
                         Entity familiar = Entity.Null;
-                        if (buffTarget.HasBuff(_evolvedVampireBuff)) buffEntity.TryRemove<SetOwnerRotateTowardsMouse>();
+                        if (buffTarget.HasBuff(_evolvedVampireBuff)) buffEntity.Remove<SetOwnerRotateTowardsMouse>();
                         if (_familiars && steamId.HasActiveFamiliar())
                         {
                             familiar = Familiars.GetActiveFamiliar(buffTarget);
@@ -170,7 +170,7 @@ internal static class BuffSystemSpawnPatches
                         }
                         break;
                     case 7 when _familiars && buffTarget.IsVBloodOrGateBoss(): // Witch pig transformation buff
-                        buffEntity.TryDestroy();
+                        buffEntity.Destroy();
                         break;
                     case 8 when isPlayerTarget:
                         if (_familiars && steamId.HasDismissedFamiliar() && Familiars.AutoCallMap.TryRemove(buffTarget, out familiar))
@@ -304,7 +304,7 @@ internal static class BuffSystemSpawnPatches
                     case 12 when _familiars:
                         if (buffTarget.TryGetFollowedPlayer(out playerCharacter) && !GetPlayerBool(playerCharacter.GetSteamId(), VBLOOD_EMOTES_KEY))
                         {
-                            buffEntity.TryDestroy();
+                            buffEntity.Destroy();
                         }
                         break;
                     case 13 when _familiars && isPlayerTarget:
@@ -317,7 +317,7 @@ internal static class BuffSystemSpawnPatches
                     case 14:
                         if (isPlayerTarget)
                         {
-                            if (buffTarget.HasBuff(_evolvedVampireBuff)) buffEntity.TryRemove<SetOwnerRotateTowardsMouse>();
+                            if (buffTarget.HasBuff(_evolvedVampireBuff)) buffEntity.Remove<SetOwnerRotateTowardsMouse>();
                             else if (_familiars && steamId.HasActiveFamiliar())
                             {
                                 familiar = Familiars.GetActiveFamiliar(buffTarget);
@@ -335,7 +335,7 @@ internal static class BuffSystemSpawnPatches
                     case 15 when _familiars:
                         if (buffTarget.IsFollowingPlayer())
                         {
-                            buffEntity.TryDestroy();
+                            buffEntity.Destroy();
                         }
                         break;
                     default:
@@ -742,7 +742,7 @@ internal static class BuffSystemSpawnPatches
     {
         if (buffEntity.TryGetComponent(out Buff buff) && buff.BuffEffectType.Equals(BuffEffectType.Debuff))
         {
-            buffEntity.TryDestroy();
+            buffEntity.Destroy();
         }
     }
     static readonly Dictionary<PrefabGUID, Action<BuffSpawnContext>> _buffSpawnActions = new()
@@ -782,7 +782,7 @@ internal static class BuffSystemSpawnPatches
     {
         if (_familiars && target.TryGetFollowedPlayer(out Entity player) && !GetPlayerBool(player.GetSteamId(), VBLOOD_EMOTES_KEY))
         {
-            buffEntity.TryDestroy();
+            buffEntity.Destroy();
         }
     }
     static void HandleUseRelic(Entity buffEntity, Entity target, bool targetIsPlayer)
@@ -833,7 +833,7 @@ internal static class BuffSystemSpawnPatches
         Entity familiar;
         if (buff.BuffTarget.HasBuff(_evolvedVampireBuff))
         {
-            buff.BuffEntity.TryRemove<SetOwnerRotateTowardsMouse>();
+            buff.BuffEntity.Remove<SetOwnerRotateTowardsMouse>();
         }
 
         if (_familiars && buff.SteamId.HasActiveFamiliar())
@@ -868,7 +868,7 @@ internal static class BuffSystemSpawnPatches
     {
         if (_familiars && buff.BuffTarget.IsVBloodOrGateBoss())
         {
-            buff.BuffEntity.TryDestroy();
+            buff.BuffEntity.Destroy();
         }
     }
     static void HandlePhasingBuff(BuffSpawnContext buff)
@@ -892,7 +892,7 @@ internal static class BuffSystemSpawnPatches
         Entity familiar;
         if (buff.BuffTarget.HasBuff(_evolvedVampireBuff))
         {
-            buff.BuffEntity.TryRemove<SetOwnerRotateTowardsMouse>();
+            buff.BuffEntity.Remove<SetOwnerRotateTowardsMouse>();
         }
         else if (_familiars && buff.SteamId.HasActiveFamiliar())
         {
@@ -937,15 +937,15 @@ internal static class BuffSystemSpawnPatches
 
         if (ctx.BuffTarget.IsFollowingPlayer())
         {
-            ctx.BuffEntity.TryDestroy();
+            ctx.BuffEntity.Destroy();
         }
     }
     static void ApplyConsumableToPlayer(Entity buffEntity, Entity player, PrefabGUID buffGuid, string prefabName, ulong steamId)
     {
         if (_potionStacking && !prefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase))
         {
-            buffEntity.TryRemove<RemoveBuffOnGameplayEvent>();
-            buffEntity.TryRemove<RemoveBuffOnGameplayEventEntry>();
+            buffEntity.Remove<RemoveBuffOnGameplayEvent>();
+            buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
         }
 
         if (_professions)
@@ -997,8 +997,8 @@ internal static class BuffSystemSpawnPatches
     {
         if (_potionStacking && !prefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase))
         {
-            buffEntity.TryRemove<RemoveBuffOnGameplayEvent>();
-            buffEntity.TryRemove<RemoveBuffOnGameplayEventEntry>();
+            buffEntity.Remove<RemoveBuffOnGameplayEvent>();
+            buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
         }
 
         if (_familiars && !buffEntity.GetPrefabGuid().Equals(_wranglerPotionBuff))

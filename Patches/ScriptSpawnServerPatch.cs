@@ -150,7 +150,7 @@ internal static class ScriptSpawnServerPatch
                         Buffs.RefreshStats(buffTarget);
                         break;
                     case 8 when _familiars && owner.IsFamiliar() && owner.IsAllies(buffTarget):
-                        buffEntity.TryDestroy();
+                        buffEntity.Destroy();
                         break;
                     case 9 when _familiars:
                         if (buffTarget.TryGetFollowedPlayer(out Entity playerCharacter))
@@ -277,7 +277,7 @@ internal static class ScriptSpawnServerPatch
         if (!familiar.TryGetFollowedPlayer(out Entity playerCharacter)) return;
         Entity servant = Familiars.GetFamiliarServant(playerCharacter);
 
-        buffEntity.TryRemove<Buff_Persists_Through_Death>();
+        buffEntity.Remove<Buff_Persists_Through_Death>();
 
         if (servant.TryGetComponent(out ServantEquipment servantEquipment))
         {
@@ -393,7 +393,7 @@ internal static class ScriptSpawnServerPatch
 
                 foreach (Entity equippableBuff in equippableBuffs)
                 {
-                    equippableBuff.TryDestroyBuff();
+                    equippableBuff.DestroyBuff();
                 }
 
                 if (modifyUnitStatBuffs.Any() && buffEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var targetBuffer))
