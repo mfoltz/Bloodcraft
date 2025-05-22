@@ -28,7 +28,7 @@ internal class Plugin : BasePlugin
             return;
         }
 
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        // Console.OutputEncoding = System.Text.Encoding.UTF8;
         _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
 
         InitializeConfig();
