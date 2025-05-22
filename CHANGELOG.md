@@ -1,3 +1,6 @@
+`1.9.9`
+- small hotfix preventing initialization on server hosts, was trying out unicode characters in console oops >_>_
+
 `1.9.8`
 - better entity existence checks for quest tracking command
 - familiars should retain equipment stats after leveling up
