@@ -8,10 +8,8 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
-using HarmonyLib;
 using Il2CppInterop.Runtime;
 using ProjectM;
-using ProjectM.CastleBuilding;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -90,7 +88,7 @@ internal static class Core
         NEW_SHARED_KEY = Convert.FromBase64String(SecretManager.GetNewSharedKey());
 
         if (!ComponentRegistry._initialized) ComponentRegistry.Initialize();
-
+        
         _ = new PlayerService();
         _ = new LocalizationService();
 

@@ -966,6 +966,10 @@ internal static class Classes
                 // Core.Log.LogWarning($"[GenerateAbilityJewelMap] Jewel map generated - {_abilityJewelMap.Count}");
             }
         );
+
+        // SpellSchoolAbility.TryGetSchoolAbility
+        // SpellSchoolMappingSystem
+        // Core.SystemService.JewelSpawnSystem.GetRandomJewelAbilityFromSchool
     }
     public static bool TryParseClassName(string className, out PlayerClass parsedClassType)
     {

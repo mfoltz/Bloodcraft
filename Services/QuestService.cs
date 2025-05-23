@@ -97,7 +97,8 @@ internal class QuestService
         "FloatingWeapon",
         "Airborne",
         "SpiritDouble",
-        "ValyrCauldron"
+        "ValyrCauldron",
+        "EmeryGolem"
     ];
 
     static readonly HashSet<string> _filteredCraftableItems =
