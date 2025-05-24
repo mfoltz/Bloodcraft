@@ -25,13 +25,8 @@ internal class SystemService(World world)
     ServerScriptMapper _serverScriptMapper;
     public ServerScriptMapper ServerScriptMapper => _serverScriptMapper ??= GetSystem<ServerScriptMapper>();
 
-    /*
-    ModifyUnitStatBuffSystem_Spawn _modifyUnitStatBuffSystem_Spawn;
-    public ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn => _modifyUnitStatBuffSystem_Spawn ??= GetSystem<ModifyUnitStatBuffSystem_Spawn>();
-
-    ModifyUnitStatBuffSystem_Destroy _modifyUnitStatBuffSystem_Destroy;
-    public ModifyUnitStatBuffSystem_Destroy ModifyUnitStatBuffSystem_Destroy => _modifyUnitStatBuffSystem_Destroy ??= GetSystem<ModifyUnitStatBuffSystem_Destroy>();
-    */
+    SpellSchoolMappingSystem _spellSchoolMappingSystem;
+    public SpellSchoolMappingSystem SpellSchoolMappingSystem => _spellSchoolMappingSystem ??= GetSystem<SpellSchoolMappingSystem>();
 
     EntityCommandBufferSystem _entityCommandBufferSystem;
     public EntityCommandBufferSystem EntityCommandBufferSystem => _entityCommandBufferSystem ??= GetSystem<EntityCommandBufferSystem>();

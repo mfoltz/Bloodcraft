@@ -970,6 +970,7 @@ internal static class Classes
         // SpellSchoolAbility.TryGetSchoolAbility
         // SpellSchoolMappingSystem
         // Core.SystemService.JewelSpawnSystem.GetRandomJewelAbilityFromSchool
+        // JewelSpawnSystem.
     }
     public static bool TryParseClassName(string className, out PlayerClass parsedClassType)
     {
