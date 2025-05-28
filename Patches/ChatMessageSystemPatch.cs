@@ -19,7 +19,7 @@ internal static class ChatMessageSystemPatch
 
     static readonly Regex _regexMAC = new(@";mac([^;]+)$");
 
-    [HarmonyBefore("gg.deca.Bloodstone", "CrimsonChatFilter")]
+    [HarmonyBefore("gg.deca.Bloodstone")]
     [HarmonyPatch(typeof(ChatMessageSystem), nameof(ChatMessageSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ChatMessageSystem __instance)
@@ -39,9 +39,9 @@ internal static class ChatMessageSystemPatch
 
                 if (CheckMAC(chatMessageEvent.MessageText.Value, out string originalMessage))
                 {
-                    // Core.Log.LogWarning($"[ChatMessageSystem] Handling Eclipse client message...");
+                    Core.Log.LogWarning($"[ChatMessageSystem] Handling Eclipse client message...");
                     EclipseService.HandleClientMessage(originalMessage);
-                    EntityManager.DestroyEntity(entity);
+                    entity.Destroy(true);
                 }
             }
         }

@@ -34,8 +34,6 @@ internal class PlayerService
     static QueryDesc _onlineUserQueryDesc;
     static QueryDesc _userQueryDesc;
 
-    static bool _rebuildCache = true;
-
     static readonly ConcurrentDictionary<ulong, PlayerInfo> _steamIdPlayerInfoCache = [];
     public static IReadOnlyDictionary<ulong, PlayerInfo> SteamIdPlayerInfoCache => _steamIdPlayerInfoCache;
 
@@ -57,54 +55,6 @@ internal class PlayerService
 
         // PlayerServiceRoutine().Start();
         BuildPlayerInfoCache();
-    }
-
-    static readonly int[] _typeIndices = [0];
-    static IEnumerator PlayerServiceRoutine()
-    {
-        if (_rebuildCache) BuildPlayerInfoCache();
-
-        while (true)
-        {
-            _steamIdOnlinePlayerInfoCache.Clear();
-            _userIndexSteamIdCache.Clear();
-
-            yield return QueryResultStreamAsync(
-                _onlineUserQueryDesc,
-                stream =>
-                {
-                    try
-                    {
-                        using (stream)
-                        {
-                            foreach (QueryResult result in stream.GetResults())
-                            {
-                                Entity userEntity = result.Entity;
-                                User user = result.ResolveComponentData<User>();
-                                Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
-
-                                ulong steamId = user.PlatformId;
-                                PlayerInfo playerInfo = new(userEntity, playerCharacter, user);
-
-                                _steamIdPlayerInfoCache[steamId] = playerInfo;
-
-                                if (user.IsConnected)
-                                {
-                                    _steamIdOnlinePlayerInfoCache[steamId] = playerInfo;
-                                    _userIndexSteamIdCache[user.Index] = steamId;
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Core.Log.LogWarning($"[PlayerService] PlayerServiceRoutine() - {ex}");
-                    }
-                }
-            );
-
-            yield return _delay;
-        }
     }
     static void BuildPlayerInfoCache()
     {
@@ -158,8 +108,6 @@ internal class PlayerService
         {
             userEntities.Dispose();
         }
-
-        _rebuildCache = false;
     }
     public static void HandleConnection(ulong steamId, PlayerInfo playerInfo)
     {
