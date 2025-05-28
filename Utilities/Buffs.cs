@@ -350,9 +350,10 @@ internal static class Buffs
     }
 
     static PrefabGUID _buffArenaActive = PrefabGUIDs.Buff_Arena_Active;
+    static PrefabGUID _buffDuelActive = PrefabGUIDs.Buff_Duel_Active;
     public static bool IsDueling(this Entity playerCharacter)
     {
-        if (playerCharacter.HasBuff(_buffArenaActive))
+        if (playerCharacter.HasBuff(_buffArenaActive) || playerCharacter.HasBuff(_buffDuelActive))
         {
             return true;
         }

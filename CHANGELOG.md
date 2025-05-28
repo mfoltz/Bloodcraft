@@ -1,3 +1,6 @@
+`1.9.11`
+- previous fix only worked for arenas, added check for the duel buff equivalent (didn't realize there was one buff for each)
+
 `1.9.10`
 - corrected base profession experience for woodcutting/mining
 - anti-griefing measures skipped for players in active duels/arenas
