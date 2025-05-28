@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -35,7 +36,7 @@ internal static class CreateGameplayEventOnTickSpawnSystemPatch
                 {
                     Entity buffTarget = buff.Target;
 
-                    if (buffTarget.IsPlayer())
+                    if (buffTarget.IsPlayer() && !buffTarget.IsDueling())
                     {
                         if (_gameMode.Equals(GameModeType.PvE)) DestroyUtility.Destroy(EntityManager, entity);
                         else if (_gameMode.Equals(GameModeType.PvP) && buffTarget.HasBuff(_pvpProtectedBuff)) DestroyUtility.Destroy(EntityManager, entity);

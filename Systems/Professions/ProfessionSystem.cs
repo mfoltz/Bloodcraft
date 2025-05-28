@@ -126,9 +126,16 @@ internal static class ProfessionSystem
 
         if (handler != null)
         {
-            if (handler.GetProfessionName().Contains("Woodcutting"))
+            string professionName = handler.GetProfessionName();
+
+            if (professionName.Contains("Woodcutting"))
             {
                 professionValue *= ProfessionMappings.GetWoodcuttingModifier(itemPrefabGuid);
+                professionValue *= 10;
+            }
+            else if (professionName.Contains("Mining"))
+            {
+                professionValue *= 10;
             }
 
             float delay = SCT_DELAY;

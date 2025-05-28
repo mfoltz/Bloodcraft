@@ -1,3 +1,7 @@
+`1.9.10`
+- corrected base profession experience for woodcutting/mining
+- anti-griefing measures skipped for players in active duels/arenas
+
 `1.9.9`
 - small hotfix preventing initialization on server hosts, was trying out unicode characters in console oops >_>_
 

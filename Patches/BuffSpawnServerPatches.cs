@@ -339,7 +339,7 @@ internal static class BuffSystemSpawnPatches
                         }
                         break;
                     default:
-                        if (isPlayerTarget)
+                        if (isPlayerTarget && !buffTarget.IsDueling())
                         {
                             Entity owner = buffEntity.GetOwner();
                             bool isPlayerOwner = owner.IsPlayer();

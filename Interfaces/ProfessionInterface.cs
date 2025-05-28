@@ -45,7 +45,7 @@ internal static class ProfessionFactory
             return new WoodcuttingProfession();
         else if (itemTypeName.Contains("gem") || itemTypeName.Contains("jewel") || itemTypeName.Contains("magicsource"))
             return new EnchantingProfession();
-        else if(itemTypeName.Contains("mineral") || itemTypeName.Contains("stone") || itemTypeName.Contains("bloodcrystal") || itemTypeName.Contains("techscrap"))
+        else if (itemTypeName.Contains("mineral") || itemTypeName.Contains("stone") || itemTypeName.Contains("bloodcrystal") || itemTypeName.Contains("techscrap") || itemTypeName.Contains("emery"))
             return new MiningProfession();
         else if(itemTypeName.Contains("weapon") || itemTypeName.Contains("onyxtear"))
             return new BlacksmithingProfession();

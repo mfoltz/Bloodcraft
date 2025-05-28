@@ -587,7 +587,7 @@ internal static class VExtensions // probably need to organize this soonTM and a
     }
     public static NativeAccessor<T> ToComponentDataArrayAccessor<T>(this EntityQuery entityQuery, Allocator allocator = Allocator.Temp) where T : unmanaged
     {
-        NativeArray<T> components = entityQuery.ToComponentDataArray<T>(Allocator.Temp);
+        NativeArray<T> components = entityQuery.ToComponentDataArray<T>(allocator);
         return new(components);
     }
 }

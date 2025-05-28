@@ -348,6 +348,17 @@ internal static class Buffs
             entities.Dispose();
         }
     }
+
+    static PrefabGUID _buffArenaActive = PrefabGUIDs.Buff_Arena_Active;
+    public static bool IsDueling(this Entity playerCharacter)
+    {
+        if (playerCharacter.HasBuff(_buffArenaActive))
+        {
+            return true;
+        }
+
+        return false;
+    }
     public static void RefreshStats(Entity entity)
     {
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
