@@ -4,6 +4,7 @@ using Bloodcraft.Services;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
+using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
@@ -966,11 +967,11 @@ internal static class Classes
                 // Core.Log.LogWarning($"[GenerateAbilityJewelMap] Jewel map generated - {_abilityJewelMap.Count}");
             }
         );
-
+        
         // SpellSchoolAbility.TryGetSchoolAbility
         // SpellSchoolMappingSystem
         // Core.SystemService.JewelSpawnSystem.GetRandomJewelAbilityFromSchool
-        // JewelSpawnSystem.
+        // JewelSpawnSystem, JewelRegisterSystem, SpellModSyncSystem_Server, SpellModTierCollectionSystem, SpellModCollectionSystem
     }
     public static bool TryParseClassName(string className, out PlayerClass parsedClassType)
     {

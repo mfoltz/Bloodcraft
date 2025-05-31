@@ -88,6 +88,29 @@ internal static class EntityQueries
             return array[index];
         }
     }
+
+    /*
+    public class ComponentHandle<T> : ComponentHandleBase where T : unmanaged
+    {
+        ComponentTypeHandle<T> _cachedHandle;
+        bool _isValid;
+        public void ResolveHandle()
+        {
+            _cachedHandle = EntityManager.GetComponentTypeHandle<T>(true);
+            _isValid = true;
+        }
+        public override object GetValueAt(ArchetypeChunk chunk, int index)
+        {
+            if (!_isValid) ResolveHandle();
+
+            if (!chunk.Has(ref _cachedHandle))
+                return default(T);
+
+            return chunk.GetNativeArray(ref _cachedHandle)[index];
+        }
+        public override TypeIndex TypeIndex => new ComponentType(Il2CppType.Of<T>()).TypeIndex;
+    }
+    */
     public readonly struct QueryDesc(EntityQuery entityQuery, ComponentType[] types, int[] indices)
     {
         public EntityQuery EntityQuery { get; } = entityQuery;

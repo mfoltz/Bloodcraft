@@ -129,7 +129,7 @@ internal static class Core
 
         if (ConfigService.ProfessionSystem)
         {
-            Misc.GetStatModPrefabs(); // modifier stuff, although... fusion forge, hm
+            // Misc.GetStatModPrefabs(); // modifier stuff, although... fusion forge, hm
         }
 
         GetWeaponTypes();

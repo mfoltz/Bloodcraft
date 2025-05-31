@@ -24,6 +24,8 @@ internal static class BloodSystem
     static readonly int _legacyStatChoices = ConfigService.LegacyStatChoices;
     static readonly float _vBloodLegacyMultiplier = ConfigService.VBloodLegacyMultiplier;
     static readonly float _unitLegacyMultiplier = ConfigService.UnitLegacyMultiplier;
+    static readonly float _prestigeRatesReducer = ConfigService.PrestigeRatesReducer;
+    static readonly float _prestigeRateMultiplier = ConfigService.PrestigeRateMultiplier;
 
     static readonly float3 _red = new(0.9f, 0f, 0.1f);
     static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
@@ -206,6 +208,7 @@ internal static class BloodSystem
         int unitLevel = target.GetUnitLevel();
 
         float bloodValue;
+        float changeFactor = 1f;
 
         if (target.Has<VBloodConsumeSource>())
         {
@@ -233,6 +236,21 @@ internal static class BloodSystem
         float qualityMultiplier = 1f + (bloodQuality / 100f);
         qualityMultiplier = Mathf.Min(qualityMultiplier, 2f); // Cap the multiplier at 2
         bloodValue *= qualityMultiplier;
+
+        if (steamId.TryGetPlayerPrestiges(out var prestiges))
+        {
+            if (prestiges.TryGetValue(BloodPrestigeTypes[bloodType], out var bloodLegacy))
+            {
+                changeFactor -= (_prestigeRatesReducer * bloodLegacy);
+            }
+
+            if (prestiges.TryGetValue(PrestigeType.Experience, out var xpPrestige))
+            {
+                changeFactor += (_prestigeRateMultiplier * xpPrestige);
+            }
+        }
+
+        bloodValue *= changeFactor;
 
         IBloodLegacy handler = BloodLegacyFactory.GetBloodHandler(bloodType);
         if (handler != null)

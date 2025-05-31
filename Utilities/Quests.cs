@@ -1,10 +1,8 @@
 ﻿using Bloodcraft.Resources;
 using Bloodcraft.Services;
-using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Quests.QuestSystem;
 

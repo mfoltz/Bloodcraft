@@ -1,3 +1,7 @@
+`1.9.12`
+- prestige properly affects blood legacy rates again
+- new spells added to primal jewels from gemcutter
+
 `1.9.11`
 - previous fix only worked for arenas, added check for the duel buff equivalent (didn't realize there was one buff for each)
 

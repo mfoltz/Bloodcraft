@@ -4,6 +4,7 @@ using ProjectM.CastleBuilding;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using ProjectM.Shared.Systems;
 using ProjectM.Tiles;
 using Unity.Entities;
@@ -99,6 +100,9 @@ internal class SystemService(World world)
 
     JewelSpawnSystem _jewelSpawnSystem;
     public JewelSpawnSystem JewelSpawnSystem => _jewelSpawnSystem ??= GetSystem<JewelSpawnSystem>();
+
+    SpellModCollectionSystem _spellModCollectionSystem;
+    public SpellModCollectionSystem SpellModCollectionSystem => _spellModCollectionSystem ??= GetSystem<SpellModCollectionSystem>();
 
     TraderPurchaseSystem _traderPurchaseSystem;
     public TraderPurchaseSystem TraderPurchaseSystem => _traderPurchaseSystem ??= GetSystem<TraderPurchaseSystem>();

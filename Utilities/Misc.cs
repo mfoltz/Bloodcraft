@@ -1,5 +1,4 @@
-﻿using Bloodcraft.Patches;
-using Bloodcraft.Resources;
+﻿using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Network;
@@ -454,18 +453,6 @@ internal static class Misc
             string message = "Something fell out of your bag!";
             InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, itemType, amount, new Entity()); // does this create multiple drops to account for excessive stacks? noting for later
             LocalizationService.HandleServerReply(EntityManager, user, message);
-        }
-    }
-    public static void GetStatModPrefabs()
-    {
-        var namesToPrefabGuids = SystemService.PrefabCollectionSystem.SpawnableNameToPrefabGuidDictionary;
-
-        foreach (var kvp in namesToPrefabGuids)
-        {
-            if (kvp.Key.StartsWith(STAT_MOD))
-            {
-                JewelSpawnSystemPatch.StatMods.TryAdd(kvp.Key, kvp.Value);
-            }
         }
     }
     public static bool RollForChance(float chance)

@@ -50,6 +50,8 @@ internal class PlayerService
     }
     public PlayerService()
     {
+        // Core.Log.LogWarning("[PlayerService] Building PlayerInfo cache...");
+
         _userQueryDesc = EntityManager.CreateQueryDesc(_userAllComponents, options: EntityQueryOptions.IncludeDisabled);
         _onlineUserQueryDesc = EntityManager.CreateQueryDesc(_userAllComponents);
 
@@ -64,6 +66,7 @@ internal class PlayerService
         {
             foreach (Entity userEntity in userEntities)
             {
+                // Core.Log.LogWarning($"[PlayerService] Processing UserEntity...");
                 if (!userEntity.Exists()) continue;
 
                 User user = userEntity.GetUser();
