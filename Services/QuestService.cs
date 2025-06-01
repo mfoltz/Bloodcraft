@@ -183,8 +183,6 @@ internal class QuestService
                                 PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
                                 string prefabName = prefabGuid.GetPrefabName();
 
-                                // Core.Log.LogWarning($"[QuestService] QuestServiceRoutine() - {prefabName}");
-
                                 if (_filteredTargetUnits.Any(unit => prefabName.Contains(unit, StringComparison.OrdinalIgnoreCase)))
                                     continue;
 
@@ -245,26 +243,8 @@ internal class QuestService
                 yield return null;
             }
 
-            // Core.Log.LogWarning($"[QuestService] TargetCache - {TargetCache.Count}");
-
             _lastUpdate = DateTime.UtcNow;
             yield return _routineDelay;
-
-            /*
-            if (_hasReset)
-            {
-                yield return _routineDelay;
-            }
-            else if (_shouldReset)
-            {
-                _hasReset = true;
-                yield return _startDelay;
-            }
-            else
-            {
-                yield return _routineDelay;
-            }
-            */
         }
     }
     static void InitializeCraftables()
