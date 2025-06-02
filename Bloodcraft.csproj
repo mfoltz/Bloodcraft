@@ -49,7 +49,7 @@
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.733" IncludeAssets="compile" />
 		<PackageReference Include="VRising.Unhollowed.Client" Version="1.1.8.9179701" />
-		<PackageReference Include="VRising.VampireCommandFramework" Version="0.10.2" />
+		<PackageReference Include="VRising.VampireCommandFramework" Version="0.10.3" />
 	</ItemGroup>
 	
 	<Target Name="BuildToServer" AfterTargets="Build">
