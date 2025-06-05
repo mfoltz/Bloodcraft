@@ -20,7 +20,6 @@ internal static class VExtensions // probably need to organize this soonTM and a
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
-    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     const string EMPTY_KEY = "LocalizationKey.Empty";
 
@@ -470,17 +469,6 @@ internal static class VExtensions // probably need to organize this soonTM and a
 
         return false;
     }
-
-    /*
-    public static void TryDestroyImmediate(this Entity entity)
-    {
-        if (entity.Exists()) EntityManager.DestroyEntity(entity);
-    }
-    public static void Destroy(this Entity entity)
-    {
-        if (entity.Exists()) DestroyUtility.Destroy(EntityManager, entity);
-    }
-    */
     public static void Destroy(this Entity entity, bool immediate = false)
     {
         if (!entity.Exists()) return;

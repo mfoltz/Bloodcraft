@@ -212,16 +212,6 @@ internal static class DataService
         {
             Entity playerCharacter = playerInfo.CharEntity;
 
-            /*
-            if (playerCharacter.Has<Energy>())
-            {
-                Energy energy = playerCharacter.Read<Energy>();
-                index = (int)energy.RegainEnergyChance._Value;
-
-                return true;
-            }
-            */
-
             if (playerCharacter.Has<BagHolder>())
             {
                 BagHolder bagHolder = playerCharacter.Read<BagHolder>();

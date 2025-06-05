@@ -27,7 +27,6 @@ internal static class ServerBootstrapSystemPatches
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;
 
     static readonly WaitForSeconds _delay = new(1f);
     static readonly WaitForSeconds _newCharacterDelay = new(2.5f);

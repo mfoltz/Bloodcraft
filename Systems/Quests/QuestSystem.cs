@@ -180,35 +180,12 @@ internal static class QuestSystem
             int level = unitLevel.Level._Value;
 
             bool isWithinStandardRange = Math.Abs(level - playerLevel) <= 10;
-
-            // For high-level players, widen range to anything down to level 80
             bool isWithinHighLevelRange = playerLevel >= DEFAULT_MAX_LEVEL && level >= 80;
 
-            // Block over-leveled VBloods for sub-90 players
-            if (isVBlood && level > playerLevel && playerLevel < DEFAULT_MAX_LEVEL)
-                continue;
-
-            if (isWithinStandardRange || isWithinHighLevelRange)
+            if (isVBlood && level > playerLevel && playerLevel < DEFAULT_MAX_LEVEL) continue;
+            else if (isWithinStandardRange || isWithinHighLevelRange) 
                 yield return prefabGuid;
         }
-
-        /*
-        foreach (PrefabGUID prefabGuid in QuestService.TargetCache.Keys)
-        {
-            if (prefabMap.TryGetValue(prefabGuid, out Entity targetEntity) && targetEntity.TryGetComponent(out UnitLevel unitLevel))
-            {
-                bool isVBlood = targetEntity.IsVBlood();
-                int level = unitLevel.Level._Value;
-
-                if (isVBlood && level > playerLevel) continue;
-
-                bool isHighLevel = (playerLevel >= DEFAULT_MAX_LEVEL && level > 80);
-                bool isWithinRange = (Math.Abs(level - playerLevel) <= 10);
-
-                if (isHighLevel || isWithinRange) yield return prefabGuid;
-            }
-        }
-        */
     }
     static IEnumerable<PrefabGUID> GetCraftPrefabsForLevelEnumerable(int playerLevel)
     {
@@ -227,11 +204,13 @@ internal static class QuestSystem
 
                 if (itemData.ItemType == ItemType.Equippable)
                 {
-                    if (IsWithinLevelRange(tier, playerLevel)) yield return prefabGuid;
+                    if (IsWithinLevelRange(tier, playerLevel)) 
+                        yield return prefabGuid;
                 }
                 else if (itemData.ItemType == ItemType.Consumable)
                 {
-                    if (IsConsumableWithinLevelRange(prefabGuid, playerLevel)) yield return prefabGuid;
+                    if (IsConsumableWithinLevelRange(prefabGuid, playerLevel)) 
+                        yield return prefabGuid;
                 }
             }
         }

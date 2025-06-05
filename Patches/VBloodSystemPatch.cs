@@ -1,16 +1,12 @@
-﻿using Bloodcraft.Resources;
-using Bloodcraft.Services;
+﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
-using Bloodcraft.Utilities;
 using HarmonyLib;
-using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
-using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 

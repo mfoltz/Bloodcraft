@@ -57,9 +57,8 @@ internal class QuestService
 
     static QueryDesc _targetUnitQueryDesc;
     static QueryDesc _harvestableResourceQueryDesc;
-
-    static readonly ConcurrentDictionary<PrefabGUID, HashSet<Entity>> _targetCache = [];
     public static IReadOnlyDictionary<PrefabGUID, HashSet<Entity>> TargetCache => _targetCache;
+    static readonly ConcurrentDictionary<PrefabGUID, HashSet<Entity>> _targetCache = [];
 
     public static readonly List<PrefabGUID> ShardBearers = 
     [
