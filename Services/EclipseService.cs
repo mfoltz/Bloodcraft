@@ -226,7 +226,7 @@ internal class EclipseService
                                 else
                                 {
                                     Core.Log.LogWarning($"Unsupported client version in EclipseService! {steamId}:Eclipse{version}, unregistering user to avoid console spam...");
-                                    UnregisterUser(steamId);
+                                    TryUnregisterUser(steamId);
                                     break;
                                 }
                         }
@@ -244,7 +244,7 @@ internal class EclipseService
         }
     }
     static bool IsVersion1_3(string version) => version.StartsWith("1.3");
-    public static void UnregisterUser(ulong steamId)
+    public static void TryUnregisterUser(ulong steamId)
     {
         _registeredUsersAndClientVersions.TryRemove(steamId, out var _);
     }

@@ -9,8 +9,11 @@ using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
+using System.Collections;
+using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 
 namespace Bloodcraft.Patches;
 
@@ -21,11 +24,13 @@ internal static class ReactToInventoryChangedSystemPatch
     static SystemService SystemService => Core.SystemService;
     static JewelSpawnSystem JewelSpawnSystem => SystemService.JewelSpawnSystem;
 
-    static readonly Random _random = new();
+    static readonly System.Random _random = new();
 
     static readonly bool _professions = ConfigService.ProfessionSystem;
     static readonly bool _quests = ConfigService.QuestSystem;
     static readonly bool _extraRecipes = ConfigService.ExtraRecipes;
+
+    static readonly WaitForSeconds _delay = new(PRIMAL_DELAY);
 
     const int MAX_PROFESSION_LEVEL = 100;
     const float BASE_PROFESSION_XP = 50f;
@@ -38,6 +43,7 @@ internal static class ReactToInventoryChangedSystemPatch
     const float ONYX_TEAR_FACTOR = 8f;
 
     const float SCT_DELAY = 0.75f;
+    const float PRIMAL_DELAY = 0.5f;
 
     static readonly PrefabGUID _itemJewelTemplate = new(1075994038);
     static readonly PrefabGUID _advancedGrinder = new(-178579946);
@@ -216,8 +222,27 @@ internal static class ReactToInventoryChangedSystemPatch
             inventoryChangedEvents.Dispose();
         }
     }
+
+    static readonly ConcurrentDictionary<NetworkId, DateTime> _stationCooldowns = [];
+    const float PRIMAL_COOLDOWN = 0.25f;
     static void SpawnPrimalJewel(Entity station, Entity inventory)
     {
+        if (!station.TryGetComponent(out NetworkId networkId))
+            return;
+
+        DateTime now = DateTime.UtcNow;
+
+        if (_stationCooldowns.TryGetValue(networkId, out DateTime lastUse) && (now - lastUse).TotalSeconds < PRIMAL_COOLDOWN)
+        {
+            // Core.Log.LogWarning($"SpawnPrimalJewel - {networkId} is on cooldown, last use was at {lastUse}, now is {now}");
+            return;
+        }
+        else
+        {
+            _stationCooldowns[networkId] = now;
+            ResetStation(networkId).Start();
+        }
+
         PrefabGUID perfectGem = PrefabGUID.Empty;
         PrefabGUID primalJewel = PrefabGUID.Empty;
 
@@ -227,7 +252,6 @@ internal static class ReactToInventoryChangedSystemPatch
 
             if (amount > 0)
             {
-                // Core.Log.LogWarning($"Found {amount} {item.GetPrefabName()} in gemcutter...");
                 perfectGem = item;
                 break;
             }
@@ -235,17 +259,12 @@ internal static class ReactToInventoryChangedSystemPatch
 
         if (_perfectGemPrimals.TryGetValue(perfectGem, out PrefabGUID primalJewelTemplate) && ServerGameManager.TryRemoveInventoryItem(station, perfectGem, 1))
         {
-            // Core.Log.LogWarning($"Removed {perfectGem.GetPrefabName()} from gemcutter, set primal jewel template - {primalJewelTemplate.GetPrefabName()}");
             primalJewel = primalJewelTemplate;
         }
 
         if (ServerGameManager.TryRemoveInventoryItem(inventory, _itemJewelTemplate, 1))
         {
             if (!primalJewel.HasValue()) primalJewel = _jewelTemplates.ElementAt(_random.Next(_jewelTemplates.Count));
-
-            // PrefabGUID spellSchoolPrefabGuid = JewelSpawnSystemPatch.JewelSpellSchool.TryGetValue(primalJewel, out PrefabGUID spellSchool) ? spellSchool : PrefabGUID.Empty;
-            // var jewelAbilities = JewelSpawnSystemPatch.JewelToSpellsMapping[primalJewel];
-            // PrefabGUID abilityPrefabGuid = jewelAbilities.ElementAt(_random.Next(jewelAbilities.Count));
 
             AddItemResponse addResponse = ServerGameManager.TryAddInventoryItem(inventory, primalJewel, 1);
             if (addResponse.Success && addResponse.NewEntity.TryGetComponent(out JewelInstance jewelInstance))
@@ -260,20 +279,13 @@ internal static class ReactToInventoryChangedSystemPatch
                 };
 
                 JewelSpawnSystem.InitializeSpawnedJewel(uninitializedJewel, false); // no idea why the tooltip only shows up right away when this is outside the try block compared to only after closing-opening gem cutter inventory if using try block but moving on x_x
-
-                /*
-                try
-                {
-                    // Unity.Mathematics.Random random = new();
-                    // JewelSpawnSystem.InitializeJewelOnSpawn(jewelEntity, ref random);
-                    // JewelSpawnSystem.InitializeSpawnedJewel(uninitializedJewel, false);
-                }
-                catch
-                {
-                    // Core.Log.LogInfo($"InitializeSpawnedJewel() try-catch - {ex}");
-                }
-                */
             }
         }
+    }
+    static IEnumerator ResetStation(NetworkId networkId)
+    {
+        yield return _delay;
+
+        _stationCooldowns.TryRemove(networkId, out _);
     }
 }

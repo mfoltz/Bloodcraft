@@ -3,7 +3,6 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM.Network;
-using System.Collections;
 using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
@@ -39,9 +38,6 @@ internal class PlayerService
 
     static readonly ConcurrentDictionary<ulong, PlayerInfo> _steamIdOnlinePlayerInfoCache = [];
     public static IReadOnlyDictionary<ulong, PlayerInfo> SteamIdOnlinePlayerInfoCache => _steamIdOnlinePlayerInfoCache;
-
-    static readonly ConcurrentDictionary<int, ulong> _userIndexSteamIdCache = [];
-    static IReadOnlyDictionary<int, ulong> UserIndexSteamIdCache => _userIndexSteamIdCache;
     public struct PlayerInfo(Entity userEntity = default, Entity charEntity = default, User user = default)
     {
         public User User { get; set; } = user;
@@ -80,7 +76,6 @@ internal class PlayerService
                 if (user.IsConnected)
                 {
                     _steamIdOnlinePlayerInfoCache[steamId] = new PlayerInfo(userEntity, character, user);
-                    _userIndexSteamIdCache[user.Index] = steamId;
                 }
 
                 if (_leveling)
@@ -118,25 +113,22 @@ internal class PlayerService
 
         _steamIdOnlinePlayerInfoCache[steamId] = playerInfo;
         _steamIdPlayerInfoCache[steamId] = playerInfo;
-        _userIndexSteamIdCache[playerInfo.User.Index] = steamId;
 
         // if (_eclipse && EclipseService.PendingRegistration.TryGetValue(steamId, out string version)) EclipseService.HandleRegistration(playerInfo, steamId, version);
     }
-    public static void HandleDisconnection(ulong steamId, int userIndex)
+    public static void HandleDisconnection(ulong steamId)
     {
         // Core.Log.LogWarning($"[PlayerService.HandleDisconnection] {steamId}");
-
         _steamIdOnlinePlayerInfoCache.TryRemove(steamId, out _);
-        _userIndexSteamIdCache.TryRemove(userIndex, out _);
 
-        if (_eclipse) EclipseService.TryRemovePreRegistration(steamId);
+        if (_eclipse)
+        {
+            EclipseService.TryRemovePreRegistration(steamId);
+            EclipseService.TryUnregisterUser(steamId);
+        }
     }
     public static PlayerInfo GetPlayerInfo(string playerName)
     {
         return SteamIdPlayerInfoCache.FirstOrDefault(kvp => kvp.Value.User.CharacterName.Value.ToLower() == playerName.ToLower()).Value;
-    }
-    public static ulong? GetSteamId(int userIndex)
-    {
-        return UserIndexSteamIdCache.TryGetValue(userIndex, out ulong steamId) ? steamId : null;
     }
 }
