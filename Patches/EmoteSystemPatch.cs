@@ -1,5 +1,4 @@
-﻿using Bloodcraft.Interfaces;
-using Bloodcraft.Resources;
+﻿using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using HarmonyLib;
@@ -9,10 +8,10 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarEquipmentManager;
 using static Bloodcraft.Utilities.Familiars;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Shapeshifts;
-using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarEquipmentManager;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
@@ -249,13 +248,14 @@ internal static class EmoteSystemPatch
 
         Entity familiar = activeFamiliarData.Familiar;
         Entity servant = activeFamiliarData.Servant;
+        Entity coffin = GetServantCoffin(servant);
 
         if (activeFamiliarData.Dismissed)
         {
             LocalizationService.HandleServerReply(EntityManager, user, "Can't interact with familiar when dismissed!");
             return;
         }
-        else if (familiar.Exists() && servant.Exists())
+        else if (familiar.Exists() && servant.Exists() && coffin.Exists())
         {
             if (familiar.HasBuff(_vanishBuff))
             {
@@ -277,6 +277,7 @@ internal static class EmoteSystemPatch
                     interactable.Disabled = true;
                 });
 
+                coffin.Add<Disabled>();
                 servant.Add<Disabled>();
             }
             else
@@ -284,6 +285,7 @@ internal static class EmoteSystemPatch
                 DisableAggro(familiar);
                 familiar.TryApplyBuffInteractMode(_interactModeBuff);
                 
+                coffin.Remove<Disabled>();
                 servant.Remove<Disabled>();
 
                 servant.With((ref Interactable interactable) =>

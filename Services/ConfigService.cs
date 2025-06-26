@@ -179,6 +179,9 @@ internal static class ConfigService
     static readonly Lazy<bool> _unarmedSlots = new(() => GetConfigValue<bool>("UnarmedSlots"));
     public static bool UnarmedSlots => _unarmedSlots.Value;
 
+    static readonly Lazy<bool> _duality = new(() => GetConfigValue<bool>("Duality"));
+    public static bool Duality => _duality.Value;
+
     static readonly Lazy<bool> _shiftSlot = new(() => GetConfigValue<bool>("ShiftSlot"));
     public static bool ShiftSlot => _shiftSlot.Value;
 
@@ -508,7 +511,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
             new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01/t02 effects at the same time)."),
             new ConfigEntryDefinition("General", "BearFormDash", false, "Enable or disable bear form dash."),
-            new ConfigEntryDefinition("General", "BleedingEdge", "Slashers, Crossbow, Pistols, TwinBlades", "Enable various weapon-specific changes; some are more experimental than others, see README for details."),
+            new ConfigEntryDefinition("General", "BleedingEdge", "", "Enable various weapon-specific changes; some are more experimental than others, see README for details. (Slashers, Crossbow, Pistols, TwinBlades, Daggers)"),
             new ConfigEntryDefinition("General", "TwilightArsenal", false, "Enable or disable experimental ability replacements on shadow weapons (currently just axes but like cosplaying as Thor with two mjolnirs)."),
             new ConfigEntryDefinition("General", "PrimalJewelCost", -77477508, "If extra recipes is enabled with a valid item prefab here (default demon fragments), it can be refined via gemcutter for random enhanced tier 4 jewels (better rolls, more modifiers)."),
             
@@ -561,6 +564,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Expertise", "ExpertiseSystem", false, "Enable or disable the expertise system."),
             new ConfigEntryDefinition("Expertise", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise."),
             new ConfigEntryDefinition("Expertise", "UnarmedSlots", false, "Enable or disable the ability to use extra unarmed spell slots."),
+            new ConfigEntryDefinition("Expertise", "Duality", true, "True for both unarmed slots, false for one unarmed slot. Does nothing without UnarmedSlots enabled."),
             new ConfigEntryDefinition("Expertise", "ShiftSlot", false, "Enable or disable using class spell on shift."),
             new ConfigEntryDefinition("Expertise", "MaxExpertiseLevel", 100, "The maximum level a player can reach in weapon expertise."),
             new ConfigEntryDefinition("Expertise", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units."),

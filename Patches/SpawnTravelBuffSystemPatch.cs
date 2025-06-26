@@ -9,6 +9,7 @@ using Unity.Entities;
 
 namespace Bloodcraft.Patches;
 
+/*
 [HarmonyPatch]
 internal static class SpawnTravelBuffSystemPatch
 {
@@ -31,10 +32,13 @@ internal static class SpawnTravelBuffSystemPatch
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
             {
+                Core.Log.LogWarning($"[Spawn_TravelBuffSystem]: {entity.GetPrefabGuid().GetPrefabName()}");
+
                 if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
                 else if (prefabGUID.Equals(_batLandingTravel) && entityOwner.Owner.TryGetPlayer(out Entity player))
                 {
@@ -45,44 +49,13 @@ internal static class SpawnTravelBuffSystemPatch
                     {
                         Familiars.CallFamiliar(player, familiar, user, steamId);
                     }
-                }
 
-                /*
-                else if (ConfigService.FamiliarSystem && entity.TryGetComponent(out Buff buff) && buff.Target.IsPlayer())
+                    Core.Log.LogWarning($"[Spawn_TravelBuffSystem]: {prefabGUID.GetPrefabName()}");
+                }
+                else
                 {
-                    Entity buffTarget = buff.Target;
-                    Entity owner = entityOwner.Owner;
-
-                    if (GameMode.Equals(GameModeType.PvE))
-                    {
-                        if (owner.IsPlayer() && !owner.Equals(buffTarget))
-                        {
-                            if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
-                        }
-                        else if (ConfigService.FamiliarSystem)
-                        {
-                            if (owner.IsFollowingPlayer() || owner.GetOwner().IsFollowingPlayer())
-                            {
-                                if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
-                            }
-                        }
-                    }
-                    else if (GameMode.Equals(GameModeType.PvP) && buffTarget.HasBuff(PvPProtectedBuff))
-                    {
-                        if (owner.IsPlayer() && !owner.Equals(buffTarget))
-                        {
-                            if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
-                        }
-                        else if (ConfigService.FamiliarSystem)
-                        {
-                            if (owner.IsFollowingPlayer() || owner.GetOwner().IsFollowingPlayer())
-                            {
-                                if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
-                            }
-                        }
-                    }
+                    Core.Log.LogWarning($"[Spawn_TravelBuffSystem]: {prefabGUID.GetPrefabName()}");
                 }
-                */
             }
         }
         finally
@@ -91,3 +64,4 @@ internal static class SpawnTravelBuffSystemPatch
         }
     }
 }
+*/

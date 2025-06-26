@@ -1,6 +1,8 @@
 ﻿using Bloodcraft.Resources;
 using Bloodcraft.Services;
+using Bloodcraft.Systems.Quests;
 using Stunlock.Core;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using VampireCommandFramework;
@@ -28,6 +30,8 @@ internal static class Quests
         { TargetType.Gather, "Resource" },
         { TargetType.Fish, "Fishing" }
     };
+
+    /*
     public static void QuestTrackReply(ChatCommandContext ctx, Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, QuestType questType)
     {
         Entity character = ctx.Event.SenderCharacterEntity;
@@ -57,20 +61,6 @@ internal static class Quests
                     .Select(x => x.Entity)
                     .FirstOrDefault();
 
-                /*
-                Entity closest = entities
-                    .Select(entity => new
-                    {
-                        Entity = entity,
-                        Distance = math.distance(userPosition, entity.GetPosition())
-                    })
-                    .Where(x => EntityManager.Exists(x.Entity) && !x.Entity.HasBuff(_imprisonedBuff)
-                        && !x.Entity.Has<BlockFeedBuff>() && x.Distance <= MAX_DISTANCE)
-                    .OrderBy(x => x.Distance)
-                    .Select(x => x.Entity)
-                    .FirstOrDefault();
-                */
-
                 if (!closest.Exists())
                 {
                     LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn!");
@@ -95,6 +85,78 @@ internal static class Quests
             {
                 LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn!");
             }
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Tracking is only available for incomplete kill quests.");
+        }
+    }
+    */
+
+    public static void QuestTrackReply(ChatCommandContext ctx, Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, QuestType questType)
+    {
+        Entity character = ctx.Event.SenderCharacterEntity;
+        ulong steamId = ctx.Event.User.PlatformId;
+
+        if (questData.TryGetValue(questType, out var questObjective) &&
+            questObjective.Objective.Goal.Equals(TargetType.Kill) &&
+            !questObjective.Objective.Complete)
+        {
+            var targetCache = TargetTrackingSystem.TargetCache;
+
+            if (!targetCache.IsCreated || !targetCache.ContainsKey(questObjective.Objective.Target))
+            {
+                LocalizationService.HandleReply(ctx, $"Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {QuestTypeColor[questType]}.");
+                return;
+            }
+
+            float3 userPosition = character.GetPosition();
+
+            bool found = targetCache.TryGetFirstValue(questObjective.Objective.Target, 
+                out Entity targetEntity, 
+                out NativeParallelMultiHashMapIterator<PrefabGUID> iterator);
+
+            Entity closest = Entity.Null;
+            float closestDist = float.MaxValue;
+
+            while (found)
+            {
+                if (targetEntity.Exists()
+                    && !targetEntity.HasBuff(_imprisonedBuff)
+                    && !targetEntity.IsFamiliar())
+                {
+                    float dist = math.distance(userPosition, targetEntity.GetPosition());
+
+                    if (dist <= MAX_DISTANCE && dist < closestDist)
+                    {
+                        closest = targetEntity;
+                        closestDist = dist;
+                    }
+                }
+
+                found = targetCache.TryGetNextValue(out targetEntity, ref iterator);
+            }
+
+            if (!closest.Exists())
+            {
+                LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn!");
+                return;
+            }
+
+            if (closest.IsVBloodOrGateBoss())
+            {
+                LocalizationService.HandleReply(ctx, "Use the VBlood menu to track bosses!");
+                return;
+            }
+
+            float3 targetPosition = closest.GetPosition();
+            float distance = math.distance(userPosition, targetPosition);
+            float3 direction = math.normalize(targetPosition - userPosition);
+            string cardinalDirection = $"<color=yellow>{GetCardinalDirection(direction)}</color>";
+            double seconds = (DateTime.UtcNow - QuestService._lastUpdate).TotalSeconds;
+
+            // LocalizationService.HandleReply(ctx, $"Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection} <color=#F88380>{(int)seconds}</color>s ago.");
+            LocalizationService.HandleReply(ctx, $"Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection}!");
         }
         else
         {

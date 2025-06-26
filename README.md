@@ -393,8 +393,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Enable or disable potion stacking (can have t01/t02 effects at the same time).
 - **Bear Form Dash**: `BearFormDash` (bool, default: False)
   Enable or disable bear form dash.
-- **Bleeding Edge**: `BleedingEdge` (string, default: "Slashers, Crossbow, Pistols, TwinBlades")
-  Enable various weapon-specific changes; some are more experimental than others, see README for details.
+- **Bleeding Edge**: `BleedingEdge` (string, default: "")
+  Enable various weapon-specific changes; some are more experimental than others, see README for details. (Slashers, Crossbow, Pistols, TwinBlades, Daggers)
 - **Twilight Arsenal**: `TwilightArsenal` (bool, default: False)
   Enable or disable experimental ability replacements on shadow weapons (currently just axes but like cosplaying as Thor with two mjolnirs).
 - **Primal Jewel Cost**: `PrimalJewelCost` (int, default: -77477508)
@@ -499,6 +499,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   The maximum number of prestiges a player can reach in expertise.
 - **Unarmed Slots**: `UnarmedSlots` (bool, default: False)
   Enable or disable the ability to use extra unarmed spell slots.
+- **Duality**: `Duality` (bool, default: True)
+  True for both unarmed slots, false for one unarmed slot. Does nothing without UnarmedSlots enabled.
 - **Shift Slot**: `ShiftSlot` (bool, default: False)
   Enable or disable using class spell on shift.
 - **Max Expertise Level**: `MaxExpertiseLevel` (int, default: 100)
@@ -747,6 +749,9 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 ### Pistols
 - 25% increased primary attack projectile range.
+
+### Daggers
+- Stacks refresh even after unequipping daggers.
 
 ## Recommended
 

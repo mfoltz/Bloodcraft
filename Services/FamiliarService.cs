@@ -60,15 +60,26 @@ internal class FamiliarService
             foreach (Entity entity in entities)
             {
                 Entity servant = FindFamiliarServant(entity);
+                Entity coffin = GetServantCoffin(servant);
 
                 if (servant.Exists())
                 {
                     FamiliarBindingSystem.RemoveDropTable(servant);
-                    StatChangeUtility.KillOrDestroyEntity(EntityManager, servant, Entity.Null, Entity.Null, Core.ServerTime, StatChangeReason.Default, true);
+                    servant.Remove<Disabled>();
+                    servant.Destroy();
+                    // StatChangeUtility.KillOrDestroyEntity(EntityManager, servant, Entity.Null, Entity.Null, Core.ServerTime, StatChangeReason.Default, true);
+                }
+
+                if (coffin.Exists())
+                {
+                    coffin.Remove<Disabled>();
+                    coffin.Destroy();
+                    // StatChangeUtility.KillOrDestroyEntity(EntityManager, servant, Entity.Null, Entity.Null, Core.ServerTime, StatChangeReason.Default, true);
                 }
 
                 if (entity.Exists())
                 {
+                    entity.Remove<Disabled>();
                     FamiliarBindingSystem.RemoveDropTable(entity);
                     StatChangeUtility.KillOrDestroyEntity(EntityManager, entity, Entity.Null, Entity.Null, Core.ServerTime, StatChangeReason.Default, true);
                 }

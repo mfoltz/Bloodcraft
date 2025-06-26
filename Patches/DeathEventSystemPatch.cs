@@ -132,10 +132,26 @@ internal static class DeathEventListenerSystemPatch
                 if (familiar.Equals(deathEvent.Died))
                 {
                     // FamiliarEquipmentManager.UnequipFamiliar(GetFamiliarServant(playerCharacter));
+                    /*
                     Entity familiarServant = GetFamiliarServant(playerCharacter);
+                    Entity servantCoffin = familiarServant.TryGetComponent(out ServantConnectedCoffin connectedCoffin) ? connectedCoffin.CoffinEntity.GetEntityOnServer() : Entity.Null;
+
+                    if (servantCoffin.Exists())
+                    {
+                        servantCoffin.With((ref ServantCoffinstation coffinStation) =>
+                        {
+                            coffinStation.ConnectedServant._Entity = Entity.Null;
+                        });
+
+                        servantCoffin.Destroy();
+                    }
 
                     familiarServant.Remove<Disabled>();
                     familiarServant.Destroy();
+                    */
+
+                    Entity familiarServant = GetFamiliarServant(playerCharacter);
+                    DestroyFamiliarServant(familiarServant);
 
                     ActiveFamiliarManager.ResetActiveFamiliarData(steamId);
                 }

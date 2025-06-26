@@ -144,7 +144,12 @@ internal static class FamiliarUnlockSystem
             if (list.Contains(famKey))
             {
                 isAlreadyUnlocked = true;
-                isShiny = HandleShiny(famKey, steamId, 1f);
+
+                if (_shinyChance > 0f)
+                {
+                    isShiny = HandleShiny(famKey, steamId, 1f);
+                }
+
                 break;
             }
         }

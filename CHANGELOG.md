@@ -1,3 +1,13 @@
+`1.10.13`
+- if shiny chance for familiars is 0 they will no longer be guaranteed on second unlock
+- can restrict unarmed to one slot (set Duality in config to false, leave at true for two slots)
+- touched up spell mod table for primal jewels (you may roll synergistic effects missing their synergy, I think this is okay given the fusion forge and how rare some modifers would otherwise be)
+- realtime closest quest target tracking #SystemBase
+- added Daggers to BleedingEdge (stacks will refresh even when unequipped when active)
+- familiar servant inventory can now be used as a mule (appreciate ScarletCarrier helping to confirm a linked coffin is required; equipped items will still persist per familiar but the rest of the inventory contents are dropped when servant dies/is destroyed and will likely NOT persist between restarts)
+- new visual effect for prestiging stuff, may stick with one for all or change it up later (I think this looks slightly different than the research unlock one but if they are the exact same please tell me lol)
+- fixed autocall for bat landing
+
 `1.9.12`
 - prestige properly affects blood legacy rates again
 - new spells added to primal jewels from gemcutter, should only consume one perfect gem at a time now as well

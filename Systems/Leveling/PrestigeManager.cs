@@ -18,14 +18,8 @@ internal static class PrestigeManager
     static EntityManager EntityManager => Core.EntityManager;
 
     const int EXO_PRESTIGES = 100;
-    public class PrestigePerk
-    {
 
-    }
-
-    static readonly PrefabGUID _experienceBuff = PrefabGUIDs.AB_BatVampire_BatStorm_ProjectileSpawnerBuff;
-    static readonly PrefabGUID _expertiseBuff = PrefabGUIDs.AB_VHunter_Leader_Whirlwind_Channel;
-    static readonly PrefabGUID _legacyBuff = PrefabGUIDs.AB_Blood_BloodStorm_PostBuffAttack;
+    static readonly SequenceGUID _prestigeEffect = SequenceGUIDs.SEQ_Vampire_LevelUp;
 
     public static readonly Dictionary<PrestigeType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -446,10 +440,11 @@ internal static class PrestigeManager
     }
     public static void PerformPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, IPrestige handler, KeyValuePair<int, float> xpData)
     {
+        if (!steamId.TryGetPlayerPrestiges(out var prestigeData) 
+            || !prestigeData.TryGetValue(parsedPrestigeType, out int updatedPrestigeLevel)) return;
+
         handler.DoPrestige(steamId);
 
-        if (!steamId.TryGetPlayerPrestiges(out var prestigeData)) return;
-        int updatedPrestigeLevel = prestigeData[parsedPrestigeType];
         if (parsedPrestigeType == PrestigeType.Experience)
         {
             HandleExperiencePrestige(ctx, updatedPrestigeLevel, xpData);
@@ -459,6 +454,8 @@ internal static class PrestigeManager
         {
             HandleOtherPrestige(ctx, steamId, parsedPrestigeType, updatedPrestigeLevel);
         }
+
+        ctx.Event.SenderCharacterEntity.PlaySequence(_prestigeEffect);
     }
     static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel, KeyValuePair<int, float> xpData)
     {
@@ -479,6 +476,7 @@ internal static class PrestigeManager
         float gainMultiplier = ConfigService.PrestigeRateMultiplier * prestigeLevel;
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
 
+        /*
         if (playerCharacter.TryApplyAndGetBuff(_experienceBuff, out Entity buffEntity))
         {
             buffEntity.With((ref LifeTime lifeTime) =>
@@ -490,6 +488,7 @@ internal static class PrestigeManager
             if (buffEntity.Has<AbilityProjectileFanOnGameplayEvent_DataServer>()) buffEntity.Remove<AbilityProjectileFanOnGameplayEvent_DataServer>();
             // if (buffEntity.Has<BlockFeedBuff>()) buffEntity.Remove<BlockFeedBuff>();
         }
+        */
 
         LocalizationService.HandleReply(ctx, $"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, experience from unit kills reduced by <color=red>{reductionPercentage}</color>.");
     }
@@ -512,6 +511,7 @@ internal static class PrestigeManager
 
         string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
 
+        /*
         if (parsedPrestigeType.ToString().Contains("Legacy"))
         {
             Buffs.TryApplyBuff(playerCharacter, _legacyBuff);
@@ -526,6 +526,7 @@ internal static class PrestigeManager
                 });
             }
         }
+        */
 
         LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>] prestiged successfully! Growth rate reduced by <color=red>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
     }

@@ -1,6 +1,6 @@
 [package.dependencies]
 BepInEx-BepInExPack_V_Rising = "1.733.2"
-deca-VampireCommandFramework = "0.10.2"
+deca-VampireCommandFramework = "0.10.4"
 
 [publish]
 communities = ["v-rising"]
@@ -12,7 +12,7 @@ v-rising = ["oakveil-update", "mods", "server"]
 [package]
 namespace = "zfolmt"
 name = "Bloodcraft"
-versionNumber = "1.9.12"
+versionNumber = "1.10.13"
 description = "Leveling, expertise, legacies, professions, familiars, classes, quests!"
 websiteUrl = "https://github.com/mfoltz/Bloodcraft"
 containsNsfwContent = false

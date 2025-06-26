@@ -25,7 +25,7 @@ internal static class FamiliarServantPatches
     {
         if (!Core._initialized) return;
         else if (!_familiars) return;
-
+        
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         NativeArray<EquipServantItemFromInventoryEvent> equipServantItemFromInventoryEvents = __instance.EntityQueries[0].ToComponentDataArray<EquipServantItemFromInventoryEvent>(Allocator.Temp);
         
@@ -51,7 +51,7 @@ internal static class FamiliarServantPatches
                     if (InvalidFamiliarEquipment(inventory, slotIndex))
                     {
                         Core.Log.LogWarning($"[EquipServantItemFromInventorySystem] isLegendary!");
-                        entity.Destroy(true);
+                        entity.Destroy(VExtensions.DestroyMode.Immediate);
                     }
                     else
                     {
@@ -117,7 +117,7 @@ internal static class FamiliarServantPatches
                     if (InvalidFamiliarEquipment(inventory, slotIndex))
                     {
                         Core.Log.LogWarning($"[EquipServantItemSystem] isLegendary!");
-                        entity.Destroy(true);
+                        entity.Destroy(VExtensions.DestroyMode.Immediate);
                     }
                     else
                     {
@@ -211,7 +211,7 @@ internal static class FamiliarServantPatches
                     if (equipment.GetEquipmentEntity(equipmentType).GetEntityOnServer().IsAncestralWeapon())
                     {
                         // Core.Log.LogWarning($"[EquipmentTransferSystem] isLegendary!");
-                        entity.Destroy(true);
+                        entity.Destroy(VExtensions.DestroyMode.Immediate);
                     }
                     else
                     {
@@ -278,6 +278,81 @@ internal static class FamiliarServantPatches
         finally
         {
             entities.Dispose();
+        }
+    }
+
+    [HarmonyPatch(typeof(MoveItemBetweenInventoriesSystem), nameof(MoveItemBetweenInventoriesSystem.OnUpdate))]
+    [HarmonyPrefix]
+    public static void OnUpdatePrefix(MoveItemBetweenInventoriesSystem __instance)
+    {
+        if (!Core._initialized) return;
+        else if (!_familiars) return;
+
+        using NativeAccessor<Entity> entities = __instance._MoveItemBetweenInventoriesEventQuery.ToEntityArrayAccessor();
+        using NativeAccessor<MoveItemBetweenInventoriesEvent> moveItemBetweenInventoriesEvents = __instance._MoveItemBetweenInventoriesEventQuery.ToComponentDataArrayAccessor<MoveItemBetweenInventoriesEvent>();
+        using NativeAccessor<FromCharacter> fromCharacters = __instance._MoveItemBetweenInventoriesEventQuery.ToComponentDataArrayAccessor<FromCharacter>();
+
+        ComponentLookup<BlockFeedBuff> blockFeedBuffLookup = __instance.GetComponentLookup<BlockFeedBuff>();
+
+        try
+        {
+            for (int i = 0; i < entities.Length; i++)
+            {
+                Entity entity = entities[i];
+                MoveItemBetweenInventoriesEvent moveItemBetweenInventoriesEvent = moveItemBetweenInventoriesEvents[i];
+                FromCharacter fromCharacter = fromCharacters[i];
+
+                NetworkId toInventory = moveItemBetweenInventoriesEvent.ToInventory;
+                int slotIndex = moveItemBetweenInventoriesEvent.FromSlot;
+
+                // Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem]"); // yep, this system
+
+                if (NetworkIdSystem._NetworkIdLookupMap.TryGetValue(toInventory, out Entity toInventoryEntity))
+                {
+                    Entity playerCharacter = fromCharacter.Character;
+                    // Entity servant = Familiars.GetFamiliarServant(playerCharacter);
+                    // Entity servantInventory = InventoryUtilities.TryGetInventoryEntity(EntityManager, servant, out Entity inventory) ? inventory : Entity.Null;
+
+                    // if (servant.Exists()) Core.DumpEntity(Core.Server, servant); // playerCharacter, yeah that makes sense
+
+                    /*
+                    if (toInventoryEntity.Exists())
+                    {
+                        Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] {toInventoryEntity} | {servantInventory}");
+                        Core.DumpEntity(Core.Server, toInventoryEntity); // appears to be the servant entity
+                    }
+                    */
+
+                    if (!blockFeedBuffLookup.HasComponent(toInventoryEntity))
+                    {
+                        Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] No BlockFeedBuff component on servant or inventory entities don't match!");
+                        continue;
+                    }
+                    else if (InvalidFamiliarEquipment(playerCharacter, slotIndex))
+                    {
+                        Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] Invalid equipment!");
+                        entity.Destroy(VExtensions.DestroyMode.Immediate);
+                    }
+                    else
+                    {
+                        Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
+
+                        if (familiar.Exists())
+                        {
+                            Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] Familiar servant equipped, refreshing stats...");
+                            Buffs.RefreshStats(familiar);
+                        }
+                    }
+                }
+                else
+                {
+                    Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] No NetworkId found for toInventory!");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogError($"[MoveItemBetweenInventoriesSystem] Error in OnUpdatePrefix: {ex}");
         }
     }
 }

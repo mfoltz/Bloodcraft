@@ -14,14 +14,24 @@ using static Bloodcraft.Services.LocalizationService;
 using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft;
-internal static class VExtensions // probably need to organize this soonTM and at least separate out Bloodcraft specific ones so easier to copy and paste around
+internal static class VExtensions
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
+    static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
     const string EMPTY_KEY = "LocalizationKey.Empty";
+    const string PREFIX = "Entity(";
+    const int LENGTH = 7;
+    public enum DestroyMode
+    {
+        None = 0,
+        Immediate = 1,
+        Delayed = 2,
+        RemoveBuff = 3
+    }
 
     public delegate void WithRefHandler<T>(ref T item);
     public static void With<T>(this Entity entity, WithRefHandler<T> action) where T : struct
@@ -30,6 +40,25 @@ internal static class VExtensions // probably need to organize this soonTM and a
         action(ref item);
 
         EntityManager.SetComponentData(entity, item);
+    }
+    public static void With<T>(this Entity entity, int index, WithRefHandler<T> action) where T : struct
+    {
+        if (!entity.TryGetBuffer<T>(out var buffer))
+        {
+            Core.Log.LogWarning($"Entity doesn't have DynamicBuffer<{typeof(T)}>!");
+            return;
+        }
+
+        if (!buffer.IsIndexWithinRange(index))
+        {
+            Core.Log.LogWarning($"Index {index} out of range for DynamicBuffer<{typeof(T)}>! Length: {buffer.Length}");
+            return;
+        }
+
+        var element = buffer[index];
+        action(ref element);
+
+        buffer[index] = element;
     }
     public static void AddWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct
     {
@@ -222,9 +251,6 @@ internal static class VExtensions // probably need to organize this soonTM and a
     {
         return entity != Entity.Null;
     }
-
-    const string PREFIX = "Entity(";
-    const int LENGTH = 7;
     public static bool IndexWithinCapacity(this Entity entity)
     {
         string entityStr = entity.ToString();
@@ -280,6 +306,10 @@ internal static class VExtensions // probably need to organize this soonTM and a
     {
         return entity.Has<SpellLevel>();
     }
+    public static bool IsMounter(this Entity entity)
+    {
+        return entity.Has<UnitMounter>();
+    }
     public static bool IsAncestralWeapon(this Entity entity)
     {
         return entity.Has<LegendaryItemInstance>() && !entity.IsMagicSource();
@@ -303,7 +333,7 @@ internal static class VExtensions // probably need to organize this soonTM and a
             return user.PlatformId;
         }
 
-        return 0; // maybe this should be -1 instead since steamId 0 sneaks in to weird places sometimes? noting for later
+        return 0;
     }
     public static NetworkId GetNetworkId(this Entity entity)
     {
@@ -469,17 +499,30 @@ internal static class VExtensions // probably need to organize this soonTM and a
 
         return false;
     }
-    public static void Destroy(this Entity entity, bool immediate = false)
+    public static void PlaySequence(this Entity entity, SequenceGUID sequenceGuid)
+    {
+        ServerGameManager.PlaySequenceOnTarget(entity, sequenceGuid);
+    }
+    public static void Destroy(this Entity entity, DestroyMode mode = DestroyMode.None)
     {
         if (!entity.Exists()) return;
 
-        if (immediate)
+        switch (mode)
         {
-            EntityManager.DestroyEntity(entity);
-        }
-        else
-        {
-            DestroyUtility.Destroy(EntityManager, entity);
+            case DestroyMode.Immediate:
+                EntityManager.DestroyEntity(entity);
+                break;
+            case DestroyMode.Delayed:
+                EntityCommandBufferSystem.CreateCommandBuffer().DestroyEntity(entity);
+                break;
+            case DestroyMode.RemoveBuff:
+                DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
+                break;
+            case DestroyMode.None:
+                DestroyUtility.Destroy(EntityManager, entity);
+                break;
+            default:
+                break;
         }
     }
     public static void DestroyBuff(this Entity buffEntity)

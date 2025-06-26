@@ -21,6 +21,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
 
     static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _unarmedSlots = ConfigService.UnarmedSlots;
+    static readonly bool _duality = ConfigService.Duality;
     static readonly bool _shiftSlot = ConfigService.ShiftSlot;
     static readonly bool _shapeshiftAbilities = ConfigService.BearFormDash;
 
@@ -84,7 +85,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             buffer.Add(buff);
         }
 
-        if (!spells.SecondUnarmed.Equals(0))
+        if (_duality && !spells.SecondUnarmed.Equals(0))
         {
             ReplaceAbilityOnSlotBuff buff = new()
             {

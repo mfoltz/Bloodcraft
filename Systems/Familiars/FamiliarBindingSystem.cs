@@ -3,9 +3,11 @@ using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
+using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
+using Steamworks;
 using Stunlock.Core;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -75,6 +77,7 @@ internal static class FamiliarBindingSystem
 
     static readonly PrefabGUID _charVampireCultistServant = PrefabGUIDs.CHAR_Vampire_Cultist_Male_Servant;
     static readonly PrefabGUID _invisibleAndImmaterialBuff = Buffs.InvisibleAndImmaterialBuff;
+    static readonly PrefabGUID _servantCoffin = PrefabGUIDs.TM_SpecialStation_ServantCoffin;
 
     static readonly PrefabGUID _ignoredFaction = PrefabGUIDs.Faction_Ignored;
     static readonly PrefabGUID _playerFaction = PrefabGUIDs.Faction_Players;
@@ -225,11 +228,11 @@ internal static class FamiliarBindingSystem
                     HandleShiny(user, steamId, familiar, familiarId);
                     HandleMapIcon(playerCharacter, familiar);
 
-                    Entity servant = HandleFamiliarServant(familiar);
-                    EquipFamiliar(steamId, familiarId.GuidHash, servant, familiar);
+                    Entity servant = HandleFamiliarServant(playerCharacter, familiar);
+                    // EquipFamiliar(steamId, familiarId.GuidHash, servant, familiar);
 
                     Utilities.Familiars.ActiveFamiliarManager.UpdateActiveFamiliarData(steamId, familiar, servant, familiarId.GuidHash);
-                    ApplyFamiliarStatsRoutine(familiar).Start();
+                    EquipFamiliarAndApplyStatsRoutine(steamId, servant, familiar, familiarId.GuidHash).Start();
 
                     return true;
                 }
@@ -839,23 +842,46 @@ internal static class FamiliarBindingSystem
     }
     static void HandleMountedUnit(Entity playerCharacter, Entity familiar, bool battle = false)
     {
-        if (!familiar.TryGetComponent(out UnitMounter unitMounter)) return;
+        if (!familiar.IsMounter()) return;
 
-        if (unitMounter.MountEntity.TryGetSyncedEntity(out Entity mount))
-        {
-
-        }
+        Entity mount = CreateGameplayEventServerUtility.GetUnitMountEntity(EntityManager, familiar);
     }
-    static Entity HandleFamiliarServant(Entity familiar)
+    static Entity HandleFamiliarServant(Entity playerCharacter, Entity familiar)
     {
         Entity servant = ServerGameManager.InstantiateEntityImmediate(familiar, _charVampireCultistServant);
+        Entity coffin = ServerGameManager.InstantiateEntityImmediate(playerCharacter, _servantCoffin);
 
-        if (servant.Exists())
+        if (servant.Exists() && coffin.Exists())
         {
+            float3 position = familiar.GetPosition();
+            coffin.SetPosition(new(position.x, position.y - 100, position.z));
+
+            servant.With((ref ServantConnectedCoffin connectedCoffin) =>
+            {
+                connectedCoffin.CoffinEntity = NetworkedEntity.ServerEntity(coffin);
+            });
+
+            coffin.With((ref ServantCoffinstation coffinStation) =>
+            {
+                coffinStation.ConnectedServant = NetworkedEntity.ServerEntity(servant);
+                coffinStation.ServantName = familiar.GetPrefabGuid().GetLocalizedName();
+                coffinStation.State = ServantCoffinState.ServantAlive;
+            });
+
             servant.AddWith((ref GetTranslationOnUpdate updateTranslation) =>
             {
                 updateTranslation.Source = GetTranslationSource.Creator;
             });
+
+            /*
+            coffin.AddWith((ref GetTranslationOnUpdate updateTranslation) =>
+            {
+                updateTranslation.Source = GetTranslationSource.Creator;
+            });
+            */
+
+            coffin.Remove<DisableWhenNoPlayersInRange>();
+            coffin.Remove<DisableWhenNoPlayersInRangeOfChunk>();
 
             servant.With((ref DynamicCollision dynamicCollision) =>
             {
@@ -896,7 +922,7 @@ internal static class FamiliarBindingSystem
                 aiMoveSpeeds.Return._Value = 0f;
             });
 
-            InventoryUtilitiesServer.InstantiateInventory(EntityManager, servant, 0);
+            // InventoryUtilitiesServer.InstantiateInventory(EntityManager, servant, 0);
             // InventoryUtilitiesServer.InstantiateInventory(EntityManager, servant, 27);
 
             /*
@@ -938,21 +964,28 @@ internal static class FamiliarBindingSystem
                 follower.Stationary._Value = true;
             });
 
-            DisableFamiliarServantRoutine(servant).Start(); // doing this immediately is reverted by server idk
+            // servant.Remove<DisableWhenNoPlayersInRange>();
+            // servant.Remove<DisableWhenNoPlayersInRangeOfChunk>();
+
+            DisableFamiliarServantRoutine(servant, coffin).Start(); // doing this immediately is reverted by server idk
 
             return servant;
         }
 
         return Entity.Null;
     }
-    static IEnumerator DisableFamiliarServantRoutine(Entity servant)
+    static IEnumerator DisableFamiliarServantRoutine(Entity servant, Entity coffin)
     {
         yield return _delay;
+
         servant.Add<Disabled>();
+        // coffin.Add<Disabled>();
     }
-    static IEnumerator ApplyFamiliarStatsRoutine(Entity familiar)
+    static IEnumerator EquipFamiliarAndApplyStatsRoutine(ulong steamId, Entity servant, Entity familiar, int guidHash)
     {
         yield return _delay;
+
+        EquipFamiliar(steamId, guidHash, servant, familiar);
         Buffs.RefreshStats(familiar);
     }
 }

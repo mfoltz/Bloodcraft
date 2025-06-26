@@ -8,11 +8,13 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
+using Gameplay.Systems;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using Stunlock.Core;
+using Stunlock.Sequencer;
 using System.Collections;
 using Unity.Collections;
 using Unity.Entities;
@@ -78,7 +80,7 @@ internal static class Core
 
     const int SECONDARY_SKILL_SLOT = 4;
     const int BLEED_STACKS = 3;
-    public static byte[] NEW_SHARED_KEY { get; internal set; }
+    public static byte[] NEW_SHARED_KEY { get; set; }
 
     public static bool _initialized = false;
     public static void Initialize()
@@ -86,6 +88,8 @@ internal static class Core
         if (_initialized) return;
 
         NEW_SHARED_KEY = Convert.FromBase64String(SecretManager.GetNewSharedKey());
+        // string hexString = SecretManager.GetNewSharedKey();
+        // NEW_SHARED_KEY = [..Enumerable.Range(0, hexString.Length / 2).Select(i => Convert.ToByte(hexString.Substring(i * 2, 2), 16))];
 
         if (!ComponentRegistry._initialized) ComponentRegistry.Initialize();
         
@@ -320,9 +324,9 @@ internal static class Core
         {
             if (BleedingEdge.Contains(WeaponType.Slashers))
             {
-                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Buffs.VargulfBleedBuff, out Entity bleedBuffPrefab))
+                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Buffs.VargulfBleedBuff, out Entity prefabEntity))
                 {
-                    bleedBuffPrefab.With((ref Buff buff) =>
+                    prefabEntity.With((ref Buff buff) =>
                     {
                         buff.MaxStacks = BLEED_STACKS;
                         buff.IncreaseStacks = true;
@@ -330,7 +334,7 @@ internal static class Core
                 }
             }
 
-            if (BleedingEdge.Contains(WeaponType.Crossbow) || BleedingEdge.Contains(WeaponType.Pistols))
+            if (BleedingEdge.Contains(WeaponType.Crossbow, WeaponType.Pistols))
             {
                 ComponentType[] _projectileAllComponents =
                 [
@@ -342,6 +346,17 @@ internal static class Core
 
                 QueryDesc projectileQueryDesc = EntityManager.CreateQueryDesc(_projectileAllComponents, typeIndices: [0], options: EntityQueryOptions.IncludeAll);
                 BleedingEdgePrimaryProjectileRoutine(projectileQueryDesc).Start();
+            }
+
+            if (BleedingEdge.Contains(WeaponType.Daggers))
+            {
+                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(PrefabGUIDs.EquipBuff_Weapon_Daggers_Ability03, out Entity prefabEntity))
+                {
+                    prefabEntity.With(0, (ref RemoveBuffOnGameplayEventEntry removeBuffOnGameplayEventEntry) =>
+                    {
+                        removeBuffOnGameplayEventEntry.Buff = PrefabIdentifier.Empty;
+                    });
+                }
             }
         }
         else
@@ -424,7 +439,6 @@ internal static class Core
             Log.LogWarning($"[ResetShardBearers] error: {ex}");
         }
     }
-
     static IEnumerator BleedingEdgePrimaryProjectileRoutine(QueryDesc projectileQueryDesc)
     {
         bool pistols = BleedingEdge.Contains(WeaponType.Pistols);
@@ -482,7 +496,7 @@ internal static class Core
     {
         return prefabName.ContainsAll([weaponType.ToString(), "Primary", "Projectile"]);
     }
-    public static void LogEntity(World world, Entity entity)
+    public static void DumpEntity(World world, Entity entity)
     {
         Il2CppSystem.Text.StringBuilder sb = new();
         

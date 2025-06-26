@@ -6,12 +6,16 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
+using HarmonyLib;
+using Il2CppInterop.Runtime;
+using Il2CppInterop.Runtime.Injection;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
@@ -167,6 +171,8 @@ internal static class QuestSystem
 
     static readonly Dictionary<ulong, Dictionary<QuestType, (int Progress, bool Active)>> _delayedQuestMessages = [];
     static readonly WaitForSeconds _questMessageDelay = new(0.1f);
+
+    /*
     static IEnumerable<PrefabGUID> GetKillPrefabsForLevelEnumerable(int playerLevel)
     {
         var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
@@ -185,6 +191,45 @@ internal static class QuestSystem
             if (isVBlood && level > playerLevel && playerLevel < DEFAULT_MAX_LEVEL) continue;
             else if (isWithinStandardRange || isWithinHighLevelRange) 
                 yield return prefabGuid;
+        }
+    }
+    */
+    static IEnumerable<PrefabGUID> GetKillPrefabsForLevelEnumerable(int playerLevel)
+    {
+        var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
+        var targetCache = TargetTrackingSystem.TargetCache;
+
+        ComponentLookup<UnitLevel> unitLevelLookup = EntityManager.GetComponentLookup<UnitLevel>(true);
+        // EntityStorageInfoLookup entityLookup = EntityManager.GetEntityStorageInfoLookup();
+
+        if (!targetCache.IsCreated)
+            yield break;
+
+        var keyValueIterator = targetCache.GetKeyValueArrays(Allocator.Temp);
+
+        try
+        {
+            for (int i = 0; i < keyValueIterator.Keys.Length; i++)
+            {
+                var prefabGuid = keyValueIterator.Keys[i];
+
+                if (!prefabMap.TryGetValue(prefabGuid, out var entity) 
+                    || !unitLevelLookup.TryGetComponent(entity, out UnitLevel unitLevel)) continue;
+
+                bool isVBlood = entity.IsVBlood();
+                int level = unitLevel.Level._Value;
+
+                bool isWithinStandardRange = Math.Abs(level - playerLevel) <= 10;
+                bool isWithinHighLevelRange = playerLevel >= DEFAULT_MAX_LEVEL && level >= 80;
+
+                if (isVBlood && level > playerLevel && playerLevel < DEFAULT_MAX_LEVEL) continue;
+                else if (isWithinStandardRange || isWithinHighLevelRange)
+                    yield return prefabGuid;
+            }
+        }
+        finally
+        {
+            keyValueIterator.Dispose();
         }
     }
     static IEnumerable<PrefabGUID> GetCraftPrefabsForLevelEnumerable(int playerLevel)
@@ -847,6 +892,218 @@ internal static class QuestSystem
         if (_delayedQuestMessages[steamId].Count == 0)
         {
             _delayedQuestMessages.Remove(steamId);
+        }
+    }
+}
+public class TargetTrackingSystem : SystemBase
+{
+    public static TargetTrackingSystem Instance { get; set; }
+
+    static readonly HashSet<string> _filteredStrings = QuestService.FilteredTargetUnits;
+    static readonly HashSet<PrefabGUID> _shardBearers = [..QuestService.ShardBearers];
+    public static NativeParallelMultiHashMap<PrefabGUID, Entity>.ReadOnly TargetCache =>
+        Instance?._targetUnits.IsCreated == true ? Instance._targetUnits.AsReadOnly() : default;
+
+    NativeParallelMultiHashMap<PrefabGUID, Entity> _targetUnits;
+    NativeParallelHashSet<Entity> _imprisonedUnits;
+    NativeParallelHashMap<PrefabGUID, byte> _blacklist;
+
+    EntityQuery _targetQuery;
+    EntityQuery _imprisonedQuery;
+
+    ComponentTypeHandle<PrefabGUID> _prefabGuidHandle;
+    ComponentTypeHandle<Buff> _buffHandle;
+
+    EntityTypeHandle _entityHandle;
+    EntityStorageInfoLookup _entityStorageInfoLookup;
+
+    DateTime _lastLogTime = DateTime.UtcNow;
+    public override void OnCreate()
+    {
+        Instance = this;
+
+        _targetQuery = GetEntityQuery(new EntityQueryDesc
+        {
+            All = new[]
+            {
+                ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+                ComponentType.ReadOnly(Il2CppType.Of<Health>()),
+                ComponentType.ReadOnly(Il2CppType.Of<UnitLevel>()),
+                ComponentType.ReadOnly(Il2CppType.Of<UnitStats>()),
+                ComponentType.ReadOnly(Il2CppType.Of<Movement>()),
+                ComponentType.ReadOnly(Il2CppType.Of<AggroConsumer>())
+            },
+            None = new[]
+            {
+                ComponentType.ReadOnly(Il2CppType.Of<Minion>()),
+                ComponentType.ReadOnly(Il2CppType.Of<DestroyOnSpawn>()),
+                ComponentType.ReadOnly(Il2CppType.Of<Trader>()),
+                ComponentType.ReadOnly(Il2CppType.Of<BlockFeedBuff>())
+            },
+            Options = EntityQueryOptions.IncludeDisabled
+        });
+
+        _imprisonedQuery = GetEntityQuery(new EntityQueryDesc
+        {
+            All = new[]
+            {
+                ComponentType.ReadOnly(Il2CppType.Of<Buff>()),
+                ComponentType.ReadOnly(Il2CppType.Of<ImprisonedBuff>())
+            },
+            Options = EntityQueryOptions.IncludeDisabled
+        });
+
+        _targetUnits = new NativeParallelMultiHashMap<PrefabGUID, Entity>(4096, Allocator.Persistent);
+        _blacklist = new NativeParallelHashMap<PrefabGUID, byte>(256, Allocator.Persistent);
+        _imprisonedUnits = new NativeParallelHashSet<Entity>(256, Allocator.Persistent);
+
+        _prefabGuidHandle = GetComponentTypeHandle<PrefabGUID>(true);
+        _buffHandle = GetComponentTypeHandle<Buff>(true);
+
+        _entityHandle = GetEntityTypeHandle();
+        _entityStorageInfoLookup = GetEntityStorageInfoLookup();
+
+        RequireForUpdate(_targetQuery);
+        Enabled = true;
+
+        // Plugin.LogInstance.LogWarning("[QuestTargetUnitSystem.OnCreate]");
+    }
+    public override void OnStartRunning()
+    {
+        var lookup = World.GetExistingSystemManaged<PrefabCollectionSystem>()
+                          ._SpawnableNameToPrefabGuidDictionary;
+
+        foreach (var kvp in lookup)
+        {
+            PrefabGUID prefabGuid = kvp.Value;
+            string prefabName = kvp.Key;
+
+            foreach (var filter in _filteredStrings)
+            {
+                if (prefabName.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                {
+                    // Plugin.LogInstance.LogWarning($"[QuestTargetUnitSystem] Blacklisting prefab: {prefabName}");
+                    _blacklist.TryAdd(prefabGuid, 0);
+                    break;
+                }
+            }
+        }
+
+        foreach (var prefabGuid in _shardBearers)
+        {
+            _blacklist.TryAdd(prefabGuid, 0);
+        }
+
+        // Plugin.LogInstance.LogWarning("[QuestTargetUnitSystem.OnStartRunning]");
+    }
+    public override void OnDestroy()
+    {
+        if (_targetUnits.IsCreated) _targetUnits.Dispose();
+        if (_blacklist.IsCreated) _blacklist.Dispose();
+        if (_imprisonedUnits.IsCreated) _imprisonedUnits.Dispose();
+        if (Instance == this) Instance = null;
+
+        // Plugin.LogInstance.LogWarning("[QuestTargetUnitSystem.OnDestroy]");
+    }
+    public override void OnUpdate()
+    {
+        _imprisonedUnits.Clear();
+        _targetUnits.Clear();
+
+        _buffHandle.Update(this);
+        _prefabGuidHandle.Update(this);
+
+        _entityHandle.Update(this);
+        _entityStorageInfoLookup.Update(this);
+
+        var imprisonedChunks = _imprisonedQuery.ToArchetypeChunkArray(Allocator.Temp);
+        int imprisonedCount = 0;
+
+        try
+        {
+            foreach (var chunk in imprisonedChunks)
+            {
+                var buffs = chunk.GetNativeArray(_buffHandle);
+
+                for (int i = 0; i < chunk.Count; ++i)
+                {
+                    Entity entity = buffs[i].Target;
+
+                    if (!_entityStorageInfoLookup.Exists(entity)) continue;
+                    else
+                    {
+                        _imprisonedUnits.Add(buffs[i].Target);
+                        imprisonedCount++;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            imprisonedChunks.Dispose();
+        }
+
+        var targetChunks = _targetQuery.ToArchetypeChunkArray(Allocator.Temp);
+        int targetCount = 0;
+
+        try
+        {
+            foreach (var chunk in targetChunks)
+            {
+                var prefabGuids = chunk.GetNativeArray(_prefabGuidHandle);
+                var entities = chunk.GetNativeArray(_entityHandle);
+
+                for (int i = 0; i < chunk.Count; ++i)
+                {
+                    PrefabGUID prefabGuid = prefabGuids[i];
+                    Entity entity = entities[i];
+
+                    if (!_entityStorageInfoLookup.Exists(entity)) continue;
+                    else if (_blacklist.ContainsKey(prefabGuid) || _imprisonedUnits.Contains(entity)) continue;
+                    else
+                    {
+                        _targetUnits.Add(prefabGuid, entity);
+                        targetCount++;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            targetChunks.Dispose();
+        }
+
+        if ((DateTime.UtcNow - _lastLogTime).TotalSeconds >= 5)
+        {
+            // Plugin.LogInstance.LogInfo($"[QuestTargetUnitSystem] Imprisoned: {imprisonedCount}, Targetable: {targetCount}");
+            _lastLogTime = DateTime.UtcNow;
+        }
+    }
+}
+
+[HarmonyPatch]
+public static class WorldBootstrapPatch
+{
+    [HarmonyPatch(typeof(WorldBootstrapUtilities), nameof(WorldBootstrapUtilities.AddSystemsToWorld))]
+    [HarmonyPrefix]
+    public static void Prefix(World world, WorldBootstrap worldConfig, WorldSystemConfig worldSystemConfig)
+    {
+        try
+        {
+            if (world.Name.Equals("Server"))
+            {
+                var updateGroup = world.GetOrCreateSystemManaged<UpdateGroup>();
+
+                ClassInjector.RegisterTypeInIl2Cpp<TargetTrackingSystem>();
+                var system = world.GetOrCreateSystemManaged<TargetTrackingSystem>();
+
+                updateGroup.AddSystemToUpdateList(system);
+                updateGroup.SortSystems();
+            }
+        }
+        catch (Exception e)
+        {
+            Plugin.LogInstance.LogError($"[WorldBootstrap_Server.AddSystemsToWorld] Exception: {e}");
         }
     }
 }

@@ -13,7 +13,6 @@ internal static class EquipmentQualityManager
     const float MAX_WEAPON_BONUS = 0.1f;
     const float MAX_ARMOR_BONUS = 0.1f;
     const float MAX_MAGIC_BONUS = 0.1f;
-
     const int MAX_PROFESSION_LEVEL = 100;
     public static void ApplyPlayerEquipmentStats(ulong steamId, Entity equipmentEntity)
     {
@@ -70,7 +69,6 @@ internal static class EquipmentQualityManager
         {
             ModifyUnitStatBuff_DOTS statBuff = buffer[i];
             statBuff.Value *= scaledBonus;
-
             buffer[i] = statBuff;
         }
     }

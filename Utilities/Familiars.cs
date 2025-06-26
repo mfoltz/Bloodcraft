@@ -62,7 +62,6 @@ internal static class Familiars
     const float BLOOD_QUALITY_IGNORE = 90f;
     public enum FamiliarEquipmentType
     {
-        Headgear,
         Chest,
         Weapon,
         MagicSource,
@@ -73,7 +72,6 @@ internal static class Familiars
 
     static readonly Dictionary<FamiliarEquipmentType, EquipmentType> _familiarEquipmentMap = new()
     {
-        { FamiliarEquipmentType.Headgear, EquipmentType.Headgear },
         { FamiliarEquipmentType.Chest, EquipmentType.Chest },
         { FamiliarEquipmentType.Weapon, EquipmentType.Weapon },
         { FamiliarEquipmentType.MagicSource, EquipmentType.MagicSource },
@@ -258,22 +256,20 @@ internal static class Familiars
 
         return Entity.Null;
     }
-    public static Entity GetActiveFamiliar(Entity playerCharacter, ulong steamId = default)
+    public static Entity GetActiveFamiliar(Entity playerCharacter)
     {
-        ActiveFamiliarData activeFamiliarData;
-
-        if (!steamId.Equals(default)) activeFamiliarData = GetActiveFamiliarData(steamId);
-        else activeFamiliarData = GetActiveFamiliarData(playerCharacter.GetSteamId());
-
+        // ActiveFamiliarData activeFamiliarData;
+        // if (!steamId.Equals(default)) activeFamiliarData = GetActiveFamiliarData(steamId);
+        // else activeFamiliarData = GetActiveFamiliarData(playerCharacter.GetSteamId());
+        ActiveFamiliarData activeFamiliarData = GetActiveFamiliarData(playerCharacter.GetSteamId());
         return activeFamiliarData.Familiar;
     }
-    public static Entity GetFamiliarServant(Entity playerCharacter, ulong steamId = default)
+    public static Entity GetFamiliarServant(Entity playerCharacter)
     {
-        ActiveFamiliarData activeFamiliarData;
-
-        if (!steamId.Equals(default)) activeFamiliarData = GetActiveFamiliarData(steamId);
-        else activeFamiliarData = GetActiveFamiliarData(playerCharacter.GetSteamId());
-
+        // ActiveFamiliarData activeFamiliarData;
+        // if (!steamId.Equals(default)) activeFamiliarData = GetActiveFamiliarData(steamId);
+        // else activeFamiliarData = GetActiveFamiliarData(playerCharacter.GetSteamId());
+        ActiveFamiliarData activeFamiliarData = GetActiveFamiliarData(playerCharacter.GetSteamId());
         return activeFamiliarData.Servant;
     }
     public static Entity GetServantFamiliar(Entity servant)
@@ -285,6 +281,15 @@ internal static class Familiars
         }
 
         return Entity.Null;
+    }
+    public static Entity GetServantCoffin(Entity servant)
+    {
+        Entity coffin = Entity.Null;
+
+        if (!servant.TryGetComponent(out ServantConnectedCoffin servantConnectedCoffin)) return coffin;
+        else coffin = servantConnectedCoffin.CoffinEntity.GetEntityOnServer();
+
+        return coffin;
     }
     public static void SyncFamiliarServant(Entity familiar, Entity servant)
     {
@@ -334,7 +339,7 @@ internal static class Familiars
         {
             foreach (Entity minion in familiarMinions)
             {
-                if (minion.Exists()) minion.Destroy();
+                minion.Destroy();
             }
         }
     }
@@ -724,7 +729,7 @@ internal static class Familiars
         }
 
         HandleFamiliarMinions(familiar);
-        SaveFamiliarEquipment(steamId, famKey, UnequipFamiliar(GetFamiliarServant(playerCharacter)));
+        SaveFamiliarEquipment(steamId, famKey, UnequipFamiliar(playerCharacter));
 
         familiar.Remove<Disabled>();
         if (AutoCallMap.ContainsKey(playerCharacter)) AutoCallMap.TryRemove(playerCharacter, out var _);
@@ -991,5 +996,44 @@ internal static class Familiars
         buffEntity.Remove<ScriptDestroy>();
         buffEntity.Remove<Script_Buff_ModifyDynamicCollision_DataServer>();
         buffEntity.Remove<Script_Castleman_AdaptLevel_DataShared>();
+    }
+    public static void DestroyFamiliarServant(Entity servant)
+    {
+        // Entity familiarServant = GetFamiliarServant(playerCharacter);
+        // Entity servantCoffin = familiarServant.TryGetComponent(out ServantConnectedCoffin connectedCoffin) ? connectedCoffin.CoffinEntity.GetEntityOnServer() : Entity.Null;
+        Entity coffin = GetServantCoffin(servant);
+
+        /*
+        if (servantCoffin.Exists())
+        {
+            servantCoffin.With((ref ServantCoffinstation coffinStation) =>
+            {
+                coffinStation.ConnectedServant._Entity = Entity.Null;
+            });
+
+            servantCoffin.Remove<Disabled>();
+            servantCoffin.Destroy();
+        }
+        */
+
+        // servant.Remove<Disabled>();
+        StatChangeUtility.KillOrDestroyEntity(EntityManager, servant, Entity.Null, Entity.Null, Core.ServerTime, StatChangeReason.Default, true);
+        // servant.Destroy();
+
+        // servant.DropInventory();
+        // servant.Destroy(VExtensions.DestroyMode.Delayed);
+
+        if (coffin.Exists())
+        {
+            /*
+            coffin.With((ref ServantCoffinstation coffinStation) =>
+            {
+                coffinStation.ConnectedServant._Entity = Entity.Null;
+            });
+            */
+
+            coffin.Remove<Disabled>();
+            coffin.Destroy();
+        }
     }
 }

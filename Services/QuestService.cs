@@ -41,7 +41,6 @@ internal class QuestService
         ComponentType.ReadOnly(Il2CppType.Of<AbilityBar_Server>()),
         ComponentType.ReadOnly(Il2CppType.Of<AbilityBar_Shared>()),
         ComponentType.ReadOnly(Il2CppType.Of<AggroConsumer>())
-
     ];
 
     static readonly ComponentType[] _harvestableResourceAllComponents =
