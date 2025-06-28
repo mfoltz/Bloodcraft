@@ -1095,9 +1095,9 @@ public static class WorldBootstrapPatch
                 var updateGroup = world.GetOrCreateSystemManaged<UpdateGroup>();
 
                 ClassInjector.RegisterTypeInIl2Cpp<TargetTrackingSystem>();
-                var system = world.GetOrCreateSystemManaged<TargetTrackingSystem>();
+                var targetSystem = world.GetOrCreateSystemManaged<TargetTrackingSystem>();
+                updateGroup.AddSystemToUpdateList(targetSystem);
 
-                updateGroup.AddSystemToUpdateList(system);
                 updateGroup.SortSystems();
             }
         }
@@ -1107,3 +1107,4 @@ public static class WorldBootstrapPatch
         }
     }
 }
+

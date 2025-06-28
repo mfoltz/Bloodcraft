@@ -118,9 +118,10 @@ internal static class UpdateBuffsBufferDestroyPatch
                 bool isBloodBuff = bloodBuffLookup.HasComponent(entity);
 
                 PrefabGUID buffPrefabGuid = prefabGuids[i];
+                string prefabName = buffPrefabGuid.GetPrefabName();
                 int buffType = GetBuffType(buffPrefabGuid, isWeaponEquipBuff, isPlayerTarget, isFamiliarTarget, isBloodBuff);
-                
-                // Core.Log.LogWarning($"[UpdateBuffsBufferDestroyPatch] - {buffPrefabGuid.GetPrefabName()}");
+
+                // if (!prefabName.Contains("AntennaBuff")) Core.Log.LogWarning($"[UpdateBuffsBuffer_Destroy] - {buffTarget.GetPrefabGuid().GetPrefabName()} | {prefabName}");
 
                 switch (buffType)
                 {

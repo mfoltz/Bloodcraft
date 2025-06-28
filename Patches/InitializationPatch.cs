@@ -1,5 +1,4 @@
 using HarmonyLib;
-using ProjectM;
 using ProjectM.Gameplay.WarEvents;
 
 namespace Bloodcraft.Patches;

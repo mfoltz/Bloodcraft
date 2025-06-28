@@ -112,7 +112,7 @@ internal static class ScriptSpawnServerPatch
                 Entity owner = entityOwners[i].Owner;
                 PrefabGUID prefabGuid = prefabGuids[i];
 
-                // Core.Log.LogWarning($"[ScriptSpawnServer] - {buffEntity} | {buffTarget} | {owner} | {prefabGuid.GetPrefabName()}");
+                // Core.Log.LogWarning($"[ScriptSpawnServer] - {buffTarget.GetPrefabGuid().GetPrefabName()} | {prefabGuid.GetPrefabName()}");
 
                 if (!buffTarget.Exists()) continue;
 

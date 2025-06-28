@@ -16,6 +16,7 @@ internal static class EquipmentQualityManager
     const int MAX_PROFESSION_LEVEL = 100;
     public static void ApplyPlayerEquipmentStats(ulong steamId, Entity equipmentEntity)
     {
+        if (!equipmentEntity.Exists()) return;
         IProfession handler = ProfessionFactory.GetProfession(equipmentEntity.GetPrefabGuid());
 
         int professionLevel = handler.GetProfessionData(steamId).Key;

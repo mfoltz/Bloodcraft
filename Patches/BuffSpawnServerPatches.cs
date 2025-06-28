@@ -85,7 +85,7 @@ internal static class BuffSystemSpawnPatches
 
                 string prefabName = buffPrefabGuid.GetPrefabName();
 
-                // Core.Log.LogWarning($"[BuffSystem_Spawn_Server] - {buffEntity} | {buffTarget} | {prefabName}");
+                // if (!prefabName.Contains("AntennaBuff")) Core.Log.LogWarning($"[BuffSystem_Spawn_Server] - {buffTarget.GetPrefabGuid().GetPrefabName()} | {prefabName}");
 
                 if (!buffTarget.Exists()) continue;
                 
