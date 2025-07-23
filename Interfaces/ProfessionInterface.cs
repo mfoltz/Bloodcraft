@@ -3,7 +3,7 @@ using Stunlock.Core;
 using Unity.Mathematics;
 
 namespace Bloodcraft.Interfaces;
-public enum ProfessionType
+public enum Profession
 {
     None,
     Enchanting,
@@ -22,6 +22,7 @@ internal interface IProfession
     void SetProfessionData(ulong steamId, KeyValuePair<int, float> xpData);
     string GetProfessionName();
     float3 GetProfessionColor();
+    Profession GetProfessionEnum();
 }
 internal static class ProfessionFactory
 {
@@ -60,18 +61,18 @@ internal static class ProfessionFactory
 
         return null;
     }
-    public static IProfession GetProfession(ProfessionType profession)
+    public static IProfession GetProfession(Profession profession)
     {
         return profession switch
         {
-            ProfessionType.Woodcutting => new WoodcuttingProfession(),
-            ProfessionType.Mining => new MiningProfession(),
-            ProfessionType.Blacksmithing => new BlacksmithingProfession(),
-            ProfessionType.Tailoring => new TailoringProfession(),
-            ProfessionType.Fishing => new FishingProfession(),
-            ProfessionType.Alchemy => new AlchemyProfession(),
-            ProfessionType.Harvesting => new HarvestingProfession(),
-            ProfessionType.Enchanting => new EnchantingProfession(),
+            Profession.Woodcutting => new WoodcuttingProfession(),
+            Profession.Mining => new MiningProfession(),
+            Profession.Blacksmithing => new BlacksmithingProfession(),
+            Profession.Tailoring => new TailoringProfession(),
+            Profession.Fishing => new FishingProfession(),
+            Profession.Alchemy => new AlchemyProfession(),
+            Profession.Harvesting => new HarvestingProfession(),
+            Profession.Enchanting => new EnchantingProfession(),
             _ => null,
         };
     }
@@ -87,6 +88,7 @@ internal abstract class ProfessionBase : IProfession
     public abstract void SetProfessionData(ulong steamId, KeyValuePair<int, float> data);
     public abstract string GetProfessionName();
     public abstract float3 GetProfessionColor();
+    public abstract Profession GetProfessionEnum();
 }
 internal class EnchantingProfession : ProfessionBase
 {
@@ -109,6 +111,10 @@ internal class EnchantingProfession : ProfessionBase
     public override float3 GetProfessionColor()
     {
         return new float3(0.5f, 0.1f, 0.8f);
+    }
+    public override Profession GetProfessionEnum()
+    {
+        return Profession.Enchanting;
     }
 }
 internal class AlchemyProfession : ProfessionBase
@@ -133,6 +139,10 @@ internal class AlchemyProfession : ProfessionBase
     {
         return new float3(0.1f, 0.8f, 0.6f);
     }
+    public override Profession GetProfessionEnum()
+    {
+        return Profession.Alchemy;
+    }
 }
 internal class HarvestingProfession : ProfessionBase
 {
@@ -155,6 +165,10 @@ internal class HarvestingProfession : ProfessionBase
     public override float3 GetProfessionColor()
     {
         return new float3(0f, 0.5f, 0f);
+    }
+    public override Profession GetProfessionEnum()
+    {
+        return Profession.Harvesting;
     }
 }
 internal class BlacksmithingProfession : ProfessionBase
@@ -179,6 +193,10 @@ internal class BlacksmithingProfession : ProfessionBase
     {
         return new float3(0.2f, 0.2f, 0.3f);
     }
+    public override Profession GetProfessionEnum()
+    {
+        return Profession.Blacksmithing;
+    }
 }
 internal class TailoringProfession : ProfessionBase
 {
@@ -201,6 +219,10 @@ internal class TailoringProfession : ProfessionBase
     public override float3 GetProfessionColor()
     {
         return new float3(0.9f, 0.6f, 0.5f);
+    }
+    public override Profession GetProfessionEnum()
+    {
+        return Profession.Tailoring;
     }
 }
 internal class WoodcuttingProfession : ProfessionBase
@@ -225,6 +247,10 @@ internal class WoodcuttingProfession : ProfessionBase
     {
         return new float3(0.6f, 0.2f, 0.2f);
     }
+    public override Profession GetProfessionEnum()
+    {
+        return Profession.Woodcutting;
+    }
 }
 internal class MiningProfession : ProfessionBase
 {
@@ -248,6 +274,10 @@ internal class MiningProfession : ProfessionBase
     {
         return new float3(0.5f, 0.5f, 0.5f);
     }
+    public override Profession GetProfessionEnum()
+    {
+        return Profession.Mining;
+    }
 }
 internal class FishingProfession : ProfessionBase
 {
@@ -270,5 +300,9 @@ internal class FishingProfession : ProfessionBase
     public override float3 GetProfessionColor()
     {
         return new float3(0f, 0.5f, 0.7f);
+    }
+    public override Profession GetProfessionEnum()
+    {
+        return Profession.Fishing;
     }
 }

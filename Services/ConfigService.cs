@@ -17,6 +17,9 @@ internal static class ConfigService
     static readonly Lazy<bool> _eliteShardBearers = new(() => GetConfigValue<bool>("EliteShardBearers"));
     public static bool EliteShardBearers => _eliteShardBearers.Value;
 
+    static readonly Lazy<bool> _elitePrimalRifts = new(() => GetConfigValue<bool>("ElitePrimalRifts"));
+    public static bool ElitePrimalRifts => _elitePrimalRifts.Value;
+
     static readonly Lazy<int> _shardBearerLevel = new(() => GetConfigValue<int>("ShardBearerLevel"));
     public static int ShardBearerLevel => _shardBearerLevel.Value;
 
@@ -311,6 +314,9 @@ internal static class ConfigService
     static readonly Lazy<float> _professionFactor = new(() => GetConfigValue<float>("ProfessionFactor"));
     public static float ProfessionFactor => _professionFactor.Value;
 
+    static readonly Lazy<string> _disabledProfessions = new(() => GetConfigValue<string>("DisabledProfessions"));
+    public static string DisabledProfessions => _disabledProfessions.Value;
+
     static readonly Lazy<bool> _extraRecipes = new(() => GetConfigValue<bool>("ExtraRecipes"));
     public static bool ExtraRecipes => _extraRecipes.Value;
 
@@ -388,9 +394,6 @@ internal static class ConfigService
 
     static readonly Lazy<bool> _classSystem = new(() => GetConfigValue<bool>("ClassSystem"));
     public static bool ClassSystem => _classSystem.Value;
-
-    // static readonly Lazy<bool> _lockedSynergies = new(() => GetConfigValue<bool>("LockedSynergies"));
-    // public static bool LockedSynergies => _lockedSynergies.Value;
 
     static readonly Lazy<bool> _classOnHitEffects = new(() => GetConfigValue<bool>("ClassOnHitEffects"));
     public static bool ClassOnHitEffects => _classOnHitEffects.Value;
@@ -508,6 +511,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
             new ConfigEntryDefinition("General", "Eclipse", true, "Enables the server sending player mod data to clients using Eclipse."),
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
+            new ConfigEntryDefinition("General", "ElitePrimalRifts", false, "Enable or disable elite primal rifts."),
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
             new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01/t02 effects at the same time)."),
             new ConfigEntryDefinition("General", "BearFormDash", false, "Enable or disable bear form dash."),
@@ -609,6 +613,7 @@ internal static class ConfigService
             
             new ConfigEntryDefinition("Professions", "ProfessionSystem", false, "Enable or disable the profession system."),
             new ConfigEntryDefinition("Professions", "ProfessionFactor", 1f, "The multiplier for profession experience."),
+            new ConfigEntryDefinition("Professions", "DisabledProfessions", "", "Professions that should be inactive separated by comma."),
             new ConfigEntryDefinition("Professions", "ExtraRecipes", false, "Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well. See 'Recipes' section in README for complete list of changes."), // maybe this should be in general >_>
             
             new ConfigEntryDefinition("Familiars", "FamiliarSystem", false, "Enable or disable the familiar system."),

@@ -63,6 +63,8 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
     static readonly Dictionary<string, string> _guidStringsToLocalizedNames = [];
     public static IReadOnlyDictionary<PrefabGUID, string> PrefabGuidNames => _prefabGuidNames;
     static readonly Dictionary<PrefabGUID, string> _prefabGuidNames = [];
+    public static IReadOnlyDictionary<SequenceGUID, string> SequenceGuidNames => _sequenceGuidNames;
+    static readonly Dictionary<SequenceGUID, string> _sequenceGuidNames = [];
 
     static readonly Dictionary<PrefabGUID, string> _prefabGuidNameOverrides = new() // based off of converter (FoundPrimal) from KindredCommands, will add other names over time for villagers and others maybe >_>
     {
@@ -93,14 +95,15 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
     public LocalizationService()
     {
         InitializeLocalizations();
-        InitializePrefabGuidNames();
+        GetPrefabGuidNames();
+        GetSequenceGuidNames();
     }
     static void InitializeLocalizations()
     {
         // LoadPrefabHashesToGuidStrings();
         LoadGuidStringsToLocalizedNames();
     }
-    static void InitializePrefabGuidNames()
+    static void GetPrefabGuidNames()
     {
         var namesToPrefabGuids = Core.SystemService.PrefabCollectionSystem._PrefabDataLookup;
 
@@ -126,6 +129,17 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
             // Core.Log.LogWarning($"[LocalizationService] Prefab names initialized - {_prefabGuidsToNames.Count}");
             prefabGuids.Dispose();
             assetData.Dispose();
+        }
+    }
+    static void GetSequenceGuidNames()
+    {
+        var fields = typeof(SequenceGUIDs).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+
+        foreach (var field in fields)
+        {
+            SequenceGUID sequenceGuid = (SequenceGUID)field.GetValue(null);
+            string sequenceName = field.Name;
+            _sequenceGuidNames[sequenceGuid] = sequenceName;
         }
     }
     static void LoadGuidStringsToLocalizedNames()

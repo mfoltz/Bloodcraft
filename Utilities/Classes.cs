@@ -924,7 +924,7 @@ internal static class Classes
     public static void GetAbilityJewels()
     {
         _jewelQueryDesc = EntityManager.CreateQueryDesc(_jewelComponents, typeIndices: _typeIndices, options: EntityQueryOptions.IncludeAll);
-        GetAbilityJewelsRoutine().Start();
+        GetAbilityJewelsRoutine().Run();
     }
     static IEnumerator GetAbilityJewelsRoutine()
     {

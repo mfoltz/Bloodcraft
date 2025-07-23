@@ -3,7 +3,6 @@ using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
-using ProjectM.UI;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
@@ -25,7 +24,13 @@ internal static class FamiliarUnlockSystem
     static readonly bool _shareUnlocks = ConfigService.ShareUnlocks;
     static readonly bool _allowVBloods = ConfigService.AllowVBloods;
 
-    static readonly PrefabGUID _familiarUnlockBuff = PrefabGUIDs.AB_HighLordSword_SelfStun_DeadBuff;
+    // static readonly SequenceGUID _unlockSequence = SequenceGUIDs.SEQ_Charm_Channel;
+    // static readonly SequenceGUID _unlockSequence = SequenceGUIDs.SEQ_WarEvent_UnitKilled_Projectile;
+    // static readonly SequenceGUID _unlockSequence = SequenceGUIDs.SEQ_GeneralTeleport_Cast;
+    // static readonly SequenceGUID _shinySequence = SequenceGUIDs.SEQ_MagicSource_BloodKey_Active_Buff;
+
+    static readonly SequenceGUID _unlockSequence = SequenceGUIDs.SEQ_Shared_Object_Destroy_1;
+    static readonly SequenceGUID _shinySequence = SequenceGUIDs.SEQ_Interact_PickupItem_InventoryFull_01_6;
 
     public static readonly HashSet<PrefabGUID> ConfiguredPrefabGuidBans = [];
     public static readonly HashSet<UnitCategory> ConfiguredCategoryBans = [];
@@ -80,11 +85,11 @@ internal static class FamiliarUnlockSystem
             if (!ValidTarget(targetPrefabName, targetPrefabGuid, targetCategory)) return;
             else if (!isVBloodOrGateBoss && (int)targetCategory.UnitCategory < 5)
             {
-                HandleRoll(_unitUnlockChance, targetPrefabGuid, source);
+                HandleRoll(_unitUnlockChance, targetPrefabGuid, source, target);
             }
             else if (_allowVBloods && isVBloodOrGateBoss)
             {
-                HandleRoll(_vBloodUnlockChance, targetPrefabGuid, source);
+                HandleRoll(_vBloodUnlockChance, targetPrefabGuid, source, target);
             }
         }
     }
@@ -103,20 +108,20 @@ internal static class FamiliarUnlockSystem
     public static bool IsBannedPrefabGuid(PrefabGUID prefabGuid)
     {
         // return (ConfiguredPrefabGuidBans.Contains(prefabGuid) || _defaultPrefabGUIDBans.Contains(prefabGuid));
-        return (ConfiguredPrefabGuidBans.Contains(prefabGuid) || _defaultPrefabGuidBans.Contains(prefabGuid));
+        return ConfiguredPrefabGuidBans.Contains(prefabGuid) || _defaultPrefabGuidBans.Contains(prefabGuid);
     }
     static bool BannedCategory(EntityCategory category)
     {
         return ConfiguredCategoryBans.Contains(category.UnitCategory);
     }
-    static void HandleRoll(float dropChance, PrefabGUID targetPrefabGuid, Entity playerCharacter)
+    static void HandleRoll(float dropChance, PrefabGUID targetPrefabGuid, Entity playerCharacter, Entity target)
     {
         if (Misc.RollForChance(dropChance))
         {
-            HandleUnlock(targetPrefabGuid, playerCharacter);
+            HandleUnlock(targetPrefabGuid, playerCharacter, target);
         }
     }
-    static void HandleUnlock(PrefabGUID targetPrefabGuid, Entity playerCharacter)
+    static void HandleUnlock(PrefabGUID targetPrefabGuid, Entity playerCharacter, Entity target)
     {
         User user = playerCharacter.GetUser();
         ulong steamId = user.PlatformId;
@@ -165,7 +170,7 @@ internal static class FamiliarUnlockSystem
             SaveFamiliarExperienceData(steamId, famData);
 
             isShiny = HandleShiny(famKey, steamId, _shinyChance);
-            HandleFamiliarUnlockBuff(playerCharacter);
+            playerCharacter.PlaySequence(_unlockSequence);
 
             if (!isShiny)
             {
@@ -173,11 +178,13 @@ internal static class FamiliarUnlockSystem
             }
             else if (isShiny)
             {
+                playerCharacter.PlaySequence(_shinySequence);
                 LocalizationService.HandleServerReply(EntityManager, user, $"New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{targetPrefabGuid.GetLocalizedName()}</color>");
             }
         }
         else if (isShiny)
         {
+            playerCharacter.PlaySequence(_shinySequence);
             LocalizationService.HandleServerReply(EntityManager, user, $"<color=#00FFFF>Shiny</color> unlocked: <color=green>{targetPrefabGuid.GetLocalizedName()}</color>");
         }
     }
@@ -235,21 +242,5 @@ internal static class FamiliarUnlockSystem
         }
 
         return false;
-    }
-    static void HandleFamiliarUnlockBuff(Entity playerCharacter)
-    {
-        if (playerCharacter.TryApplyAndGetBuff(_familiarUnlockBuff, out Entity buffEntity))
-        {
-            buffEntity.HasWith((ref LifeTime lifeTime) =>
-            {
-                lifeTime.Duration = 3f;
-                lifeTime.EndAction = LifeTimeEndAction.Destroy;
-            });
-
-            buffEntity.Remove<ServerControlsMovementBuff>();
-            buffEntity.Remove<ServerControlsRotationBuff>();
-            buffEntity.Remove<BuffModificationFlagData>();
-            buffEntity.Remove<BlockFeedBuff>();
-        }
     }
 }

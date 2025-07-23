@@ -163,24 +163,6 @@ internal static class BloodManager
                 maxBonus *= gainFactor;
             }
 
-            /*
-            try
-            {
-                if (playerCharacter.TryGetComponent(out VampireAttributeCapModificationsSource capModificationsSource)
-                    && capModificationsSource.ModificationsEntity.TryGetComponent(out VampireAttributeCapModifications capModifications)
-                    && BloodStatTypes.TryGetValue(bloodStatType, out UnitStatType unitStatType))
-                {
-                    AttributeCapModIds capModIds = capModifications.CapModIds.GetCap(unitStatType);
-                    capModId = modifyUnitStatBuff.AttributeCapType.Equals(AttributeCapType.SoftCapped) ?
-                        capModIds.SoftCapModId : capModIds.HardCapModId;
-                }
-            }
-            catch (Exception ex)
-            {
-                Core.Log.LogError($"[BloodManager] Error getting cap modifications: {ex}");
-            }
-            */
-
             statValue = maxBonus * ((float)xpData.Key / _maxLegacyLevel);
             return true;
         }

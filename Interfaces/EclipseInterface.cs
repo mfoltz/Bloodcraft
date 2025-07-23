@@ -1,19 +1,20 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Utilities;
-using ProjectM;
 using ProjectM.Network;
 using System.Globalization;
 using System.Text;
 using Unity.Entities;
 using static Bloodcraft.Interfaces.EclipseInterface;
 using static Bloodcraft.Services.EclipseService;
+using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 
 namespace Bloodcraft.Interfaces;
 internal class EclipseInterface
 {
+    // public static readonly bool LimitBreak = ConfigService.LimitBreak;
     public static readonly bool ExtraRecipes = ConfigService.ExtraRecipes;
     public static readonly int PrimalCost = ConfigService.PrimalJewelCost;
     public static readonly int MaxLevel = ConfigService.MaxLevel;
@@ -25,22 +26,27 @@ internal class EclipseInterface
 
     public const int MAX_PROFESSION_LEVEL = 100;
 }
+
+[Flags]
+public enum ReservedFlags : int
+{
+    None = 0,
+    // ExampleFlag = 1 << 0,
+}
 internal interface IVersionHandler<TProgressData>
 {
     void SendClientConfig(User user);
-    void SendClientProgress(Entity character, ulong steamId);
+    void SendClientProgress(PlayerInfo playerInfo);
     string BuildConfigMessage();
     string BuildProgressMessage(TProgressData data);
 }
 internal static class VersionHandler
 {
-    const string VERSION_1_3 = "1.3";
+    const string V1_3 = "1.3";
 
     public static readonly Dictionary<string, object> VersionHandlers = new()
     {
-        // { "1.1.2", new VersionHandler_1_1_2() },
-        // { "1.2.2", new VersionHandler_1_2_2() },
-        { VERSION_1_3, new VersionHandler_1_3() }
+        { V1_3, new VersionHandlerV1_3() },
     };
 
 #nullable enable
@@ -56,7 +62,7 @@ internal static class VersionHandler
 
 #nullable disable
 }
-internal class VersionHandler_1_3 : IVersionHandler<ProgressDataV1_3>
+internal class VersionHandlerV1_3 : IVersionHandler<ProgressDataV1_3>
 {
     public void SendClientConfig(User user)
     {
@@ -65,10 +71,11 @@ internal class VersionHandler_1_3 : IVersionHandler<ProgressDataV1_3>
 
         LocalizationService.HandleServerReply(Core.EntityManager, user, messageWithMAC);
     }
-    public void SendClientProgress(Entity playerCharacter, ulong steamId)
+    public void SendClientProgress(PlayerInfo playerInfo)
     {
-        Entity userEntity = playerCharacter.Read<PlayerCharacter>().UserEntity;
-        User user = userEntity.Read<User>();
+        Entity playerCharacter = playerInfo.CharEntity;
+        User user = playerInfo.User;
+        ulong steamId = user.PlatformId;
 
         ProgressDataV1_3 data = new()
         {
@@ -89,8 +96,8 @@ internal class VersionHandler_1_3 : IVersionHandler<ProgressDataV1_3>
     }
     public string BuildConfigMessage()
     {
-        List<float> weaponStatValues = Enum.GetValues(typeof(WeaponStatType)).Cast<WeaponStatType>().Select(stat => WeaponStatBaseCaps[stat]).ToList();
-        List<float> bloodStatValues = Enum.GetValues(typeof(BloodStatType)).Cast<BloodStatType>().Select(stat => BloodStatBaseCaps[stat]).ToList();
+        List<float> weaponStatValues = [..Enum.GetValues(typeof(WeaponStatType)).Cast<WeaponStatType>().Select(stat => WeaponStatBaseCaps[stat])];
+        List<float> bloodStatValues = [..Enum.GetValues(typeof(BloodStatType)).Cast<BloodStatType>().Select(stat => BloodStatBaseCaps[stat])];
 
         float prestigeStatMultiplier = PrestigeStatMultiplier;
         float statSynergyMultiplier = ClassStatMultiplier;
@@ -99,19 +106,21 @@ internal class VersionHandler_1_3 : IVersionHandler<ProgressDataV1_3>
         int maxLegacyLevel = MaxLegacyLevel;
         int maxExpertiseLevel = MaxExpertiseLevel;
         int maxFamiliarLevel = MaxFamiliarLevel;
-        int maxProfessionLevel = MAX_PROFESSION_LEVEL;
+        // int maxProfessionLevel = MAX_PROFESSION_LEVEL; // ah, can just use this as a catch-all for small new bits. neat
+        int reservedFlags = (int)ReservedFlags.None;
+
         bool extraRecipes = ExtraRecipes;
         int primalCost = PrimalCost;
 
         var sb = new StringBuilder();
         sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ConfigsToClient)
             .AppendFormat(CultureInfo.InvariantCulture, "{0:F2},{1:F2},{2},{3},{4},{5},{6},{7},{8},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel,
-            maxExpertiseLevel, maxFamiliarLevel, maxProfessionLevel, extraRecipes, primalCost);
+            maxExpertiseLevel, maxFamiliarLevel, reservedFlags, extraRecipes, primalCost);
 
-        sb.Append(string.Join(",", weaponStatValues.Select(val => val.ToString("F2"))))
+        sb.Append(string.Join(",", weaponStatValues.Select(val => val.ToString("F2", CultureInfo.InvariantCulture))))
             .Append(',');
 
-        sb.Append(string.Join(",", bloodStatValues.Select(val => val.ToString("F2"))))
+        sb.Append(string.Join(",", bloodStatValues.Select(val => val.ToString("F2", CultureInfo.InvariantCulture))))
             .Append(',');
 
         foreach (var classEntry in Classes.ClassWeaponBloodEnumMap)
@@ -120,10 +129,10 @@ internal class VersionHandler_1_3 : IVersionHandler<ProgressDataV1_3>
             var (weaponSynergies, bloodSynergies) = classEntry.Value;
 
             sb.AppendFormat(CultureInfo.InvariantCulture, "{0:D2},", (int)playerClass + 1);
-            sb.Append(string.Join("", weaponSynergies.Select(s => (s + 1).ToString("D2"))));
+            sb.Append(string.Join("", weaponSynergies.Select(s => (s + 1).ToString("D2", CultureInfo.InvariantCulture))));
             sb.Append(',');
 
-            sb.Append(string.Join("", bloodSynergies.Select(s => (s + 1).ToString("D2"))));
+            sb.Append(string.Join("", bloodSynergies.Select(s => (s + 1).ToString("D2", CultureInfo.InvariantCulture))));
             sb.Append(',');
         }
 
@@ -148,7 +157,7 @@ internal class VersionHandler_1_3 : IVersionHandler<ProgressDataV1_3>
             .AppendFormat(CultureInfo.InvariantCulture, "{0},{1:D2},{2:D2},{3},{4},", data.DailyQuestData.Type, data.DailyQuestData.Progress, data.DailyQuestData.Goal, data.DailyQuestData.Target, data.DailyQuestData.IsVBlood)
             .AppendFormat(CultureInfo.InvariantCulture, "{0},{1:D2},{2:D2},{3},{4},", data.WeeklyQuestData.Type, data.WeeklyQuestData.Progress, data.WeeklyQuestData.Goal, data.WeeklyQuestData.Target, data.WeeklyQuestData.IsVBlood)
             .AppendFormat(CultureInfo.InvariantCulture, "{0:D2}", data.ShiftSpellData);
-
+        
         return sb.ToString();
     }
 }

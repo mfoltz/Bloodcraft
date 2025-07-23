@@ -24,7 +24,6 @@ internal class Plugin : BasePlugin
         if (Application.productName != "VRisingServer")
         {
             LogInstance.LogInfo("Bloodcraft is a server mod and will not continue loading on the client; this is not an error, and likely just means you're using ServerLaunchFix in which case you may disregard this");
-
             return;
         }
 

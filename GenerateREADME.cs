@@ -22,6 +22,7 @@ internal static class GenerateREADME
 
     const string COMMANDS_HEADER = "## Commands";
     const string CONFIG_HEADER = "## Configuration";
+    const string SKIP = "DevCommands.cs";
 
     static readonly Dictionary<(string groupName, string groupShort), List<(string name, string shortHand, bool adminOnly, string usage, string description)>> _commandsByGroup
         = [];
@@ -63,7 +64,7 @@ internal static class GenerateREADME
     static void CollectCommands()
     {
         var files = Directory.GetFiles(CommandsPath, "*.cs")
-         .Where(file => !Path.GetFileName(file).Equals("TestCommands.cs", StringComparison.OrdinalIgnoreCase));
+         .Where(file => !Path.GetFileName(file).Equals(SKIP, StringComparison.OrdinalIgnoreCase));
 
         foreach (string file in files)
         {

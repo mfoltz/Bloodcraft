@@ -88,17 +88,17 @@ internal class ProfessionManager : DataManager<ProfessionData>
 {
     public class ProfessionData
     {
-        public Dictionary<ProfessionType, KeyValuePair<int, float>> Professions { get; set; } = [];
+        public Dictionary<Profession, KeyValuePair<int, float>> Professions { get; set; } = [];
     }
     static readonly Dictionary<ulong, ProfessionData> _data = [];
     protected override string FolderName => "Professions";
     protected override Dictionary<ulong, ProfessionData> DataMap => _data;
-    public static KeyValuePair<int, float> GetProfessionXP(ulong steamId, ProfessionType type)
+    public static KeyValuePair<int, float> GetProfessionXP(ulong steamId, Profession type)
     {
         if (!_data.TryGetValue(steamId, out var data)) return new(0, 0f);
         return data.Professions.TryGetValue(type, out var xp) ? xp : new(0, 0f);
     }
-    public void SetProfessionXP(ulong steamId, ProfessionType type, KeyValuePair<int, float> value)
+    public void SetProfessionXP(ulong steamId, Profession type, KeyValuePair<int, float> value)
     {
         if (!_data.TryGetValue(steamId, out var data))
         {

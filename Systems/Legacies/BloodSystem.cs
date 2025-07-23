@@ -336,7 +336,7 @@ internal static class BloodSystem
         if (GetPlayerBool(steamId, SCT_PLAYER_BL_KEY))
         {
             // Core.Log.LogInfo($"Legacy SCT for {user.CharacterName.Value} with gainedXP: {gainedXP} and delay: {delay}");
-            PlayerLegacySCTDelayRoutine(playerCharacter, userEntity, _red, gainedXP, delay).Start();
+            PlayerLegacySCTDelayRoutine(playerCharacter, userEntity, _red, gainedXP, delay).Run();
         }
     }
     static IEnumerator PlayerLegacySCTDelayRoutine(Entity playerCharacter, Entity userEntity, float3 color, float gainedXP, float delay) // maybe just have one of these in progression utilities but later

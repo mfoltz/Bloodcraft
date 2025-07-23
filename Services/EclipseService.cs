@@ -38,23 +38,18 @@ internal class EclipseService
     static readonly bool _professions = ConfigService.ProfessionSystem;
     static readonly bool _quests = ConfigService.QuestSystem;
 
-    static readonly WaitForSeconds _delay = new(2.5f);
-    static readonly WaitForSeconds _newUserDelay = new(15f);
-
-    const int MAX_RETRIES = 20;
     const string V1_3 = "1.3";
 
-    static readonly Regex _oldRegex = new(@"^\[(\d+)\]:(\d+)$");
     static readonly Regex _regex = new(@"^\[ECLIPSE\]\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
-
-    const string VERSION_1_3 = "1.3";
+    static readonly WaitForSeconds _throttle = new(0.05f);
+    static readonly WaitForSeconds _delay = new(0.25f);
     public static IReadOnlyDictionary<ulong, string> PendingRegistration => _pendingRegistration;
     static readonly ConcurrentDictionary<ulong, string> _pendingRegistration = [];
     public static IReadOnlyDictionary<ulong, string> RegisteredUsersAndClientVersions => _registeredUsersAndClientVersions;
     static readonly ConcurrentDictionary<ulong, string> _registeredUsersAndClientVersions = [];
     public EclipseService()
     {
-        EclipseServiceRoutine().Start();
+        EclipseServiceRoutine().Run();
     }
     public enum NetworkEventSubType
     {
@@ -80,7 +75,6 @@ internal class EclipseService
             switch (eventType)
             {
                 case (int)NetworkEventSubType.RegisterUser:
-                    // Core.Log.LogWarning($"[EclipseService.HandleClientMessage] {steamId}:Eclipse{modVersion} ({DateTime.Now})");
                     RegisterUser(steamId, modVersion);
                     break;
                 default:
@@ -103,15 +97,6 @@ internal class EclipseService
                 // Core.Log.LogInfo($"{steamId}:Eclipse{version} registered!");
             }
         }
-
-        /*
-        else
-        {
-            // DelayedRegistrationRoutine(steamId, version).Start();
-            _pendingRegistration.TryAdd(steamId, version);
-            Core.Log.LogInfo($"{steamId}:Eclipse{version} pending registration...");
-        }
-        */
     }
     public static void HandlePreRegistration(ulong steamId)
     {
@@ -123,7 +108,6 @@ internal class EclipseService
     }
     public static bool HandleRegistration(PlayerInfo playerInfo, ulong steamId, string version)
     {
-        // Core.Log.LogWarning($"[EclipseService.HandleRegistration] {steamId}:Eclipse{version}");
         if (_registeredUsersAndClientVersions.TryAdd(steamId, version))
         {
             try
@@ -133,10 +117,9 @@ internal class EclipseService
                     default:
                         if (IsVersion1_3(version))
                         {
-                            // Core.Log.LogWarning($"[EclipseService.HandleRegistration] - {version}");
-                            IVersionHandler<ProgressDataV1_3> versionHandler13X = VersionHandler.GetHandler<ProgressDataV1_3>(VERSION_1_3);
+                            IVersionHandler<ProgressDataV1_3> versionHandler13X = VersionHandler.GetHandler<ProgressDataV1_3>(V1_3);
                             versionHandler13X?.SendClientConfig(playerInfo.User);
-                            versionHandler13X?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                            versionHandler13X?.SendClientProgress(playerInfo);
                             _pendingRegistration.TryRemove(steamId, out var _);
                             return true;
                         }
@@ -155,29 +138,6 @@ internal class EclipseService
         {
             Core.Log.LogWarning($"Failed to add {steamId}:Eclipse{version} to RegisteredUsersAndClientVersions dictionary!");
             return false;
-        }
-    }
-    static IEnumerator DelayedRegistrationRoutine(ulong steamId, string version)
-    {
-        int tries = 0;
-
-        while (tries <= MAX_RETRIES)
-        {
-            yield return _newUserDelay;
-
-            if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists() && playerInfo.User.IsConnected)
-            {
-                if (HandleRegistration(playerInfo, steamId, version))
-                {
-                    Core.Log.LogInfo($"{steamId}:Eclipse{version} registered for Eclipse updates from PlayerCache | (DelayedRegistration)");
-                }
-
-                yield break;
-            }
-            else
-            {
-                tries++;
-            }
         }
     }
     static IEnumerator EclipseServiceRoutine()
@@ -201,26 +161,12 @@ internal class EclipseService
                     {
                         switch (version)
                         {
-                            /*
-                            case V1_1_2:
-                                IVersionHandler<ProgressDataV1_1_2> versionHandlerV1_1_2 = VersionHandler.GetHandler<ProgressDataV1_1_2>(version);
-                                versionHandlerV1_1_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-                                break;
-                            case V1_2_2:
-                                IVersionHandler<ProgressDataV1_2_2> versionHandlerV1_2_2 = VersionHandler.GetHandler<ProgressDataV1_2_2>(version);
-                                versionHandlerV1_2_2.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-                                break;
-                            case V1_3_2:
-                                IVersionHandler<ProgressDataV1_3> versionHandlerV1_3_2 = VersionHandler.GetHandler<ProgressDataV1_3>(version);
-                                versionHandlerV1_3_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-                                break;
-                            */
                             default:
                                 if (IsVersion1_3(version))
                                 {
                                     if ((_legacies || _expertise || _classes) && !playerInfo.CharEntity.HasBuff(Buffs.BonusStatsBuff)) playerInfo.CharEntity.TryApplyBuff(Buffs.BonusStatsBuff);
                                     IVersionHandler<ProgressDataV1_3> versionHandler13X = VersionHandler.GetHandler<ProgressDataV1_3>(V1_3);
-                                    versionHandler13X?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                                    versionHandler13X?.SendClientProgress(playerInfo);
                                     break;
                                 }
                                 else
@@ -237,7 +183,7 @@ internal class EclipseService
                     }
                 }
 
-                yield return null;
+                yield return _throttle;
             }
 
             yield return _delay;
@@ -429,35 +375,35 @@ internal class EclipseService
 
         if (_professions)
         {
-            IProfession profession = ProfessionFactory.GetProfession(ProfessionType.Enchanting);
+            IProfession profession = ProfessionFactory.GetProfession(Profession.Enchanting);
             enchantingLevel = profession.GetProfessionData(steamId).Key;
             enchantingProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            profession = ProfessionFactory.GetProfession(ProfessionType.Alchemy);
+            profession = ProfessionFactory.GetProfession(Profession.Alchemy);
             alchemyLevel = profession.GetProfessionData(steamId).Key;
             alchemyProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            profession = ProfessionFactory.GetProfession(ProfessionType.Harvesting);
+            profession = ProfessionFactory.GetProfession(Profession.Harvesting);
             harvestingLevel = profession.GetProfessionData(steamId).Key;
             harvestingProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            profession = ProfessionFactory.GetProfession(ProfessionType.Blacksmithing);
+            profession = ProfessionFactory.GetProfession(Profession.Blacksmithing);
             blacksmithingLevel = profession.GetProfessionData(steamId).Key;
             blacksmithingProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            profession = ProfessionFactory.GetProfession(ProfessionType.Tailoring);
+            profession = ProfessionFactory.GetProfession(Profession.Tailoring);
             tailoringLevel = profession.GetProfessionData(steamId).Key;
             tailoringProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            profession = ProfessionFactory.GetProfession(ProfessionType.Woodcutting);
+            profession = ProfessionFactory.GetProfession(Profession.Woodcutting);
             woodcuttingLevel = profession.GetProfessionData(steamId).Key;
             woodcuttingProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            profession = ProfessionFactory.GetProfession(ProfessionType.Mining);
+            profession = ProfessionFactory.GetProfession(Profession.Mining);
             miningLevel = profession.GetProfessionData(steamId).Key;
             miningProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            profession = ProfessionFactory.GetProfession(ProfessionType.Fishing);
+            profession = ProfessionFactory.GetProfession(Profession.Fishing);
             fishingLevel = profession.GetProfessionData(steamId).Key;
             fishingProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 

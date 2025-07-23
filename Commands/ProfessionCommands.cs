@@ -37,7 +37,7 @@ internal static class ProfessionCommands
             return;
         }
 
-        if (!Enum.TryParse(profession, true, out ProfessionType professionType))
+        if (!Enum.TryParse(profession, true, out Profession professionType))
         {
             LocalizationService.HandleReply(ctx, $"Valid professions: {ProfessionFactory.GetProfessionNames()}");
             return;
@@ -86,7 +86,7 @@ internal static class ProfessionCommands
             return;
         }
 
-        if (!Enum.TryParse(profession, true, out ProfessionType professionType))
+        if (!Enum.TryParse(profession, true, out Profession professionType))
         {
             LocalizationService.HandleReply(ctx, $"Valid professions: {ProfessionFactory.GetProfessionNames()}");
             return;

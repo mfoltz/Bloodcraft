@@ -112,6 +112,10 @@ internal static class VExtensions
     {
         return PrefabGuidNames.TryGetValue(prefabGuid, out string prefabName) ? $"{prefabName} {prefabGuid}" : EMPTY_KEY;
     }
+    public static string GetSequenceName(this SequenceGUID sequenceGuid)
+    {
+        return SequenceGuidNames.TryGetValue(sequenceGuid, out string sequenceName) ? sequenceName: string.Empty;
+    }
     public static string GetLocalizedName(this PrefabGUID prefabGuid)
     {
         string prefabName = GetNameFromPrefabGuid(prefabGuid);
@@ -387,6 +391,10 @@ internal static class VExtensions
     {
         return ServerGameManager.HasBuff(entity, buffPrefabGuid.ToIdentifier());
     }
+    public static bool HasBuff<T>(this Entity entity)
+    {
+        return BuffUtility.HasBuff<T>(EntityManager, entity);
+    }
     public static unsafe bool TryGetBuffer<T>(this Entity entity, out DynamicBuffer<T> dynamicBuffer) where T : struct
     {
         if (ServerGameManager.TryGetBuffer(entity, out dynamicBuffer))
@@ -469,6 +477,19 @@ internal static class VExtensions
 
         throw new InvalidOperationException("Entity does not have Blood!");
     }
+    public static AiMoveSpeeds GetMoveSpeeds(this Entity entity)
+    {
+        if (entity.TryGetComponent(out AiMoveSpeeds aiMoveSpeeds))
+        {
+            return aiMoveSpeeds;
+        }
+
+        throw new InvalidOperationException("Entity does not have Blood!");
+    }
+    public static EntityInput GetInput(this Entity entity)
+    {
+        return ServerGameManager.GetInput(entity);
+    }
     public static (float physicalPower, float spellPower) GetPowerTuple(this Entity entity)
     {
         if (entity.TryGetComponent(out UnitStats unitStats))
@@ -498,10 +519,6 @@ internal static class VExtensions
         }
 
         return false;
-    }
-    public static void PlaySequence(this Entity entity, SequenceGUID sequenceGuid)
-    {
-        ServerGameManager.PlaySequenceOnTarget(entity, sequenceGuid);
     }
     public static void Destroy(this Entity entity, DestroyMode mode = DestroyMode.None)
     {
@@ -575,7 +592,7 @@ internal static class VExtensions
             });
         }
     }
-    public static bool IsAllies(this Entity entity, Entity player)
+    public static bool IsAllied(this Entity entity, Entity player)
     {
         return ServerGameManager.IsAllies(entity, player);
     }

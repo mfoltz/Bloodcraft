@@ -1,13 +1,15 @@
-﻿using Bloodcraft.Resources;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
-using System.Diagnostics;
 using System.Text;
 using Unity.Entities;
+using Unity.Mathematics;
 using VampireCommandFramework;
+using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
@@ -19,8 +21,8 @@ internal static class Misc
     static SystemService SystemService => Core.SystemService;
     static GameDataSystem GameDataSystem => SystemService.GameDataSystem;
 
-    static readonly Random _random = new();
-    const string STAT_MOD = "StatMod";
+    static readonly System.Random _random = new();
+    // const string STAT_MOD = "StatMod";
     public enum SpellSchool : int
     {
         Shadow = 0,
@@ -459,79 +461,24 @@ internal static class Misc
     {
         return _random.NextDouble() < chance;
     }
-    public static class Performance
+
+    const float BLINK_RADIUS = 25f;
+
+    static readonly List<SequenceGUID> _blinkSequences = new()
     {
-        static readonly Stopwatch _stopwatch = new();
-        static string _label = "";
-        static long _totalElapsedTicks = 0;
-        public static void Start(string label)
+
+    };
+    public static void RevealNearbyPrestiges(float3 position)
+    {
+        List<PlayerInfo> onlineNearbyPlayers = Progression.GetUsersNearPosition(position, BLINK_RADIUS);
+        IPrestige handler = PrestigeFactory.GetPrestige(PrestigeType.Experience);
+
+        foreach (PlayerInfo playerInfo in onlineNearbyPlayers)
         {
-            _label = label;
-            _stopwatch.Restart();
-            Core.Log.LogInfo($"[TIMER] Start - {_label}");
-        }
-        public static void Stop()
-        {
-            _stopwatch.Stop();
+            int prestigeLevel = handler.GetPrestigeLevel(playerInfo.User.PlatformId);
 
-            long elapsedTicks = _stopwatch.ElapsedTicks;
-            _totalElapsedTicks += elapsedTicks;
-
-            double elapsedMilliseconds = _stopwatch.Elapsed.TotalMilliseconds;
-
-            Core.Log.LogInfo($"[TIMER] Stop - {_label} ({_totalElapsedTicks}t | {elapsedMilliseconds:F3}ms)");
-
-            // Reset
-            _totalElapsedTicks = 0;
         }
     }
-
-    /*
-    public static class PerformanceTimer
-    {
-        class TimerData
-        {
-            public Stopwatch Stopwatch = new();
-            public long TotalElapsedTicks = 0;
-        }
-
-        static readonly Dictionary<string, TimerData> _timers = [];
-        public static void Start(string label)
-        {
-            if (!_timers.TryGetValue(label, out var timerData))
-            {
-                timerData = new TimerData();
-                _timers[label] = timerData;
-            }
-
-            timerData.Stopwatch.Restart();
-            Core.Log.LogInfo($"[TIMER] Start - {label}");
-        }
-        public static void Stop(string label)
-        {
-            if (!_timers.TryGetValue(label, out var timerData))
-            {
-                Core.Log.LogWarning($"[TIMER] Attempted to stop unknown timer: {label}");
-                return;
-            }
-
-            timerData.Stopwatch.Stop();
-            long elapsedTicks = timerData.Stopwatch.ElapsedTicks;
-            timerData.TotalElapsedTicks += elapsedTicks;
-            double elapsedMilliseconds = timerData.Stopwatch.Elapsed.TotalMilliseconds;
-
-            Core.Log.LogInfo($"[TIMER] Stop - {label} ({timerData.TotalElapsedTicks}t | {elapsedMilliseconds:F3}ms)");
-        }
-        public static void Reset(string label)
-        {
-            _timers.Remove(label);
-        }
-        public static void ResetAll()
-        {
-            _timers.Clear();
-        }
-    }
-    */
 
     /*
     public static bool EarnedPermaShroud()

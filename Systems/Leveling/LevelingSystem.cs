@@ -257,7 +257,7 @@ internal static class LevelingSystem
 
         if (GetPlayerBool(steamId, SCT_PLAYER_LVL_KEY))
         {
-            PlayerExperienceSCTDelayRoutine(playerCharacter, userEntity, _gold, gainedXP, delay).Start();
+            PlayerExperienceSCTDelayRoutine(playerCharacter, userEntity, _gold, gainedXP, delay).Run();
         }
     }
     static IEnumerator PlayerExperienceSCTDelayRoutine(Entity playerCharacter, Entity userEntity, float3 color, float gainedXP, float delay) // maybe just have one of these in progression utilities but later

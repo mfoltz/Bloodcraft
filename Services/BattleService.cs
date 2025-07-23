@@ -72,8 +72,8 @@ internal class BattleService
     static bool _serviceActive = false;
     static bool _matchPending = false;
 
-    // Sanguis reflection
-    public static bool _awardSanguis = false;
+    // Penumbra reflection
+    public static bool _awardTokens = false;
     public static int _tokensTransferred;
     public static PropertyInfo _tokensProperty;
     public static MethodInfo _saveTokens;
@@ -94,7 +94,7 @@ internal class BattleService
             _sctPosition = new(battlePosition.x, battlePosition.y + SCT_HEIGHT, battlePosition.z);
 
             GenerateBattleFormations(battlePosition);
-            BattleUpdateRoutine().Start();
+            BattleUpdateRoutine().Run();
 
             _serviceActive = true;
 
@@ -356,17 +356,17 @@ internal class BattleService
         EnableAggro(PlayerBattleFamiliars[steamIdOne]);
         EnableAggro(PlayerBattleFamiliars[steamIdTwo]);
 
-        MatchTimeoutRoutine(matchPair).Start();
+        MatchTimeoutRoutine(matchPair).Run();
     }
     static IEnumerator BattleSummoningRoutine(Entity playerOne, User playerUserOne, Entity playerTwo, User playerUserTwo,
     List<PrefabGUID> playerOneFamiliars, List<PrefabGUID> playerTwoFamiliars)
     {
-        bool allies = playerOne.IsAllies(playerTwo);
+        bool allies = playerOne.IsAllied(playerTwo);
 
         for (int i = 0; i < TEAM_SIZE; i++)
         {
-            InstantiateFamiliarRoutine(playerUserOne, playerOne, playerOneFamiliars[i].GuidHash, true, TEAM_ONE, PlayerOneFamiliarPositions[i], allies).Start();
-            InstantiateFamiliarRoutine(playerUserTwo, playerTwo, playerTwoFamiliars[i].GuidHash, true, TEAM_TWO, PlayerTwoFamiliarPositions[i], allies).Start();
+            InstantiateFamiliarRoutine(playerUserOne, playerOne, playerOneFamiliars[i].GuidHash, true, TEAM_ONE, PlayerOneFamiliarPositions[i], allies).Run();
+            InstantiateFamiliarRoutine(playerUserTwo, playerTwo, playerTwoFamiliars[i].GuidHash, true, TEAM_TWO, PlayerTwoFamiliarPositions[i], allies).Run();
             yield return _delay;
         }
     }
@@ -437,7 +437,7 @@ internal class BattleService
 
             BattleSummoningRoutine(playerOneInfo.CharEntity, playerOneInfo.User,
                 playerTwoInfo.CharEntity, playerTwoInfo.User,
-                [..battleGroupOne], [..battleGroupTwo]).Start();
+                [..battleGroupOne], [..battleGroupTwo]).Run();
         }
         else
         {

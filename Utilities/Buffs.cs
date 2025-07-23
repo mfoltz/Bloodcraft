@@ -313,14 +313,22 @@ internal static class Buffs
             UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Add(new PrefabGUID(buff));
         }
     }
-    public static bool PlayerInCombat(this Entity entity)
+    public static bool InPvECombat(this Entity entity)
+    {
+        return entity.HasBuff(PvECombatBuff);
+    }
+    public static bool InPvPCombat(this Entity entity)
+    {
+        return entity.HasBuff(PvPCombatBuff);
+    }
+    public static bool InCombat(this Entity entity)
     {
         if (entity.IsPlayer())
         {
-            return entity.HasBuff(PvECombatBuff) || entity.HasBuff(PvPCombatBuff);
+            return entity.InPvECombat() || entity.InPvPCombat();
         }
 
-        return false;
+        return entity.HasBuff<InCombatBuff>();
     }
     public static void GetStackableBuffs()
     {
@@ -362,6 +370,11 @@ internal static class Buffs
     }
     public static void RefreshStats(Entity entity)
     {
+        if (entity.TryGetBuff(BonusStatsBuff, out Entity buffEntity))
+        {
+            buffEntity.Remove<ModifyUnitStatBloodBuff_DOTS>();
+        }
+
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
         {
             BuffPrefabGUID = BonusStatsBuff,

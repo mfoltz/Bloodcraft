@@ -110,7 +110,7 @@ internal static class EmoteSystemPatch
                     {
                         LocalizationService.HandleServerReply(EntityManager, user, "You can't use emote actions when using bat form!");
                     }
-                    else if (useEmoteEvent.Action.Equals(_beckonAbilityGroup) && playerCharacter.PlayerInCombat())
+                    else if (useEmoteEvent.Action.Equals(_beckonAbilityGroup) && playerCharacter.InCombat())
                     {
                         LocalizationService.HandleServerReply(EntityManager, user, "You can't interact with your familiar during combat!");
                     }
@@ -165,6 +165,26 @@ internal static class EmoteSystemPatch
         {
             Entity familiar = GetActiveFamiliar(playerCharacter);
 
+            if (steamId.HasDismissedFamiliar())
+            {
+                if (playerCharacter.InPvPCombat())
+                {
+                    LocalizationService.HandleServerReply(EntityManager, user, "You can't call your familiar during PvP combat!");
+                    return;
+                }
+                else CallFamiliar(playerCharacter, familiar, user, steamId);
+            }
+            else if (familiar.HasBuff(_interactModeBuff))
+            {
+                InteractMode(user, playerCharacter, steamId);
+                DismissFamiliar(playerCharacter, familiar, user, steamId);
+            }
+            else
+            {
+                DismissFamiliar(playerCharacter, familiar, user, steamId);
+            }
+
+            /*
             if (familiar.Exists())
             {
                 if (steamId.HasDismissedFamiliar())
@@ -190,6 +210,7 @@ internal static class EmoteSystemPatch
             {
                 LocalizationService.HandleServerReply(EntityManager, user, "Active familiar doesn't exist! If that doesn't seem right try using '<color=white>.fam reset</color>'.");
             }
+            */
         }
         else
         {
@@ -204,7 +225,7 @@ internal static class EmoteSystemPatch
             return;
         }
 
-        if (playerCharacter.PlayerInCombat())
+        if (playerCharacter.InCombat())
         {
             LocalizationService.HandleServerReply(EntityManager, user, "You can't toggle familiar combat mode during PvE/PvP combat!");
             return;

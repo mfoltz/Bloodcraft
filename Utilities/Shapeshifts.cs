@@ -364,7 +364,7 @@ internal static class Shapeshifts
         }
 
         ReplaceAbilityOnSlotSystem.OnUpdate();
-        ExoFormCountdown(buffEntity, playerCharacter, userEntity, duration - EXO_COUNTDOWN).Start();
+        ExoFormCountdown(buffEntity, playerCharacter, userEntity, duration - EXO_COUNTDOWN).Run();
     }
     public static float GetShapeshiftAbilityCooldown<T>(PrefabGUID abilityGroup) where T : Shapeshift, new()
     {

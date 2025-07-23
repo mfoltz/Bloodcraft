@@ -147,12 +147,12 @@ internal class QuestService
         _harvestableResourceQueryDesc = EntityManager.CreateQueryDesc(allTypes: _harvestableResourceAllComponents, typeIndices: [0], options: EntityQueryOptions.IncludeSpawnTag);
 
         Configuration.GetQuestRewardItems();
-        QuestServiceRoutine().Start();
+        QuestServiceRoutine().Run();
     }
     static IEnumerator QuestServiceRoutine()
     {
         if (_craftables) InitializeCraftables();
-        if (_harvestables) InitializeHarvestables().Start();
+        if (_harvestables) InitializeHarvestables().Run();
 
         while (true)
         {
