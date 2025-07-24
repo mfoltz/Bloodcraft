@@ -24,7 +24,7 @@ using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Familiars.FamiliarBindingSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarUnlockSystem;
 using static Bloodcraft.Utilities.Familiars.ActiveFamiliarManager;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 
 namespace Bloodcraft.Utilities;
 internal static class Familiars

@@ -25,7 +25,7 @@ using static Bloodcraft.Systems.Familiars.FamiliarLevelingSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarUnlockSystem;
 using static Bloodcraft.Utilities.Familiars;
 using static Bloodcraft.Utilities.Familiars.ActiveFamiliarManager;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Commands;

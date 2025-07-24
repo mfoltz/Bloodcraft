@@ -9,7 +9,7 @@ using System.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 using static Bloodcraft.Utilities.Progression;
 using Random = System.Random;
 using User = ProjectM.Network.User;

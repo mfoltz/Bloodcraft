@@ -10,7 +10,7 @@ using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 
 namespace Bloodcraft.Systems.Leveling;
 internal static class PrestigeManager

@@ -9,7 +9,7 @@ using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarExperienceManager;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Systems.Familiars;

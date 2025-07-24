@@ -18,7 +18,7 @@ using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarEquipmentManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarExperienceManager;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Systems.Familiars;

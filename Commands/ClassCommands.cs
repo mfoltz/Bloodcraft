@@ -7,7 +7,7 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Leveling.ClassManager;
 using static Bloodcraft.Utilities.Classes;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 

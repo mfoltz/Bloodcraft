@@ -7,7 +7,7 @@ using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Utilities.Misc;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 using static VCF.Core.Basics.RoleCommands;
 
 namespace Bloodcraft.Commands;

@@ -9,7 +9,7 @@ using System.Text;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 
 namespace Bloodcraft.Utilities;
 internal static class Misc
@@ -127,7 +127,7 @@ internal static class Misc
         { ScrollingTextMessage.ProfessionExperience, SCT_PROFESSIONS_KEY },
         { ScrollingTextMessage.ProfessionYields, SCT_YIELD_KEY }
     };
-    public static class PlayerBoolsManager
+    public static class PlayerBools
     {
         public const string EXPERIENCE_LOG_KEY = "ExperienceLogging";
         public const string QUEST_LOG_KEY = "QuestLogging";
@@ -152,18 +152,37 @@ internal static class Misc
         public const string SHROUD_KEY = "Shroud";
         public const string CLASS_BUFFS_KEY = "Passives";
         public const string PRESTIGE_BUFFS_KEY = "PrestigeBuffs";
-        public const string FREE_BLOOD_RST_PREFIX = "FreeBloodReset_";
-        public const string FREE_WEAPON_RST_PREFIX = "FreeWeaponReset_";
 
-        public static string GetFreeBloodResetKey(BloodType type)
-        {
-            return $"{FREE_BLOOD_RST_PREFIX}{type}";
-        }
+        public const string WORKER_KEY = nameof(BloodType.Worker);
+        public const string WARRIOR_KEY = nameof(BloodType.Warrior);
+        public const string SCHOLAR_KEY = nameof(BloodType.Scholar);
+        public const string ROGUE_KEY = nameof(BloodType.Rogue);
+        public const string MUTANT_KEY = nameof(BloodType.Mutant);
+        public const string VBLOOD_KEY = nameof(BloodType.VBlood);
+        public const string NONE_BLOOD_KEY = nameof(BloodType.None);
+        public const string GATE_BOSS_KEY = nameof(BloodType.GateBoss);
+        public const string DRACULIN_KEY = nameof(BloodType.Draculin);
+        public const string IMMORTAL_KEY = nameof(BloodType.Immortal);
+        public const string CREATURE_KEY = nameof(BloodType.Creature);
+        public const string BRUTE_KEY = nameof(BloodType.Brute);
+        public const string CORRUPTION_KEY = nameof(BloodType.Corruption);
 
-        public static string GetFreeWeaponResetKey(WeaponType type)
-        {
-            return $"{FREE_WEAPON_RST_PREFIX}{type}";
-        }
+        public const string SWORD_KEY = nameof(WeaponType.Sword);
+        public const string AXE_KEY = nameof(WeaponType.Axe);
+        public const string MACE_KEY = nameof(WeaponType.Mace);
+        public const string SPEAR_KEY = nameof(WeaponType.Spear);
+        public const string CROSSBOW_KEY = nameof(WeaponType.Crossbow);
+        public const string GREATSWORD_KEY = nameof(WeaponType.GreatSword);
+        public const string SLASHERS_KEY = nameof(WeaponType.Slashers);
+        public const string PISTOLS_KEY = nameof(WeaponType.Pistols);
+        public const string REAPER_KEY = nameof(WeaponType.Reaper);
+        public const string LONGBOW_KEY = nameof(WeaponType.Longbow);
+        public const string WHIP_KEY = nameof(WeaponType.Whip);
+        public const string UNARMED_KEY = nameof(WeaponType.Unarmed);
+        public const string FISHING_POLE_KEY = nameof(WeaponType.FishingPole);
+        public const string TWIN_BLADES_KEY = nameof(WeaponType.TwinBlades);
+        public const string DAGGERS_KEY = nameof(WeaponType.Daggers);
+        public const string CLAWS_KEY = nameof(WeaponType.Claws);
 
         public static readonly Dictionary<string, bool> DefaultBools = new()
         {
@@ -189,21 +208,39 @@ internal static class Misc
             [SHAPESHIFT_KEY] = false,
             [SHROUD_KEY] = true,
             [CLASS_BUFFS_KEY] = false,
-            [PRESTIGE_BUFFS_KEY] = true
+            [PRESTIGE_BUFFS_KEY] = true,
+
+            [WORKER_KEY] = true,
+            [WARRIOR_KEY] = true,
+            [SCHOLAR_KEY] = true,
+            [ROGUE_KEY] = true,
+            [MUTANT_KEY] = true,
+            [VBLOOD_KEY] = true,
+            [NONE_BLOOD_KEY] = true,
+            [GATE_BOSS_KEY] = true,
+            [DRACULIN_KEY] = true,
+            [IMMORTAL_KEY] = true,
+            [CREATURE_KEY] = true,
+            [BRUTE_KEY] = true,
+            [CORRUPTION_KEY] = true,
+
+            [SWORD_KEY] = true,
+            [AXE_KEY] = true,
+            [MACE_KEY] = true,
+            [SPEAR_KEY] = true,
+            [CROSSBOW_KEY] = true,
+            [GREATSWORD_KEY] = true,
+            [SLASHERS_KEY] = true,
+            [PISTOLS_KEY] = true,
+            [REAPER_KEY] = true,
+            [LONGBOW_KEY] = true,
+            [WHIP_KEY] = true,
+            [UNARMED_KEY] = true,
+            [FISHING_POLE_KEY] = true,
+            [TWIN_BLADES_KEY] = true,
+            [DAGGERS_KEY] = true,
+            [CLAWS_KEY] = true
         };
-
-        static PlayerBoolsManager()
-        {
-            foreach (WeaponType weaponType in Enum.GetValues(typeof(WeaponType)))
-            {
-                DefaultBools[GetFreeWeaponResetKey(weaponType)] = true;
-            }
-
-            foreach (BloodType bloodType in Enum.GetValues(typeof(BloodType)))
-            {
-                DefaultBools[GetFreeBloodResetKey(bloodType)] = true;
-            }
-        }
         public static bool GetPlayerBool(ulong steamId, string boolKey)
         {
             var bools = DataService.PlayerBoolsManager.LoadPlayerBools(steamId);

@@ -10,7 +10,7 @@ using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarEquipmentManager;
 using static Bloodcraft.Utilities.Familiars;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 using static Bloodcraft.Utilities.Shapeshifts;
 using User = ProjectM.Network.User;
 
