@@ -333,7 +333,7 @@ internal static class WeaponSystem
         if (GetPlayerBool(steamId, SCT_PLAYER_WEP_KEY))
         {
             // Core.Log.LogInfo($"Expertise SCT for {user.CharacterName.Value} with gainedXP: {gainedXP} and delay: {delay}");
-            PlayerExpertiseSCTDelayRoutine(playerCharacter, userEntity, _grey, gainedXP, delay).Run();
+            PlayerExpertiseSCTDelayRoutine(playerCharacter, userEntity, _grey, gainedXP, delay).Start();
         }
     }
     static void HandleWeaponLevelUp(User user, WeaponType weaponType, int newLevel, ulong steamID)

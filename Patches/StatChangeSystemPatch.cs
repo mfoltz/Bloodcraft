@@ -162,7 +162,7 @@ internal static class StatChangeSystemPatch
                         {
                             Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
-                            if (_familiarPvP && familiar.FamiliarEligibleForCombat())
+                            if (_familiarPvP && familiar.EligibleForCombat())
                             {
                                 Familiars.AddToFamiliarAggroBuffer(playerCharacter, familiar, [damageTakenEvent.Entity]);
                             }
@@ -197,7 +197,7 @@ internal static class StatChangeSystemPatch
     {
         Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
-        if (familiar.TryGetComponent(out BehaviourTreeState behaviourTreeState) && familiar.FamiliarEligibleForCombat())
+        if (familiar.TryGetComponent(out BehaviourTreeState behaviourTreeState) && familiar.EligibleForCombat())
         {
             if (!behaviourTreeState.Value.Equals(GenericEnemyState.Combat))
             {

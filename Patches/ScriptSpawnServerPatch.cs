@@ -149,7 +149,7 @@ internal static class ScriptSpawnServerPatch
                     case 7 when _legacies && BloodSystem.BloodBuffToBloodType.ContainsKey(prefabGuid):
                         Buffs.RefreshStats(buffTarget);
                         break;
-                    case 8 when _familiars && owner.IsFamiliar() && owner.IsAllied(buffTarget):
+                    case 8 when _familiars && owner.IsFamiliar() && owner.IsAllies(buffTarget):
                         buffEntity.Destroy();
                         break;
                     case 9 when _familiars:
@@ -163,7 +163,7 @@ internal static class ScriptSpawnServerPatch
                         if (buffTarget.TryGetFollowedPlayer(out playerCharacter))
                         {
                             Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
-                            if (familiar.Exists()) Familiars.HandleFamiliarShapeshiftRoutine(playerCharacter.GetUser(), playerCharacter, familiar).Run();
+                            if (familiar.Exists()) Familiars.HandleFamiliarShapeshiftRoutine(playerCharacter.GetUser(), playerCharacter, familiar).Start();
                         }
                         break;
                     default:
@@ -417,7 +417,7 @@ internal static class ScriptSpawnServerPatch
                 equippableBuffs.Dispose();
             }
 
-            Familiars.FamiliarSyncDelayRoutine(familiar, servant).Run();
+            Familiars.FamiliarSyncDelayRoutine(familiar, servant).Start();
         }
     }
 

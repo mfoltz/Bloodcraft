@@ -174,7 +174,7 @@ internal static class FamiliarBindingSystem
                     if (PlayerBattleGroups[steamId].Count == 0 &&
                         PlayerBattleGroups[pairedId].Count == 0)
                     {
-                        BattleService.BattleCountdownRoutine((steamId, pairedId)).Run();
+                        BattleService.BattleCountdownRoutine((steamId, pairedId)).Start();
                     }
                 }
             }
@@ -232,7 +232,7 @@ internal static class FamiliarBindingSystem
                     // EquipFamiliar(steamId, familiarId.GuidHash, servant, familiar);
 
                     Utilities.Familiars.ActiveFamiliarManager.UpdateActiveFamiliarData(steamId, familiar, servant, familiarId.GuidHash);
-                    EquipFamiliarAndApplyStatsRoutine(steamId, servant, familiar, familiarId.GuidHash).Run();
+                    EquipFamiliarAndApplyStatsRoutine(steamId, servant, familiar, familiarId.GuidHash).Start();
 
                     return true;
                 }
@@ -800,10 +800,8 @@ internal static class FamiliarBindingSystem
     static void HandleResistanceBuffForShiny(Entity familiar)
     {
         string familiarName = familiar.GetPrefabGuid().GetPrefabName();
-        
-        if (!familiarName.Contains("golem", StringComparison.OrdinalIgnoreCase)
-            && !familiarName.Contains("elemental", StringComparison.OrdinalIgnoreCase)
-            && !familiarName.Contains("spidertank", StringComparison.OrdinalIgnoreCase)) return;
+
+        if (!familiarName.Contains("golem", StringComparison.OrdinalIgnoreCase) && !familiarName.Contains("spidertank", StringComparison.OrdinalIgnoreCase)) return;
         else if (familiar.TryGetComponent(out BuffResistances buffResistances))
         {
             Entity resistanceBuff = buffResistances.SettingsEntity._Value;
@@ -969,7 +967,7 @@ internal static class FamiliarBindingSystem
             // servant.Remove<DisableWhenNoPlayersInRange>();
             // servant.Remove<DisableWhenNoPlayersInRangeOfChunk>();
 
-            DisableFamiliarServantRoutine(servant, coffin).Run(); // doing this immediately is reverted by server idk
+            DisableFamiliarServantRoutine(servant, coffin).Start(); // doing this immediately is reverted by server idk
 
             return servant;
         }

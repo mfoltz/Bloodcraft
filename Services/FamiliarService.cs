@@ -29,7 +29,7 @@ internal class FamiliarService
     public FamiliarService()
     {
         _familiarQueryDesc = EntityManager.CreateQueryDesc(_familiarAllComponents, options: EntityQueryOptions.IncludeDisabled);
-        DisabledFamiliarPositionUpdateRoutine().Run();
+        DisabledFamiliarPositionUpdateRoutine().Start();
     }
     static IEnumerator DisabledFamiliarPositionUpdateRoutine()
     {

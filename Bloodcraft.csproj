@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AssemblyName>Bloodcraft</AssemblyName>
-		<Version>1.11.14</Version>
+		<Version>1.10.13</Version>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<RestoreSources>
 			https://api.nuget.org/v3/index.json;

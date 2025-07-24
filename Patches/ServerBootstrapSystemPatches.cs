@@ -34,7 +34,6 @@ internal static class ServerBootstrapSystemPatches
     static readonly PrefabGUID _insideWoodenCoffin = new(381160212);
     static readonly PrefabGUID _insideStoneCoffin = new(569692162);
 
-    // static readonly bool _limitBreak = ConfigService.LimitBreak;
     static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _legacies = ConfigService.LegacySystem;
     static readonly bool _leveling = ConfigService.LevelingSystem;
@@ -73,7 +72,7 @@ internal static class ServerBootstrapSystemPatches
         Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
         bool exists = playerCharacter.Exists();
 
-        UpdatePlayerData(steamId, playerCharacter, userEntity, user, exists).Run();
+        UpdatePlayerData(steamId, playerCharacter, userEntity, user, exists).Start();
     }
     static IEnumerator UpdatePlayerData(ulong steamId, Entity playerCharacter, Entity userEntity, User user, bool exists)
     {
@@ -609,7 +608,7 @@ internal static class ServerBootstrapSystemPatches
                 Entity userEntity = fromCharacter.User;
 
                 // Core.Log.LogWarning($"[HandleCreateCharacterEventSystem] PreRegistration for new character...");
-                HandleCharacterCreatedRoutine(userEntity).Run();
+                HandleCharacterCreatedRoutine(userEntity).Start();
             }
         }
         catch (Exception ex)
@@ -632,7 +631,6 @@ internal static class ServerBootstrapSystemPatches
         };
 
         HandleConnection(user.PlatformId, playerInfo);
-        // if (_limitBreak) ModifyVampireAttributeCaps(playerInfo.CharEntity);
 
         if (!playerInfo.CharEntity.HasBuff(_bonusStatsBuff))
         {

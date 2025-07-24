@@ -1183,7 +1183,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "shinybuff", shortHand: "shiny", adminOnly: false, usage: ".fam shiny [SpellSchool]", description: "Spend vampiric dust to make your familiar shiny!")]
+    [Command(name: "shinybuff", shortHand: "shiny", adminOnly: false, usage: ".fam shiny [SpellSchool]", description: "Chooses shiny for current active familiar, one freebie then costs configured amount to change if already unlocked.")]
     public static void ShinyFamiliarCommand(ChatCommandContext ctx, string spellSchool = "")
     {
         if (!ConfigService.FamiliarSystem)
@@ -1531,7 +1531,7 @@ internal static class FamiliarCommands
         ctx.Reply($"Challenged <color=white>{playerInfo.User.CharacterName.Value}</color> to a battle! (<color=yellow>30s</color> until it expires)");
         LocalizationService.HandleServerReply(EntityManager, playerInfo.User, $"<color=white>{ctx.User.CharacterName.Value}</color> has challenged you to a battle! (<color=yellow>30s</color> until it expires, accept by emoting '<color=green>Yes</color>' or decline by emoting '<color=red>No</color>')");
 
-        ChallengeExpiredRoutine((ctx.User.PlatformId, playerInfo.User.PlatformId)).Run();
+        ChallengeExpiredRoutine((ctx.User.PlatformId, playerInfo.User.PlatformId)).Start();
     }
 
     [Command(name: "setbattlearena", shortHand: "sba", adminOnly: true, usage: ".fam sba", description: "Set current position as the center for the familiar battle arena.")]

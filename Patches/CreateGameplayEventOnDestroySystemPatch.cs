@@ -62,12 +62,8 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     if (prefabGuid.IsEmpty()) continue;
 
                     IProfession handler = ProfessionFactory.GetProfession(prefabGuid);
-
                     if (handler != null)
                     {
-                        Profession profession = handler.GetProfessionEnum();
-                        if (profession.IsDisabled()) continue;
-
                         int multiplier = ProfessionMappings.GetFishingModifier(prefabGuid);
                         float delay = SCT_DELAY;
 

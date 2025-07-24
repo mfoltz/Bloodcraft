@@ -2,6 +2,7 @@
 using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
+using Gameplay.Systems;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Shared;
@@ -33,14 +34,10 @@ internal static class Progression
     static readonly PrefabGUID _pveCombatBuff = Buffs.PvECombatBuff;
     static readonly PrefabGUID _draculaVBlood = PrefabGUIDs.CHAR_Vampire_Dracula_VBlood;
     static readonly PrefabGUID _megaraVBlood = PrefabGUIDs.CHAR_Blackfang_Morgana_VBlood;
-    static readonly PrefabGUID _vampireMale = PrefabGUIDs.CHAR_VampireMale;
 
     const float EXP_CONSTANT = 0.1f;
     const float EXP_POWER = 2f;
     const int SIMULATED_LEVEL_FACTOR = 2;
-
-    const float DEFAULT_CAPS = 1f;
-    const float RAISED_CAPS = 10f;
     public static class ModifyUnitStatBuffSettings
     {
         public class ModifyUnitStatBuff(
@@ -100,8 +97,8 @@ internal static class Progression
             { BloodStatType.CorruptionDamageReduction, new ModifyUnitStatBuff(BloodStatType.CorruptionDamageReduction, UnitStatType.CorruptionDamageReduction) },
         };
     }
-
-    static readonly Dictionary<UnitStatType, AttributeCap> _defaultAttributeCaps = [];
+    public static IReadOnlyDictionary<UnitStatType, AttributeCap> UnitStatAtributeCaps => _unitStatAttributeCaps;
+    static readonly Dictionary<UnitStatType, AttributeCap> _unitStatAttributeCaps = [];
 
     static readonly HashSet<UnitStatType> _vampireAttributeUnitStatTypes =
     [
@@ -162,22 +159,6 @@ internal static class Progression
         UnitStatType.SpellFreeCast,
         UnitStatType.WeaponFreeCast
     ];
-
-    static readonly HashSet<UnitStatType> _ignoredAttributes =
-    [
-        UnitStatType.MovementSpeed,
-        UnitStatType.BonusMovementSpeed,
-        UnitStatType.BonusShapeshiftMovementSpeed,
-        UnitStatType.BonusMountMovementSpeed,
-        // UnitStatType.PhysicalCriticalStrikeChance, 100%
-        // UnitStatType.SpellCriticalStrikeChance, 100%
-        // UnitStatType.DamageReduction, 
-        UnitStatType.BloodEfficiency,
-        UnitStatType.CorruptionDamageReduction,
-        UnitStatType.PvPResilience,
-        UnitStatType.SpellFreeCast,
-        UnitStatType.WeaponFreeCast
-];
     public class PlayerProgressionCacheManager
     {
         public class PlayerProgressionData(int level, bool hasPrestiged)
@@ -289,7 +270,7 @@ internal static class Progression
 
                 if (_isPvE)
                 {
-                    if (targetProgression.HasPrestiged || _shareLevelRange.Equals(0) || source.IsAllied(playerInfo.CharEntity))
+                    if (targetProgression.HasPrestiged || _shareLevelRange.Equals(0) || source.IsAllies(playerInfo.CharEntity))
                     {
                         // Core.Log.LogWarning($"[PvE] Adding {steamId} to participants (hasPrestiged, isAllies, or no shareLevelRange ({_shareLevelRange})");
                         players.Add(playerInfo.CharEntity);
@@ -304,7 +285,7 @@ internal static class Progression
                         // Core.Log.LogWarning($"[PvE] Ignoring {steamId} (level difference > {_shareLevelRange})");
                     }
                 }
-                else if (source.IsAllied(playerInfo.CharEntity))
+                else if (source.IsAllies(playerInfo.CharEntity))
                 {
                     // Core.Log.LogWarning($"[PvP] Adding {steamId} to participants (isAllies)");
                     players.Add(playerInfo.CharEntity);
@@ -408,7 +389,9 @@ internal static class Progression
     }
     public static unsafe void GetAttributeCaps()
     {
-        if (_vampireMale.TryGetPrefabEntity(out Entity prefabEntity)
+        PrefabGUID vampireMale = PrefabGUIDs.CHAR_VampireMale;
+
+        if (vampireMale.TryGetPrefabEntity(out Entity prefabEntity)
             && prefabEntity.TryGetComponent(out VampireAttributeCaps vampireAttributeCaps))
         {
             BlobAssetReference<VampireAttributes_Unboxed<AttributeCap>> blobRef = vampireAttributeCaps.Caps;
@@ -417,7 +400,8 @@ internal static class Progression
             foreach (UnitStatType unitStatType in _vampireAttributeUnitStatTypes)
             {
                 AttributeCap attributeCap = unboxedAttributeCaps->GetCap(unitStatType);
-                _defaultAttributeCaps[unitStatType] = attributeCap;
+                _unitStatAttributeCaps[unitStatType] = attributeCap;
+                // Core.Log.LogWarning($"{unitStatType} - {attributeCap.Start} | {attributeCap.SoftCap} | {attributeCap.HardCap}");
             }
         }
         else

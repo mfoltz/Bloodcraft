@@ -650,7 +650,7 @@ internal static class Familiars
                     return;
                 }
 
-                InstantiateFamiliarRoutine(user, playerCharacter, famKeys[boxIndex - 1]).Run();
+                InstantiateFamiliarRoutine(user, playerCharacter, famKeys[boxIndex - 1]).Start();
             }
             else if (boxIndex == -1)
             {
@@ -663,7 +663,7 @@ internal static class Familiars
             else
             {
                 steamId.SetBindingIndex(boxIndex);
-                InstantiateFamiliarRoutine(user, playerCharacter, famKeys[boxIndex - 1]).Run();
+                InstantiateFamiliarRoutine(user, playerCharacter, famKeys[boxIndex - 1]).Start();
             }
         }
         else
@@ -692,7 +692,7 @@ internal static class Familiars
             familiar.TryApplyBuff(_disableAggroBuff);
             familiar.TryRemoveBuff(buffPrefabGuid: _bonusStatsBuff);
 
-            UnbindFamiliarDelayRoutine(user, playerCharacter, familiar, smartBind, index).Run();
+            UnbindFamiliarDelayRoutine(user, playerCharacter, familiar, smartBind, index).Start();
         }
         else if (isDismissed)
         {
@@ -859,7 +859,7 @@ internal static class Familiars
             });
         }
     }
-    public static bool FamiliarEligibleForCombat(this Entity familiar)
+    public static bool EligibleForCombat(this Entity familiar)
     {
         return familiar.Exists() && !familiar.IsDisabled() && !familiar.HasBuff(_invulnerableBuff);
     }

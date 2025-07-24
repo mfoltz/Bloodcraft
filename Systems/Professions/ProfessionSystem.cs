@@ -126,21 +126,8 @@ internal static class ProfessionSystem
 
         if (handler != null)
         {
-            Profession profession = handler.GetProfessionEnum();
-
-            if (profession.IsDisabled()) return;
-            else if (profession.Equals(Profession.Woodcutting))
-            {
-                professionValue *= ProfessionMappings.GetWoodcuttingModifier(itemPrefabGuid);
-                professionValue *= 10;
-            }
-            else if (profession.Equals(Profession.Mining))
-            {
-                professionValue *= 10;
-            }
-
-            /*
             string professionName = handler.GetProfessionName();
+
             if (professionName.Contains("Woodcutting"))
             {
                 professionValue *= ProfessionMappings.GetWoodcuttingModifier(itemPrefabGuid);
@@ -150,7 +137,6 @@ internal static class ProfessionSystem
             {
                 professionValue *= 10;
             }
-            */
 
             float delay = SCT_DELAY;
 
@@ -358,7 +344,7 @@ internal static class ProfessionSystem
             float3 targetPosition = target.GetPosition();
             float3 professionColor = handler.GetProfessionColor();
 
-            ProfessionSCTDelayRoutine(_experienceGainSCT, _experienceAssetGuid, playerCharacter, userEntity, targetPosition, professionColor, gainedXP, delay).Run();
+            ProfessionSCTDelayRoutine(_experienceGainSCT, _experienceAssetGuid, playerCharacter, userEntity, targetPosition, professionColor, gainedXP, delay).Start();
         }
     }
     static IEnumerator ProfessionSCTDelayRoutine(PrefabGUID sctPrefabGuid, AssetGuid assetGuid, Entity playerCharacter, Entity userEntity, float3 position, float3 color, float value, float delay)
@@ -397,7 +383,7 @@ internal static class ProfessionSystem
     {
         float3 targetPosition = target.GetPosition();
 
-        ProfessionSCTDelayRoutine(sctPrefabGuid, assetGuid, playerCharacter, userEntity, targetPosition, color, bonusYield, delay).Run();
+        ProfessionSCTDelayRoutine(sctPrefabGuid, assetGuid, playerCharacter, userEntity, targetPosition, color, bonusYield, delay).Start();
         delay += SCT_DELAY_ADD;
     }
     static void HandleExperienceAndBonusYield(User user, Entity userEntity, Entity playerCharacter, Entity target, PrefabGUID resource, string professionName, float bonusYield, bool professionLogging, bool sctYield, ref float delay)
@@ -761,9 +747,5 @@ internal static class ProfessionMappings
         }
 
         return 1;
-    }
-    public static bool IsDisabled(this Profession profession)
-    {
-        return Core.DisabledProfessions.Contains(profession);
     }
 }

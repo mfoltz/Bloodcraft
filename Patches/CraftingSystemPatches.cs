@@ -125,9 +125,6 @@ internal static class CraftingSystemPatches
 
                     if (handler != null)
                     {
-                        Profession profession = handler.GetProfessionEnum();
-                        if (profession.IsDisabled()) continue;
-
                         if (itemEntity.Has<Durability>())
                         {
                             Entity originalItem = PrefabCollectionSystem._PrefabGuidToEntityMap[itemPrefab];

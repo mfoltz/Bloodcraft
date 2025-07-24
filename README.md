@@ -221,7 +221,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Set current familiar level.
   - Shortcut: *.fam sl [Player] [Level]*
 - `.familiar shinybuff [SpellSchool]`
-  - Spend vampiric dust to make your familiar shiny!
+  - Chooses shiny for current active familiar, one freebie then costs configured amount to change if already unlocked.
   - Shortcut: *.fam shiny [SpellSchool]*
 - `.familiar slotbattlegroup [BattleGroupOrSlot] [Slot]`
   - Assigns active familiar to a battle group slot. If no battle group is specified, assigns to active group.
@@ -387,8 +387,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Enables the server sending player mod data to clients using Eclipse.
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
   Enable or disable elite shard bearers.
-- **Elite Primal Rifts**: `ElitePrimalRifts` (bool, default: False)
-  Enable or disable elite primal rifts.
 - **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)
   Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect.
 - **Potion Stacking**: `PotionStacking` (bool, default: False)
@@ -591,8 +589,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Enable or disable the profession system.
 - **Profession Factor**: `ProfessionFactor` (float, default: 1)
   The multiplier for profession experience.
-- **Disabled Professions**: `DisabledProfessions` (string, default: "")
-  Professions that should be inactive separated by comma.
 - **Extra Recipes**: `ExtraRecipes` (bool, default: False)
   Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well. See 'Recipes' section in README for complete list of changes.
 
@@ -769,8 +765,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Closest thing to creative mode we'll likely ever get. Copy/paste castles, build wherever with whatever you want!
 - [KindredPortals](https://thunderstore.io/c/v-rising/p/odjit/KindredPortals/)
   Create custom portals and waygates for your server! Pairs great with KindredSchematics for making new areas.
-- [KindredInnkeeper](https://thunderstore.io/c/v-rising/p/odjit/KindredInnkeeper/)
-  Make an inn players can use as a shared living space, for fun or for necessity!
 - [XPRising](https://thunderstore.io/c/v-rising/p/XPRising/XPRising/)
   If you like the idea of a mod with RPG features but Bloodcraft doesn't float your boat maybe this will!
 

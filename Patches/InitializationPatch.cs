@@ -1,11 +1,5 @@
-using Bloodcraft.Resources;
-using Bloodcraft.Services;
 using HarmonyLib;
-using ProjectM;
 using ProjectM.Gameplay.WarEvents;
-using ProjectM.Shared.WarEvents;
-using Stunlock.Core;
-using Unity.Entities;
 
 namespace Bloodcraft.Patches;
 

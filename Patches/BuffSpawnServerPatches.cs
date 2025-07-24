@@ -34,7 +34,6 @@ internal static class BuffSystemSpawnPatches
     static readonly bool _familiarPvP = ConfigService.FamiliarPvP;
     static readonly bool _potionStacking = ConfigService.PotionStacking;
     static readonly bool _professions = ConfigService.ProfessionSystem;
-    static readonly bool _alchemy = !Profession.Alchemy.IsDisabled();
 
     const float FAMILIAR_TRAVEL_DURATION = 7.5f;
     const float MINION_LIFETIME = 30f;
@@ -221,8 +220,6 @@ internal static class BuffSystemSpawnPatches
                                 if (buffEntity.Has<RemoveBuffOnGameplayEvent>()) buffEntity.Remove<RemoveBuffOnGameplayEvent>();
                                 if (buffEntity.Has<RemoveBuffOnGameplayEventEntry>()) buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
                             }
-
-                            if (!_alchemy) continue;
 
                             if (_professions)
                             {

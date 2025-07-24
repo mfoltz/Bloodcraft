@@ -47,7 +47,7 @@ internal static class FamiliarLevelingSystem
     {
         Entity familiar = Utilities.Familiars.GetActiveFamiliar(source);
 
-        if (!familiar.FamiliarEligibleForCombat()) return;
+        if (!familiar.EligibleForCombat()) return;
 
         PrefabGUID familiarId = familiar.Read<PrefabGUID>();
         ProcessExperienceGain(source, familiar, target, steamId, familiarId.GuidHash, groupMultiplier);
@@ -144,7 +144,7 @@ internal static class FamiliarLevelingSystem
 
         if (GetPlayerBool(steamId, SCT_FAMILIAR_LVL_KEY))
         {
-            FamiliarExperienceSCTDelayRoutine(player, userEntity, familiar, _gold, gainedXP).Run();
+            FamiliarExperienceSCTDelayRoutine(player, userEntity, familiar, _gold, gainedXP).Start();
         }
     }
     static IEnumerator FamiliarExperienceSCTDelayRoutine(Entity character, Entity userEntity, Entity familiar, float3 color, float gainedXP)

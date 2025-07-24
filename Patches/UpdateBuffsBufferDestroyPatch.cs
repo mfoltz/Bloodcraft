@@ -180,7 +180,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                         if (buffTarget.TryGetFollowedPlayer(out Entity playerCharacter))
                         {
                             familiar = Familiars.GetActiveFamiliar(playerCharacter);
-                            if (familiar.Exists()) Familiars.HandleFamiliarShapeshiftRoutine(playerCharacter.GetUser(), playerCharacter, familiar).Run();
+                            if (familiar.Exists()) Familiars.HandleFamiliarShapeshiftRoutine(playerCharacter.GetUser(), playerCharacter, familiar).Start();
                         }
                         break;
                     default: // class buffs otherwise, probably merits a case for switch but later

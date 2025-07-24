@@ -50,7 +50,7 @@ internal static class FamiliarServantPatches
                 {
                     if (InvalidFamiliarEquipment(inventory, slotIndex))
                     {
-                        // Core.Log.LogWarning($"[EquipServantItemFromInventorySystem] isLegendary!");
+                        Core.Log.LogWarning($"[EquipServantItemFromInventorySystem] isLegendary!");
                         entity.Destroy(VExtensions.DestroyMode.Immediate);
                     }
                     else
@@ -116,7 +116,7 @@ internal static class FamiliarServantPatches
                 {
                     if (InvalidFamiliarEquipment(inventory, slotIndex))
                     {
-                        // Core.Log.LogWarning($"[EquipServantItemSystem] isLegendary!");
+                        Core.Log.LogWarning($"[EquipServantItemSystem] isLegendary!");
                         entity.Destroy(VExtensions.DestroyMode.Immediate);
                     }
                     else
@@ -325,12 +325,12 @@ internal static class FamiliarServantPatches
 
                     if (!blockFeedBuffLookup.HasComponent(toInventoryEntity))
                     {
-                        // Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] No BlockFeedBuff component on servant or inventory entities don't match!");
+                        Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] No BlockFeedBuff component on servant or inventory entities don't match!");
                         continue;
                     }
                     else if (InvalidFamiliarEquipment(playerCharacter, slotIndex))
                     {
-                        // Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] Invalid equipment!");
+                        Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] Invalid equipment!");
                         entity.Destroy(VExtensions.DestroyMode.Immediate);
                     }
                     else
@@ -339,7 +339,7 @@ internal static class FamiliarServantPatches
 
                         if (familiar.Exists())
                         {
-                            // Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] Familiar servant equipped, refreshing stats...");
+                            Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] Familiar servant equipped, refreshing stats...");
                             Buffs.RefreshStats(familiar);
                         }
                     }

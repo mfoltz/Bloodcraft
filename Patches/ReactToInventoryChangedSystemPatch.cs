@@ -165,8 +165,6 @@ internal static class ReactToInventoryChangedSystemPatch
                                     // Core.Log.LogWarning($"Profession Crafting - {itemPrefabGuid.GetPrefabName()}");
                                     IProfession handler = ProfessionFactory.GetProfession(itemPrefabGuid);
 
-                                    if (handler == null || handler.GetProfessionEnum().IsDisabled()) continue;
-
                                     switch (handler)
                                     {
                                         case BlacksmithingProfession:
@@ -242,7 +240,7 @@ internal static class ReactToInventoryChangedSystemPatch
         else
         {
             _stationCooldowns[networkId] = now;
-            ResetStation(networkId).Run();
+            ResetStation(networkId).Start();
         }
 
         PrefabGUID perfectGem = PrefabGUID.Empty;

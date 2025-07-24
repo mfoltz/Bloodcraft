@@ -17,9 +17,6 @@ internal class SystemService(World world)
     DebugEventsSystem _debugEventsSystem;
     public DebugEventsSystem DebugEventsSystem => _debugEventsSystem ??= GetSystem<DebugEventsSystem>();
 
-    VariousMigratedDebugEventsSystem _variousMigratedDebugEventsSystem;
-    public VariousMigratedDebugEventsSystem VariousMigratedDebugEventsSystem => _variousMigratedDebugEventsSystem ??= GetSystem<VariousMigratedDebugEventsSystem>();
-
     PrefabCollectionSystem _prefabCollectionSystem;
     public PrefabCollectionSystem PrefabCollectionSystem => _prefabCollectionSystem ??= GetSystem<PrefabCollectionSystem>();
 

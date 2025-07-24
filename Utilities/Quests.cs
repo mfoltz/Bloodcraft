@@ -102,7 +102,7 @@ internal static class Quests
             questObjective.Objective.Goal.Equals(TargetType.Kill) &&
             !questObjective.Objective.Complete)
         {
-            var targetCache = QuestTargetSystem.TargetCache;
+            var targetCache = TargetTrackingSystem.TargetCache;
 
             if (!targetCache.IsCreated || !targetCache.ContainsKey(questObjective.Objective.Target))
             {

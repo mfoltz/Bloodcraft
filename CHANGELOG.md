@@ -1,8 +1,3 @@
-`1.11.14`
-- added config option for elite primal rifts (ElitePrimalRifts, must use admin console command to spawn primal war events for now)
-- can disable specific professions instead of all on/off
-- PvP combat prevents calling/enabling familiar for the duration of combat
-
 `1.10.13`
 - if shiny chance for familiars is 0 they will no longer be guaranteed on second unlock
 - can restrict unarmed to one slot (set Duality in config to false, leave at true for two slots)
