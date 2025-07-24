@@ -189,6 +189,17 @@ internal static class WeaponCommands
 
         WeaponType weaponType = GetCurrentWeaponType(playerCharacter);
 
+        string freeKey = PlayerBoolsManager.GetFreeWeaponResetKey(weaponType);
+        if (GetPlayerBool(steamId, freeKey))
+        {
+            ResetStats(steamId, weaponType);
+            Buffs.RefreshStats(playerCharacter);
+
+            SetPlayerBool(steamId, freeKey, false);
+            LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!");
+            return;
+        }
+
         if (!ConfigService.ResetExpertiseItem.Equals(0))
         {
             PrefabGUID item = new(ConfigService.ResetExpertiseItem);
