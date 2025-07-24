@@ -4,7 +4,7 @@ using Bloodcraft.Systems.Leveling;
 using ProjectM.Network;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Commands;

@@ -12,7 +12,7 @@ using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Expertise.WeaponSystem;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 using static Bloodcraft.Utilities.Progression;
 using static Bloodcraft.Utilities.Progression.ModifyUnitStatBuffSettings;
 using static VCF.Core.Basics.RoleCommands;
@@ -189,7 +189,7 @@ internal static class WeaponCommands
 
         WeaponType weaponType = GetCurrentWeaponType(playerCharacter);
 
-        string freeKey = PlayerBoolsManager.GetFreeWeaponResetKey(weaponType);
+        string freeKey = weaponType.ToString();
         if (GetPlayerBool(steamId, freeKey))
         {
             ResetStats(steamId, weaponType);

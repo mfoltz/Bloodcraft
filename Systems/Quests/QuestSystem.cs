@@ -19,7 +19,7 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 using static Bloodcraft.Utilities.Progression;
 using Match = System.Text.RegularExpressions.Match;
 using Random = System.Random;

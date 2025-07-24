@@ -11,7 +11,7 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Leveling.PrestigeManager;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 
 namespace Bloodcraft.Commands;
 

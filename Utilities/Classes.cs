@@ -20,7 +20,7 @@ using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 using static Bloodcraft.Systems.Leveling.ClassManager;
 using static Bloodcraft.Systems.Leveling.LevelingSystem;
 using static Bloodcraft.Utilities.EntityQueries;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 
 namespace Bloodcraft.Utilities;
 internal static class Classes

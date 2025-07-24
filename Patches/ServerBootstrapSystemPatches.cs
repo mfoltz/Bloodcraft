@@ -15,7 +15,7 @@ using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Utilities.Familiars;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 using static Bloodcraft.Utilities.Progression;
 using User = ProjectM.Network.User;
 using WeaponType = Bloodcraft.Interfaces.WeaponType;

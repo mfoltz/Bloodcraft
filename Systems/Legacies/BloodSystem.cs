@@ -10,7 +10,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Systems.Legacies;

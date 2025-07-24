@@ -999,7 +999,7 @@ internal static class DataService
                 }
             }
 
-            bools[Misc.PlayerBoolsManager.CLASS_BUFFS_KEY] = false;
+            bools[Misc.PlayerBools.CLASS_BUFFS_KEY] = false;
             SavePlayerBools(steamId, bools);
             return bools;
         }

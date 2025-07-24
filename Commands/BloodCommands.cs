@@ -10,7 +10,7 @@ using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Legacies.BloodManager;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Misc.PlayerBools;
 using static Bloodcraft.Utilities.Progression;
 using static Bloodcraft.Utilities.Progression.ModifyUnitStatBuffSettings;
 using static VCF.Core.Basics.RoleCommands;
@@ -214,7 +214,7 @@ internal static class BloodCommands
             return;
         }
 
-        string freeKey = PlayerBoolsManager.GetFreeBloodResetKey(bloodType);
+        string freeKey = bloodType.ToString();
         if (GetPlayerBool(steamId, freeKey))
         {
             ResetStats(steamId, bloodType);
