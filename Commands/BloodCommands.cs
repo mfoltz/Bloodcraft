@@ -214,6 +214,17 @@ internal static class BloodCommands
             return;
         }
 
+        string freeKey = PlayerBoolsManager.GetFreeBloodResetKey(bloodType);
+        if (GetPlayerBool(steamId, freeKey))
+        {
+            ResetStats(steamId, bloodType);
+            Buffs.RefreshStats(playerCharacter);
+
+            SetPlayerBool(steamId, freeKey, false);
+            LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>!");
+            return;
+        }
+
         if (!ConfigService.ResetLegacyItem.Equals(0))
         {
             PrefabGUID item = new(ConfigService.ResetLegacyItem);

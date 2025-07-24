@@ -154,6 +154,18 @@ internal static class Misc
         public const string SHROUD_KEY = "Shroud";
         public const string CLASS_BUFFS_KEY = "Passives";
         public const string PRESTIGE_BUFFS_KEY = "PrestigeBuffs";
+        public const string FREE_BLOOD_RST_PREFIX = "FreeBloodReset_";
+        public const string FREE_WEAPON_RST_PREFIX = "FreeWeaponReset_";
+
+        public static string GetFreeBloodResetKey(BloodType type)
+        {
+            return $"{FREE_BLOOD_RST_PREFIX}{type}";
+        }
+
+        public static string GetFreeWeaponResetKey(WeaponType type)
+        {
+            return $"{FREE_WEAPON_RST_PREFIX}{type}";
+        }
 
         public static readonly Dictionary<string, bool> DefaultBools = new()
         {
@@ -181,6 +193,19 @@ internal static class Misc
             [CLASS_BUFFS_KEY] = false,
             [PRESTIGE_BUFFS_KEY] = true
         };
+
+        static PlayerBoolsManager()
+        {
+            foreach (WeaponType weaponType in Enum.GetValues(typeof(WeaponType)))
+            {
+                DefaultBools[GetFreeWeaponResetKey(weaponType)] = true;
+            }
+
+            foreach (BloodType bloodType in Enum.GetValues(typeof(BloodType)))
+            {
+                DefaultBools[GetFreeBloodResetKey(bloodType)] = true;
+            }
+        }
         public static bool GetPlayerBool(ulong steamId, string boolKey)
         {
             var bools = DataService.PlayerBoolsManager.LoadPlayerBools(steamId);

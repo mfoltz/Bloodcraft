@@ -33,7 +33,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - Pick stats to enhance per weapon when equipped.
   - `.wep lst` (view weapon bonus stat options)
   - `.wep cst` [Weapon] [WeaponStat] (select bonus stat for entered weapon)
-  - `.wep rst` (reset stat selection for current weapon)
+  - `.wep rst` (reset stat selection for current weapon; first reset per weapon is free)
 - Stat bonus values scale with player weapon expertise level per weapon.
   - classes have synergies with different weapon stats (see Classes)
 
@@ -44,7 +44,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - Pick stats to enhance per blood when using.
   - `.bl lst` (view blood bonus stat options)
   - `.bl cst` [Blood] [BloodStat] (select bonus stat for entered weapon)
-  - `.bl rst` (reset stat selection for current weapon)
+  - `.bl rst` (reset stat selection for current blood; first reset per blood is free)
 - Stat bonus values scale with player blood legacy level per blood.
   - classes have synergies with different blood stats (see Classes)
 
@@ -115,7 +115,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Toggles Legacy progress logging.
   - Shortcut: *.bl log*
 - `.bloodlegacy resetstats`
-  - Reset stats for current blood.
+  - Reset stats for current blood. First reset per blood is free.
   - Shortcut: *.bl rst*
 - `.bloodlegacy set [Player] [Blood] [Level]` 🔒
   - Sets player blood legacy level.
@@ -367,8 +367,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - `.weapon log`
   - Toggles expertise logging.
   - Shortcut: *.wep log*
-- `.weapon resetstats`
-  - Reset the stats for current weapon.
+  - `.weapon resetstats`
+  - Reset the stats for current weapon. First reset per weapon is free.
   - Shortcut: *.wep rst*
 - `.weapon set [Name] [Weapon] [Level]` 🔒
   - Sets player weapon expertise level.
