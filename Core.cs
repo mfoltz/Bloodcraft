@@ -162,15 +162,50 @@ internal static class Core
     {
         return World.s_AllWorlds.ToArray().FirstOrDefault(world => world.Name == "Server");
     }
-    public static void StartCoroutine(IEnumerator routine)
+    static MonoBehaviour GetOrCreateMonoBehaviour()
     {
-        if (_monoBehaviour == null)
-        {
-            _monoBehaviour = new GameObject(MyPluginInfo.PLUGIN_NAME).AddComponent<IgnorePhysicsDebugSystem>();
-            UnityEngine.Object.DontDestroyOnLoad(_monoBehaviour.gameObject);
-        }
+        return _monoBehaviour ??= CreateMonoBehaviour();
+    }
+    static MonoBehaviour CreateMonoBehaviour()
+    {
+        MonoBehaviour monoBehaviour = new GameObject(MyPluginInfo.PLUGIN_NAME).AddComponent<IgnorePhysicsDebugSystem>();
+        UnityEngine.Object.DontDestroyOnLoad(monoBehaviour.gameObject);
+        return monoBehaviour;
+    }
+    public static Coroutine StartCoroutine(IEnumerator routine)
+    {
+        return GetOrCreateMonoBehaviour().StartCoroutine(routine.WrapToIl2Cpp());
+    }
+    public static void StopCoroutine(Coroutine routine)
+    {
+        GetOrCreateMonoBehaviour().StopCoroutine(routine);
+    }
+    public static void RunDelayed(float delay, Action action)
+    {
+        RunDelayedRoutine(delay, action).Run();
+    }
+    public static void Delay(this Action action, float delay)
+    {
+        RunDelayedRoutine(delay, action).Run();
+    }
+    static IEnumerator RunDelayedRoutine(float delay, Action action)
+    {
+        yield return new WaitForSeconds(delay);
+        action?.Invoke();
+    }
+    public static void DelayCall(float delay, Delegate method, params object[] args)
+    {
+        DelayedRoutine(delay, method, args).Run();
+    }
 
-        _monoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
+    private static IEnumerator DelayedRoutine(float delay, Delegate method, object[] args)
+    {
+        if (delay > 0f)
+            yield return new WaitForSeconds(delay);
+        else
+            yield return null;
+
+        method.DynamicInvoke(args);
     }
     public static AddItemSettings GetAddItemSettings()
     {
@@ -511,13 +546,9 @@ internal static class Core
         }
     }
 }
-public readonly struct NativeAccessor<T> : IDisposable where T : unmanaged
+public struct NativeAccessor<T>(NativeArray<T> array) : IDisposable where T : unmanaged
 {
-    static NativeArray<T> _array;
-    public NativeAccessor(NativeArray<T> array)
-    {
-        _array = array;
-    }
+    NativeArray<T> _array = array;
     public T this[int index]
     {
         get => _array[index];

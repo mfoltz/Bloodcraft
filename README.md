@@ -15,7 +15,7 @@
 
 ## Sponsors
 
-Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; Imperivm Draconis; Geoffrey D.; SirSaia; Robin C.; Colin F.; Jade K.;
+Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; Imperivm Draconis; Geoffrey D.; SirSaia; Robin C.; Colin F.; Jade K.; Jorge L.; Adrian L.;
 
 ## Features
 
@@ -115,7 +115,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Toggles Legacy progress logging.
   - Shortcut: *.bl log*
 - `.bloodlegacy resetstats`
-  - Reset stats for current blood. First reset per blood is free.
+  - Reset stats for current blood.
   - Shortcut: *.bl rst*
 - `.bloodlegacy set [Player] [Blood] [Level]` 🔒
   - Sets player blood legacy level.
@@ -256,6 +256,32 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Sets player level.
   - Shortcut: *.lvl set [Player] [Level]*
 
+### Misc Commands
+- `.misc buffhovered [PrefabGUID]` 🔒
+  - testing
+  - Shortcut: *.bh [PrefabGUID]*
+- `.misc pathingtest` 🔒
+  - testing PvE raid mechanic ideas
+  - Shortcut: *.pt*
+- `.misc renametest [Name]` 🔒
+  - testing
+  - Shortcut: *.rt [Name]*
+- `.misc spawnprefab [PrefabGUID]` 🔒
+  - testing
+  - Shortcut: *.sp [PrefabGUID]*
+- `.misc spawnsequence [Scale]` 🔒
+  - Spawn specific sequences on target.
+  - Shortcut: *.sq [SequenceGUID] [Scale]*
+- `.misc spawnsequences` 🔒
+  - testing
+  - Shortcut: *.ssq*
+- `.misc stripteamstest` 🔒
+  - testing PvE raid mechanic ideas
+  - Shortcut: *.stt*
+- `.misc wareventschedule` 🔒
+  - testing
+  - Shortcut: *.wes*
+
 ### Miscellaneous Commands
 - `.miscellaneous prepareforthehunt`
   - Completes GettingReadyForTheHunt if not already completed.
@@ -367,8 +393,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - `.weapon log`
   - Toggles expertise logging.
   - Shortcut: *.wep log*
-  - `.weapon resetstats`
-  - Reset the stats for current weapon. First reset per weapon is free.
+- `.weapon resetstats`
+  - Reset the stats for current weapon.
   - Shortcut: *.wep rst*
 - `.weapon set [Name] [Weapon] [Level]` 🔒
   - Sets player weapon expertise level.

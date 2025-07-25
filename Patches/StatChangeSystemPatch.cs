@@ -72,9 +72,6 @@ internal static class StatChangeSystemPatch
     {
         if (!Core._initialized) return;
 
-        // NativeArray<Entity> entities = __instance._DamageTakenEventQuery.ToEntityArray(Allocator.Temp);
-        // NativeArray<DamageTakenEvent> damageTakenEvents = __instance._DamageTakenEventQuery.ToComponentDataArray<DamageTakenEvent>(Allocator.Temp);
-
         using NativeAccessor<Entity> entities = __instance._DamageTakenEventQuery.ToEntityArrayAccessor(Allocator.Temp);
         using NativeAccessor<DamageTakenEvent> damageTakenEvents = __instance._DamageTakenEventQuery.ToComponentDataArrayAccessor<DamageTakenEvent>(Allocator.Temp);
 
@@ -95,7 +92,7 @@ internal static class StatChangeSystemPatch
                 {
                     if (damageTakenEvent.Entity.IsPlayer() && playerCharacter.Equals(damageTakenEvent.Entity))
                     {
-                        entity.Destroy(VExtensions.DestroyMode.Immediate);
+                        entity.Destroy(true);
                     }
                     else if (IsValidTarget(damageTakenEvent.Entity))
                     {
@@ -124,7 +121,7 @@ internal static class StatChangeSystemPatch
                 {
                     if (_gameMode.Equals(GameModeType.PvE) && damageTakenEvent.Entity.HasBuff(_activeCharmedHumanBuff))
                     {
-                        entity.Destroy(VExtensions.DestroyMode.Immediate);
+                        entity.Destroy(true);
                     }
                     else if (_quests && damageTakenEvent.Entity.Has<YieldResourcesOnDamageTaken>() && sourceOwner.TryGetPlayer(out playerCharacter))
                     {

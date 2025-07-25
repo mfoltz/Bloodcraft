@@ -1,9 +1,10 @@
 ﻿using System.Collections;
+using UnityEngine;
 
 namespace Bloodcraft;
 internal static class IExtensions
 {
-    static readonly Random _random = new();
+    static readonly System.Random _random = new();
     public static Dictionary<TValue, TKey> Reverse<TKey, TValue>(
         this IDictionary<TKey, TValue> source)
     {
@@ -98,8 +99,16 @@ internal static class IExtensions
 
         return false;
     }
-    public static void Start(this IEnumerator routine)
+    public static void Run(this IEnumerator routine)
     {
         Core.StartCoroutine(routine);
+    }
+    public static Coroutine Start(this IEnumerator routine)
+    {
+        return Core.StartCoroutine(routine);
+    }
+    public static void Stop(this Coroutine coroutine)
+    {
+        Core.StopCoroutine(coroutine);
     }
 }

@@ -469,6 +469,10 @@ internal static class VExtensions
 
         throw new InvalidOperationException("Entity does not have Blood!");
     }
+    public static EntityInput GetInput(this Entity entity)
+    {
+        return ServerGameManager.GetInput(entity);
+    }
     public static (float physicalPower, float spellPower) GetPowerTuple(this Entity entity)
     {
         if (entity.TryGetComponent(out UnitStats unitStats))
@@ -503,31 +507,22 @@ internal static class VExtensions
     {
         ServerGameManager.PlaySequenceOnTarget(entity, sequenceGuid);
     }
-    public static void Destroy(this Entity entity, DestroyMode mode = DestroyMode.None)
+    public static void Destroy(this Entity entity, bool immediate = false)
     {
         if (!entity.Exists()) return;
 
-        switch (mode)
-        {
-            case DestroyMode.Immediate:
-                EntityManager.DestroyEntity(entity);
-                break;
-            case DestroyMode.Delayed:
-                EntityCommandBufferSystem.CreateCommandBuffer().DestroyEntity(entity);
-                break;
-            case DestroyMode.RemoveBuff:
-                DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
-                break;
-            case DestroyMode.None:
-                DestroyUtility.Destroy(EntityManager, entity);
-                break;
-            default:
-                break;
-        }
+        bool isBuff = entity.IsBuff();
+
+        if (immediate && !isBuff)
+            EntityManager.DestroyEntity(entity);
+        else if (isBuff)
+            DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
+        else
+            DestroyUtility.Destroy(EntityManager, entity);
     }
-    public static void DestroyBuff(this Entity buffEntity)
+    public static bool IsBuff(this Entity entity)
     {
-        if (buffEntity.Exists()) DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
+        return entity.Has<Buff>();
     }
     public static void SetTeam(this Entity entity, Entity teamSource)
     {
@@ -569,13 +564,10 @@ internal static class VExtensions
     {
         if (entity.Has<FactionReference>())
         {
-            entity.With((ref FactionReference factionReference) =>
-            {
-                factionReference.FactionGuid._Value = factionPrefabGuid;
-            });
+            entity.With((ref FactionReference factionReference) => factionReference.FactionGuid._Value = factionPrefabGuid);
         }
     }
-    public static bool IsAllies(this Entity entity, Entity player)
+    public static bool IsAllied(this Entity entity, Entity player)
     {
         return ServerGameManager.IsAllies(entity, player);
     }

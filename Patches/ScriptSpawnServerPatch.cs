@@ -149,7 +149,7 @@ internal static class ScriptSpawnServerPatch
                     case 7 when _legacies && BloodSystem.BloodBuffToBloodType.ContainsKey(prefabGuid):
                         Buffs.RefreshStats(buffTarget);
                         break;
-                    case 8 when _familiars && owner.IsFamiliar() && owner.IsAllies(buffTarget):
+                    case 8 when _familiars && owner.IsFamiliar() && owner.IsAllied(buffTarget):
                         buffEntity.Destroy();
                         break;
                     case 9 when _familiars:
@@ -393,7 +393,7 @@ internal static class ScriptSpawnServerPatch
 
                 foreach (Entity equippableBuff in equippableBuffs)
                 {
-                    equippableBuff.DestroyBuff();
+                    equippableBuff.Destroy();
                 }
 
                 if (modifyUnitStatBuffs.Any() && buffEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var targetBuffer))

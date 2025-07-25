@@ -143,7 +143,7 @@ internal static class EmoteSystemPatch
         {
             BlockShapeshift.Add(steamId);
             playerCharacter.TryApplyBuff(_gateBossFeedCompleteBuff);
-            buffEntity.DestroyBuff();
+            buffEntity.Destroy();
         }
     }
     public static void BindUnbind(User user, Entity playerCharacter, ulong steamId)

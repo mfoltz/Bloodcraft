@@ -361,7 +361,7 @@ internal class BattleService
     static IEnumerator BattleSummoningRoutine(Entity playerOne, User playerUserOne, Entity playerTwo, User playerUserTwo,
     List<PrefabGUID> playerOneFamiliars, List<PrefabGUID> playerTwoFamiliars)
     {
-        bool allies = playerOne.IsAllies(playerTwo);
+        bool allies = playerOne.IsAllied(playerTwo);
 
         for (int i = 0; i < TEAM_SIZE; i++)
         {

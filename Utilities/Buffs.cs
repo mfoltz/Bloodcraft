@@ -158,7 +158,7 @@ internal static class Buffs
                 // else if (entity.IsFamiliar()) Progression.RemoveFamiliarStats(buffEntity, entity);
             }
 
-            buffEntity.DestroyBuff();
+            buffEntity.Destroy();
         }
     }
     public static bool TryApplyAndGetBuff(this Entity entity, PrefabGUID buffPrefabGuid, out Entity buffEntity)

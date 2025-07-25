@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Resources;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Network;
@@ -10,6 +11,7 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
 using static Bloodcraft.Utilities.Misc.PlayerBools;
+using WeaponType = Bloodcraft.Interfaces.WeaponType;
 
 namespace Bloodcraft.Utilities;
 internal static class Misc

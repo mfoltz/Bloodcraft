@@ -39,7 +39,7 @@ internal static class ChatMessageSystemPatch
                 {
                     // Core.Log.LogWarning($"[ChatMessageSystem] Handling Eclipse client message...");
                     EclipseService.HandleClientMessage(originalMessage);
-                    entity.Destroy(VExtensions.DestroyMode.Immediate);
+                    entity.Destroy(true);
                 }
             }
         }

@@ -270,7 +270,7 @@ internal static class Progression
 
                 if (_isPvE)
                 {
-                    if (targetProgression.HasPrestiged || _shareLevelRange.Equals(0) || source.IsAllies(playerInfo.CharEntity))
+                    if (targetProgression.HasPrestiged || _shareLevelRange.Equals(0) || source.IsAllied(playerInfo.CharEntity))
                     {
                         // Core.Log.LogWarning($"[PvE] Adding {steamId} to participants (hasPrestiged, isAllies, or no shareLevelRange ({_shareLevelRange})");
                         players.Add(playerInfo.CharEntity);
@@ -285,7 +285,7 @@ internal static class Progression
                         // Core.Log.LogWarning($"[PvE] Ignoring {steamId} (level difference > {_shareLevelRange})");
                     }
                 }
-                else if (source.IsAllies(playerInfo.CharEntity))
+                else if (source.IsAllied(playerInfo.CharEntity))
                 {
                     // Core.Log.LogWarning($"[PvP] Adding {steamId} to participants (isAllies)");
                     players.Add(playerInfo.CharEntity);

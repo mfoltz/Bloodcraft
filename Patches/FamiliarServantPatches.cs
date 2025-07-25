@@ -51,7 +51,7 @@ internal static class FamiliarServantPatches
                     if (InvalidFamiliarEquipment(inventory, slotIndex))
                     {
                         Core.Log.LogWarning($"[EquipServantItemFromInventorySystem] isLegendary!");
-                        entity.Destroy(VExtensions.DestroyMode.Immediate);
+                        entity.Destroy(true);
                     }
                     else
                     {
@@ -117,7 +117,7 @@ internal static class FamiliarServantPatches
                     if (InvalidFamiliarEquipment(inventory, slotIndex))
                     {
                         Core.Log.LogWarning($"[EquipServantItemSystem] isLegendary!");
-                        entity.Destroy(VExtensions.DestroyMode.Immediate);
+                        entity.Destroy(true);
                     }
                     else
                     {
@@ -211,7 +211,7 @@ internal static class FamiliarServantPatches
                     if (equipment.GetEquipmentEntity(equipmentType).GetEntityOnServer().IsAncestralWeapon())
                     {
                         // Core.Log.LogWarning($"[EquipmentTransferSystem] isLegendary!");
-                        entity.Destroy(VExtensions.DestroyMode.Immediate);
+                        entity.Destroy(true);
                     }
                     else
                     {
@@ -331,7 +331,7 @@ internal static class FamiliarServantPatches
                     else if (InvalidFamiliarEquipment(playerCharacter, slotIndex))
                     {
                         Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] Invalid equipment!");
-                        entity.Destroy(VExtensions.DestroyMode.Immediate);
+                        entity.Destroy(true);
                     }
                     else
                     {
