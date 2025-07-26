@@ -40,9 +40,11 @@
 		<EmbeddedResource Include="Resources\Localization\TChinese.json" />
 		<EmbeddedResource Include="Resources\Localization\Thai.json" />
 		<EmbeddedResource Include="Resources\Localization\Turkish.json" />
-		<EmbeddedResource Include="Resources\Localization\Spanish.json" />
-		<EmbeddedResource Include="Resources\Localization\Vietnamese.json" />
-		<EmbeddedResource Include="Resources\secrets.json" />
+                <EmbeddedResource Include="Resources\Localization\Spanish.json" />
+                <EmbeddedResource Include="Resources\Localization\Vietnamese.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\English.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\Spanish.json" />
+                <EmbeddedResource Include="Resources\secrets.json" />
 	</ItemGroup>
 
 	<ItemGroup>
