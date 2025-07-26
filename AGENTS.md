@@ -48,7 +48,7 @@
 * **Single Responsibility & DRY:**  
   Keep classes and methods focused. Avoid duplication by refactoring shared behavior. ([dev.to](https://dev.to) :contentReference[oaicite:9]{index=9})
 * **Modern Features:**  
-  Use `var`, LINQ, `?.`, pattern matching, records, and `async/await` where appropriate. ([Code Maze](https://code-maze.com) :contentReference[oaicite:10]{index=10})
+  Use explicit typing with modern collection initialization, new(), and such instead of `var` with descriptive names and avoid excessive shorthanding; Refactor spaghetti code as able with LINQ, `?.`, pattern matching, records, interfaces, factory patterns, delegates, and other modern C# design patterns. ([Code Maze](https://code-maze.com) :contentReference[oaicite:10]{index=10})
 * **Exceptions:**  
   Catch only what you can handle; avoid broad `catch (Exception)`. Filter exceptions specifically. ([dev.to](https://dev.to) :contentReference[oaicite:11]{index=11})
 
@@ -70,6 +70,6 @@
 ## Specific Do's and Don'ts
   
 - Do not touch or otherwise make edits to CHANGELOG.md if found or otherwise seen; do please provide succinct and relevant task reports separately as usual, versioning and other such edits involving the CHANGELOG.md or othertwise should generally be left solely to the human developer for now.
-- Never use the 'private' accessibility modifier, as things will be private by default unless made public, internal etc. specifically.
+- Never use the 'private' accessibility modifier, as things will be private by default unless made public/internal/etc.
 
 ---
