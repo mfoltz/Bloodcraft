@@ -7,10 +7,10 @@
 - [Recipes](#recipes)
 - [BleedingEdge](#bleedingedge)
 - [Configuration](#configuration)
-- [Recommended Mods](#recommended)
+- [Recommended Mods](#recommended-mods)
+- [Codex Workflow](#codex-workflow)
+- [Workflow Source](#workflow-source)
 - [Credits](#credits)
-- [Codex Workflow](#codex)
-- [Workflow Source](#workflow)
 
 ## Sponsor this project
 
@@ -786,7 +786,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### Daggers
 - Stacks refresh even after unequipping daggers.
 
-## Recommended
+## Recommended Mods
 
 - [KindredCommands](https://thunderstore.io/c/v-rising/p/odjit/KindredCommands/) 
   Highly recommend getting this if you plan on using Bloodcraft or any other mods for V Rising in general. Invaluable set of tools and options that will greatly improve your modding experience.
@@ -814,9 +814,6 @@ Translators can copy this file to a new `<Language>.json` and translate the valu
 while keeping the numeric hashes intact. After editing, run the
 `Tools/CheckTranslations` utility to report any missing hashes.
 
-## Credits
-Do my best to mention/attribute where ideas and bug reports come from in the changelog and commit history, if I've missed something or someone on a specific change please let me know!
-
 ## Codex Workflow
 
 1. Run `.codex/install.sh` once to install dependencies.
@@ -833,3 +830,6 @@ Current PRDs and task lists are stored in `.project-management/current-prd/`, wh
 - Overview: https://community.openai.com/t/repo-file-based-task-management-in-codex-example-solution/1278584
 
 Very appreciative of the author for making this available! All portions derived or used directly are licensed under [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+## Credits
+Do my best to mention/attribute where ideas and bug reports come from in the changelog and commit history, if I've missed something or someone on a specific change please let me know!
