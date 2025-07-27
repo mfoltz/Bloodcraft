@@ -43,6 +43,13 @@ internal static class ProfessionCommands
             return;
         }
 
+        if (professionType.IsDisabled())
+        {
+            var handler = ProfessionFactory.GetProfession(professionType);
+            LocalizationService.HandleReply(ctx, $"{handler.GetProfessionName()} is disabled via config.");
+            return;
+        }
+
         ulong steamId = ctx.Event.User.PlatformId;
 
         IProfession professionHandler = ProfessionFactory.GetProfession(professionType);

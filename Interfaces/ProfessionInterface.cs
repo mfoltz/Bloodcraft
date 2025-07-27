@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Professions;
 using Stunlock.Core;
 using Unity.Mathematics;
 
@@ -78,7 +79,16 @@ internal static class ProfessionFactory
     }
     public static string GetProfessionNames()
     {
-        return string.Join(", ", _professionHandlers.Select(profession => profession.GetProfessionName()));
+        // string professions = string.Join(", ", _professionHandlers.Select(profession => profession.GetProfessionEnum()));
+        List<Profession> professions = _professionHandlers.ConvertAll(profession => profession.GetProfessionEnum());
+
+        foreach (var profession in professions)
+        {
+            if (profession.IsDisabled())
+                professions.Remove(profession);
+        }
+
+        return string.Join(", ", professions.Select(profession => profession.ToString()));
     }
 }
 internal abstract class ProfessionBase : IProfession
