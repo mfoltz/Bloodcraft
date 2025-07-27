@@ -10,8 +10,7 @@ if ! command -v dotnet >/dev/null; then
 fi
 
 PROJECT="$(dirname "$0")/Bloodcraft.csproj"
-
-dotnet build -c Release "$PROJECT"
+dotnet build --no-restore -p:RunGenerateREADME=false "$PROJECT"
 
 DLL_PATH="$(dirname "$0")/bin/Release/net6.0/Bloodcraft.dll"
 
