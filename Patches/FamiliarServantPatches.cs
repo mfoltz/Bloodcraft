@@ -325,12 +325,12 @@ internal static class FamiliarServantPatches
 
                     if (!blockFeedBuffLookup.HasComponent(toInventoryEntity))
                     {
-                        Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] No BlockFeedBuff component on servant or inventory entities don't match!");
+                        // Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] No BlockFeedBuff component on servant or inventory entities don't match!");
                         continue;
                     }
                     else if (InvalidFamiliarEquipment(playerCharacter, slotIndex))
                     {
-                        Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] Invalid equipment!");
+                        // Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] Invalid equipment!");
                         entity.Destroy(true);
                     }
                     else
@@ -339,14 +339,14 @@ internal static class FamiliarServantPatches
 
                         if (familiar.Exists())
                         {
-                            Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] Familiar servant equipped, refreshing stats...");
+                            // Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] Familiar servant equipped, refreshing stats...");
                             Buffs.RefreshStats(familiar);
                         }
                     }
                 }
                 else
                 {
-                    Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] No NetworkId found for toInventory!");
+                    // Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] No NetworkId found for toInventory!");
                 }
             }
         }
