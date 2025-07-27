@@ -30,7 +30,14 @@ internal static class GenerateREADME
         // Check if we're running in a GitHub Actions environment and skip
         if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
         {
-            Console.WriteLine("GenerateREADME skipped during GitHub Actions build.");
+            Console.WriteLine("Generate tools skipped during GitHub Actions build.");
+            return;
+        }
+
+        if (args.Length >= 1 && args[0].Equals("generate-messages", StringComparison.OrdinalIgnoreCase))
+        {
+            string root = args.Length > 1 ? args[1] : Directory.GetCurrentDirectory();
+            Tools.GenerateMessageTranslations.Run(root);
             return;
         }
 

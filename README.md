@@ -800,7 +800,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 1. Run `.codex/install.sh` once to install dependencies.
 2. Build and deploy locally with `./dev_init.sh`.
-3. Use the keywords (**CreatePrd**, **CreateTasks**, **TaskMaster**, **ClosePrd**) to manage PRDs and tasks.
+3. Generate localization message hashes with `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .`.
+4. Use the keywords (**CreatePrd**, **CreateTasks**, **TaskMaster**, **ClosePrd**) to manage PRDs and tasks.
 
 Current PRDs and task lists are stored in `.project-management/current-prd/`, while completed items are moved to `.project-management/closed-prd/`.
 
