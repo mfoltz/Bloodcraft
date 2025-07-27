@@ -11,6 +11,9 @@ internal static class ConfigService
     static readonly Lazy<string> _languageLocalization = new(() => GetConfigValue<string>("LanguageLocalization"));
     public static string LanguageLocalization => _languageLocalization.Value;
 
+    static readonly Lazy<string> _pluginLanguage = new(() => GetConfigValue<string>("PluginLanguage"));
+    public static string PluginLanguage => _pluginLanguage.Value;
+
     static readonly Lazy<bool> _eclipse = new(() => GetConfigValue<bool>("Eclipse"));
     public static bool Eclipse => _eclipse.Value;
 
@@ -506,6 +509,7 @@ internal static class ConfigService
         public static readonly List<ConfigEntryDefinition> ConfigEntries =
         [
             new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
+            new ConfigEntryDefinition("General", "PluginLanguage", "English", "Language for plugin messages."),
             new ConfigEntryDefinition("General", "Eclipse", true, "Enables the server sending player mod data to clients using Eclipse."),
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),

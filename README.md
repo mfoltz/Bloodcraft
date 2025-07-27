@@ -409,6 +409,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### General
 - **Language Localization**: `LanguageLocalization` (string, default: "English")
   The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese
+- **Plugin Language**: `PluginLanguage` (string, default: "English")
+  Language for plugin messages.
 - **Eclipse**: `Eclipse` (bool, default: True)
   Enables the server sending player mod data to clients using Eclipse.
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
