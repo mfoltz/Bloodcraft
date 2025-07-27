@@ -11,7 +11,7 @@ fi
 
 PROJECT="$(dirname "$0")/Bloodcraft.csproj"
 
-dotnet build "$PROJECT" -c Release -p:RunGenerateREADME=false`
+dotnet build "$PROJECT" -c Release -p:RunGenerateREADME=false
 
 DLL_PATH="$(dirname "$0")/bin/Release/net6.0/Bloodcraft.dll"
 
