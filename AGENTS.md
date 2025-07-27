@@ -83,4 +83,4 @@ The Codex system uses the following keywords:
 * **TaskMaster** – execute tasks and update their status.
 * **ClosePrd** – finalize and archive completed PRDs.
 
-`.codex/install.sh` and `dev_init.sh` handle environment setup.
+`.codex/install.sh` and `dev_init.sh` handle environment setup. Compile with .NET 8 to build with preview features, though do note VRising runs on the .NET 6 runtime as the .csproj implies; be mindful to stay within the .NET 6 API surface to avoid surprises later at runtime.
