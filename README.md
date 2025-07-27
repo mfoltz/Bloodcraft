@@ -831,4 +831,5 @@ Current PRDs and task lists are stored in `.project-management/current-prd/`, wh
 
 - Repo: https://github.com/knavillus1/codex_bootstrap/tree/dev_chat_with_tasks
 - Overview: https://community.openai.com/t/repo-file-based-task-management-in-codex-example-solution/1278584
+
 Very appreciative of the author for making this available! All portions derived or used directly are licensed under [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0).
