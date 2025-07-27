@@ -41,7 +41,7 @@ internal static class Quests
         {
             if (!QuestService.TargetCache.TryGetValue(questObjective.Objective.Target, out HashSet<Entity> entities))
             {
-                LocalizationService.HandleReply(ctx, $"Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {QuestTypeColor[questType]}.");
+                LocalizationService.Reply(ctx, $"Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {QuestTypeColor[questType]}.");
             }
             else if (entities.Count > 0)
             {
@@ -63,12 +63,12 @@ internal static class Quests
 
                 if (!closest.Exists())
                 {
-                    LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn!");
+                    LocalizationService.Reply(ctx, "Targets have all been killed, give them a chance to respawn!");
                     return;
                 }
                 else if (closest.IsVBloodOrGateBoss())
                 {
-                    LocalizationService.HandleReply(ctx, "Use the VBlood menu to track bosses!");
+                    LocalizationService.Reply(ctx, "Use the VBlood menu to track bosses!");
                     return;
                 }
 
@@ -79,16 +79,16 @@ internal static class Quests
                 string cardinalDirection = $"<color=yellow>{GetCardinalDirection(direction)}</color>";
                 double seconds = (DateTime.UtcNow - QuestService._lastUpdate).TotalSeconds;
 
-                LocalizationService.HandleReply(ctx, $"Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection} <color=#F88380>{(int)seconds}</color>s ago.");
+                LocalizationService.Reply(ctx, $"Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection} <color=#F88380>{(int)seconds}</color>s ago.");
             }
             else if (entities.Count == 0)
             {
-                LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn!");
+                LocalizationService.Reply(ctx, "Targets have all been killed, give them a chance to respawn!");
             }
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Tracking is only available for incomplete kill quests.");
+            LocalizationService.Reply(ctx, "Tracking is only available for incomplete kill quests.");
         }
     }
     */
@@ -106,7 +106,7 @@ internal static class Quests
 
             if (!targetCache.IsCreated || !targetCache.ContainsKey(questObjective.Objective.Target))
             {
-                LocalizationService.HandleReply(ctx, $"Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {QuestTypeColor[questType]}.");
+                LocalizationService.Reply(ctx, $"Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {QuestTypeColor[questType]}.");
                 return;
             }
 
@@ -139,13 +139,13 @@ internal static class Quests
 
             if (!closest.Exists())
             {
-                LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn!");
+                LocalizationService.Reply(ctx, "Targets have all been killed, give them a chance to respawn!");
                 return;
             }
 
             if (closest.IsVBloodOrGateBoss())
             {
-                LocalizationService.HandleReply(ctx, "Use the VBlood menu to track bosses!");
+                LocalizationService.Reply(ctx, "Use the VBlood menu to track bosses!");
                 return;
             }
 
@@ -156,11 +156,11 @@ internal static class Quests
             double seconds = (DateTime.UtcNow - QuestService._lastUpdate).TotalSeconds;
 
             // LocalizationService.HandleReply(ctx, $"Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection} <color=#F88380>{(int)seconds}</color>s ago.");
-            LocalizationService.HandleReply(ctx, $"Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection}!");
+            LocalizationService.Reply(ctx, $"Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection}!");
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Tracking is only available for incomplete kill quests.");
+            LocalizationService.Reply(ctx, "Tracking is only available for incomplete kill quests.");
         }
     }
     public static void QuestObjectiveReply(ChatCommandContext ctx, Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, QuestType questType)
@@ -168,17 +168,17 @@ internal static class Quests
         if (questData.TryGetValue(questType, out var questObjective) && !questObjective.Objective.Complete)
         {
             string timeLeft = GetTimeUntilReset(questObjective, questType);
-            LocalizationService.HandleReply(ctx, $"{QuestTypeColor[questType]}: <color=green>{questObjective.Objective.Goal}</color> <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>x<color=#FFC0CB>{questObjective.Objective.RequiredAmount}</color> [<color=white>{questObjective.Progress}</color>/<color=yellow>{questObjective.Objective.RequiredAmount}</color>]");
-            LocalizationService.HandleReply(ctx, $"Time until {questType} reset - <color=yellow>{timeLeft}</color> | {_questTargetType[questObjective.Objective.Goal]} Prefab: <color=white>{questObjective.Objective.Target.GetPrefabName()}</color>");
+            LocalizationService.Reply(ctx, $"{QuestTypeColor[questType]}: <color=green>{questObjective.Objective.Goal}</color> <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>x<color=#FFC0CB>{questObjective.Objective.RequiredAmount}</color> [<color=white>{questObjective.Progress}</color>/<color=yellow>{questObjective.Objective.RequiredAmount}</color>]");
+            LocalizationService.Reply(ctx, $"Time until {questType} reset - <color=yellow>{timeLeft}</color> | {_questTargetType[questObjective.Objective.Goal]} Prefab: <color=white>{questObjective.Objective.Target.GetPrefabName()}</color>");
         }
         else if (questObjective.Objective.Complete)
         {
             string timeLeft = GetTimeUntilReset(questObjective, questType);
-            LocalizationService.HandleReply(ctx, $"You've already completed your {QuestTypeColor[questType]}! Time until {questType} reset - <color=yellow>{timeLeft}</color>");
+            LocalizationService.Reply(ctx, $"You've already completed your {QuestTypeColor[questType]}! Time until {questType} reset - <color=yellow>{timeLeft}</color>");
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"You don't have a {QuestTypeColor[questType]}.");
+            LocalizationService.Reply(ctx, $"You don't have a {QuestTypeColor[questType]}.");
         }
     }
     static string GetTimeUntilReset((QuestObjective Objective, int Progress, DateTime LastReset) questObjective, QuestType questType)

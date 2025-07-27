@@ -352,14 +352,14 @@ internal static class Familiars
             // Add to set if valid
             if (!prefabEntity.Read<PrefabGUID>().GetPrefabName().StartsWith("CHAR"))
             {
-                LocalizationService.HandleReply(ctx, "Invalid unit prefab (match found but does not start with CHAR/char).");
+                LocalizationService.Reply(ctx, "Invalid unit prefab (match found but does not start with CHAR/char).");
                 return;
             }
 
             data.FamiliarUnlocks[activeBox].Add(prefabHash);
             SaveFamiliarUnlocksData(steamId, data);
 
-            LocalizationService.HandleReply(ctx, $"<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.");
+            LocalizationService.Reply(ctx, $"<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.");
         }
         else if (unit.ToLower().StartsWith("char")) // search for full and/or partial name match
         {
@@ -383,23 +383,23 @@ internal static class Familiars
             {
                 if (!prefabEntity.Read<PrefabGUID>().GetPrefabName().StartsWith("CHAR"))
                 {
-                    LocalizationService.HandleReply(ctx, "Invalid unit name (match found but does not start with CHAR/char).");
+                    LocalizationService.Reply(ctx, "Invalid unit name (match found but does not start with CHAR/char).");
                     return;
                 }
 
                 data.FamiliarUnlocks[activeBox].Add(match.GuidHash);
                 SaveFamiliarUnlocksData(steamId, data);
 
-                LocalizationService.HandleReply(ctx, $"<color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.");
+                LocalizationService.Reply(ctx, $"<color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.");
             }
             else
             {
-                LocalizationService.HandleReply(ctx, "Invalid unit name (no full or partial matches).");
+                LocalizationService.Reply(ctx, "Invalid unit name (no full or partial matches).");
             }
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Invalid prefab (not an integer) or name (does not start with CHAR/char).");
+            LocalizationService.Reply(ctx, "Invalid prefab (not an integer) or name (does not start with CHAR/char).");
         }
     }
     public static void TryReturnFamiliar(Entity playerCharacter, Entity familiar)
@@ -475,12 +475,12 @@ internal static class Familiars
     public static void ToggleShinies(ChatCommandContext ctx, ulong steamId)
     {
         TogglePlayerBool(steamId, SHINY_FAMILIARS_KEY);
-        LocalizationService.HandleReply(ctx, GetPlayerBool(steamId, SHINY_FAMILIARS_KEY) ? "Shiny familiars <color=green>enabled</color>." : "Shiny familiars <color=red>disabled</color>.");
+        LocalizationService.Reply(ctx, GetPlayerBool(steamId, SHINY_FAMILIARS_KEY) ? "Shiny familiars <color=green>enabled</color>." : "Shiny familiars <color=red>disabled</color>.");
     }
     public static void ToggleVBloodEmotes(ChatCommandContext ctx, ulong steamId)
     {
         TogglePlayerBool(steamId, VBLOOD_EMOTES_KEY);
-        LocalizationService.HandleReply(ctx, GetPlayerBool(steamId, VBLOOD_EMOTES_KEY) ? "VBlood emotes <color=green>enabled</color>." : "VBlood emotes <color=red>disabled</color>.");
+        LocalizationService.Reply(ctx, GetPlayerBool(steamId, VBLOOD_EMOTES_KEY) ? "VBlood emotes <color=green>enabled</color>." : "VBlood emotes <color=red>disabled</color>.");
     }
     public static void CallFamiliar(Entity playerCharacter, Entity familiar, User user, ulong steamId)
     {
@@ -885,7 +885,7 @@ internal static class Familiars
 
         if (!steamId.HasActiveFamiliar())
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find active familiar!");
+            LocalizationService.Reply(ctx, "Couldn't find active familiar!");
             return;
         }
 
@@ -905,7 +905,7 @@ internal static class Familiars
 
         if (prestigeData.FamiliarPrestige[familiarId] >= ConfigService.MaxFamiliarPrestiges)
         {
-            LocalizationService.HandleReply(ctx, $"Your familiar has already prestiged the maximum number of times! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)");
+            LocalizationService.Reply(ctx, $"Your familiar has already prestiged the maximum number of times! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)");
             return;
         }
 
@@ -920,7 +920,7 @@ internal static class Familiars
 
                 if (value < 1 || value > length)
                 {
-                    LocalizationService.HandleReply(ctx, $"Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.");
+                    LocalizationService.Reply(ctx, $"Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.");
                     return;
                 }
 
@@ -932,19 +932,19 @@ internal static class Familiars
                 }
                 else
                 {
-                    LocalizationService.HandleReply(ctx, $"Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.");
+                    LocalizationService.Reply(ctx, $"Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.");
                     return;
                 }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.");
+                LocalizationService.Reply(ctx, $"Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.");
                 return;
             }
         }
         else if (stats.Count >= FamiliarPrestigeStats.Count && !string.IsNullOrEmpty(statType))
         {
-            LocalizationService.HandleReply(ctx, "Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')");
+            LocalizationService.Reply(ctx, "Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')");
             return;
         }
         */
@@ -958,22 +958,22 @@ internal static class Familiars
             Entity familiar = GetActiveFamiliar(playerCharacter);
             ModifyUnitStats(familiar, xpData.FamiliarExperience[familiarId].Key, steamId, familiarId);
 
-            LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!");
+            LocalizationService.Reply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!");
 
             /*
             if (value == -1)
             {
-                LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!");
+                LocalizationService.Reply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!");
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)");
+                LocalizationService.Reply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)");
             }
             */
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Failed to remove schematics from your inventory!");
+            LocalizationService.Reply(ctx, "Failed to remove schematics from your inventory!");
         }
     }
     public static IEnumerator HandleFamiliarShapeshiftRoutine(User user, Entity playerCharacter, Entity familiar)
