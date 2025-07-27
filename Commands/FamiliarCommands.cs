@@ -412,7 +412,7 @@ internal static class FamiliarCommands
         }
 
         List<PrefabGUID> vBloodPrefabGuids = [..VBloodNamePrefabGuidMap
-            .Where(kvp => kvp.Key.Contains(vBlood, StringComparison.OrdinalIgnoreCase))
+            .Where(kvp => kvp.Key.Contains(vBlood, StringComparison.CurrentCultureIgnoreCase))
             .Select(kvp => kvp.Value)];
 
         if (!vBloodPrefabGuids.Any())
@@ -470,7 +470,7 @@ internal static class FamiliarCommands
                     {
                         string lastBoxName = unlocksData.FamiliarUnlocks.Keys.LastOrDefault();
 
-                        if (string.IsNullOrEmpty(lastBoxName) || unlocksData.FamiliarUnlocks.TryGetValue(lastBoxName, out var box) && box.Count >= BOX_SIZE)
+                        if (string.IsNullOrEmpty(lastBoxName) || (unlocksData.FamiliarUnlocks.TryGetValue(lastBoxName, out var box) && box.Count >= BOX_SIZE))
                         {
                             lastBoxName = $"box{unlocksData.FamiliarUnlocks.Count + 1}";
 
@@ -668,7 +668,7 @@ internal static class FamiliarCommands
             }
 
             LocalizationService.HandleReply(ctx, $"Your familiar is level [<color=white>{xpData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!");
-            
+
             if (familiar.Exists())
             {
                 Health health = familiar.Read<Health>();
@@ -696,7 +696,7 @@ internal static class FamiliarCommands
                     lifeLeech.SpellLifeLeechFactor._Value = familiarLifeLeech.SpellLifeLeechFactor._Value;
                 }
                 */
-                
+
                 List<KeyValuePair<string, string>> statPairs = [];
 
                 foreach (FamiliarStatType statType in Enum.GetValues(typeof(FamiliarStatType)))
@@ -1023,7 +1023,7 @@ internal static class FamiliarCommands
         {
             List<string> foundBoxNames = [];
 
-            if (name.Equals("vblood", StringComparison.OrdinalIgnoreCase))
+            if (name.Equals("vblood", StringComparison.CurrentCultureIgnoreCase))
             {
                 foreach (var box in data.FamiliarUnlocks)
                 {
@@ -1066,7 +1066,7 @@ internal static class FamiliarCommands
                     var matchingFamiliars = box.Value.Where(famKey =>
                     {
                         PrefabGUID famPrefab = new(famKey);
-                        return famPrefab.GetLocalizedName().Contains(name, StringComparison.OrdinalIgnoreCase);
+                        return famPrefab.GetLocalizedName().Contains(name, StringComparison.CurrentCultureIgnoreCase);
                     }).ToList();
 
                     if (matchingFamiliars.Count > 0)
@@ -1135,7 +1135,7 @@ internal static class FamiliarCommands
                 .Where(item =>
                 {
                     PrefabGUID famPrefab = new(item.FamKey);
-                    return famPrefab.GetLocalizedName().Contains(name, StringComparison.OrdinalIgnoreCase);
+                    return famPrefab.GetLocalizedName().Contains(name, StringComparison.CurrentCultureIgnoreCase);
                 })
                 .ToDictionary(
                     item => item.FamKey,
@@ -1183,7 +1183,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "shinybuff", shortHand: "shiny", adminOnly: false, usage: ".fam shiny [SpellSchool]", description: "Chooses shiny for current active familiar, one freebie then costs configured amount to change if already unlocked.")]
+    [Command(name: "shinybuff", shortHand: "shiny", adminOnly: false, usage: ".fam shiny [SpellSchool]", description: "Spend vampiric dust to make your familiar shiny!")]
     public static void ShinyFamiliarCommand(ChatCommandContext ctx, string spellSchool = "")
     {
         if (!ConfigService.FamiliarSystem)
@@ -1193,7 +1193,7 @@ internal static class FamiliarCommands
         }
 
         PrefabGUID spellSchoolPrefabGuid = ShinyBuffColorHexes.Keys
-                .SingleOrDefault(prefab => prefab.GetPrefabName().ToLower().Contains(spellSchool.ToLower()));
+                .SingleOrDefault(prefab => prefab.GetPrefabName().Contains(spellSchool, StringComparison.CurrentCultureIgnoreCase));
 
         if (!ShinyBuffColorHexes.ContainsKey(spellSchoolPrefabGuid))
         {
@@ -1263,7 +1263,7 @@ internal static class FamiliarCommands
 
         ulong steamId = ctx.User.PlatformId;
         var action = _familiarSettings
-            .Where(kvp => kvp.Key.ToLower() == option.ToLower())
+            .Where(kvp => string.Equals(kvp.Key, option, StringComparison.CurrentCultureIgnoreCase))
             .Select(kvp => kvp.Value)
             .FirstOrDefault();
 
@@ -1531,7 +1531,7 @@ internal static class FamiliarCommands
         ctx.Reply($"Challenged <color=white>{playerInfo.User.CharacterName.Value}</color> to a battle! (<color=yellow>30s</color> until it expires)");
         LocalizationService.HandleServerReply(EntityManager, playerInfo.User, $"<color=white>{ctx.User.CharacterName.Value}</color> has challenged you to a battle! (<color=yellow>30s</color> until it expires, accept by emoting '<color=green>Yes</color>' or decline by emoting '<color=red>No</color>')");
 
-        ChallengeExpiredRoutine((ctx.User.PlatformId, playerInfo.User.PlatformId)).Start();
+        ChallengeExpiredRoutine((ctx.User.PlatformId, playerInfo.User.PlatformId)).Run();
     }
 
     [Command(name: "setbattlearena", shortHand: "sba", adminOnly: true, usage: ".fam sba", description: "Set current position as the center for the familiar battle arena.")]

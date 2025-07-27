@@ -102,7 +102,7 @@ internal static class Quests
             questObjective.Objective.Goal.Equals(TargetType.Kill) &&
             !questObjective.Objective.Complete)
         {
-            var targetCache = TargetTrackingSystem.TargetCache;
+            var targetCache = QuestTargetSystem.TargetCache;
 
             if (!targetCache.IsCreated || !targetCache.ContainsKey(questObjective.Objective.Target))
             {
@@ -112,8 +112,8 @@ internal static class Quests
 
             float3 userPosition = character.GetPosition();
 
-            bool found = targetCache.TryGetFirstValue(questObjective.Objective.Target, 
-                out Entity targetEntity, 
+            bool found = targetCache.TryGetFirstValue(questObjective.Objective.Target,
+                out Entity targetEntity,
                 out NativeParallelMultiHashMapIterator<PrefabGUID> iterator);
 
             Entity closest = Entity.Null;

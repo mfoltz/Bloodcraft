@@ -72,7 +72,7 @@ internal static class Classes
 
     public static readonly Dictionary<PlayerClass, List<PrefabGUID>> ClassShiftAbilities = new()
     {
-        [PlayerClass.BloodKnight] = 
+        [PlayerClass.BloodKnight] =
         [
             new(0),
             new(0),
@@ -545,7 +545,7 @@ internal static class Classes
 
         parsedClassType = Enum.GetValues(typeof(PlayerClass))
                               .Cast<PlayerClass>()
-                              .FirstOrDefault(pc => pc.ToString().Contains(classType, StringComparison.OrdinalIgnoreCase));
+                              .FirstOrDefault(pc => pc.ToString().Contains(classType, StringComparison.CurrentCultureIgnoreCase));
 
         if (!parsedClassType.Equals(default(PlayerClass)))
         {
@@ -700,10 +700,8 @@ internal static class Classes
                 {
                     if (abilityEntry.ActiveAbility.Equals(spellPrefabGUID))
                     {
-                        abilityEntry.ActiveBuff.With((ref VBloodAbilityReplaceBuff vBloodAbilityReplaceBuff) =>
-                        {
-                            vBloodAbilityReplaceBuff.AbilityType = vBloodAbilityData.AbilityType;
-                        });
+                        abilityEntry.ActiveBuff.With((ref VBloodAbilityReplaceBuff vBloodAbilityReplaceBuff)
+                            => vBloodAbilityReplaceBuff.AbilityType = vBloodAbilityData.AbilityType);
 
                         break;
                     }
@@ -967,7 +965,7 @@ internal static class Classes
                 // Core.Log.LogWarning($"[GenerateAbilityJewelMap] Jewel map generated - {_abilityJewelMap.Count}");
             }
         );
-        
+
         // SpellSchoolAbility.TryGetSchoolAbility
         // SpellSchoolMappingSystem
         // Core.SystemService.JewelSpawnSystem.GetRandomJewelAbilityFromSchool
@@ -982,7 +980,7 @@ internal static class Classes
 
         parsedClassType = Enum.GetValues(typeof(PlayerClass))
             .Cast<PlayerClass>()
-            .FirstOrDefault(ct => ct.ToString().Contains(className, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(ct => ct.ToString().Contains(className, StringComparison.CurrentCultureIgnoreCase));
 
         if (!parsedClassType.Equals(default(PlayerClass)))
         {

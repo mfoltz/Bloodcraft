@@ -156,7 +156,7 @@ internal static class BloodSystem
         { BloodType.Corruption, PrestigeType.CorruptionLegacy }
     };
     public static IReadOnlyDictionary<PrefabGUID, BloodType> BloodBuffToBloodType => _bloodBuffToBloodType;
-    static readonly Dictionary<PrefabGUID, BloodType> _bloodBuffToBloodType = new() 
+    static readonly Dictionary<PrefabGUID, BloodType> _bloodBuffToBloodType = new()
     {
         { PrefabGUIDs.AB_BloodBuff_Worker_Tier1, BloodType.Worker },
         { PrefabGUIDs.AB_BloodBuff_Warrior_Tier1, BloodType.Warrior },
@@ -177,10 +177,10 @@ internal static class BloodSystem
         { BloodType.Scholar, PrefabGUIDs.AB_BloodBuff_Scholar_Tier1 },
         { BloodType.Rogue, PrefabGUIDs.AB_BloodBuff_Rogue_Tier1 },
         { BloodType.Mutant, PrefabGUIDs.AB_BloodBuff_Mutant_Tier1 },
-        { BloodType.Draculin, PrefabGUIDs.AB_BloodBuff_Draculin_Tier1 }, 
+        { BloodType.Draculin, PrefabGUIDs.AB_BloodBuff_Draculin_Tier1 },
         { BloodType.Immortal, PrefabGUIDs.AB_BloodBuff_Dracula_Tier1 },
-        { BloodType.Creature, PrefabGUIDs.AB_BloodBuff_Creature_Tier1 }, 
-        { BloodType.Brute, PrefabGUIDs.AB_BloodBuff_Brute_Tier1 }, 
+        { BloodType.Creature, PrefabGUIDs.AB_BloodBuff_Creature_Tier1 },
+        { BloodType.Brute, PrefabGUIDs.AB_BloodBuff_Brute_Tier1 },
         { BloodType.Corruption, PrefabGUIDs.AB_BloodBuff_Corruption_Tier1 }
     };
     public static IReadOnlyDictionary<BloodType, PrefabGUID> BloodTypeToConsumeSource => _bloodTypeToConsumeSource;
@@ -336,7 +336,7 @@ internal static class BloodSystem
         if (GetPlayerBool(steamId, SCT_PLAYER_BL_KEY))
         {
             // Core.Log.LogInfo($"Legacy SCT for {user.CharacterName.Value} with gainedXP: {gainedXP} and delay: {delay}");
-            PlayerLegacySCTDelayRoutine(playerCharacter, userEntity, _red, gainedXP, delay).Start();
+            PlayerLegacySCTDelayRoutine(playerCharacter, userEntity, _red, gainedXP, delay).Run();
         }
     }
     static IEnumerator PlayerLegacySCTDelayRoutine(Entity playerCharacter, Entity userEntity, float3 color, float gainedXP, float delay) // maybe just have one of these in progression utilities but later
@@ -376,6 +376,6 @@ internal static class BloodSystem
         return Enum.GetValues(typeof(BloodType))
             .Cast<BloodType>()
             .FirstOrDefault(type =>
-            bloodCheck.Contains(type.ToString(), StringComparison.OrdinalIgnoreCase));
+            bloodCheck.Contains(type.ToString(), StringComparison.CurrentCultureIgnoreCase));
     }
 }

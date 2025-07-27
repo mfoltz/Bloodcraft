@@ -63,7 +63,7 @@ internal static class WeaponCommands
                 List<KeyValuePair<WeaponStatType, string>> weaponExpertiseStats = [];
                 foreach (WeaponStatType weaponStatType in weaponStatTypes)
                 {
-                    if (!TryGetScaledModifyUnitExpertiseStat(handler, playerCharacter, steamId, weaponType, 
+                    if (!TryGetScaledModifyUnitExpertiseStat(handler, playerCharacter, steamId, weaponType,
                         weaponStatType, out float statValue, out ModifyUnitStatBuff modifyUnitStatBuff)) continue;
 
                     string weaponStatString = Misc.FormatWeaponStatValue(weaponStatType, statValue);

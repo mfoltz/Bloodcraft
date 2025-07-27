@@ -108,7 +108,7 @@ internal static class Misc
         SCT_YIELD
     ];
 
-    public static readonly Dictionary<string, ScrollingTextMessage> ScrollingTextNameMap = new(StringComparer.OrdinalIgnoreCase)
+    public static readonly Dictionary<string, ScrollingTextMessage> ScrollingTextNameMap = new(StringComparer.CurrentCultureIgnoreCase)
     {
         { SCT_PLAYER_LVL, ScrollingTextMessage.PlayerExperience },
         { SCT_PLAYER_WEP, ScrollingTextMessage.PlayerExpertise },
@@ -263,7 +263,7 @@ internal static class Misc
         { new(-1700712765), 0.25f },
         { new(523084427), 0.15f },
         { new(1179205309), 0.15f },
-        { new(-2004879548), 0.10f }, 
+        { new(-2004879548), 0.10f },
         { new(539854831), 0.15f },
         { new(-1274939577), 0.10f },
         { new(1032018140), 0.15f },
@@ -278,13 +278,13 @@ internal static class Misc
         string baseName = rawPrefabString.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
         if (baseName is null) return false;
 
-        baseName = baseName.Replace("StatMod_", "", StringComparison.OrdinalIgnoreCase)
-                           .Replace("Unique_", "", StringComparison.OrdinalIgnoreCase);
+        baseName = baseName.Replace("StatMod_", "", StringComparison.CurrentCultureIgnoreCase)
+                           .Replace("Unique_", "", StringComparison.CurrentCultureIgnoreCase);
 
         string[] tierSuffixes = ["_Low", "_Mid", "_High"];
         foreach (var suffix in tierSuffixes)
         {
-            if (baseName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+            if (baseName.EndsWith(suffix, StringComparison.CurrentCultureIgnoreCase))
             {
                 baseName = baseName[..^suffix.Length];
                 break;
@@ -347,14 +347,14 @@ internal static class Misc
             return false;
 
         // Step 2: Strip known prefixes and suffixes
-        baseName = baseName.Replace("StatMod_", "", StringComparison.OrdinalIgnoreCase)
-                           .Replace("Unique_", "", StringComparison.OrdinalIgnoreCase);
+        baseName = baseName.Replace("StatMod_", "", StringComparison.CurrentCultureIgnoreCase)
+                           .Replace("Unique_", "", StringComparison.CurrentCultureIgnoreCase);
 
         // Remove suffixes like "_Low", "_Mid", "_High"
         string[] tierSuffixes = ["_Low", "_Mid", "_High"];
         foreach (var suffix in tierSuffixes)
         {
-            if (baseName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+            if (baseName.EndsWith(suffix, StringComparison.CurrentCultureIgnoreCase))
             {
                 baseName = baseName[..^suffix.Length];
                 break;

@@ -20,10 +20,7 @@ internal static class UnitSpawnerPatch
         {
             foreach (Entity entity in entities)
             {
-                entity.HasWith((ref IsMinion isMinion) =>
-                {
-                    isMinion.Value = true;
-                });
+                entity.HasWith((ref IsMinion isMinion) => isMinion.Value = true);
             }
         }
         catch (Exception e)

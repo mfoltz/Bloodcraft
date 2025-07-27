@@ -53,7 +53,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
 
                     if (_quests && steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, _fishingQuestGoal, 1, user);
 
-                    if (target.TryGetBuffer<DropTableBuffer>(out var buffer) 
+                    if (target.TryGetBuffer<DropTableBuffer>(out var buffer)
                         && !buffer.IsEmpty)
                     {
                         prefabGuid = buffer[0].DropTableGuid;
@@ -64,6 +64,9 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     IProfession handler = ProfessionFactory.GetProfession(prefabGuid);
                     if (handler != null)
                     {
+                        Profession profession = handler.GetProfessionEnum();
+                        if (profession.IsDisabled()) continue;
+
                         int multiplier = ProfessionMappings.GetFishingModifier(prefabGuid);
                         float delay = SCT_DELAY;
 

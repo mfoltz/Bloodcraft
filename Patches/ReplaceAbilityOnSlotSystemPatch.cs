@@ -32,7 +32,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
         if (!Core._initialized) return;
 
         NativeArray<Entity> entities = __instance.__query_1482480545_0.ToEntityArray(Allocator.Temp);
-        
+
         try
         {
             foreach (Entity entity in entities)
@@ -45,8 +45,8 @@ internal static class ReplaceAbilityOnSlotSystemPatch
                     PrefabGUID prefabGuid = entity.GetPrefabGuid();
                     string prefabName = prefabGuid.GetPrefabName();
 
-                    bool slotSpells = prefabName.Contains("unarmed", StringComparison.OrdinalIgnoreCase) || prefabName.Contains("fishingpole", StringComparison.OrdinalIgnoreCase);
-                    bool shiftSpell = prefabName.Contains("weapon", StringComparison.OrdinalIgnoreCase);
+                    bool slotSpells = prefabName.Contains("unarmed", StringComparison.CurrentCultureIgnoreCase) || prefabName.Contains("fishingpole", StringComparison.CurrentCultureIgnoreCase);
+                    bool shiftSpell = prefabName.Contains("weapon", StringComparison.CurrentCultureIgnoreCase);
 
                     if (_unarmedSlots && slotSpells && steamId.TryGetPlayerSpells(out (int FirstUnarmed, int SecondUnarmed, int ClassSpell) spells))
                     {

@@ -11,8 +11,11 @@ internal static class ConfigService
     static readonly Lazy<string> _languageLocalization = new(() => GetConfigValue<string>("LanguageLocalization"));
     public static string LanguageLocalization => _languageLocalization.Value;
 
-    static readonly Lazy<bool> _eclipse = new(() => GetConfigValue<bool>("Eclipse"));
-    public static bool Eclipse => _eclipse.Value;
+    static readonly Lazy<bool> _eclipsed = new(() => GetConfigValue<bool>("Eclipsed"));
+    public static bool Eclipsed => _eclipsed.Value;
+
+    static readonly Lazy<bool> _elitePrimalRifts = new(() => GetConfigValue<bool>("ElitePrimalRifts"));
+    public static bool ElitePrimalRifts => _elitePrimalRifts.Value;
 
     static readonly Lazy<bool> _eliteShardBearers = new(() => GetConfigValue<bool>("EliteShardBearers"));
     public static bool EliteShardBearers => _eliteShardBearers.Value;
@@ -311,6 +314,9 @@ internal static class ConfigService
     static readonly Lazy<float> _professionFactor = new(() => GetConfigValue<float>("ProfessionFactor"));
     public static float ProfessionFactor => _professionFactor.Value;
 
+    static readonly Lazy<string> _disabledProfessions = new(() => GetConfigValue<string>("DisabledProfessions"));
+    public static string DisabledProfessions => _disabledProfessions.Value;
+
     static readonly Lazy<bool> _extraRecipes = new(() => GetConfigValue<bool>("ExtraRecipes"));
     public static bool ExtraRecipes => _extraRecipes.Value;
 
@@ -352,6 +358,9 @@ internal static class ConfigService
 
     static readonly Lazy<string> _bannedTypes = new(() => GetConfigValue<string>("BannedTypes"));
     public static string BannedTypes => _bannedTypes.Value;
+
+    static readonly Lazy<bool> _equipmentOnly = new(() => GetConfigValue<bool>("EquipmentOnly"));
+    public static bool EquipmentOnly => _equipmentOnly.Value;
 
     static readonly Lazy<float> _unitFamiliarMultiplier = new(() => GetConfigValue<float>("UnitFamiliarMultiplier"));
     public static float UnitFamiliarMultiplier => _unitFamiliarMultiplier.Value;
@@ -506,7 +515,8 @@ internal static class ConfigService
         public static readonly List<ConfigEntryDefinition> ConfigEntries =
         [
             new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
-            new ConfigEntryDefinition("General", "Eclipse", true, "Enables the server sending player mod data to clients using Eclipse."),
+            new ConfigEntryDefinition("General", "Eclipsed", false, "Eclipse will be active if any features that sync with the client are enabled. Instead, this now controls the frequency; true for faster (0.1s), false for slower (2.5s)."),
+            new ConfigEntryDefinition("General", "ElitePrimalRifts", false, "Enable or disable elite primal rifts. (WIP!)"),
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
             new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01/t02 effects at the same time)."),
@@ -514,7 +524,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("General", "BleedingEdge", "", "Enable various weapon-specific changes; some are more experimental than others, see README for details. (Slashers, Crossbow, Pistols, TwinBlades, Daggers)"),
             new ConfigEntryDefinition("General", "TwilightArsenal", false, "Enable or disable experimental ability replacements on shadow weapons (currently just axes but like cosplaying as Thor with two mjolnirs)."),
             new ConfigEntryDefinition("General", "PrimalJewelCost", -77477508, "If extra recipes is enabled with a valid item prefab here (default demon fragments), it can be refined via gemcutter for random enhanced tier 4 jewels (better rolls, more modifiers)."),
-            
+
             new ConfigEntryDefinition("StarterKit", "StarterKit", false, "Enable or disable the starter kit."),
             new ConfigEntryDefinition("StarterKit", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "Item prefabGuids for starting kit."),
             new ConfigEntryDefinition("StarterKit", "KitQuantities", "500,1000,1000,250", "The quantity of each item in the starter kit."),
@@ -528,7 +538,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Quests", "RerollDailyAmount", 50, "Cost of prefab for rerolling daily."),
             new ConfigEntryDefinition("Quests", "RerollWeeklyPrefab", -949672483, "Prefab item for rerolling weekly."),
             new ConfigEntryDefinition("Quests", "RerollWeeklyAmount", 50, "Cost of prefab for rerolling weekly. Won't work if already completed for the week."),
-            
+
             new ConfigEntryDefinition("Leveling", "LevelingSystem", false, "Enable or disable the leveling system."),
             new ConfigEntryDefinition("Leveling", "RestedXPSystem", false, "Enable or disable rested experience for players logging out inside of coffins (half for wooden, full for stone). Prestiging level will reset accumulated rested xp."),
             new ConfigEntryDefinition("Leveling", "RestedXPRate", 0.05f, "Rate of Rested XP accumulation per tick (as a percentage of maximum allowed rested XP, if configured to one tick per hour 20 hours offline in a stone coffin will provide maximum current rested XP)."),
@@ -546,7 +556,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Leveling", "ExpShare", true, "Enable or disable sharing experience with nearby players (ExpShareDistance) in combat that are within level range (ExpShareLevelRange, this does not apply to players that have prestiged at least once on PvE servers or clan members of the player that does the final blow) along with familiar unlock sharing if enabled (on PvP servers will only apply to clan members)."),
             new ConfigEntryDefinition("Leveling", "ExpShareLevelRange", 10, "Maximum level difference between players allowed for ExpShare, players who have prestiged at least once are exempt from this. Use 0 for no level diff restrictions."),
             new ConfigEntryDefinition("Leveling", "ExpShareDistance", 25f, "Default is ~5 floor tile lengths."),
-            
+
             new ConfigEntryDefinition("Prestige", "PrestigeSystem", false, "Enable or disable the prestige system (requires leveling to be enabled as well)."),
             new ConfigEntryDefinition("Prestige", "PrestigeBuffs", "1504279833,0,0,0,0,0,0,0,0,0", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level (only shroud for first default while reworked)."),
             new ConfigEntryDefinition("Prestige", "PrestigeLevelsToUnlockClassSpells", "0,1,2,3,4,5", "The prestige levels at which class spells are unlocked. This should match the number of spells per class +1 to account for the default class spell. Can leave at 0 each if you want them unlocked from the start."),
@@ -560,7 +570,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Prestige", "ExoPrestigeRewardQuantity", 500, "The quantity of the reward for exo prestiging."),
             new ConfigEntryDefinition("Prestige", "TrueImmortal", false, "Enable or disable Immortal blood for the duration of exoform."),
             new ConfigEntryDefinition("Prestige", "Leaderboard", true, "Enable or disable the various prestige leaderboard rankings."),
-            
+
             new ConfigEntryDefinition("Expertise", "ExpertiseSystem", false, "Enable or disable the expertise system."),
             new ConfigEntryDefinition("Expertise", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise."),
             new ConfigEntryDefinition("Expertise", "UnarmedSlots", false, "Enable or disable the ability to use extra unarmed spell slots."),
@@ -585,7 +595,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Expertise", "PhysicalCritDamage", 0.50f, "The base cap for physical critical strike damage."),
             new ConfigEntryDefinition("Expertise", "SpellCritChance", 0.10f, "The base cap for spell critical strike chance."),
             new ConfigEntryDefinition("Expertise", "SpellCritDamage", 0.50f, "The base cap for spell critical strike damage."),
-            
+
             new ConfigEntryDefinition("Legacies", "LegacySystem", false, "Enable or disable the blood legacy system."),
             new ConfigEntryDefinition("Legacies", "MaxLegacyPrestiges", 10, "The maximum number of prestiges a player can reach in blood legacies."),
             new ConfigEntryDefinition("Legacies", "MaxBloodLevel", 100, "The maximum level a player can reach in blood legacies."),
@@ -606,11 +616,12 @@ internal static class ConfigService
             new ConfigEntryDefinition("Legacies", "MinionDamage", 0.25f, "The base cap for minion damage."),
             new ConfigEntryDefinition("Legacies", "AbilityAttackSpeed", 0.10f, "The base cap for ability attack speed."),
             new ConfigEntryDefinition("Legacies", "CorruptionDamageReduction", 0.10f, "The base cap for corruption damage reduction."),
-            
+
             new ConfigEntryDefinition("Professions", "ProfessionSystem", false, "Enable or disable the profession system."),
             new ConfigEntryDefinition("Professions", "ProfessionFactor", 1f, "The multiplier for profession experience."),
+            new ConfigEntryDefinition("Professions", "DisabledProfessions", "", "Professions that should be inactive separated by comma."),
             new ConfigEntryDefinition("Professions", "ExtraRecipes", false, "Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well. See 'Recipes' section in README for complete list of changes."), // maybe this should be in general >_>
-            
+
             new ConfigEntryDefinition("Familiars", "FamiliarSystem", false, "Enable or disable the familiar system."),
             new ConfigEntryDefinition("Familiars", "ShareUnlocks", false, "Enable or disable sharing unlocks between players in clans or parties (uses exp share distance)."),
             new ConfigEntryDefinition("Familiars", "FamiliarCombat", true, "Enable or disable combat for familiars."),
@@ -624,6 +635,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Familiars", "AllowMinions", false, "Allow Minions to be unlocked as familiars (leaving these excluded by default since some have undesirable behaviour and I am not sifting through them all to correct that, enable at own risk)."),
             new ConfigEntryDefinition("Familiars", "BannedUnits", "", "The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs."),
             new ConfigEntryDefinition("Familiars", "BannedTypes", "", "The types of units that cannot be used as familiars go here (Human, Undead, Demon, Mechanical, Beast)."),
+            new ConfigEntryDefinition("Familiars", "EquipmentOnly", false, "True for only equipment with no working inventory slots, false for both."),
             new ConfigEntryDefinition("Familiars", "UnitFamiliarMultiplier", 7.5f, "The multiplier for experience gained from units."),
             new ConfigEntryDefinition("Familiars", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods."),
             new ConfigEntryDefinition("Familiars", "UnitUnlockChance", 0.05f, "The chance for a unit unlock as a familiar."),
@@ -635,7 +647,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Familiars", "ShinyChance", 0.2f, "The chance for a shiny when unlocking familiars (6 total buffs, 1 buff per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff."),
             new ConfigEntryDefinition("Familiars", "ShinyCostItemQuantity", 100, "Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders. Valid values are between 50-200, if outside that range in either direction it will be clamped."),
             new ConfigEntryDefinition("Familiars", "PrestigeCostItemQuantity", 1000, "Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging). Valid values are between 500-2000, if outside that range in either direction it will be clamped."),
-            
+
             new ConfigEntryDefinition("Classes", "ClassSystem", false, "Enable classes without synergy restrictions."),
             new ConfigEntryDefinition("Classes", "ChangeClassItem", 576389135, "Item PrefabGUID cost for changing class."),
             new ConfigEntryDefinition("Classes", "ChangeClassQuantity", 750, "Quantity of item required for changing class."),
@@ -841,7 +853,7 @@ internal static class ConfigService
                         var configValue = keyValue[1].Trim();
 
                         // Check if the key matches the provided key
-                        if (configKey.Equals(key, StringComparison.OrdinalIgnoreCase))
+                        if (configKey.Equals(key, StringComparison.CurrentCultureIgnoreCase))
                         {
                             // Try to convert the string value to the expected type
                             try

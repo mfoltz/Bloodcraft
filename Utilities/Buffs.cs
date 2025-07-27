@@ -105,7 +105,7 @@ internal static class Buffs
             };
 
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-            
+
             // ServerGameManager.InstantiateBuffEntityImmediate(entity, entity, prefabGuid, null, 0); better? worse? who knooooows maybe I'll check later
             return true;
         }
@@ -117,7 +117,7 @@ internal static class Buffs
         buffEntity = Entity.Null;
         stacks = 0;
 
-        if (_buffMaxStacks.TryGetValue(prefabGuid, out int maxStacks) 
+        if (_buffMaxStacks.TryGetValue(prefabGuid, out int maxStacks)
             && entity.TryGetBuffStacks(prefabGuid, out buffEntity, out int buffStacks))
         {
             stacks = (byte)buffStacks;
@@ -158,7 +158,7 @@ internal static class Buffs
                 // else if (entity.IsFamiliar()) Progression.RemoveFamiliarStats(buffEntity, entity);
             }
 
-            buffEntity.DestroyBuff();
+            buffEntity.Destroy();
         }
     }
     public static bool TryApplyAndGetBuff(this Entity entity, PrefabGUID buffPrefabGuid, out Entity buffEntity)
@@ -176,10 +176,7 @@ internal static class Buffs
     {
         if (target.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity) && buffEntity.Has<EntityOwner>())
         {
-            buffEntity.With((ref EntityOwner entityOwner) =>
-            {
-                entityOwner.Owner = owner;
-            });
+            buffEntity.With((ref EntityOwner entityOwner) => entityOwner.Owner = owner);
 
             return true;
         }
@@ -231,10 +228,7 @@ internal static class Buffs
 
         if (target.TryApplyAndGetBuff(buffPrefabGUID, out buffEntity))
         {
-            buffEntity.With((ref EntityOwner entityOwner) =>
-            {
-                entityOwner.Owner = owner;
-            });
+            buffEntity.With((ref EntityOwner entityOwner) => entityOwner.Owner = owner);
 
             return true;
         }
@@ -278,17 +272,14 @@ internal static class Buffs
                 buff.Stacks = 1;
             });
 
-            buffEntity.HasWith((ref BuffCategory buffCategory) =>
-            {
-                buffCategory.Groups = BuffCategoryFlag.None;
-            });
+            buffEntity.HasWith((ref BuffCategory buffCategory) => buffCategory.Groups = BuffCategoryFlag.None);
 
             buffEntity.HasWith((ref LifeTime lifeTime) =>
             {
                 lifeTime.Duration = 0f;
                 lifeTime.EndAction = LifeTimeEndAction.None;
             });
-            
+
             buffEntity.Remove<CreateGameplayEventsOnSpawn>();
             buffEntity.Remove<GameplayEventListeners>();
             buffEntity.Remove<RemoveBuffOnGameplayEvent>();
@@ -302,7 +293,7 @@ internal static class Buffs
             buffEntity.Remove<WeakenBuff>();
             buffEntity.Remove<ReplaceAbilityOnSlotBuff>();
             buffEntity.Remove<AmplifyBuff>();
-        }    
+        }
     }
     public static void GetPrestigeBuffs()
     {

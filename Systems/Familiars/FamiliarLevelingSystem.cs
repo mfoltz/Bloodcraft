@@ -132,10 +132,7 @@ internal static class FamiliarLevelingSystem
         {
             familiar.TryApplyBuff(_levelUpBuff);
 
-            familiar.With((ref UnitLevel unitLevel) =>
-            {
-                unitLevel.Level._Value = newLevel;
-            });
+            familiar.With((ref UnitLevel unitLevel) => unitLevel.Level._Value = newLevel);
 
             FamiliarBindingSystem.ModifyUnitStats(familiar, newLevel, steamId, famKey);
             if (familiar.Has<BloodConsumeSource>()) FamiliarBindingSystem.ModifyBloodSource(familiar, newLevel);
@@ -144,13 +141,13 @@ internal static class FamiliarLevelingSystem
 
         if (GetPlayerBool(steamId, SCT_FAMILIAR_LVL_KEY))
         {
-            FamiliarExperienceSCTDelayRoutine(player, userEntity, familiar, _gold, gainedXP).Start();
+            FamiliarExperienceSCTDelayRoutine(player, userEntity, familiar, _gold, gainedXP).Run();
         }
     }
     static IEnumerator FamiliarExperienceSCTDelayRoutine(Entity character, Entity userEntity, Entity familiar, float3 color, float gainedXP)
     {
         yield return _delay;
-        
+
         ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, familiar.GetPosition(), color, character, gainedXP, _sctResourceGain, userEntity);
     }
     static float GetXp(ulong steamID, int familiarId)

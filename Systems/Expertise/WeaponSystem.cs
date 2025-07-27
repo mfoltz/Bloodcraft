@@ -333,7 +333,7 @@ internal static class WeaponSystem
         if (GetPlayerBool(steamId, SCT_PLAYER_WEP_KEY))
         {
             // Core.Log.LogInfo($"Expertise SCT for {user.CharacterName.Value} with gainedXP: {gainedXP} and delay: {delay}");
-            PlayerExpertiseSCTDelayRoutine(playerCharacter, userEntity, _grey, gainedXP, delay).Start();
+            PlayerExpertiseSCTDelayRoutine(playerCharacter, userEntity, _grey, gainedXP, delay).Run();
         }
     }
     static void HandleWeaponLevelUp(User user, WeaponType weaponType, int newLevel, ulong steamID)
@@ -399,8 +399,8 @@ internal static class WeaponSystem
         return Enum.GetValues(typeof(WeaponType))
             .Cast<WeaponType>()
             .FirstOrDefault(type =>
-            weaponCheck.Contains(type.ToString(), StringComparison.OrdinalIgnoreCase) &&
-            !(type == WeaponType.Sword && weaponCheck.Contains("GreatSword", StringComparison.OrdinalIgnoreCase))
+            weaponCheck.Contains(type.ToString(), StringComparison.CurrentCultureIgnoreCase) &&
+            !(type == WeaponType.Sword && weaponCheck.Contains("GreatSword", StringComparison.CurrentCultureIgnoreCase))
             );
     }
 }

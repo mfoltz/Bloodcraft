@@ -34,7 +34,7 @@ internal static class CraftingSystemPatches
 
     static readonly float _craftRateModifier = SystemService.ServerGameSettingsSystem._Settings.CraftRateModifier;
 
-    static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> _playerCraftingJobs = [];  
+    static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> _playerCraftingJobs = [];
     public static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> ValidatedCraftingJobs = [];
 
     static readonly ConcurrentDictionary<ulong, int> _playerLegendaryCraftingJobs = [];
@@ -99,7 +99,7 @@ internal static class CraftingSystemPatches
                 Entity userEntity = userOwner.Owner._Entity;
                 User user = userEntity.GetUser();
                 ulong steamId = user.PlatformId;
-                
+
                 Entity itemEntity = forge_Shared.ItemEntity._Entity;
                 PrefabGUID itemPrefab = itemEntity.GetPrefabGuid();
 

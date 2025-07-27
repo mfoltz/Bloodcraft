@@ -496,10 +496,7 @@ internal static class DataService
             Entity playerCharacter = playerInfo.CharEntity;
             int index = familiarBoxes.FamiliarUnlocks.Keys.ToList().IndexOf(data);
 
-            playerCharacter.HasWith((ref BagHolder bagHolder) =>
-            {
-                bagHolder.BagInstance1.InventoryIndex = index;
-            });
+            playerCharacter.HasWith((ref BagHolder bagHolder) => bagHolder.BagInstance1.InventoryIndex = index);
         }
 
         _playerFamiliarBox[steamId] = data;
@@ -510,10 +507,7 @@ internal static class DataService
         {
             Entity playerCharacter = playerInfo.CharEntity;
 
-            playerCharacter.HasWith((ref BagHolder bagHolder) =>
-            {
-                bagHolder.BagInstance0.InventoryIndex = index;
-            });
+            playerCharacter.HasWith((ref BagHolder bagHolder) => bagHolder.BagInstance0.InventoryIndex = index);
         }
 
         _playerBindingIndex[steamId] = index;
@@ -534,10 +528,7 @@ internal static class DataService
         {
             Entity playerCharacter = playerInfo.CharEntity;
 
-            playerCharacter.HasWith((ref BagHolder bagHolder) =>
-            {
-                bagHolder.BagInstance2.InventoryIndex = shapeshiftBuff.GuidHash;
-            });
+            playerCharacter.HasWith((ref BagHolder bagHolder) => bagHolder.BagInstance2.InventoryIndex = shapeshiftBuff.GuidHash);
 
             ShapeshiftCache.SetShapeshiftBuff(steamId, shapeshiftType);
         }
@@ -1118,7 +1109,7 @@ internal static class DataService
 
             [Serializable]
             public class FamiliarBattleGroup
-            { 
+            {
                 public string Name { get; set; }
                 public List<int> Familiars { get; set; } = [0, 0, 0];
             }
@@ -1616,7 +1607,7 @@ internal static class DataService
             {
                 var outList = new List<EquipmentBaseV2>(EQUIPMENT_SLOTS);
 
-                foreach (object item in source)         
+                foreach (object item in source)
                 {
                     switch (item)
                     {
@@ -1647,7 +1638,7 @@ internal static class DataService
                 {
                     Equipment = guidHash,
                     Quality = quality,
-                    Durability = durability     
+                    Durability = durability
                 };
             }
             static int MapToSanguineOrKey(int guidHash)

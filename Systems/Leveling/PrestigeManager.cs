@@ -19,7 +19,7 @@ internal static class PrestigeManager
 
     const int EXO_PRESTIGES = 100;
 
-    static readonly SequenceGUID _prestigeEffect = SequenceGUIDs.SEQ_Vampire_LevelUp;
+    static readonly SequenceGUID _prestigeSequence = SequenceGUIDs.SEQ_Vampire_LevelUp;
 
     public static readonly Dictionary<PrestigeType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -440,7 +440,7 @@ internal static class PrestigeManager
     }
     public static void PerformPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, IPrestige handler, KeyValuePair<int, float> xpData)
     {
-        if (!steamId.TryGetPlayerPrestiges(out var prestigeData) 
+        if (!steamId.TryGetPlayerPrestiges(out var prestigeData)
             || !prestigeData.TryGetValue(parsedPrestigeType, out int updatedPrestigeLevel)) return;
 
         handler.DoPrestige(steamId);
@@ -455,7 +455,7 @@ internal static class PrestigeManager
             HandleOtherPrestige(ctx, steamId, parsedPrestigeType, updatedPrestigeLevel);
         }
 
-        ctx.Event.SenderCharacterEntity.PlaySequence(_prestigeEffect);
+        ctx.Event.SenderCharacterEntity.PlaySequence(_prestigeSequence);
     }
     static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel, KeyValuePair<int, float> xpData)
     {
@@ -584,7 +584,7 @@ internal static class PrestigeManager
 
         parsedPrestigeType = Enum.GetValues(typeof(PrestigeType))
                                  .Cast<PrestigeType>()
-                                 .FirstOrDefault(pt => pt.ToString().Contains(prestigeType, StringComparison.OrdinalIgnoreCase));
+                                 .FirstOrDefault(pt => pt.ToString().Contains(prestigeType, StringComparison.CurrentCultureIgnoreCase));
 
         if (!parsedPrestigeType.Equals(default(PrestigeType)))
         {

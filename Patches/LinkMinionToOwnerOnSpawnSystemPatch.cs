@@ -32,7 +32,7 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp); // All Components: ProjectM.EntityOwner [ReadOnly], ProjectM.Minion [ReadOnly], Unity.Entities.SpawnTag [ReadOnly]
-        
+
         try
         {
             foreach (Entity entity in entities)

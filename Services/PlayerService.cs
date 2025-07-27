@@ -6,7 +6,6 @@ using ProjectM.Network;
 using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
-using UnityEngine;
 using static Bloodcraft.Utilities.EntityQueries;
 using PrestigeManager = Bloodcraft.Systems.Leveling.PrestigeManager;
 
@@ -17,20 +16,12 @@ internal class PlayerService
 
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _exoForm = ConfigService.ExoPrestiging;
-    static readonly bool _eclipse = ConfigService.Eclipse;
-
-    // const float START_DELAY = 30f;
-    const float ROUTINE_DELAY = 60f;
-
-    // static readonly WaitForSeconds _startDelay = new(START_DELAY);
-    static readonly WaitForSeconds _delay = new(ROUTINE_DELAY);
 
     static readonly ComponentType[] _userAllComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<User>())
     ];
 
-    static QueryDesc _onlineUserQueryDesc;
     static QueryDesc _userQueryDesc;
 
     static readonly ConcurrentDictionary<ulong, PlayerInfo> _steamIdPlayerInfoCache = [];
@@ -46,12 +37,7 @@ internal class PlayerService
     }
     public PlayerService()
     {
-        // Core.Log.LogWarning("[PlayerService] Building PlayerInfo cache...");
-
         _userQueryDesc = EntityManager.CreateQueryDesc(_userAllComponents, options: EntityQueryOptions.IncludeDisabled);
-        _onlineUserQueryDesc = EntityManager.CreateQueryDesc(_userAllComponents);
-
-        // PlayerServiceRoutine().Start();
         BuildPlayerInfoCache();
     }
     static void BuildPlayerInfoCache()
@@ -62,7 +48,6 @@ internal class PlayerService
         {
             foreach (Entity userEntity in userEntities)
             {
-                // Core.Log.LogWarning($"[PlayerService] Processing UserEntity...");
                 if (!userEntity.Exists()) continue;
 
                 User user = userEntity.GetUser();
@@ -82,8 +67,6 @@ internal class PlayerService
                 {
                     int level = LevelingSystem.GetLevel(steamId);
                     bool hasPrestiged = PrestigeManager.HasPrestiged(steamId);
-
-                    // Core.Log.LogWarning($"[PlayerService.BuildPlayerInfoCache] {steamId} - {playerName} - Level: {level} - HasPrestiged: {hasPrestiged}");
                     Progression.PlayerProgressionCacheManager.UpdatePlayerProgression(steamId, level, hasPrestiged);
                 }
 
@@ -109,26 +92,19 @@ internal class PlayerService
     }
     public static void HandleConnection(ulong steamId, PlayerInfo playerInfo)
     {
-        // Core.Log.LogWarning($"[PlayerService.HandleConnection] {steamId}");
-
         _steamIdOnlinePlayerInfoCache[steamId] = playerInfo;
         _steamIdPlayerInfoCache[steamId] = playerInfo;
-
-        // if (_eclipse && EclipseService.PendingRegistration.TryGetValue(steamId, out string version)) EclipseService.HandleRegistration(playerInfo, steamId, version);
     }
     public static void HandleDisconnection(ulong steamId)
     {
-        // Core.Log.LogWarning($"[PlayerService.HandleDisconnection] {steamId}");
         _steamIdOnlinePlayerInfoCache.TryRemove(steamId, out _);
 
-        if (_eclipse)
-        {
-            EclipseService.TryRemovePreRegistration(steamId);
-            EclipseService.TryUnregisterUser(steamId);
-        }
+        EclipseService.TryRemovePreRegistration(steamId);
+        EclipseService.TryUnregisterUser(steamId);
     }
     public static PlayerInfo GetPlayerInfo(string playerName)
     {
-        return SteamIdPlayerInfoCache.FirstOrDefault(kvp => kvp.Value.User.CharacterName.Value.ToLower() == playerName.ToLower()).Value;
+        return SteamIdPlayerInfoCache.FirstOrDefault(kvp => string.Equals(kvp.Value.User.CharacterName.Value,
+            playerName, StringComparison.CurrentCultureIgnoreCase)).Value;
     }
 }

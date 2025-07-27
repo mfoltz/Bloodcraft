@@ -112,6 +112,10 @@ internal static class VExtensions
     {
         return PrefabGuidNames.TryGetValue(prefabGuid, out string prefabName) ? $"{prefabName} {prefabGuid}" : EMPTY_KEY;
     }
+    public static string GetSequenceName(this SequenceGUID sequenceGuid)
+    {
+        return SequenceGuidNames.TryGetValue(sequenceGuid, out string sequenceName) ? sequenceName: string.Empty;
+    }
     public static string GetLocalizedName(this PrefabGUID prefabGuid)
     {
         string prefabName = GetNameFromPrefabGuid(prefabGuid);
@@ -260,7 +264,7 @@ internal static class VExtensions
         span = span[LENGTH..];
 
         int colon = span.IndexOf(':');
-        if (colon <= 0) return false;             
+        if (colon <= 0) return false;
 
         ReadOnlySpan<char> tail = span[(colon + 1)..];
 
@@ -387,6 +391,10 @@ internal static class VExtensions
     {
         return ServerGameManager.HasBuff(entity, buffPrefabGuid.ToIdentifier());
     }
+    public static bool HasBuff<T>(this Entity entity)
+    {
+        return BuffUtility.HasBuff<T>(EntityManager, entity);
+    }
     public static unsafe bool TryGetBuffer<T>(this Entity entity, out DynamicBuffer<T> dynamicBuffer) where T : struct
     {
         if (ServerGameManager.TryGetBuffer(entity, out dynamicBuffer))
@@ -469,6 +477,19 @@ internal static class VExtensions
 
         throw new InvalidOperationException("Entity does not have Blood!");
     }
+    public static AiMoveSpeeds GetMoveSpeeds(this Entity entity)
+    {
+        if (entity.TryGetComponent(out AiMoveSpeeds aiMoveSpeeds))
+        {
+            return aiMoveSpeeds;
+        }
+
+        throw new InvalidOperationException("Entity does not have Blood!");
+    }
+    public static EntityInput GetInput(this Entity entity)
+    {
+        return ServerGameManager.GetInput(entity);
+    }
     public static (float physicalPower, float spellPower) GetPowerTuple(this Entity entity)
     {
         if (entity.TryGetComponent(out UnitStats unitStats))
@@ -499,35 +520,26 @@ internal static class VExtensions
 
         return false;
     }
-    public static void PlaySequence(this Entity entity, SequenceGUID sequenceGuid)
+    public static Entity Create(this ComponentType[] components)
     {
-        ServerGameManager.PlaySequenceOnTarget(entity, sequenceGuid);
+        return EntityManager.CreateEntity(components);
     }
-    public static void Destroy(this Entity entity, DestroyMode mode = DestroyMode.None)
+    public static void Destroy(this Entity entity, bool immediate = false)
     {
         if (!entity.Exists()) return;
 
-        switch (mode)
-        {
-            case DestroyMode.Immediate:
-                EntityManager.DestroyEntity(entity);
-                break;
-            case DestroyMode.Delayed:
-                EntityCommandBufferSystem.CreateCommandBuffer().DestroyEntity(entity);
-                break;
-            case DestroyMode.RemoveBuff:
-                DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
-                break;
-            case DestroyMode.None:
-                DestroyUtility.Destroy(EntityManager, entity);
-                break;
-            default:
-                break;
-        }
+        bool isBuff = entity.IsBuff(); // should probably check if this actually matters or not but like... later >_>
+
+        if (immediate && !isBuff)
+            EntityManager.DestroyEntity(entity);
+        else if (isBuff)
+            DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
+        else
+            DestroyUtility.Destroy(EntityManager, entity);
     }
-    public static void DestroyBuff(this Entity buffEntity)
+    public static bool IsBuff(this Entity entity)
     {
-        if (buffEntity.Exists()) DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
+        return entity.Has<Buff>();
     }
     public static void SetTeam(this Entity entity, Entity teamSource)
     {
@@ -536,46 +548,31 @@ internal static class VExtensions
             Entity teamRefEntity = sourceTeamReference.Value._Value;
             int teamId = sourceTeam.Value;
 
-            entity.With((ref TeamReference teamReference) =>
-            {
-                teamReference.Value._Value = teamRefEntity;
-            });
+            entity.With((ref TeamReference teamReference) => teamReference.Value._Value = teamRefEntity);
 
-            entity.With((ref Team team) =>
-            {
-                team.Value = teamId;
-            });
+            entity.With((ref Team team) => team.Value = teamId);
         }
     }
     public static void SetPosition(this Entity entity, float3 position)
     {
         if (entity.Has<Translation>())
         {
-            entity.With((ref Translation translation) =>
-            {
-                translation.Value = position;
-            });
+            entity.With((ref Translation translation) => translation.Value = position);
         }
 
         if (entity.Has<LastTranslation>())
         {
-            entity.With((ref LastTranslation lastTranslation) =>
-            {
-                lastTranslation.Value = position;
-            });
+            entity.With((ref LastTranslation lastTranslation) => lastTranslation.Value = position);
         }
     }
     public static void SetFaction(this Entity entity, PrefabGUID factionPrefabGuid)
     {
         if (entity.Has<FactionReference>())
         {
-            entity.With((ref FactionReference factionReference) =>
-            {
-                factionReference.FactionGuid._Value = factionPrefabGuid;
-            });
+            entity.With((ref FactionReference factionReference) => factionReference.FactionGuid._Value = factionPrefabGuid);
         }
     }
-    public static bool IsAllies(this Entity entity, Entity player)
+    public static bool IsAllied(this Entity entity, Entity player)
     {
         return ServerGameManager.IsAllies(entity, player);
     }

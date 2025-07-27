@@ -13,17 +13,15 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class ChatMessageSystemPatch
 {
-    static readonly bool _eclipse = ConfigService.Eclipse;
+    static readonly Regex _regexMAC = new(";mac([^;]+)$");
 
-    static readonly Regex _regexMAC = new(@";mac([^;]+)$");
-
-    [HarmonyBefore("gg.deca.Bloodstone", "CrimsonChatFilter")]
+    [HarmonyBefore("CrimsonChatFilter")]
     [HarmonyPatch(typeof(ChatMessageSystem), nameof(ChatMessageSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ChatMessageSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!_eclipse) return;
+        else if (!Core.Eclipsed) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         NativeArray<ChatMessageEvent> chatMessageEvents = __instance.EntityQueries[0].ToComponentDataArray<ChatMessageEvent>(Allocator.Temp);
@@ -37,9 +35,8 @@ internal static class ChatMessageSystemPatch
 
                 if (CheckMAC(chatMessageEvent.MessageText.Value, out string originalMessage))
                 {
-                    // Core.Log.LogWarning($"[ChatMessageSystem] Handling Eclipse client message...");
                     EclipseService.HandleClientMessage(originalMessage);
-                    entity.Destroy(VExtensions.DestroyMode.Immediate);
+                    entity.Destroy(true);
                 }
             }
         }

@@ -29,7 +29,7 @@ internal static class KnockbackSystemSpawnPatch
     {
         if (!Core._initialized) return;
         else if (!_familiars) return;
-        
+
         NativeArray<Entity> entities = __instance.__query_1729431709_0.ToEntityArray(Allocator.Temp);
         try
         {

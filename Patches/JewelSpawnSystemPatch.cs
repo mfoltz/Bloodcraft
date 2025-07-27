@@ -49,9 +49,9 @@ internal static class JewelSpawnSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.TryGetComponent(out PrefabGUID prefabGuid) 
-                    || !entity.TryGetComponent(out InventoryItem inventoryItem) 
-                    || !inventoryItem.ContainerEntity.TryGetComponent(out InventoryConnection inventoryConnection) 
+                if (!entity.TryGetComponent(out PrefabGUID prefabGuid)
+                    || !entity.TryGetComponent(out InventoryItem inventoryItem)
+                    || !inventoryItem.ContainerEntity.TryGetComponent(out InventoryConnection inventoryConnection)
                     || !inventoryConnection.InventoryOwner.GetPrefabGuid().Equals(_gemCuttingTable)) continue;
                 else if (!_jewelTemplates.Contains(prefabGuid)) continue;
                 else if (entity.TryGetComponent(out SpellModSetComponent spellModSetComponent)

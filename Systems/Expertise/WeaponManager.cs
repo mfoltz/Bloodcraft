@@ -129,7 +129,7 @@ internal static class WeaponManager
 
             foreach (WeaponStatType weaponStatType in bonuses)
             {
-                if (!TryGetScaledModifyUnitExpertiseStat(handler, playerCharacter, steamId, weaponType, 
+                if (!TryGetScaledModifyUnitExpertiseStat(handler, playerCharacter, steamId, weaponType,
                     weaponStatType, out float statValue, out ModifyUnitStatBuff modifyUnitStatBuff)) continue;
 
                 ModifyUnitStatBuff_DOTS newStatBuff = new()

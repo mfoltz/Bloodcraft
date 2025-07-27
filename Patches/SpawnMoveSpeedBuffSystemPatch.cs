@@ -28,7 +28,7 @@ internal static class SpawnMoveSpeedBuffSystemPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.TryGetComponent(out PrefabGUID prefabGuid) || !entity.TryGetComponent(out EntityOwner entityOwner)) continue;
-                else if (prefabGuid.Equals(_solarusFinalBuff) && entityOwner.Owner.IsFollowingPlayer() 
+                else if (prefabGuid.Equals(_solarusFinalBuff) && entityOwner.Owner.IsFollowingPlayer()
                     && entity.TryGetBuffer<ApplyBuffOnGameplayEvent>(out var buffer) && !buffer.IsEmpty)
                 {
                     ApplyBuffOnGameplayEvent applyBuffOnGameplayEvent = buffer[0];

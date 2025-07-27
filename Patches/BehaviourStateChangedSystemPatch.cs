@@ -40,15 +40,9 @@ internal static class BehaviourStateChangedSystemPatch
                 {
                     if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Return))
                     {
-                        target.With((ref BehaviourTreeState behaviourTreeState) =>
-                        {
-                            behaviourTreeState.Value = GenericEnemyState.Follow;
-                        });
+                        target.With((ref BehaviourTreeState behaviourTreeState) => behaviourTreeState.Value = GenericEnemyState.Follow);
 
-                        source.With((ref BehaviourTreeStateChangedEvent behaviourTreeState) =>
-                        {
-                            behaviourTreeState.NewState = GenericEnemyState.Follow;
-                        });
+                        source.With((ref BehaviourTreeStateChangedEvent behaviourTreeState) => behaviourTreeState.NewState = GenericEnemyState.Follow);
 
                         Familiars.HandleFamiliarMinions(target);
                     }

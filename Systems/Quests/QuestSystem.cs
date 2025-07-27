@@ -13,6 +13,7 @@ using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
+using ProjectM.Shared.WarEvents;
 using Stunlock.Core;
 using System.Collections;
 using Unity.Collections;
@@ -197,7 +198,7 @@ internal static class QuestSystem
     static IEnumerable<PrefabGUID> GetKillPrefabsForLevelEnumerable(int playerLevel)
     {
         var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
-        var targetCache = TargetTrackingSystem.TargetCache;
+        var targetCache = QuestTargetSystem.TargetCache;
 
         ComponentLookup<UnitLevel> unitLevelLookup = EntityManager.GetComponentLookup<UnitLevel>(true);
         // EntityStorageInfoLookup entityLookup = EntityManager.GetEntityStorageInfoLookup();
@@ -213,7 +214,7 @@ internal static class QuestSystem
             {
                 var prefabGuid = keyValueIterator.Keys[i];
 
-                if (!prefabMap.TryGetValue(prefabGuid, out var entity) 
+                if (!prefabMap.TryGetValue(prefabGuid, out var entity)
                     || !unitLevelLookup.TryGetComponent(entity, out UnitLevel unitLevel)) continue;
 
                 bool isVBlood = entity.IsVBlood();
@@ -249,12 +250,12 @@ internal static class QuestSystem
 
                 if (itemData.ItemType == ItemType.Equippable)
                 {
-                    if (IsWithinLevelRange(tier, playerLevel)) 
+                    if (IsWithinLevelRange(tier, playerLevel))
                         yield return prefabGuid;
                 }
                 else if (itemData.ItemType == ItemType.Consumable)
                 {
-                    if (IsConsumableWithinLevelRange(prefabGuid, playerLevel)) 
+                    if (IsConsumableWithinLevelRange(prefabGuid, playerLevel))
                         yield return prefabGuid;
                 }
             }
@@ -343,13 +344,15 @@ internal static class QuestSystem
                     target = targets.ElementAt(_random.Next(targets.Count));
                     targets.Remove(target);
                 }
-                else if (questType.Equals(QuestType.Daily)) target = _graveyardSkeleton;
-                else if (questType.Equals(QuestType.Weekly)) target = _forestWolf;
+                else if (questType.Equals(QuestType.Daily))
+                    target = _graveyardSkeleton;
+                else if (questType.Equals(QuestType.Weekly))
+                    target = _forestWolf;
 
                 requiredAmount = 6 * _questMultipliers[questType];
                 string targetLower = target.GetPrefabName().ToLower();
 
-                if ((targetLower.Contains("vblood") || targetLower.Contains("vhunter")))
+                if (targetLower.ContainsAny(["vblood", "vhunter"]))
                 {
                     if (questType.Equals(QuestType.Daily))
                     {
@@ -360,6 +363,7 @@ internal static class QuestSystem
                         requiredAmount = 5;
                     }
                 }
+
                 break;
             case TargetType.Craft:
 
@@ -368,8 +372,10 @@ internal static class QuestSystem
                     target = targets.ElementAt(_random.Next(targets.Count));
                     targets.Remove(target);
                 }
-                else if (questType.Equals(QuestType.Daily)) target = _reinforcedBoneSword;
-                else if (questType.Equals(QuestType.Weekly)) target = _reinforcedBoneMace;
+                else if (questType.Equals(QuestType.Daily))
+                    target = _reinforcedBoneSword;
+                else if (questType.Equals(QuestType.Weekly))
+                    target = _reinforcedBoneMace;
 
                 requiredAmount = _random.Next(2, 4) * _questMultipliers[questType];
                 break;
@@ -405,7 +411,7 @@ internal static class QuestSystem
             TargetType.Gather => GetGatherPrefabsForLevelEnumerable(level),
             TargetType.Fish => [PrefabGUIDs.FakeItem_AnyFish],
             _ => throw new ArgumentOutOfRangeException(
-                goal.ToString(), 
+                goal.ToString(),
                 "Unknown quest goal type encountered when generating quest objective!")
         };
     }
@@ -600,7 +606,7 @@ internal static class QuestSystem
                     var questEntry = (questData[quest.Key].Progress, true);
                     _delayedQuestMessages[steamId].Add(quest.Key, questEntry);
 
-                    QuestProgressDelayRoutine(questData, quest, user, steamId, colorType).Start();
+                    QuestProgressDelayRoutine(questData, quest, user, steamId, colorType).Run();
                 }
                 else
                 {
@@ -653,7 +659,7 @@ internal static class QuestSystem
 
         if (questType == QuestType.Weekly) quantity *= _questMultipliers[questType];
 
-        if (objective.Target.GetPrefabName().Contains("vblood", StringComparison.OrdinalIgnoreCase)) quantity *= VBLOOD_FACTOR;
+        if (objective.Target.GetPrefabName().Contains("vblood", StringComparison.CurrentCultureIgnoreCase)) quantity *= VBLOOD_FACTOR;
 
         if (ServerGameManager.TryAddInventoryItem(user.LocalCharacter._Entity, reward, quantity))
         {
@@ -895,191 +901,6 @@ internal static class QuestSystem
         }
     }
 }
-public class TargetTrackingSystem : SystemBase
-{
-    public static TargetTrackingSystem Instance { get; set; }
-
-    static readonly HashSet<string> _filteredStrings = QuestService.FilteredTargetUnits;
-    static readonly HashSet<PrefabGUID> _shardBearers = [..QuestService.ShardBearers];
-    public static NativeParallelMultiHashMap<PrefabGUID, Entity>.ReadOnly TargetCache =>
-        Instance?._targetUnits.IsCreated == true ? Instance._targetUnits.AsReadOnly() : default;
-
-    NativeParallelMultiHashMap<PrefabGUID, Entity> _targetUnits;
-    NativeParallelHashSet<Entity> _imprisonedUnits;
-    NativeParallelHashMap<PrefabGUID, byte> _blacklist;
-
-    EntityQuery _targetQuery;
-    EntityQuery _imprisonedQuery;
-
-    ComponentTypeHandle<PrefabGUID> _prefabGuidHandle;
-    ComponentTypeHandle<Buff> _buffHandle;
-
-    EntityTypeHandle _entityHandle;
-    EntityStorageInfoLookup _entityStorageInfoLookup;
-
-    DateTime _lastLogTime = DateTime.UtcNow;
-    public override void OnCreate()
-    {
-        Instance = this;
-
-        _targetQuery = GetEntityQuery(new EntityQueryDesc
-        {
-            All = new[]
-            {
-                ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
-                ComponentType.ReadOnly(Il2CppType.Of<Health>()),
-                ComponentType.ReadOnly(Il2CppType.Of<UnitLevel>()),
-                ComponentType.ReadOnly(Il2CppType.Of<UnitStats>()),
-                ComponentType.ReadOnly(Il2CppType.Of<Movement>()),
-                ComponentType.ReadOnly(Il2CppType.Of<AggroConsumer>())
-            },
-            None = new[]
-            {
-                ComponentType.ReadOnly(Il2CppType.Of<Minion>()),
-                ComponentType.ReadOnly(Il2CppType.Of<DestroyOnSpawn>()),
-                ComponentType.ReadOnly(Il2CppType.Of<Trader>()),
-                ComponentType.ReadOnly(Il2CppType.Of<BlockFeedBuff>())
-            },
-            Options = EntityQueryOptions.IncludeDisabled
-        });
-
-        _imprisonedQuery = GetEntityQuery(new EntityQueryDesc
-        {
-            All = new[]
-            {
-                ComponentType.ReadOnly(Il2CppType.Of<Buff>()),
-                ComponentType.ReadOnly(Il2CppType.Of<ImprisonedBuff>())
-            },
-            Options = EntityQueryOptions.IncludeDisabled
-        });
-
-        _targetUnits = new NativeParallelMultiHashMap<PrefabGUID, Entity>(4096, Allocator.Persistent);
-        _blacklist = new NativeParallelHashMap<PrefabGUID, byte>(256, Allocator.Persistent);
-        _imprisonedUnits = new NativeParallelHashSet<Entity>(256, Allocator.Persistent);
-
-        _prefabGuidHandle = GetComponentTypeHandle<PrefabGUID>(true);
-        _buffHandle = GetComponentTypeHandle<Buff>(true);
-
-        _entityHandle = GetEntityTypeHandle();
-        _entityStorageInfoLookup = GetEntityStorageInfoLookup();
-
-        RequireForUpdate(_targetQuery);
-        Enabled = true;
-
-        // Plugin.LogInstance.LogWarning("[QuestTargetUnitSystem.OnCreate]");
-    }
-    public override void OnStartRunning()
-    {
-        var lookup = World.GetExistingSystemManaged<PrefabCollectionSystem>()
-                          ._SpawnableNameToPrefabGuidDictionary;
-
-        foreach (var kvp in lookup)
-        {
-            PrefabGUID prefabGuid = kvp.Value;
-            string prefabName = kvp.Key;
-
-            foreach (var filter in _filteredStrings)
-            {
-                if (prefabName.Contains(filter, StringComparison.OrdinalIgnoreCase))
-                {
-                    // Plugin.LogInstance.LogWarning($"[QuestTargetUnitSystem] Blacklisting prefab: {prefabName}");
-                    _blacklist.TryAdd(prefabGuid, 0);
-                    break;
-                }
-            }
-        }
-
-        foreach (var prefabGuid in _shardBearers)
-        {
-            _blacklist.TryAdd(prefabGuid, 0);
-        }
-
-        // Plugin.LogInstance.LogWarning("[QuestTargetUnitSystem.OnStartRunning]");
-    }
-    public override void OnDestroy()
-    {
-        if (_targetUnits.IsCreated) _targetUnits.Dispose();
-        if (_blacklist.IsCreated) _blacklist.Dispose();
-        if (_imprisonedUnits.IsCreated) _imprisonedUnits.Dispose();
-        if (Instance == this) Instance = null;
-
-        // Plugin.LogInstance.LogWarning("[QuestTargetUnitSystem.OnDestroy]");
-    }
-    public override void OnUpdate()
-    {
-        _imprisonedUnits.Clear();
-        _targetUnits.Clear();
-
-        _buffHandle.Update(this);
-        _prefabGuidHandle.Update(this);
-
-        _entityHandle.Update(this);
-        _entityStorageInfoLookup.Update(this);
-
-        var imprisonedChunks = _imprisonedQuery.ToArchetypeChunkArray(Allocator.Temp);
-        int imprisonedCount = 0;
-
-        try
-        {
-            foreach (var chunk in imprisonedChunks)
-            {
-                var buffs = chunk.GetNativeArray(_buffHandle);
-
-                for (int i = 0; i < chunk.Count; ++i)
-                {
-                    Entity entity = buffs[i].Target;
-
-                    if (!_entityStorageInfoLookup.Exists(entity)) continue;
-                    else
-                    {
-                        _imprisonedUnits.Add(buffs[i].Target);
-                        imprisonedCount++;
-                    }
-                }
-            }
-        }
-        finally
-        {
-            imprisonedChunks.Dispose();
-        }
-
-        var targetChunks = _targetQuery.ToArchetypeChunkArray(Allocator.Temp);
-        int targetCount = 0;
-
-        try
-        {
-            foreach (var chunk in targetChunks)
-            {
-                var prefabGuids = chunk.GetNativeArray(_prefabGuidHandle);
-                var entities = chunk.GetNativeArray(_entityHandle);
-
-                for (int i = 0; i < chunk.Count; ++i)
-                {
-                    PrefabGUID prefabGuid = prefabGuids[i];
-                    Entity entity = entities[i];
-
-                    if (!_entityStorageInfoLookup.Exists(entity)) continue;
-                    else if (_blacklist.ContainsKey(prefabGuid) || _imprisonedUnits.Contains(entity)) continue;
-                    else
-                    {
-                        _targetUnits.Add(prefabGuid, entity);
-                        targetCount++;
-                    }
-                }
-            }
-        }
-        finally
-        {
-            targetChunks.Dispose();
-        }
-
-        if ((DateTime.UtcNow - _lastLogTime).TotalSeconds >= 5)
-        {
-            // Plugin.LogInstance.LogInfo($"[QuestTargetUnitSystem] Imprisoned: {imprisonedCount}, Targetable: {targetCount}");
-            _lastLogTime = DateTime.UtcNow;
-        }
-    }
-}
 
 [HarmonyPatch]
 public static class WorldBootstrapPatch
@@ -1094,9 +915,12 @@ public static class WorldBootstrapPatch
             {
                 var updateGroup = world.GetOrCreateSystemManaged<UpdateGroup>();
 
-                ClassInjector.RegisterTypeInIl2Cpp<TargetTrackingSystem>();
-                var targetSystem = world.GetOrCreateSystemManaged<TargetTrackingSystem>();
+                ClassInjector.RegisterTypeInIl2Cpp<QuestTargetSystem>();
+                ClassInjector.RegisterTypeInIl2Cpp<PrimalWarEventSystem>();
+                var targetSystem = world.GetOrCreateSystemManaged<QuestTargetSystem>();
+                var warEventSystem = world.GetOrCreateSystemManaged<PrimalWarEventSystem>();
                 updateGroup.AddSystemToUpdateList(targetSystem);
+                updateGroup.AddSystemToUpdateList(warEventSystem);
 
                 updateGroup.SortSystems();
             }
@@ -1107,4 +931,6 @@ public static class WorldBootstrapPatch
         }
     }
 }
+
+
 

@@ -1,9 +1,10 @@
 ﻿using System.Collections;
+using UnityEngine;
 
 namespace Bloodcraft;
 internal static class IExtensions
 {
-    static readonly Random _random = new();
+    static readonly System.Random _random = new();
     public static Dictionary<TValue, TKey> Reverse<TKey, TValue>(
         this IDictionary<TKey, TValue> source)
     {
@@ -50,7 +51,7 @@ internal static class IExtensions
     {
         foreach (string str in strings)
         {
-            if (!stringChars.Contains(str, StringComparison.OrdinalIgnoreCase))
+            if (!stringChars.Contains(str, StringComparison.CurrentCultureIgnoreCase))
             {
                 return false;
             }
@@ -58,17 +59,26 @@ internal static class IExtensions
 
         return true;
     }
-    public static bool ContainsAny(this string stringChars, List<string> strings)
+    public static bool ContainsAny(this string stringChars, List<string> strings, StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
     {
         foreach (string str in strings)
         {
-            if (stringChars.Contains(str, StringComparison.OrdinalIgnoreCase))
+            if (stringChars.Contains(str, stringComparison))
             {
                 return true;
             }
         }
 
         return false;
+    }
+    public static T DrawRandom<T>(this IList<T> list)
+    {
+        int index = _random.Next(list.Count);
+
+        if (list.IsIndexWithinRange(index))
+            return list[index];
+
+        return default;
     }
     public static void Shuffle<T>(this IList<T> list)
     {
@@ -98,8 +108,16 @@ internal static class IExtensions
 
         return false;
     }
-    public static void Start(this IEnumerator routine)
+    public static void Run(this IEnumerator routine)
     {
         Core.StartCoroutine(routine);
+    }
+    public static Coroutine Start(this IEnumerator routine)
+    {
+        return Core.StartCoroutine(routine);
+    }
+    public static void Stop(this Coroutine coroutine)
+    {
+        Core.StopCoroutine(coroutine);
     }
 }

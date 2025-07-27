@@ -307,10 +307,7 @@ internal static class Shapeshifts
             lifeTime.EndAction = LifeTimeEndAction.Destroy;
         });
 
-        buffEntity.AddWith((ref ChangeKnockbackResistanceBuff knockback) =>
-        {
-            knockback.KnockbackResistanceIndex = 6;
-        });
+        buffEntity.AddWith((ref ChangeKnockbackResistanceBuff knockback) => knockback.KnockbackResistanceIndex = 6);
 
         if (!buffEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var modifyStatsBuffer))
         {
@@ -330,21 +327,12 @@ internal static class Shapeshifts
             Id = ModificationIDs.Create().NewModificationId()
         });
 
-        buffEntity.With((ref Buff buff) =>
-        {
-            buff.BuffType = BuffType.Block;
-        });
+        buffEntity.With((ref Buff buff) => buff.BuffType = BuffType.Block);
 
-        buffEntity.With((ref BuffCategory buffCategory) =>
-        {
-            buffCategory.Groups = BuffCategoryFlag.Shapeshift | BuffCategoryFlag.RemoveOnDisconnect;
-        });
+        buffEntity.With((ref BuffCategory buffCategory) => buffCategory.Groups = BuffCategoryFlag.Shapeshift | BuffCategoryFlag.RemoveOnDisconnect);
 
-        buffEntity.AddWith((ref AmplifyBuff amplifyBuff) =>
-        {
-            amplifyBuff.AmplifyModifier = -0.25f;
-        });
-        
+        buffEntity.AddWith((ref AmplifyBuff amplifyBuff) => amplifyBuff.AmplifyModifier = -0.25f);
+
         if (!buffEntity.TryGetBuffer<ReplaceAbilityOnSlotBuff>(out var replaceAbilityBuffer))
         {
             replaceAbilityBuffer = buffEntity.AddBuffer<ReplaceAbilityOnSlotBuff>();

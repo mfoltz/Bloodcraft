@@ -8,15 +8,15 @@ internal static class GenerateREADME
     static string CommandsPath { get; set; }
     static string ReadMePath { get; set; }
 
-    static readonly Regex _commandGroupRegex = 
+    static readonly Regex _commandGroupRegex =
         new("\\[CommandGroup\\((?<args>.*?)\\)\\]",
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
-    static readonly Regex _commandAttributeRegex = 
+    static readonly Regex _commandAttributeRegex =
         new("\\[Command\\((?<args>.*?)\\)\\]",
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
-    static readonly Regex _argPairRegex = 
+    static readonly Regex _argPairRegex =
         new("\\b(?<key>\\w+)\\s*:\\s*(?<value>\\\"[^\\\"]*\\\"|[^,\\)\\r\\n]+)",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -63,7 +63,7 @@ internal static class GenerateREADME
     static void CollectCommands()
     {
         var files = Directory.GetFiles(CommandsPath, "*.cs")
-         .Where(file => !Path.GetFileName(file).Equals("TestCommands.cs", StringComparison.OrdinalIgnoreCase));
+         .Where(file => !Path.GetFileName(file).Equals("DevCommands.cs", StringComparison.CurrentCultureIgnoreCase));
 
         foreach (string file in files)
         {
@@ -101,7 +101,7 @@ internal static class GenerateREADME
 
         // keep each list sorted for deterministic output
         foreach (var key in _commandsByGroup.Keys.ToList())
-            _commandsByGroup[key] = [.._commandsByGroup[key].OrderBy(c => c.name, StringComparer.OrdinalIgnoreCase)];
+            _commandsByGroup[key] = [.._commandsByGroup[key].OrderBy(c => c.name, StringComparer.CurrentCultureIgnoreCase)];
     }
     static string BuildCommandsSection()
     {
@@ -222,7 +222,7 @@ internal static class GenerateREADME
         {
             foreach (string line in File.ReadLines(ReadMePath))
             {
-                if (line.Trim().Equals(COMMANDS_HEADER, StringComparison.OrdinalIgnoreCase))
+                if (line.Trim().Equals(COMMANDS_HEADER, StringComparison.CurrentCultureIgnoreCase))
                 {
                     // Start of "## Commands"
                     inCommandsSection = true;
@@ -233,7 +233,7 @@ internal static class GenerateREADME
                     continue;
                 }
 
-                if (line.Trim().Equals(CONFIG_HEADER, StringComparison.OrdinalIgnoreCase))
+                if (line.Trim().Equals(CONFIG_HEADER, StringComparison.CurrentCultureIgnoreCase))
                 {
                     // Start of "## Configuration"
                     inConfigSection = true;
@@ -244,15 +244,15 @@ internal static class GenerateREADME
                     continue;
                 }
 
-                if (inCommandsSection && line.Trim().StartsWith("## ", StringComparison.OrdinalIgnoreCase) &&
-                    !line.Trim().Equals(COMMANDS_HEADER, StringComparison.OrdinalIgnoreCase))
+                if (inCommandsSection && line.Trim().StartsWith("## ", StringComparison.CurrentCultureIgnoreCase) &&
+                    !line.Trim().Equals(COMMANDS_HEADER, StringComparison.CurrentCultureIgnoreCase))
                 {
                     // Reached the next section or a new header
                     inCommandsSection = false;
                 }
 
-                if (inConfigSection && line.Trim().StartsWith("## ", StringComparison.OrdinalIgnoreCase) &&
-                    !line.Trim().Equals(CONFIG_HEADER, StringComparison.OrdinalIgnoreCase))
+                if (inConfigSection && line.Trim().StartsWith("## ", StringComparison.CurrentCultureIgnoreCase) &&
+                    !line.Trim().Equals(CONFIG_HEADER, StringComparison.CurrentCultureIgnoreCase))
                 {
                     // Reached the next section or a new header
                     inConfigSection = false;
@@ -296,7 +296,7 @@ internal static class GenerateREADME
     {
         foreach (Match m in _argPairRegex.Matches(args))
         {
-            if (m.Groups["key"].Value.Equals(key, StringComparison.OrdinalIgnoreCase))
+            if (m.Groups["key"].Value.Equals(key, StringComparison.CurrentCultureIgnoreCase))
             {
                 string raw = m.Groups["value"].Value.Trim();
                 return raw.Length > 1 && raw[0] == '\"' && raw[^1] == '\"'
@@ -310,7 +310,7 @@ internal static class GenerateREADME
     static bool GetBoolArg(string args, string key)
     {
         foreach (Match m in _argPairRegex.Matches(args))
-            if (string.Equals(m.Groups["key"].Value, key, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(m.Groups["key"].Value, key, StringComparison.CurrentCultureIgnoreCase))
                 return bool.TryParse(m.Groups["value"].Value, out bool b) && b;
 
         return false;

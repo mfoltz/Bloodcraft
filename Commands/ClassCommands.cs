@@ -80,8 +80,8 @@ internal static class ClassCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (GetPlayerBool(steamId, SHIFT_LOCK_KEY) 
-            && steamId.HasClass(out PlayerClass? playerClass) 
+        if (GetPlayerBool(steamId, SHIFT_LOCK_KEY)
+            && steamId.HasClass(out PlayerClass? playerClass)
             && playerClass.HasValue)
         {
             if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
@@ -238,10 +238,7 @@ internal static class ClassCommands
             return;
         }
 
-        var classes = Enum.GetValues(typeof(PlayerClass)).Cast<PlayerClass>().Select((playerClass, index) =>
-        {
-            return $"<color=yellow>{index + 1}</color>| {FormatClassName(playerClass, false)}";
-        }).ToList();
+        var classes = Enum.GetValues(typeof(PlayerClass)).Cast<PlayerClass>().Select((playerClass, index) => $"<color=yellow>{index + 1}</color>| {FormatClassName(playerClass, false)}").ToList();
 
         string classTypes = string.Join(", ", classes);
         LocalizationService.HandleReply(ctx, $"Classes: {classTypes}");

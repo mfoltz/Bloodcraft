@@ -340,7 +340,7 @@ internal static class ComponentRegistry
     }
 
     // KindredExtract component extractor saved significant amounts of time here, thank you Odjit <3 (honorable mention to Find&Replace)
-    public static void Initialize() 
+    public static void Initialize()
     {
         RegisterComponent<Entity>();
         RegisterComponent<SubSwatchGuidData>();

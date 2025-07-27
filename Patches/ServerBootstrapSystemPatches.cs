@@ -41,7 +41,6 @@ internal static class ServerBootstrapSystemPatches
     static readonly bool _familiars = ConfigService.FamiliarSystem;
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _quests = ConfigService.QuestSystem;
-    static readonly bool _eclipse = ConfigService.Eclipse;
     static readonly bool _exoForm = ConfigService.ExoPrestiging;
     static readonly bool _restedXP = ConfigService.RestedXPSystem;
     static readonly bool _professions = ConfigService.ProfessionSystem;
@@ -68,7 +67,7 @@ internal static class ServerBootstrapSystemPatches
         Entity userEntity = serverClient.UserEntity;
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
         ulong steamId = user.PlatformId;
-        
+
         Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
         bool exists = playerCharacter.Exists();
 
@@ -383,19 +382,16 @@ internal static class ServerBootstrapSystemPatches
                 }
             }
 
-            if (_prestige)
-            {
-                SetPlayerBool(steamId, SHROUD_KEY, true);
+            SetPlayerBool(steamId, SHROUD_KEY, true);
 
-                if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(_shroudBuff) && !playerCharacter.HasBuff(_shroudBuff)
-                    && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))
-                {
-                    Buffs.TryApplyPermanentBuff(playerCharacter, _shroudBuff);
-                }
-                else
-                {
-                    SetPlayerBool(steamId, SHROUD_KEY, false);
-                }
+            if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(_shroudBuff) && !playerCharacter.HasBuff(_shroudBuff)
+                && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))
+            {
+                Buffs.TryApplyPermanentBuff(playerCharacter, _shroudBuff);
+            }
+            else
+            {
+                SetPlayerBool(steamId, SHROUD_KEY, false);
             }
         }
 
@@ -424,15 +420,10 @@ internal static class ServerBootstrapSystemPatches
                     // Core.Log.LogWarning($"[UpdatePlayerData] - BuffByItemCategoryCount Relic entry removed!");
                 }
             }
-            else
-            {
-                // Core.Log.LogWarning($"[UpdatePlayerData] - BuffByItemCategoryCount buffer index out of range!");
-            }
 
             if (playerCharacter.HasBuff(_relicDebuff))
             {
                 playerCharacter.TryRemoveBuff(buffPrefabGuid: _relicDebuff);
-                // Core.Log.LogWarning($"[UpdatePlayerData] - Relic carry debuff removed!");
             }
         }
 
@@ -457,13 +448,11 @@ internal static class ServerBootstrapSystemPatches
 
             if (!playerCharacter.HasBuff(_bonusStatsBuff))
             {
-                // playerCharacter.TryApplyBuff(_bonusStatsBuff);
                 Buffs.RefreshStats(playerInfo.CharEntity);
             }
         }
-        else if (_eclipse)
+        else if (Core.Eclipsed)
         {
-            // Core.Log.LogWarning($"[HandlePreRegistration] - {steamId}");
             EclipseService.HandlePreRegistration(steamId);
         }
     }
@@ -585,7 +574,7 @@ internal static class ServerBootstrapSystemPatches
                     // if (SteamIdOnlinePlayerInfoCache.ContainsKey(steamId)) HandleDisconnection(steamId); 
                     HandleDisconnection(steamId);
                 }
-                
+
             }
         }
         catch (Exception ex)
@@ -637,5 +626,5 @@ internal static class ServerBootstrapSystemPatches
             // playerInfo.CharEntity.TryApplyBuff(_bonusStatsBuff);
             Buffs.RefreshStats(playerInfo.CharEntity);
         }
-    } 
+    }
 }

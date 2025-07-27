@@ -44,7 +44,7 @@ internal static class VBloodSystemPatch
                 Entity playerCharacter = vBloodConsumed.Target;
                 User user = playerCharacter.GetUser();
                 ulong steamId = user.PlatformId;
-                
+
                 if (_lastUpdateCache.TryGetValue(steamId, out DateTime lastUpdate) && (now - lastUpdate).TotalSeconds < 5) continue;
 
                 _lastUpdateCache[steamId] = now;

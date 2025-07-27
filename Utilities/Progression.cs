@@ -2,7 +2,6 @@
 using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
-using Gameplay.Systems;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Shared;
@@ -159,17 +158,15 @@ internal static class Progression
         UnitStatType.SpellFreeCast,
         UnitStatType.WeaponFreeCast
     ];
-    public class PlayerProgressionCacheManager
+    public static class PlayerProgressionCacheManager
     {
+        public static IReadOnlyList<ulong> IgnoreShared => DataService.PlayerDictionaries._ignoreSharedExperience;
+        static readonly ConcurrentDictionary<ulong, PlayerProgressionData> _playerProgressionCache = [];
         public class PlayerProgressionData(int level, bool hasPrestiged)
         {
             public int Level { get; set; } = level;
             public bool HasPrestiged { get; set; } = hasPrestiged;
         }
-        public static IReadOnlyList<ulong> IgnoreShared => DataService.PlayerDictionaries._ignoreSharedExperience;
-
-        static readonly ConcurrentDictionary<ulong, PlayerProgressionData> _playerProgressionCache = [];
-        public static IReadOnlyDictionary<ulong, PlayerProgressionData> PlayerProgressionCache => _playerProgressionCache;
         public static void UpdatePlayerProgression(ulong steamId, int level, bool hasPrestiged)
         {
             if (_playerProgressionCache.ContainsKey(steamId))
@@ -231,7 +228,7 @@ internal static class Progression
             return [source];
         }
 
-        var userIndexToSteamId = ServerBootstrapSystem._PlatformIdToApprovedUserIndex.ReverseIl2CppDictionary();
+        var userIndexToSteamId = ServerBootstrapSystem?._PlatformIdToApprovedUserIndex?.ReverseIl2CppDictionary();
 
         HashSet<Entity> players = [source];
 
@@ -241,53 +238,30 @@ internal static class Progression
             UserBitMask128 userBitMask = userActivityGrid.GetUsersInRadius(position, _shareDistance);
             UserBitMask128.Enumerable usersInRange = userBitMask.GetUsers();
 
-            // Core.Log.LogWarning($"Users in range of deathEvent - {usersInRange._Mask.Count}");
-
             foreach (int userIndex in usersInRange)
             {
-                if (!userIndexToSteamId.TryGetValue(userIndex, out ulong steamId))
-                {
-                    // Core.Log.LogWarning($"UserIndexToSteamId invalid - {userIndex} | {steamId}");
+                if (!userIndexToSteamId.TryGetValue(userIndex, out ulong steamId) || Enumerable.Contains(IgnoreShared, steamId))
                     continue;
-                }
-                else if (Enumerable.Contains(IgnoreShared, steamId))
-                {
-                    // Core.Log.LogWarning($"IgnoreShared - {userIndex} | {steamId}");
-                }
                 if (!steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
-                {
                     continue;
-                }
                 if (!playerInfo.CharEntity.HasBuff(_pveCombatBuff))
-                {
-                    // Core.Log.LogWarning($"Not in combat - {userIndex} | {steamId}");
                     continue;
-                }
 
                 var targetProgression = GetProgressionCacheData(steamId);
 
-                // Core.Log.LogWarning($"ProgressionCache - {userIndex} | {steamId} | {targetProgression.Level} | {targetProgression.HasPrestiged}");
-
                 if (_isPvE)
                 {
-                    if (targetProgression.HasPrestiged || _shareLevelRange.Equals(0) || source.IsAllies(playerInfo.CharEntity))
+                    if (targetProgression.HasPrestiged || _shareLevelRange.Equals(0) || source.IsAllied(playerInfo.CharEntity))
                     {
-                        // Core.Log.LogWarning($"[PvE] Adding {steamId} to participants (hasPrestiged, isAllies, or no shareLevelRange ({_shareLevelRange})");
                         players.Add(playerInfo.CharEntity);
                     }
                     else if (Math.Abs(sourceLevel - targetProgression.Level) <= _shareLevelRange)
                     {
-                        // Core.Log.LogWarning($"[PvE] Adding {steamId} to participants (level difference <= {_shareLevelRange})");
                         players.Add(playerInfo.CharEntity);
                     }
-                    else
-                    {
-                        // Core.Log.LogWarning($"[PvE] Ignoring {steamId} (level difference > {_shareLevelRange})");
-                    }
                 }
-                else if (source.IsAllies(playerInfo.CharEntity))
+                else if (source.IsAllied(playerInfo.CharEntity))
                 {
-                    // Core.Log.LogWarning($"[PvP] Adding {steamId} to participants (isAllies)");
                     players.Add(playerInfo.CharEntity);
                 }
             }
@@ -301,7 +275,7 @@ internal static class Progression
     }
     public static List<PlayerInfo> GetUsersNearPosition(float3 position, float radius)
     {
-        var userIndexToSteamId = ServerBootstrapSystem._PlatformIdToApprovedUserIndex.ReverseIl2CppDictionary();
+        var userIndexToSteamId = ServerBootstrapSystem?._PlatformIdToApprovedUserIndex?.ReverseIl2CppDictionary();
         List<PlayerInfo> playerInfos = [];
 
         try
@@ -314,7 +288,6 @@ internal static class Progression
             {
                 if (!userIndexToSteamId.TryGetValue(userIndex, out ulong steamId))
                 {
-                    // Core.Log.LogWarning($"UserIndexToSteamId invalid - {userIndex} | {steamId}");
                     continue;
                 }
 
@@ -401,7 +374,6 @@ internal static class Progression
             {
                 AttributeCap attributeCap = unboxedAttributeCaps->GetCap(unitStatType);
                 _unitStatAttributeCaps[unitStatType] = attributeCap;
-                // Core.Log.LogWarning($"{unitStatType} - {attributeCap.Start} | {attributeCap.SoftCap} | {attributeCap.HardCap}");
             }
         }
         else

@@ -123,7 +123,7 @@ internal static class ScriptSpawnServerPatch
                 bool isDebuff = buffs[i].BuffEffectType.Equals(BuffEffectType.Debuff);
 
                 int buffType = GetBuffType(prefabGuid, isDebuff, targetIsPlayer, targetIsFamiliar, isBloodBuff);
-                
+
                 switch (buffType)
                 {
                     case 1:
@@ -141,15 +141,12 @@ internal static class ScriptSpawnServerPatch
                         if (targetIsFamiliar) ApplyFamiliarBonusStats(buffEntity, buffTarget);
                         break;
                     case 6 when _leveling && targetIsPlayer:
-                        buffEntity.With((ref SpellLevel spellLevel) =>
-                        {
-                            spellLevel.Level = 0;
-                        });
+                        buffEntity.With((ref SpellLevel spellLevel) => spellLevel.Level = 0);
                         break;
                     case 7 when _legacies && BloodSystem.BloodBuffToBloodType.ContainsKey(prefabGuid):
                         Buffs.RefreshStats(buffTarget);
                         break;
-                    case 8 when _familiars && owner.IsFamiliar() && owner.IsAllies(buffTarget):
+                    case 8 when _familiars && owner.IsFamiliar() && owner.IsAllied(buffTarget):
                         buffEntity.Destroy();
                         break;
                     case 9 when _familiars:
@@ -393,7 +390,7 @@ internal static class ScriptSpawnServerPatch
 
                 foreach (Entity equippableBuff in equippableBuffs)
                 {
-                    equippableBuff.DestroyBuff();
+                    equippableBuff.Destroy();
                 }
 
                 if (modifyUnitStatBuffs.Any() && buffEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var targetBuffer))

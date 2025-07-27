@@ -59,7 +59,7 @@ internal class QuestService
     public static IReadOnlyDictionary<PrefabGUID, HashSet<Entity>> TargetCache => _targetCache;
     static readonly ConcurrentDictionary<PrefabGUID, HashSet<Entity>> _targetCache = [];
 
-    public static readonly List<PrefabGUID> ShardBearers = 
+    public static readonly List<PrefabGUID> ShardBearers =
     [
         PrefabGUIDs.CHAR_Manticore_VBlood,
         PrefabGUIDs.CHAR_ChurchOfLight_Paladin_VBlood,
@@ -147,80 +147,15 @@ internal class QuestService
         _harvestableResourceQueryDesc = EntityManager.CreateQueryDesc(allTypes: _harvestableResourceAllComponents, typeIndices: [0], options: EntityQueryOptions.IncludeSpawnTag);
 
         Configuration.GetQuestRewardItems();
-        QuestServiceRoutine().Start();
+        QuestServiceRoutine().Run();
     }
     static IEnumerator QuestServiceRoutine()
     {
         if (_craftables) InitializeCraftables();
-        if (_harvestables) InitializeHarvestables().Start();
+        if (_harvestables) InitializeHarvestables().Run();
 
         while (true)
         {
-            yield return QueryResultStreamAsync(
-                _targetUnitQueryDesc,
-                stream =>
-                {
-                    try
-                    {
-                        Dictionary<PrefabGUID, HashSet<Entity>> prefabGuidEntityGroups = [];
-                        using (stream)
-                        {
-                            ComponentLookup<Minion> minionLookup = EntityManager.GetComponentLookup<Minion>(true);
-                            ComponentLookup<DestroyOnSpawn> destroyOnSpawnLookup = EntityManager.GetComponentLookup<DestroyOnSpawn>(true);
-                            ComponentLookup<Trader> traderLookup = EntityManager.GetComponentLookup<Trader>(true);
-                            ComponentLookup<BlockFeedBuff> blockFeedBuffLookup = EntityManager.GetComponentLookup<BlockFeedBuff>(true);
-
-                            foreach (QueryResult result in stream.GetResults())
-                            {
-                                if (minionLookup.HasComponent(result.Entity) 
-                                    || destroyOnSpawnLookup.HasComponent(result.Entity) 
-                                    || traderLookup.HasComponent(result.Entity) 
-                                    || blockFeedBuffLookup.HasComponent(result.Entity) 
-                                    || BuffUtility.HasBuff<ImprisonedBuff>(EntityManager, result.Entity)) continue;
-
-                                PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
-                                string prefabName = prefabGuid.GetPrefabName();
-
-                                if (FilteredTargetUnits.Any(unit => prefabName.Contains(unit, StringComparison.OrdinalIgnoreCase)))
-                                    continue;
-
-                                if (!prefabGuidEntityGroups.TryGetValue(prefabGuid, out var entities))
-                                {
-                                    entities = [];
-                                    prefabGuidEntityGroups[prefabGuid] = entities;
-                                }
-
-                                entities.Add(result.Entity);
-                            }
-
-                            foreach (var keyValuePair in prefabGuidEntityGroups)
-                            {
-                                _targetCache.AddOrUpdate(
-                                    keyValuePair.Key,
-                                    _ => keyValuePair.Value,
-                                    (_, existingSet) =>
-                                    {
-                                        existingSet.Clear();
-                                        existingSet.UnionWith(keyValuePair.Value);
-                                        return existingSet;
-                                    }
-                                );
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Core.Log.LogWarning($"[QuestService] QuestServiceRoutine() - {ex}");
-                    }
-                }
-            );
-
-
-            foreach (PrefabGUID prefabGuid in ShardBearers)
-            {
-                _targetCache.TryRemove(prefabGuid, out var _);
-            }
-
             foreach (var playerInfoPair in SteamIdPlayerInfoCache)
             {
                 ulong steamId = playerInfoPair.Key;
@@ -261,45 +196,35 @@ internal class QuestService
                 RecipeData recipeData = recipeDatas[i];
                 Entity recipeEntity = recipeData.Entity;
 
-                // Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {prefabGuid.GetPrefabName()}");
-
                 if (!recipeEntity.TryGetBuffer<RecipeOutputBuffer>(out var buffer) || buffer.IsEmpty)
-                {
-                    // Core.Log.LogWarning($"[QuestService] InitializeCraftables() - Empty buffer: {prefabGuid.GetPrefabName()}");
                     continue;
-                }
 
                 if (!prefabGuidEntities.TryGetValue(buffer[0].Guid, out Entity prefabEntity))
-                {
-                    // Core.Log.LogWarning($"[QuestService] InitializeCraftables() - Couldn't get item prefab from RecipeOutputBuffer: {prefabGuid.GetPrefabName()} | {(buffer.IsEmpty ? buffer.get_Item(0).Guid.GetPrefabName() : string.Empty)}");
                     continue;
-                }
 
                 prefabGuid = prefabEntity.GetPrefabGuid();
                 string prefabName = prefabGuid.GetPrefabName();
 
-                // Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {prefabName}");
+                if (_filteredCraftableItems.Any(item => prefabName.Contains(item, StringComparison.CurrentCultureIgnoreCase)))
+                    continue;
 
-                if (_filteredCraftableItems.Any(item => prefabName.Contains(item, StringComparison.OrdinalIgnoreCase))) continue;
-
-                if (prefabEntity.Has<Equippable>() && prefabEntity.TryGetComponent(out Salvageable salvageable))
+                if (prefabEntity.Has<Equippable>()
+                    && prefabEntity.TryGetComponent(out Salvageable salvageable))
                 {
                     if (salvageable.RecipeGUID.HasValue())
                     {
-                        // Core.Log.LogWarning($"[QuestService] Added to CraftPrefabs - {prefabName}");
                         CraftPrefabs.Add(prefabGuid);
                     }
                 }
                 else if (prefabEntity.Has<ConsumableCondition>())
                 {
-                    // Core.Log.LogWarning($"[QuestService] Added to CraftPrefabs - {prefabName}");
                     CraftPrefabs.Add(prefabGuid);
                 }
             }
         }
         catch (Exception ex)
         {
-            Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {ex}");
+            Core.Log.LogError($"[QuestService] InitializeCraftables() - {ex}");
         }
         finally
         {
@@ -307,7 +232,6 @@ internal class QuestService
             recipeDatas.Dispose();
         }
 
-        // Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {CraftPrefabs.Count}");
         _craftables = false;
     }
     static IEnumerator InitializeHarvestables()
@@ -327,19 +251,18 @@ internal class QuestService
                             string prefabName = prefabGuid.GetPrefabName();
 
                             if (!entity.Has<DropTableBuffer>()) continue;
-                            else if (_filteredHarvestableResources.Any(resource => prefabName.Contains(resource, StringComparison.OrdinalIgnoreCase))) continue;
+                            else if (_filteredHarvestableResources.Any(resource => prefabName.Contains(resource, StringComparison.CurrentCultureIgnoreCase))) continue;
                             else if (prefabGuid.HasValue()) ResourcePrefabs.Add(prefabGuid);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Core.Log.LogWarning($"[QuestService] InitializeHarvestables() - {ex}");
+                    Core.Log.LogError($"[QuestService] InitializeHarvestables() - {ex}");
                 }
             }
         );
 
-        // Core.Log.LogWarning($"[QuestService] InitializeHarvestables() - {ResourcePrefabs.Count}");
         _harvestables = false;
     }
 }

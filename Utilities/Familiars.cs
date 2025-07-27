@@ -210,7 +210,7 @@ internal static class Familiars
         { "General Valencia the Depraved", new(495971434)},
         { "Dracula the Immortal King", new(-327335305)},
         { "General Cassius the Betrayer", new(-496360395)},
-        { "General Elena the Hollow", PrefabGUIDs.CHAR_Vampire_IceRanger_VBlood},        
+        { "General Elena the Hollow", PrefabGUIDs.CHAR_Vampire_IceRanger_VBlood},
         { "Willfred the Village Elder", PrefabGUIDs.CHAR_WerewolfChieftain_Human},
         { "Sir Erwin the Gallant Cavalier", PrefabGUIDs.CHAR_Militia_Fabian_VBlood},
         { "Gaius the Cursed Champion", PrefabGUIDs.CHAR_Undead_ArenaChampion_VBlood},
@@ -361,7 +361,7 @@ internal static class Familiars
 
             LocalizationService.HandleReply(ctx, $"<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.");
         }
-        else if (unit.ToLower().StartsWith("char")) // search for full and/or partial name match
+        else if (unit.StartsWith("char", StringComparison.CurrentCultureIgnoreCase)) // search for full and/or partial name match
         {
             // Try using TryGetValue for an exact match (case-sensitive)
             if (!PrefabCollectionSystem.SpawnableNameToPrefabGuidDictionary.TryGetValue(unit, out PrefabGUID match))
@@ -370,7 +370,7 @@ internal static class Familiars
                 foreach (var kvp in LocalizationService.PrefabGuidNames)
                 {
                     // Check for a case-insensitive full match
-                    if (kvp.Value.Equals(unit, System.StringComparison.OrdinalIgnoreCase))
+                    if (kvp.Value.Equals(unit, System.StringComparison.CurrentCultureIgnoreCase))
                     {
                         match = kvp.Key; // Full match found
                         break;
@@ -433,10 +433,7 @@ internal static class Familiars
     }
     public static void SetPreCombatPosition(Entity playerCharacter, Entity familiar)
     {
-        familiar.With((ref AggroConsumer aggroConsumer) =>
-        {
-            aggroConsumer.PreCombatPosition = playerCharacter.GetPosition();
-        });
+        familiar.With((ref AggroConsumer aggroConsumer) => aggroConsumer.PreCombatPosition = playerCharacter.GetPosition());
     }
     public static void HandleFamiliarEnteringCombat(Entity playerCharacter, Entity familiar)
     {
@@ -455,20 +452,11 @@ internal static class Familiars
     }
     public static void ReturnFamiliar(float3 position, Entity familiar)
     {
-        familiar.With((ref LastTranslation lastTranslation) =>
-        {
-            lastTranslation.Value = position;
-        });
+        familiar.With((ref LastTranslation lastTranslation) => lastTranslation.Value = position);
 
-        familiar.With((ref Translation translation) =>
-        {
-            translation.Value = position;
-        });
+        familiar.With((ref Translation translation) => translation.Value = position);
 
-        familiar.With((ref AggroConsumer aggroConsumer) =>
-        {
-            aggroConsumer.PreCombatPosition = position;
-        });
+        familiar.With((ref AggroConsumer aggroConsumer) => aggroConsumer.PreCombatPosition = position);
     }
 
     // mmm these seem redundant? note to remove or otherwise rethink
@@ -516,10 +504,7 @@ internal static class Familiars
 
         HandleFamiliarMinions(familiar);
 
-        familiar.With((ref Follower follower) =>
-        {
-            follower.Followed._Value = Entity.Null;
-        });
+        familiar.With((ref Follower follower) => follower.Followed._Value = Entity.Null);
 
         var buffer = playerCharacter.ReadBuffer<FollowerBuffer>();
         for (int i = 0; i < buffer.Length; i++)
@@ -557,19 +542,13 @@ internal static class Familiars
     {
         if (unit.TryApplyAndGetBuff(_inkCrawlerDeathBuff, out Entity buffEntity))
         {
-            buffEntity.With((ref LifeTime lifeTime) =>
-            {
-                lifeTime.Duration = duration;
-            });
+            buffEntity.With((ref LifeTime lifeTime) => lifeTime.Duration = duration);
 
             PrefabGUID unitPrefabGuid = unit.GetPrefabGuid();
 
             if ((unitPrefabGuid.Equals(_spiritDouble) || unitPrefabGuid.Equals(_highlordGroundSword)) && unit.Has<Immortal>())
             {
-                unit.With((ref Immortal immortal) =>
-                {
-                    immortal.IsImmortal = false;
-                });
+                unit.With((ref Immortal immortal) => immortal.IsImmortal = false);
             }
         }
     }
@@ -577,20 +556,14 @@ internal static class Familiars
     {
         if (familiar.Has<AggroConsumer>())
         {
-            familiar.With((ref AggroConsumer aggroConsumer) =>
-            {
-                aggroConsumer.Active._Value = false;
-            });
+            familiar.With((ref AggroConsumer aggroConsumer) => aggroConsumer.Active._Value = false);
         }
     }
     public static void EnableAggro(Entity familiar)
     {
         if (familiar.Has<AggroConsumer>())
         {
-            familiar.With((ref AggroConsumer aggroConsumer) =>
-            {
-                aggroConsumer.Active._Value = true;
-            });
+            familiar.With((ref AggroConsumer aggroConsumer) => aggroConsumer.Active._Value = true);
         }
     }
     public static void EnableAggroable(this Entity entity)
@@ -837,26 +810,17 @@ internal static class Familiars
     {
         if (familiar.Has<EntityInput>())
         {
-            familiar.With((ref EntityInput entityInput) =>
-            {
-                entityInput.AimDirection = _southFloat3;
-            });
+            familiar.With((ref EntityInput entityInput) => entityInput.AimDirection = _southFloat3);
         }
 
         if (familiar.Has<TargetDirection>())
         {
-            familiar.With((ref TargetDirection targetDirection) =>
-            {
-                targetDirection.AimDirection = _southFloat3;
-            });
+            familiar.With((ref TargetDirection targetDirection) => targetDirection.AimDirection = _southFloat3);
         }
 
         if (familiar.TryApplyBuff(_defaultEmoteBuff) && familiar.TryGetBuff(_defaultEmoteBuff, out Entity buffEntity))
         {
-            buffEntity.With((ref EntityOwner entityOwner) =>
-            {
-                entityOwner.Owner = target;
-            });
+            buffEntity.With((ref EntityOwner entityOwner) => entityOwner.Owner = target);
         }
     }
     public static bool EligibleForCombat(this Entity familiar)

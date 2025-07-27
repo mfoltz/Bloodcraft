@@ -221,7 +221,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Set current familiar level.
   - Shortcut: *.fam sl [Player] [Level]*
 - `.familiar shinybuff [SpellSchool]`
-  - Chooses shiny for current active familiar, one freebie then costs configured amount to change if already unlocked.
+  - Spend vampiric dust to make your familiar shiny!
   - Shortcut: *.fam shiny [SpellSchool]*
 - `.familiar slotbattlegroup [BattleGroupOrSlot] [Slot]`
   - Assigns active familiar to a battle group slot. If no battle group is specified, assigns to active group.
@@ -383,8 +383,10 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### General
 - **Language Localization**: `LanguageLocalization` (string, default: "English")
   The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese
-- **Eclipse**: `Eclipse` (bool, default: True)
-  Enables the server sending player mod data to clients using Eclipse.
+- **Eclipsed**: `Eclipsed` (bool, default: False)
+  Eclipse will be active if any features that sync with the client are enabled. Instead, this now controls the frequency; true for faster (0.1s), false for slower (2.5s).
+- **Elite Primal Rifts**: `ElitePrimalRifts` (bool, default: False)
+  Enable or disable elite primal rifts. (WIP!)
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
   Enable or disable elite shard bearers.
 - **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)
@@ -589,6 +591,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Enable or disable the profession system.
 - **Profession Factor**: `ProfessionFactor` (float, default: 1)
   The multiplier for profession experience.
+- **Disabled Professions**: `DisabledProfessions` (string, default: "")
+  Professions that should be inactive separated by comma.
 - **Extra Recipes**: `ExtraRecipes` (bool, default: False)
   Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well. See 'Recipes' section in README for complete list of changes.
 
@@ -619,6 +623,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs.
 - **Banned Types**: `BannedTypes` (string, default: "")
   The types of units that cannot be used as familiars go here (Human, Undead, Demon, Mechanical, Beast).
+- **Equipment Only**: `EquipmentOnly` (bool, default: False)
+  True for only equipment with no working inventory slots, false for both.
 - **Unit Familiar Multiplier**: `UnitFamiliarMultiplier` (float, default: 7.5)
   The multiplier for experience gained from units.
 - **V Blood Familiar Multiplier**: `VBloodFamiliarMultiplier` (float, default: 15)

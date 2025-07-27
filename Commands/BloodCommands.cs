@@ -71,7 +71,7 @@ internal static class BloodCommands
 
                 foreach (BloodStatType bloodStatType in bloodStatTypes)
                 {
-                    if (!TryGetScaledModifyUnitLegacyStat(handler, playerCharacter, steamId, bloodType, 
+                    if (!TryGetScaledModifyUnitLegacyStat(handler, playerCharacter, steamId, bloodType,
                         bloodStatType, out float statValue, out ModifyUnitStatBuff modifyUnitStatBuff)) continue;
 
                     string bloodStatString = (statValue * 100).ToString("F1") + "%";

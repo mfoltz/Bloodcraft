@@ -42,7 +42,7 @@ internal static class AbilityRunScriptsSystemPatch
         try
         {
             foreach (AbilityPostCastEndedEvent postCastEndedEvent in postCastEndedEvents)
-            {                
+            {
                 if (postCastEndedEvent.AbilityGroup.Has<VBloodAbilityData>()) continue;
                 else if (postCastEndedEvent.Character.IsPlayer())
                 {

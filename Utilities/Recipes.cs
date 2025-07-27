@@ -18,7 +18,7 @@ internal static class Recipes // pending organization and refactoring, should al
     static readonly PrefabGUID _advancedGrinder = new(-178579946);
     static readonly PrefabGUID _primitiveGrinder = new(-600683642);
     static readonly PrefabGUID _advancedFurnace = new(-222851985);
-    static readonly PrefabGUID _fabricator = new(-465055967);      
+    static readonly PrefabGUID _fabricator = new(-465055967);
     static readonly PrefabGUID _shardExtractor = new(1794206684);
     static readonly PrefabGUID _gemCuttingTable = new(-21483617);
     static readonly PrefabGUID _advancedBloodPress = new(-684391635);
@@ -107,7 +107,7 @@ internal static class Recipes // pending organization and refactoring, should al
         _morganaShardRecipe
     ];
 
-    static readonly List<PrefabGUID> _soulShards = 
+    static readonly List<PrefabGUID> _soulShards =
     [
         _solarusShard,
         _monsterShard,
@@ -124,7 +124,7 @@ internal static class Recipes // pending organization and refactoring, should al
         _draculaShardContainer,
         _morganaShardContainer
     ];
-    
+
     static readonly Dictionary<PrefabGUID, PrefabGUID> _recipesToShards = new()
     {
         { _solarusShardRecipe, _solarusShard },
@@ -380,7 +380,7 @@ internal static class Recipes // pending organization and refactoring, should al
 
         foreach (PrefabGUID shardContainer in _shardContainers)
         {
-            if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(shardContainer, out prefabEntity) 
+            if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(shardContainer, out prefabEntity)
                 && prefabEntity.TryGetBuffer<InventoryInstanceElement>(out var instanceBuffer))
             {
                 InventoryInstanceElement inventoryInstanceElement = instanceBuffer[0];
@@ -448,7 +448,7 @@ internal static class Recipes // pending organization and refactoring, should al
 
         recipeRequirementBuffer = recipeEntity.ReadBuffer<RecipeRequirementBuffer>();
         recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = _batteryCharge, Amount = 1 });
-        
+
         recipeEntity.With((ref RecipeData recipeData) =>
         {
             recipeData.CraftDuration = 90f;
@@ -463,7 +463,7 @@ internal static class Recipes // pending organization and refactoring, should al
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = _copperWiresRecipe, Disabled = false, Unlocked = true });
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = _chargedBatteryRecipe, Disabled = false, Unlocked = true });
 
-        if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_fakeFlowerRecipe, out Entity recipePrefab) 
+        if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_fakeFlowerRecipe, out Entity recipePrefab)
             && recipePrefab.TryGetBuffer<RecipeRequirementBuffer>(out var refinementRecipeBuffer) && !refinementRecipeBuffer.IsEmpty)
         {
             recipeRequirement = refinementRecipeBuffer[0];

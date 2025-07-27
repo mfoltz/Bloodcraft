@@ -75,7 +75,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                     {
                         // WeaponManager.ApplyWeaponStats(steamId, weaponType, entity);
                     }
-                    
+
                     Buffs.RefreshStats(playerCharacter);
                 }
 
@@ -91,10 +91,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                     if (weaponType.Equals(WeaponType.Unarmed) && steamId.TryGetPlayerUnarmedExpertise(out var expertise))
                     {
                         float unarmedLevel = expertise.Key;
-                        entity.With((ref WeaponLevel weaponLevel) =>
-                        {
-                            weaponLevel.Level = unarmedLevel;
-                        });
+                        entity.With((ref WeaponLevel weaponLevel) => weaponLevel.Level = unarmedLevel);
                     }
                 }
             }
@@ -147,10 +144,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                 if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
                 else if (entityOwner.Owner.IsPlayer())
                 {
-                    entity.HasWith((ref ArmorLevel armorLevel) =>
-                    {
-                        armorLevel.Level = 0f;
-                    });
+                    entity.HasWith((ref ArmorLevel armorLevel) => armorLevel.Level = 0f);
                 }
             }
         }

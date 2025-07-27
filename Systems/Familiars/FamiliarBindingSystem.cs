@@ -7,7 +7,6 @@ using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
-using Steamworks;
 using Stunlock.Core;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -33,6 +32,7 @@ internal static class FamiliarBindingSystem
 
     static readonly bool _familiarCombat = ConfigService.FamiliarCombat;
     static readonly bool _familiarPrestige = ConfigService.FamiliarPrestige;
+    static bool EquipmentOnly { get; } = ConfigService.EquipmentOnly;
 
     static readonly WaitForSeconds _delay = new(0.25f);
 
@@ -146,7 +146,7 @@ internal static class FamiliarBindingSystem
 
     public static readonly ConcurrentDictionary<ulong, List<PrefabGUID>> PlayerBattleGroups = [];
     public static readonly ConcurrentDictionary<ulong, List<Entity>> PlayerBattleFamiliars = [];
-    public static IEnumerator InstantiateFamiliarRoutine(User user, Entity playerCharacter, int famKey, 
+    public static IEnumerator InstantiateFamiliarRoutine(User user, Entity playerCharacter, int famKey,
         bool battle = false, int teamIndex = -1, float3 position = default, bool allies = false)
     {
         PrefabGUID familiarId = new(famKey);
@@ -174,7 +174,7 @@ internal static class FamiliarBindingSystem
                     if (PlayerBattleGroups[steamId].Count == 0 &&
                         PlayerBattleGroups[pairedId].Count == 0)
                     {
-                        BattleService.BattleCountdownRoutine((steamId, pairedId)).Start();
+                        BattleService.BattleCountdownRoutine((steamId, pairedId)).Run();
                     }
                 }
             }
@@ -188,7 +188,7 @@ internal static class FamiliarBindingSystem
     static bool HandleBinding(User user, Entity playerCharacter, Entity familiar, PrefabGUID familiarId, float3 position, bool battle = false, int teamIndex = -1, bool allies = false)
     {
         ulong steamId = user.PlatformId;
-        
+
         if (battle)
         {
             if (familiar.Exists())
@@ -232,7 +232,7 @@ internal static class FamiliarBindingSystem
                     // EquipFamiliar(steamId, familiarId.GuidHash, servant, familiar);
 
                     Utilities.Familiars.ActiveFamiliarManager.UpdateActiveFamiliarData(steamId, familiar, servant, familiarId.GuidHash);
-                    EquipFamiliarAndApplyStatsRoutine(steamId, servant, familiar, familiarId.GuidHash).Start();
+                    EquipFamiliarAndApplyStatsRoutine(steamId, servant, familiar, familiarId.GuidHash).Run();
 
                     return true;
                 }
@@ -252,7 +252,7 @@ internal static class FamiliarBindingSystem
             }
         }
     }
-    public static bool HandleModifications(User user, Entity playerCharacter, Entity familiar, 
+    public static bool HandleModifications(User user, Entity playerCharacter, Entity familiar,
         bool battle = false, int teamIndex = -1, bool allies = false)
     {
         ulong steamId = user.PlatformId;
@@ -305,11 +305,11 @@ internal static class FamiliarBindingSystem
             return false;
         }
     }
-    public static bool ModifyFamiliar(User user, ulong steamId, int famKey, Entity playerCharacter, Entity familiar, int level, 
+    public static bool ModifyFamiliar(User user, ulong steamId, int famKey, Entity playerCharacter, Entity familiar, int level,
         bool battle = false, int teamIndex = -1, bool allies = false)
     {
         try
-        {            
+        {
             if (battle)
             {
                 ModifyTeamFactionAggro(playerCharacter, familiar, teamIndex, allies);
@@ -386,18 +386,12 @@ internal static class FamiliarBindingSystem
     {
         if (familiar.Has<AggroConsumer>())
         {
-            familiar.With((ref AggroConsumer aggroConsumer) =>
-            {
-                aggroConsumer.Active._Value = false;
-            });
+            familiar.With((ref AggroConsumer aggroConsumer) => aggroConsumer.Active._Value = false);
         }
 
         if (familiar.Has<Aggroable>())
         {
-            familiar.With((ref Aggroable aggroable) =>
-            {
-                aggroable.Value._Value = false;
-            });
+            familiar.With((ref Aggroable aggroable) => aggroable.Value._Value = false);
         }
 
         if (!allies && playerCharacter.TryGetTeamEntity(out Entity teamEntity))
@@ -412,15 +406,9 @@ internal static class FamiliarBindingSystem
                 familiar.SetFaction(factionPrefabGUID);
             }
 
-            familiar.With((ref Team team) =>
-            {
-                team.Value = 2;
-            });
+            familiar.With((ref Team team) => team.Value = 2);
 
-            familiar.With((ref TeamReference teamReference) =>
-            {
-                teamReference.Value._Value = _unitTeamSingleton;
-            });
+            familiar.With((ref TeamReference teamReference) => teamReference.Value._Value = _unitTeamSingleton);
         }
         else
         {
@@ -453,10 +441,7 @@ internal static class FamiliarBindingSystem
     {
         if (familiar.Has<FactionReference>())
         {
-            familiar.With((ref FactionReference factionReference) =>
-            {
-                factionReference.FactionGuid._Value = _playerFaction;
-            });
+            familiar.With((ref FactionReference factionReference) => factionReference.FactionGuid._Value = _playerFaction);
         }
 
         if (familiar.Has<Follower>())
@@ -475,10 +460,7 @@ internal static class FamiliarBindingSystem
 
         if (familiar.Has<EntityOwner>())
         {
-            familiar.With((ref EntityOwner entityOwner) =>
-            {
-                entityOwner.Owner = playerCharacter;
-            });
+            familiar.With((ref EntityOwner entityOwner) => entityOwner.Owner = playerCharacter);
         }
 
         if (!familiar.Has<BlockFeedBuff>()) familiar.Add<BlockFeedBuff>();
@@ -536,7 +518,7 @@ internal static class FamiliarBindingSystem
 
         familiarUnitStats.PhysicalPower._Value = unitStats.PhysicalPower._Value * powerFactor; // scaling these with prestige not a great idea in retrospect, nerfed that a bit but they also start at higher base power per prestige then probably rebalancing when equipment stats come into play
         familiarUnitStats.SpellPower._Value = unitStats.SpellPower._Value * powerFactor;
-        
+
         /*
         foreach (FamiliarStatType prestigeStat in familiarPrestigeStats)
         {
@@ -594,7 +576,7 @@ internal static class FamiliarBindingSystem
         {
             maxHealth *= healthFactor;
         }
-        
+
         familiar.With((ref Health health) =>
         {
             health.MaxHealth._Value = maxHealth;
@@ -613,10 +595,7 @@ internal static class FamiliarBindingSystem
     }
     public static void PreventDisableFamiliar(Entity familiar)
     {
-        familiar.AddWith((ref CanPreventDisableWhenNoPlayersInRange canPreventDisable) =>
-        {
-            canPreventDisable.CanDisable = new ModifiableBool(false);
-        });
+        familiar.AddWith((ref CanPreventDisableWhenNoPlayersInRange canPreventDisable) => canPreventDisable.CanDisable = new ModifiableBool(false));
     }
     static void RemoveConvertable(Entity familiar)
     {
@@ -636,7 +615,7 @@ internal static class FamiliarBindingSystem
     static void ModifyCollision(Entity familiar)
     {
         if (!familiar.Has<DynamicCollision>()) return;
-        
+
         // best values tried so far
         familiar.With((ref DynamicCollision dynamicCollision) =>
         {
@@ -685,15 +664,9 @@ internal static class FamiliarBindingSystem
             aggroModifiers.ConeRadiusFactor._Value = 0f;
         });
 
-        familiar.With((ref GainAggroByVicinity gainAggroByVicinity) =>
-        {
-            gainAggroByVicinity.Value.AggroValue = 0f;
-        });
+        familiar.With((ref GainAggroByVicinity gainAggroByVicinity) => gainAggroByVicinity.Value.AggroValue = 0f);
 
-        familiar.With((ref GainAlertByVicinity gainAlertByVicinity) =>
-        {
-            gainAlertByVicinity.Value.AggroValue = 0f;
-        });
+        familiar.With((ref GainAlertByVicinity gainAlertByVicinity) => gainAlertByVicinity.Value.AggroValue = 0f);
     }
     static void RemoveMisc(Entity familiar, PrefabGUID familiarId)
     {
@@ -711,7 +684,7 @@ internal static class FamiliarBindingSystem
 
                     break;
                 }
-                else if (buffer[i].SpawnPrefab.GetPrefabName().Contains("pilot", StringComparison.OrdinalIgnoreCase)) // don't want pilots spawning from spider tank familiars
+                else if (buffer[i].SpawnPrefab.GetPrefabName().Contains("pilot", StringComparison.CurrentCultureIgnoreCase)) // don't want pilots spawning from spider tank familiars
                 {
                     if (familiar.TryGetBuffer<MinionBuffer>(out var minions))
                     {
@@ -731,10 +704,7 @@ internal static class FamiliarBindingSystem
 
         if (familiarId.Equals(_charDivineAngel) && familiar.Has<Script_ApplyBuffUnderHealthThreshold_DataServer>()) // don't want fallen angels spawning from divine angel familiars on death
         {
-            familiar.With((ref Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer) =>
-            {
-                script_ApplyBuffUnderHealthThreshold_DataServer.NewBuffEntity = PrefabGUID.Empty;
-            });
+            familiar.With((ref Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer) => script_ApplyBuffUnderHealthThreshold_DataServer.NewBuffEntity = PrefabGUID.Empty);
         }
 
         if (familiarId.Equals(_charWerewolfChieftainVBlood) && familiar.TryGetBuffer<AbilityGroupSlotBuffer>(out var abilityGroupBuffer)) // don't want wilfred familiars opening cages in werewolf village
@@ -792,7 +762,7 @@ internal static class FamiliarBindingSystem
                     isShiny = true;
                 }
             }
-            
+
             string message = isShiny ? $"<color=green>{familiarId.GetLocalizedName()}</color>{colorCode}*</color> <color=#00FFFF>bound</color>!" : $"<color=green>{familiarId.GetLocalizedName()}</color> <color=#00FFFF>bound</color>!";
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
@@ -801,7 +771,9 @@ internal static class FamiliarBindingSystem
     {
         string familiarName = familiar.GetPrefabGuid().GetPrefabName();
 
-        if (!familiarName.Contains("golem", StringComparison.OrdinalIgnoreCase) && !familiarName.Contains("spidertank", StringComparison.OrdinalIgnoreCase)) return;
+        if (!familiarName.Contains("golem", StringComparison.CurrentCultureIgnoreCase)
+            && !familiarName.Contains("elemental", StringComparison.CurrentCultureIgnoreCase)
+            && !familiarName.Contains("spidertank", StringComparison.CurrentCultureIgnoreCase)) return;
         else if (familiar.TryGetComponent(out BuffResistances buffResistances))
         {
             Entity resistanceBuff = buffResistances.SettingsEntity._Value;
@@ -830,13 +802,10 @@ internal static class FamiliarBindingSystem
                 buffEntity.Remove<Attached>();
                 buffEntity.Write(new Attach(familiar));
             }
-            
+
             if (!buffEntity.GetBuffTarget().Equals(familiar))
             {
-                buffEntity.With((ref Buff buff) =>
-                {
-                    buff.Target = familiar;
-                });
+                buffEntity.With((ref Buff buff) => buff.Target = familiar);
             }
         }
     }
@@ -856,10 +825,7 @@ internal static class FamiliarBindingSystem
             float3 position = familiar.GetPosition();
             coffin.SetPosition(new(position.x, position.y - 100, position.z));
 
-            servant.With((ref ServantConnectedCoffin connectedCoffin) =>
-            {
-                connectedCoffin.CoffinEntity = NetworkedEntity.ServerEntity(coffin);
-            });
+            servant.With((ref ServantConnectedCoffin connectedCoffin) => connectedCoffin.CoffinEntity = NetworkedEntity.ServerEntity(coffin));
 
             coffin.With((ref ServantCoffinstation coffinStation) =>
             {
@@ -868,10 +834,7 @@ internal static class FamiliarBindingSystem
                 coffinStation.State = ServantCoffinState.ServantAlive;
             });
 
-            servant.AddWith((ref GetTranslationOnUpdate updateTranslation) =>
-            {
-                updateTranslation.Source = GetTranslationSource.Creator;
-            });
+            servant.AddWith((ref GetTranslationOnUpdate updateTranslation) => updateTranslation.Source = GetTranslationSource.Creator);
 
             /*
             coffin.AddWith((ref GetTranslationOnUpdate updateTranslation) =>
@@ -909,11 +872,8 @@ internal static class FamiliarBindingSystem
                 });
             }
 
-            servant.With((ref Interactable interactable) =>
-            {
-                interactable.Disabled = true;
-            });
-            
+            servant.With((ref Interactable interactable) => interactable.Disabled = true);
+
             servant.With((ref AiMoveSpeeds aiMoveSpeeds) =>
             {
                 aiMoveSpeeds.Circle._Value = 0f;
@@ -922,38 +882,14 @@ internal static class FamiliarBindingSystem
                 aiMoveSpeeds.Return._Value = 0f;
             });
 
-            // InventoryUtilitiesServer.InstantiateInventory(EntityManager, servant, 0);
-            // InventoryUtilitiesServer.InstantiateInventory(EntityManager, servant, 27);
-
-            /*
-            int index = SystemService.AttachParentIdSystem.GetFreeParentIndex();
-            servant.AddWith((ref AttachParentId attachParentId) =>
+            if (EquipmentOnly)
             {
-                attachParentId.Index = index;
-            });
-
-            if (!servant.TryGetBuffer<AttachedBuffer>(out var buffer))
-            {
-                buffer = servant.AddBuffer<AttachedBuffer>();
-                Entity inventory = InventoryUtilities.TryGetInventoryEntity(EntityManager, servant, out inventory) ? inventory : Entity.Null;
-
-                if (inventory.Exists())
-                {
-                    AttachedBuffer attachedBuffer = new()
-                    {
-                        Entity = inventory,
-                        PrefabGuid = _externalInventory
-                    };
-
-                    buffer.Add(attachedBuffer);
-                }
+                InventoryUtilitiesServer.InstantiateInventory(EntityManager, servant, 0);
             }
-            */
 
             servant.Add<BlockFeedBuff>();
             // servant.TryRemove<OpenDoors>();
             servant.Remove<ServantPowerConstants>();
-            // servant.TryRemoveComponent<UnitLevel>(); // console spam - typeIndexInArchetype was -1 for NetworkComponentIndex: 20. networkSnapshotType: 331
 
             RemoveDropTable(servant);
 
@@ -964,10 +900,7 @@ internal static class FamiliarBindingSystem
                 follower.Stationary._Value = true;
             });
 
-            // servant.Remove<DisableWhenNoPlayersInRange>();
-            // servant.Remove<DisableWhenNoPlayersInRangeOfChunk>();
-
-            DisableFamiliarServantRoutine(servant, coffin).Start(); // doing this immediately is reverted by server idk
+            DisableFamiliarServantRoutine(servant, coffin).Run();
 
             return servant;
         }

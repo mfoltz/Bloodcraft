@@ -95,7 +95,7 @@ internal static class StatChangeSystemPatch
                 {
                     if (damageTakenEvent.Entity.IsPlayer() && playerCharacter.Equals(damageTakenEvent.Entity))
                     {
-                        entity.Destroy(VExtensions.DestroyMode.Immediate);
+                        entity.Destroy(true);
                     }
                     else if (IsValidTarget(damageTakenEvent.Entity))
                     {
@@ -124,7 +124,7 @@ internal static class StatChangeSystemPatch
                 {
                     if (_gameMode.Equals(GameModeType.PvE) && damageTakenEvent.Entity.HasBuff(_activeCharmedHumanBuff))
                     {
-                        entity.Destroy(VExtensions.DestroyMode.Immediate);
+                        entity.Destroy(true);
                     }
                     else if (_quests && damageTakenEvent.Entity.Has<YieldResourcesOnDamageTaken>() && sourceOwner.TryGetPlayer(out playerCharacter))
                     {
@@ -147,8 +147,8 @@ internal static class StatChangeSystemPatch
                         }
 
                         if (!_onHitEffects || !_classes) continue;
-                        
-                        if (!steamId.HasClass(out PlayerClass? playerClass) 
+
+                        if (!steamId.HasClass(out PlayerClass? playerClass)
                             || !playerClass.HasValue) continue;
 
                         if (_random.NextDouble() <= _onHitProcChance && ClassOnDamageEffects.TryGetValue(playerClass.Value, out OnHitEffects onDamageEffects))
@@ -201,10 +201,7 @@ internal static class StatChangeSystemPatch
         {
             if (!behaviourTreeState.Value.Equals(GenericEnemyState.Combat))
             {
-                familiar.With((ref Follower follower) =>
-                {
-                    follower.ModeModifiable._Value = 1;
-                });
+                familiar.With((ref Follower follower) => follower.ModeModifiable._Value = 1);
 
                 Familiars.AddToFamiliarAggroBuffer(playerCharacter, familiar, [spellOwner]);
             }

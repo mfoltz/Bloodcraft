@@ -50,7 +50,7 @@ internal static class ReactToInventoryChangedSystemPatch
     static readonly PrefabGUID _gemCuttingTable = new(-21483617);
     static readonly PrefabGUID _onyxTear = PrefabGUIDs.Item_Ingredient_OnyxTear;
 
-    static readonly List<PrefabGUID> _jewelTemplates = 
+    static readonly List<PrefabGUID> _jewelTemplates =
     [
         new(1412786604),  // Item_Jewel_Unholy_T04
         new(2023809276),  // Item_Jewel_Storm_T04
@@ -112,7 +112,7 @@ internal static class ReactToInventoryChangedSystemPatch
 
                         Dictionary<ulong, User> clanMembers = [];
                         Entity clanEntity = user.ClanEntity.GetEntityOnServer();
-                        
+
                         PrefabGUID itemPrefabGuid = inventoryChangedEvent.Item;
                         Entity itemEntity = inventoryChangedEvent.ItemEntity;
                         string itemName = itemPrefabGuid.GetPrefabName();
@@ -122,7 +122,7 @@ internal static class ReactToInventoryChangedSystemPatch
                             SpawnPrimalJewel(castleWorkstation, inventory);
                             continue;
                         }
-                        
+
                         if (itemEntity.Has<UpgradeableLegendaryItem>())
                         {
                             int tier = itemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
@@ -164,6 +164,8 @@ internal static class ReactToInventoryChangedSystemPatch
 
                                     // Core.Log.LogWarning($"Profession Crafting - {itemPrefabGuid.GetPrefabName()}");
                                     IProfession handler = ProfessionFactory.GetProfession(itemPrefabGuid);
+
+                                    if (handler == null || handler.GetProfessionEnum().IsDisabled()) continue;
 
                                     switch (handler)
                                     {
@@ -240,7 +242,7 @@ internal static class ReactToInventoryChangedSystemPatch
         else
         {
             _stationCooldowns[networkId] = now;
-            ResetStation(networkId).Start();
+            ResetStation(networkId).Run();
         }
 
         PrefabGUID perfectGem = PrefabGUID.Empty;

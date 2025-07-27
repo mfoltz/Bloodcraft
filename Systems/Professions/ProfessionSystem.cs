@@ -45,7 +45,7 @@ internal static class ProfessionSystem
     static readonly float3 _goldOreColor = new(1f, 0.8f, 0f);
     static readonly float3 _seedColor = new(0.6f, 0.9f, 0.6f);
     static readonly float3 _saplingColor = new(0.4f, 0.25f, 0.2f);
-    static readonly float3 _radiantFiberColor = new(0.8f, 0.1f, 0.5f); 
+    static readonly float3 _radiantFiberColor = new(0.8f, 0.1f, 0.5f);
 
     static readonly PrefabGUID _goldOre = PrefabGUIDs.Item_Ingredient_Mineral_GoldOre;
     static readonly PrefabGUID _radiantFibre = PrefabGUIDs.Item_Ingredient_Plant_RadiantFiber;
@@ -111,7 +111,7 @@ internal static class ProfessionSystem
             professionValue = prefabEntity.Read<EntityCategory>().ResourceLevel._Value;
         }
 
-        if (target.GetUnitLevel() > professionValue && !targetPrefabGuid.GetPrefabName().Contains("iron", StringComparison.OrdinalIgnoreCase))
+        if (target.GetUnitLevel() > professionValue && !targetPrefabGuid.GetPrefabName().Contains("iron", StringComparison.CurrentCultureIgnoreCase))
         {
             professionValue = target.Read<UnitLevel>().Level;
         }
@@ -126,8 +126,21 @@ internal static class ProfessionSystem
 
         if (handler != null)
         {
-            string professionName = handler.GetProfessionName();
+            Profession profession = handler.GetProfessionEnum();
 
+            if (profession.IsDisabled()) return;
+            else if (profession.Equals(Profession.Woodcutting))
+            {
+                professionValue *= ProfessionMappings.GetWoodcuttingModifier(itemPrefabGuid);
+                professionValue *= 10;
+            }
+            else if (profession.Equals(Profession.Mining))
+            {
+                professionValue *= 10;
+            }
+
+            /*
+            string professionName = handler.GetProfessionName();
             if (professionName.Contains("Woodcutting"))
             {
                 professionValue *= ProfessionMappings.GetWoodcuttingModifier(itemPrefabGuid);
@@ -137,6 +150,7 @@ internal static class ProfessionSystem
             {
                 professionValue *= 10;
             }
+            */
 
             float delay = SCT_DELAY;
 
@@ -201,11 +215,11 @@ internal static class ProfessionSystem
                             string itemName = dropTableData.ItemGuid.GetPrefabName();
                             // string localizedItemName = dropTableData.ItemGuid.GetLocalizedName();
 
-                            if (itemName.Contains("ingredient", StringComparison.OrdinalIgnoreCase) || itemName.Contains("trippyshroom", StringComparison.OrdinalIgnoreCase))
+                            if (itemName.Contains("ingredient", StringComparison.CurrentCultureIgnoreCase) || itemName.Contains("trippyshroom", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 int bonusYield;
 
-                                if (itemName.Contains("plant", StringComparison.OrdinalIgnoreCase) || itemName.Contains("trippyshroom", StringComparison.OrdinalIgnoreCase))
+                                if (itemName.Contains("plant", StringComparison.CurrentCultureIgnoreCase) || itemName.Contains("trippyshroom", StringComparison.CurrentCultureIgnoreCase))
                                 {
                                     bonusYield = level / 10;
                                 }
@@ -344,7 +358,7 @@ internal static class ProfessionSystem
             float3 targetPosition = target.GetPosition();
             float3 professionColor = handler.GetProfessionColor();
 
-            ProfessionSCTDelayRoutine(_experienceGainSCT, _experienceAssetGuid, playerCharacter, userEntity, targetPosition, professionColor, gainedXP, delay).Start();
+            ProfessionSCTDelayRoutine(_experienceGainSCT, _experienceAssetGuid, playerCharacter, userEntity, targetPosition, professionColor, gainedXP, delay).Run();
         }
     }
     static IEnumerator ProfessionSCTDelayRoutine(PrefabGUID sctPrefabGuid, AssetGuid assetGuid, Entity playerCharacter, Entity userEntity, float3 position, float3 color, float value, float delay)
@@ -383,7 +397,7 @@ internal static class ProfessionSystem
     {
         float3 targetPosition = target.GetPosition();
 
-        ProfessionSCTDelayRoutine(sctPrefabGuid, assetGuid, playerCharacter, userEntity, targetPosition, color, bonusYield, delay).Start();
+        ProfessionSCTDelayRoutine(sctPrefabGuid, assetGuid, playerCharacter, userEntity, targetPosition, color, bonusYield, delay).Run();
         delay += SCT_DELAY_ADD;
     }
     static void HandleExperienceAndBonusYield(User user, Entity userEntity, Entity playerCharacter, Entity target, PrefabGUID resource, string professionName, float bonusYield, bool professionLogging, bool sctYield, ref float delay)
@@ -402,7 +416,7 @@ internal static class ProfessionSystem
 
         for (int i = 0; i < maxRolls; i++)
         {
-            int roll = _random.Next(1, 101); 
+            int roll = _random.Next(1, 101);
             if (roll <= successChances[i])
             {
                 goldOreCount++;
@@ -665,7 +679,7 @@ internal static class ProfessionMappings
         { new(736318803) }, //sagefish
         { new(-1779269313) }, //bloodsnapper
         { new(67930804) }, //goldenbassriver
-        { PrefabGUIDs.Item_Ingredient_Fish_Corrupted_T03 } 
+        { PrefabGUIDs.Item_Ingredient_Fish_Corrupted_T03 }
     };
 
     static readonly Dictionary<string, List<PrefabGUID>> _fishingAreaDrops = new()
@@ -717,7 +731,7 @@ internal static class ProfessionMappings
             {
                 return location.Value;
             }
-            else if (prefab.GetPrefabName().ToLower().Contains("general"))
+            else if (prefab.GetPrefabName().Contains("general", StringComparison.CurrentCultureIgnoreCase))
             {
                 return _farbaneFishDrops;
             }
@@ -747,5 +761,9 @@ internal static class ProfessionMappings
         }
 
         return 1;
+    }
+    public static bool IsDisabled(this Profession profession)
+    {
+        return Core.DisabledProfessions.Contains(profession);
     }
 }

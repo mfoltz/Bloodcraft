@@ -139,10 +139,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                         Entity familiar = Familiars.GetActiveFamiliar(buffTarget);
                         if (familiar.Exists())
                         {
-                            buffTarget.With((ref CombatMusicListener_Shared shared) =>
-                            {
-                                shared.UnitPrefabGuid = PrefabGUID.Empty;
-                            });
+                            buffTarget.With((ref CombatMusicListener_Shared shared) => shared.UnitPrefabGuid = PrefabGUID.Empty);
                             Familiars.TryReturnFamiliar(buffTarget, familiar);
                         }
                         break;
@@ -163,7 +160,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                         steamId = buffTarget.GetSteamId();
                         int index = PrestigeBuffs.IndexOf(buffPrefabGuid);
 
-                        if (buffPrefabGuid.Equals(_shroudBuff) && !GetPlayerBool(steamId, SHROUD_KEY)) 
+                        if (buffPrefabGuid.Equals(_shroudBuff) && !GetPlayerBool(steamId, SHROUD_KEY))
                         {
                             continue; // allow shroud buff destruction
                         }

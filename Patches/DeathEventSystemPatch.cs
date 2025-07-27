@@ -49,7 +49,7 @@ internal static class DeathEventListenerSystemPatch
         ComponentLookup<UnitLevel> unitLevelLookup = __instance.GetComponentLookup<UnitLevel>(true);
         ComponentLookup<Minion> minionLookup = __instance.GetComponentLookup<Minion>(true);
         ComponentLookup<VBloodConsumeSource> vBloodConsumeSourceLookup = __instance.GetComponentLookup<VBloodConsumeSource>(true);
-        
+
         try
         {
             for (int i = 0; i < deathEvents.Length; i++)
@@ -115,8 +115,8 @@ internal static class DeathEventListenerSystemPatch
 
         return deathSource;
     }
-    static bool ValidateTarget(DeathEvent deathEvent, ref ComponentLookup<BlockFeedBuff> blockFeedBuffLookup, 
-        ref ComponentLookup<Trader> traderLookup, ref ComponentLookup<UnitLevel> unitLevelLookup, 
+    static bool ValidateTarget(DeathEvent deathEvent, ref ComponentLookup<BlockFeedBuff> blockFeedBuffLookup,
+        ref ComponentLookup<Trader> traderLookup, ref ComponentLookup<UnitLevel> unitLevelLookup,
         ref ComponentLookup<VBloodConsumeSource> vBloodConsumeSourceLookup)
     {
         if (deathEvent.Killer == deathEvent.Died) return false;
@@ -126,7 +126,7 @@ internal static class DeathEventListenerSystemPatch
             bool hasActive = steamId.HasActiveFamiliar();
 
             if (hasActive)
-            { 
+            {
                 Entity familiar = GetActiveFamiliar(playerCharacter);
 
                 if (familiar.Equals(deathEvent.Died))
@@ -185,9 +185,9 @@ internal static class DeathEventListenerSystemPatch
 
             return false;
         }
-        else if (vBloodConsumeSourceLookup.HasComponent(deathEvent.Died) 
-            || blockFeedBuffLookup.HasComponent(deathEvent.Died) 
-            || traderLookup.HasComponent(deathEvent.Died) 
+        else if (vBloodConsumeSourceLookup.HasComponent(deathEvent.Died)
+            || blockFeedBuffLookup.HasComponent(deathEvent.Died)
+            || traderLookup.HasComponent(deathEvent.Died)
             || !unitLevelLookup.HasComponent(deathEvent.Died)) return false;
 
         return true;

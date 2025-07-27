@@ -173,10 +173,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
     {
         if (_shardBearerLevel > 0)
         {
-            entity.With((ref UnitLevel unitLevel) =>
-            {
-                unitLevel.Level._Value = _shardBearerLevel;
-            });
+            entity.With((ref UnitLevel unitLevel) => unitLevel.Level._Value = _shardBearerLevel);
         }
     }
     static void SetAttackSpeed(Entity entity)

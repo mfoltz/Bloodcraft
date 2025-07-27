@@ -55,18 +55,17 @@ internal static class EmoteSystemPatch
     public static IReadOnlyDictionary<PrefabGUID, Action<User, Entity, ulong>> EmoteActions => _emoteActions;
     static readonly Dictionary<PrefabGUID, Action<User, Entity, ulong>> _emoteActions = new()
     {
-        { _waveAbilityGroup, CallDismiss }, 
-        { _saluteAbilityGroup, CombatMode },   
-        { _clapAbilityGroup, BindUnbind },    
+        { _waveAbilityGroup, CallDismiss },
+        { _saluteAbilityGroup, CombatMode },
+        { _clapAbilityGroup, BindUnbind },
         { _beckonAbilityGroup, InteractMode },
-        // { _bowAbilityGroup, CycleShapeshift },
         { _tauntAbilityGroup, HandleShapeshift }
     };
 
     static readonly Dictionary<PrefabGUID, Action<(ulong, ulong)>> _matchActions = new()
     {
-        { _yesAbilityGroup, AcceptBattle }, 
-        { _noAbilityGroup, DeclineBattle }    
+        { _yesAbilityGroup, AcceptBattle },
+        { _noAbilityGroup, DeclineBattle }
     };
 
     public static readonly HashSet<ulong> BlockShapeshift = [];
@@ -143,7 +142,7 @@ internal static class EmoteSystemPatch
         {
             BlockShapeshift.Add(steamId);
             playerCharacter.TryApplyBuff(_gateBossFeedCompleteBuff);
-            buffEntity.DestroyBuff();
+            buffEntity.Destroy();
         }
     }
     public static void BindUnbind(User user, Entity playerCharacter, ulong steamId)
@@ -169,7 +168,7 @@ internal static class EmoteSystemPatch
             {
                 if (steamId.HasDismissedFamiliar())
                 {
-                    if (!_familiarPvP && playerCharacter.HasBuff(_pvpCombatBuff))
+                    if (playerCharacter.HasBuff(_pvpCombatBuff))
                     {
                         LocalizationService.HandleServerReply(EntityManager, user, "You can't call your familiar during PvP combat!");
                         return;
@@ -272,10 +271,7 @@ internal static class EmoteSystemPatch
                 EnableAggro(familiar);
                 familiar.TryRemoveBuff(buffPrefabGuid: _interactModeBuff);
 
-                servant.With((ref Interactable interactable) =>
-                {
-                    interactable.Disabled = true;
-                });
+                servant.With((ref Interactable interactable) => interactable.Disabled = true);
 
                 coffin.Add<Disabled>();
                 servant.Add<Disabled>();
@@ -284,14 +280,11 @@ internal static class EmoteSystemPatch
             {
                 DisableAggro(familiar);
                 familiar.TryApplyBuffInteractMode(_interactModeBuff);
-                
+
                 coffin.Remove<Disabled>();
                 servant.Remove<Disabled>();
 
-                servant.With((ref Interactable interactable) =>
-                {
-                    interactable.Disabled = false;
-                });
+                servant.With((ref Interactable interactable) => interactable.Disabled = false);
             }
         }
     }

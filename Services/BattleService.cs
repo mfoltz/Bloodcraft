@@ -199,7 +199,7 @@ internal class BattleService
                     PlayerInfo loserInfo = winner == matchPairInfo.Item1.User.PlatformId ? matchPairInfo.Item2 : matchPairInfo.Item1;
 
                     string loserName = loserInfo.User.CharacterName.Value;
-                    string loserNameWithSuffix = loserName.EndsWith("s", StringComparison.OrdinalIgnoreCase)
+                    string loserNameWithSuffix = loserName.EndsWith("s", StringComparison.CurrentCultureIgnoreCase)
                     ? $"{loserName}’"
                     : $"{loserName}’s";
                     string formattedLoserName = $"<color=#808080>{loserNameWithSuffix}</color>";
@@ -333,7 +333,7 @@ internal class BattleService
         ulong steamIdTwo = matchPair.playerTwo;
 
         while (countdown > 0f)
-        {            
+        {
             foreach (PlayerInfo player in onlineNearbyPlayers)
             {
                 ScrollingCombatTextMessage.Create(
@@ -361,7 +361,7 @@ internal class BattleService
     static IEnumerator BattleSummoningRoutine(Entity playerOne, User playerUserOne, Entity playerTwo, User playerUserTwo,
     List<PrefabGUID> playerOneFamiliars, List<PrefabGUID> playerTwoFamiliars)
     {
-        bool allies = playerOne.IsAllies(playerTwo);
+        bool allies = playerOne.IsAllied(playerTwo);
 
         for (int i = 0; i < TEAM_SIZE; i++)
         {
@@ -531,18 +531,12 @@ internal class BattleService
         {
             if (familiar.Has<AggroConsumer>())
             {
-                familiar.With((ref AggroConsumer aggroConsumer) =>
-                {
-                    aggroConsumer.Active._Value = true;
-                });
+                familiar.With((ref AggroConsumer aggroConsumer) => aggroConsumer.Active._Value = true);
             }
 
             if (familiar.Has<Aggroable>())
             {
-                familiar.With((ref Aggroable aggroable) =>
-                {
-                    aggroable.Value._Value = true;
-                });
+                familiar.With((ref Aggroable aggroable) => aggroable.Value._Value = true);
             }
         }
     }

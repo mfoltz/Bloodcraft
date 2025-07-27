@@ -34,6 +34,7 @@ internal static class BuffSystemSpawnPatches
     static readonly bool _familiarPvP = ConfigService.FamiliarPvP;
     static readonly bool _potionStacking = ConfigService.PotionStacking;
     static readonly bool _professions = ConfigService.ProfessionSystem;
+    static readonly bool _alchemy = !Profession.Alchemy.IsDisabled();
 
     const float FAMILIAR_TRAVEL_DURATION = 7.5f;
     const float MINION_LIFETIME = 30f;
@@ -88,7 +89,7 @@ internal static class BuffSystemSpawnPatches
                 // if (!prefabName.Contains("AntennaBuff")) Core.Log.LogWarning($"[BuffSystem_Spawn_Server] - {buffTarget.GetPrefabGuid().GetPrefabName()} | {prefabName}");
 
                 if (!buffTarget.Exists()) continue;
-                
+
                 bool isPlayerTarget = playerCharacterLookup.HasComponent(buffTarget);
                 ulong steamId = isPlayerTarget ? buffTarget.GetSteamId() : 0;
 
@@ -186,11 +187,8 @@ internal static class BuffSystemSpawnPatches
 
                             if (familiar.Exists() && familiar.TryGetBuff(_highlordGroundSwordBossBuff, out buffEntity))
                             {
-                                buffEntity.AddWith((ref AmplifyBuff amplifyBuff) =>
-                                {
-                                    amplifyBuff.AmplifyModifier = -0.75f;
-                                });
-                                
+                                buffEntity.AddWith((ref AmplifyBuff amplifyBuff) => amplifyBuff.AmplifyModifier = -0.75f);
+
                                 buffEntity.AddWith((ref LifeTime lifeTime) =>
                                 {
                                     lifeTime.Duration = MINION_LIFETIME;
@@ -215,18 +213,20 @@ internal static class BuffSystemSpawnPatches
                     case 11:
                         if (isPlayerTarget)
                         {
-                            if (_potionStacking && !prefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase))
+                            if (_potionStacking && !prefabName.Contains("holyresistance", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 if (buffEntity.Has<RemoveBuffOnGameplayEvent>()) buffEntity.Remove<RemoveBuffOnGameplayEvent>();
                                 if (buffEntity.Has<RemoveBuffOnGameplayEventEntry>()) buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
                             }
+
+                            if (!_alchemy) continue;
 
                             if (_professions)
                             {
                                 IProfession handler = ProfessionFactory.GetProfession(buffPrefabGuid);
 
                                 int level = handler.GetProfessionData(steamId).Key;
-                                float bonus = 1 + level / (float)MAX_PROFESSION_LEVEL;
+                                float bonus = 1 + (level / (float)MAX_PROFESSION_LEVEL);
 
                                 if (buffEntity.Has<LifeTime>())
                                 {
@@ -235,7 +235,7 @@ internal static class BuffSystemSpawnPatches
                                     buffEntity.Write(lifeTime);
                                 }
 
-                                if (!prefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase) && buffEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var statBuffer) && !statBuffer.IsEmpty)
+                                if (!prefabName.Contains("holyresistance", StringComparison.CurrentCultureIgnoreCase) && buffEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var statBuffer) && !statBuffer.IsEmpty)
                                 {
                                     for (int j = 0; j < statBuffer.Length; j++)
                                     {
@@ -274,7 +274,7 @@ internal static class BuffSystemSpawnPatches
                         }
                         else if (buffTarget.TryGetFollowedPlayer(out playerCharacter))
                         {
-                            if (_potionStacking && !prefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase))
+                            if (_potionStacking && !prefabName.Contains("holyresistance", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 if (buffEntity.Has<RemoveBuffOnGameplayEvent>()) buffEntity.Remove<RemoveBuffOnGameplayEvent>();
                                 if (buffEntity.Has<RemoveBuffOnGameplayEventEntry>()) buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
@@ -630,7 +630,7 @@ internal static class BuffSystemSpawnPatches
     }
     static void ApplyConsumableToPlayer(Entity buffEntity, Entity player, PrefabGUID buffGuid, string prefabName, ulong steamId)
     {
-        if (_potionStacking && !prefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase))
+        if (_potionStacking && !prefabName.Contains("holyresistance", StringComparison.CurrentCultureIgnoreCase))
         {
             buffEntity.Remove<RemoveBuffOnGameplayEvent>();
             buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
@@ -650,7 +650,7 @@ internal static class BuffSystemSpawnPatches
                 }
             });
 
-            if (!prefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase) &&
+            if (!prefabName.Contains("holyresistance", StringComparison.CurrentCultureIgnoreCase) &&
                 buffEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var statBuffer) && !statBuffer.IsEmpty)
             {
                 for (int j = 0; j < statBuffer.Length; ++j)
@@ -683,7 +683,7 @@ internal static class BuffSystemSpawnPatches
     }
     static void ApplyConsumableToFollower(Entity buffEntity, Entity playerCharacter, string prefabName)
     {
-        if (_potionStacking && !prefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase))
+        if (_potionStacking && !prefabName.Contains("holyresistance", StringComparison.CurrentCultureIgnoreCase))
         {
             buffEntity.Remove<RemoveBuffOnGameplayEvent>();
             buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();

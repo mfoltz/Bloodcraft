@@ -113,7 +113,7 @@ internal static class BloodManager
 
             foreach (BloodStatType bloodStatType in bloodStatTypes)
             {
-                if (!TryGetScaledModifyUnitLegacyStat(handler, playerCharacter, steamId, bloodType, 
+                if (!TryGetScaledModifyUnitLegacyStat(handler, playerCharacter, steamId, bloodType,
                     bloodStatType, out float statValue, out ModifyUnitStatBuff modifyUnitStatBuff)) continue;
 
                 ModifyUnitStatBuff_DOTS newStatBuff = new()
@@ -135,7 +135,7 @@ internal static class BloodManager
             }
         }
     }
-    public static bool TryGetScaledModifyUnitLegacyStat(IBloodLegacy handler, Entity playerCharacter, ulong steamId, 
+    public static bool TryGetScaledModifyUnitLegacyStat(IBloodLegacy handler, Entity playerCharacter, ulong steamId,
         BloodType bloodType, BloodStatType bloodStatType, out float statValue, out ModifyUnitStatBuff modifyUnitStatBuff)
     {
         modifyUnitStatBuff = default;
@@ -151,7 +151,7 @@ internal static class BloodManager
             var xpData = handler.GetLegacyData(steamId);
             float maxBonus = modifyUnitStatBuff.BaseCap;
 
-            if (_classes && steamId.HasClass(out PlayerClass? playerClass) 
+            if (_classes && steamId.HasClass(out PlayerClass? playerClass)
                 && playerClass.HasValue && ClassBloodStatSynergies[playerClass.Value].Contains(bloodStatType))
             {
                 maxBonus *= _synergyMultiplier;
@@ -162,24 +162,6 @@ internal static class BloodManager
                 float gainFactor = 1 + (_prestigeStatMultiplier * legacyPrestiges);
                 maxBonus *= gainFactor;
             }
-
-            /*
-            try
-            {
-                if (playerCharacter.TryGetComponent(out VampireAttributeCapModificationsSource capModificationsSource)
-                    && capModificationsSource.ModificationsEntity.TryGetComponent(out VampireAttributeCapModifications capModifications)
-                    && BloodStatTypes.TryGetValue(bloodStatType, out UnitStatType unitStatType))
-                {
-                    AttributeCapModIds capModIds = capModifications.CapModIds.GetCap(unitStatType);
-                    capModId = modifyUnitStatBuff.AttributeCapType.Equals(AttributeCapType.SoftCapped) ?
-                        capModIds.SoftCapModId : capModIds.HardCapModId;
-                }
-            }
-            catch (Exception ex)
-            {
-                Core.Log.LogError($"[BloodManager] Error getting cap modifications: {ex}");
-            }
-            */
 
             statValue = maxBonus * ((float)xpData.Key / _maxLegacyLevel);
             return true;

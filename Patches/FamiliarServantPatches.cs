@@ -25,10 +25,10 @@ internal static class FamiliarServantPatches
     {
         if (!Core._initialized) return;
         else if (!_familiars) return;
-        
+
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         NativeArray<EquipServantItemFromInventoryEvent> equipServantItemFromInventoryEvents = __instance.EntityQueries[0].ToComponentDataArray<EquipServantItemFromInventoryEvent>(Allocator.Temp);
-        
+
         ComponentLookup<BlockFeedBuff> blockFeedBuffLookup = __instance.GetComponentLookup<BlockFeedBuff>();
 
         try
@@ -45,13 +45,13 @@ internal static class FamiliarServantPatches
                 int slotIndex = equipServantItemFromInventoryEvent.SlotIndex;
 
                 if (networkIdLookupMap.TryGetValue(toEntity, out Entity servant)
-                    && blockFeedBuffLookup.HasComponent(servant) 
+                    && blockFeedBuffLookup.HasComponent(servant)
                     && networkIdLookupMap.TryGetValue(fromInventory, out Entity inventory))
                 {
                     if (InvalidFamiliarEquipment(inventory, slotIndex))
                     {
                         Core.Log.LogWarning($"[EquipServantItemFromInventorySystem] isLegendary!");
-                        entity.Destroy(VExtensions.DestroyMode.Immediate);
+                        entity.Destroy(true);
                     }
                     else
                     {
@@ -111,13 +111,13 @@ internal static class FamiliarServantPatches
                 int slotIndex = equipServantItemEvent.SlotIndex;
 
                 if (NetworkIdSystem._NetworkIdLookupMap.TryGetValue(networkId, out Entity servant)
-                    && blockFeedBuffLookup.HasComponent(servant) 
+                    && blockFeedBuffLookup.HasComponent(servant)
                     && InventoryUtilities.TryGetInventoryEntity(EntityManager, fromCharacter.Character, out Entity inventory))
                 {
                     if (InvalidFamiliarEquipment(inventory, slotIndex))
                     {
                         Core.Log.LogWarning($"[EquipServantItemSystem] isLegendary!");
-                        entity.Destroy(VExtensions.DestroyMode.Immediate);
+                        entity.Destroy(true);
                     }
                     else
                     {
@@ -205,13 +205,13 @@ internal static class FamiliarServantPatches
                 bool servantToCharacter = equipmentToEquipmentTransferEvent.ServantToCharacter;
 
                 if (!servantToCharacter && NetworkIdSystem._NetworkIdLookupMap.TryGetValue(networkId, out Entity servant)
-                    && blockFeedBuffLookup.HasComponent(servant) 
+                    && blockFeedBuffLookup.HasComponent(servant)
                     && fromCharacter.Character.TryGetComponent(out Equipment equipment))
                 {
                     if (equipment.GetEquipmentEntity(equipmentType).GetEntityOnServer().IsAncestralWeapon())
                     {
                         // Core.Log.LogWarning($"[EquipmentTransferSystem] isLegendary!");
-                        entity.Destroy(VExtensions.DestroyMode.Immediate);
+                        entity.Destroy(true);
                     }
                     else
                     {
@@ -232,7 +232,7 @@ internal static class FamiliarServantPatches
                     if (steamId.HasActiveFamiliar())
                     {
                         Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
-                       
+
                         // Core.Log.LogWarning($"[EquipmentTransferSystem] Familiar servant unequipped (?), refreshing stats...");
                         Buffs.RefreshStats(familiar);
                     }
@@ -331,7 +331,7 @@ internal static class FamiliarServantPatches
                     else if (InvalidFamiliarEquipment(playerCharacter, slotIndex))
                     {
                         Core.Log.LogWarning($"[MoveItemBetweenInventoriesSystem] Invalid equipment!");
-                        entity.Destroy(VExtensions.DestroyMode.Immediate);
+                        entity.Destroy(true);
                     }
                     else
                     {
