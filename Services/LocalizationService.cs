@@ -36,9 +36,9 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         public Node[] Nodes { get; set; }
         public Word[] Words { get; set; }
     }
-    struct MessageFile
+    class MessageFile
     {
-        public Dictionary<string, string> Messages { get; set; }
+        public Dictionary<string, string> Messages { get; set; } = new();
     }
 
     static readonly string _language = ConfigService.LanguageLocalization;
