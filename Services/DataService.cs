@@ -1154,7 +1154,7 @@ internal static class DataService
 
                 if (battleGroup.Familiars.Contains(ActiveFamiliarManager.GetActiveFamiliarData(steamId).FamiliarId))
                 {
-                    LocalizationService.HandleReply(ctx, "Active familiar already present in battle group!");
+                    LocalizationService.Reply(ctx, "Active familiar already present in battle group!");
                     return false;
                 }
 
@@ -1189,7 +1189,7 @@ internal static class DataService
                 var data = LoadFamiliarBattleGroupsData(steamId);
                 if (data.BattleGroups.Count >= MAX_BATTLE_GROUPS)
                 {
-                    LocalizationService.HandleReply(ctx, $"Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!");
+                    LocalizationService.Reply(ctx, $"Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!");
                     return false;
                 }
 
@@ -1207,7 +1207,7 @@ internal static class DataService
 
                 data.BattleGroups.Remove(group);
                 SaveFamiliarBattleGroupsData(steamId, data);
-                LocalizationService.HandleReply(ctx, $"Deleted battle group <color=white>{groupName}</color>!");
+                LocalizationService.Reply(ctx, $"Deleted battle group <color=white>{groupName}</color>!");
                 return true;
             }
             public static bool SetActiveBattleGroup(ChatCommandContext ctx, ulong steamId, string groupName)
@@ -1234,11 +1234,11 @@ internal static class DataService
                     BuildBattleGroupDetailsReply(steamId, buffsData, prestigeData, battleGroup, ref familiars);
 
                     string familiarReply = string.Join(", ", familiars);
-                    LocalizationService.HandleReply(ctx, $"Battle Group - {familiarReply}");
+                    LocalizationService.Reply(ctx, $"Battle Group - {familiarReply}");
                 }
                 else
                 {
-                    LocalizationService.HandleReply(ctx, "No familiars in battle group!");
+                    LocalizationService.Reply(ctx, "No familiars in battle group!");
                 }
             }
             static void BuildBattleGroupDetailsReply(ulong steamId, FamiliarBuffsData buffsData, FamiliarPrestigeData prestigeData, FamiliarBattleGroup battleGroup, ref List<string> familiars)

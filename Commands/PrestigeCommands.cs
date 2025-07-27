@@ -31,13 +31,13 @@ internal static class PrestigeCommands
     {
         if (!ConfigService.PrestigeSystem)
         {
-            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Prestiging is not enabled.");
             return;
         }
 
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige type, use <color=white>'.prestige l'</color> to see options.");
+            LocalizationService.Reply(ctx, "Invalid prestige type, use <color=white>'.prestige l'</color> to see options.");
             return;
         }
 
@@ -50,12 +50,12 @@ internal static class PrestigeCommands
             {
                 if (steamId.TryGetPlayerExperience(out var expData) && expData.Key < ConfigService.MaxLevel)
                 {
-                    LocalizationService.HandleReply(ctx, "You must reach max level before <color=#90EE90>Exo</color> prestiging again.");
+                    LocalizationService.Reply(ctx, "You must reach max level before <color=#90EE90>Exo</color> prestiging again.");
                     return;
                 }
                 else if (prestigeData[PrestigeType.Exo] >= EXO_PRESTIGES)
                 {
-                    LocalizationService.HandleReply(ctx, $"You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges. (<color=white>{EXO_PRESTIGES}</color>)");
+                    LocalizationService.Reply(ctx, $"You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges. (<color=white>{EXO_PRESTIGES}</color>)");
                     return;
                 }
 
@@ -79,31 +79,31 @@ internal static class PrestigeCommands
                 if (ConfigService.ExoPrestigeReward != 0) exoReward = new(ConfigService.ExoPrestigeReward);
                 else if (ConfigService.ExoPrestigeReward == 0)
                 {
-                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!");
+                    LocalizationService.Reply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!");
                     return;
                 }
 
                 if (ServerGameManager.TryAddInventoryItem(playerCharacter, exoReward, ConfigService.ExoPrestigeRewardQuantity))
                 {
-                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!");
+                    LocalizationService.Reply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!");
                     return;
                 }
                 else
                 {
                     InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, exoReward, ConfigService.ExoPrestigeRewardQuantity, new Entity());
-                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.");
+                    LocalizationService.Reply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.");
                     return;
                 }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, "You must reach the maximum level in <color=#90EE90>Experience</color> prestige before <color=#90EE90>Exo</color> prestiging.");
+                LocalizationService.Reply(ctx, "You must reach the maximum level in <color=#90EE90>Experience</color> prestige before <color=#90EE90>Exo</color> prestiging.");
                 return;
             }
         }
         else if (!ConfigService.ExoPrestiging && parsedPrestigeType.Equals(PrestigeType.Exo))
         {
-            LocalizationService.HandleReply(ctx, "<color=#90EE90>Exo</color> prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "<color=#90EE90>Exo</color> prestiging is not enabled.");
             return;
         }
 
@@ -111,7 +111,7 @@ internal static class PrestigeCommands
 
         if (handler == null)
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
+            LocalizationService.Reply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
@@ -123,7 +123,7 @@ internal static class PrestigeCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.");
+            LocalizationService.Reply(ctx, $"You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.");
         }
     }
 
@@ -132,13 +132,13 @@ internal static class PrestigeCommands
     {
         if (!ConfigService.PrestigeSystem)
         {
-            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Prestiging is not enabled.");
             return;
         }
 
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
+            LocalizationService.Reply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
@@ -147,7 +147,7 @@ internal static class PrestigeCommands
 
         if (parsedPrestigeType == PrestigeType.Exo && steamId.TryGetPlayerPrestiges(out var exoData) && exoData.TryGetValue(parsedPrestigeType, out var exoLevel) && exoLevel > 0)
         {
-            LocalizationService.HandleReply(ctx, $"Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s");
+            LocalizationService.Reply(ctx, $"Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s");
             Shapeshifts.UpdateExoFormChargeStored(steamId);
 
             if (steamId.TryGetPlayerExoFormData(out var exoFormData))
@@ -158,7 +158,7 @@ internal static class PrestigeCommands
                 }
                 else if (exoFormData.Value >= Shapeshifts.BASE_DURATION)
                 {
-                    LocalizationService.HandleReply(ctx, $"Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s");
+                    LocalizationService.Reply(ctx, $"Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s");
                 }
 
                 /*
@@ -181,7 +181,7 @@ internal static class PrestigeCommands
                 {
                     var batch = exoFormSkills.Skip(i).Take(4);
                     string replyMessage = string.Join(", ", batch);
-                    LocalizationService.HandleReply(ctx, replyMessage);
+                    LocalizationService.Reply(ctx, replyMessage);
                 }
                 */
             }
@@ -190,14 +190,14 @@ internal static class PrestigeCommands
         }
         else if (parsedPrestigeType == PrestigeType.Exo)
         {
-            LocalizationService.HandleReply(ctx, "You have not prestiged in <color=#90EE90>Exo</color> yet.");
+            LocalizationService.Reply(ctx, "You have not prestiged in <color=#90EE90>Exo</color> yet.");
             return;
         }
 
         IPrestige handler = PrestigeFactory.GetPrestige(parsedPrestigeType);
         if (handler == null)
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
+            LocalizationService.Reply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
@@ -209,7 +209,7 @@ internal static class PrestigeCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.");
+            LocalizationService.Reply(ctx, $"You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.");
         }
     }
 
@@ -218,20 +218,20 @@ internal static class PrestigeCommands
     {
         if (!ConfigService.PrestigeSystem)
         {
-            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Prestiging is not enabled.");
             return;
         }
 
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
+            LocalizationService.Reply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
         PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
-            ctx.Reply($"Couldn't find player.");
+            LocalizationService.Reply(ctx, $"Couldn't find player.");
             return;
         }
 
@@ -242,13 +242,13 @@ internal static class PrestigeCommands
         {
             if (!ConfigService.ExoPrestiging)
             {
-                LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestiging is not enabled.");
+                LocalizationService.Reply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestiging is not enabled.");
                 return;
             }
 
             if (level > PrestigeTypeToMaxPrestiges[parsedPrestigeType] || level < 1)
             {
-                LocalizationService.HandleReply(ctx, $"The maximum level for <color=#90EE90>{parsedPrestigeType}</color> prestige is {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.");
+                LocalizationService.Reply(ctx, $"The maximum level for <color=#90EE90>{parsedPrestigeType}</color> prestige is {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.");
                 return;
             }
 
@@ -262,7 +262,7 @@ internal static class PrestigeCommands
                 KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, Shapeshifts.CalculateFormDuration(exoPrestige));
                 steamId.SetPlayerExoFormData(timeEnergyPair);
 
-                LocalizationService.HandleReply(ctx, $"Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.");
+                LocalizationService.Reply(ctx, $"Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.");
                 return;
             }
         }
@@ -271,7 +271,7 @@ internal static class PrestigeCommands
 
         if (handler == null)
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
+            LocalizationService.Reply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
@@ -288,7 +288,7 @@ internal static class PrestigeCommands
 
         if (level > PrestigeTypeToMaxPrestiges[parsedPrestigeType])
         {
-            LocalizationService.HandleReply(ctx, $"The maximum level for <color=#90EE90>{parsedPrestigeType}</color> prestige is {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.");
+            LocalizationService.Reply(ctx, $"The maximum level for <color=#90EE90>{parsedPrestigeType}</color> prestige is {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.");
             return;
         }
 
@@ -307,7 +307,7 @@ internal static class PrestigeCommands
             ReplyOtherPrestigeEffects(playerInfo.User, steamId, parsedPrestigeType, level);
         }
 
-        LocalizationService.HandleReply(ctx, $"Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.");
+        LocalizationService.Reply(ctx, $"Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.");
     }
 
     [Command(name: "reset", shortHand: "r", adminOnly: true, usage: ".prestige r [Player] [PrestigeType]", description: "Handles resetting prestiging.")]
@@ -315,26 +315,26 @@ internal static class PrestigeCommands
     {
         if (!ConfigService.PrestigeSystem)
         {
-            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Prestiging is not enabled.");
             return;
         }
 
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
+            LocalizationService.Reply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
         if (!ConfigService.ExoPrestiging && parsedPrestigeType == PrestigeType.Exo)
         {
-            LocalizationService.HandleReply(ctx, "Exo prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Exo prestiging is not enabled.");
             return;
         }
 
         PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
-            ctx.Reply($"Couldn't find player...");
+            LocalizationService.Reply(ctx, $"Couldn't find player...");
             return;
         }
 
@@ -363,7 +363,7 @@ internal static class PrestigeCommands
                 if (GetPlayerBool(steamId, SHAPESHIFT_KEY)) SetPlayerBool(steamId, SHAPESHIFT_KEY, false);
             }
 
-            LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.");
+            LocalizationService.Reply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.");
         }
     }
 
@@ -372,7 +372,7 @@ internal static class PrestigeCommands
     {
         if (!ConfigService.PrestigeSystem)
         {
-            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Prestiging is not enabled.");
             return;
         }
 
@@ -384,11 +384,11 @@ internal static class PrestigeCommands
             Entity character = ctx.Event.SenderCharacterEntity;
             ApplyPrestigeBuffs(character, prestigeLevel);
 
-            LocalizationService.HandleReply(ctx, "Prestige buffs applied! (if they were missing)");
+            LocalizationService.Reply(ctx, "Prestige buffs applied! (if they were missing)");
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"You have not prestiged in <color=#90EE90>{PrestigeType.Experience}</color>.");
+            LocalizationService.Reply(ctx, $"You have not prestiged in <color=#90EE90>{PrestigeType.Experience}</color>.");
         }
     }
 
@@ -397,7 +397,7 @@ internal static class PrestigeCommands
     {
         if (!ConfigService.PrestigeSystem)
         {
-            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Prestiging is not enabled.");
             return;
         }
 
@@ -405,12 +405,12 @@ internal static class PrestigeCommands
 
         const int maxPerMessage = 6;
 
-        LocalizationService.HandleReply(ctx, $"Prestiges:");
+        LocalizationService.Reply(ctx, $"Prestiges:");
         for (int i = 0; i < prestigeTypes.Count; i += maxPerMessage)
         {
             var batch = prestigeTypes.Skip(i).Take(maxPerMessage);
             string prestiges = string.Join(", ", batch);
-            LocalizationService.HandleReply(ctx, $"{prestiges}");
+            LocalizationService.Reply(ctx, $"{prestiges}");
         }
     }
 
@@ -419,25 +419,25 @@ internal static class PrestigeCommands
     {
         if (!ConfigService.PrestigeSystem)
         {
-            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Prestiging is not enabled.");
             return;
         }
 
         if (!ConfigService.PrestigeLeaderboard)
         {
-            LocalizationService.HandleReply(ctx, "Leaderboards are not enabled.");
+            LocalizationService.Reply(ctx, "Leaderboards are not enabled.");
             return;
         }
 
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
+            LocalizationService.Reply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
         if (!ConfigService.ExoPrestiging && parsedPrestigeType == PrestigeType.Exo)
         {
-            LocalizationService.HandleReply(ctx, "Exo prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Exo prestiging is not enabled.");
             return;
         }
 
@@ -448,7 +448,7 @@ internal static class PrestigeCommands
 
         if (!prestigeData.Any())
         {
-            LocalizationService.HandleReply(ctx, $"No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!");
+            LocalizationService.Reply(ctx, $"No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!");
             return;
         }
 
@@ -463,7 +463,7 @@ internal static class PrestigeCommands
 
         if (leaderboard.Count == 0)
         {
-            LocalizationService.HandleReply(ctx, $"No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!");
+            LocalizationService.Reply(ctx, $"No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!");
         }
         else
         {
@@ -472,7 +472,7 @@ internal static class PrestigeCommands
                 var batch = leaderboard.Skip(i).Take(4);
                 string replyMessage = string.Join(", ", batch);
 
-                LocalizationService.HandleReply(ctx, replyMessage);
+                LocalizationService.Reply(ctx, replyMessage);
             }
         }
     }
@@ -482,7 +482,7 @@ internal static class PrestigeCommands
     {
         if (!ConfigService.ExoPrestiging)
         {
-            ctx.Reply("Exo prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Exo prestiging is not enabled.");
             return;
         }
 
@@ -492,16 +492,16 @@ internal static class PrestigeCommands
         {
             if (!Progression.ConsumedMegara(ctx.Event.SenderUserEntity) && !Progression.ConsumedDracula(ctx.Event.SenderUserEntity))
             {
-                ctx.Reply("You must consume at least one primordial essence...");
+                LocalizationService.Reply(ctx, "You must consume at least one primordial essence...");
                 return;
             }
 
             TogglePlayerBool(steamId, SHAPESHIFT_KEY);
-            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");
+            LocalizationService.Reply(ctx, $"Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");
         }
         else
         {
-            ctx.Reply("You are not yet worthy...");
+            LocalizationService.Reply(ctx, "You are not yet worthy...");
         }
     }
 
@@ -510,14 +510,14 @@ internal static class PrestigeCommands
     {
         if (!ConfigService.ExoPrestiging)
         {
-            ctx.Reply("Exo prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Exo prestiging is not enabled.");
             return;
         }
 
         if (!Enum.TryParse<ShapeshiftType>(shapeshift, ignoreCase: true, out var form))
         {
             var shapeshifts = string.Join(", ", Enum.GetNames(typeof(ShapeshiftType)).Select(name => $"<color=white>{name}</color>"));
-            ctx.Reply($"Invalid shapeshift! Valid options: {shapeshifts}");
+            LocalizationService.Reply(ctx, $"Invalid shapeshift! Valid options: {shapeshifts}");
             return;
         }
 
@@ -527,22 +527,22 @@ internal static class PrestigeCommands
         {
             if (form.Equals(ShapeshiftType.EvolvedVampire) && !Progression.ConsumedDracula(ctx.Event.SenderUserEntity))
             {
-                ctx.Reply("You must consume Dracula's essence before manifesting his form...");
+                LocalizationService.Reply(ctx, "You must consume Dracula's essence before manifesting his form...");
                 return;
             }
 
             if (form.Equals(ShapeshiftType.CorruptedSerpent) && !Progression.ConsumedMegara(ctx.Event.SenderUserEntity))
             {
-                ctx.Reply("You must consume Megara's essence before manifesting her form...");
+                LocalizationService.Reply(ctx, "You must consume Megara's essence before manifesting her form...");
                 return;
             }
 
             steamId.SetPlayerShapeshift(form);
-            ctx.Reply($"Current Exoform: <color=white>{form}</color>");
+            LocalizationService.Reply(ctx, $"Current Exoform: <color=white>{form}</color>");
         }
         else
         {
-            ctx.Reply("You are not yet worthy...");
+            LocalizationService.Reply(ctx, "You are not yet worthy...");
         }
     }
 
@@ -551,14 +551,14 @@ internal static class PrestigeCommands
     {
         if (!ConfigService.PrestigeSystem)
         {
-            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Prestiging is not enabled.");
             return;
         }
 
         PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
-            ctx.Reply($"Couldn't find player...");
+            LocalizationService.Reply(ctx, $"Couldn't find player...");
             return;
         }
 
@@ -567,14 +567,14 @@ internal static class PrestigeCommands
             DataService.PlayerDictionaries._ignorePrestigeLeaderboard.Add(playerInfo.User.PlatformId);
             DataService.PlayerPersistence.SaveIgnoredPrestigeLeaderboard();
 
-            ctx.Reply($"<color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore prestige leaderboard list!");
+            LocalizationService.Reply(ctx, $"<color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore prestige leaderboard list!");
         }
         else if (DataService.PlayerDictionaries._ignorePrestigeLeaderboard.Contains(playerInfo.User.PlatformId))
         {
             DataService.PlayerDictionaries._ignorePrestigeLeaderboard.Remove(playerInfo.User.PlatformId);
             DataService.PlayerPersistence.SaveIgnoredPrestigeLeaderboard();
 
-            ctx.Reply($"<color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore prestige leaderboard list!");
+            LocalizationService.Reply(ctx, $"<color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore prestige leaderboard list!");
         }
     }
 
@@ -583,7 +583,7 @@ internal static class PrestigeCommands
     {
         if (!ConfigService.PrestigeSystem)
         {
-            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Prestiging is not enabled.");
             return;
         }
 
@@ -593,7 +593,7 @@ internal static class PrestigeCommands
         TogglePlayerBool(steamId, SHROUD_KEY);
         if (GetPlayerBool(steamId, SHROUD_KEY))
         {
-            LocalizationService.HandleReply(ctx, "Permashroud <color=green>enabled</color>!");
+            LocalizationService.Reply(ctx, "Permashroud <color=green>enabled</color>!");
 
             if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(_shroudBuff) && !playerCharacter.HasBuff(_shroudBuff)
                 && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))
@@ -603,7 +603,7 @@ internal static class PrestigeCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Permashroud <color=red>disabled</color>!");
+            LocalizationService.Reply(ctx, "Permashroud <color=red>disabled</color>!");
             Equipment equipment = playerCharacter.Read<Equipment>();
 
             if (!equipment.IsEquipped(_shroudCloak, out var _) && playerCharacter.HasBuff(_shroudBuff))
@@ -618,7 +618,7 @@ internal static class PrestigeCommands
     {
         if (!ConfigService.PrestigeSystem)
         {
-            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.Reply(ctx, "Prestiging is not enabled.");
             return;
         }
 

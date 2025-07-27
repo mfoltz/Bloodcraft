@@ -25,7 +25,7 @@ internal static class ClassCommands
     {
         if (!_classes)
         {
-            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            LocalizationService.Reply(ctx, "Classes are not enabled.");
             return;
         }
 
@@ -42,16 +42,16 @@ internal static class ClassCommands
                 UpdatePlayerClass(playerCharacter, playerClass, steamId);
                 // ApplyClassBuffs(playerCharacter, steamId);
 
-                LocalizationService.HandleReply(ctx, $"You've selected {FormatClassName(playerClass)}!");
+                LocalizationService.Reply(ctx, $"You've selected {FormatClassName(playerClass)}!");
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"You've already selected {FormatClassName(currentClass.Value)}, use <color=white>'.class c [Class]'</color> to change. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)");
+                LocalizationService.Reply(ctx, $"You've already selected {FormatClassName(currentClass.Value)}, use <color=white>'.class c [Class]'</color> to change. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)");
             }
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Invalid class, use '<color=white>.class l</color>' to see options.");
+            LocalizationService.Reply(ctx, "Invalid class, use '<color=white>.class l</color>' to see options.");
         }
     }
 
@@ -60,13 +60,13 @@ internal static class ClassCommands
     {
         if (!_classes)
         {
-            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            LocalizationService.Reply(ctx, "Classes are not enabled.");
             return;
         }
 
         if (!ConfigService.ShiftSlot)
         {
-            LocalizationService.HandleReply(ctx, "Shift spells are not enabled.");
+            LocalizationService.Reply(ctx, "Shift spells are not enabled.");
             return;
         }
 
@@ -74,7 +74,7 @@ internal static class ClassCommands
 
         if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, playerCharacter, out Entity inventoryEntity) || InventoryUtilities.IsInventoryFull(EntityManager, inventoryEntity))
         {
-            LocalizationService.HandleReply(ctx, "Can't change or activate class spells when inventory is full, need at least one space to safely handle jewels when switching.");
+            LocalizationService.Reply(ctx, "Can't change or activate class spells when inventory is full, need at least one space to safely handle jewels when switching.");
             return;
         }
 
@@ -90,12 +90,12 @@ internal static class ClassCommands
 
                 if (spells.Count == 0)
                 {
-                    LocalizationService.HandleReply(ctx, $"No spells for {FormatClassName(playerClass.Value)} configured!");
+                    LocalizationService.Reply(ctx, $"No spells for {FormatClassName(playerClass.Value)} configured!");
                     return;
                 }
                 else if (choice < 0 || choice > spells.Count)
                 {
-                    LocalizationService.HandleReply(ctx, $"Invalid spell, use '<color=white>.class lsp</color>' to see options.");
+                    LocalizationService.Reply(ctx, $"Invalid spell, use '<color=white>.class lsp</color>' to see options.");
                     return;
                 }
 
@@ -103,12 +103,12 @@ internal static class ClassCommands
                 {
                     if (ConfigService.DefaultClassSpell == 0)
                     {
-                        LocalizationService.HandleReply(ctx, "No spell for class default configured!");
+                        LocalizationService.Reply(ctx, "No spell for class default configured!");
                         return;
                     }
                     else if (prestigeLevel < Configuration.ParseIntegersFromString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice])
                     {
-                        LocalizationService.HandleReply(ctx, "You don't have the required prestige level for that spell!");
+                        LocalizationService.Reply(ctx, "You don't have the required prestige level for that spell!");
                         return;
                     }
                     else if (steamId.TryGetPlayerSpells(out var data))
@@ -124,7 +124,7 @@ internal static class ClassCommands
                 }
                 else if (prestigeLevel < Configuration.ParseIntegersFromString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice])
                 {
-                    LocalizationService.HandleReply(ctx, "You don't have the required prestige level for that spell!");
+                    LocalizationService.Reply(ctx, "You don't have the required prestige level for that spell!");
                     return;
                 }
                 else if (steamId.TryGetPlayerSpells(out var spellsData))
@@ -141,12 +141,12 @@ internal static class ClassCommands
 
                 if (spells.Count == 0)
                 {
-                    LocalizationService.HandleReply(ctx, $"No spells for {FormatClassName(playerClass.Value)} configured!");
+                    LocalizationService.Reply(ctx, $"No spells for {FormatClassName(playerClass.Value)} configured!");
                     return;
                 }
                 else if (choice < 0 || choice > spells.Count)
                 {
-                    LocalizationService.HandleReply(ctx, $"Invalid spell, use <color=white>'.class lsp'</color> to see options.");
+                    LocalizationService.Reply(ctx, $"Invalid spell, use <color=white>'.class lsp'</color> to see options.");
                     return;
                 }
 
@@ -156,7 +156,7 @@ internal static class ClassCommands
                     {
                         if (ConfigService.DefaultClassSpell == 0)
                         {
-                            LocalizationService.HandleReply(ctx, "No spell for class default configured!");
+                            LocalizationService.Reply(ctx, "No spell for class default configured!");
                             return;
                         }
 
@@ -181,7 +181,7 @@ internal static class ClassCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "You haven't selected a class or you haven't activated shift spells! (<color=white>'.class s [Class]'</color> | <color=white>'.class shift'</color>)");
+            LocalizationService.Reply(ctx, "You haven't selected a class or you haven't activated shift spells! (<color=white>'.class s [Class]'</color> | <color=white>'.class shift'</color>)");
         }
     }
 
@@ -190,7 +190,7 @@ internal static class ClassCommands
     {
         if (!_classes)
         {
-            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            LocalizationService.Reply(ctx, "Classes are not enabled.");
             return;
         }
 
@@ -205,13 +205,13 @@ internal static class ClassCommands
 
             if (!steamId.HasClass(out PlayerClass? currentClass) || !currentClass.HasValue)
             {
-                LocalizationService.HandleReply(ctx, "You haven't selected a class yet, use <color=white>'.class s [Class]'</color> instead.");
+                LocalizationService.Reply(ctx, "You haven't selected a class yet, use <color=white>'.class s [Class]'</color> instead.");
                 return;
             }
 
             if (GetPlayerBool(steamId, CLASS_BUFFS_KEY))
             {
-                LocalizationService.HandleReply(ctx, "You have class buffs enabled, use <color=white>'.class passives'</color> to disable them before changing classes!");
+                LocalizationService.Reply(ctx, "You have class buffs enabled, use <color=white>'.class passives'</color> to disable them before changing classes!");
                 return;
             }
 
@@ -221,11 +221,11 @@ internal static class ClassCommands
             }
 
             UpdatePlayerClass(playerCharacter, playerClass, steamId);
-            LocalizationService.HandleReply(ctx, $"Class changed to {FormatClassName(playerClass)}!");
+            LocalizationService.Reply(ctx, $"Class changed to {FormatClassName(playerClass)}!");
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Invalid class, use '<color=white>.class l</color>' to see options.");
+            LocalizationService.Reply(ctx, "Invalid class, use '<color=white>.class l</color>' to see options.");
         }
     }
 
@@ -234,7 +234,7 @@ internal static class ClassCommands
     {
         if (!_classes)
         {
-            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            LocalizationService.Reply(ctx, "Classes are not enabled.");
             return;
         }
 
@@ -244,7 +244,7 @@ internal static class ClassCommands
         }).ToList();
 
         string classTypes = string.Join(", ", classes);
-        LocalizationService.HandleReply(ctx, $"Classes: {classTypes}");
+        LocalizationService.Reply(ctx, $"Classes: {classTypes}");
     }
 
     [Command(name: "listspells", shortHand: "lsp", adminOnly: false, usage: ".class lsp [Class]", description: "Shows spells that can be gained from class.")]
@@ -252,7 +252,7 @@ internal static class ClassCommands
     {
         if (!_classes)
         {
-            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            LocalizationService.Reply(ctx, "Classes are not enabled.");
             return;
         }
 
@@ -271,7 +271,7 @@ internal static class ClassCommands
         /*
         else
         {
-            LocalizationService.HandleReply(ctx, "Invalid class, use '<color=white>.class l</color>' to see options.");
+            LocalizationService.Reply(ctx, "Invalid class, use '<color=white>.class l</color>' to see options.");
         }
 
         ulong steamId = ctx.Event.User.PlatformId;
@@ -294,7 +294,7 @@ internal static class ClassCommands
             }
             else
             {
-                LocalizationService.HandleReply(ctx, "Invalid class, use <color=white>'.class l'</color> to see options.");
+                LocalizationService.Reply(ctx, "Invalid class, use <color=white>'.class l'</color> to see options.");
             }
         }
         */
@@ -305,7 +305,7 @@ internal static class ClassCommands
     {
         if (!_classes)
         {
-            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            LocalizationService.Reply(ctx, "Classes are not enabled.");
             return;
         }
 
@@ -322,7 +322,7 @@ internal static class ClassCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Invalid class, use '<color=white>.class l</color>' to see options.");
+            LocalizationService.Reply(ctx, "Invalid class, use '<color=white>.class l</color>' to see options.");
         }
 
         /*
@@ -346,7 +346,7 @@ internal static class ClassCommands
             }
             else
             {
-                LocalizationService.HandleReply(ctx, "Invalid class, use <color=white>'.class l'</color> to see options.");
+                LocalizationService.Reply(ctx, "Invalid class, use <color=white>'.class l'</color> to see options.");
             }
         }
         */
@@ -357,13 +357,13 @@ internal static class ClassCommands
     {
         if (!_classes)
         {
-            LocalizationService.HandleReply(ctx, "Classes are not enabled and spells can't be set to shift.");
+            LocalizationService.Reply(ctx, "Classes are not enabled and spells can't be set to shift.");
             return;
         }
 
         if (!ConfigService.ShiftSlot)
         {
-            LocalizationService.HandleReply(ctx, "Shift slots are not enabled.");
+            LocalizationService.Reply(ctx, "Shift slots are not enabled.");
             return;
         }
 
@@ -374,7 +374,7 @@ internal static class ClassCommands
 
         if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) || InventoryUtilities.IsInventoryFull(EntityManager, inventoryEntity))
         {
-            LocalizationService.HandleReply(ctx, "Can't change or active class spells when inventory is full, need at least one space to safely handle jewels when switching.");
+            LocalizationService.Reply(ctx, "Can't change or active class spells when inventory is full, need at least one space to safely handle jewels when switching.");
             return;
         }
 
@@ -391,13 +391,13 @@ internal static class ClassCommands
                 }
             }
 
-            LocalizationService.HandleReply(ctx, "Shift spell <color=green>enabled</color>!");
+            LocalizationService.Reply(ctx, "Shift spell <color=green>enabled</color>!");
         }
         else
         {
             RemoveShift(ctx.Event.SenderCharacterEntity);
 
-            LocalizationService.HandleReply(ctx, "Shift spell <color=red>disabled</color>!");
+            LocalizationService.Reply(ctx, "Shift spell <color=red>disabled</color>!");
         }
     }
 }
