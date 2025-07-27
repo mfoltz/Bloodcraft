@@ -1,8 +1,3 @@
-## Codex Branch
-- Workflow source: https://github.com/knavillus1/codex_bootstrap/tree/dev_chat_with_tasks
-- Workflow overview: https://community.openai.com/t/repo-file-based-task-management-in-codex-example-solution/1278584
-Very appreciative of the author for making this available to others. All portions derived or used directly are licensed under [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0).
-
 ## Table of Contents
 
 - [Eclipse](https://new.thunderstore.io/c/v-rising/p/zfolmt/Eclipse/) <--- **RECOMMENDED**
@@ -13,6 +8,9 @@ Very appreciative of the author for making this available to others. All portion
 - [BleedingEdge](#bleedingedge)
 - [Configuration](#configuration)
 - [Recommended Mods](#recommended)
+- [Credits](#credits)
+- [Codex Workflow](#codexworkflow)
+- [Workflow Source](#workflowsource)
 
 ## Sponsor this project
 
@@ -803,7 +801,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - [XPRising](https://thunderstore.io/c/v-rising/p/XPRising/XPRising/)
   If you like the idea of a mod with RPG features but Bloodcraft doesn't float your boat maybe this will!
 
-## Localization
+## Localization (WIP)
 
 Messages shown by the plugin are stored under `Resources/Localization/Messages`.
 To update `English.json` with the latest hashes run:
@@ -816,6 +814,9 @@ Translators can copy this file to a new `<Language>.json` and translate the valu
 while keeping the numeric hashes intact. After editing, run the
 `Tools/CheckTranslations` utility to report any missing hashes.
 
+## Credits
+Do my best to mention/attribute where ideas and bug reports come from in the changelog and commit history, if I've missed something or someone on a specific change please let me know!
+
 ## Codex Workflow
 
 1. Run `.codex/install.sh` once to install dependencies.
@@ -826,5 +827,8 @@ while keeping the numeric hashes intact. After editing, run the
 
 Current PRDs and task lists are stored in `.project-management/current-prd/`, while completed items are moved to `.project-management/closed-prd/`.
 
-## Credits
-Do my best to mention/attribute where ideas and bug reports come from in the changelog and commit history, if I've missed something or someone on a specific change please let me know!
+## Workflow Source
+
+- Repo: https://github.com/knavillus1/codex_bootstrap/tree/dev_chat_with_tasks
+- Overview: https://community.openai.com/t/repo-file-based-task-management-in-codex-example-solution/1278584
+Very appreciative of the author for making this available! All portions derived or used directly are licensed under [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0).
