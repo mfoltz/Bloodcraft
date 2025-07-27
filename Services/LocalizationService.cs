@@ -3,6 +3,7 @@ using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
+using System;
 using System.Reflection;
 using System.Text.Json;
 using Unity.Collections;
@@ -34,6 +35,10 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         public Code[] Codes { get; set; }
         public Node[] Nodes { get; set; }
         public Word[] Words { get; set; }
+    }
+    struct MessageFile
+    {
+        public Dictionary<string, string> Messages { get; set; }
     }
 
     static readonly string _language = ConfigService.LanguageLocalization;
@@ -90,6 +95,15 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         {PrefabGUIDs.CHAR_Winter_Yeti_VBlood_GateBoss_Major, "Primal Terrorclaw"},
         {PrefabGUIDs.FakeItem_AnyFish, "Go Fish!" }
     };
+
+    static readonly string _pluginLanguage = ConfigService.PluginLanguage;
+    static readonly Dictionary<string, string> _localizedMessagePaths = new()
+    {
+        {"English", "Bloodcraft.Resources.Localization.Messages.English.json"},
+        {"Spanish", "Bloodcraft.Resources.Localization.Messages.Spanish.json"}
+    };
+
+    static readonly Dictionary<uint, string> _messageDictionary = [];
     public LocalizationService()
     {
         InitializeLocalizations();
@@ -99,6 +113,7 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
     {
         // LoadPrefabHashesToGuidStrings();
         LoadGuidStringsToLocalizedNames();
+        LoadLocalizedMessages();
     }
     static void InitializePrefabGuidNames()
     {
@@ -165,6 +180,42 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
             .ToDictionary(x => x.Guid, x => x.Text)
             .ForEach(kvp => _guidStringsToLocalizedNames[kvp.Key] = kvp.Value);
     }
+
+    static void LoadLocalizedMessages()
+    {
+        const string englishResource = "Bloodcraft.Resources.Localization.Messages.English.json";
+        Assembly assembly = Assembly.GetExecutingAssembly();
+
+        using Stream streamEng = assembly.GetManifestResourceStream(englishResource);
+        if (streamEng == null) return;
+
+        string englishJson = new StreamReader(streamEng).ReadToEnd();
+        var englishFile = JsonSerializer.Deserialize<MessageFile>(englishJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (englishFile?.Messages == null) return;
+
+        Dictionary<string, string> localized = englishFile.Messages;
+        if (_localizedMessagePaths.TryGetValue(_pluginLanguage, out string localizedResource) && _pluginLanguage != "English")
+        {
+            using Stream streamLoc = assembly.GetManifestResourceStream(localizedResource);
+            if (streamLoc != null)
+            {
+                string locJson = new StreamReader(streamLoc).ReadToEnd();
+                var locFile = JsonSerializer.Deserialize<MessageFile>(locJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (locFile?.Messages != null)
+                {
+                    localized = locFile.Messages;
+                }
+            }
+        }
+
+        foreach (var kvp in englishFile.Messages)
+        {
+            string engText = kvp.Value;
+            string text = localized.ContainsKey(kvp.Key) ? localized[kvp.Key] : engText;
+            uint hash = ComputeHash(engText);
+            _messageDictionary[hash] = text;
+        }
+    }
     public static string GetAssetGuidString(PrefabGUID prefabGUID)
     {
         if (_guidHashesToGuidStrings.TryGetValue(prefabGUID.GuidHash, out var guidString))
@@ -197,9 +248,42 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         if (_prefabGuidNameOverrides.TryGetValue(prefabGuid, out string characterName)) return characterName;
         else return GetNameFromGuidString(GetGuidString(prefabGuid));
     }
+
+    static uint ComputeHash(string englishText)
+    {
+        const uint offset = 2166136261;
+        const uint prime = 16777619;
+        uint hash = offset;
+
+        foreach (char c in englishText)
+        {
+            hash ^= c;
+            hash *= prime;
+        }
+
+        return hash;
+    }
+
+    public static void Reply(ChatCommandContext ctx, string englishText, params object[] args)
+    {
+        uint hash = ComputeHash(englishText);
+        string message = englishText;
+
+        if (_messageDictionary.TryGetValue(hash, out string localized))
+        {
+            message = args.Length > 0 ? string.Format(localized, args) : localized;
+        }
+        else if (args.Length > 0)
+        {
+            message = string.Format(englishText, args);
+        }
+
+        ctx.Reply(message);
+    }
+    [Obsolete("Use Reply instead")]
     public static void HandleReply(ChatCommandContext ctx, string message)
     {
-        ctx.Reply(message);
+        Reply(ctx, message);
     }
 
     static readonly ComponentType[] _networkEventComponents =
