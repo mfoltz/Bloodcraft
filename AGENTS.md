@@ -73,3 +73,14 @@
 - Never use the 'private' accessibility modifier, as things will be private by default unless made public/internal/etc.
 
 ---
+
+## Codex Keywords & Workflow
+
+The Codex system uses the following keywords:
+
+* **CreatePrd** – create a Product Requirements Document.
+* **CreateTasks** – generate task lists from the PRD.
+* **TaskMaster** – execute tasks and update their status.
+* **ClosePrd** – finalize and archive completed PRDs.
+
+`.codex/install.sh` and `dev_init.sh` handle environment setup.
