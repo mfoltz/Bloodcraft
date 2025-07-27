@@ -84,4 +84,3 @@ The Codex system uses the following keywords:
 * **ClosePrd** – finalize and archive completed PRDs.
 
 `.codex/install.sh` and `dev_init.sh` handle environment setup.
-`dotnet build Bloodcraft.csproj -c Release -p:RunGenerateREADME=false` handles building the project.
