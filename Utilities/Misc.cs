@@ -500,7 +500,7 @@ internal static class Misc
             }
         }
 
-        LocalizationService.HandleReply(ctx, sb.ToString());
+        LocalizationService.Reply(ctx, sb.ToString());
     }
     public static void GiveOrDropItem(User user, Entity playerCharacter, PrefabGUID itemType, int amount)
     {

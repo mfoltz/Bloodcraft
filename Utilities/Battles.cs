@@ -180,7 +180,7 @@ internal static class Battles
             prestiges = prestigeData.FamiliarPrestige[familiarId].Key;
         }
 
-        LocalizationService.HandleReply(ctx, $"<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)");
+        LocalizationService.Reply(ctx, $"<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)");
     }
     */
     public static void HandleBattleGroupDetailsReply(ChatCommandContext ctx, ulong steamId, FamiliarBattleGroupsManager.FamiliarBattleGroup battleGroup)
@@ -194,12 +194,12 @@ internal static class Battles
             BuildBattleGroupDetailsReply(steamId, buffsData, prestigeData, battleGroup.Familiars, ref familiars);
 
             string familiarReply = string.Join(", ", familiars);
-            LocalizationService.HandleReply(ctx, $"Battle Group - {familiarReply}");
+            LocalizationService.Reply(ctx, $"Battle Group - {familiarReply}");
             return;
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "No familiars in battle group!");
+            LocalizationService.Reply(ctx, "No familiars in battle group!");
             return;
         }
     }
