@@ -29,7 +29,7 @@ internal static class BloodCommands
     {
         if (!ConfigService.LegacySystem)
         {
-            LocalizationService.HandleReply(ctx, "Blood Legacies are not enabled.");
+            LocalizationService.Reply(ctx, "Blood Legacies are not enabled.");
             return;
         }
 
@@ -43,7 +43,7 @@ internal static class BloodCommands
         }
         else if (!Enum.TryParse(blood, true, out bloodType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid blood, use '.bl l' to see options.");
+            LocalizationService.Reply(ctx, "Invalid blood, use '.bl l' to see options.");
             return;
         }
 
@@ -52,7 +52,7 @@ internal static class BloodCommands
 
         if (handler == null)
         {
-            LocalizationService.HandleReply(ctx, "Invalid blood legacy.");
+            LocalizationService.Reply(ctx, "Invalid blood legacy.");
             return;
         }
 
@@ -63,7 +63,7 @@ internal static class BloodCommands
 
         if (data.Key > 0)
         {
-            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!");
+            LocalizationService.Reply(ctx, $"You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!");
 
             if (steamId.TryGetPlayerBloodStats(out var bloodTypeStats) && bloodTypeStats.TryGetValue(bloodType, out var bloodStatTypes))
             {
@@ -82,17 +82,17 @@ internal static class BloodCommands
                 {
                     var batch = bloodLegacyStats.Skip(i).Take(6);
                     string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
-                    LocalizationService.HandleReply(ctx, $"<color=red>{bloodType}</color> Stats: {bonuses}");
+                    LocalizationService.Reply(ctx, $"<color=red>{bloodType}</color> Stats: {bonuses}");
                 }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"No stats selected for <color=red>{bloodType}</color>, use <color=white>'.bl lst'</color> to see valid options.");
+                LocalizationService.Reply(ctx, $"No stats selected for <color=red>{bloodType}</color>, use <color=white>'.bl lst'</color> to see valid options.");
             }
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"No progress in <color=red>{handler.GetBloodType()}</color> yet.");
+            LocalizationService.Reply(ctx, $"No progress in <color=red>{handler.GetBloodType()}</color> yet.");
         }
     }
 
@@ -101,14 +101,14 @@ internal static class BloodCommands
     {
         if (!ConfigService.LegacySystem)
         {
-            LocalizationService.HandleReply(ctx, "Blood Legacies are not enabled.");
+            LocalizationService.Reply(ctx, "Blood Legacies are not enabled.");
             return;
         }
 
         var steamId = ctx.Event.User.PlatformId;
 
         TogglePlayerBool(steamId, BLOOD_LOG_KEY);
-        LocalizationService.HandleReply(ctx, $"Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.Reply(ctx, $"Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".bl cst [BloodOrStat] [BloodStat]", description: "Choose a bonus stat to enhance for your blood legacy.")]
@@ -116,7 +116,7 @@ internal static class BloodCommands
     {
         if (!ConfigService.LegacySystem)
         {
-            LocalizationService.HandleReply(ctx, "Legacies are not enabled.");
+            LocalizationService.Reply(ctx, "Legacies are not enabled.");
             return;
         }
 
@@ -133,7 +133,7 @@ internal static class BloodCommands
 
             if (!Enum.IsDefined(typeof(BloodStatType), numericStat))
             {
-                LocalizationService.HandleReply(ctx,
+                LocalizationService.Reply(ctx,
                     "Invalid blood stat, use '<color=white>.bl lst</color>' to see valid options.");
                 return;
             }
@@ -145,7 +145,7 @@ internal static class BloodCommands
             if (ChooseStat(steamId, finalBloodType, finalBloodStat))
             {
                 Buffs.RefreshStats(playerCharacter);
-                LocalizationService.HandleReply(ctx,
+                LocalizationService.Reply(ctx,
                     $"<color=#00FFFF>{finalBloodStat}</color> selected for <color=red>{finalBloodType}</color>!");
             }
         }
@@ -153,21 +153,21 @@ internal static class BloodCommands
         {
             if (!Enum.TryParse(bloodOrStat, true, out finalBloodType))
             {
-                LocalizationService.HandleReply(ctx,
+                LocalizationService.Reply(ctx,
                     "Invalid blood type, use '<color=white>.bl l</color>' to see valid options.");
                 return;
             }
 
             if (finalBloodType == BloodType.GateBoss || finalBloodType == BloodType.None || finalBloodType == BloodType.VBlood)
             {
-                LocalizationService.HandleReply(ctx,
+                LocalizationService.Reply(ctx,
                     "Invalid blood legacy, use '<color=white>.bl l</color>' to see valid options.");
                 return;
             }
 
             if (statType <= 0)
             {
-                LocalizationService.HandleReply(ctx,
+                LocalizationService.Reply(ctx,
                     "Invalid blood stat, use '<color=white>.bl lst</color>' to see valid options.");
                 return;
             }
@@ -176,7 +176,7 @@ internal static class BloodCommands
 
             if (!Enum.IsDefined(typeof(BloodStatType), typedStat))
             {
-                LocalizationService.HandleReply(ctx,
+                LocalizationService.Reply(ctx,
                     "Invalid blood stat, use '<color=white>.bl lst</color>' to see valid options.");
                 return;
             }
@@ -186,7 +186,7 @@ internal static class BloodCommands
             if (ChooseStat(steamId, finalBloodType, finalBloodStat))
             {
                 Buffs.RefreshStats(playerCharacter);
-                LocalizationService.HandleReply(ctx,
+                LocalizationService.Reply(ctx,
                     $"<color=#00FFFF>{finalBloodStat}</color> selected for <color=red>{finalBloodType}</color>!");
             }
         }
@@ -197,7 +197,7 @@ internal static class BloodCommands
     {
         if (!ConfigService.LegacySystem)
         {
-            LocalizationService.HandleReply(ctx, "Legacies are not enabled.");
+            LocalizationService.Reply(ctx, "Legacies are not enabled.");
             return;
         }
 
@@ -210,7 +210,7 @@ internal static class BloodCommands
 
         if (bloodType.Equals(BloodType.GateBoss) || bloodType.Equals(BloodType.None) || bloodType.Equals(BloodType.VBlood))
         {
-            LocalizationService.HandleReply(ctx, $"No legacy available for <color=white>{bloodType}</color>.");
+            LocalizationService.Reply(ctx, $"No legacy available for <color=white>{bloodType}</color>.");
             return;
         }
 
@@ -221,7 +221,7 @@ internal static class BloodCommands
             Buffs.RefreshStats(playerCharacter);
 
             SetPlayerBool(steamId, freeKey, false);
-            LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>!");
+            LocalizationService.Reply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>!");
             return;
         }
 
@@ -237,12 +237,12 @@ internal static class BloodCommands
                     ResetStats(steamId, bloodType);
                     Buffs.RefreshStats(playerCharacter);
 
-                    LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>!");
+                    LocalizationService.Reply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>!");
                 }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)");
+                LocalizationService.Reply(ctx, $"You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)");
             }
         }
         else
@@ -250,7 +250,7 @@ internal static class BloodCommands
             ResetStats(steamId, bloodType);
             Buffs.RefreshStats(playerCharacter);
 
-            LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>.");
+            LocalizationService.Reply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>.");
         }
     }
 
@@ -259,7 +259,7 @@ internal static class BloodCommands
     {
         if (!ConfigService.LegacySystem)
         {
-            LocalizationService.HandleReply(ctx, "Legacies are not enabled.");
+            LocalizationService.Reply(ctx, "Legacies are not enabled.");
             return;
         }
 
@@ -271,7 +271,7 @@ internal static class BloodCommands
 
         if (bloodStatsWithCaps.Count == 0)
         {
-            LocalizationService.HandleReply(ctx, "No blood stats available at this time.");
+            LocalizationService.Reply(ctx, "No blood stats available at this time.");
         }
         else
         {
@@ -279,7 +279,7 @@ internal static class BloodCommands
             {
                 var batch = bloodStatsWithCaps.Skip(i).Take(4);
                 string replyMessage = string.Join(", ", batch);
-                LocalizationService.HandleReply(ctx, replyMessage);
+                LocalizationService.Reply(ctx, replyMessage);
             }
         }
     }
@@ -289,34 +289,34 @@ internal static class BloodCommands
     {
         if (!ConfigService.LegacySystem)
         {
-            LocalizationService.HandleReply(ctx, "Blood Legacies are not enabled.");
+            LocalizationService.Reply(ctx, "Blood Legacies are not enabled.");
             return;
         }
 
         PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
-            ctx.Reply($"Couldn't find player.");
+            LocalizationService.Reply(ctx, $"Couldn't find player.");
             return;
         }
 
         User foundUser = playerInfo.User;
         if (level < 0 || level > ConfigService.MaxBloodLevel)
         {
-            LocalizationService.HandleReply(ctx, $"Level must be between 0 and {ConfigService.MaxBloodLevel}.");
+            LocalizationService.Reply(ctx, $"Level must be between 0 and {ConfigService.MaxBloodLevel}.");
             return;
         }
 
         if (!Enum.TryParse<BloodType>(blood, true, out var bloodType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid blood legacy.");
+            LocalizationService.Reply(ctx, "Invalid blood legacy.");
             return;
         }
 
         var BloodHandler = BloodLegacyFactory.GetBloodHandler(bloodType);
         if (BloodHandler == null)
         {
-            LocalizationService.HandleReply(ctx, "Invalid blood legacy.");
+            LocalizationService.Reply(ctx, "Invalid blood legacy.");
             return;
         }
 
@@ -325,7 +325,7 @@ internal static class BloodCommands
         BloodHandler.SetLegacyData(steamId, xpData);
 
         Buffs.RefreshStats(playerInfo.CharEntity);
-        LocalizationService.HandleReply(ctx, $"<color=red>{BloodHandler.GetBloodType()}</color> legacy set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>");
+        LocalizationService.Reply(ctx, $"<color=red>{BloodHandler.GetBloodType()}</color> legacy set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>");
     }
 
     [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".bl l", description: "Lists blood legacies available.")]
@@ -333,7 +333,7 @@ internal static class BloodCommands
     {
         if (!ConfigService.LegacySystem)
         {
-            LocalizationService.HandleReply(ctx, "Blood Legacies are not enabled.");
+            LocalizationService.Reply(ctx, "Blood Legacies are not enabled.");
             return;
         }
 
@@ -344,6 +344,6 @@ internal static class BloodCommands
                               .Select(b => b.ToString());
 
         string bloodTypesList = string.Join(", ", bloodTypes);
-        LocalizationService.HandleReply(ctx, $"Available Blood Legacies: <color=red>{bloodTypesList}</color>");
+        LocalizationService.Reply(ctx, $"Available Blood Legacies: <color=red>{bloodTypesList}</color>");
     }
 }

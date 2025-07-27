@@ -34,7 +34,7 @@ internal static class WeaponCommands
     {
         if (!ConfigService.ExpertiseSystem)
         {
-            LocalizationService.HandleReply(ctx, "Expertise is not enabled.");
+            LocalizationService.Reply(ctx, "Expertise is not enabled.");
             return;
         }
 
@@ -44,7 +44,7 @@ internal static class WeaponCommands
         IWeaponExpertise handler = WeaponExpertiseFactory.GetExpertise(weaponType);
         if (handler == null)
         {
-            LocalizationService.HandleReply(ctx, "Expertise handler for weapon is null; this shouldn't happen and you may want to inform the developer.");
+            LocalizationService.Reply(ctx, "Expertise handler for weapon is null; this shouldn't happen and you may want to inform the developer.");
             return;
         }
 
@@ -56,7 +56,7 @@ internal static class WeaponCommands
 
         if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
         {
-            LocalizationService.HandleReply(ctx, $"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!");
+            LocalizationService.Reply(ctx, $"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!");
 
             if (steamId.TryGetPlayerWeaponStats(out var weaponTypeStats) && weaponTypeStats.TryGetValue(weaponType, out var weaponStatTypes))
             {
@@ -74,17 +74,17 @@ internal static class WeaponCommands
                 {
                     var batch = weaponExpertiseStats.Skip(i).Take(6);
                     string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
-                    LocalizationService.HandleReply(ctx, $"<color=#c0c0c0>{weaponType}</color> Stats: {bonuses}");
+                    LocalizationService.Reply(ctx, $"<color=#c0c0c0>{weaponType}</color> Stats: {bonuses}");
                 }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, "No bonuses from currently equipped weapon.");
+                LocalizationService.Reply(ctx, "No bonuses from currently equipped weapon.");
             }
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet!");
+            LocalizationService.Reply(ctx, $"You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet!");
         }
     }
 
@@ -93,14 +93,14 @@ internal static class WeaponCommands
     {
         if (!ConfigService.ExpertiseSystem)
         {
-            LocalizationService.HandleReply(ctx, "Expertise is not enabled.");
+            LocalizationService.Reply(ctx, "Expertise is not enabled.");
             return;
         }
 
         var steamId = ctx.Event.User.PlatformId;
         TogglePlayerBool(steamId, WEAPON_LOG_KEY);
 
-        LocalizationService.HandleReply(ctx, $"Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.Reply(ctx, $"Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".wep cst [WeaponOrStat] [WeaponStat]", description: "Choose a weapon stat to enhance based on your expertise.")]
@@ -108,7 +108,7 @@ internal static class WeaponCommands
     {
         if (!ConfigService.ExpertiseSystem)
         {
-            LocalizationService.HandleReply(ctx, "Expertise is not enabled.");
+            LocalizationService.Reply(ctx, "Expertise is not enabled.");
             return;
         }
 
@@ -124,7 +124,7 @@ internal static class WeaponCommands
 
             if (!Enum.IsDefined(typeof(WeaponStats.WeaponStatType), numericStat))
             {
-                LocalizationService.HandleReply(ctx,
+                LocalizationService.Reply(ctx,
                     "Invalid stat, use '<color=white>.wep lst</color>' to see valid options.");
                 return;
             }
@@ -135,7 +135,7 @@ internal static class WeaponCommands
             if (ChooseStat(steamId, finalWeaponType, finalWeaponStat))
             {
                 Buffs.RefreshStats(playerCharacter);
-                LocalizationService.HandleReply(ctx,
+                LocalizationService.Reply(ctx,
                     $"<color=#00FFFF>{finalWeaponStat}</color> has been chosen for <color=#c0c0c0>{finalWeaponType}</color>!");
             }
         }
@@ -143,14 +143,14 @@ internal static class WeaponCommands
         {
             if (!Enum.TryParse(weaponOrStat, true, out finalWeaponType))
             {
-                LocalizationService.HandleReply(ctx,
+                LocalizationService.Reply(ctx,
                     "Invalid weapon choice, use '<color=white>.wep lst</color>' to see valid options.");
                 return;
             }
 
             if (statType <= 0)
             {
-                LocalizationService.HandleReply(ctx,
+                LocalizationService.Reply(ctx,
                     "Invalid stat, use '<color=white>.wep lst</color>' to see valid options.");
                 return;
             }
@@ -159,7 +159,7 @@ internal static class WeaponCommands
 
             if (!Enum.IsDefined(typeof(WeaponStats.WeaponStatType), typedStat))
             {
-                LocalizationService.HandleReply(ctx,
+                LocalizationService.Reply(ctx,
                     "Invalid stat, use '<color=white>.wep lst</color>' to see valid options.");
                 return;
             }
@@ -169,7 +169,7 @@ internal static class WeaponCommands
             if (ChooseStat(steamId, finalWeaponType, finalWeaponStat))
             {
                 Buffs.RefreshStats(playerCharacter);
-                LocalizationService.HandleReply(ctx,
+                LocalizationService.Reply(ctx,
                     $"<color=#00FFFF>{finalWeaponStat}</color> has been chosen for <color=#c0c0c0>{finalWeaponType}</color>!");
             }
         }
@@ -180,7 +180,7 @@ internal static class WeaponCommands
     {
         if (!ConfigService.ExpertiseSystem)
         {
-            LocalizationService.HandleReply(ctx, "Expertise is not enabled.");
+            LocalizationService.Reply(ctx, "Expertise is not enabled.");
             return;
         }
 
@@ -196,7 +196,7 @@ internal static class WeaponCommands
             Buffs.RefreshStats(playerCharacter);
 
             SetPlayerBool(steamId, freeKey, false);
-            LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!");
+            LocalizationService.Reply(ctx, $"Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!");
             return;
         }
 
@@ -212,13 +212,13 @@ internal static class WeaponCommands
                     ResetStats(steamId, weaponType);
                     Buffs.RefreshStats(playerCharacter);
 
-                    LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!");
+                    LocalizationService.Reply(ctx, $"Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!");
                     return;
                 }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)");
+                LocalizationService.Reply(ctx, $"You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)");
                 return;
             }
 
@@ -227,7 +227,7 @@ internal static class WeaponCommands
         ResetStats(steamId, weaponType);
         Buffs.RefreshStats(playerCharacter);
 
-        LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!");
+        LocalizationService.Reply(ctx, $"Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!");
     }
 
     [Command(name: "set", adminOnly: true, usage: ".wep set [Name] [Weapon] [Level]", description: "Sets player weapon expertise level.")]
@@ -235,34 +235,34 @@ internal static class WeaponCommands
     {
         if (!ConfigService.ExpertiseSystem)
         {
-            LocalizationService.HandleReply(ctx, "Expertise is not enabled.");
+            LocalizationService.Reply(ctx, "Expertise is not enabled.");
             return;
         }
 
         PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
-            ctx.Reply($"Couldn't find player.");
+            LocalizationService.Reply(ctx, $"Couldn't find player.");
             return;
         }
 
         if (level < 0 || level > ConfigService.MaxExpertiseLevel)
         {
             string message = $"Level must be between 0 and {ConfigService.MaxExpertiseLevel}.";
-            LocalizationService.HandleReply(ctx, message);
+            LocalizationService.Reply(ctx, message);
             return;
         }
 
         if (!Enum.TryParse<WeaponType>(weapon, true, out var weaponType))
         {
-            LocalizationService.HandleReply(ctx, $"Level must be between 0 and {ConfigService.MaxExpertiseLevel}.");
+            LocalizationService.Reply(ctx, $"Level must be between 0 and {ConfigService.MaxExpertiseLevel}.");
             return;
         }
 
         IWeaponExpertise expertiseHandler = WeaponExpertiseFactory.GetExpertise(weaponType);
         if (expertiseHandler == null)
         {
-            LocalizationService.HandleReply(ctx, "Invalid weapon type.");
+            LocalizationService.Reply(ctx, "Invalid weapon type.");
             return;
         }
 
@@ -274,11 +274,11 @@ internal static class WeaponCommands
             setFunc(steamId, xpData);
             Buffs.RefreshStats(playerInfo.CharEntity);
 
-            LocalizationService.HandleReply(ctx, $"<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>");
+            LocalizationService.Reply(ctx, $"<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>");
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find matching save method for weapon type...");
+            LocalizationService.Reply(ctx, "Couldn't find matching save method for weapon type...");
         }
     }
 
@@ -287,7 +287,7 @@ internal static class WeaponCommands
     {
         if (!ConfigService.ExpertiseSystem)
         {
-            LocalizationService.HandleReply(ctx, "Expertise is not enabled.");
+            LocalizationService.Reply(ctx, "Expertise is not enabled.");
             return;
         }
 
@@ -299,7 +299,7 @@ internal static class WeaponCommands
 
         if (weaponStatsWithCaps.Count == 0)
         {
-            LocalizationService.HandleReply(ctx, "No weapon stats available at this time.");
+            LocalizationService.Reply(ctx, "No weapon stats available at this time.");
         }
         else
         {
@@ -308,7 +308,7 @@ internal static class WeaponCommands
                 var batch = weaponStatsWithCaps.Skip(i).Take(4);
                 string replyMessage = string.Join(", ", batch);
 
-                LocalizationService.HandleReply(ctx, replyMessage);
+                LocalizationService.Reply(ctx, replyMessage);
             }
         }
     }
@@ -318,12 +318,12 @@ internal static class WeaponCommands
     {
         if (!ConfigService.ExpertiseSystem)
         {
-            LocalizationService.HandleReply(ctx, "Expertise is not enabled.");
+            LocalizationService.Reply(ctx, "Expertise is not enabled.");
             return;
         }
 
         string weaponTypes = string.Join(", ", Enum.GetNames(typeof(WeaponType)));
-        LocalizationService.HandleReply(ctx, $"Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>");
+        LocalizationService.Reply(ctx, $"Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>");
     }
 
     [Command(name: "setspells", shortHand: "spell", adminOnly: true, usage: ".wep spell [Name] [Slot] [PrefabGuid] [Radius]", description: "Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).")]
@@ -331,13 +331,13 @@ internal static class WeaponCommands
     {
         if (!ConfigService.UnarmedSlots)
         {
-            LocalizationService.HandleReply(ctx, "Extra spell slots are not enabled.");
+            LocalizationService.Reply(ctx, "Extra spell slots are not enabled.");
             return;
         }
 
         if (slot < 1 || slot > 7)
         {
-            LocalizationService.HandleReply(ctx, "Invalid slot (<color=white>1</color> for Q or <color=white>2</color> for E)");
+            LocalizationService.Reply(ctx, "Invalid slot (<color=white>1</color> for Q or <color=white>2</color> for E)");
             return;
         }
 
@@ -360,12 +360,12 @@ internal static class WeaponCommands
                         if (slot == 1)
                         {
                             spells.FirstUnarmed = ability;
-                            LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                            LocalizationService.Reply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
                         }
                         else if (slot == 2)
                         {
                             spells.SecondUnarmed = ability;
-                            LocalizationService.HandleReply(ctx, $"Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                            LocalizationService.Reply(ctx, $"Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
                         }
 
                         steamId.SetPlayerSpells(spells);
@@ -377,7 +377,7 @@ internal static class WeaponCommands
         }
         else if (radius < 0f)
         {
-            LocalizationService.HandleReply(ctx, "Radius must be positive!");
+            LocalizationService.Reply(ctx, "Radius must be positive!");
             return;
         }
         else
@@ -385,7 +385,7 @@ internal static class WeaponCommands
             PlayerInfo playerInfo = GetPlayerInfo(name);
             if (!playerInfo.UserEntity.Exists())
             {
-                ctx.Reply($"Couldn't find player.");
+                LocalizationService.Reply(ctx, $"Couldn't find player.");
                 return;
             }
 
@@ -396,12 +396,12 @@ internal static class WeaponCommands
                 if (slot == 1)
                 {
                     spells.FirstUnarmed = ability;
-                    LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                    LocalizationService.Reply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
                 }
                 else if (slot == 2)
                 {
                     spells.SecondUnarmed = ability;
-                    LocalizationService.HandleReply(ctx, $"Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                    LocalizationService.Reply(ctx, $"Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
                 }
 
                 steamId.SetPlayerSpells(spells);
@@ -414,7 +414,7 @@ internal static class WeaponCommands
     {
         if (!ConfigService.UnarmedSlots)
         {
-            LocalizationService.HandleReply(ctx, "Extra spell slots for unarmed are not enabled.");
+            LocalizationService.Reply(ctx, "Extra spell slots for unarmed are not enabled.");
             return;
         }
 
@@ -424,7 +424,7 @@ internal static class WeaponCommands
 
         if (playerCharacter.HasBuff(_exoFormBuff))
         {
-            LocalizationService.HandleReply(ctx, "Spells cannot be locked when using exoform.");
+            LocalizationService.Reply(ctx, "Spells cannot be locked when using exoform.");
             return;
         }
 
@@ -432,11 +432,11 @@ internal static class WeaponCommands
 
         if (GetPlayerBool(SteamID, SPELL_LOCK_KEY))
         {
-            LocalizationService.HandleReply(ctx, "Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
+            LocalizationService.Reply(ctx, "Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Spells locked.");
+            LocalizationService.Reply(ctx, "Spells locked.");
         }
     }
 }

@@ -31,7 +31,7 @@ internal static class MiscCommands
         ulong steamId = ctx.Event.User.PlatformId;
 
         TogglePlayerBool(steamId, REMINDERS_KEY);
-        LocalizationService.HandleReply(ctx, $"Reminders {(GetPlayerBool(steamId, REMINDERS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.Reply(ctx, $"Reminders {(GetPlayerBool(steamId, REMINDERS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "sct", adminOnly: false, usage: ".misc sct [Type]", description: "Toggles various scrolling text elements.")]
@@ -58,14 +58,14 @@ internal static class MiscCommands
 
             if (!ScrollingTextBoolKeyMap.TryGetValue(sctType, out var boolKey))
             {
-                LocalizationService.HandleReply(ctx, "Couldn't find bool key from scrolling text type...");
+                LocalizationService.Reply(ctx, "Couldn't find bool key from scrolling text type...");
                 return;
             }
 
             TogglePlayerBool(steamId, boolKey);
             bool currentState = GetPlayerBool(steamId, boolKey);
 
-            LocalizationService.HandleReply(ctx, $"<color=white>{sctType}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+            LocalizationService.Reply(ctx, $"<color=white>{sctType}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
         else
         {
@@ -77,14 +77,14 @@ internal static class MiscCommands
 
             if (!ScrollingTextBoolKeyMap.TryGetValue(sctType, out var boolKey))
             {
-                LocalizationService.HandleReply(ctx, "Couldn't find bool key from scrolling text type...");
+                LocalizationService.Reply(ctx, "Couldn't find bool key from scrolling text type...");
                 return;
             }
 
             TogglePlayerBool(steamId, boolKey);
             bool currentState = GetPlayerBool(steamId, boolKey);
 
-            LocalizationService.HandleReply(ctx, $"<color=white>{sctType}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+            LocalizationService.Reply(ctx, $"<color=white>{sctType}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
     }
 
@@ -93,7 +93,7 @@ internal static class MiscCommands
     {
         if (!ConfigService.StarterKit)
         {
-            LocalizationService.HandleReply(ctx, "Starter kit is not enabled.");
+            LocalizationService.Reply(ctx, "Starter kit is not enabled.");
             return;
         }
 
@@ -111,7 +111,7 @@ internal static class MiscCommands
 
             List<string> kitItems = StarterKitItemPrefabGUIDs.Select(x => $"<color=white>{x.Key.GetLocalizedName()}</color>").ToList();
 
-            LocalizationService.HandleReply(ctx, $"You've received a starting kit with:");
+            LocalizationService.Reply(ctx, $"You've received a starting kit with:");
 
             const int maxPerMessage = 6;
             for (int i = 0; i < kitItems.Count; i += maxPerMessage)
@@ -119,12 +119,12 @@ internal static class MiscCommands
                 var batch = kitItems.Skip(i).Take(maxPerMessage);
                 string items = string.Join(", ", batch);
 
-                LocalizationService.HandleReply(ctx, $"{items}");
+                LocalizationService.Reply(ctx, $"{items}");
             }
         }
         else
         {
-            ctx.Reply("You've already used your starting kit!");
+            LocalizationService.Reply(ctx, "You've already used your starting kit!");
         }
     }
 
@@ -133,7 +133,7 @@ internal static class MiscCommands
     {
         if (!ConfigService.LevelingSystem)
         {
-            LocalizationService.HandleReply(ctx, "Leveling is not enabled.");
+            LocalizationService.Reply(ctx, "Leveling is not enabled.");
             return;
         }
 
@@ -145,7 +145,7 @@ internal static class MiscCommands
         Entity achievementOwnerEntity = userEntity.Read<AchievementOwner>().Entity._Entity;
 
         ClaimAchievementSystem.CompleteAchievement(entityCommandBuffer, achievementPrefabGUID, userEntity, characterEntity, achievementOwnerEntity, false, true);
-        LocalizationService.HandleReply(ctx, "You are now prepared for the hunt!");
+        LocalizationService.Reply(ctx, "You are now prepared for the hunt!");
     }
 
     [Command(name: "userstats", adminOnly: false, usage: ".misc userstats", description: "Shows neat information about the player.")]
@@ -167,7 +167,7 @@ internal static class MiscCommands
         float LitresBloodConsumed = userStats.LitresBloodConsumed;
         LitresBloodConsumed = (int)LitresBloodConsumed;
 
-        LocalizationService.HandleReply(ctx, $"<color=white>VBloods Slain</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Units Killed</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Deaths</color>: <color=#808080>{Deaths}</color> | <color=white>Time Online</color>: <color=#1E90FF>{OnlineTime}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Blood Consumed</color>: <color=red>{LitresBloodConsumed}</color>L");
+        LocalizationService.Reply(ctx, $"<color=white>VBloods Slain</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Units Killed</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Deaths</color>: <color=#808080>{Deaths}</color> | <color=white>Time Online</color>: <color=#1E90FF>{OnlineTime}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Blood Consumed</color>: <color=red>{LitresBloodConsumed}</color>L");
     }
 
     [Command(name: "silence", adminOnly: false, usage: ".misc silence", description: "Resets stuck combat music if needed.")]
@@ -177,7 +177,7 @@ internal static class MiscCommands
 
         if (ServerGameManager.HasBuff(character, _combatBuff.ToIdentifier()))
         {
-            LocalizationService.HandleReply(ctx, "This command should only be used as required and certainly not while in combat.");
+            LocalizationService.Reply(ctx, "This command should only be used as required and certainly not while in combat.");
             return;
         }
 
@@ -186,6 +186,6 @@ internal static class MiscCommands
         character.Write(combatMusicListener_Shared);
 
         CombatMusicSystemServer.OnUpdate();
-        ctx.Reply($"Combat music cleared!");
+        LocalizationService.Reply(ctx, $"Combat music cleared!");
     }
 }
