@@ -9,8 +9,8 @@
 - [Configuration](#configuration)
 - [Recommended Mods](#recommended)
 - [Credits](#credits)
-- [Codex Workflow](#codexworkflow)
-- [Workflow Source](#workflowsource)
+- [Codex Workflow](#codex)
+- [Workflow Source](#workflow)
 
 ## Sponsor this project
 
