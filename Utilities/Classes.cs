@@ -1064,7 +1064,7 @@ internal static class Classes
             ApplyClassBuffs(playerInfo.CharEntity, steamId);
         }
 
-        ctx.Reply("Removed all class buffs then applied current class buffs for all players.");
+        LocalizationService.Reply(ctx, "Removed all class buffs then applied current class buffs for all players.");
     }
     public static void GlobalPurgeClassBuffs(ChatCommandContext ctx)
     {
@@ -1078,7 +1078,7 @@ internal static class Classes
             RemoveAllClassBuffs(playerInfo.CharEntity);
         }
 
-        ctx.Reply("Removed all class buffs for all players.");
+        LocalizationService.Reply(ctx, "Removed all class buffs for all players.");
     }
     public static string FormatModifyUnitStatBuffer(Entity buffEntity)
     {
