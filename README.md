@@ -816,11 +816,11 @@ while keeping the numeric hashes intact. After editing, run the
 
 ## Codex Workflow
 
-1. Run `.codex/install.sh` once to install dependencies.
-2. Build and deploy locally with `./dev_init.sh`.
+1. Run `.codex/install.sh` once to install dependencies
+2. Build and deploy locally with `./dev_init.sh`
 3. Update message hashes using `Tools/GenerateMessageTranslations`:
-   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .`.
-4. Use the keywords (**CreatePrd**, **CreateTasks**, **TaskMaster**, **ClosePrd**) to manage PRDs and tasks.
+   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .`
+4. Use the keywords (**CreatePrd**, **CreateTasks**, **TaskMaster**, **ClosePrd**) to manage PRDs and tasks
 
 Current PRDs and task lists are stored in `.project-management/current-prd/`, while completed items are moved to `.project-management/closed-prd/`.
 
