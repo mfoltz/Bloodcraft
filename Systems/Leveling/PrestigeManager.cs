@@ -392,14 +392,14 @@ internal static class PrestigeManager
             string reductionPercentage = (reductionFactor * 100).ToString("F2") + "%";
             string gainPercentage = (gainFactor * 100).ToString("F2") + "%";
 
-            ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
-            ctx.Reply($"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
-            ctx.Reply($"Growth rate increase for expertise and legacies: <color=green>{gainPercentage}</color>");
-            ctx.Reply($"Growth rate reduction for experience: <color=yellow>{reductionPercentage}</color>");
+            LocalizationService.Reply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
+            LocalizationService.Reply(ctx, $"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
+            LocalizationService.Reply(ctx, $"Growth rate increase for expertise and legacies: <color=green>{gainPercentage}</color>");
+            LocalizationService.Reply(ctx, $"Growth rate reduction for experience: <color=yellow>{reductionPercentage}</color>");
 
             if (prestigeData.TryGetValue(PrestigeType.Exo, out var exoData) && exoData > 0)
             {
-                ctx.Reply($"Experience rate reduction for leveling no longer applies for exo prestiging.");
+                LocalizationService.Reply(ctx, $"Experience rate reduction for leveling no longer applies for exo prestiging.");
             }
         }
         else
@@ -624,7 +624,7 @@ internal static class PrestigeManager
             RemovePrestigeBuffs(playerInfo.CharEntity);
         }
 
-        ctx.Reply("Removed prestige buffs from all players.");
+        LocalizationService.Reply(ctx, "Removed prestige buffs from all players.");
     }
     public static bool HasPrestiged(ulong steamId)
     {

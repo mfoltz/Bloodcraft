@@ -6,11 +6,11 @@ namespace Bloodcraft.Tools;
 internal static class GenerateMessageTranslations
 {
     static readonly Regex _serviceRegex = new(
-        "LocalizationService\\.Reply\\s*\\([^,]*,\\s*(?<lit>@?\\$?\"(?:[^\"\\]|\\.)*\")",
+        @"LocalizationService\.Reply\s*\([^,]*,\s*(?<lit>@?\$?""(?:[^""\\]|\\.)*"")",
         RegexOptions.Compiled | RegexOptions.Singleline);
 
     static readonly Regex _ctxRegex = new(
-        "ctx\\.Reply\\s*\\(\\s*(?<lit>@?\\$?\"(?:[^\"\\]|\\.)*\")",
+        @"ctx\.Reply\s*\(\s*(?<lit>@?\$?""(?:[^""\\]|\\.)*"")",
         RegexOptions.Compiled | RegexOptions.Singleline);
 
     public static void Run(string rootPath)
