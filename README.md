@@ -410,7 +410,9 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Language Localization**: `LanguageLocalization` (string, default: "English")
   The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese
 - **Plugin Language**: `PluginLanguage` (string, default: "English")
-  Language for plugin messages.
+  Determines which file under `Resources/Localization/Messages` is used for
+  plugin messages. Set this to the file name without the extension (currently
+  `English` or `Spanish`). Missing entries fall back to English.
 - **Eclipse**: `Eclipse` (bool, default: True)
   Enables the server sending player mod data to clients using Eclipse.
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
@@ -796,11 +798,25 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - [XPRising](https://thunderstore.io/c/v-rising/p/XPRising/XPRising/)
   If you like the idea of a mod with RPG features but Bloodcraft doesn't float your boat maybe this will!
 
+## Localization
+
+Messages shown by the plugin are stored under `Resources/Localization/Messages`.
+To update `English.json` with the latest hashes run:
+
+```bash
+dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .
+```
+
+Translators can copy this file to a new `<Language>.json` and translate the values
+while keeping the numeric hashes intact. After editing, run the
+`Tools/CheckTranslations` utility to report any missing hashes.
+
 ## Codex Workflow
 
 1. Run `.codex/install.sh` once to install dependencies.
 2. Build and deploy locally with `./dev_init.sh`.
-3. Generate localization message hashes with `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .`.
+3. Update message hashes using `Tools/GenerateMessageTranslations`:
+   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .`.
 4. Use the keywords (**CreatePrd**, **CreateTasks**, **TaskMaster**, **ClosePrd**) to manage PRDs and tasks.
 
 Current PRDs and task lists are stored in `.project-management/current-prd/`, while completed items are moved to `.project-management/closed-prd/`.
