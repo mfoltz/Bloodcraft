@@ -814,16 +814,6 @@ Translators can copy this file to a new `<Language>.json` and translate the valu
 while keeping the numeric hashes intact. After editing, run the
 `Tools/CheckTranslations` utility to report any missing hashes.
 
-## Codex Workflow
-
-1. Run `.codex/install.sh` once to install dependencies
-2. Build and deploy locally with `./dev_init.sh`
-3. Update message hashes using `Tools/GenerateMessageTranslations`:
-   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .`
-4. Use the keywords (**CreatePrd**, **CreateTasks**, **TaskMaster**, **ClosePrd**) to manage PRDs and tasks
-
-Current PRDs and task lists are stored in `.project-management/current-prd/`, while completed items are moved to `.project-management/closed-prd/`.
-
 ## Workflow Source
 
 - Repo: https://github.com/knavillus1/codex_bootstrap/tree/dev_chat_with_tasks
