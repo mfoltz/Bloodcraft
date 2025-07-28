@@ -85,8 +85,8 @@ Current PRDs and task lists are stored in `.project-management/current-prd/`, wh
   Track modern C# developments (C# 13), .NET releases, and follow trusted sources (.NET blog, Microsoft Docs, Code Maze). ([dev.to](https://dev.to) :contentReference[oaicite:15]{index=15})
 
 ---
-
+  
 ## Specific Do's and Don'ts
   
-- Do not touch or otherwise make edits to CHANGELOG.md if found or otherwise seen; do please provide succinct and relevant task reports separately as usual, versioning and other such edits involving the CHANGELOG.md or othertwise should generally be left solely to the human developer for now.
+- Do not touch or otherwise make edits to CHANGELOG.md, instead rely on the project-management folder and workflow for your documentation.
 - Never use the 'private' accessibility modifier, as things will be private by default unless made public/internal/etc.
