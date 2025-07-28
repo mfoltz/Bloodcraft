@@ -2,13 +2,13 @@
 
 These tasks implement the requirements from `translation-support-prd.md`.
 
-:::task{title="Create placeholder message files for all languages", owner="@dev", due="2025-08-10", status="open"}
+:::task{title="Create placeholder message files for all languages", owner="@dev", due="2025-08-10", status="done"}
 1. Copy `Resources/Localization/Messages/English.json` to new files for each language (Brazilian, French, etc.).
 2. Ensure hashes match the English file structure.
 3. Add new files as `<EmbeddedResource>` in `Bloodcraft.csproj`.
 :::
 
-:::task{title="Verify csproj embedding", owner="@dev", due="2025-08-10", status="open"}
+:::task{title="Verify csproj embedding", owner="@dev", due="2025-08-10", status="done"}
 1. Confirm every language file under `Resources/Localization/Messages` is listed in the project file.
 2. Build the project to ensure embedded resources load without errors.
 :::
