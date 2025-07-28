@@ -10,10 +10,10 @@ The Codex system uses the following keywords:
 1. Run `.codex/install.sh` once to install dependencies
 2. Build and deploy locally with `./dev_init.sh`
 3. Update message hashes using `Tools/GenerateMessageTranslations`:
-   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .`
+   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
 4. Use the keywords (**CreatePrd**, **CreateTasks**, **TaskMaster**, **ClosePrd**) to manage PRDs and tasks
 
-Current PRDs and task lists are stored in `.project-management/current-prd/`, while completed items are moved to `.project-management/closed-prd/`. Codex is expected to own as much as it feels capable of doing so in terms of completion, furthering goals, and being generally proactive with managing tasks to completion of state project goals. Compile with .NET 8 to build with preview features, though do note VRising runs on the .NET 6 runtime as the .csproj implies; be mindful to stay within the .NET 6 API surface to avoid surprises later.
+Current PRDs and task lists are stored in `.project-management/current-prd/`, while completed items are moved to `.project-management/closed-prd/`. Codex is expected to own as much as it feels capable of doing so in terms of completion, furthering goals, and being generally proactive with managing tasks to completion of state project goals. Compile with .NET 8 to build with preview features, though do note VRising runs on the .NET 6 runtime as the .csproj implies; be mindful to stay within the .NET 6 API surface to avoid surprises.
 
 ---
 
