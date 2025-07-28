@@ -9,7 +9,7 @@ The Codex system uses the following keywords:
 
 1. Run `.codex/install.sh` once to install dependencies
 2. Build and deploy locally with `./dev_init.sh`
-3. Update message hashes using `Tools/GenerateMessageTranslations`:
+3. Update message hashes when needed using `Tools/GenerateMessageTranslations`:
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
 4. Use the keywords (**CreatePrd**, **CreateTasks**, **TaskMaster**, **ClosePrd**) to manage PRDs and tasks
 
