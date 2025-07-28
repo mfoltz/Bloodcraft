@@ -83,4 +83,10 @@ The Codex system uses the following keywords:
 * **TaskMaster** – execute tasks and update their status.
 * **ClosePrd** – finalize and archive completed PRDs.
 
-`.codex/install.sh` and `dev_init.sh` handle environment setup. Compile with .NET 8 to build with preview features, though do note VRising runs on the .NET 6 runtime as the .csproj implies; be mindful to stay within the .NET 6 API surface to avoid surprises later at runtime.
+1. Run `.codex/install.sh` once to install dependencies
+2. Build and deploy locally with `./dev_init.sh`
+3. Update message hashes using `Tools/GenerateMessageTranslations`:
+   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .`
+4. Use the keywords (**CreatePrd**, **CreateTasks**, **TaskMaster**, **ClosePrd**) to manage PRDs and tasks
+
+Current PRDs and task lists are stored in `.project-management/current-prd/`, while completed items are moved to `.project-management/closed-prd/`. Codex is expected to own as much as it feels capable of doing so in terms of completion, furthering goals, and being generally proactive. Compile with .NET 8 to build with preview features, though do note VRising runs on the .NET 6 runtime as the .csproj implies; be mindful to stay within the .NET 6 API surface to avoid surprises later.
