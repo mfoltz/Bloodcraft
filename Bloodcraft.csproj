@@ -44,8 +44,24 @@
                 <EmbeddedResource Include="Resources\Localization\Vietnamese.json" />
                 <EmbeddedResource Include="Resources\Localization\Messages\English.json" />
                 <EmbeddedResource Include="Resources\Localization\Messages\Spanish.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\Brazilian.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\French.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\German.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\Hungarian.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\Italian.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\Japanese.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\Koreana.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\Latam.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\Polish.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\Russian.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\SChinese.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\TChinese.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\Thai.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\Turkish.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\Ukrainian.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\Vietnamese.json" />
                 <EmbeddedResource Include="Resources\secrets.json" />
-	</ItemGroup>
+        </ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
