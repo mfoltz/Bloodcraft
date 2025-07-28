@@ -798,6 +798,22 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
    continues to work as written.
 4. Rebuild and deploy the plugin with `./dev_init.sh` to load the new messages.
 
+### Protecting Tags During Translation
+
+Some strings contain Unity rich-text tags or runtime placeholders like `{player}`.
+These must remain byte-for-byte identical in every language. Use the
+`LocalizationHelpers` utility to temporarily hide these tokens before translating:
+
+```csharp
+string protectedText = LocalizationHelpers.ProtectTokens(originalText);
+// Translate protectedText here
+string finalText = LocalizationHelpers.UnprotectTokens(translatedText);
+```
+
+Tags and placeholders are replaced with markers such as `[[TAG_...]]` so that
+human or automated translators do not alter them. After translation, the helpers
+restore the original tokens, preventing broken color codes or variables.
+
 ## Workflow Source
 
 - Repo: https://github.com/knavillus1/codex_bootstrap/tree/dev_chat_with_tasks
