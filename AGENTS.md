@@ -13,80 +13,71 @@ The Codex system uses the following keywords:
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .`
 4. Use the keywords (**CreatePrd**, **CreateTasks**, **TaskMaster**, **ClosePrd**) to manage PRDs and tasks
 
-Current PRDs and task lists are stored in `.project-management/current-prd/`, while completed items are moved to `.project-management/closed-prd/`. Codex is expected to own as much as it feels capable of doing so in terms of completion, furthering goals, and being generally proactive. Compile with .NET 8 to build with preview features, though do note VRising runs on the .NET 6 runtime as the .csproj implies; be mindful to stay within the .NET 6 API surface to avoid surprises later.
+Current PRDs and task lists are stored in `.project-management/current-prd/`, while completed items are moved to `.project-management/closed-prd/`. Codex is expected to own as much as it feels capable of doing so in terms of completion, furthering goals, and being generally proactive with managing tasks to completion of state project goals. Compile with .NET 8 to build with preview features, though do note VRising runs on the .NET 6 runtime as the .csproj implies; be mindful to stay within the .NET 6 API surface to avoid surprises later.
 
 ---
 
-## Environment & Dependency Awareness
+# Universal Principles for CSharp and General Programming
 
-* **Write for the actual build environment:**  
-  Assume code will be compiled in Visual Studio (or the team’s IDE) with all dependencies and references as specified in the project’s `.csproj` or package manager.
-* **Reference only what’s included:**  
-  Use only libraries, types, and APIs present in the project dependencies. If a new dependency is required, document how to add it.
+This guide provides universal, intelligent principles and patterns to master C# coding effectively, applicable across any project or repository.
 
----
+## 🧠 Structured Reasoning
 
-## Strong Typing & Domain Modeling
+* **Single Responsibility Principle (SRP)**: Every class and method should have one clearly defined responsibility.
+* **Explicit Intent**: Write self-descriptive methods and classes, avoiding ambiguous or overly general names.
+* **Readability First**: Prioritize readability over cleverness. The intent of your code should be immediately clear to others.
 
-* **Favor classes and structs over loose data structures:**  
-  Organize related data and behavior into well-defined types rather than scattering logic in dictionaries or primitive value collections.
-* **Model the problem domain:**  
-  Create types that reflect real-world entities, actions, and rules to improve clarity and reduce errors.
-* **Encapsulate logic:**  
-  Bundle methods and validation with the data they affect, not in standalone helper methods.
+## 🎯 Clarity & Explicitness
 
----
+* Clearly specify the purpose, parameters, and return values of each method using XML documentation comments.
+* Choose names that explicitly describe intent (e.g., `CalculateTotalPrice()` instead of `Calculate()` or `CalcTP()`).
+* Favor descriptive variable names (`customerAge` rather than `ca`).
+* Do not explicitly use 'private', it's implied well-enough as the default accessibility modifier.
 
-## “Should Compile” Mindset
+## 🔄 Iterative Improvement
 
-* **Think like the compiler:**  
-  Before reviewing logic or style, ensure code would build successfully with available dependencies.  
-  - Check for missing `using` directives, typos, unclosed braces, mismatched signatures, and correct namespaces.
-* **Resolve errors first:**  
-  Treat build errors (“red squigglies”) as top priority—fix these before anything else to maintain a buildable codebase.
+* Implement incremental changes and continuously validate with unit tests.
+* Regularly refactor code to simplify complexity and improve maintainability.
+* Conduct periodic peer reviews to integrate diverse perspectives and catch overlooked issues.
 
----
+## 🛡️ Robustness & Safety Nets
 
-## Patterns & Knowledge
+* Write unit tests covering critical paths and edge cases to ensure code stability and correctness.
+* Leverage static code analysis tools like Roslyn analyzers and StyleCop to maintain high-quality standards.
+* Use assertions liberally to document and enforce assumptions in code logic.
 
-* **Interfaces & Abstraction:**  
-  Define clear contracts with interfaces; use interface segregation for narrow-focus responsibilities. ([submain.com](https://blog.submain.com/c-interface-definition-examples/) :contentReference[oaicite:2]{index=2})
-* **Events & Delegates:**  
-  Use events (backed by delegates) to implement the observer pattern and keep components loosely coupled. Define a `protected virtual OnX()` raiser, and pass standard `(sender, EventArgs)` parameters. ([MS Learn](https://learn.microsoft.com) :contentReference[oaicite:3]{index=3}; [StackOverflow](https://stackoverflow.com) :contentReference[oaicite:4]{index=4})
-* **Multicast Delegates:**  
-  Prefer delegates over interfaces when you need to support multiple subscribers without explicit coupling. ([wiki Observer :contentReference[oaicite:5]{index=5})
-* **Default Interface Methods:**  
-  Use sparingly—primarily for versioning library interfaces, not for routine shared behavior. ([Medium](https://medium.com) :contentReference[oaicite:6]{index=6})
+## 🏗️ Universal Design Patterns
 
----
+* **Factory & Abstract Factory**: For managing object creation and reducing direct dependencies.
+* **Strategy Pattern**: To encapsulate varying algorithms and make behaviors interchangeable.
+* **Repository Pattern**: For abstracting data layer logic and enhancing testability.
+* **Dependency Injection**: Use constructor injection to clearly define dependencies and improve modularity.
 
-## Design & Readability
+## ♻️ Maintainable Code Habits
 
-* **Naming & Formatting:**  
-  Use PascalCase for types/members, camelCase for locals/params, and ALL_CAPS for constants. Apply consistent braces, indenting, and file layout. ([Microsoft Docs](https://learn.microsoft.com) :contentReference[oaicite:7]{index=7}; [dev.to](https://dev.to) :contentReference[oaicite:8]{index=8})
-* **Single Responsibility & DRY:**  
-  Keep classes and methods focused. Avoid duplication by refactoring shared behavior. ([dev.to](https://dev.to) :contentReference[oaicite:9]{index=9})
-* **Modern Features:**  
-  Use explicit typing with modern collection initialization, new(), and such instead of `var` with descriptive names and avoid excessive shorthanding; Refactor spaghetti code as able with LINQ, `?.`, pattern matching, records, interfaces, factory patterns, delegates, and other modern C# design patterns. ([Code Maze](https://code-maze.com) :contentReference[oaicite:10]{index=10})
-* **Exceptions:**  
-  Catch only what you can handle; avoid broad `catch (Exception)`. Filter exceptions specifically. ([dev.to](https://dev.to) :contentReference[oaicite:11]{index=11})
+* Avoid magic numbers; define constants or configuration settings instead.
+* Keep methods short (ideally fewer than 30 lines) to enhance readability and testability.
+* Organize methods logically within classes (constructors first, public methods next, followed by private methods).
 
----
+## 🚦 Consistent Coding Style
 
-## Quality & Continuous Learning
+* Adhere to established naming conventions:
 
-* **Unit Testing & DI:**  
-  Use dependency injection and interfaces to support testable code. Write unit tests with xUnit, NUnit, or MSTest. ([Code Maze](https://code-maze.com) :contentReference[oaicite:12]{index=12})
-* **Static Analysis & Reviews:**  
-  Use analyzers (FxCop, Roslyn, ReSharper) and perform regular code reviews. Reference *Framework Design Guidelines*. ([StackOverflow](https://stackoverflow.com) :contentReference[oaicite:13]{index=13})
-* **Refactor & Cleanup:**  
-  Regularly revisit and refactor code to avoid tech debt and improve maintainability. ([Wikipedia](https://en.wikipedia.org) :contentReference[oaicite:14]{index=14})
-* **Stay Updated:**  
-  Track modern C# developments (C# 13), .NET releases, and follow trusted sources (.NET blog, Microsoft Docs, Code Maze). ([dev.to](https://dev.to) :contentReference[oaicite:15]{index=15})
+  * Methods & Variables: `PascalCase`
+  * Private fields & parameters: `camelCase`
+  * Constants: `UPPERCASE_WITH_UNDERSCORES`
+* Consistently format your code using tools like `.editorconfig`.
 
----
-  
-## Specific Do's and Don'ts
-  
-- Do not touch or otherwise make edits to CHANGELOG.md, instead rely on the project-management folder and workflow for your documentation.
-- Never use the 'private' accessibility modifier, as things will be private by default unless made public/internal/etc.
+## 📈 Performance Awareness
+
+* Understand the performance implications of collections (prefer using `Dictionary` for key-value lookups over lists).
+* Minimize object allocations, especially within loops or performance-critical paths.
+* Favor efficient data structures and algorithms suited to the task at hand (e.g., HashSets for uniqueness checks).
+
+## 🛠️ Continuous Learning & Reflection
+
+* Periodically review code written previously to identify opportunities for improvement.
+* Stay updated on language features and industry best practices.
+* Learn from established open-source C# projects and communities.
+
+By internalizing these universal principles, you build a solid foundation to become a proficient and thoughtful C# developer.
