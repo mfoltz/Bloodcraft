@@ -793,7 +793,9 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
    ```bash
    dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations .
    ```
-   Missing hashes will be printed for further translation.
+   Missing hashes will be printed for further translation. The command now defaults
+   to the current directory when no path is specified, so the example above
+   continues to work as written.
 4. Rebuild and deploy the plugin with `./dev_init.sh` to load the new messages.
 
 ## Workflow Source

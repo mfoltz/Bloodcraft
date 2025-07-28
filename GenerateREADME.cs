@@ -41,6 +41,13 @@ internal static class GenerateREADME
             return;
         }
 
+        if (args.Length >= 1 && args[0].Equals("check-translations", StringComparison.OrdinalIgnoreCase))
+        {
+            string root = args.Length > 1 ? args[1] : Directory.GetCurrentDirectory();
+            Tools.CheckTranslations.Run(root);
+            return;
+        }
+
         if (args.Length < 2)
         {
             Console.WriteLine("Usage: GenerateREADME <CommandsPath> <ReadMePath>");
