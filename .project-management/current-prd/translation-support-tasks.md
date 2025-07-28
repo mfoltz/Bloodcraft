@@ -93,7 +93,7 @@ These tasks implement the requirements from `translation-support-prd.md`.
 2. Update README to reflect the decision.
 :::
 
-:::task{title="Document translation workflow in README", owner="@dev", due="2025-08-24", status="open"}
+:::task{title="Document translation workflow in README", owner="@dev", due="2025-08-24", status="done"}
 1. Add instructions for `GenerateMessageTranslations` and `CheckTranslations`.
 2. Document how to add new translations and reload messages.
 :::

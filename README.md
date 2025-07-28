@@ -259,32 +259,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Sets player level.
   - Shortcut: *.lvl set [Player] [Level]*
 
-### Misc Commands
-- `.misc buffhovered [PrefabGUID]` 🔒
-  - testing
-  - Shortcut: *.bh [PrefabGUID]*
-- `.misc pathingtest` 🔒
-  - testing PvE raid mechanic ideas
-  - Shortcut: *.pt*
-- `.misc renametest [Name]` 🔒
-  - testing
-  - Shortcut: *.rt [Name]*
-- `.misc spawnprefab [PrefabGUID]` 🔒
-  - testing
-  - Shortcut: *.sp [PrefabGUID]*
-- `.misc spawnsequence [Scale]` 🔒
-  - Spawn specific sequences on target.
-  - Shortcut: *.sq [SequenceGUID] [Scale]*
-- `.misc spawnsequences` 🔒
-  - testing
-  - Shortcut: *.ssq*
-- `.misc stripteamstest` 🔒
-  - testing PvE raid mechanic ideas
-  - Shortcut: *.stt*
-- `.misc wareventschedule` 🔒
-  - testing
-  - Shortcut: *.wes*
-
 ### Miscellaneous Commands
 - `.miscellaneous prepareforthehunt`
   - Completes GettingReadyForTheHunt if not already completed.
@@ -413,9 +387,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Language Localization**: `LanguageLocalization` (string, default: "English")
   The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese
 - **Plugin Language**: `PluginLanguage` (string, default: "English")
-  Determines which file under `Resources/Localization/Messages` is used for
-  plugin messages. Set this to the file name without the extension (currently
-  `English` or `Spanish`). Missing entries fall back to English.
+  Language for plugin messages.
 - **Eclipse**: `Eclipse` (bool, default: True)
   Enables the server sending player mod data to clients using Eclipse.
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
@@ -810,9 +782,19 @@ To update `English.json` with the latest hashes run:
 dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .
 ```
 
-Translators can copy this file to a new `<Language>.json` and translate the values
-while keeping the numeric hashes intact. After editing, run the
-`Tools/CheckTranslations` utility to report any missing hashes.
+### Translation Workflow
+
+1. Run the generator to refresh `English.json` with any new messages:
+   ```bash
+   dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .
+   ```
+2. Copy this file to a new `<Language>.json` and translate each value while keeping the numeric hashes intact.
+3. Verify completeness using the translation checker:
+   ```bash
+   dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations .
+   ```
+   Missing hashes will be printed for further translation.
+4. Rebuild and deploy the plugin with `./dev_init.sh` to load the new messages.
 
 ## Workflow Source
 
