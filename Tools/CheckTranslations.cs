@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Bloodcraft.Tools;
 
@@ -27,10 +28,13 @@ internal static class CheckTranslations
             langFile.Messages ??= new Dictionary<string, string>();
 
             List<string> missing = [];
+            List<string> englishLike = [];
             foreach (string hash in englishFile.Messages.Keys)
             {
                 if (!langFile.Messages.ContainsKey(hash))
                     missing.Add(hash);
+                else if (LooksEnglish(langFile.Messages[hash]))
+                    englishLike.Add(hash);
             }
 
             if (missing.Count > 0)
@@ -39,11 +43,30 @@ internal static class CheckTranslations
                 foreach (string h in missing)
                     Console.WriteLine($"  {h}");
             }
+
+            if (englishLike.Count > 0)
+            {
+                Console.WriteLine($"Potential untranslated strings in {Path.GetFileName(path)}:");
+                foreach (string h in englishLike)
+                    Console.WriteLine($"  {h}");
+            }
         }
     }
 
     class MessageFile
     {
         public Dictionary<string, string> Messages { get; set; } = new();
+    }
+
+    static readonly Regex EnglishWords = new(
+        @"\b(the|and|of|to|with|you|your|for|a|an)\b",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    static bool LooksEnglish(string txt)
+    {
+        if (string.IsNullOrWhiteSpace(txt))
+            return false;
+
+        return EnglishWords.IsMatch(txt);
     }
 }

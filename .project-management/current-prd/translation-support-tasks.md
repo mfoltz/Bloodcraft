@@ -98,8 +98,8 @@ These tasks implement the requirements from `translation-support-prd.md`.
 2. Document how to add new translations and reload messages.
 :::
 
-:::task{title="Add token protection helpers", owner="@dev", due="2025-08-25", status="open"}
-1. Implement `LocalizationHelpers.ProtectTokens` and `LocalizationHelpers.UnprotectTokens` in the codebase.
+:::task{title="Add token protection helpers", owner="@dev", due="2025-08-25", status="done"}
+1. Implement `LocalizationHelpers.ProtectTokens` and `LocalizationHelpers.UnprotectTokens` with indexed markers and a token map.
 2. Extend the README with an example showing how to use them during translation.
 :::
 
