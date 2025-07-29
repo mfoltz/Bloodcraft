@@ -784,42 +784,7 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 
 ### Translation Workflow
 
-1. Run the generator to refresh `English.json` with any new messages:
-   ```bash
-   dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .
-   ```
-2. Copy this file to a new `<Language>.json` and translate each value while keeping the numeric hashes intact.
-3. Automatically translate any missing entries using Argos Translate:
-   ```bash
-   python Tools/batch_translate.py Resources/Localization/Messages/<Language>.json --to <iso-code>
-   ```
-4. Verify completeness using the translation checker:
-   ```bash
-   dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations .
-   ```
-   Missing hashes will be printed for further translation. The command now defaults
-   to the current directory when no path is specified, so the example above
-   continues to work as written.
-   The command warns if translated strings still look English so you can catch untranslated text early.
-5. Rebuild and deploy the plugin with `./dev_init.sh` to load the new messages.
-
-### Protecting Tags During Translation
-
-Some strings contain Unity rich-text tags or runtime placeholders like `{player}`.
-These must remain byte-for-byte identical in every language. Use the
-`LocalizationHelpers` utility to temporarily hide these tokens before translating.
-The `Protect` method returns a safe string and the list of tokens to restore:
-
-```csharp
-// Protect returns a tuple with the sanitized text and token list
-var (safe, tokens) = LocalizationHelpers.Protect(originalText);
-// Translate 'safe' here
-string finalText = LocalizationHelpers.Unprotect(translatedText, tokens);
-```
-
-Tags and placeholders are replaced with markers such as `[[TAG_...]]` so that
-human or automated translators do not alter them. After translation, the helpers
-restore the original tokens, preventing broken color codes or variables.
+Use `Tools/batch_translate.py` to generate missing strings. The script protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. After translating, run `check-translations` to ensure no English text remains. See `AGENTS.md` for the full workflow.
 
 ## Workflow Source
 

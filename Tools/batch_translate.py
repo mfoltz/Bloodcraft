@@ -6,15 +6,16 @@ import re
 import subprocess
 from typing import List
 
-RICHTEXT = re.compile(r'</?\w+[^>]*>')
-PLACEHOLDER = re.compile(r'\{[^}]+\}')
-CSINTERP = re.compile(r'\$\{[^}]+\}')
+RICHTEXT = re.compile(r'<[^>]+>')
+PLACEHOLDER = re.compile(r'\{[^{}]+\}')
+CSINTERP = re.compile(r'\$\{[^{}]+\}')
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
 
 ENGLISH_WORDS = re.compile(r'\b(the|and|of|to|with|you|your|for|a|an)\b', re.I)
 
 
 def protect(text: str):
+    text = text.replace("\\u003C", "<").replace("\\u003E", ">")
     tokens: List[str] = []
     for regex in (RICHTEXT, PLACEHOLDER, CSINTERP):
         text = regex.sub(lambda m: _store(tokens, m.group(0)), text)
@@ -58,6 +59,8 @@ def main():
     ap.add_argument("--root", default=os.path.dirname(os.path.dirname(__file__)), help="Repo root")
     args = ap.parse_args()
 
+    print("NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.")
+
     root = os.path.abspath(args.root)
     english_path = os.path.join(root, "Resources", "Localization", "Messages", "English.json")
     target_path = os.path.join(root, args.target_file)
@@ -74,7 +77,7 @@ def main():
     messages = target.get("Messages", {})
     to_translate = [(k, v) for k, v in english.items() if k not in messages]
 
-    queue = to_translate
+    queue = [(k, v, 0) for k, v in to_translate]
     translated = {}
     while queue:
         batch = queue[:20]
@@ -82,10 +85,13 @@ def main():
         safe_lines = []
         tokens_list = []
         keys = []
-        for key, text in batch:
+        for key, text, tries in batch:
             safe, tokens = protect(text)
+            token_only = TOKEN_RE.sub("", safe).strip() == ""
+            if token_only:
+                safe += " TRANSLATE"
             safe_lines.append(safe)
-            tokens_list.append(tokens)
+            tokens_list.append((tokens, token_only, tries))
             keys.append(key)
         try:
             results = translate_batch(args.src, args.dst, safe_lines)
@@ -93,14 +99,18 @@ def main():
             print("Translation error", e)
             queue.extend(batch)
             continue
-        for key, result, tokens in zip(keys, results, tokens_list):
+        for (key, text, tries), result, (tokens, token_only, _) in zip(batch, results, tokens_list):
+            if token_only:
+                result = result.replace(" TRANSLATE", "")
             if TOKEN_RE.findall(result).count != len(tokens):
                 # translator mangled tokens
-                queue.append((key, english[key]))
+                queue.append((key, text, tries + 1))
                 continue
             un = unprotect(result, tokens)
-            if contains_english(un):
-                queue.append((key, english[key]))
+            un = un.replace("\\u003C", "<").replace("\\u003E", ">")
+            if un == text or contains_english(un):
+                if tries + 1 < 3:
+                    queue.append((key, text, tries + 1))
                 continue
             translated[key] = un
 
