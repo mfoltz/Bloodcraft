@@ -1,102 +1,98 @@
 # Translation Support Tasks
 
-These tasks implement the requirements from `translation-support-prd.md`.
+These tasks break down the work described in `translation-support-prd.md`.
 
-:::task{title="Create placeholder message files for all languages", owner="@dev", due="2025-08-10", status="done"}
-1. Copy `Resources/Localization/Messages/English.json` to new files for each language (Brazilian, French, etc.).
-2. Ensure hashes match the English file structure.
-3. Add new files as `<EmbeddedResource>` in `Bloodcraft.csproj`.
-:::
+- [x] Create placeholder message files for all languages  
+  Copy English.json to new files for each language (Brazilian, French, etc.), ensure structure/hashes match, and add as <EmbeddedResource> in Bloodcraft.csproj.  
+  (Owner: @dev, Due: 2025-08-10)
 
-:::task{title="Verify csproj embedding", owner="@dev", due="2025-08-10", status="done"}
-1. Confirm every language file under `Resources/Localization/Messages` is listed in the project file.
-2. Build the project to ensure embedded resources load without errors.
-:::
+- [x] Verify csproj embedding  
+  Confirm all language files are embedded and build loads resources without errors.  
+  (Owner: @dev, Due: 2025-08-10)
 
-:::task{title="Translate Spanish message file", owner="@dev", due="2025-08-12", status="open"}
-1. Provide Spanish translations for all entries in `Spanish.json`.
-2. Run `Tools/CheckTranslations` to verify completeness.
-:::
+- [ ] Translate Spanish message file  
+  Provide Spanish translations for all entries in Spanish.json and verify with Tools/CheckTranslations.  
+  (Owner: @dev, Due: 2025-08-12)
 
-:::task{title="Translate Brazilian Portuguese messages", owner="@dev", due="2025-08-13", status="open"}
-1. Populate `Brazilian.json` with Portuguese translations.
-2. Validate with the checker tool.
-:::
+- [ ] Translate Brazilian Portuguese messages  
+  Populate Brazilian.json with Portuguese, validate using the checker tool.  
+  (Owner: @dev, Due: 2025-08-13)
 
-:::task{title="Translate French messages", owner="@dev", due="2025-08-13", status="open"}
-1. Fill `French.json` with French translations and verify hashes.
-:::
+- [ ] Translate French messages  
+  Fill French.json and verify hashes/structure.  
+  (Owner: @dev, Due: 2025-08-13)
 
-:::task{title="Translate German messages", owner="@dev", due="2025-08-14", status="open"}
-1. Translate `German.json` and confirm with `Tools/CheckTranslations`.
-:::
+- [ ] Translate German messages  
+  Translate German.json and confirm with checker.  
+  (Owner: @dev, Due: 2025-08-14)
 
-:::task{title="Translate Hungarian messages", owner="@dev", due="2025-08-14", status="open"}
-1. Translate `Hungarian.json` and run the checker.
-:::
+- [ ] Translate Hungarian messages  
+  Translate Hungarian.json and run the checker tool.  
+  (Owner: @dev, Due: 2025-08-14)
 
-:::task{title="Translate Italian messages", owner="@dev", due="2025-08-15", status="open"}
-1. Provide Italian text in `Italian.json` and verify.
-:::
+- [ ] Translate Italian messages  
+  Provide Italian text in Italian.json and verify.  
+  (Owner: @dev, Due: 2025-08-15)
 
-:::task{title="Translate Japanese messages", owner="@dev", due="2025-08-15", status="open"}
-1. Update `Japanese.json` with translations and run the checker.
-:::
+- [ ] Translate Japanese messages  
+  Update Japanese.json and run the checker.  
+  (Owner: @dev, Due: 2025-08-15)
 
-:::task{title="Translate Korean messages", owner="@dev", due="2025-08-16", status="open"}
-1. Use `Koreana.json` for Korean translations and validate hashes.
-:::
+- [ ] Translate Korean messages  
+  Use Koreana.json for Korean, validate hashes/structure.  
+  (Owner: @dev, Due: 2025-08-16)
 
-:::task{title="Translate Latin American Spanish messages", owner="@dev", due="2025-08-16", status="open"}
-1. Translate `Latam.json` fully and check for missing entries.
-:::
+- [ ] Translate Latin American Spanish messages  
+  Translate Latam.json fully and check for missing entries.  
+  (Owner: @dev, Due: 2025-08-16)
 
-:::task{title="Translate Polish messages", owner="@dev", due="2025-08-17", status="open"}
-1. Fill `Polish.json` with translations and run `Tools/CheckTranslations`.
-:::
+- [ ] Translate Polish messages  
+  Fill Polish.json and verify with checker tool.  
+  (Owner: @dev, Due: 2025-08-17)
 
-:::task{title="Translate Russian messages", owner="@dev", due="2025-08-17", status="open"}
-1. Provide Russian translations in `Russian.json` and verify.
-:::
+- [ ] Translate Russian messages  
+  Provide Russian in Russian.json and verify.  
+  (Owner: @dev, Due: 2025-08-17)
 
-:::task{title="Translate Simplified Chinese messages", owner="@dev", due="2025-08-18", status="open"}
-1. Populate `SChinese.json` and run the checker tool.
-:::
+- [ ] Translate Simplified Chinese messages  
+  Populate SChinese.json and run checker tool.  
+  (Owner: @dev, Due: 2025-08-18)
 
-:::task{title="Translate Traditional Chinese messages", owner="@dev", due="2025-08-18", status="open"}
-1. Translate `TChinese.json` and verify completeness.
-:::
+- [ ] Translate Traditional Chinese messages  
+  Translate TChinese.json and verify completeness.  
+  (Owner: @dev, Due: 2025-08-18)
 
-:::task{title="Translate Thai messages", owner="@dev", due="2025-08-19", status="open"}
-1. Provide Thai translations in `Thai.json` and run the checker.
-:::
+- [ ] Translate Thai messages  
+  Provide Thai in Thai.json and run checker.  
+  (Owner: @dev, Due: 2025-08-19)
 
-:::task{title="Translate Turkish messages", owner="@dev", due="2025-08-19", status="open"}
-1. Translate `Turkish.json` fully and validate.
-:::
+- [ ] Translate Turkish messages  
+  Translate Turkish.json fully and validate.  
+  (Owner: @dev, Due: 2025-08-19)
 
-:::task{title="Translate Ukrainian messages", owner="@dev", due="2025-08-20", status="open"}
-1. Update `Ukrainian.json` with translations and run `Tools/CheckTranslations`.
-:::
+- [ ] Translate Ukrainian messages  
+  Update Ukrainian.json and run checker tool.  
+  (Owner: @dev, Due: 2025-08-20)
 
-:::task{title="Translate Vietnamese messages", owner="@dev", due="2025-08-20", status="open"}
-1. Fill `Vietnamese.json` with Vietnamese text and verify hashes.
-:::
+- [ ] Translate Vietnamese messages  
+  Fill Vietnamese.json and verify structure/hashes.  
+  (Owner: @dev, Due: 2025-08-20)
 
-:::task{title="Migrate remaining HandleServerReply calls", owner="@dev", due="2025-08-22", status="open"}
-1. Search for `LocalizationService.HandleServerReply` usages and replace with `LocalizationService.Reply`.
-2. Run `Tools/GenerateMessageTranslations` and then `Tools/CheckTranslations`.
-:::
+- [ ] Migrate remaining HandleServerReply calls  
+  Replace LocalizationService.HandleServerReply with Reply, re-generate and check translations.  
+  (Owner: @dev, Due: 2025-08-22)
 
-:::task{title="Finalize word-replacement feature", owner="@dev", due="2025-08-23", status="open"}
-1. Decide whether to enable or remove the commented word replacement logic in `LocalizationService.cs`.
-2. Update README to reflect the decision.
-:::
+- [ ] Finalize word-replacement feature  
+  Decide on enabling/removing commented word replacement logic, update README accordingly.  
+  (Owner: @dev, Due: 2025-08-23)
 
-:::task{title="Document translation workflow in README", owner="@dev", due="2025-08-24", status="done"}
-1. Add instructions for `GenerateMessageTranslations` and `CheckTranslations`.
-2. Document how to add new translations and reload messages.
-:::
+- [x] Document translation workflow in README  
+  Add instructions for tools and describe how to add/reload translations.  
+  (Owner: @dev, Due: 2025-08-24)
+
+- [x] Add token protection helpers  
+  Implement ProtectTokens/UnprotectTokens helpers and document usage.  
+  (Owner: @dev, Due: 2025-08-25)
 
 :::task{title="Add token protection helpers", owner="@dev", due="2025-08-25", status="done"}
 1. Implement `LocalizationHelpers.ProtectTokens` and `LocalizationHelpers.UnprotectTokens` with indexed markers and a token map.
