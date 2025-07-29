@@ -17,8 +17,15 @@
 		<OutputType>Exe</OutputType>
 		<UseAppHost>false</UseAppHost>
 		<NuGetAudit>False</NuGetAudit>
-		<RunGenerateREADME>true</RunGenerateREADME>
-	</PropertyGroup>
+        <RunGenerateREADME>true</RunGenerateREADME>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="Bloodcraft.Tests/**/*" />
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>Bloodcraft.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<Optimize>True</Optimize>
