@@ -102,7 +102,7 @@ def main():
         for (key, text, tries), result, (tokens, token_only, _) in zip(batch, results, tokens_list):
             if token_only:
                 result = result.replace(" TRANSLATE", "")
-            if TOKEN_RE.findall(result).count != len(tokens):
+            if len(TOKEN_RE.findall(result)) != len(tokens):
                 # translator mangled tokens
                 queue.append((key, text, tries + 1))
                 continue
