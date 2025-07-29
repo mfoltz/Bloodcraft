@@ -804,13 +804,15 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 Some strings contain Unity rich-text tags or runtime placeholders like `{player}`.
 These must remain byte-for-byte identical in every language. Use the
 `LocalizationHelpers` utility to temporarily hide these tokens before translating.
-Tokens are mapped into a dictionary so they can be restored later:
+Tokens are mapped into a dictionary so they can be restored later. Provide a new
+dictionary for each message string:
 
 ```csharp
-var map = new Dictionary<string, string>();
-string protectedText = LocalizationHelpers.ProtectTokens(originalText, map);
+// Use a fresh dictionary for each string
+var tokenMap = new Dictionary<string, string>();
+string protectedText = LocalizationHelpers.ProtectTokens(originalText, tokenMap);
 // Translate protectedText here
-string finalText = LocalizationHelpers.UnprotectTokens(translatedText, map);
+string finalText = LocalizationHelpers.UnprotectTokens(translatedText, tokenMap);
 ```
 
 Tags and placeholders are replaced with markers such as `[[TAG_...]]` so that
