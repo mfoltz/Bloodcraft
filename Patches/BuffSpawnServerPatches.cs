@@ -219,9 +219,7 @@ internal static class BuffSystemSpawnPatches
                                 if (buffEntity.Has<RemoveBuffOnGameplayEventEntry>()) buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
                             }
 
-                            if (!_alchemy) continue;
-
-                            if (_professions)
+                            if (_professions && _alchemy)
                             {
                                 IProfession handler = ProfessionFactory.GetProfession(buffPrefabGuid);
 
@@ -636,7 +634,7 @@ internal static class BuffSystemSpawnPatches
             buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
         }
 
-        if (_professions)
+        if (_professions && _alchemy)
         {
             IProfession alchemyHandler = ProfessionFactory.GetProfession(buffGuid);
             int level = alchemyHandler.GetProfessionLevel(steamId);
