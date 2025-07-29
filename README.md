@@ -789,14 +789,18 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
    dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .
    ```
 2. Copy this file to a new `<Language>.json` and translate each value while keeping the numeric hashes intact.
-3. Verify completeness using the translation checker:
+3. Automatically translate any missing entries using Argos Translate:
+   ```bash
+   python Tools/batch_translate.py Resources/Localization/Messages/<Language>.json --to <iso-code>
+   ```
+4. Verify completeness using the translation checker:
    ```bash
    dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations .
    ```
    Missing hashes will be printed for further translation. The command now defaults
    to the current directory when no path is specified, so the example above
    continues to work as written.
-4. The checker also warns when any translation still looks English so you can catch untranslated strings early.
+   The command warns if translated strings still look English so you can catch untranslated text early.
 5. Rebuild and deploy the plugin with `./dev_init.sh` to load the new messages.
 
 ### Protecting Tags During Translation
@@ -804,15 +808,13 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 Some strings contain Unity rich-text tags or runtime placeholders like `{player}`.
 These must remain byte-for-byte identical in every language. Use the
 `LocalizationHelpers` utility to temporarily hide these tokens before translating.
-Tokens are mapped into a dictionary so they can be restored later. Provide a new
-dictionary for each message string:
+The `Protect` method returns a safe string and the list of tokens to restore:
 
 ```csharp
-// Use a fresh dictionary for each string
-var tokenMap = new Dictionary<string, string>();
-string protectedText = LocalizationHelpers.ProtectTokens(originalText, tokenMap);
-// Translate protectedText here
-string finalText = LocalizationHelpers.UnprotectTokens(translatedText, tokenMap);
+// Protect returns a tuple with the sanitized text and token list
+var (safe, tokens) = LocalizationHelpers.Protect(originalText);
+// Translate 'safe' here
+string finalText = LocalizationHelpers.Unprotect(translatedText, tokens);
 ```
 
 Tags and placeholders are replaced with markers such as `[[TAG_...]]` so that
