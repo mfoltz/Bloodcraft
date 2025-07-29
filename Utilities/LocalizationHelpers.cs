@@ -8,34 +8,60 @@ namespace Bloodcraft.Utilities;
 /// </summary>
 internal static class LocalizationHelpers
 {
-    static readonly Regex _tagPattern = new(
-        @"</?color=[^>]+>|</?b>|</?size=[^>]+>",
+    static readonly Regex RichTextTag = new(
+        @"</?\w+[^>]*>",
         RegexOptions.Compiled);
 
-    static readonly Regex _varPattern = new(
+    static readonly Regex Placeholder = new(
         @"\{[^}]+\}",
         RegexOptions.Compiled);
 
+    static readonly Regex CsInterp = new(
+        @"\$\{[^}]+\}",
+        RegexOptions.Compiled);
+
     /// <summary>
-    /// Replaces tags and variable placeholders with base64 markers
-    /// so translation services do not alter them.
+    /// Replaces tags and placeholders with indexed markers so translation services do not alter them.
     /// </summary>
-    public static string ProtectTokens(string message)
+    public static string ProtectTokens(string message, IDictionary<string, string> map)
     {
-        message = _tagPattern.Replace(message, m => $"[[TAG_{Convert.ToBase64String(Encoding.UTF8.GetBytes(m.Value))}]]");
-        message = _varPattern.Replace(message, m => $"[[VAR_{Convert.ToBase64String(Encoding.UTF8.GetBytes(m.Value))}]]");
+        int tagIndex = 0;
+        int varIndex = 0;
+        int csIndex = 0;
+
+        message = RichTextTag.Replace(message, m =>
+        {
+            string key = $"TAG_{tagIndex++}";
+            map[key] = m.Value;
+            return $"[[{key}]]";
+        });
+
+        message = Placeholder.Replace(message, m =>
+        {
+            string key = $"VAR_{varIndex++}";
+            map[key] = m.Value;
+            return $"[[{key}]]";
+        });
+
+        message = CsInterp.Replace(message, m =>
+        {
+            string key = $"CS_{csIndex++}";
+            map[key] = m.Value;
+            return $"[[{key}]]";
+        });
+
         return message;
     }
 
     /// <summary>
-    /// Restores tags and variables from base64 markers.
+    /// Restores tokens from the map back into the message string.
     /// </summary>
-    public static string UnprotectTokens(string message)
+    public static string UnprotectTokens(string message, IDictionary<string, string> map)
     {
-        return Regex.Replace(message, @"\[\[TAG_(.*?)\]\]|\[\[VAR_(.*?)\]\]", m =>
+        return Regex.Replace(message, @"\[\[(TAG|VAR|CS)_(\d+)\]\]", m =>
         {
-            string data = m.Groups[1].Value.Length > 0 ? m.Groups[1].Value : m.Groups[2].Value;
-            return Encoding.UTF8.GetString(Convert.FromBase64String(data));
+            string key = $"{m.Groups[1].Value}_{m.Groups[2].Value}";
+            return map.TryGetValue(key, out string value) ? value : m.Value;
         });
     }
 }
