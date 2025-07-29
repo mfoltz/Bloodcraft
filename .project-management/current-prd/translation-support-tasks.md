@@ -13,7 +13,7 @@ These tasks implement the requirements from `translation-support-prd.md`.
 2. Build the project to ensure embedded resources load without errors.
 :::
 
-:::task{title="Translate Spanish message file", owner="@dev", due="2025-08-12", status="open"}
+:::task{title="Translate Spanish message file", owner="@dev", due="2025-08-12", status="done"}
 1. Provide Spanish translations for all entries in `Spanish.json`.
 2. Run `Tools/CheckTranslations` to verify completeness.
 :::
