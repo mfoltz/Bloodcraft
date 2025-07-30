@@ -2,7 +2,7 @@
 
 These tasks break down the work described in `translation-support-prd.md`.
 
-* `Tools/batch_translate.py` retries each missing entry up to three times. Hashes that still fail are listed at the end and require manual translation.
+* `Tools/batch_translate.py` retries each missing entry up to three times. Hashes that still fail are listed at the end and require manual translation. Use `--batch-size` to reduce the number of lines per request if Argos stalls.
 
 - [x] Create placeholder message files for all languages  
   Copy English.json to new files for each language (Brazilian, French, etc.), ensure structure/hashes match, and add as <EmbeddedResource> in Bloodcraft.csproj.  
