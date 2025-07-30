@@ -108,7 +108,8 @@ def main():
         for (key, text, tries), result, (tokens, token_only, _) in zip(batch, results, tokens_list):
             if token_only:
                 result = result.replace(" TRANSLATE", "")
-            if len(TOKEN_RE.findall(result)) != len(tokens):
+            found_tokens = TOKEN_RE.findall(result)
+            if len(found_tokens) != len(tokens):
                 # translator mangled tokens
                 if tries + 1 >= MAX_ATTEMPTS:
                     print(f"Skipping {key} after {MAX_ATTEMPTS} attempts")
