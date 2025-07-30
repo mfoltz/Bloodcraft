@@ -58,6 +58,11 @@ internal static class ScriptSpawnServerPatch
     // static readonly PrefabGUID _bonusFamiliarStatsBuff = Buffs.BonusFamiliarStatsBuff;
     static readonly PrefabGUID _bonusStatsBuff = Buffs.BonusStatsBuff;
 
+    static readonly bool _eliteShardBearers = ConfigService.EliteShardBearers;
+    static readonly int _shardBearerLevel = ConfigService.ShardBearerLevel;
+    static readonly PrefabGUID _dracula = new(-327335305);
+    static readonly PrefabGUID _draculaVisual = PrefabGUIDs.AB_Shapeshift_BloodHunger_BloodSight_Buff;
+
     /*
     static readonly HashSet<PrefabGUID> _bonusStatBuffs =
     [
@@ -414,8 +419,44 @@ internal static class ScriptSpawnServerPatch
                 equippableBuffs.Dispose();
             }
 
-            Familiars.FamiliarSyncDelayRoutine(familiar, servant).Start();
+        Familiars.FamiliarSyncDelayRoutine(familiar, servant).Start();
+    }
+
+    static void ApplyEliteDraculaModifiers(Entity entity)
+    {
+        entity.Remove<DynamicallyWeakenAttackers>();
+
+        if (_shardBearerLevel > 0)
+        {
+            entity.With((ref UnitLevel unitLevel) => unitLevel.Level._Value = _shardBearerLevel);
         }
+
+        entity.With((ref AbilityBar_Shared abilityBarShared) =>
+        {
+            abilityBarShared.AbilityAttackSpeed._Value = 2f;
+            abilityBarShared.PrimaryAttackSpeed._Value = 2f;
+        });
+
+        entity.With((ref Health health) =>
+        {
+            health.MaxHealth._Value *= 5;
+            health.Value = health.MaxHealth._Value;
+        });
+
+        entity.With((ref UnitStats unitStats) =>
+        {
+            unitStats.PhysicalPower._Value *= 1.5f;
+            unitStats.SpellPower._Value *= 1.5f;
+        });
+
+        entity.With((ref AiMoveSpeeds aiMoveSpeeds) =>
+        {
+            aiMoveSpeeds.Walk._Value = 2.5f;
+            aiMoveSpeeds.Run._Value = 3.5f;
+        });
+
+        Buffs.HandleShinyBuff(entity, _draculaVisual);
+    }
     }
 
     [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
@@ -423,11 +464,12 @@ internal static class ScriptSpawnServerPatch
     static void OnUpdatePostfix(ScriptSpawnServer __instance)
     {
         if (!Core._initialized) return;
-        else if (!_leveling) return;
+
+        bool handleLevel = _leveling;
 
         using NativeAccessor<Entity> entities = _query.ToEntityArrayAccessor();
         using NativeAccessor<Buff> buffs = _query.ToComponentDataArrayAccessor<Buff>();
-
+        
         try
         {
             for (int i = 0; i < entities.Length; i++)
@@ -435,7 +477,15 @@ internal static class ScriptSpawnServerPatch
                 Entity buffEntity = entities[i];
                 Entity buffTarget = buffs[i].Target;
 
-                if (buffEntity.HasSpellLevel() && buffTarget.IsPlayer())
+                if (_eliteShardBearers && buffEntity.GetPrefabGuid().Equals(Buffs.EvolvedVampireBuff) && !buffTarget.IsPlayer())
+                {
+                    if (buffTarget.TryGetComponent(out PrefabGUID targetPrefab) && targetPrefab.Equals(_dracula))
+                    {
+                        ApplyEliteDraculaModifiers(buffTarget);
+                    }
+                }
+
+                if (handleLevel && buffEntity.HasSpellLevel() && buffTarget.IsPlayer())
                 {
                     LevelingSystem.SetLevel(buffTarget);
                 }
