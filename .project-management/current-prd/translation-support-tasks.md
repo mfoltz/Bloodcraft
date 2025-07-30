@@ -2,6 +2,8 @@
 
 These tasks break down the work described in `translation-support-prd.md`.
 
+* `Tools/batch_translate.py` retries each missing entry up to three times. Hashes that still fail are listed at the end and require manual translation.
+
 - [x] Create placeholder message files for all languages  
   Copy English.json to new files for each language (Brazilian, French, etc.), ensure structure/hashes match, and add as <EmbeddedResource> in Bloodcraft.csproj.  
   (Owner: @dev, Due: 2025-08-10)

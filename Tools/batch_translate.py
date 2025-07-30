@@ -6,6 +6,8 @@ import re
 import subprocess
 from typing import List
 
+MAX_ATTEMPTS = 3
+
 RICHTEXT = re.compile(r'<[^>]+>')
 PLACEHOLDER = re.compile(r'\{[^{}]+\}')
 CSINTERP = re.compile(r'\$\{[^{}]+\}')
@@ -79,6 +81,7 @@ def main():
 
     queue = [(k, v, 0) for k, v in to_translate]
     translated = {}
+    skipped: List[str] = []
     while queue:
         batch = queue[:20]
         queue = queue[20:]
@@ -97,19 +100,31 @@ def main():
             results = translate_batch(args.src, args.dst, safe_lines)
         except Exception as e:
             print("Translation error", e)
-            queue.extend(batch)
+            for key, text, tries in batch:
+                if tries + 1 >= MAX_ATTEMPTS:
+                    print(f"Skipping {key} after {MAX_ATTEMPTS} attempts")
+                    skipped.append(key)
+                else:
+                    queue.append((key, text, tries + 1))
             continue
         for (key, text, tries), result, (tokens, token_only, _) in zip(batch, results, tokens_list):
             if token_only:
                 result = result.replace(" TRANSLATE", "")
             if len(TOKEN_RE.findall(result)) != len(tokens):
                 # translator mangled tokens
-                queue.append((key, text, tries + 1))
+                if tries + 1 >= MAX_ATTEMPTS:
+                    print(f"Skipping {key} after {MAX_ATTEMPTS} attempts")
+                    skipped.append(key)
+                else:
+                    queue.append((key, text, tries + 1))
                 continue
             un = unprotect(result, tokens)
             un = un.replace("\\u003C", "<").replace("\\u003E", ">")
             if un == text or contains_english(un):
-                if tries + 1 < 3:
+                if tries + 1 >= MAX_ATTEMPTS:
+                    print(f"Skipping {key} after {MAX_ATTEMPTS} attempts")
+                    skipped.append(key)
+                else:
                     queue.append((key, text, tries + 1))
                 continue
             translated[key] = un
@@ -120,6 +135,11 @@ def main():
         json.dump(target, f, indent=2, ensure_ascii=False)
 
     print(f"Wrote translations to {target_path}")
+
+    if skipped:
+        print("Skipped the following message hashes due to repeated errors:")
+        for k in skipped:
+            print(f" - {k}")
 
 
 if __name__ == "__main__":
