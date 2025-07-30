@@ -86,6 +86,7 @@ internal static class Familiars
         public Entity Servant { get; set; } = Entity.Null;
         public int FamiliarId { get; set; } = 0;
         public bool Dismissed { get; set; } = false;
+        public bool IsBinding { get; set; } = false;
     }
     public static class ActiveFamiliarManager
     {
@@ -136,6 +137,18 @@ internal static class Familiars
                 data.Dismissed = dismissed;
                 _familiarActives[steamId] = data;
             }
+        }
+        public static void UpdateActiveFamiliarBinding(ulong steamId, bool isBinding)
+        {
+            if (_familiarActives.TryGetValue(steamId, out var data))
+            {
+                data.IsBinding = isBinding;
+                _familiarActives[steamId] = data;
+            }
+        }
+        public static bool IsBinding(ulong steamId)
+        {
+            return _familiarActives.TryGetValue(steamId, out var data) && data.IsBinding;
         }
         public static bool HasActiveFamiliar(ulong steamId)
         {
@@ -229,6 +242,10 @@ internal static class Familiars
     public static bool HasDismissedFamiliar(this ulong steamId)
     {
         return ActiveFamiliarManager.HasDismissedFamiliar(steamId);
+    }
+    public static bool IsBinding(this ulong steamId)
+    {
+        return ActiveFamiliarManager.IsBinding(steamId);
     }
     public static Entity FindActiveFamiliar(Entity playerCharacter)
     {
@@ -593,6 +610,11 @@ internal static class Familiars
     public static void BindFamiliar(User user, Entity playerCharacter, int boxIndex = -1)
     {
         ulong steamId = user.PlatformId;
+        if (steamId.IsBinding())
+        {
+            LocalizationService.HandleServerReply(EntityManager, user, "Familiar binding already in progress!");
+            return;
+        }
         bool hasActive = steamId.HasActiveFamiliar();
 
         if (hasActive)
@@ -623,6 +645,7 @@ internal static class Familiars
                     return;
                 }
 
+                ActiveFamiliarManager.UpdateActiveFamiliarBinding(steamId, true);
                 InstantiateFamiliarRoutine(user, playerCharacter, famKeys[boxIndex - 1]).Start();
             }
             else if (boxIndex == -1)
@@ -636,6 +659,7 @@ internal static class Familiars
             else
             {
                 steamId.SetBindingIndex(boxIndex);
+                ActiveFamiliarManager.UpdateActiveFamiliarBinding(steamId, true);
                 InstantiateFamiliarRoutine(user, playerCharacter, famKeys[boxIndex - 1]).Start();
             }
         }
@@ -647,6 +671,12 @@ internal static class Familiars
     public static void UnbindFamiliar(User user, Entity playerCharacter, bool smartBind = false, int index = -1)
     {
         ulong steamId = user.PlatformId;
+
+        if (steamId.IsBinding())
+        {
+            LocalizationService.HandleServerReply(EntityManager, user, "Cannot unbind while a binding is in progress!");
+            return;
+        }
 
         bool hasActive = steamId.HasActiveFamiliar();
         bool isDismissed = steamId.HasDismissedFamiliar();
@@ -665,6 +695,7 @@ internal static class Familiars
             familiar.TryApplyBuff(_disableAggroBuff);
             familiar.TryRemoveBuff(buffPrefabGuid: _bonusStatsBuff);
 
+            ActiveFamiliarManager.UpdateActiveFamiliarBinding(steamId, true);
             UnbindFamiliarDelayRoutine(user, playerCharacter, familiar, smartBind, index).Start();
         }
         else if (isDismissed)
@@ -682,12 +713,13 @@ internal static class Familiars
         yield return _delay;
 
         PrefabGUID prefabGuid = familiar.GetPrefabGuid();
+        ulong steamId = user.PlatformId;
         if (prefabGuid.IsEmpty())
         {
+            ActiveFamiliarManager.UpdateActiveFamiliarBinding(steamId, false);
             yield break;
         }
 
-        ulong steamId = user.PlatformId;
         int famKey = prefabGuid.GuidHash;
 
         FamiliarBuffsData buffsData = LoadFamiliarBuffsData(steamId);
@@ -709,6 +741,7 @@ internal static class Familiars
 
         familiar.Destroy();
         ResetActiveFamiliarData(steamId);
+        ActiveFamiliarManager.UpdateActiveFamiliarBinding(steamId, false);
 
         string message = !string.IsNullOrEmpty(shinyHexColor) ? $"<color=green>{prefabGuid.GetLocalizedName()}</color>{shinyHexColor}*</color> <color=#FFC0CB>unbound</color>!" : $"<color=green>{prefabGuid.GetLocalizedName()}</color> <color=#FFC0CB>unbound</color>!";
         LocalizationService.HandleServerReply(EntityManager, user, message);

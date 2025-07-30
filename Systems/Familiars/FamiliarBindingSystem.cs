@@ -18,6 +18,7 @@ using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsMa
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarEquipmentManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarExperienceManager;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Familiars.ActiveFamiliarManager;
 using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Systems.Familiars;
@@ -149,6 +150,9 @@ internal static class FamiliarBindingSystem
     public static IEnumerator InstantiateFamiliarRoutine(User user, Entity playerCharacter, int famKey,
         bool battle = false, int teamIndex = -1, float3 position = default, bool allies = false)
     {
+        ulong steamId = user.PlatformId;
+        Bloodcraft.Utilities.Familiars.ActiveFamiliarManager.UpdateActiveFamiliarBinding(steamId, true);
+
         PrefabGUID familiarId = new(famKey);
         Entity familiar = ServerGameManager.InstantiateEntityImmediate(playerCharacter, familiarId);
 
@@ -156,8 +160,6 @@ internal static class FamiliarBindingSystem
 
         if (battle)
         {
-            ulong steamId = user.PlatformId;
-
             if (!PlayerBattleFamiliars.ContainsKey(steamId)) PlayerBattleFamiliars[steamId] = [];
 
             PlayerBattleFamiliars[steamId].Add(familiar);
@@ -184,6 +186,8 @@ internal static class FamiliarBindingSystem
             familiar.TryApplyBuff(_hideSpawnBuff);
             HandleBinding(user, playerCharacter, familiar, familiarId, playerCharacter.GetPosition());
         }
+
+        Bloodcraft.Utilities.Familiars.ActiveFamiliarManager.UpdateActiveFamiliarBinding(steamId, false);
     }
     static bool HandleBinding(User user, Entity playerCharacter, Entity familiar, PrefabGUID familiarId, float3 position, bool battle = false, int teamIndex = -1, bool allies = false)
     {
