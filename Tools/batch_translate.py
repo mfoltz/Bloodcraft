@@ -61,8 +61,8 @@ def main():
     ap.add_argument(
         "--batch-size",
         type=int,
-        default=20,
-        help="Number of strings to translate per request (default: 20)",
+        default=0,
+        help="Optional limit on strings per request; defaults to one batch",
     )
     ap.add_argument("--root", default=os.path.dirname(os.path.dirname(__file__)), help="Repo root")
     args = ap.parse_args()
@@ -86,7 +86,7 @@ def main():
     to_translate = [(k, v) for k, v in english.items() if k not in messages]
 
     queue = [(k, v, 0) for k, v in to_translate]
-    batch_size = max(1, args.batch_size)
+    batch_size = args.batch_size or len(queue)
     translated = {}
     skipped: List[str] = []
     while queue:
