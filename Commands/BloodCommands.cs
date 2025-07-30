@@ -35,21 +35,12 @@ internal static class BloodCommands
 
         Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         Blood playerBlood = playerCharacter.Read<Blood>();
-        BloodType bloodType = GetCurrentBloodType(playerBlood);
 
-        if (string.IsNullOrEmpty(blood))
-        {
-            bloodType = BloodSystem.GetBloodTypeFromPrefab(playerBlood.BloodType);
-        }
-        else if (!Enum.TryParse(blood, true, out bloodType))
-        {
-            LocalizationService.Reply(ctx, "Invalid blood, use '.bl l' to see options.");
+        if (!TryParseBloodType(ctx, playerBlood, blood, out var bloodType))
             return;
-        }
 
         ulong steamId = ctx.Event.User.PlatformId;
         IBloodLegacy handler = BloodLegacyFactory.GetBloodHandler(bloodType);
-
         if (handler == null)
         {
             LocalizationService.Reply(ctx, "Invalid blood legacy.");
@@ -57,43 +48,17 @@ internal static class BloodCommands
         }
 
         var data = handler.GetLegacyData(steamId);
-        int progress = (int)(data.Value - ConvertLevelToXp(data.Key));
-
-        int prestigeLevel = steamId.TryGetPlayerPrestiges(out var prestiges) ? prestiges[BloodSystem.BloodPrestigeTypes[bloodType]] : 0;
-
-        if (data.Key > 0)
-        {
-            LocalizationService.Reply(ctx, $"You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!");
-
-            if (steamId.TryGetPlayerBloodStats(out var bloodTypeStats) && bloodTypeStats.TryGetValue(bloodType, out var bloodStatTypes))
-            {
-                List<KeyValuePair<BloodStatType, string>> bloodLegacyStats = [];
-
-                foreach (BloodStatType bloodStatType in bloodStatTypes)
-                {
-                    if (!TryGetScaledModifyUnitLegacyStat(handler, playerCharacter, steamId, bloodType, 
-                        bloodStatType, out float statValue, out ModifyUnitStatBuff modifyUnitStatBuff)) continue;
-
-                    string bloodStatString = (statValue * 100).ToString("F1") + "%";
-                    bloodLegacyStats.Add(new KeyValuePair<BloodStatType, string>(bloodStatType, bloodStatString));
-                }
-
-                for (int i = 0; i < bloodLegacyStats.Count; i += 6)
-                {
-                    var batch = bloodLegacyStats.Skip(i).Take(6);
-                    string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
-                    LocalizationService.Reply(ctx, $"<color=red>{bloodType}</color> Stats: {bonuses}");
-                }
-            }
-            else
-            {
-                LocalizationService.Reply(ctx, $"No stats selected for <color=red>{bloodType}</color>, use <color=white>'.bl lst'</color> to see valid options.");
-            }
-        }
-        else
+        if (data.Key <= 0)
         {
             LocalizationService.Reply(ctx, $"No progress in <color=red>{handler.GetBloodType()}</color> yet.");
+            return;
         }
+
+        int progress = (int)(data.Value - ConvertLevelToXp(data.Key));
+        int prestigeLevel = steamId.TryGetPlayerPrestiges(out var prestiges) ? prestiges[BloodSystem.BloodPrestigeTypes[bloodType]] : 0;
+
+        List<KeyValuePair<BloodStatType, string>> stats = BuildLegacyStatList(steamId, bloodType, handler, playerCharacter);
+        PrintLegacyProgress(ctx, bloodType, handler, data, progress, prestigeLevel, stats);
     }
 
     [Command(name: "log", adminOnly: false, usage: ".bl log", description: "Toggles Legacy progress logging.")]
@@ -203,54 +168,32 @@ internal static class BloodCommands
 
         Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         Blood blood = playerCharacter.Read<Blood>();
-        User user = ctx.Event.User;
-
-        ulong steamId = user.PlatformId;
+        ulong steamId = ctx.Event.User.PlatformId;
         BloodType bloodType = GetCurrentBloodType(blood);
 
-        if (bloodType.Equals(BloodType.GateBoss) || bloodType.Equals(BloodType.None) || bloodType.Equals(BloodType.VBlood))
-        {
-            LocalizationService.Reply(ctx, $"No legacy available for <color=white>{bloodType}</color>.");
+        if (!ValidateBloodType(ctx, bloodType))
             return;
-        }
 
         string freeKey = bloodType.ToString();
         if (GetPlayerBool(steamId, freeKey))
         {
-            ResetStats(steamId, bloodType);
-            Buffs.RefreshStats(playerCharacter);
-
+            ApplyBloodStatReset(ctx, playerCharacter, steamId, bloodType);
             SetPlayerBool(steamId, freeKey, false);
-            LocalizationService.Reply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>!");
             return;
         }
 
-        if (!ConfigService.ResetLegacyItem.Equals(0))
+        if (ConfigService.ResetLegacyItem.Equals(0))
         {
-            PrefabGUID item = new(ConfigService.ResetLegacyItem);
-            int quantity = ConfigService.ResetLegacyItemQuantity;
-
-            if (InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.User.LocalCharacter._Entity, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, item) >= quantity)
-            {
-                if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
-                {
-                    ResetStats(steamId, bloodType);
-                    Buffs.RefreshStats(playerCharacter);
-
-                    LocalizationService.Reply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>!");
-                }
-            }
-            else
-            {
-                LocalizationService.Reply(ctx, $"You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)");
-            }
+            ApplyBloodStatReset(ctx, playerCharacter, steamId, bloodType);
+            return;
         }
-        else
-        {
-            ResetStats(steamId, bloodType);
-            Buffs.RefreshStats(playerCharacter);
 
-            LocalizationService.Reply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>.");
+        PrefabGUID item = new(ConfigService.ResetLegacyItem);
+        int quantity = ConfigService.ResetLegacyItemQuantity;
+
+        if (TryConsumeResetItem(ctx, item, quantity))
+        {
+            ApplyBloodStatReset(ctx, playerCharacter, steamId, bloodType);
         }
     }
 
@@ -345,5 +288,89 @@ internal static class BloodCommands
 
         string bloodTypesList = string.Join(", ", bloodTypes);
         LocalizationService.Reply(ctx, $"Available Blood Legacies: <color=red>{bloodTypesList}</color>");
+    }
+
+    static bool TryParseBloodType(ChatCommandContext ctx, Blood playerBlood, string bloodArg, out BloodType bloodType)
+    {
+        bloodType = GetCurrentBloodType(playerBlood);
+        if (string.IsNullOrEmpty(bloodArg))
+        {
+            bloodType = BloodSystem.GetBloodTypeFromPrefab(playerBlood.BloodType);
+            return true;
+        }
+
+        if (Enum.TryParse(bloodArg, true, out bloodType))
+        {
+            return true;
+        }
+
+        LocalizationService.Reply(ctx, "Invalid blood, use '.bl l' to see options.");
+        return false;
+    }
+
+    static List<KeyValuePair<BloodStatType, string>> BuildLegacyStatList(ulong steamId, BloodType bloodType, IBloodLegacy handler, Entity playerCharacter)
+    {
+        List<KeyValuePair<BloodStatType, string>> stats = [];
+
+        if (!steamId.TryGetPlayerBloodStats(out var bloodTypeStats) || !bloodTypeStats.TryGetValue(bloodType, out var bloodStatTypes))
+            return stats;
+
+        foreach (BloodStatType bloodStatType in bloodStatTypes)
+        {
+            if (!TryGetScaledModifyUnitLegacyStat(handler, playerCharacter, steamId, bloodType, bloodStatType, out float statValue, out ModifyUnitStatBuff _))
+                continue;
+
+            string bloodStatString = (statValue * 100).ToString("F1") + "%";
+            stats.Add(new KeyValuePair<BloodStatType, string>(bloodStatType, bloodStatString));
+        }
+
+        return stats;
+    }
+
+    static void PrintLegacyProgress(ChatCommandContext ctx, BloodType bloodType, IBloodLegacy handler, KeyValuePair<int, float> data, int progress, int prestigeLevel, List<KeyValuePair<BloodStatType, string>> stats)
+    {
+        LocalizationService.Reply(ctx, $"You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!");
+
+        if (stats.Count == 0)
+        {
+            LocalizationService.Reply(ctx, $"No stats selected for <color=red>{bloodType}</color>, use <color=white>'.bl lst'</color> to see valid options.");
+            return;
+        }
+
+        for (int i = 0; i < stats.Count; i += 6)
+        {
+            var batch = stats.Skip(i).Take(6);
+            string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
+            LocalizationService.Reply(ctx, $"<color=red>{bloodType}</color> Stats: {bonuses}");
+        }
+    }
+
+    static bool ValidateBloodType(ChatCommandContext ctx, BloodType bloodType)
+    {
+        if (bloodType == BloodType.GateBoss || bloodType == BloodType.None || bloodType == BloodType.VBlood)
+        {
+            LocalizationService.Reply(ctx, $"No legacy available for <color=white>{bloodType}</color>.");
+            return false;
+        }
+
+        return true;
+    }
+
+    static bool TryConsumeResetItem(ChatCommandContext ctx, PrefabGUID item, int quantity)
+    {
+        if (InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.User.LocalCharacter._Entity, out var inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, item) >= quantity)
+        {
+            return ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity);
+        }
+
+        LocalizationService.Reply(ctx, $"You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)");
+        return false;
+    }
+
+    static void ApplyBloodStatReset(ChatCommandContext ctx, Entity playerCharacter, ulong steamId, BloodType bloodType)
+    {
+        ResetStats(steamId, bloodType);
+        Buffs.RefreshStats(playerCharacter);
+        LocalizationService.Reply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>!");
     }
 }
