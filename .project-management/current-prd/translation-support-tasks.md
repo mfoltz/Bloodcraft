@@ -91,11 +91,11 @@ These tasks break down the work described in `translation-support-prd.md`.
   (Owner: @dev, Due: 2025-08-24)
 
 - [x] Add token protection helpers  
-  Implement ProtectTokens/UnprotectTokens helpers and document usage.  
+  Implement Protect/Unprotect helpers and document usage.
   (Owner: @dev, Due: 2025-08-25)
 
 :::task{title="Add token protection helpers", owner="@dev", due="2025-08-25", status="done"}
-1. Implement `LocalizationHelpers.ProtectTokens` and `LocalizationHelpers.UnprotectTokens` with indexed markers and a token map.
+1. Implement `LocalizationHelpers.Protect` and `LocalizationHelpers.Unprotect` with indexed markers and a token map.
 2. Extend the README with an example showing how to use them during translation.
 :::
 

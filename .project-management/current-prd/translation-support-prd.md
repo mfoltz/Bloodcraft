@@ -28,7 +28,7 @@ While hashed-message localization and configuration for plugin language selectio
    - Document and regularly run `Tools/GenerateMessageTranslations` and `Tools/CheckTranslations` as part of the development workflow.
    - Acceptance: README includes clear instructions and the tools run without errors in CI or local development.
 6. **Token Protection**
-   - Use `LocalizationHelpers.ProtectTokens` before sending strings to translators and call `LocalizationHelpers.UnprotectTokens` on the returned text.
+   - Use `LocalizationHelpers.Protect` before sending strings to translators and call `LocalizationHelpers.Unprotect` on the returned text.
    - Keep `English.json` unchanged; apply the helpers only when creating other language files so rich-text tags and placeholders remain intact.
    - Acceptance: README and tasks describe this workflow and translated JSON files preserve tokens exactly.
 

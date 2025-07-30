@@ -786,6 +786,17 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 
 Use `Tools/batch_translate.py` to generate missing strings. The script protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. After translating, run `check-translations` to ensure no English text remains. See `AGENTS.md` for the full workflow.
 
+### Protecting Tags During Translation
+
+When translating strings manually, use `LocalizationHelpers.Protect` to temporarily replace rich-text tags and placeholders with numbered markers. After translating, call `LocalizationHelpers.Unprotect` to restore the original tokens.
+
+```csharp
+var (safe, tokens) = LocalizationHelpers.Protect(original);
+// send `safe` to a translation service
+string translated = Translate(safe);
+string final = LocalizationHelpers.Unprotect(translated, tokens);
+```
+
 ## Workflow Source
 
 - Repo: https://github.com/knavillus1/codex_bootstrap/tree/dev_chat_with_tasks
