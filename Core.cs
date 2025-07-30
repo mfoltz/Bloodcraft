@@ -31,6 +31,7 @@ internal static class Core
     public static ServerGameManager ServerGameManager => SystemService.ServerScriptMapper.GetServerGameManager();
     public static SystemService SystemService { get; } = new(Server);
     public static ServerGameBalanceSettings ServerGameBalanceSettings { get; set; }
+    public static bool IsPvP => ServerGameBalanceSettings.GameModeType == GameModeType.PvP;
     public static double ServerTime => ServerGameManager.ServerTime;
     public static double DeltaTime => ServerGameManager.DeltaTime;
     public static ManualLogSource Log => Plugin.LogInstance;
@@ -86,7 +87,7 @@ internal static class Core
     const int BLEED_STACKS = 3;
     public static byte[] NEW_SHARED_KEY { get; set; }
 
-    public static bool _initialized = false;
+    public static bool _initialized;
     public static void Initialize()
     {
         if (_initialized) return;
@@ -195,7 +196,6 @@ internal static class Core
     {
         DelayedRoutine(delay, method, args).Run();
     }
-
     private static IEnumerator DelayedRoutine(float delay, Delegate method, object[] args)
     {
         if (delay > 0f)
@@ -288,7 +288,7 @@ internal static class Core
             }
         }
 
-        if (ConfigService.EliteShardBearers)
+        if (ConfigService.EliteShardBearers && !IsPvP)
         {
             foreach (PrefabGUID soulShardDropTable in _shardBearerDropTables)
             {

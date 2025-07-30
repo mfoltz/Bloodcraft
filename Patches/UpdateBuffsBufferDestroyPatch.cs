@@ -232,7 +232,7 @@ internal static class UpdateBuffsBufferDestroyPatch
         }
         else return guidHash switch
         {
-            -31099041 or -1859425781 => 1,     // ExoForm Buff
+            -31099041 or -1859425781 => 1,     // ExoForm Buffs
             // 20081801 => 2,                  // bonus stats testing
             // 737485591 => 2,                 // Set bonus buff trying for bonus stats
             581443919 => 3,                    // Combat Buff

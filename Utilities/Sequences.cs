@@ -1,5 +1,4 @@
-﻿using Bloodcraft.Resources;
-using ProjectM;
+﻿using ProjectM;
 using Unity.Entities;
 
 namespace Bloodcraft.Utilities;
