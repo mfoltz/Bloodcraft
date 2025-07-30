@@ -58,6 +58,12 @@ def main():
     ap.add_argument("target_file", help="Path to the target language JSON file")
     ap.add_argument("--from", dest="src", default="en", help="Source language code (default: en)")
     ap.add_argument("--to", dest="dst", required=True, help="Target language code")
+    ap.add_argument(
+        "--batch-size",
+        type=int,
+        default=20,
+        help="Number of strings to translate per request (default: 20)",
+    )
     ap.add_argument("--root", default=os.path.dirname(os.path.dirname(__file__)), help="Repo root")
     args = ap.parse_args()
 
@@ -80,11 +86,12 @@ def main():
     to_translate = [(k, v) for k, v in english.items() if k not in messages]
 
     queue = [(k, v, 0) for k, v in to_translate]
+    batch_size = max(1, args.batch_size)
     translated = {}
     skipped: List[str] = []
     while queue:
-        batch = queue[:20]
-        queue = queue[20:]
+        batch = queue[:batch_size]
+        queue = queue[batch_size:]
         safe_lines = []
         tokens_list = []
         keys = []
