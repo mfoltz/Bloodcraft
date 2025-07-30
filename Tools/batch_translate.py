@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 from typing import List
+from argostranslate import translate as argos_translate
 
 MAX_ATTEMPTS = 3
 
@@ -41,16 +42,11 @@ def contains_english(text: str) -> bool:
 
 
 def translate_batch(src: str, dst: str, lines: List[str]) -> List[str]:
-    joined = "\n".join(lines)
-    result = subprocess.run(
-        ["argos-translate", "-f", src, "-t", dst],
-        input=joined,
-        text=True,
-        capture_output=True,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(result.stderr)
-    return result.stdout.strip().splitlines()
+    languages = {l.code: l for l in argos_translate.get_installed_languages()}
+    if src not in languages or dst not in languages:
+        raise RuntimeError(f"Languages {src}->{dst} not installed")
+    translator = languages[src].get_translation(languages[dst])
+    return [translator.translate(line) for line in lines]
 
 
 def main():
