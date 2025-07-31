@@ -6,8 +6,6 @@ import re
 import subprocess
 from typing import List
 
-MAX_ATTEMPTS = 3
-
 RICHTEXT = re.compile(r'<[^>]+>')
 PLACEHOLDER = re.compile(r'\{[^{}]+\}')
 CSINTERP = re.compile(r'\$\{[^{}]+\}')
@@ -79,54 +77,46 @@ def main():
     messages = target.get("Messages", {})
     to_translate = [(k, v) for k, v in english.items() if k not in messages]
 
-    queue = [(k, v, 0) for k, v in to_translate]
-    translated = {}
+    if not to_translate:
+        print("No messages need translation.")
+        return
+
+    safe_lines: List[str] = []
+    tokens_list: List[tuple[List[str], bool]] = []
+    keys: List[str] = []
+
+    for key, text in to_translate:
+        safe, tokens = protect(text)
+        token_only = TOKEN_RE.sub("", safe).strip() == ""
+        if token_only:
+            safe += " TRANSLATE"
+        safe_lines.append(safe)
+        tokens_list.append((tokens, token_only))
+        keys.append(key)
+
+    try:
+        results = translate_batch(args.src, args.dst, safe_lines)
+    except Exception as e:
+        print("Translation error:", e)
+        return
+
+    translated: dict[str, str] = {}
     skipped: List[str] = []
-    while queue:
-        batch = queue
-        queue = []
-        safe_lines = []
-        tokens_list = []
-        for key, text, tries in batch:
-            safe, tokens = protect(text)
-            token_only = TOKEN_RE.sub("", safe).strip() == ""
-            if token_only:
-                safe += " TRANSLATE"
-            safe_lines.append(safe)
-            tokens_list.append((tokens, token_only, tries))
-        try:
-            results = translate_batch(args.src, args.dst, safe_lines)
-        except Exception as e:
-            print("Translation error", e)
-            for key, text, tries in batch:
-                if tries + 1 >= MAX_ATTEMPTS:
-                    print(f"Skipping {key} after {MAX_ATTEMPTS} attempts")
-                    skipped.append(key)
-                else:
-                    queue.append((key, text, tries + 1))
+
+    for key, result, (tokens, token_only) in zip(keys, results, tokens_list):
+        if token_only:
+            result = result.replace(" TRANSLATE", "")
+        if len(TOKEN_RE.findall(result)) != len(tokens):
+            print(f"Skipping {key}: token mismatch")
+            skipped.append(key)
             continue
-        for (key, text, tries), result, (tokens, token_only, _) in zip(batch, results, tokens_list):
-            if token_only:
-                result = result.replace(" TRANSLATE", "")
-            found_tokens = TOKEN_RE.findall(result)
-            if len(found_tokens) != len(tokens):
-                # translator mangled tokens
-                if tries + 1 >= MAX_ATTEMPTS:
-                    print(f"Skipping {key} after {MAX_ATTEMPTS} attempts")
-                    skipped.append(key)
-                else:
-                    queue.append((key, text, tries + 1))
-                continue
-            un = unprotect(result, tokens)
-            un = un.replace("\\u003C", "<").replace("\\u003E", ">")
-            if un == text or contains_english(un):
-                if tries + 1 >= MAX_ATTEMPTS:
-                    print(f"Skipping {key} after {MAX_ATTEMPTS} attempts")
-                    skipped.append(key)
-                else:
-                    queue.append((key, text, tries + 1))
-                continue
-            translated[key] = un
+        un = unprotect(result, tokens)
+        un = un.replace("\\u003C", "<").replace("\\u003E", ">")
+        if un == english[key] or contains_english(un):
+            print(f"Skipping {key}: looks untranslated")
+            skipped.append(key)
+            continue
+        translated[key] = un
 
     messages.update(translated)
     target["Messages"] = messages
