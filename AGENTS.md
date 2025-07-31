@@ -20,7 +20,7 @@ The Codex system uses the following keywords:
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages .`
 2. Copy `English.json` to `<Language>.json` and translate each value while keeping numeric hashes.
 3. Automatically translate missing strings with Argos:
-   `python Tools/batch_translate.py Resources/Localization/Messages/<Language>.json --to <iso-code>`
+   `python Tools/translate.py Resources/Localization/Messages/<Language>.json --to <iso-code>`
 4. The script hides `<...>` tags and `{...}` placeholders as `[[TOKEN_n]]` tokens. Lines consisting only of tokens are given a dummy `TRANSLATE` suffix so Argos will process them.
    **DO NOT** edit text inside these tokens, tags, or variables.
 5. After translation, run the checker to ensure nothing remains in English:
