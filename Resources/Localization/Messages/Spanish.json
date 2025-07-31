@@ -1,1 +1,5 @@
-{ "Messages": {} }
+{
+  "Messages": {
+    "welcome": "Bloodcraft te da la bienvenida"
+  }
+}
