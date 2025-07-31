@@ -2,7 +2,6 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Bloodcraft.Tools;
-
 internal static class CheckTranslations
 {
     public static void Run(string rootPath)
