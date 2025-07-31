@@ -8,7 +8,8 @@ The Codex system uses the following keywords:
 * **ClosePrd** – finalize and archive completed PRDs.
 
 0. Codex-related workflow items belong in `AGENTS.md`, NOT `README.md`!
-1. Run `.codex/install.sh` once to install dependencies
+1. Run `.codex/install.sh` once to install dependencies. This will also generate
+   `Resources/secrets.json` with default development secrets.
 2. Build and deploy locally with `./dev_init.sh`
 3. Update message hashes when needed using `Tools/GenerateMessageTranslations`:
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
