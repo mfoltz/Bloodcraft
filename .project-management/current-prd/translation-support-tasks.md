@@ -16,8 +16,15 @@ These tasks break down the work described in `translation-support-prd.md`.
   Provide Spanish translations for all entries in Spanish.json and verify with Tools/CheckTranslations.
   (Owner: @dev, Due: 2025-08-12)
 
-:::task{title="Translate Spanish", owner="@dev", due="2025-08-12", status="open"}
+:::task{title="Translate Spanish", owner="@dev", due="2025-08-12", status="in_progress"}
 Run `python Tools/translate.py Resources/Localization/Messages/Spanish.json --to es`
+:::
+
+- [ ] Cleanup Spanish tokens
+  Replace `[TOKEN_n]` markers with the correct translations and verify using `check-translations`.
+  (Owner: @dev, Due: 2025-08-12)
+:::task{title="Cleanup Spanish tokens", owner="@dev", due="2025-08-12", status="open"}
+Run `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations .`
 :::
 
 - [ ] Translate Brazilian Portuguese messages
