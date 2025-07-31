@@ -14,9 +14,10 @@ These tasks break down the work described in `translation-support-prd.md`.
 
 - [ ] Translate Spanish message file
   Provide Spanish translations for all entries in Spanish.json and verify with Tools/CheckTranslations.
+  Translation packages installed; initial run produced token mismatches that require manual review.
   (Owner: @dev, Due: 2025-08-12)
 
-:::task{title="Translate Spanish", owner="@dev", due="2025-08-12", status="open"}
+:::task{title="Translate Spanish", owner="@dev", due="2025-08-12", status="in_progress"}
 Run `python Tools/translate.py Resources/Localization/Messages/Spanish.json --to es`
 :::
 
