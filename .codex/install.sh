@@ -5,13 +5,27 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-DOTNET_VERSION="6.0"
+DOTNET_VERSION="8.0"
 
 if ! command -v dotnet >/dev/null; then
     echo "Installing .NET $DOTNET_VERSION SDK..."
     curl -sSL https://dot.net/v1/dotnet-install.sh -o "$SCRIPT_DIR/dotnet-install.sh"
-    bash "$SCRIPT_DIR/dotnet-install.sh" --channel "$DOTNET_VERSION"
-    export PATH="$HOME/.dotnet:$PATH"
+    bash "$SCRIPT_DIR/dotnet-install.sh" --channel "$DOTNET_VERSION" --install-dir "$HOME/.dotnet"
+fi
+
+# Install .NET 6 targeting pack if not already present
+if ! dotnet --list-sdks 2>/dev/null | grep -q '^6\.'; then
+    echo "Installing .NET 6 targeting pack..."
+    bash "$SCRIPT_DIR/dotnet-install.sh" --channel "6.0" --install-dir "$HOME/.dotnet" --no-path
+fi
+
+export DOTNET_ROOT="$HOME/.dotnet"
+export PATH="$DOTNET_ROOT:$PATH"
+
+# Persist environment variables for future sessions
+if ! grep -q "DOTNET_ROOT" "$HOME/.bashrc"; then
+    echo "export DOTNET_ROOT=$DOTNET_ROOT" >> "$HOME/.bashrc"
+    echo "export PATH=\$DOTNET_ROOT:\$PATH" >> "$HOME/.bashrc"
 fi
 
 dotnet restore "$ROOT_DIR/Bloodcraft.csproj"
