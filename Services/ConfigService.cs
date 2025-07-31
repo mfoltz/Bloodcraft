@@ -23,6 +23,9 @@ internal static class ConfigService
     static readonly Lazy<int> _shardBearerLevel = new(() => GetConfigValue<int>("ShardBearerLevel"));
     public static int ShardBearerLevel => _shardBearerLevel.Value;
 
+    static readonly Lazy<int> _primalRiftFrequency = new(() => GetConfigValue<int>("PrimalRiftFrequency"));
+    public static int PrimalRiftFrequency => _primalRiftFrequency.Value;
+
     static readonly Lazy<bool> _potionStacking = new(() => GetConfigValue<bool>("PotionStacking"));
     public static bool PotionStacking => _potionStacking.Value;
 
@@ -519,6 +522,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("General", "ElitePrimalRifts", false, "Enable or disable elite primal rifts. (WIP!)"),
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
+            new ConfigEntryDefinition("General", "PrimalRiftFrequency", 0, "Number of primal rifts to start per day automatically. 0 to disable."),
             new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01/t02 effects at the same time)."),
             new ConfigEntryDefinition("General", "BearFormDash", false, "Enable or disable bear form dash."),
             new ConfigEntryDefinition("General", "BleedingEdge", "", "Enable various weapon-specific changes; some are more experimental than others, see README for details. (Slashers, Crossbow, Pistols, TwinBlades, Daggers)"),
