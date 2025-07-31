@@ -16,7 +16,8 @@ These tasks break down the work described in `translation-support-prd.md`.
   Provide Spanish translations for all entries in Spanish.json and verify with Tools/CheckTranslations.
   (Owner: @dev, Due: 2025-08-12)
 
-:::task{title="Translate Spanish", owner="@dev", due="2025-08-12", status="in_progress"}
+:::task{title="Translate Spanish", owner="@dev", due="2025-08-12", status="blocked"}
+Argos Translate language data missing; cannot run translation command.
 Run `python Tools/translate.py Resources/Localization/Messages/Spanish.json --to es`
 :::
 
