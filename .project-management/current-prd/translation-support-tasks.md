@@ -24,7 +24,7 @@ Run `python Tools/translate.py Resources/Localization/Messages/Spanish.json --to
   Replace `[TOKEN_n]` markers with the correct translations and verify using `check-translations`.
   (Owner: @dev, Due: 2025-08-12)
 :::task{title="Cleanup Spanish tokens", owner="@dev", due="2025-08-12", status="open"}
-Run `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations .`
+Run `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations`
 :::
 
 - [ ] Translate Brazilian Portuguese messages
