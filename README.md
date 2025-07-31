@@ -391,6 +391,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Enable or disable elite shard bearers.
 - **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)
   Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect.
+- **Primal Rift Frequency**: `PrimalRiftFrequency` (int, default: 0)
+  Number of primal rifts automatically triggered per day. Set to 0 to disable.
 - **Potion Stacking**: `PotionStacking` (bool, default: False)
   Enable or disable potion stacking (can have t01/t02 effects at the same time).
 - **Bear Form Dash**: `BearFormDash` (bool, default: False)
