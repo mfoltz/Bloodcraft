@@ -68,6 +68,8 @@ artifacts/
 *.tmp
 *.tmp_proj
 *.log
+# Translation run outputs
+translate_es.log
 *.vspscc
 *.vssscc
 .builds
