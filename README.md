@@ -784,8 +784,8 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 
 ### Translation Workflow
 
-Use `Tools/translate.py` to generate missing strings. The script protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. Pass `--verbose` to display each entry as it is processed and `--log-file` to keep a record. After translating, run `check-translations --show-text` to pinpoint any skipped or untranslated strings. See `AGENTS.md` for the full workflow.
-`translate.py` accepts `--batch-size`, `--max-retries`, and `--timeout` options. It splits work across batches and retries each batch up to the specified limit, waiting at most `--timeout` seconds for Argos to respond. Re-run it on a clean copy of `Spanish.json` to restart translations from scratch.
+Use `Tools/translate_argos.py` to generate missing strings. The script uses the `argostranslate` Python API and protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. Pass `--verbose` to display each entry as it is processed and `--log-file` to keep a record. After translating, run `check-translations --show-text` to pinpoint any skipped or untranslated strings. See `AGENTS.md` for the full workflow.
+`translate_argos.py` accepts `--batch-size`, `--max-retries`, and `--timeout` options. It processes strings in batches and retries failures up to the specified limit. Re-run it on a clean copy of `Spanish.json` to restart translations from scratch. `Tools/translate.py` remains for backward compatibility but will print a deprecation warning.
 
 ### Protecting Tags During Translation
 
