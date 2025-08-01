@@ -21,11 +21,13 @@ The Codex system uses the following keywords:
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
 2. Copy `English.json` to `<Language>.json` and translate each value while keeping numeric hashes.
 3. Automatically translate missing strings with Argos:
-   `python Tools/translate.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3`
+   `python Tools/translate.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --verbose --log-file translate.log`
+   `--verbose` and `--log-file` help pinpoint skipped or untranslated strings.
 4. The script hides `<...>` tags and `{...}` placeholders as `[[TOKEN_n]]` tokens. Lines consisting only of tokens are given a dummy `TRANSLATE` suffix so Argos will process them.
    **DO NOT** edit text inside these tokens, tags, or variables.
 5. After translation, run the checker to ensure nothing remains in English:
-   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations`
+   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text`
+   Use `--show-text` to display lines that still contain English for quick review.
 
 Current PRDs and task lists are stored in `.project-management/current-prd/`, while completed items are moved to `.project-management/closed-prd/`. Codex is expected to own as much as it feels capable of doing so in terms of completion, furthering goals, and being generally proactive with managing tasks to completion of state project goals. Compile with .NET 8 to build with preview features, though do note VRising runs on the .NET 6 runtime as the .csproj implies; be mindful to stay within the .NET 6 API surface to avoid surprises.
 
