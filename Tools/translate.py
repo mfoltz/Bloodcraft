@@ -11,7 +11,7 @@ PLACEHOLDER = re.compile(r'\{[^{}]+\}')
 CSINTERP = re.compile(r'\$\{[^{}]+\}')
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
 
-ENGLISH_WORDS = re.compile(r'\b(the|and|of|to|with|you|your|for|a|an)\b', re.I)
+ENGLISH_WORDS = re.compile(r'\b(the|and|of|with|you|your|for|an)\b', re.I)
 
 
 def protect(text: str):
