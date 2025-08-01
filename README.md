@@ -8,6 +8,7 @@
 - [BleedingEdge](#bleedingedge)
 - [Configuration](#configuration)
 - [Recommended Mods](#recommended-mods)
+- [Development Setup](#development-setup)
 - [Codex Workflow](#codex-workflow)
 - [Workflow Source](#workflow-source)
 - [Credits](#credits)
@@ -772,6 +773,11 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Create custom portals and waygates for your server! Pairs great with KindredSchematics for making new areas.
 - [XPRising](https://thunderstore.io/c/v-rising/p/XPRising/XPRising/)
   If you like the idea of a mod with RPG features but Bloodcraft doesn't float your boat maybe this will!
+
+## Development Setup
+
+Run `.codex/install.sh` once to install the .NET SDK and Argos Translate. The script adds
+`~/.local/bin` to your `PATH` so the `argos-translate` CLI is available in future sessions.
 
 ## Localization (WIP)
 
