@@ -83,7 +83,17 @@ def main():
         help="Seconds to wait for argos-translate before giving up",
     )
     ap.add_argument("--overwrite", action="store_true", help="Translate all messages even if already present")
+    ap.add_argument("--verbose", action="store_true", help="Print per-message translation details")
+    ap.add_argument("--log-file", help="Write verbose output to this file")
     args = ap.parse_args()
+
+    log_fp = open(args.log_file, "w", encoding="utf-8") if args.log_file else None
+
+    def log_verbose(msg: str) -> None:
+        if args.verbose:
+            print(msg)
+        if log_fp:
+            log_fp.write(msg + "\n")
 
     print("NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.")
 
@@ -127,6 +137,14 @@ def main():
     translated: dict[str, str] = {}
     skipped: List[str] = []
 
+    def log_entry(key: str, original: str, result: str, reason: str | None = None) -> None:
+        status = "SKIPPED" if reason else "TRANSLATED"
+        msg = f"{key}: {status}"
+        if reason:
+            msg += f" ({reason})"
+        msg += f"\n  Original: {original}\n  Result: {result}"
+        log_verbose(msg)
+
     for i in range(0, len(safe_lines), args.batch_size):
         batch_lines = safe_lines[i : i + args.batch_size]
         batch_keys = keys[i : i + args.batch_size]
@@ -140,7 +158,9 @@ def main():
                 timeout=args.timeout,
             )
         except Exception as e:
-            print("Translation error:", e)
+            log_verbose(f"Translation error: {e}")
+            for k in batch_keys:
+                log_entry(k, english[k], "", f"batch error: {e}")
             skipped.extend(batch_keys)
             continue
 
@@ -150,16 +170,17 @@ def main():
             if token_only:
                 result = result.replace(" TRANSLATE", "")
             if len(TOKEN_RE.findall(result)) != len(tokens):
-                print(f"Skipping {key}: token mismatch")
+                log_entry(key, english[key], result, "token mismatch")
                 skipped.append(key)
                 continue
             un = unprotect(result, tokens)
             un = un.replace("\\u003C", "<").replace("\\u003E", ">")
             if un == english[key] or contains_english(un):
-                print(f"Skipping {key}: looks untranslated")
+                log_entry(key, english[key], un, "looks untranslated")
                 skipped.append(key)
                 continue
             translated[key] = un
+            log_entry(key, english[key], un)
 
     messages.update(translated)
     target["Messages"] = messages
@@ -167,6 +188,9 @@ def main():
         json.dump(target, f, indent=2, ensure_ascii=False)
 
     print(f"Wrote translations to {target_path}")
+
+    if log_fp:
+        log_fp.close()
 
     if skipped:
         print("Skipped the following message hashes due to repeated errors:")
