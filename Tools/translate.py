@@ -38,17 +38,34 @@ def contains_english(text: str) -> bool:
     return bool(ENGLISH_WORDS.search(text))
 
 
-def translate_batch(src: str, dst: str, lines: List[str]) -> List[str]:
+def translate_batch(
+    src: str,
+    dst: str,
+    lines: List[str],
+    *,
+    max_retries: int,
+    timeout: int,
+) -> List[str]:
     joined = "\n".join(lines)
-    result = subprocess.run(
-        ["argos-translate", "-f", src, "-t", dst],
-        input=joined,
-        text=True,
-        capture_output=True,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(result.stderr)
-    return result.stdout.strip().splitlines()
+    for attempt in range(1, max_retries + 1):
+        try:
+            result = subprocess.run(
+                ["argos-translate", "-f", src, "-t", dst],
+                input=joined,
+                text=True,
+                capture_output=True,
+                timeout=timeout,
+            )
+            if result.returncode == 0:
+                return result.stdout.strip().splitlines()
+            print(
+                f"argos-translate exited with {result.returncode} on attempt {attempt}/{max_retries}"
+            )
+        except subprocess.TimeoutExpired:
+            print(
+                f"argos-translate timed out after {timeout}s on attempt {attempt}/{max_retries}"
+            )
+    raise RuntimeError("Translation failed after maximum retries")
 
 
 def main():
@@ -58,6 +75,13 @@ def main():
     ap.add_argument("--to", dest="dst", required=True, help="Target language code")
     ap.add_argument("--root", default=os.path.dirname(os.path.dirname(__file__)), help="Repo root")
     ap.add_argument("--batch-size", type=int, default=100, help="Number of lines to translate per request")
+    ap.add_argument("--max-retries", type=int, default=3, help="Retry failed batches up to this many times")
+    ap.add_argument(
+        "--timeout",
+        type=int,
+        default=60,
+        help="Seconds to wait for argos-translate before giving up",
+    )
     ap.add_argument("--overwrite", action="store_true", help="Translate all messages even if already present")
     args = ap.parse_args()
 
@@ -100,32 +124,42 @@ def main():
         tokens_list.append((tokens, token_only))
         keys.append(key)
 
-    results: List[str] = []
-    try:
-        for i in range(0, len(safe_lines), args.batch_size):
-            batch = safe_lines[i : i + args.batch_size]
-            results.extend(translate_batch(args.src, args.dst, batch))
-    except Exception as e:
-        print("Translation error:", e)
-        return
-
     translated: dict[str, str] = {}
     skipped: List[str] = []
 
-    for key, result, (tokens, token_only) in zip(keys, results, tokens_list):
-        if token_only:
-            result = result.replace(" TRANSLATE", "")
-        if len(TOKEN_RE.findall(result)) != len(tokens):
-            print(f"Skipping {key}: token mismatch")
-            skipped.append(key)
+    for i in range(0, len(safe_lines), args.batch_size):
+        batch_lines = safe_lines[i : i + args.batch_size]
+        batch_keys = keys[i : i + args.batch_size]
+        batch_tokens = tokens_list[i : i + args.batch_size]
+        try:
+            batch_results = translate_batch(
+                args.src,
+                args.dst,
+                batch_lines,
+                max_retries=args.max_retries,
+                timeout=args.timeout,
+            )
+        except Exception as e:
+            print("Translation error:", e)
+            skipped.extend(batch_keys)
             continue
-        un = unprotect(result, tokens)
-        un = un.replace("\\u003C", "<").replace("\\u003E", ">")
-        if un == english[key] or contains_english(un):
-            print(f"Skipping {key}: looks untranslated")
-            skipped.append(key)
-            continue
-        translated[key] = un
+
+        for key, result, (tokens, token_only) in zip(
+            batch_keys, batch_results, batch_tokens
+        ):
+            if token_only:
+                result = result.replace(" TRANSLATE", "")
+            if len(TOKEN_RE.findall(result)) != len(tokens):
+                print(f"Skipping {key}: token mismatch")
+                skipped.append(key)
+                continue
+            un = unprotect(result, tokens)
+            un = un.replace("\\u003C", "<").replace("\\u003E", ">")
+            if un == english[key] or contains_english(un):
+                print(f"Skipping {key}: looks untranslated")
+                skipped.append(key)
+                continue
+            translated[key] = un
 
     messages.update(translated)
     target["Messages"] = messages
