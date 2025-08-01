@@ -50,3 +50,16 @@ EOF
 fi
 
 dotnet restore "$ROOT_DIR/Bloodcraft.csproj"
+
+# Optional: download an Argos Translate language pair if requested
+FROM_LANG="${FROM_LANG:-}"
+TO_LANG="${TO_LANG:-}"
+
+if [ -n "${ARGOS_LANGUAGE_PAIR:-}" ]; then
+    IFS=':' read -r FROM_LANG TO_LANG <<<"$ARGOS_LANGUAGE_PAIR"
+fi
+
+if [ -n "$FROM_LANG" ] && [ -n "$TO_LANG" ]; then
+    echo "Downloading Argos Translate model from $FROM_LANG to $TO_LANG"
+    python3 -m argostranslate.cli download --from "$FROM_LANG" --to "$TO_LANG"
+fi
