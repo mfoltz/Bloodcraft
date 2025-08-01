@@ -21,6 +21,12 @@
 
 Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; Imperivm Draconis; Geoffrey D.; SirSaia; Robin C.; Colin F.; Jade K.; Jorge L.; Adrian L.;
 
+## Development setup
+
+Run `.codex/install.sh` once to install the .NET SDK and Argos Translate dependencies. See
+[AGENTS.md](AGENTS.md) for the full workflow. For instructions on customizing
+`FROM_LANG` and `TO_LANG`, jump to the [Localization](#localization-wip) section.
+
 ## Features
 
 ### Experience Leveling
