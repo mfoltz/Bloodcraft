@@ -786,7 +786,7 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 
 Use `Tools/translate.py` to generate missing strings. The script protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. After translating, run `check-translations` to ensure no English text remains. See `AGENTS.md` for the full workflow.
 
-`translate.py` sends all messages in a single request without retries or batching.
+`translate.py` accepts a `--batch-size` option to split work across multiple requests and retries failed lines up to `--max-retries` times. Re-run it on a clean copy of `Spanish.json` to restart translations from scratch.
 
 ### Protecting Tags During Translation
 
