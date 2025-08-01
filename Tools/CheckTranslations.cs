@@ -58,7 +58,7 @@ internal static class CheckTranslations
     }
 
     static readonly Regex EnglishWords = new(
-        @"\b(the|and|of|to|with|you|your|for|a|an)\b",
+        @"\b(the|and|of|with|you|your|for|an)\b",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     static bool LooksEnglish(string txt)
