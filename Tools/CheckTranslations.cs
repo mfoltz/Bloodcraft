@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace Bloodcraft.Tools;
 internal static class CheckTranslations
 {
-    public static void Run(string rootPath)
+    public static void Run(string rootPath, bool showText = false)
     {
         string messagesDir = Path.Combine(rootPath, "Resources", "Localization", "Messages");
         string engPath = Path.Combine(messagesDir, "English.json");
@@ -40,14 +40,35 @@ internal static class CheckTranslations
             {
                 Console.WriteLine($"Missing hashes in {Path.GetFileName(path)}:");
                 foreach (string h in missing)
-                    Console.WriteLine($"  {h}");
+                {
+                    if (showText)
+                    {
+                        string eng = englishFile.Messages.GetValueOrDefault(h, string.Empty);
+                        Console.WriteLine($"  {h}: {eng}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"  {h}");
+                    }
+                }
             }
 
             if (englishLike.Count > 0)
             {
                 Console.WriteLine($"Potential untranslated strings in {Path.GetFileName(path)}:");
                 foreach (string h in englishLike)
-                    Console.WriteLine($"  {h}");
+                {
+                    if (showText)
+                    {
+                        string eng = englishFile.Messages.GetValueOrDefault(h, string.Empty);
+                        string current = langFile.Messages[h];
+                        Console.WriteLine($"  {h}: {eng} -> {current}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"  {h}");
+                    }
+                }
             }
         }
     }

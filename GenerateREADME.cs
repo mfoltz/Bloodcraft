@@ -43,8 +43,18 @@ internal static class GenerateREADME
 
         if (args.Length >= 1 && args[0].Equals("check-translations", StringComparison.OrdinalIgnoreCase))
         {
-            string root = args.Length > 1 ? args[1] : Directory.GetCurrentDirectory();
-            Tools.CheckTranslations.Run(root);
+            string root = Directory.GetCurrentDirectory();
+            bool showText = false;
+            for (int i = 1; i < args.Length; i++)
+            {
+                string arg = args[i];
+                if (arg.Equals("--show-text", StringComparison.OrdinalIgnoreCase) || arg.Equals("--verbose", StringComparison.OrdinalIgnoreCase))
+                    showText = true;
+                else if (!arg.StartsWith("-"))
+                    root = arg;
+            }
+
+            Tools.CheckTranslations.Run(root, showText);
             return;
         }
 
