@@ -57,6 +57,8 @@ def main():
     ap.add_argument("--from", dest="src", default="en", help="Source language code (default: en)")
     ap.add_argument("--to", dest="dst", required=True, help="Target language code")
     ap.add_argument("--root", default=os.path.dirname(os.path.dirname(__file__)), help="Repo root")
+    ap.add_argument("--batch-size", type=int, default=20, help="Number of lines to send per translation request")
+    ap.add_argument("--max-retries", type=int, default=3, help="Maximum attempts per message before skipping")
     args = ap.parse_args()
 
     print("NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.")
@@ -75,48 +77,69 @@ def main():
         target = {"Messages": {}}
 
     messages = target.get("Messages", {})
-    to_translate = [(k, v) for k, v in english.items() if k not in messages]
+    queue: List[tuple[str, str, int]] = [(k, v, 0) for k, v in english.items() if k not in messages]
 
-    if not to_translate:
+    if not queue:
         print("No messages need translation.")
-        return
-
-    safe_lines: List[str] = []
-    tokens_list: List[tuple[List[str], bool]] = []
-    keys: List[str] = []
-
-    for key, text in to_translate:
-        safe, tokens = protect(text)
-        token_only = TOKEN_RE.sub("", safe).strip() == ""
-        if token_only:
-            safe += " TRANSLATE"
-        safe_lines.append(safe)
-        tokens_list.append((tokens, token_only))
-        keys.append(key)
-
-    try:
-        results = translate_batch(args.src, args.dst, safe_lines)
-    except Exception as e:
-        print("Translation error:", e)
         return
 
     translated: dict[str, str] = {}
     skipped: List[str] = []
 
-    for key, result, (tokens, token_only) in zip(keys, results, tokens_list):
-        if token_only:
-            result = result.replace(" TRANSLATE", "")
-        if len(TOKEN_RE.findall(result)) != len(tokens):
-            print(f"Skipping {key}: token mismatch")
-            skipped.append(key)
+    while queue:
+        batch = queue[: args.batch_size]
+        del queue[: args.batch_size]
+
+        safe_lines: List[str] = []
+        meta: List[tuple[str, List[str], bool, str, int]] = []
+
+        for key, text, attempts in batch:
+            safe, tokens = protect(text)
+            token_only = TOKEN_RE.sub("", safe).strip() == ""
+            if token_only:
+                safe += " TRANSLATE"
+            safe_lines.append(safe)
+            meta.append((key, tokens, token_only, text, attempts))
+
+        try:
+            results = translate_batch(args.src, args.dst, safe_lines)
+            if len(results) != len(meta):
+                raise RuntimeError("result count mismatch")
+        except Exception as e:
+            print("Translation error:", e)
+            for key, _tokens, _tokonly, text, attempts in meta:
+                attempts += 1
+                if attempts <= args.max_retries:
+                    queue.append((key, text, attempts))
+                else:
+                    print(f"Skipping {key}: exceeded max retries")
+                    skipped.append(key)
             continue
-        un = unprotect(result, tokens)
-        un = un.replace("\\u003C", "<").replace("\\u003E", ">")
-        if un == english[key] or contains_english(un):
-            print(f"Skipping {key}: looks untranslated")
-            skipped.append(key)
-            continue
-        translated[key] = un
+
+        for (key, tokens, token_only, text, attempts), result in zip(meta, results):
+            if token_only:
+                result = result.replace(" TRANSLATE", "")
+            if len(TOKEN_RE.findall(result)) != len(tokens):
+                print(f"Requeueing {key}: token mismatch")
+                attempts += 1
+                if attempts <= args.max_retries:
+                    queue.append((key, text, attempts))
+                else:
+                    print(f"Skipping {key}: exceeded max retries")
+                    skipped.append(key)
+                continue
+            un = unprotect(result, tokens)
+            un = un.replace("\\u003C", "<").replace("\\u003E", ">")
+            if un == english[key] or contains_english(un):
+                print(f"Requeueing {key}: looks untranslated")
+                attempts += 1
+                if attempts <= args.max_retries:
+                    queue.append((key, text, attempts))
+                else:
+                    print(f"Skipping {key}: exceeded max retries")
+                    skipped.append(key)
+                continue
+            translated[key] = un
 
     messages.update(translated)
     target["Messages"] = messages
