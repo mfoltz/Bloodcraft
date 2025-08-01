@@ -57,6 +57,8 @@ def main():
     ap.add_argument("--from", dest="src", default="en", help="Source language code (default: en)")
     ap.add_argument("--to", dest="dst", required=True, help="Target language code")
     ap.add_argument("--root", default=os.path.dirname(os.path.dirname(__file__)), help="Repo root")
+    ap.add_argument("--batch-size", type=int, default=100, help="Number of lines to translate per request")
+    ap.add_argument("--overwrite", action="store_true", help="Translate all messages even if already present")
     args = ap.parse_args()
 
     print("NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.")
@@ -75,7 +77,11 @@ def main():
         target = {"Messages": {}}
 
     messages = target.get("Messages", {})
-    to_translate = [(k, v) for k, v in english.items() if k not in messages]
+    if args.overwrite:
+        to_translate = list(english.items())
+        messages = {}
+    else:
+        to_translate = [(k, v) for k, v in english.items() if k not in messages]
 
     if not to_translate:
         print("No messages need translation.")
@@ -94,8 +100,11 @@ def main():
         tokens_list.append((tokens, token_only))
         keys.append(key)
 
+    results: List[str] = []
     try:
-        results = translate_batch(args.src, args.dst, safe_lines)
+        for i in range(0, len(safe_lines), args.batch_size):
+            batch = safe_lines[i : i + args.batch_size]
+            results.extend(translate_batch(args.src, args.dst, batch))
     except Exception as e:
         print("Translation error:", e)
         return
