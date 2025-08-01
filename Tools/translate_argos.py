@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
+"""Translate message JSON files using the argostranslate Python API."""
+
 import argparse
 import json
 import os
 import re
-import subprocess
-import sys
 from typing import List
 
-print(
-    "WARNING: Tools/translate.py is deprecated. Use Tools/translate_argos.py instead.",
-    file=sys.stderr,
-)
+from argostranslate import translate as argos_translate
 
 RICHTEXT = re.compile(r'<[^>]+>')
 PLACEHOLDER = re.compile(r'\{[^{}]+\}')
@@ -52,42 +49,35 @@ def translate_batch(
     max_retries: int,
     timeout: int,
 ) -> List[str]:
-    joined = "\n".join(lines)
-    for attempt in range(1, max_retries + 1):
-        try:
-            result = subprocess.run(
-                ["argos-translate", "-f", src, "-t", dst],
-                input=joined,
-                text=True,
-                capture_output=True,
-                timeout=timeout,
-            )
-            if result.returncode == 0:
-                return result.stdout.strip().splitlines()
-            print(
-                f"argos-translate exited with {result.returncode} on attempt {attempt}/{max_retries}"
-            )
-        except subprocess.TimeoutExpired:
-            print(
-                f"argos-translate timed out after {timeout}s on attempt {attempt}/{max_retries}"
-            )
-    raise RuntimeError("Translation failed after maximum retries")
+    """Translate a list of lines using argostranslate."""
+    argos_translate.load_installed_languages()
+    translator = argos_translate.get_translation_from_codes(src, dst)
+    results: List[str] = []
+    for line in lines:
+        for attempt in range(1, max_retries + 1):
+            try:
+                results.append(translator.translate(line))
+                break
+            except Exception as e:
+                if attempt == max_retries:
+                    raise RuntimeError(f"Translation failed: {e}")
+                print(
+                    f"Argos failed on attempt {attempt}/{max_retries}: {e}"
+                )
+    return results
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Translate message JSON files with Argos Translate")
+    ap = argparse.ArgumentParser(
+        description="Translate message JSON files with Argos Translate"
+    )
     ap.add_argument("target_file", help="Path to the target language JSON file")
     ap.add_argument("--from", dest="src", default="en", help="Source language code (default: en)")
     ap.add_argument("--to", dest="dst", required=True, help="Target language code")
     ap.add_argument("--root", default=os.path.dirname(os.path.dirname(__file__)), help="Repo root")
     ap.add_argument("--batch-size", type=int, default=100, help="Number of lines to translate per request")
-    ap.add_argument("--max-retries", type=int, default=3, help="Retry failed batches up to this many times")
-    ap.add_argument(
-        "--timeout",
-        type=int,
-        default=60,
-        help="Seconds to wait for argos-translate before giving up",
-    )
+    ap.add_argument("--max-retries", type=int, default=3, help="Retry failed translations up to this many times")
+    ap.add_argument("--timeout", type=int, default=60, help="Unused for API compatibility")
     ap.add_argument("--overwrite", action="store_true", help="Translate all messages even if already present")
     ap.add_argument("--verbose", action="store_true", help="Print per-message translation details")
     ap.add_argument("--log-file", help="Write verbose output to this file")
