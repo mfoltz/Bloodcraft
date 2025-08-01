@@ -21,13 +21,22 @@ if ! dotnet --list-sdks 2>/dev/null | grep -q '^6\.'; then
 fi
 
 export DOTNET_ROOT="$HOME/.dotnet"
-export PATH="$DOTNET_ROOT:$PATH"
+export PATH="$DOTNET_ROOT:$PATH:$HOME/.local/bin"
 
 # Persist environment variables for future sessions
 if ! grep -q "DOTNET_ROOT" "$HOME/.bashrc"; then
     echo "export DOTNET_ROOT=$DOTNET_ROOT" >> "$HOME/.bashrc"
-    echo "export PATH=\$DOTNET_ROOT:\$PATH" >> "$HOME/.bashrc"
+    echo "export PATH=\$DOTNET_ROOT:\$PATH:\$HOME/.local/bin" >> "$HOME/.bashrc"
 fi
+
+# Install Argos Translate and expose CLI
+python3 -m pip install --user --no-cache-dir argostranslate==1.8.0
+mkdir -p "$HOME/.local/bin"
+cat >"$HOME/.local/bin/argos-translate" <<'EOF'
+#!/usr/bin/env bash
+python3 -m argostranslate.cli "$@"
+EOF
+chmod +x "$HOME/.local/bin/argos-translate"
 
 # Ensure embedded secrets exist before restoring
 SECRETS_FILE="$ROOT_DIR/Resources/secrets.json"
