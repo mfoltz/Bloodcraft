@@ -13,6 +13,7 @@ RICHTEXT = re.compile(r'<[^>]+>')
 PLACEHOLDER = re.compile(r'\{[^{}]+\}')
 CSINTERP = re.compile(r'\$\{[^{}]+\}')
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
+TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
 
 ENGLISH_WORDS = re.compile(r'\b(the|and|of|with|you|your|for|an)\b', re.I)
 
@@ -35,6 +36,11 @@ def unprotect(text: str, tokens: List[str]) -> str:
         idx = int(m.group(1))
         return tokens[idx] if 0 <= idx < len(tokens) else m.group(0)
     return TOKEN_RE.sub(repl, text)
+
+
+def normalize_tokens(text: str) -> str:
+    """Normalize token formatting in Argos output."""
+    return TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
 
 
 def contains_english(text: str) -> bool:
@@ -165,6 +171,7 @@ def main():
         ):
             if token_only:
                 result = result.replace(" TRANSLATE", "")
+            result = normalize_tokens(result)
             if len(TOKEN_RE.findall(result)) != len(tokens):
                 log_entry(key, english[key], result, "token mismatch")
                 skipped.append(key)
