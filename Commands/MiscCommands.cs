@@ -6,6 +6,7 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarUnlocksManager;
 using static Bloodcraft.Utilities.Misc;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static VCF.Core.Basics.RoleCommands;
@@ -109,6 +110,39 @@ internal static class MiscCommands
                 ServerGameManager.TryAddInventoryItem(character, item.Key, item.Value);
             }
 
+            string kitFamiliarName = string.Empty;
+            int familiarGuid = ConfigService.KitFamiliar;
+
+            if (familiarGuid > 0)
+            {
+                FamiliarUnlocksData unlocksData = LoadFamiliarUnlocksData(steamId);
+                string boxName = steamId.TryGetFamiliarBox(out var currentBox) ? currentBox : string.Empty;
+
+                if (string.IsNullOrEmpty(boxName) || !unlocksData.FamiliarUnlocks.ContainsKey(boxName))
+                {
+                    boxName = unlocksData.FamiliarUnlocks.Count == 0 ? "box1" : unlocksData.FamiliarUnlocks.Keys.First();
+                    if (!unlocksData.FamiliarUnlocks.ContainsKey(boxName))
+                    {
+                        unlocksData.FamiliarUnlocks[boxName] = [];
+                    }
+
+                    steamId.SetFamiliarBox(boxName);
+                }
+
+                if (!unlocksData.FamiliarUnlocks.TryGetValue(boxName, out var familiars))
+                {
+                    familiars = [];
+                    unlocksData.FamiliarUnlocks[boxName] = familiars;
+                }
+
+                if (!familiars.Contains(familiarGuid))
+                {
+                    familiars.Add(familiarGuid);
+                    SaveFamiliarUnlocksData(steamId, unlocksData);
+                    kitFamiliarName = new PrefabGUID(familiarGuid).GetLocalizedName();
+                }
+            }
+
             List<string> kitItems = StarterKitItemPrefabGUIDs.Select(x => $"<color=white>{x.Key.GetLocalizedName()}</color>").ToList();
 
             LocalizationService.HandleReply(ctx, $"You've received a starting kit with:");
@@ -120,6 +154,11 @@ internal static class MiscCommands
                 string items = string.Join(", ", batch);
 
                 LocalizationService.HandleReply(ctx, $"{items}");
+            }
+
+            if (!string.IsNullOrEmpty(kitFamiliarName))
+            {
+                LocalizationService.HandleReply(ctx, $"Starter familiar unlocked: <color=white>{kitFamiliarName}</color>.");
             }
         }
         else
