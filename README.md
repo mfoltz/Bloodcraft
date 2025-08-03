@@ -800,9 +800,10 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 
 ```bash
 cd Resources/Localization/Messages/Models
-cat translate-en_es-1_0.z* > translate-en_es-1_0.zip
+cat translate-en_es-1_0.z01 translate-en_es-1_0.z02 translate-en_es-1_0.z03 translate-en_es-1_0.z04 > translate-en_es-1_0.zip
 unzip translate-en_es-1_0.zip
 argos-translate install translate-en_es-1_0.argosmodel
+rm translate-en_es-1_0.zip translate-en_es-1_0.argosmodel
 ```
 
 Use `Tools/translate_argos.py` to generate missing strings. The script uses the `argostranslate` Python API and protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. Pass `--verbose` to display each entry as it is processed and `--log-file` to keep a record. After translating, run `check-translations --show-text` to pinpoint any skipped or untranslated strings. See `AGENTS.md` for the full workflow.
