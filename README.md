@@ -796,6 +796,15 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 
 ### Translation Workflow
 
+`Resources/Localization/Messages/Models` contains a split Argos English→Spanish model (`translate-en_es-1_0.z01`–`translate-en_es-1_0.z04`). Combine the parts and install the model before running any translation scripts:
+
+```bash
+cd Resources/Localization/Messages/Models
+cat translate-en_es-1_0.z* > translate-en_es-1_0.zip
+unzip translate-en_es-1_0.zip
+argos-translate install translate-en_es-1_0.argosmodel
+```
+
 Use `Tools/translate_argos.py` to generate missing strings. The script uses the `argostranslate` Python API and protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. Pass `--verbose` to display each entry as it is processed and `--log-file` to keep a record. After translating, run `check-translations --show-text` to pinpoint any skipped or untranslated strings. See `AGENTS.md` for the full workflow.
 `translate_argos.py` accepts `--batch-size`, `--max-retries`, and `--timeout` options. It processes strings in batches and retries failures up to the specified limit. Re-run it on a clean copy of `Spanish.json` to restart translations from scratch. `Tools/translate.py` remains for backward compatibility but will print a deprecation warning.
 

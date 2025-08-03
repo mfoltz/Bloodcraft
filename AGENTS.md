@@ -20,12 +20,20 @@ The Codex system uses the following keywords:
 1. Run the generator to refresh `English.json`:
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
 2. Copy `English.json` to `<Language>.json` and translate each value while keeping numeric hashes.
-3. Automatically translate missing strings with Argos:
+3. Reassemble and install the Argos model before running translation scripts. The split files `translate-en_es-1_0.z01`–`translate-en_es-1_0.z04` live in `Resources/Localization/Messages/Models`:
+   ```bash
+   cd Resources/Localization/Messages/Models
+   cat translate-en_es-1_0.z* > translate-en_es-1_0.zip
+   unzip translate-en_es-1_0.zip
+   argos-translate install translate-en_es-1_0.argosmodel
+   ```
+   Translation scripts require the model to be installed beforehand.
+4. Automatically translate missing strings with Argos:
    `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --verbose --log-file translate.log`
    `--verbose` and `--log-file` help pinpoint skipped or untranslated strings. `translate.py` still exists but prints a deprecation warning.
-4. The script hides `<...>` tags and `{...}` placeholders as `[[TOKEN_n]]` tokens. Lines consisting only of tokens are given a dummy `TRANSLATE` suffix so Argos will process them.
+5. The script hides `<...>` tags and `{...}` placeholders as `[[TOKEN_n]]` tokens. Lines consisting only of tokens are given a dummy `TRANSLATE` suffix so Argos will process them.
    **DO NOT** edit text inside these tokens, tags, or variables.
-5. After translation, run the checker to ensure nothing remains in English:
+6. After translation, run the checker to ensure nothing remains in English:
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations`
    Use `--show-text` to also print the English string and existing translation alongside each hash.
 
