@@ -73,6 +73,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - 20% chance for random shiny effect on first unit unlock, 100% chance on repeated unit unlock
   - Chance when dealing damage to apply respective spell school debuff, same proc chance as configured for class onhit effects
   - `.fam shiny [SpellSchool]` (apply or change shiny, requires vampiric dust)
+- Spend exo prestige rewards to unlock VBlood familiars with `.fam echoes [VBloodName]`. Costs scale by unit level and tier and depend on the `PrimalEchoes` configuration and `EchoesFactor` multiplier.
 
 ### Quests
 - Players can complete daily and weekly quests for XP and rewards.
