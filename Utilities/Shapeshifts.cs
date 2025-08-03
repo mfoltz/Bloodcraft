@@ -363,4 +363,9 @@ internal static class Shapeshifts
     {
         return ShapeshiftBuffs[shapeshiftType];
     }
+    public static bool IsExoForm(this Entity playerCharacter)
+    {
+        return playerCharacter.HasBuff(Buffs.EvolvedVampireBuff)
+            || playerCharacter.HasBuff(Buffs.CorruptedSerpentBuff);
+    }
 }

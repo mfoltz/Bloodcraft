@@ -173,7 +173,7 @@ public class QuestTargetSystem : SystemBase
 
         while (Sequences.TryDequeue(out var sequenceRequest))
         {
-            Core.Log.LogWarning($"{sequenceRequest.SequenceName} = {sequenceRequest.SequenceGuid.GuidHash}");
+            // Core.Log.LogWarning($"{sequenceRequest.SequenceName} = {sequenceRequest.SequenceGuid.GuidHash}");
             _serverGameManager.PlaySequenceOnTarget(
                 sequenceRequest.Target,
                 sequenceRequest.SequenceGuid,

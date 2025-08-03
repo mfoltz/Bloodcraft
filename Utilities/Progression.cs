@@ -363,9 +363,9 @@ internal static class Progression
     public static unsafe void GetAttributeCaps()
     {
         PrefabGUID vampireMale = PrefabGUIDs.CHAR_VampireMale;
+        Entity prefab = vampireMale.GetPrefabEntity();
 
-        if (vampireMale.TryGetPrefabEntity(out Entity prefabEntity)
-            && prefabEntity.TryGetComponent(out VampireAttributeCaps vampireAttributeCaps))
+        if (prefab.TryGetComponent(out VampireAttributeCaps vampireAttributeCaps))
         {
             BlobAssetReference<VampireAttributes_Unboxed<AttributeCap>> blobRef = vampireAttributeCaps.Caps;
             VampireAttributes_Unboxed<AttributeCap>* unboxedAttributeCaps = (VampireAttributes_Unboxed<AttributeCap>*)blobRef.GetUnsafePtr();

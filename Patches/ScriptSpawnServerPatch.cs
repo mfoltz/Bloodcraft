@@ -54,22 +54,12 @@ internal static class ScriptSpawnServerPatch
     static readonly PrefabGUID _bloodBoltChannelBuff = PrefabGUIDs.AB_Vampire_Dracula_BloodBoltSwarm_ChannelBuff;
     static readonly PrefabGUID _bloodBoltSwarmGroup = PrefabGUIDs.AB_Vampire_Dracula_BloodBoltSwarm_AbilityGroup;
 
-    // static readonly PrefabGUID _bonusPlayerStatsBuff = Buffs.BonusPlayerStatsBuff;
-    // static readonly PrefabGUID _bonusFamiliarStatsBuff = Buffs.BonusFamiliarStatsBuff;
     static readonly PrefabGUID _bonusStatsBuff = Buffs.BonusStatsBuff;
 
     static readonly bool _eliteShardBearers = ConfigService.EliteShardBearers;
     static readonly int _shardBearerLevel = ConfigService.ShardBearerLevel;
     static readonly PrefabGUID _dracula = new(-327335305);
     static readonly PrefabGUID _draculaVisual = PrefabGUIDs.AB_Shapeshift_BloodHunger_BloodSight_Buff;
-
-    /*
-    static readonly HashSet<PrefabGUID> _bonusStatBuffs =
-    [
-        _bonusPlayerStatsBuff,
-        _bonusFamiliarStatsBuff
-    ];
-    */
 
     static readonly HashSet<int> _shapeshiftBuffs =
     [
@@ -234,13 +224,6 @@ internal static class ScriptSpawnServerPatch
     {
         ulong steamId = playerCharacter.GetSteamId();
 
-        /*
-        buffEntity.With((ref Buff buff) =>
-        {
-            buff.BuffType = BuffType.Parallel;
-        });
-        */
-
         if (buffEntity.TryGetBuffer<SyncToUserBuffer>(out var syncToUsers))
         {
             if (syncToUsers.IsEmpty)
@@ -253,23 +236,6 @@ internal static class ScriptSpawnServerPatch
                 syncToUsers.Add(syncToUserBuffer);
             }
         }
-
-        /*
-        if (playerCharacter.TryGetBuffer<EquipmentSetBuff>(out var equipmentSetBuffs))
-        {
-            EquipmentSetBuff equipmentSetBuff = new()
-            {
-                BuffGUID = _bonusStatsBuff,
-                BuffInstance = buffEntity
-            };
-
-            equipmentSetBuffs.Add(equipmentSetBuff);
-        }
-        else
-        {
-            Core.Log.LogWarning($"[ApplyPlayerStats] - SyncToUserBuffer not found!");
-        }
-        */
 
         BloodManager.UpdateBloodStats(buffEntity, playerCharacter, steamId);
         WeaponManager.UpdateWeaponStats(buffEntity, playerCharacter, steamId);
@@ -305,92 +271,6 @@ internal static class ScriptSpawnServerPatch
                             modifyUnitStatBuffs.Add(modifyUnitStatBuff);
                         }
                     }
-
-                    /*
-                    if (equipmentEntity.IsAncestralWeapon() && equipmentEntity.TryGetComponent(out LegendaryItemSpellModSetComponent spellModSetComponent))
-                    {
-                        SpellModSet statModSet = spellModSetComponent.StatMods;
-                        int statModCount = statModSet.Count;
-
-                        PrefabGUID spellSchoolInfusion = spellModSetComponent.AbilityMods0.Mod0.Id;
-                        PrefabGUID secondSpellSchoolInfusion = spellModSetComponent.AbilityMods1.Mod0.Id;
-                        PrefabGUID shinyPrefabGuid = Misc.InfusionShinyBuffs.TryGetValue(spellSchoolInfusion, out shinyPrefabGuid) ? shinyPrefabGuid : PrefabGUID.Empty;
-
-                        Core.Log.LogWarning($"ApplyFamiliarEquipmentStats() - {spellSchoolInfusion.GetPrefabName()}|{secondSpellSchoolInfusion.GetPrefabName()}|{shinyPrefabGuid.GetPrefabName()}");
-
-                        if (shinyPrefabGuid.HasValue() && familiar.TryGetBuff(shinyPrefabGuid, out Entity shinyBuff) && shinyBuff.Has<Buff>())
-                        {
-                            shinyBuff.With((ref Buff buff) =>
-                            {
-                                buff.Stacks = SHINY_TIER;
-                            });
-
-                            Buff buff = shinyBuff.Read<Buff>();
-                            Core.Log.LogWarning($"ApplyFamiliarEquipmentStats() - {shinyPrefabGuid.GetPrefabName()}|{buff.Stacks}|{buff.MaxStacks}|{buff.IncreaseStacks}");
-                        }
-
-                        for (int i = 0; i < statModCount; i++)
-                        {
-                            SpellMod statMod = statModSet[i];
-                            PrefabGUID prefabGuid = statMod.Id;
-                            float value = statMod.Power;
-
-                            Core.Log.LogWarning($"ApplyFamiliarEquipmentStats() - {prefabGuid.GetPrefabName()}|{statMod.Power}"); // ah, need the power from 0-1 lol kill me
-
-                            if (!Misc.TryGetStatTypeFromPrefabName(prefabGuid, value, out UnitStatType unitStatType, out value)) continue;
-
-                            // [Warning:Bloodcraft] [ApplyFamiliarEquipmentStats] - StatMod_Unique_CriticalStrikeSpell_Mid PrefabGuid(-1466424600)|1
-                            // so need to make a map of those to the real values
-                            // if (unitStatType.Equals(UnitStatType.DamageReduction)) value /= 10f;
-
-                            ModifyUnitStatBuff_DOTS modifyUnitStatBuff_DOTS = new()
-                            {
-                                StatType = unitStatType,
-                                // ModificationType = !unitStatType.Equals(UnitStatType.MovementSpeed) ? ModificationType.AddToBase : ModificationType.MultiplyBaseAdd,
-                                ModificationType = !unitStatType.Equals(UnitStatType.MovementSpeed) ? ModificationType.Add : ModificationType.MultiplyBaseAdd,
-                                Value = value,
-                                Modifier = 1,
-                                IncreaseByStacks = false,
-                                ValueByStacks = 0,
-                                Priority = 0,
-                                Id = ModificationIDs.Create().NewModificationId()
-                            };
-
-                            modifyUnitStatBuffs.Add(modifyUnitStatBuff_DOTS);
-                        }
-                    }
-                    else if (equipmentEntity.IsShardNecklace() && equipmentEntity.TryGetComponent(out spellModSetComponent))
-                    {
-                        SpellModSet statModSet = spellModSetComponent.StatMods;
-                        int statModCount = statModSet.Count;
-
-                        for (int i = 0; i < statModCount; i++)
-                        {
-                            SpellMod statMod = statModSet[i];
-                            PrefabGUID prefabGuid = statMod.Id;
-                            float value = statMod.Power;
-
-                            Core.Log.LogWarning($"ApplyFamiliarEquipmentStats() - {prefabGuid.GetPrefabName()}|{statMod.Power}");
-
-                            if (!Misc.TryGetStatTypeFromPrefabName(prefabGuid, value, out UnitStatType unitStatType, out value)) continue;
-
-                            ModifyUnitStatBuff_DOTS modifyUnitStatBuff_DOTS = new()
-                            {
-                                StatType = unitStatType,
-                                // ModificationType = !unitStatType.Equals(UnitStatType.MovementSpeed) ? ModificationType.AddToBase : ModificationType.MultiplyBaseAdd,
-                                ModificationType = !unitStatType.Equals(UnitStatType.MovementSpeed) ? ModificationType.Add : ModificationType.MultiplyBaseAdd,
-                                Value = value,
-                                Modifier = 1,
-                                IncreaseByStacks = false,
-                                ValueByStacks = 0,
-                                Priority = 0,
-                                Id = ModificationIDs.Create().NewModificationId()
-                            };
-
-                            modifyUnitStatBuffs.Add(modifyUnitStatBuff_DOTS);
-                        }
-                    }
-                    */
                 }
 
                 foreach (Entity equippableBuff in equippableBuffs)
@@ -419,9 +299,47 @@ internal static class ScriptSpawnServerPatch
                 equippableBuffs.Dispose();
             }
 
-        Familiars.FamiliarSyncDelayRoutine(familiar, servant).Start();
+            Familiars.FamiliarSyncDelayRoutine(familiar, servant).Start();
+        }
     }
 
+    [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
+    [HarmonyPostfix]
+    static void OnUpdatePostfix(ScriptSpawnServer __instance)
+    {
+        if (!Core._initialized) return;
+
+        bool handleLevel = _leveling;
+
+        using NativeAccessor<Entity> entities = _query.ToEntityArrayAccessor();
+        using NativeAccessor<Buff> buffs = _query.ToComponentDataArrayAccessor<Buff>();
+
+        try
+        {
+            for (int i = 0; i < entities.Length; i++)
+            {
+                Entity buffEntity = entities[i];
+                Entity buffTarget = buffs[i].Target;
+
+                if (_eliteShardBearers && buffEntity.GetPrefabGuid().Equals(Buffs.EvolvedVampireBuff) && !buffTarget.IsPlayer())
+                {
+                    if (buffTarget.TryGetComponent(out PrefabGUID targetPrefab) && targetPrefab.Equals(_dracula))
+                    {
+                        ApplyEliteDraculaModifiers(buffTarget);
+                    }
+                }
+
+                if (handleLevel && buffEntity.HasSpellLevel() && buffTarget.IsPlayer())
+                {
+                    LevelingSystem.SetLevel(buffTarget);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Core.Log.LogWarning($"[ScriptSpawnServer.OnUpdatePostfix] - {e}");
+        }
+    }
     static void ApplyEliteDraculaModifiers(Entity entity)
     {
         entity.Remove<DynamicallyWeakenAttackers>();
@@ -456,44 +374,5 @@ internal static class ScriptSpawnServerPatch
         });
 
         Buffs.HandleShinyBuff(entity, _draculaVisual);
-    }
-    }
-
-    [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
-    [HarmonyPostfix]
-    static void OnUpdatePostfix(ScriptSpawnServer __instance)
-    {
-        if (!Core._initialized) return;
-
-        bool handleLevel = _leveling;
-
-        using NativeAccessor<Entity> entities = _query.ToEntityArrayAccessor();
-        using NativeAccessor<Buff> buffs = _query.ToComponentDataArrayAccessor<Buff>();
-        
-        try
-        {
-            for (int i = 0; i < entities.Length; i++)
-            {
-                Entity buffEntity = entities[i];
-                Entity buffTarget = buffs[i].Target;
-
-                if (_eliteShardBearers && buffEntity.GetPrefabGuid().Equals(Buffs.EvolvedVampireBuff) && !buffTarget.IsPlayer())
-                {
-                    if (buffTarget.TryGetComponent(out PrefabGUID targetPrefab) && targetPrefab.Equals(_dracula))
-                    {
-                        ApplyEliteDraculaModifiers(buffTarget);
-                    }
-                }
-
-                if (handleLevel && buffEntity.HasSpellLevel() && buffTarget.IsPlayer())
-                {
-                    LevelingSystem.SetLevel(buffTarget);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogWarning($"[ScriptSpawnServer.OnUpdatePostfix] - {e}");
-        }
     }
 }

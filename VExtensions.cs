@@ -219,12 +219,12 @@ internal static class VExtensions
     }
     public static Entity GetPrefabEntity(this Entity entity)
     {
-        return ServerGameManager.GetPrefabEntity(entity.GetPrefabGuid());
+        // return ServerGameManager.GetPrefabEntity(entity.GetPrefabGuid());
+        return entity.Exists() ? ServerGameManager.GetPrefabEntity(entity.GetPrefabGuid()) : Entity.Null;
     }
-    public static bool TryGetPrefabEntity(this PrefabGUID prefabGuid, out Entity prefabEntity)
+    public static Entity GetPrefabEntity(this PrefabGUID prefabGuid)
     {
-        prefabEntity = ServerGameManager.GetPrefabEntity(prefabGuid);
-        return prefabEntity.Exists();
+        return prefabGuid.HasValue() ? ServerGameManager.GetPrefabEntity(prefabGuid) : Entity.Null;
     }
     public static Entity GetSpellTarget(this Entity entity)
     {
@@ -374,11 +374,14 @@ internal static class VExtensions
 
         return Entity.Null;
     }
-    public static Entity GetOwner(this Entity entity)
+    public static Entity GetOwner(this Entity entity, bool trueOwner = false)
     {
-        if (entity.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.Exists()) return entityOwner.Owner;
-
-        return Entity.Null;
+        if (!entity.Exists())
+            return Entity.Null;
+        else if (trueOwner && VampireDownedServerEventSystem.TryFindRootOwner(entity, 1, EntityManager, out Entity result))
+            return result;
+        else
+            return ServerGameManager.GetOwner(entity);
     }
     public static User GetUser(this Entity entity)
     {

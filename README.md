@@ -386,13 +386,13 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Eclipsed**: `Eclipsed` (bool, default: False)
   Eclipse will be active if any features that sync with the client are enabled. Instead, this now controls the frequency; true for faster (0.1s), false for slower (2.5s).
 - **Elite Primal Rifts**: `ElitePrimalRifts` (bool, default: False)
-  Enable or disable elite primal rifts. (WIP!)
+  Enable or disable elite primal rifts.
+- **Primal Rift Frequency**: `PrimalRiftFrequency` (int, default: 0)
+  Number of primal rifts to start per day when they are enabled (12 max recommended).
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
   Enable or disable elite shard bearers.
 - **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)
   Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect.
-- **Primal Rift Frequency**: `PrimalRiftFrequency` (int, default: 0)
-  Number of primal rifts automatically triggered per day. Set to 0 to disable.
 - **Potion Stacking**: `PotionStacking` (bool, default: False)
   Enable or disable potion stacking (can have t01/t02 effects at the same time).
 - **Bear Form Dash**: `BearFormDash` (bool, default: False)

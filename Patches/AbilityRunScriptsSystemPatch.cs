@@ -44,11 +44,12 @@ internal static class AbilityRunScriptsSystemPatch
             foreach (AbilityPostCastEndedEvent postCastEndedEvent in postCastEndedEvents)
             {
                 if (postCastEndedEvent.AbilityGroup.Has<VBloodAbilityData>()) continue;
-                else if (postCastEndedEvent.Character.IsPlayer())
+                else if (postCastEndedEvent.Character.TryGetPlayer(out Entity playerCharacter))
                 {
                     PrefabGUID prefabGuid = postCastEndedEvent.AbilityGroup.GetPrefabGuid();
+                    bool isExoForm = playerCharacter.IsExoForm();
 
-                    if (ShapeshiftRegistry.TryGetByAbilityGroup(prefabGuid, out var shapeshift))
+                    if (isExoForm && ShapeshiftRegistry.TryGetByAbilityGroup(prefabGuid, out var shapeshift))
                     {
                         if (shapeshift.TryGetCooldown(prefabGuid, out var cooldown))
                         {

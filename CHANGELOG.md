@@ -1,3 +1,6 @@
+`1.12.15`
+- 
+
 `1.11.14`
 - added config option for ElitePrimalRifts (units/gateBosses are amped similarly to EliteShardBearers with some surprises ;D WIP feature, use admin console command to spawn primal war events for now)
 - added config option for DisabledProfessions, valid options: Enchanting,Alchemy,Harvesting,Blacksmithing,Tailoring,Woodcutting,Mining,Fishing
