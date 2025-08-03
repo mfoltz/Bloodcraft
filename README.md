@@ -73,7 +73,10 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - 20% chance for random shiny effect on first unit unlock, 100% chance on repeated unit unlock
   - Chance when dealing damage to apply respective spell school debuff, same proc chance as configured for class onhit effects
   - `.fam shiny [SpellSchool]` (apply or change shiny, requires vampiric dust)
+- Familiar unlocks can be shared with clan or party members within experience share distance when `ShareUnlocks` is enabled.
+- Familiars can equip gear when emote actions (`.fam e`, list available emote actions with `.fam actions`) are enabled; `beckon` to enter interact mode, setting `EquipmentOnly` to true limits this to equipment slots only without a useable inventory.
 - Spend exo prestige rewards to unlock VBlood familiars with `.fam echoes [VBloodName]`. Costs scale by unit level and tier and depend on the `PrimalEchoes` configuration and `EchoesFactor` multiplier.
+- Server owners can control which units are eligible through `AllowVBloods`, `AllowMinions`, `BannedUnits`, and `BannedTypes` settings.
 
 ### Quests
 - Players can complete daily and weekly quests for XP and rewards.
