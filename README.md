@@ -96,9 +96,9 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - `.prestige me [Type]` (experience and/or various weapons and bloods, the latter variety will see increased bonus stat caps and reduced rate gains per prestige)
 - `.prestige get [Type]` (view prestige progress and details)
 
-### World Events
-- Elite Primal Rifts automatically start Primal War events at the rate set by `PrimalRiftFrequency`; enabling `ElitePrimalRifts` applies a difficulty modifier to their enemies.
-- Elite Shard Bearers increase the challenge of shard bearers when `EliteShardBearers` is enabled, and their level can be set with `ShardBearerLevel`.
+### Endgame Extras (section WIP)
+- Elite Primal Rifts automatically start Primal War events at the rate set by `PrimalRiftFrequency` when `ElitePrimalRifts` are enabled.
+- Elite Shard Bearers increases the challenge of shard bearers significantly when `EliteShardBearers` is enabled, and their levels can be uniformly set via `ShardBearerLevel`.
 
 ## Commands
 
