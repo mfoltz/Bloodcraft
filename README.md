@@ -95,7 +95,11 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### Prestige
 - Resets player level, grants a permanent buff (REWORKING), reduces experience gained from units, and increases rate gains for expertise/legacies per prestige.
   - `.prestige me [Type]` (experience and/or various weapons and bloods, the latter variety will see increased bonus stat caps and reduced rate gains per prestige)
-  - `.prestige get [Type]` (view prestige progress and details)
+- `.prestige get [Type]` (view prestige progress and details)
+
+### Endgame Extras (section WIP)
+- Elite Primal Rifts automatically start Primal War events at the rate set by `PrimalRiftFrequency` when `ElitePrimalRifts` are enabled.
+- Elite Shard Bearers increases the challenge of shard bearers significantly when `EliteShardBearers` is enabled, and their levels can be uniformly set via `ShardBearerLevel`.
 
 ## Commands
 
