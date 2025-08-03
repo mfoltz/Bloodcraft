@@ -51,6 +51,24 @@ fi
 
 dotnet restore "$ROOT_DIR/Bloodcraft.csproj"
 
+# Install a local Argos Translate model if segmented archives are present
+MODEL_DIR="$ROOT_DIR/Resources/Localization/Messages/Models"
+LOCAL_MODEL_BASE="$MODEL_DIR/translate-en_es-1_0"
+MODEL_INSTALLED=false
+if [ -f "${LOCAL_MODEL_BASE}.z01" ]; then
+    echo "Installing local Argos Translate model for English to Spanish..."
+    if cat "${LOCAL_MODEL_BASE}".z* > "${LOCAL_MODEL_BASE}.argosmodel"; then
+        if argos-translate install "${LOCAL_MODEL_BASE}.argosmodel"; then
+            MODEL_INSTALLED=true
+        else
+            echo "Failed to install local model; will attempt remote download if configured."
+        fi
+        rm -f "${LOCAL_MODEL_BASE}.argosmodel"
+    else
+        echo "Failed to combine local model segments; will attempt remote download if configured."
+    fi
+fi
+
 # Optional: download an Argos Translate language pair if requested
 FROM_LANG="${FROM_LANG:-}"
 TO_LANG="${TO_LANG:-}"
@@ -59,7 +77,7 @@ if [ -n "${ARGOS_LANGUAGE_PAIR:-}" ]; then
     IFS=':' read -r FROM_LANG TO_LANG <<<"$ARGOS_LANGUAGE_PAIR"
 fi
 
-if [ -n "$FROM_LANG" ] && [ -n "$TO_LANG" ]; then
+if [ "$MODEL_INSTALLED" = false ] && [ -n "$FROM_LANG" ] && [ -n "$TO_LANG" ]; then
     echo "Downloading Argos Translate model from $FROM_LANG to $TO_LANG"
     python3 -m argostranslate.cli download --from "$FROM_LANG" --to "$TO_LANG"
 fi
