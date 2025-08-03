@@ -50,6 +50,9 @@ internal static class ConfigService
     static readonly Lazy<string> _kitQuantities = new(() => GetConfigValue<string>("KitQuantities"));
     public static string KitQuantities => _kitQuantities.Value;
 
+    static readonly Lazy<int> _kitFamiliar = new(() => GetConfigValue<int>("KitFamiliar"));
+    public static int KitFamiliar => _kitFamiliar.Value;
+
     static readonly Lazy<bool> _questSystem = new(() => GetConfigValue<bool>("QuestSystem"));
     public static bool QuestSystem => _questSystem.Value;
 
@@ -532,6 +535,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("StarterKit", "StarterKit", false, "Enable or disable the starter kit."),
             new ConfigEntryDefinition("StarterKit", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "Item prefabGuids for starting kit."),
             new ConfigEntryDefinition("StarterKit", "KitQuantities", "500,1000,1000,250", "The quantity of each item in the starter kit."),
+            new ConfigEntryDefinition("StarterKit", "KitFamiliar", 0, "Character Prefab GUID for a familiar to grant with the starter kit (0 disables)."),
 
             new ConfigEntryDefinition("Quests", "QuestSystem", false, "Enable or disable quests (kill, gather, and crafting)."),
             new ConfigEntryDefinition("Quests", "InfiniteDailies", false, "Enable or disable infinite dailies."),
