@@ -57,13 +57,17 @@ LOCAL_MODEL_BASE="$MODEL_DIR/translate-en_es-1_0"
 MODEL_INSTALLED=false
 if [ -f "${LOCAL_MODEL_BASE}.z01" ]; then
     echo "Installing local Argos Translate model for English to Spanish..."
-    if cat "${LOCAL_MODEL_BASE}".z* > "${LOCAL_MODEL_BASE}.argosmodel"; then
-        if argos-translate install "${LOCAL_MODEL_BASE}.argosmodel"; then
-            MODEL_INSTALLED=true
+    if cat "${LOCAL_MODEL_BASE}".z0{1..4} > "${LOCAL_MODEL_BASE}.zip"; then
+        if unzip -o "${LOCAL_MODEL_BASE}.zip"; then
+            if argos-translate install "${LOCAL_MODEL_BASE}.argosmodel"; then
+                MODEL_INSTALLED=true
+            else
+                echo "Failed to install local model; will attempt remote download if configured."
+            fi
+            rm -f "${LOCAL_MODEL_BASE}.zip" "${LOCAL_MODEL_BASE}.argosmodel"
         else
-            echo "Failed to install local model; will attempt remote download if configured."
+            echo "Failed to unzip local model; will attempt remote download if configured."
         fi
-        rm -f "${LOCAL_MODEL_BASE}.argosmodel"
     else
         echo "Failed to combine local model segments; will attempt remote download if configured."
     fi
