@@ -7,6 +7,8 @@ import subprocess
 import sys
 from typing import List
 
+from argostranslate import translate as argos_translate
+
 print(
     "WARNING: Tools/translate.py is deprecated. Use Tools/translate_argos.py instead.",
     file=sys.stderr,
@@ -52,6 +54,13 @@ def translate_batch(
     max_retries: int,
     timeout: int,
 ) -> List[str]:
+    argos_translate.load_installed_languages()
+    translator = argos_translate.get_translation_from_codes(src, dst)
+    if translator is None:
+        raise RuntimeError(
+            f"No Argos translation model for {src}->{dst}. "
+            "Assemble or install the model, or run `.codex/install.sh`."
+        )
     joined = "\n".join(lines)
     for attempt in range(1, max_retries + 1):
         try:

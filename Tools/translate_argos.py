@@ -58,6 +58,11 @@ def translate_batch(
     """Translate a list of lines using argostranslate."""
     argos_translate.load_installed_languages()
     translator = argos_translate.get_translation_from_codes(src, dst)
+    if translator is None:
+        raise RuntimeError(
+            f"No Argos translation model for {src}->{dst}. "
+            "Assemble or install the model, or run `.codex/install.sh`."
+        )
     results: List[str] = []
     for line in lines:
         for attempt in range(1, max_retries + 1):
