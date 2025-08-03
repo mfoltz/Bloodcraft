@@ -407,6 +407,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### StarterKit
 - **Starter Kit**: `StarterKit` (bool, default: False)
   Enable or disable the starter kit.
+- **Kit Familiar**: `KitFamiliar` (bool, default: False)
+  Grant players a familiar when the starter kit is enabled.
 - **Kit Prefabs**: `KitPrefabs` (string, default: "862477668,-1531666018,-1593377811,1821405450")
   Item prefabGuids for starting kit.
 - **Kit Quantities**: `KitQuantities` (string, default: "500,1000,1000,250")
