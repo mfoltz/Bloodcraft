@@ -100,6 +100,7 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
     static readonly Dictionary<string, string> _localizedMessagePaths = new()
     {
         {"English", "Bloodcraft.Resources.Localization.Messages.English.json"},
+        {"German", "Bloodcraft.Resources.Localization.Messages.German.json"},
         {"Spanish", "Bloodcraft.Resources.Localization.Messages.Spanish.json"}
     };
 
