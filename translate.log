@@ -1,906 +1,906 @@
 welcome: TRANSLATED
   Original: Welcome to Bloodcraft
-  Result: Bienvenue à Bloodcraft
+  Result: Willkommen bei Bloodcraft
 3004207253: TRANSLATED
   Original: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $
-  Result: [<color=green>][{famName}[</color>]{(buffsData.FamiliarBuffs.Contient une clé(familiar Id) ? $
+  Result: [<color=green>[[{famName}][[</color>]]{(buffsData.FamiliarBuffs.ContainsKey(familiar Id? $
 2761093386: TRANSLATED
   Original: Battle Group - {familiarReply}
-  Result: Groupe tactique - [{familiarReply}]
+  Result: Battle Group - [{familiarReply}
 3158650477: TRANSLATED
   Original: No familiars in battle group!
-  Result: Pas de familiers dans le groupe de combat !
+  Result: Keine Vertrauten in der Kampfgruppe!
 4165788499: TRANSLATED
   Original: Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {QuestTypeColor[questType]}.
-  Result: Les cibles ont toutes été tuées, donnez-leur une chance de se reproduire ! Si cela ne semble pas juste envisager de reroller votre [{QuestTypeColor[questType]}].
+  Result: Ziele wurden alle getötet, geben Sie ihnen die Chance, sich anzusprechen! Wenn dies nicht richtig erscheint, betrachten Sie es, Ihre [{QuestTypeColor[questType]}].
 2932385107: TRANSLATED
   Original: Targets have all been killed, give them a chance to respawn!
-  Result: Les cibles ont toutes été tuées, donnez-leur une chance de se reproduire !
+  Result: Ziele wurden alle getötet, geben Sie ihnen die Chance, sich anzusprechen!
 1076291728: TRANSLATED
   Original: Use the VBlood menu to track bosses!
-  Result: Utilisez le menu VBlood pour suivre les patrons !
-3782703317: TRANSLATED
+  Result: Nutzen Sie das Menü VBlood, um Bosse zu verfolgen!
+3782703317: SKIPPED (token mismatch)
   Original: Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection} <color=#F88380>{(int)seconds}</color>s ago.
-  Result: Le plus près [<color=white>][{questObjective.Objective.Target.GetLocalizedName()}][</color>] était [<color=#00FFFF>[{(int)distance}][</color>]f loin de [{cardinalDirection}] [<color=#F88380>][{(int)seconds}]</color>] il y a.
+  Result: Nächst [[[TOKEN_0]]][[[[TOKEN_6]]]][[[[TOKEN_1]]]]]] war [[[[TOKEN_2]]]]]][[[[[TOKEN_3]]]]]]]]]][[[[[[TOKEN_9]]]]]]]]][[[[[[[[[[[TOKEN_5]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]] [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
 1420278477: TRANSLATED
   Original: Tracking is only available for incomplete kill quests.
-  Result: Le suivi n'est disponible que pour les quêtes incomplètes.
-3308780183: TRANSLATED
+  Result: Tracking ist nur für unvollständige Kill Quests verfügbar.
+3308780183: SKIPPED (token mismatch)
   Original: Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection}!
-  Result: Le plus près [<color=white>][{questObjective.Objective.Target.GetLocalizedName()}][</color>] était [<color=#00FFFF>[{(int)distance}][</color>]f loin vers [{cardinalDirection}]!
-465036552: TRANSLATED
+  Result: Nächst [[[TOKEN_0]]][[[[TOKEN_4]]][[[[TOKEN_1]]]]]] war [[[[TOKEN_2]]]]]][[[[[TOKEN_3]]]]]]]]] zum [[[TOKEN_6]]]]]]]]]!
+465036552: SKIPPED (token mismatch)
   Original: {QuestTypeColor[questType]}: <color=green>{questObjective.Objective.Goal}</color> <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>x<color=#FFC0CB>{questObjective.Objective.RequiredAmount}</color> [<color=white>{questObjective.Progress}</color>/<color=yellow>{questObjective.Objective.RequiredAmount}</color>]
-  Result: [{QuestTypeColor[questType]}]: [<color=green>][{questObjective.Objective.Goal}][</color>] [<color=white>][{questObjective.Objective.Target.GetLocalizedName()}][</color>]x[<color=#FFC0CB>][{questObjective.Objective.RequiredAmount}][</color>][[<color=white>][{questObjective.Progress}][</color>][<color=yellow>][{questObjective.Objective.RequiredAmount}][</color>]]
-860647533: TRANSLATED
+  Result: [[[TOKEN_10]]]: [[[TOKEN_0]]][[[[TOKEN_11]]]][[[[TOKEN_3]]]]]][[[[[TOKEN_4]]]]]][[[[[[TOKEN_5]]]]]]][[[[[[[[[TOKEN_6]]]]]]]]][[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]][[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+860647533: SKIPPED (token mismatch)
   Original: Time until {questType} reset - <color=yellow>{timeLeft}</color> | {_questTargetType[questObjective.Objective.Goal]} Prefab: <color=white>{questObjective.Objective.Target.GetPrefabName()}</color>
-  Result: Durée jusqu'à [{questType}] réinitialiser [<color=yellow>][{timeLeft}][</color>]][{_questTargetType[questObjective.Objective.Goal]}] Préfab: [<color=white>[{questObjective.Objective.Target.GetPrefabName()}][</color>]
-1707710671: SKIPPED (token mismatch)
+  Result: Zeit bis [[[TOKEN_4]] Zurücksetzen - [[[TOKEN_0]]][[[[TOKEN_5]]]][[[TOKEN_1]]]]]]] [[[[TOKEN_6]]]]]] Vorab: [[[[[TOKEN_2]]]]]]]]][[[[[TOKEN_3]]]]]]]
+1707710671: TRANSLATED
   Original: You've already completed your {QuestTypeColor[questType]}! Time until {questType} reset - <color=yellow>{timeLeft}</color>
-  Result: Vous avez déjà terminé votre [[TOKEN[2]]! Temps jusqu'à [[[TOKEN_3]]] réinitialiser - [[[TOKEN_0]]][[[TOKEN_4]]][[[TOKEN_1]]]
+  Result: Sie haben Ihre [{QuestTypeColor[questType]}]! Zeit bis [{questType} Zurücksetzen - [<color=yellow>][{timeLeft}]][[</color>]]]
 319696654: TRANSLATED
   Original: You don't have a {QuestTypeColor[questType]}.
-  Result: Vous n'avez pas de [{QuestTypeColor[questType]}].
+  Result: Sie haben keine [{QuestTypeColor[questType]}].
 3546356968: TRANSLATED
   Original: Invalid unit prefab (match found but does not start with CHAR/char).
-  Result: Unité non valide préfab (match trouvé mais ne commence pas avec CHAR/char).
-2886300456: TRANSLATED
+  Result: Invalid unit prefab (match gefunden, aber beginnt nicht mit CHAR/char).
+2886300456: SKIPPED (token mismatch)
   Original: <color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.
-  Result: [<color=green>][{new PrefabGUID(prefabHash).GetLocalizedName()}][</color>] ajouté à [<color=white>[{activeBox}][</color>].
+  Result: [[[TOKEN_0]]][[[[[TOKEN_4]]]][[[[TOKEN_1]]]]]]]][[[[[TOKEN_3]]]]]]]]]].
 2169578147: TRANSLATED
   Original: Invalid unit name (match found but does not start with CHAR/char).
-  Result: Nom de l'unité non valide (correspondant trouvé mais ne commence pas avec CHAR/char).
-2151120362: TRANSLATED
+  Result: Invalide Einheitsname (Match gefunden, aber nicht mit CHAR/char gestartet).
+2151120362: SKIPPED (token mismatch)
   Original: <color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.
-  Result: [<color=green>][{match.GetLocalizedName()}][</color>][[<color=yellow>[{match.GuidHash}][</color>]] ajouté à [<color=white>][{activeBox}][</color>].
+  Result: [[[TOKEN_0]]][[[[TOKEN_6]]][[[[TOKEN_1]]]][[[[[TOKEN_2]]]]]]][[[[[TOKEN_3]]]]]]]]]]]]]]]]][[[[[TOKEN_5]]]]]]]]]]]]]]]].
 223311103: TRANSLATED
   Original: Invalid unit name (no full or partial matches).
-  Result: Nom de l'unité non valide (pas de correspondance complète ou partielle).
+  Result: Invalider Einheitsname (keine Voll- oder Teilspiele).
 2155028867: TRANSLATED
   Original: Invalid prefab (not an integer) or name (does not start with CHAR/char).
-  Result: Préfab non valide (pas un entier) ou nom (ne commence pas par CHAR/char).
+  Result: Invalide Vorab (nicht eine ganze Zahl) oder Name (nicht mit CHAR/char beginnen).
 3102592194: TRANSLATED
   Original: Couldn't find active familiar!
-  Result: Je n'ai pas trouvé de familier actif !
+  Result: Ich konnte nicht aktiv vertraut finden!
 1057342822: TRANSLATED
   Original: Your familiar has already prestiged the maximum number of times! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)
-  Result: Votre familier a déjà apprécié le nombre maximum de fois! [[<color=white>][{ConfigService.MaxFamiliarPrestiges}[</color>]]
+  Result: Ihr vertraut hat bereits die maximale Anzahl von Zeiten angesehen! ([<color=white>][[{ConfigService.MaxFamiliarPrestiges}][</color>]]])
 2689850927: TRANSLATED
   Original: Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.
-  Result: Type de statistique de prestige inconnu, utilisez '<color=white>].fam lst[</color>]' pour voir les options.
+  Result: Invalid vertraut prestige stat type, verwenden Sie '<color=white>].fam lst[[</color>]]', um Optionen zu sehen.
 3125006928: SKIPPED (token mismatch)
   Original: Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.
-  Result: Familiar a déjà [[[TOKEN_0]]][[[TOKEN_6]]][[[TOKEN_1]]][[[[TOKEN_2]][[[TOKEN_7]]][[[TOKEN_3]]]] [[TOKEN_3]]] pour voir les options.
+  Result: Familiar hat bereits [[[TOKEN_0]]][[[[TOKEN_6]]][[[[[TOKEN_1]]]]] [[[[[TOKEN_2]]]]]]]]]]]] [[[[[TOKEN_3]]]]]]]]]]]]]]]]]] [[[[[[[[[[[TOKEN_5]]]]]]]]]]]]]]]]]]]]]]]]]]], um Optionen zu sehen.
 2846646667: TRANSLATED
   Original: Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.
-  Result: Stat de prestige familier non valide, utilisez '<color=white>].fam lst[</color>]' pour voir les options.
+  Result: Invalid vertraut prestige stat, verwenden Sie '<color=white>.fam lst[</color>]]', um Optionen zu sehen.
 705325693: TRANSLATED
   Original: Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')
-  Result: Familiar a déjà toutes les statistiques de prestige! ('[<color=white>].fam pr[</color>]' au lieu de '<color=white>].fam pr [PrestigeStat][</color>]')
-2844729307: TRANSLATED
+  Result: Familiar hat bereits alle Prestige Statistiken! ('<color=white>]].fam pr[</color>]]]' statt '[<color=white>]].fam pr [PrestigeStat][</color>]]]]])
+2844729307: SKIPPED (token mismatch)
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!
-  Result: Votre familier a connu [[<color=#90EE90>][{prestigeLevel}[</color>]] ; les connaissances accumulées leur ont permis de conserver leur niveau !
-2712718738: TRANSLATED
+  Result: Ihr vertrautes hat prestiged [[[[[TOKEN_0]]][[[[TOKEN_2]]]]]]]]]; das akkumulierte Wissen erlaubte ihnen, ihr Niveau zu behalten!
+2712718738: SKIPPED (token mismatch)
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
-  Result: Votre familier a connu [[<color=#90EE90>][{prestigeLevel}][</color>]] ; les connaissances accumulées leur ont permis de conserver leur niveau ! [<color=#00FFFF>][{FamiliarPrestigeStats[value]}][</color>]
+  Result: Ihr vertrautes hat prestiged [[[[[TOKEN_0]]][[[[TOKEN_4]]]]]]]]]; das gesammelte Wissen erlaubte ihnen, ihr Niveau zu behalten! (+[[[TOKEN_2]]][[[[TOKEN_5]]][[[TOKEN_3]]]]]]
 872190851: TRANSLATED
   Original: Failed to remove schematics from your inventory!
-  Result: Impossible de supprimer les schémas de votre inventaire!
-329722985: TRANSLATED
+  Result: Nicht zu entfernen Schaltpläne aus Ihrem Inventar!
+329722985: SKIPPED (token mismatch)
   Original: You do not have enough of the required item to change classes (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: Vous n'avez pas assez de l'élément requis pour changer de classe ([<color=#ffd9eb>][{item.GetLocalizedName()}][</color>]x[<color=white>[{quantity}][</color>])
-3466860311: TRANSLATED
+  Result: Sie haben nicht genug von dem gewünschten Artikel, um Klassen zu ändern ([[TOKEN_0]]][[[TOKEN_4]]]][[[[TOKEN_1]]]]]]]]]]][[[[[TOKEN_5]]]]]]]]]]]
+3466860311: SKIPPED (token mismatch)
   Original: Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: Il a échoué à enlever suffisamment de l'élément requis ([<color=#ffd9eb>][{item.GetLocalizedName()}][</color>]x[<color=white>[{quantity}][</color>])
+  Result: Versäumt, genug der benötigten Ware zu entfernen ([[TOKEN_0]]][[[TOKEN_4]]][[[[TOKEN_1]]]]]]]]][[[[[TOKEN_5]]]]]]]]]]]]]
 3720524051: TRANSLATED
   Original: {FormatClassName(playerClass)} passives not found!
-  Result: [{FormatClassName(playerClass)} passives pas trouvés!
+  Result: [{FormatClassName(playerClass)}] Nicht gefundene Passive!
 3543031585: TRANSLATED
   Original: {FormatClassName(playerClass)} passives:
-  Result: {FormatClassName(playerClass)} passifs :
+  Result: [{FormatClassName(playerClass)}] Passive:
 1106946472: TRANSLATED
   Original: {replyMessage}
-  Result: [{replyMessage}] TRANSLÉMENT
+  Result: [{replyMessage} VERKEHR
 2164633984: TRANSLATED
   Original: Couldn't find stat synergies for {FormatClassName(playerClass)}...
-  Result: Impossible de trouver des synergies statistiques pour [{FormatClassName(playerClass)}]...
+  Result: Konnte Statistiken für [{FormatClassName(playerClass)}] nicht finden...
 1293896668: TRANSLATED
   Original: No stat synergies found for {FormatClassName(playerClass)}.
-  Result: Aucune synergie statistique n'a été trouvée pour [{FormatClassName(playerClass)}.
+  Result: Keine Statistiken für [{FormatClassName(playerClass)}].
 2147420594: SKIPPED (token mismatch)
   Original: {FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:
-  Result: [[[TOKEN_2]]] synergies statistiques [x[[[TOKEN_0]]][[[TOKEN_3]]]]:
-999548370: TRANSLATED
+  Result: [[[TOKEN_2]]] stat synergies [x[[[TOKEN_0]]]][[[[TOKEN_3]]]]]]]]]]:
+999548370: SKIPPED (token mismatch)
   Original: {FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:
-  Result: [{FormatClassName(playerClass)}] synergies statistiques[x[<color=white>][{ConfigService.SynergyMultiplier}][</color>]:
+  Result: [[[TOKEN_2]]] stat synergis[x[[[TOKEN_0]]]][[[[TOKEN_3]]]]]]]]]]]]:
 460602473: TRANSLATED
   Original: {FormatClassName(playerClass)} has no spells configured...
-  Result: [{FormatClassName(playerClass)}] n'a aucun sort configuré...
+  Result: [{FormatClassName(playerClass)}] hat keine Zauber konfiguriert...
 442755566: TRANSLATED
   Original: {FormatClassName(playerClass)} spells:
-  Result: {FormatClassName(playerClass)} sorts :
+  Result: [{FormatClassName(playerClass)}]
 2967576286: TRANSLATED
   Original: Shift spell: <color=#CBC3E3>{spellName}</color>
-  Result: [<color=#CBC3E3>][{spellName}[</color>]
+  Result: Schaltbuch: [<color=#CBC3E3>][{spellName}][</color>]]
 3097011724: TRANSLATED
   Original: Invalid class, use '<color=white>.class l</color>' to see options.
-  Result: Classe non valide, utilisez '<color=white>].classe l[</color>]' pour voir les options.
+  Result: Invalide Klasse, verwenden Sie '[<color=white>].class l[</color>]]', um Optionen zu sehen.
 1597216248: TRANSLATED
   Original: Invalid class, use <color=white>'.class l'</color> to see options.
-  Result: Classe non valide, utilisez [<color=white>'.class l'[</color>] pour voir les options.
+  Result: Invalide Klasse, verwenden Sie [<color=white>]'.class l'[</color>]], um Optionen zu sehen.
 2747211297: TRANSLATED
   Original: Removed all class buffs then applied current class buffs for all players.
-  Result: Supprimé tous les buffs de classe puis appliqué les buffs de classe courante pour tous les joueurs.
+  Result: Entfernt alle Klassen-Buffs dann angewendet aktuelle Klassenbuffs für alle Spieler.
 2761429858: TRANSLATED
   Original: Removed all class buffs for all players.
-  Result: Supprimé tous les buffs de classe pour tous les joueurs.
+  Result: Entfernt alle Klassenbuffs für alle Spieler.
 327031724: TRANSLATED
   Original: Active familiar already present in battle group!
-  Result: Connaissant actif déjà présent dans le groupe de combat!
+  Result: Aktiv vertraut bereits in der Schlachtgruppe vorhanden!
 625301684: TRANSLATED
   Original: Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!
-  Result: Il ne peut y avoir plus que [<color=white>][{MAX_BATTLE_GROUPS}[</color>] des groupes de combat!
+  Result: Kann nicht mehr als [<color=white>][{MAX_BATTLE_GROUPS}][[</color>]]] Kampfgruppen haben!
 3944404979: TRANSLATED
   Original: Deleted battle group <color=white>{groupName}</color>!
-  Result: Groupe de combat supprimé [<color=white>][{groupName}[</color>]!
+  Result: Gelöschte Kampfgruppe [<color=white>][{groupName}][[</color>]]]!
 2979158417: TRANSLATED
   Original: Prestiging is not enabled.
-  Result: Le préjugé n'est pas activé.
+  Result: Prestiging ist nicht aktiviert.
 2350508902: TRANSLATED
   Original: Invalid prestige type, use <color=white>'.prestige l'</color> to see options.
-  Result: Type de prestige non valide, utilisez [<color=white>'.prestige l'[</color>] pour voir les options.
+  Result: Invalid prestige type, verwenden [<color=white>]'.prestige l'[</color>]], um Optionen zu sehen.
 1897692916: TRANSLATED
   Original: You must reach max level before <color=#90EE90>Exo</color> prestiging again.
-  Result: Vous devez atteindre le niveau maximum avant [<color=#90EE90>]Exo</color>] prélude à nouveau.
+  Result: Sie müssen die maximale Ebene erreichen, bevor Sie [<color=#90EE90>]Exo[</color>]] wieder vorschlagen.
 9816116: TRANSLATED
   Original: You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges. (<color=white>{EXO_PRESTIGES}</color>)
-  Result: Vous avez atteint le maximum de prestiges [<color=#90EE90>Exo</color>]. [<color=white>[{EXO_PRESTIGES}][</color>]]
-3729714988: TRANSLATED
+  Result: Sie haben die maximale Menge von [<color=#90EE90>]Exo[</color>]] Vorkommen erreicht. (<color=white>[[{EXO_PRESTIGES}][</color>]]])
+3729714988: SKIPPED (token mismatch)
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!
-  Result: [<color=#90EE90>][{parsedPrestigeType}][</color>][[<color=white>[{exoPrestiges}][</color>]] prestige complet!
-2402733055: TRANSLATED
+  Result: [[[TOKEN_0]][[[[TOKEN_4]]][[[[TOKEN_1]]]]][[[[[[TOKEN_2]]]]]][[[[[TOKEN_3]]]]]]]]]]]]] prestige komplett!
+2402733055: SKIPPED (token mismatch)
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
-  Result: [<color=#90EE90>][{parsedPrestigeType}][</color>][[<color=white>][{exoPrestiges}][</color>]] prestige complet! Vous avez également reçu [<color=#ffd9eb>][{exoReward.GetLocalizedName()}[</color>]x[<color=white>][{ConfigService.ExoPrestigeRewardQuantity}[</color>]!
-3961332984: TRANSLATED
+  Result: [[[TOKEN_0]][[[[TOKEN_8]]][[[[TOKEN_1]]]]][[[[[[TOKEN_2]]]]]][[[[[TOKEN_3]]]]]]]]]]]]] prestige komplett! Sie wurden auch mit [[[TOKEN_4]][[[TOKEN_10]]][[[[TOKEN_5]]]]x[[[[TOKEN_6]]]]][[[[[TOKEN_11]]]]]][[[[[TOKEN_7]]]]]] ausgezeichnet!
+3961332984: SKIPPED (token mismatch)
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.
-  Result: [<color=#90EE90>][{parsedPrestigeType}][</color>][[<color=white>][{exoPrestiges}][</color>]] prestige complet! Vous avez reçu [<color=#ffd9eb>][{exoReward.GetLocalizedName()}[</color>]x[<color=white>][{ConfigService.ExoPrestigeRewardQuantity}[</color>]! Il est tombé sur le sol car votre inventaire était plein.
+  Result: [[[TOKEN_0]][[[[TOKEN_8]]][[[[TOKEN_1]]]]][[[[[[TOKEN_2]]]]]][[[[[TOKEN_3]]]]]]]]]]]]] prestige komplett! Sie wurden mit [[[TOKEN_4]][[[TOKEN_10]]][[[[TOKEN_5]]]]]x[[[[TOKEN_6]]]][[[[[TOKEN_11]]]]]][[[[[TOKEN_7]]]]]] ausgezeichnet! Es fiel auf den Boden Becuase Ihr Inventar war jedoch voll.
 145841390: TRANSLATED
   Original: You must reach the maximum level in <color=#90EE90>Experience</color> prestige before <color=#90EE90>Exo</color> prestiging.
-  Result: Vous devez atteindre le niveau maximum dans [<color=#90EE90>]Expérience[</color>] prestige avant [<color=#90EE90>]Exo[</color>] prestant.
+  Result: Sie müssen die maximale Ebene in [<color=#90EE90>] Erfahrung[</color>] prestige vor [<color=#90EE90>]Exo[[</color>]] prestiging erreichen.
 2076214502: TRANSLATED
   Original: <color=#90EE90>Exo</color> prestiging is not enabled.
-  Result: [<color=#90EE90>]L'exo[</color>] prestiging n'est pas activé.
+  Result: [<color=#90EE90>]Exo[[</color>]]] Prestiging ist nicht aktiviert.
 1641131342: TRANSLATED
   Original: Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.
-  Result: prestige non valide, utilisez [<color=white>'.prestige l'[</color>] pour voir les options valides.
+  Result: Invalides Prestige, verwenden Sie [<color=white>]'.prestige l'[</color>]], um gültige Optionen zu sehen.
 484801240: TRANSLATED
   Original: You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.
-  Result: Vous n'avez pas atteint le niveau de prestige requis dans [<color=#90EE90>][{parsedPrestigeType}[</color>] ou vous êtes au niveau de prestige maximal.
+  Result: Sie haben in [<color=#90EE90>][[{parsedPrestigeType}]] [[</color>]] nicht das erforderliche Niveau erreicht oder sind auf höchstem Prestigeniveau.
 11642316: SKIPPED (token mismatch)
   Original: Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s
-  Result: Actuellement [[[TOKEN_0]]]Exo[[TOKEN_1]]] Niveau de prestige : [[[TOKEN_2]]][[[TOKEN_6]]][[[TOKEN_3]]]/[[TOKEN_7]]]
+  Result: Strom [[[TOKEN_0]]]Exo[[[TOKEN_1]]] Prestige Level: [[[TOKEN_2]]][[[[TOKEN_6]]]][[[[TOKEN_3]]]]]/[[[TOKEN_7]]]]]] Max Form Dauer: [[[TOKEN_4]]]][[[[TOKEN_8]]]]]]]
 836746607: TRANSLATED
   Original: Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s
-  Result: Charge suffisante pour maintenir la forme pour [<color=white>][{(int)exoFormData.Value}[</color>]s
+  Result: Genügen Sie die Ladung, um Formular für [<color=white>[{(int)exoFormData.Value}] zu halten [</color>]]
 2332227846: TRANSLATED
   Original: You have not prestiged in <color=#90EE90>Exo</color> yet.
-  Result: Vous n'avez pas encore de prestige dans [<color=#90EE90>]Exo[</color>].
+  Result: Sie haben noch nicht in [<color=#90EE90>]Exo[[</color>] angepriesen.
 3706109126: TRANSLATED
   Original: You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.
-  Result: Vous n'avez pas de prestige dans [<color=#90EE90>][{parsedPrestigeType}[</color>].
+  Result: Sie haben in [<color=#90EE90>] [{parsedPrestigeType}][[[</color>]] nicht anerkannt.
 1689690159: TRANSLATED
   Original: Couldn't find player.
-  Result: Je n'ai pas trouvé le joueur.
+  Result: Ich konnte keinen Spieler finden.
 3055902112: TRANSLATED
   Original: <color=#90EE90>{parsedPrestigeType}</color> prestiging is not enabled.
-  Result: [<color=#90EE90>][{parsedPrestigeType}[</color>] la préfiguration n'est pas activée.
+  Result: [<color=#90EE90>][[{parsedPrestigeType}][[</color>]]]] Prestiging ist nicht aktiviert.
 3468772905: TRANSLATED
   Original: The maximum level for <color=#90EE90>{parsedPrestigeType}</color> prestige is {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.
-  Result: Le niveau maximum pour le prestige [<color=#90EE90>[{parsedPrestigeType}[</color>] est [{PrestigeTypeToMaxPrestiges[parsedPrestigeType]}].
-3343555659: TRANSLATED
+  Result: Die maximale Höhe für [<color=#90EE90>][{parsedPrestigeType}][[</color>]] prestige ist [{PrestigeTypeToMaxPrestiges[parsedPrestigeType]}]].
+3343555659: SKIPPED (token mismatch)
   Original: Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.
-  Result: Le joueur [<color=green>][{playerInfo.User.CharacterName.Value}][</color>] a été placé au niveau [<color=white>[{level}][</color>] dans [<color=#90EE90>][{parsedPrestigeType}][</color>] le prestige.
+  Result: Der Spieler [[[TOKEN_0]]][[[[TOKEN_6]]][[[[TOKEN_1]]]]]] wurde in [[[TOKEN_4]]][[[[TOKEN_8]]]]]][[[[[[TOKEN_5]]]]]]]] prestige gesetzt.
 101395383: TRANSLATED
   Original: Exo prestiging is not enabled.
-  Result: Exo prestiging n'est pas activé.
+  Result: Exo prestiging ist nicht aktiviert.
 3878313095: TRANSLATED
   Original: Couldn't find player...
-  Result: Impossible de trouver le joueur...
-1411528307: TRANSLATED
+  Result: Ich konnte den Spieler nicht finden...
+1411528307: SKIPPED (looks untranslated)
   Original: <color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.
-  Result: [<color=#90EE90>][{parsedPrestigeType}][</color>] la remise du prestige pour [<color=white>[{playerInfo.User.CharacterName.Value}][</color>].
+  Result: [<color=#90EE90>][[{parsedPrestigeType}][[</color>]]]] prestige reset for [<color=white>][[{playerInfo.User.CharacterName.Value}]]]]][[[</color>]]]]]]]].
 3318828181: TRANSLATED
   Original: Prestige buffs applied! (if they were missing)
-  Result: Des pantalons de prestige appliqués ! (s'ils avaient disparu)
+  Result: Prestige Buffs angewendet! (wenn sie vermisst wurden)
 830139985: TRANSLATED
   Original: You have not prestiged in <color=#90EE90>{PrestigeType.Experience}</color>.
-  Result: Vous n'avez pas de prestige dans [<color=#90EE90>][{PrestigeType.Experience}[</color>].
+  Result: Sie haben in [<color=#90EE90>] [{PrestigeType.Experience}][[[</color>]] nicht anerkannt.
 2461283441: TRANSLATED
   Original: Prestiges:
-  Result: Prestiges :
+  Result: Prestige:
 3320998835: TRANSLATED
   Original: {prestiges}
-  Result: [{prestiges}] TRANSLÉMENT
+  Result: [{prestiges} VERKEHR
 947905559: TRANSLATED
   Original: Leaderboards are not enabled.
-  Result: Les tableaux de classement ne sont pas activés.
+  Result: Leaderboards sind nicht aktiviert.
 1182925736: TRANSLATED
   Original: No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!
-  Result: Aucun joueur n'a encore eu de prestige dans [<color=#90EE90>][{parsedPrestigeType}[</color>]!
+  Result: Noch keine Spieler haben in [<color=#90EE90>][[{parsedPrestigeType}]][[</color>]] angepriesen!
 1687700552: TRANSLATED
   Original: You must consume at least one primordial essence...
-  Result: Vous devez consommer au moins une essence primordiale...
+  Result: Sie müssen mindestens eine ursprüngliche Essenz konsumieren...
 1763729577: TRANSLATED
   Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? 
-  Result: Action d'émote d'exo ([<color=white>]taunt[</color>]) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ?
+  Result: Exo form emote Aktion ([<color=white>]taunt[</color>]]) (GetPlayerBool(steamId, SHAPESHIFT_KEY)?
 1711247206: TRANSLATED
   Original: You are not yet worthy...
-  Result: Tu n'es pas encore digne...
+  Result: Sie sind noch nicht würdig...
 3882215894: TRANSLATED
   Original: Invalid shapeshift! Valid options: {shapeshifts}
-  Result: Changement de forme non valide ! Options valides : [{shapeshifts}]
+  Result: Ungültige Formverschiebung! Gültige Optionen: [{shapeshifts}]
 1884272339: TRANSLATED
   Original: You must consume Dracula's essence before manifesting his form...
-  Result: Vous devez consommer l'essence de Dracula avant de manifester sa forme...
+  Result: Sie müssen Draculas Essenz konsumieren, bevor Sie seine Form manifestieren...
 816810753: TRANSLATED
   Original: You must consume Megara's essence before manifesting her form...
-  Result: Vous devez consommer l'essence de Megara avant de manifester sa forme...
+  Result: Sie müssen Megaras Essenz konsumieren, bevor Sie ihre Form manifestieren...
 3587073963: TRANSLATED
   Original: Current Exoform: <color=white>{form}</color>
-  Result: Exoforme actuelle: [<color=white>][{form}[</color>]
+  Result: Aktuelles Exoform: [<color=white>][{form}][</color>]]
 1440482998: TRANSLATED
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore prestige leaderboard list!
-  Result: [<color=green>][{playerInfo.User.CharacterName.Value}[</color>] ajouté à la liste de classement de prestige!
+  Result: [<color=green>][[[{playerInfo.User.CharacterName.Value}]][[</color>]]]]]] zur ignorieren prestige Leaderboard-Liste hinzugefügt!
 2659109549: TRANSLATED
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore prestige leaderboard list!
-  Result: [<color=green>][{playerInfo.User.CharacterName.Value}[</color>] supprimé de la liste de classement de prestige!
+  Result: [<color=green>][[[{playerInfo.User.CharacterName.Value}]][[</color>]]]]] aus der ignorierten Liste der Prestige-Leaderboards entfernt!
 2178615132: TRANSLATED
   Original: Permashroud <color=green>enabled</color>!
-  Result: [<color=green>] [</color>]!
+  Result: Permashroud [<color=green>] aktiviert[[</color>]!
 1797973559: TRANSLATED
   Original: Permashroud <color=red>disabled</color>!
-  Result: Permashroud [<color=red>]désactivé[</color>]!
+  Result: Permashroud [<color=red>]disabled[[</color>]]!
 985830382: TRANSLATED
   Original: Expertise is not enabled.
-  Result: L'expertise n'est pas activée.
+  Result: Expertise ist nicht aktiviert.
 3170250471: TRANSLATED
   Original: Expertise handler for weapon is null; this shouldn't happen and you may want to inform the developer.
-  Result: Le gestionnaire d'expertise pour l'arme est nul; cela ne devrait pas arriver et vous pourriez vouloir en informer le développeur.
-3591926048: TRANSLATED
+  Result: Expertise-Handler für Waffe ist null; dies sollte nicht passieren und Sie können den Entwickler informieren wollen.
+3591926048: SKIPPED (token mismatch)
   Original: Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!
-  Result: Votre expertise en armes est [[<color=white>][{ExpertiseData.Key}[</color>][[<color=#90EE90>][{prestigeLevel}[</color>]] et vous avez [<color=yellow>][{progress}[</color>] [<color=#FFC0CB>]expertise[</color>] ([<color=white>][{GetLevelProgress(steamId, handler)}]%[</color>]) avec [<color=#c0c0c0>[{weaponType}][</color>]!
+  Result: Ihre Waffenkompetenz ist [[[[TOKEN_0]]][[[TOKEN_12]]][[[[TOKEN_1]]]]]]][[[[[[TOKEN_2]]]]]]][[[[[TOKEN_3]]]]]]]]]]]] und Sie haben [[[[TOKEN_4]]]][[[[TOKEN_14]]]][[[[[TOKEN_5]]]]]]]]]]]]]]]]][[[[[[[[[]]]]]]]]] [[[TOKEN_6]]]Expertise[[[[TOKEN_7]]]] [[[[TOKEN_8]]]][[[TOKEN_15]]]]%[[[[TOKEN_9]]]]]]]]]]]]]]]]] [[[[[TOKEN_11]]]]]]]]]!
 3489173133: TRANSLATED
   Original: <color=#c0c0c0>{weaponType}</color> Stats: {bonuses}
-  Result: [<color=#c0c0c0>][{weaponType}[</color>] Statistiques: [{bonuses}]
+  Result: [<color=#c0c0c0>][[{weaponType}][</color>]] Stats: [{bonuses}
 3863739608: TRANSLATED
   Original: No bonuses from currently equipped weapon.
-  Result: Pas de bonus de l'arme actuellement équipée.
+  Result: Keine Boni aus aktuell ausgestatteter Waffe.
 4023020194: TRANSLATED
   Original: You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet!
-  Result: Vous n'avez pas encore acquis d'expertise pour [<color=#c0c0c0>][{weaponType}[</color>] !
+  Result: Sie haben noch keine Expertise für [<color=#c0c0c0>][{weaponType}]][[</color>]]] gewonnen!
 736301693: TRANSLATED
   Original: Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? 
-  Result: Expertise de journalisation est maintenant {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ?
+  Result: Expertise Protokollierung ist jetzt {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ?
 27929505: TRANSLATED
   Original: Invalid stat, use '<color=white>.wep lst</color>' to see valid options.
-  Result: Statistiques non valides, utilisez '<color=white>].wep lst[</color>]' pour voir les options valides.
-1880632188: TRANSLATED
+  Result: Invalid stat, verwenden Sie '[<color=white>].wep lst[</color>]]', um gültige Optionen zu sehen.
+1880632188: SKIPPED (token mismatch)
   Original: <color=#00FFFF>{finalWeaponStat}</color> has been chosen for <color=#c0c0c0>{finalWeaponType}</color>!
-  Result: [<color=#00FFFF>][{finalWeaponStat}][</color>] a été choisi pour [<color=#c0c0c0>[{finalWeaponType}][</color>]!
+  Result: [[[TOKEN_0]]][[[[TOKEN_4]]][[[[TOKEN_1]]]]]]] wurde für [[[TOKEN_2]]][[[[TOKEN_5]]]]]][[[[[[[TOKEN_3]]]]]]]]]]]] [[[[[[[[[[[[[[TOKEN_3]]]]]]]]]]]]]]]]]]]]]]]]]]]]]] [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]] [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
 2008856310: TRANSLATED
   Original: Invalid weapon choice, use '<color=white>.wep lst</color>' to see valid options.
-  Result: Choix d'arme non valide, utilisez '<color=white>].wep lst[</color>]' pour voir les options valides.
+  Result: Invalide Waffenwahl, verwenden Sie '[<color=white>].wep lst[</color>]]', um gültige Optionen zu sehen.
 3274700132: TRANSLATED
   Original: Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!
-  Result: Vos statistiques d'armes ont été réinitialisées pour [<color=#c0c0c0>][{weaponType}[</color>]!
-719993404: TRANSLATED
+  Result: Ihre Waffenstate wurden für [<color=#c0c0c0>][{weaponType}]][[</color>]] zurückgesetzt!
+719993404: SKIPPED (token mismatch)
   Original: You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: Vous n'avez pas l'article nécessaire pour réinitialiser vos statistiques d'armes ! [[<color=#ffd9eb>][{item.GetLocalizedName()}][</color>]x[<color=white>[{quantity}][</color>]]
+  Result: Sie haben nicht den erforderlichen Artikel, um Ihre Waffen Statistiken zurücksetzen! ([[[TOKEN_0]]][[[[TOKEN_4]]]][[[[TOKEN_1]]]]]]]][[[[[TOKEN_3]]]]]]]]]]]]]
 2128999876: TRANSLATED
   Original: Level must be between 0 and {ConfigService.MaxExpertiseLevel}.
-  Result: Le niveau doit être compris entre 0 et [{ConfigService.MaxExpertiseLevel}].
+  Result: Die Ebene muss zwischen 0 und [{ConfigService.MaxExpertiseLevel}] liegen.
 2252129438: TRANSLATED
   Original: Invalid weapon type.
-  Result: Type d'arme non valide.
+  Result: Ungültiger Waffentyp.
 2480816305: SKIPPED (token mismatch)
   Original: <color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>
-  Result: [[[TOKEN_0]]][[[TOKEN_6]]][[[TOKEN_1]]] [[[TOKEN_2]]][[[TOKEN_7]]][[[TOKEN_3]]]][[[TOKEN_4]]][[[TOKEN_8]]][[TOKEN_5]]][[TOKEN_5]]]
+  Result: [[[TOKEN_0]]][[[[TOKEN_6]]][[[[TOKEN_1]]]]]]] [[[[[TOKEN_2]]]]]][[[[[[TOKEN_3]]]]]]]]]]]]] [[[[[TOKEN_5]]]]]]]]
 3013651462: TRANSLATED
   Original: Couldn't find matching save method for weapon type...
-  Result: Impossible de trouver la méthode de sauvegarde correspondante pour le type d'arme...
+  Result: Konnte keine passende Save-Methode für Waffentyp finden...
 2965167816: TRANSLATED
   Original: No weapon stats available at this time.
-  Result: Pas de statistiques disponibles pour le moment.
+  Result: Zu dieser Zeit gibt es keine Waffenstaten.
 3084457547: TRANSLATED
   Original: Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>
-  Result: Expertises disponibles en matière d'armes: [<color=#c0c0c0>][{weaponTypes}[</color>]
+  Result: Verfügbare Waffenkompetenzen: [<color=#c0c0c0>][{weaponTypes}][</color>]]
 2202242526: TRANSLATED
   Original: Extra spell slots are not enabled.
-  Result: Les fentes supplémentaires ne sont pas activées.
+  Result: Extra Zauberslots sind nicht aktiviert.
 2998300513: TRANSLATED
   Original: Invalid slot (<color=white>1</color> for Q or <color=white>2</color> for E)
-  Result: Slot non valide ([<color=white>]1[</color>] pour Q ou [<color=white>]2[</color>] pour E)
-3761416018: TRANSLATED
+  Result: Ungültiger Slot (<color=white>]]1[</color>]] für Q oder [<color=white>]2[[</color>]] für E)
+3761416018: SKIPPED (token mismatch)
   Original: First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
-  Result: Première fente non armée définie à [<color=white>][{new PrefabGUID(ability).GetPrefabName()}][</color>] pour [<color=green>[{playerInfo.User.CharacterName.Value}][</color>].
-1826355702: TRANSLATED
+  Result: Erster unbewaffneter Slot auf [[[TOKEN_0]][[[[TOKEN_4]]]][[[[TOKEN_1]]]]] für [[[TOKEN_2]]]]][[[[[[TOKEN_3]]]]]].
+1826355702: SKIPPED (token mismatch)
   Original: Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
-  Result: Deuxième emplacement non armé défini à [<color=white>][{new PrefabGUID(ability).GetPrefabName()}][</color>] pour [<color=green>[{playerInfo.User.CharacterName.Value}][</color>].
+  Result: Zweiter unbewaffneter Slot auf [[[TOKEN_0]][[[[TOKEN_4]]]][[[[TOKEN_1]]]]] für [[[TOKEN_2]]]]][[[[[[TOKEN_3]]]]]].
 2712082651: TRANSLATED
   Original: Radius must be positive!
-  Result: Le radius doit être positif !
+  Result: Radius muss positiv sein!
 1846116445: TRANSLATED
   Original: Extra spell slots for unarmed are not enabled.
-  Result: Les emplacements supplémentaires pour sorts non armés ne sont pas activés.
+  Result: Extra Zauberschlitze für unbewaffnet sind nicht aktiviert.
 446698782: TRANSLATED
   Original: Spells cannot be locked when using exoform.
-  Result: Les sorts ne peuvent pas être verrouillés lors de l'utilisation de l'exoforme.
+  Result: Flügel können bei Verwendung von Exoform nicht verriegelt werden.
 313887201: TRANSLATED
   Original: Change spells to the ones you want in your unarmed slots. When done, toggle this again.
-  Result: Changer les sorts à ceux que vous voulez dans vos fentes non armées. Quand c'est fait, refait ça.
+  Result: Wechseln Sie die Sprüche zu den, die Sie in Ihren unbewaffneten Slots wünschen. Wenn getan, schalten Sie das wieder.
 121410310: TRANSLATED
   Original: Spells locked.
-  Result: C'est fermé.
+  Result: Spells gesperrt.
 4061888430: TRANSLATED
   Original: Blood Legacies are not enabled.
-  Result: Les legs du sang ne sont pas activés.
+  Result: Blood Legacies sind nicht aktiviert.
 3361608225: TRANSLATED
   Original: Invalid blood, use '.bl l' to see options.
-  Result: Sang invalide, utilisez '.bl l'' pour voir les options.
+  Result: Invalides Blut, verwenden Sie '.bl l', um Optionen zu sehen.
 18401539: TRANSLATED
   Original: Invalid blood legacy.
-  Result: Un héritage de sang non valide.
-3254231727: TRANSLATED
+  Result: Invalides Blutvermächtnis.
+3254231727: SKIPPED (token mismatch)
   Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
-  Result: Vous êtes niveau [[<color=white>][{data.Key}[</color>][[<color=#90EE90>][{prestigeLevel}[</color>]] avec [<color=yellow>][{progress}][</color>] [<color=#FFC0CB>] [</color>] [[<color=white>][{BloodSystem.GetLevelProgress(steamId, handler)}]%[</color>]] dans [<color=red>[{handler.GetBloodType()}][</color>]!
+  Result: Sie sind Level [[[[TOKEN_0]]][[[[TOKEN_12]]]][[[[TOKEN_1]]]]]]][[[[[TOKEN_2]]]]]][[[[[TOKEN_3]]]]]]]]]]][[[[[[TOKEN_4]]]]]]][[[[[[[[[[[TOKEN_5]]]]]]]]]]]]]]] [[[TOKEN_6]]essence[[[TOKEN_7]]]] [[[[TOKEN_8]]]][[[TOKEN_15]]]]%[[[[TOKEN_9]]]]]]]]]]]] [[[[TOKEN_16]]]]]]]]][[[[[[TOKEN_11]]]]]]]]]!
 1711931034: TRANSLATED
   Original: <color=red>{bloodType}</color> Stats: {bonuses}
-  Result: [<color=red>][{bloodType}[</color>] Statistiques: [{bonuses}]
-939340687: TRANSLATED
+  Result: [<color=red>][[{bloodType}][</color>]] Stats: [{bonuses}
+939340687: SKIPPED (token mismatch)
   Original: No stats selected for <color=red>{bloodType}</color>, use <color=white>'.bl lst'</color> to see valid options.
-  Result: Aucune statistique sélectionnée pour [<color=red>][{bloodType}][</color>], utiliser [<color=white>'.bl lst'[</color>] pour voir les options valides.
+  Result: Für [[[TOKEN_0]]][[[[TOKEN_4]]]][[[[[TOKEN_1]]]]] werden keine Statistiken ausgewählt, um gültige Optionen zu sehen.
 226227140: TRANSLATED
   Original: No progress in <color=red>{handler.GetBloodType()}</color> yet.
-  Result: Aucun progrès dans [<color=red>][{handler.GetBloodType()}[</color>] pour l'instant.
+  Result: Noch kein Fortschritt in [<color=red>][[{handler.GetBloodType()}][[</color>]]]].
 4051608029: TRANSLATED
   Original: Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? 
-  Result: Enregistrement de l'héritage sanguin {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ?
+  Result: Blut Legacy Protokollierung {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ?
 3335571950: TRANSLATED
   Original: Legacies are not enabled.
-  Result: Les legs ne sont pas activés.
+  Result: Legacies sind nicht aktiviert.
 2194796157: TRANSLATED
   Original: Invalid blood stat, use '<color=white>.bl lst</color>' to see valid options.
-  Result: Statistiques sanguines non valides, utilisez '<color=white>].bl lst[</color>]' pour voir les options valides.
-2785130336: TRANSLATED
+  Result: Invalider Blutstat, verwenden Sie '[<color=white>].bl lst[</color>]]', um gültige Optionen zu sehen.
+2785130336: SKIPPED (token mismatch)
   Original: <color=#00FFFF>{finalBloodStat}</color> selected for <color=red>{finalBloodType}</color>!
-  Result: [<color=#00FFFF>][{finalBloodStat}][</color>] sélectionnés pour [<color=red>[{finalBloodType}][</color>]!
+  Result: [[[TOKEN_0]]][[[[[TOKEN_4]]][[[[TOKEN_1]]]]]]]] [[[[[TOKEN_3]]]]]]]]]]
 4126149106: TRANSLATED
   Original: Invalid blood type, use '<color=white>.bl l</color>' to see valid options.
-  Result: Type de sang non valide, utilisez '<color=white>].bl l[</color>]' pour voir les options valides.
+  Result: Invalider Bluttyp, verwenden Sie '[<color=white>].bl l[</color>]]', um gültige Optionen zu sehen.
 4258273173: TRANSLATED
   Original: Invalid blood legacy, use '<color=white>.bl l</color>' to see valid options.
-  Result: Legs sanguins non valides, utilisez '<color=white>].bl l[</color>]' pour voir les options valides.
+  Result: Invalides Blutvermächtnis, verwenden Sie '[<color=white>].bl l[</color>]]', um gültige Optionen zu sehen.
 1298892920: TRANSLATED
   Original: No legacy available for <color=white>{bloodType}</color>.
-  Result: Aucun héritage disponible pour [<color=white>][{bloodType}[</color>].
+  Result: Kein Vermächtnis für [<color=white>][{bloodType}][</color>]].
 1740355579: TRANSLATED
   Original: Your blood stats have been reset for <color=red>{bloodType}</color>!
-  Result: Vos statistiques sanguines ont été réinitialisées pour [<color=red>][{bloodType}[</color>]!
-1449977777: TRANSLATED
+  Result: Ihre Blutstaten wurden für [<color=red>][{bloodType}][[</color>]]] zurückgesetzt!
+1449977777: SKIPPED (token mismatch)
   Original: You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: Vous n'avez pas l'élément nécessaire pour réinitialiser vos statistiques sanguines ([<color=#ffd9eb>][{item.GetLocalizedName()}][</color>]x[<color=white>[{quantity}][</color>]
+  Result: Sie haben nicht den gewünschten Artikel, um Ihre Blutstaten zurückzusetzen ([[TOKEN_0]]][[[[TOKEN_4]]]][[[[TOKEN_1]]]]]]]]]]][[[[[TOKEN_5]]]]]]]]]]]
 1690022722: TRANSLATED
   Original: Your blood stats have been reset for <color=red>{bloodType}</color>.
-  Result: Vos statistiques sanguines ont été réinitialisées pour [<color=red>][{bloodType}[</color>].
+  Result: Ihre Blutstaten wurden für [<color=red>][{bloodType}][[</color>]] zurückgesetzt.
 1680589832: TRANSLATED
   Original: No blood stats available at this time.
-  Result: Pas de statistiques sanguines disponibles pour l'instant.
+  Result: Keine Blutstaten zur Verfügung.
 1108347105: TRANSLATED
   Original: Level must be between 0 and {ConfigService.MaxBloodLevel}.
-  Result: Le niveau doit être compris entre 0 et [{ConfigService.MaxBloodLevel}].
-2196432591: TRANSLATED
+  Result: Die Ebene muss zwischen 0 und [{ConfigService.MaxBloodLevel}] liegen.
+2196432591: SKIPPED (token mismatch)
   Original: <color=red>{BloodHandler.GetBloodType()}</color> legacy set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>
-  Result: [<color=red>][{BloodHandler.GetBloodType()}][</color>] legs mis à [[<color=white>[{level}][</color>]] pour [<color=green>][{foundUser.CharacterName}][</color>]
+  Result: [[[TOKEN_0]]][[[[[TOKEN_6]]][[[[TOKEN_1]]]]]] Vermächtnis auf [[[[[TOKEN_2]]]]][[[[[TOKEN_3]]]]]]]]]] [[[[[TOKEN_5]]]]]]]]]]
 85537047: TRANSLATED
   Original: Available Blood Legacies: <color=red>{bloodTypesList}</color>
-  Result: Legs sanguins disponibles: [<color=red>][{bloodTypesList}[</color>]
+  Result: Verfügbare Blutgesetze: [<color=red>][{bloodTypesList}][</color>]]
 1381058165: TRANSLATED
   Original: Familiars are not enabled.
-  Result: Les familiers ne sont pas activés.
+  Result: Vertraute sind nicht aktiviert.
 1716911803: TRANSLATED
   Original: <color=white>{box}</color>:
-  Result: [<color=white>][{box}[</color>]:
+  Result: [<color=white>[[{box}][[</color>]]]:
 863911874: TRANSLATED
   Original: <color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $
-  Result: [<color=yellow>][{count}][</color>] [<color=green>][{famName}][</color>]{(familiarBuffsData.FamiliarBuffs.ContientKey(familiarKey) ? $
+  Result: [<color=yellow>][[{count}][</color>]]] [<color=green>[[{famName}][[</color>]]{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $
 1066178325: TRANSLATED
   Original: No active box! Try using <color=white>'.fam sb [Name]'</color> if you know the familiar you're looking for. (use quotes for names with a space)
-  Result: Pas de boîte active ! Essayez d'utiliser [<color=white>'.fam sb [Nom]'[</color>] si vous connaissez le familier que vous recherchez. (utiliser des citations pour les noms avec un espace)
+  Result: Keine aktive Box! Versuchen Sie, [<color=white>]]'.fam sb [Name]'[</color>]] zu verwenden, wenn Sie das vertraute wissen, nach dem Sie suchen. (Zitate für Namen mit einem Raum verwenden)
 2462277004: TRANSLATED
   Original: Couldn't find active box!
-  Result: Je n'ai pas trouvé de boîte active !
+  Result: Ich konnte keine aktive Box finden!
 1977482431: TRANSLATED
   Original: Familiar Boxes:
-  Result: Boîtes familiales:
+  Result: Familiar Boxs:
 2321621014: TRANSLATED
   Original: {fams}
-  Result: [{fams}] TRANSLÉMENT
+  Result: [{fams} VERKEHR
 854134032: TRANSLATED
   Original: You don't have any unlocks yet!
-  Result: Vous n'avez pas encore de déverrouillages !
+  Result: Du hast noch keine Entriegelungen!
 321106656: TRANSLATED
   Original: Box Selected - <color=white>{name}</color>
-  Result: Case sélectionnée - [<color=white>][{name}[</color>]
+  Result: Box Ausgewählt - [<color=white>][{name}][</color>]]
 2465841402: TRANSLATED
   Original: Couldn't find box!
-  Result: Je n'ai pas trouvé de boîte !
-698362524: TRANSLATED
+  Result: Ich konnte keine Kiste finden!
+698362524: SKIPPED (token mismatch)
   Original: Box <color=white>{current}</color> renamed - <color=yellow>{name}</color>
-  Result: Encadré [<color=white>][{current}][</color>] rebaptisé - [<color=yellow>[{name}][</color>]
+  Result: Feld [[[TOKEN_0]]][[[[TOKEN_4]]]][[[[TOKEN_1]]]]]] umbenannt - [[[TOKEN_2]]]][[[[TOKEN_3]]]]]]
 1575879194: TRANSLATED
   Original: Couldn't find box to rename or there's already a box with that name!
-  Result: Impossible de trouver une boîte à renommer ou il y a déjà une boîte avec ce nom !
-823180732: TRANSLATED
+  Result: Könnten Sie nicht umbenennen, oder es gibt bereits eine Box mit diesem Namen!
+823180732: SKIPPED (token mismatch)
   Original: <color=green>{PrefabGUID.GetLocalizedName()}</color> moved - <color=white>{name}</color>
-  Result: [<color=green>][{PrefabGUID.GetLocalizedName()}][</color>] déplacé - [<color=white>[{name}][</color>]
+  Result: [[[TOKEN_0]]][[[[TOKEN_4]]][[[[TOKEN_1]]]]]] bewegt - [[[TOKEN_2]]]][[[[[TOKEN_3]]]]]]]
 3236338434: TRANSLATED
   Original: Box is full!
-  Result: La boîte est pleine !
+  Result: Box ist voll!
 2213724716: TRANSLATED
   Original: Deleted box - <color=white>{name}</color>
-  Result: Case supprimée - [<color=white>][{name}[</color>]
+  Result: Gelöschte Box - [<color=white>][{name}][</color>]
 4289445665: TRANSLATED
   Original: Box is not empty!
-  Result: La boîte n'est pas vide !
+  Result: Box ist nicht leer!
 3279926559: TRANSLATED
   Original: Added box - <color=white>{name}</color>
-  Result: Ajouter la case [<color=white>][{name}[</color>]
+  Result: Feld hinzugefügt - [<color=white>][{name}][</color>]]
 2724064627: TRANSLATED
   Original: Must have at least one unit unlocked to start adding boxes. Additionally, the total number of boxes cannot exceed <color=yellow>{BOX_CAP}</color>.
-  Result: Doit avoir au moins une unité déverrouillée pour commencer à ajouter des boîtes. De plus, le nombre total de cases ne peut pas dépasser [<color=yellow>][{BOX_CAP}[</color>].
+  Result: Muss mindestens eine Einheit entriegelt haben, um zu beginnen, Boxen hinzuzufügen. Zusätzlich kann die Gesamtzahl der Boxen [<color=yellow>][[{BOX_CAP}]]][[</color>]] nicht überschreiten.
 2648123409: TRANSLATED
   Original: VBlood familiars are not enabled.
-  Result: Les familiers VBlood ne sont pas activés.
+  Result: VBlood Vertraute sind nicht aktiviert.
 2179875375: TRANSLATED
   Original: VBlood purchasing is not enabled.
-  Result: L'achat de VBlood n'est pas activé.
+  Result: VBlood Einkauf ist nicht aktiviert.
 2721627196: TRANSLATED
   Original: Couldn't find matching vBlood!
-  Result: Je n'ai pas trouvé de vBlood correspondant !
+  Result: Ich konnte nicht passende vBlood finden!
 1976698463: TRANSLATED
   Original: Multiple matches, please be more specific!
-  Result: Plusieurs matchs, s'il vous plaît soyez plus précis!
+  Result: Mehrere Spiele, bitte genauer sein!
 3052690511: TRANSLATED
   Original: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is not available per configured familiar bans!
-  Result: [<color=white>][{vBloodPrefabGuid.GetLocalizedName()}[</color>] n'est pas disponible par interdictions familières configurées!
+  Result: [<color=white>][[{vBloodPrefabGuid.GetLocalizedName()}][[</color>]]]] ist nicht pro konfigurierten vertrauten Verboten verfügbar!
 3195375072: TRANSLATED
   Original: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is already unlocked!
-  Result: [<color=white>][{vBloodPrefabGuid.GetLocalizedName()}[</color>] est déjà déverrouillé!
+  Result: [<color=white>][[{vBloodPrefabGuid.GetLocalizedName()}][[</color>]]]]] ist bereits entriegelt!
 3380184352: TRANSLATED
   Original: Unable to verify cost for {vBloodPrefabGuid.GetPrefabName()}!
-  Result: Impossible de vérifier le coût de [{vBloodPrefabGuid.GetPrefabName()}]!
+  Result: Nicht zu überprüfen Kosten für [{vBloodPrefabGuid.GetPrefabName()}]!
 3498334942: TRANSLATED
   Original: Unable to verify exo prestige reward item! (<color=yellow>{exoItem}</color>)
-  Result: Impossible de vérifier la récompense exo prestige ! [[<color=yellow>][{exoItem}[</color>]]
+  Result: Nicht zu überprüfen exo prestige lohnartikel! ([<color=yellow>][[{exoItem}][</color>]]])
 4255236631: TRANSLATED
   Original: New unit unlocked: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>
-  Result: Nouvelle unité déverrouillée : [<color=green>][{vBloodPrefabGuid.GetLocalizedName()}[</color>]
-2191580006: TRANSLATED
+  Result: Neue Einheit entsperrt: [<color=green>][{vBloodPrefabGuid.GetLocalizedName()}][</color>]]
+2191580006: SKIPPED (token mismatch)
   Original: Not enough <color=#ffd9eb>{exoItem.GetLocalizedName()}</color>x<color=white>{factoredCost}</color> for {vBloodPrefabGuid.GetPrefabName()}!
-  Result: Pas assez [<color=#ffd9eb>][{exoItem.GetLocalizedName()}][</color>]x[<color=white>[{factoredCost}][</color>] pour [{vBloodPrefabGuid.GetPrefabName()}]!
-1809964020: TRANSLATED
+  Result: Nicht genug [[[TOKEN_0]]][[[[TOKEN_4]]][[[[TOKEN_1]]]]]]][[[[[TOKEN_5]]]]]][[[[[TOKEN_3]]]]]]]]]] für [[[TOKEN_6]]]]]!
+1809964020: SKIPPED (looks untranslated)
   Original: Unable to verify tier for {vBloodPrefabGuid.GetPrefabName()}! Shouldn't really happen at this point and may want to inform the developer.
-  Result: Impossible de vérifier le niveau de [{vBloodPrefabGuid.GetPrefabName()}]! Ne devrait pas vraiment se produire à ce stade et pourrait vouloir informer le développeur.
+  Result: Nicht zu überprüfen Tier für [{vBloodPrefabGuid.GetPrefabName()}! Sollte an diesem Punkt nicht wirklich passieren und den Entwickler informieren wollen.
 1057363547: TRANSLATED
   Original: Invalid choice, please use <color=white>1</color> to <color=white>{familiarSet.Count}</color> (Current List:<color=yellow>{activeBox}</color>)
-  Result: Choix non valable, veuillez utiliser [<color=white>]1[</color>] à [<color=white>[{familiarSet.Count}][</color>] (Liste actuelle:[<color=yellow>][{activeBox}][</color>])
-780970161: TRANSLATED
+  Result: Invalide Wahl bitte [<color=white>]1[</color>]] auf [<color=white>][[{familiarSet.Count}]]][[[</color>]]]]] (Weitere Liste:[<color=yellow>][{activeBox}]][</color>]]])
+780970161: SKIPPED (token mismatch)
   Original: <color=green>{familiarId.GetLocalizedName()}</color> removed from <color=white>{activeBox}</color>.
-  Result: [<color=green>][{familiarId.GetLocalizedName()}][</color>] enlevé de [<color=white>[{activeBox}][</color>].
+  Result: [[[TOKEN_0]]][[[[TOKEN_4]]][[[[TOKEN_1]]]]]]] aus [[[TOKEN_2]]][[[[[TOKEN_3]]]]]]]] entfernt.
 615667259: TRANSLATED
   Original: Couldn't find active familiar box to remove from...
-  Result: Impossible de trouver la boîte familière active à supprimer de...
+  Result: konnte nicht finden aktive vertraute Box, um von...
 210979117: TRANSLATED
   Original: You can't call a familiar when using dominating presence!
-  Result: Vous ne pouvez pas appeler un familier en utilisant la présence dominante!
+  Result: Sie können nicht bekannt nennen, wenn Sie dominierende Präsenz verwenden!
 744989655: TRANSLATED
   Original: You can't call a familiar when using batform!
-  Result: Vous ne pouvez pas appeler un familier en utilisant batform!
+  Result: Du kannst bei der Verwendung von Batform nicht vertraut sein!
 3960937922: TRANSLATED
   Original: You can't toggle combat for a familiar when using dominating presence!
-  Result: Vous ne pouvez pas basculer le combat pour un familier lorsque vous utilisez la présence dominante!
+  Result: Sie können nicht den Kampf für eine vertraute, wenn Sie dominierende Präsenz!
 3219279796: TRANSLATED
   Original: You can't toggle combat for a familiar when using batform!
-  Result: Vous ne pouvez pas basculer le combat pour un familier lorsque vous utilisez batform!
+  Result: Bei der Verwendung von Batform können Sie den Kampf nicht für einen Bekannten kippen!
 2720898024: TRANSLATED
   Original: You can't toggle combat for a familiar in PvP/PvE combat!
-  Result: Vous ne pouvez pas basculer le combat pour un familier dans le combat PvP/PvE!
+  Result: Sie können den Kampf für einen vertrauten PvP/PvE-Kampf nicht knacken!
 3946665029: TRANSLATED
   Original: Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? 
-  Result: Actions d'émote {(GetPlayerBool(steam) Id, EMOTE_ACTIONS_KEY) ?
-2709293439: TRANSLATED
+  Result: Emote Aktionen {(GetPlayerBool) Id, EMOTE_ACTIONS_KEY?
+2709293439: SKIPPED (token mismatch)
   Original: Your familiar is level [<color=white>{xpData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
-  Result: Votre niveau familier est [[<color=white>][{xpData.Key}[</color>][[<color=#90EE90>][{prestigeLevel}[</color>]] et a [<color=yellow>][{progress}[</color>] [<color=#FFC0CB>]expérience[</color>] [[<color=white>][{percent}]%[</color>])!
+  Result: Ihr Bekannter ist Level [[[[TOKEN_0]]][[[[TOKEN_10]]][[[[TOKEN_1]]]]]]][[[[[[TOKEN_2]]]]]]]]][[[[[[TOKEN_3]]]]]]]]]]]]]] und hat [[[[[[TOKEN_5]]]]]]]]]]] [[[TOKEN_6]]] Erfahrung[[[[TOKEN_7]]]] [[[[[TOKEN_8]]]]]]] %[[[[[TOKEN_9]]]]]]]]]]!
 2794958495: TRANSLATED
   Original: {line}
-  Result: [{line}] TRANSLÉMENT
+  Result: [{line} VERKEHR
 488752679: TRANSLATED
   Original: Level must be between 1 and {ConfigService.MaxFamiliarLevel}
-  Result: Le niveau doit être compris entre 1 et [{ConfigService.MaxFamiliarLevel}]
-1440602422: SKIPPED (token mismatch)
+  Result: Level muss zwischen 1 und [{ConfigService.MaxFamiliarLevel} liegen
+1440602422: TRANSLATED
   Original: Active familiar for <color=green>{user.CharacterName.Value}</color> has been set to level <color=white>{level}</color>.
-  Result: [[[TOKEN_0]]][[[TOKEN_4]]][[[TOKEN_1]]] [[TOKEN_1]]] a été mis au niveau [[[TOKEN_2]][[[TOKEN_5]]][[[TOKEN_3]]].
+  Result: Aktiv vertraut für [<color=green>][[{user.CharacterName.Value}][[</color>]]] wurde auf Ebene [<color=white>]][[{level}]]][[[</color>]]]] eingestellt.
 2526362535: TRANSLATED
   Original: Couldn't find active familiar....
-  Result: Je n'ai pas trouvé de familier actif...
+  Result: Ich konnte nicht aktiv vertraut finden....
 701382701: TRANSLATED
   Original: Familiar prestige is not enabled.
-  Result: Le prestige familier n'est pas activé.
+  Result: Familiar prestige ist nicht aktiviert.
 802918832: TRANSLATED
   Original: Familiar is already at maximum number of prestiges!
-  Result: Familiar est déjà au nombre maximum de prestiges!
-1391708521: TRANSLATED
+  Result: Familiar ist bereits bei maximaler Anzahl von Vorkommen!
+1391708521: SKIPPED (token mismatch)
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]!
-  Result: Votre familier a connu [[<color=#90EE90>][{prestigeLevel}][</color>]!
-3235862068: TRANSLATED
+  Result: Ihr Bekannter hat prestiged [[[[TOKEN_0]]][[[[TOKEN_2]]]]]]]]!
+3235862068: SKIPPED (token mismatch)
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>!
-  Result: Votre familier a connu [[<color=#90EE90>][{prestigeLevel}][</color>]] et est maintenant niveau [<color=white>[{newXP.Key}][</color>]!
-54858227: TRANSLATED
+  Result: Ihr vertrautes hat prestiged [[[[[TOKEN_0]]][[[[TOKEN_4]]]]]]]]]] und ist nun Level [[[TOKEN_2]]][[[[[TOKEN_5]]]]]]]]]]!
+54858227: SKIPPED (token mismatch)
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
-  Result: Votre familier a connu [[<color=#90EE90>][{prestigeLevel}[</color>]] et est maintenant niveau [<color=white>[{newXP.Key}][</color>]! (+[<color=#00FFFF>][{FamiliarPrestigeStats[value]}][</color>]
+  Result: Ihr vertrautes hat prestiged [[[[TOKEN_0]]][[[[TOKEN_6]]]]]]]]]] und ist nun Level [[[TOKEN_2]]][[[[TOKEN_7]]]]]]] [[[[[TOKEN_3]]]]]]]]] [[[[[[[[[[[[TOKEN_5]]]]]]]]]]]]]]]]]]]]]]]]]
 3334433396: SKIPPED (token mismatch)
   Original: Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.
-  Result: [[[TOKEN_0]]][[[TOKEN_8]]][[[TOKEN_5]]][[[TOKEN_5]]][[[TOKEN_6]]][[[TOKEN_10]][[[TOKEN_7]]][[TOKEN_7]]][[TOKEN_10]][[TOKEN_7]]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]][[TOKEN_0]]][[TOKEN_0]]][[TOKEN_0]][[TOKEN_0]]
+  Result: [[TOKEN_8]]][[[[TOKEN_3]]]]]][[[[[[TOKEN_9]]]]]][[[[[TOKEN_3]]]]]]][[[[[TOKEN_4]]]]]]][[[[9]]]]][[[[9]]]]][[[[[[[[[TOKEN_6]]]]]]]]]]]][[[[[[[[[[[[[[[[[]]]]]]]]]]]][[[[[[[[[[]]]]]]]]]][[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]][[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]][[[[[[[[[[[[[
 2169705185: TRANSLATED
   Original: Couldn't find active familiar for prestiging!
-  Result: Je ne pouvais pas trouver actif familier pour prestiging!
+  Result: Ich konnte nicht für Prestiging aktiv vertraut finden!
 1469754031: TRANSLATED
   Original: Looks like your familiar is still able to be found; unbind it normally after calling if it's dismissed instead.
-  Result: On dirait que votre familier est encore en mesure d'être trouvé; débranchez-le normalement après avoir appelé si elle est rejetée à la place.
+  Result: Sieht so aus, als ob Ihr Bekannter noch in der Lage ist, gefunden zu werden; sie normalerweise nach dem Aufruf, wenn es abgewiesen statt.
 628275031: TRANSLATED
   Original: Familiar actives and followers cleared.
-  Result: Les actifs familiers et les adeptes sont dégagés.
+  Result: Familiar Aktive und Anhänger geräumt.
 2474938940: TRANSLATED
   Original: Couldn't find matching familiar in boxes.
-  Result: Je n'ai pas trouvé d'appariement familier dans les boîtes.
+  Result: Ich konnte nicht finden, dass sie in Boxen vertraut sind.
 4055019293: TRANSLATED
   Original: Couldn't find any matches...
-  Result: Je n'ai trouvé aucune correspondance...
+  Result: Ich konnte keine Spiele finden...
 1939118629: TRANSLATED
   Original: You don't have any unlocked familiars yet.
-  Result: Vous n'avez pas encore de familiers déverrouillés.
+  Result: Sie haben noch keine entsperrten Bekannten.
 1516467471: TRANSLATED
   Original: You haven't unlocked any familiars yet!
-  Result: Vous n'avez pas encore déverrouillé de familiers !
+  Result: Sie haben noch keine Bekannten entsperrt!
 284459823: TRANSLATED
   Original: Multiple matches found! SmartBind doesn't support this yet... (WIP)
-  Result: Plusieurs allumettes trouvées ! SmartBind ne supporte pas encore ça...
+  Result: Mehrere Treffer gefunden! SmartBind unterstützt das noch nicht... (WIP)
 2165480178: TRANSLATED
   Original: Couldn't find matching shinyBuff from entered spell school. (options: blood, storm, unholy, chaos, frost, illusion)
-  Result: Je n'ai pas trouvé de Buff brillant correspondant de l'école de sort. (options : sang, tempête, impie, chaos, gel, illusion)
+  Result: Ich konnte nicht die passende glänzendeBuff aus der betretenen Zauberschule finden. (Optionen: Blut, Sturm, unheilig, Chaos, Frost, Illusion)
 1581983564: TRANSLATED
   Original: Shiny added! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).
-  Result: Shiny a ajouté ! Rebind familier pour voir les effets. Utilisez l'option «[<color=white>].fam brillance[</color>]» pour basculer (aucune chance d'appliquer le debuff d'école de sort sur frapper si les buffs brillants sont désactivés).
-2682530289: TRANSLATED
+  Result: Shiny hat hinzugefügt! Rebind vertraut, um Effekte zu sehen. Verwenden Sie '[<color=white>].fam Option shiny[[</color>]]]', um zu wechseln (keine Chance, Recht Schule Debuff auf Hit anzuwenden, wenn glänzende Buffs deaktiviert sind).
+2682530289: SKIPPED (token mismatch)
   Original: You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{clampedCost}</color>)
-  Result: Vous n'avez pas la quantité requise de [<color=#ffd9eb>[{_vampiricDust.GetLocalizedName()}][</color>]! [x[<color=white>[{clampedCost}][</color>]
+  Result: Sie haben nicht die erforderliche Menge von [[[TOKEN_0]][[[[TOKEN_4]]]][[[[TOKEN_1]]]]]]! (x[[[TOKEN_2]]]]][[[[[TOKEN_5]]]]]]]]]]]])
 53933494: TRANSLATED
   Original: Shiny changed! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).
-  Result: Shiny a changé ! Rebind familier pour voir les effets. Utilisez l'option «[<color=white>].fam brillance[</color>]» pour basculer (aucune chance d'appliquer le debuff d'école de sort sur frapper si les buffs brillants sont désactivés).
-2486628899: TRANSLATED
+  Result: Shiny hat sich verändert! Rebind vertraut, um Effekte zu sehen. Verwenden Sie '[<color=white>].fam Option shiny[[</color>]]]', um zu wechseln (keine Chance, Recht Schule Debuff auf Hit anzuwenden, wenn glänzende Buffs deaktiviert sind).
+2486628899: SKIPPED (token mismatch)
   Original: You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{changeQuantity}</color>)
-  Result: Vous n'avez pas la quantité requise de [<color=#ffd9eb>[{_vampiricDust.GetLocalizedName()}][</color>]! [x[<color=white>[{changeQuantity}][</color>]
+  Result: Sie haben nicht die erforderliche Menge von [[[TOKEN_0]][[[[TOKEN_4]]]][[[[TOKEN_1]]]]]]! (x[[[TOKEN_2]]]]][[[[[TOKEN_5]]]]]]]]]]]])
 3170335283: TRANSLATED
   Original: Couldn't find active familiar...
-  Result: Je n'ai pas trouvé de familier actif...
+  Result: Ich konnte nicht wissen, dass es...
 1354182381: TRANSLATED
   Original: Valid options: {validOptions}
-  Result: Options valides : [{validOptions}]
+  Result: Gültige Optionen: [{validOptions}]
 318734715: TRANSLATED
   Original: Familiar battles are not enabled.
-  Result: Les combats familiers ne sont pas activés.
-1228611582: TRANSLATED
+  Result: Bekannte Kämpfe sind nicht aktiviert.
+1228611582: SKIPPED (looks untranslated)
   Original: Familiar Battle Groups:
-  Result: Groupes de combat familiers :
+  Result: Familiar Battle Groups:
 3819833139: TRANSLATED
   Original: You have no battle groups.
-  Result: Vous n'avez pas de groupes de combat.
+  Result: Du hast keine Kampfgruppen.
 1081599663: TRANSLATED
   Original: No active battle group selected! Use <color=white>.fam cbg [Name]</color> to select one.
-  Result: Aucun groupe de combat actif sélectionné! Utilisez [<color=white>].fam cbg [Nom][</color>] pour en sélectionner un.
+  Result: Keine aktive Kampfgruppe ausgewählt! Verwenden Sie [<color=white>].fam cbg [Name][</color>]]], um eine auszuwählen.
 3628025920: TRANSLATED
   Original: Active battle group set to <color=white>{groupName}</color>.
-  Result: Groupe tactique actif défini à [<color=white>][{groupName}[</color>].
+  Result: Aktive Kampfgruppe auf [<color=white>][{groupName}][[</color>]]].
 480925981: TRANSLATED
   Original: Battle group not found.
-  Result: Bataille introuvable.
+  Result: Schlachtgruppe nicht gefunden.
 3862629133: TRANSLATED
   Original: Battle group <color=white>{groupName}</color> created.
-  Result: Groupe tactique [<color=white>][{groupName}[</color>] créé.
+  Result: Schlachtgruppe [<color=white>][[{groupName}]][[</color>]]]]] erstellt.
 3182929151: TRANSLATED
   Original: Slot input out of range! (use <color=white>1, 2,</color> or <color=white>3</color>)
-  Result: Entrée de fente hors de portée! (utiliser [<color=white>]1, 2, [</color>] ou [<color=white>]3 [</color>])
+  Result: Slot-Eingabe aus Reichweite! (Verwendung [<color=white>]1, 2,[</color>] oder [<color=white>]3[</color>]]])
 1894878159: TRANSLATED
   Original: Familiar assigned to <color=white>{groupName}</color> in slot {slotIndex}.
-  Result: Familiar assigné à [<color=white>][{groupName}[</color>] dans la fente [{slotIndex}].
+  Result: Familiar zugewiesen [<color=white>][{groupName}][[</color>]]]] im Slot [{slotIndex}].
 4162514026: TRANSLATED
   Original: Deleted battle group <color=white>{groupName}</color>.
-  Result: Groupe de combat supprimé [<color=white>][{groupName}[</color>].
-907868427: TRANSLATED
+  Result: Gelöschte Kampfgruppe [<color=white>][{groupName}][[</color>]]].
+907868427: SKIPPED (token mismatch)
   Original: Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
-  Result: Position dans la file d'attente: [<color=white>][{position}][</color>][[<color=yellow>[{Misc.FormatTimespan(timeRemaining)}][</color>]
+  Result: Position in der Warteschlange: [[[TOKEN_0]]][[[[TOKEN_4]]][[[[TOKEN_1]]]] [[[[[TOKEN_2]]]]]]][[[[[[TOKEN_3]]]]]]]]
 2129553669: TRANSLATED
   Original: You're not currently queued for battle! Use '<color=white>.fam challenge [PlayerName]</color>' to challenge another player.
-  Result: Vous n'êtes pas en attente pour le combat ! Utilisez '<color=white>].fam challenge [PlayerName][</color>]' pour défier un autre joueur.
-2968342812: TRANSLATED
+  Result: Sie sind derzeit nicht für den Kampf abgeschreckt! Verwenden Sie "[<color=white>]].fam Challenge [PlayerName][[</color>]]]]", um einen anderen Spieler herauszufordern.
+2968342812: SKIPPED (token mismatch)
   Original: You can't challenge another player while queued for battle! Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
-  Result: Vous ne pouvez pas défier un autre joueur en attente pour la bataille! Position dans la file d'attente: [<color=white>][{position}][</color>][[<color=yellow>[{Misc.FormatTimespan(timeRemaining)}][</color>]
+  Result: Sie können keinen anderen Spieler herausfordern, während Sie sich für den Kampf entschieden haben! Position in der Warteschlange: [[[TOKEN_0]]][[[[TOKEN_4]]][[[[TOKEN_1]]]] [[[[[TOKEN_2]]]]]]][[[[[[TOKEN_3]]]]]]]]
 3664649404: TRANSLATED
   Original: You can't challenge yourself!
-  Result: Tu ne peux pas te défier !
+  Result: Du kannst dich nicht herausfordern!
 2228202821: TRANSLATED
   Original: <color=green>{playerInfo.User.CharacterName}</color> is already queued for battle!
-  Result: [<color=green>][{playerInfo.User.CharacterName}[</color>] est déjà en attente pour la bataille!
+  Result: [<color=green>][[{playerInfo.User.CharacterName}]][[</color>]]]]] ist schon für den Kampf abgeschreckt!
 349704338: TRANSLATED
   Original: Can't challenge another player until an existing challenge expires or is declined!
-  Result: Ne peut pas défier un autre joueur jusqu'à ce qu'un défi existant expire ou soit refusé!
+  Result: Kann keinen anderen Spieler herausfordern, bis eine bestehende Herausforderung abläuft oder abgelehnt wird!
 2817263998: TRANSLATED
   Original: <color=green>{playerInfo.User.CharacterName}</color> already has a pending challenge!
-  Result: [<color=green>][{playerInfo.User.CharacterName}[</color>] a déjà un défi en suspens!
+  Result: [<color=green>][[{playerInfo.User.CharacterName}][[</color>]]]]] hat bereits eine anstehende Herausforderung!
 1231839381: TRANSLATED
   Original: Challenged <color=white>{playerInfo.User.CharacterName.Value}</color> to a battle! (<color=yellow>30s</color> until it expires)
-  Result: Défié [<color=white>][{playerInfo.User.CharacterName.Value}[</color>] à une bataille! [<color=yellow>]30s[</color>] jusqu'à son expiration
+  Result: Herausforderung [<color=white>][[{playerInfo.User.CharacterName.Value}]][[</color>]]]] zu einer Schlacht! ([<color=yellow>30s[</color>]]] bis zum Ablauf)
 3761848707: TRANSLATED
   Original: Familiar arena position set, battle service started! (only one arena currently allowed)
-  Result: Position de l'arène familiale, le service de combat a commencé ! (une seule arène est actuellement autorisée)
+  Result: Familiar arena position set, Kampfdienst gestartet! (nur eine Arena derzeit erlaubt)
 2557313311: TRANSLATED
   Original: Familiar arena position changed! (only one arena currently allowed)
-  Result: La position de l'arène familiale a changé ! (une seule arène est actuellement autorisée)
+  Result: Vertraute Arena Position geändert! (nur eine Arena derzeit erlaubt)
 1836101498: TRANSLATED
   Original: Quests are not enabled.
-  Result: Les quêtes ne sont pas activées.
+  Result: Quests sind nicht aktiviert.
 2271729042: TRANSLATED
   Original: Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? 
-  Result: L'enregistrement de Quest est maintenant {(GetPlayerBool(steamId, QUEST_LOG_KEY) ?
+  Result: Quest Protokollierung ist jetzt {(GetPlayerBool(steamId, QUEST_LOG_KEY) ?
 1955962459: TRANSLATED
   Original: Invalid quest type. (daily/weekly or d/w)
-  Result: Type de quête invalide. (jour/semaine ou p/p)
+  Result: Invalide Suchart. (täglich/wöchentlich oder d/w)
 4007697799: TRANSLATED
   Original: You don't have any quests yet, check back soon.
-  Result: Vous n'avez pas encore de quêtes, revenez vite.
+  Result: Du hast noch keine Quests, schau bald zurück.
 2563987683: TRANSLATED
   Original: Target cache isn't ready yet, check back shortly!
-  Result: Cible cache n'est pas encore prêt, revenez vite!
+  Result: Target Cache ist noch nicht bereit, zurück in Kürze!
 3823143990: TRANSLATED
   Original: You don't have any quests yet, check back soon!
-  Result: Vous n'avez pas encore de quêtes, revenez vite !
-3878896595: TRANSLATED
+  Result: Du hast noch keine Quests, schau bald zurück!
+3878896595: SKIPPED (looks untranslated)
   Original: Quests for <color=green>{playerInfo.User.CharacterName.Value}</color> have been refreshed.
-  Result: Les quêtes pour [<color=green>][{playerInfo.User.CharacterName.Value}[</color>] ont été rafraîchies.
+  Result: Quests for [<color=green>][{playerInfo.User.CharacterName.Value}][[</color>]]]] wurden erfrischt.
 334075444: TRANSLATED
   Original: Invalid quest type. (Daily/Weekly)
-  Result: Type de quête invalide. (Daily/Weekly)
+  Result: Invalide Suchart. (Daily/Weekly)
 1952946751: TRANSLATED
   Original: You've already completed your <color=#00FFFF>Daily Quest</color> today. Check back tomorrow.
-  Result: Vous avez déjà terminé votre [<color=#00FFFF>]Jaily Quest[</color>] aujourd'hui. Revenez demain.
+  Result: Sie haben Ihre [<color=#00FFFF>]Daily Quest[</color>] heute bereits abgeschlossen. Bis morgen.
 860320001: TRANSLATED
   Original: Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!
-  Result: Votre [<color=#00FFFF>]Quest quotidienne[</color>] a été réaménagé pour [<color=#C0C0C0>[{item.GetLocalizedName()}[</color>] x[<color=white>][{quantity}][</color>]!
-1985982508: TRANSLATED
+  Result: Ihr [<color=#00FFFF>]]Daily Quest[[</color>]] wurde für [<color=#C0C0C0>][[{item.GetLocalizedName()}]]][[[</color>]]]]]]][[[[[{quantity}]]]]]]][[[[[[</color>]]]]]]]]]]]]]]]]]]]]]]] [[[[[[[[[[[[[[[[[[[[[[[[[[[[[</color>]]]]]]]]]]]]]]]]]]]]]]] [[[[[[[[[[[[[[]]]]]]]]]]]]] [[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+1985982508: SKIPPED (token mismatch)
   Original: You couldn't afford to reroll your daily... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)
-  Result: Vous ne pouviez pas vous permettre de recycler votre quotidien... [[<color=#C0C0C0>][{item.GetLocalizedName()}][</color>] x[<color=white>[{quantity}][</color>]
+  Result: Sie konnten sich nicht leisten, Ihre tägliche... ([[TOKEN_0]]][[[TOKEN_4]]]][[[[TOKEN_1]]]]]]] x[[[TOKEN_2]]]]][[[[[TOKEN_5]]]]]]]]]]
 677562659: TRANSLATED
   Original: No daily reroll item configured or couldn't find daily quest entry for player.
-  Result: Aucun élément de reroll quotidien configuré ou ne pouvait trouver d'entrée de quête quotidienne pour le joueur.
+  Result: Kein tägliches Nachrollen Element konfiguriert oder konnte nicht finden tägliche Quest-Eintrag für Spieler.
 1677522996: TRANSLATED
   Original: You've already completed your <color=#BF40BF>Weekly Quest</color>. Check back next week.
-  Result: Vous avez déjà terminé votre [<color=#BF40BF>]Weekly Quest[</color>]. Revenez la semaine prochaine.
+  Result: Sie haben bereits Ihre [<color=#BF40BF>]]Woche Quest[</color>] abgeschlossen. Nächste Woche zurück.
 4009901629: TRANSLATED
   Original: Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!
-  Result: Votre [<color=#BF40BF> Quest hebdomadaire[</color>] a été réaménagé pour [<color=#C0C0C0>[{item.GetLocalizedName()}][</color>] x[<color=white>][{quantity}][</color>]!
-707311945: TRANSLATED
+  Result: Ihr [<color=#BF40BF>]] Weekly Quest[[</color>]] wurde für [<color=#C0C0C0>][[{item.GetLocalizedName()}]]][[[</color>]]]]]][[[[{quantity}]]]]]][[[[[</color>]]]]]]]]]]]]]]] [[[[[[[[[[[[[[[[[[</color>]]]]]]]]]]]]]]]]]] [[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]] [[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]] [[[[[[[[[[[[[[[[[[
+707311945: SKIPPED (token mismatch)
   Original: You couldn't afford to reroll your wekly... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)
-  Result: Vous ne pouviez pas vous permettre de recycler votre wekly... [[<color=#C0C0C0>][{item.GetLocalizedName()}][</color>] x[<color=white>[{quantity}][</color>]
+  Result: Sie konnten es sich nicht leisten, Ihre Weberei... ([[TOKEN_0]]][[[[TOKEN_4]]]]][[[[TOKEN_3]]]]]]]])
 2402916111: TRANSLATED
   Original: No weekly reroll item configured or couldn't find weekly quest entry for player.
-  Result: Aucun élément de reroll hebdomadaire configuré ou ne pouvait trouver d'entrée de quête hebdomadaire pour le joueur.
+  Result: Keine wöchentliche Nachlaufposition konfiguriert oder konnte keine wöchentliche Suche für Spieler finden.
 3719118489: TRANSLATED
   Original: Player has no active quests!
-  Result: Le joueur n'a aucune quête active !
+  Result: Spieler hat keine aktiven Quests!
 563018011: TRANSLATED
   Original: Invalid quest type '{questTypeName}'. Valid values are: {string.Join(
-  Result: Type de quête non valide '{questTypeName}'. Les valeurs valides sont : {string. Joindre(
+  Result: Invalider Suchtyp '[{questTypeName}]]. Gültige Werte sind: {string. Mitglied
 3751423711: TRANSLATED
   Original: Player does not have an active {questType} quest to complete.
-  Result: Le joueur n'a pas de recherche active [{questType}] à compléter.
+  Result: Der Spieler hat keine aktive [{questType}] Suche zum Abschluss.
 998944061: TRANSLATED
   Original: The {questType} quest is already complete for {playerInfo.User.CharacterName.Value}.
-  Result: La quête [{questType}] est déjà terminée pour [{playerInfo.User.CharacterName.Value}].
+  Result: Die [{questType}] Quest ist bereits für [{playerInfo.User.CharacterName.Value}] abgeschlossen.
 2305440578: TRANSLATED
   Original: Completed {Quests.QuestTypeColor[questType]} for <color=green>{playerInfo.User.CharacterName.Value}</color>!
-  Result: Terminé [{Quests.QuestTypeColor[questType]}] pour [<color=green>][{playerInfo.User.CharacterName.Value}][</color>]!
+  Result: Vollständig [{Quests.QuestTypeColor[questType]}] für [<color=green>][{playerInfo.User.CharacterName.Value}]][[</color>]]]!
 1496603105: TRANSLATED
   Original: Leveling is not enabled.
-  Result: Le nivellement n'est pas activé.
+  Result: Leveling ist nicht aktiviert.
 107297214: TRANSLATED
   Original: Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? 
-  Result: Enregistrement de niveau {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ?
-743696282: TRANSLATED
+  Result: Level Logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ?
+743696282: SKIPPED (token mismatch)
   Original: You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
-  Result: Vous êtes niveau [[<color=white>][{level}[</color>][[<color=#90EE90>][{prestigeLevel}[</color>]] avec [<color=yellow>][{progress}][</color>] [<color=#FFC0CB>]expérience[</color>] [[<color=white>][{percent}]%[</color>])!
+  Result: Sie sind Level [[[[TOKEN_0]]][[[[TOKEN_10]]]][[[[TOKEN_1]]]]]]][[[[[TOKEN_2]]]]]][[[[[TOKEN_3]]]]]]]]]]]][[[[[[TOKEN_4]]]]]][[[[[[[[[[[TOKEN_5]]]]]]]]]]]]]]]]]]]] [[[TOKEN_6]]] Erfahrung[[[[TOKEN_7]]]] [[[[[TOKEN_8]]]]]]] %[[[[[TOKEN_9]]]]]]]]]]!
 2051256929: TRANSLATED
   Original: <color=#FFD700>{roundedXP}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~
-  Result: [<color=#FFD700>][{roundedXP}][</color>] bonus [<color=#FFC0CB>]expérience[</color>] restant de [<color=green>] repos[</color>]~
+  Result: [<color=#FFD700>][[[{roundedXP}][[</color>]]]]] Bonus [<color=#FFC0CB>]]]] Erfahrung[[</color>]]]], die von [<color=green>] zurückbleibt[[[[</color>]]]
 400324857: TRANSLATED
   Original: You haven't earned any experience yet!
-  Result: Tu n'as pas encore gagné d'expérience !
-3681675424: TRANSLATED
+  Result: Du hast noch keine Erfahrung verdient!
+3681675424: SKIPPED (token mismatch)
   Original: Level must be between <color=white>0</color> and <color=white>{ConfigService.MaxLevel}</color>!
-  Result: Le niveau doit être compris entre [<color=white>]0[</color>] et [<color=white>[{ConfigService.MaxLevel}][</color>]!
-2437634726: TRANSLATED
+  Result: Die Höhe muss zwischen [[[TOKEN_0]]]0[[[[TOKEN_1]]] und [[[TOKEN_2]]][[[[TOKEN_4]]]]]] liegen!
+2437634726: SKIPPED (token mismatch)
   Original: Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName.Value}</color>!
-  Result: Niveau défini à [<color=white>][{level}][</color>] pour [<color=green>[{foundUser.CharacterName.Value}][</color>]!
+  Result: Ebene eingestellt auf [[[TOKEN_0]]][[[[TOKEN_4]]][[[[TOKEN_1]]]]] für [[[TOKEN_2]]][[[[TOKEN_5]]]]]]]]]!
 1254994229: TRANSLATED
   Original: Couldn't find experience data for {foundUser.CharacterName.Value}
-  Result: Impossible de trouver des données d'expérience pour [{foundUser.CharacterName.Value}]
+  Result: Er konnte keine Erfahrungsdaten für [{foundUser.CharacterName.Value}] finden
 160628229: TRANSLATED
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore shared experience list!
-  Result: [<color=green>][{playerInfo.User.CharacterName.Value}[</color>] ajouté à la liste d'expérience partagée ignorée!
+  Result: [<color=green>][[[{playerInfo.User.CharacterName.Value}]][[</color>]]]]]] zur ignorierten gemeinsamen Erfahrungsliste hinzugefügt!
 1725928464: TRANSLATED
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore shared experience list!
-  Result: [<color=green>][{playerInfo.User.CharacterName.Value}[</color>] supprimé de la liste d'expérience partagée ignorée!
+  Result: [<color=green>][[[{playerInfo.User.CharacterName.Value}][[</color>]]]]] aus der ignorierten Erfahrungsliste entfernt!
 317079168: TRANSLATED
   Original: Professions are not enabled.
-  Result: Les professions ne sont pas activées.
+  Result: Berufe sind nicht aktiviert.
 1548584430: TRANSLATED
   Original: Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? 
-  Result: L'enregistrement professionnel est maintenant {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ?
+  Result: Beruf Protokollierung ist jetzt {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ?
 2935471585: TRANSLATED
   Original: Valid professions: {ProfessionFactory.GetProfessionNames()}
-  Result: Professions valides: [{ProfessionFactory.GetProfessionNames()}]
+  Result: Gültige Berufe: [{ProfessionFactory.GetProfessionNames()}]
 134200388: TRANSLATED
   Original: Invalid profession.
-  Result: Une profession invalide.
-216725398: TRANSLATED
+  Result: Ungültiger Beruf.
+216725398: SKIPPED (token mismatch)
   Original: You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamId, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}
-  Result: Vous êtes niveau [[<color=white>][{data.Key}][</color>]] et avez [<color=yellow>[{progress}[</color>][<color=#FFC0CB>]profiabilité[[</color>][[<color=white>][{ProfessionSystem.GetLevelProgress(steamId, professionHandler)}]%[</color>]) dans [{professionHandler.GetProfessionName()}
+  Result: Sie sind Level [[[[TOKEN_0]]][[[TOKEN_8]]][[[[TOKEN_1]]]]]]] und haben [[[TOKEN_2]]]][[[[[TOKEN_3]]]]]]][[[[TOKEN_4]]]]]]proficiency[[[[[TOKEN_5]]]][[[[[[[[TOKEN_10]]]]]]]]][[[[[[[[[[[[[]]]]]]]]]][[[[[[[[[[[[[]]]]]]]]]]]]]]]][[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]][[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
 1201875369: TRANSLATED
   Original: No progress in {professionHandler.GetProfessionName()} yet!
-  Result: Pas encore de progrès dans [{professionHandler.GetProfessionName()}]!
+  Result: Noch kein Fortschritt in [{professionHandler.GetProfessionName()}]!
 2095668308: TRANSLATED
   Original: Level must be between 0 and {MAX_PROFESSION_LEVEL}.
-  Result: Le niveau doit être compris entre 0 et [{MAX_PROFESSION_LEVEL}].
+  Result: Die Ebene muss zwischen 0 und [{MAX_PROFESSION_LEVEL}] liegen.
 2554001784: TRANSLATED
   Original: {professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>
-  Result: [{professionHandler.GetProfessionName()}] défini à [[<color=white>][{level}][</color>]] pour [<color=green>[{playerInfo.User.CharacterName.Value}][</color>]
+  Result: [{professionHandler.GetProfessionName()}] auf [[[<color=white>][{level}]][[</color>]]]]] für [<color=green>][[[{playerInfo.User.CharacterName.Value}]]]][[[[</color>]]]]]]]]]
 3320804900: TRANSLATED
   Original: Available professions: {ProfessionFactory.GetProfessionNames()}
-  Result: Professions disponibles: [{ProfessionFactory.GetProfessionNames()}]
+  Result: Verfügbare Berufe: [{ProfessionFactory.GetProfessionNames()}]
 2410464917: TRANSLATED
   Original: Classes are not enabled.
-  Result: Les classes ne sont pas activées.
+  Result: Klassen sind nicht aktiviert.
 947371822: TRANSLATED
   Original: You've selected {FormatClassName(playerClass)}!
-  Result: Vous avez sélectionné [{FormatClassName(playerClass)}]!
-714432788: TRANSLATED
+  Result: Sie haben ausgewählt [{FormatClassName(playerClass)}]!
+714432788: SKIPPED (token mismatch)
   Original: You've already selected {FormatClassName(currentClass.Value)}, use <color=white>'.class c [Class]'</color> to change. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)
-  Result: Vous avez déjà sélectionné [{FormatClassName(currentClass.Value)}], utilisez [<color=white>'.class c [Class]'[</color>] pour changer. [[<color=#ffd9eb>][{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}][</color>]x[<color=white>][{ConfigService.ChangeClassQuantity}][</color>]]
+  Result: Sie haben bereits [[[TOKEN_6]]] ausgewählt, verwenden [[[TOKEN_0]]]]'.class c [Class]'[[[TOKEN_1]]]] um sich zu ändern. ([[TOKEN_2]]][[[[TOKEN_7]]][[[[TOKEN_3]]]]]]][[[[TOKEN_4]]]]]][[[[[TOKEN_5]]]]]]]]]]]]
 173404118: TRANSLATED
   Original: Shift spells are not enabled.
-  Result: Les sorts de déplacement ne sont pas activés.
+  Result: Schaltbuchstaben sind nicht aktiviert.
 24953571: TRANSLATED
   Original: Can't change or activate class spells when inventory is full, need at least one space to safely handle jewels when switching.
-  Result: Impossible de modifier ou d'activer les sorts de classe lorsque l'inventaire est complet, besoin d'au moins un espace pour manipuler les bijoux en toute sécurité lors de la commutation.
+  Result: Kann Klassenbuchstaben nicht ändern oder aktivieren, wenn das Inventar voll ist, braucht mindestens einen Raum, um Juwelen beim Schalten sicher zu handhaben.
 2497805382: TRANSLATED
   Original: No spells for {FormatClassName(playerClass.Value)} configured!
-  Result: Aucun sort pour [{FormatClassName(playerClass.Value)}] configuré!
+  Result: Keine Zauber für [{FormatClassName(playerClass.Value)}]] konfiguriert!
 2645405211: TRANSLATED
   Original: Invalid spell, use '<color=white>.class lsp</color>' to see options.
-  Result: sort non valide, utilisez '<color=white>].class lsp[</color>]' pour voir les options.
+  Result: Invalide Schreibweise, verwenden Sie '[<color=white>].class lsp[[</color>]]]', um Optionen zu sehen.
 677404705: TRANSLATED
   Original: No spell for class default configured!
-  Result: Aucun sort pour la classe par défaut configuré!
+  Result: Kein Zauber für Klasseneinstellung konfiguriert!
 1562141642: TRANSLATED
   Original: You don't have the required prestige level for that spell!
-  Result: Vous n'avez pas le niveau de prestige requis pour ce sort !
+  Result: Sie haben nicht das erforderliche Prestigeniveau für diesen Zauber!
 2001389111: TRANSLATED
   Original: Invalid spell, use <color=white>'.class lsp'</color> to see options.
-  Result: sort non valide, utilisez [<color=white>]'.class lsp'[</color>] pour voir les options.
+  Result: Invalide Schreibweise, verwenden Sie [<color=white>]'.class lsp'[</color>]], um Optionen zu sehen.
 20873033: TRANSLATED
   Original: You haven't selected a class or you haven't activated shift spells! (<color=white>'.class s [Class]'</color> | <color=white>'.class shift'</color>)
-  Result: Vous n'avez pas sélectionné de cours ou vous n'avez pas activé les sorts de changement ! [<color=white>'.classe s [Class]'[</color>]"<color=white>'.classe s [</color>])
+  Result: Sie haben keine Klasse ausgewählt oder Sie haben keine Schaltbuchstaben aktiviert! (<color=white>]'.class s [Class]'[</color>]] | [<color=white>]].class Shift'[</color>]])
 4140406916: TRANSLATED
   Original: You haven't selected a class yet, use <color=white>'.class s [Class]'</color> instead.
-  Result: Vous n'avez pas encore sélectionné de classe, utilisez [<color=white>'.class s [Class]'[</color>] à la place.
+  Result: Sie haben noch keine Klasse ausgewählt, stattdessen [<color=white>].class s [Class]'[</color>]].
 1282509635: TRANSLATED
   Original: You have class buffs enabled, use <color=white>'.class passives'</color> to disable them before changing classes!
-  Result: Vous avez activé les buffs de classe, utilisez [<color=white>'.class passives'[</color>] pour les désactiver avant de changer de classe!
+  Result: Sie haben Klassenbuffs aktiviert, verwenden Sie [<color=white>]'.class Passivs'[</color>]], um sie vor dem Wechsel von Klassen zu deaktivieren!
 501637283: TRANSLATED
   Original: Class changed to {FormatClassName(playerClass)}!
-  Result: La classe est passée à [{FormatClassName(playerClass)}]!
+  Result: Klasse geändert in [{FormatClassName(playerClass)}!
 3938051122: TRANSLATED
   Original: Classes: {classTypes}
-  Result: Classes: [{classTypes}]
+  Result: Klassen: [{classTypes}]
 167244174: TRANSLATED
   Original: Classes are not enabled and spells can't be set to shift.
-  Result: Les classes ne sont pas activées et les sorts ne peuvent pas être réglés pour se déplacer.
+  Result: Klassen sind nicht aktiviert und Zaubersprüche können nicht auf Verschiebung gesetzt werden.
 3730830670: TRANSLATED
   Original: Shift slots are not enabled.
-  Result: Les créneaux horaires ne sont pas activés.
+  Result: Schaltschlitze sind nicht aktiviert.
 349267262: TRANSLATED
   Original: Can't change or active class spells when inventory is full, need at least one space to safely handle jewels when switching.
-  Result: Ne peut pas changer ou les sorts de classe active lorsque l'inventaire est plein, besoin d'au moins un espace pour manipuler les bijoux en toute sécurité lors de la commutation.
+  Result: Kann nicht ändern oder aktive Klassenbuchstaben, wenn die Inventar ist voll, brauchen mindestens einen Raum, um sicher zu handhaben Juwelen beim Schalten.
 4066899438: TRANSLATED
   Original: Shift spell <color=green>enabled</color>!
-  Result: [<color=green>]activé[</color>]!
+  Result: Schaltbuch [<color=green>] aktiviert[[</color>]]!
 2320898349: TRANSLATED
   Original: Shift spell <color=red>disabled</color>!
-  Result: Le sort de changement [<color=red>] est désactivé[</color>]!
+  Result: Schaltbuch [<color=red> deaktiviert[</color>]]!
 3756348742: TRANSLATED
   Original: Reminders {(GetPlayerBool(steamId, REMINDERS_KEY) ? 
-  Result: Rappels {(GetPlayerBool(steamId, REMINDERS_KEY) ?
+  Result: Reminders {(GetPlayerBool(steamId, REMINDERS_KEY) ?
 1769980541: TRANSLATED
   Original: Couldn't find bool key from scrolling text type...
-  Result: Impossible de trouver la clé de bool à partir du type de texte défilant...
+  Result: Kann nicht finden bool key aus scrolling text type...
 4003734136: TRANSLATED
   Original: <color=white>{sctType}</color> scrolling text {(currentState ? 
-  Result: [<color=white>][{sctType}[</color>] texte défilant {(état actuel ?
+  Result: [<color=white>][[{sctType}][[</color>]]]]]]]] Text blättern {(currentState ?
 2069903402: TRANSLATED
   Original: Starter kit is not enabled.
-  Result: Le kit de démarrage n'est pas activé.
+  Result: Starter Kit ist nicht aktiviert.
 2817800174: TRANSLATED
   Original: You've received a starting kit with:
-  Result: Vous avez reçu un kit de départ avec :
+  Result: Sie haben ein Startset mit:
 2316405313: TRANSLATED
   Original: {items}
-  Result: [{items}] TRANSLÉMENT
+  Result: [{items} VERKEHR
 2303740299: TRANSLATED
   Original: You've already used your starting kit!
-  Result: Vous avez déjà utilisé votre kit de départ !
+  Result: Du hast schon dein Startset benutzt!
 3125108847: TRANSLATED
   Original: You are now prepared for the hunt!
-  Result: Vous êtes maintenant prêt pour la chasse !
+  Result: Du bist jetzt auf die Jagd vorbereitet!
 3399068440: SKIPPED (token mismatch)
   Original: <color=white>VBloods Slain</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Units Killed</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Deaths</color>: <color=#808080>{Deaths}</color> | <color=white>Time Online</color>: <color=#1E90FF>{OnlineTime}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Blood Consumed</color>: <color=red>{LitresBloodConsumed}</color>L
-  Result: [[[TOKEN_0]]]VBloods Slain[[[TOKEN_1]]]: [[[TOKEN_2]]][[[TOKEN_24]][[[TOKEN_3]]][[[TOKEN_4]]][[[TOKEN_4]]]Unités tuées[[[TOKEN_5]]][[[TOKEN_6]]][[[TOKEN_25]][[[TOKEN_7]]][[TOKEN_8]]][[TOKEN_8]][[TOKEN_9]]][[[TOKEN_10]]][[TOKEN_26]][[[TOKEN_11]]]][[[TOKEN_12]]][Temps en ligne[[[[TOKEN_13]]]][[[TOKEN_14]][[TOKEN_27]]][[[TOKEN_15]]]][[[TOKEN_15]]][TOKEN_K][TOKTO][TOKTO][[TOKEN_17]][[TOKEN_18]][[TOKEN_H][T][T][TK
+  Result: [[[TOKEN_0]]][[KEN_1]]][[K]][K][K]][[K]][K][K]][K][K]]][K][K]][K]][K]][K]][[K]]]][[K]]]][[[K]]]]]][[[[K]]]]]]][[[[K]]]]]]][[[[K]]]][[[K]]]]]]]]]][[[[[[K]]]]]]]]]]][[[[[[K]]]]]][[[[[[[[[[[[K]]]]]]]]]]][[[[[[[[[[[[[[[K]]]]]]]]]]]]]]]]]]]]]]]][[[[[[[[[[[[[[[[[[[[[
 1345204457: TRANSLATED
   Original: This command should only be used as required and certainly not while in combat.
-  Result: Ce commandement ne devrait être utilisé que selon les besoins et certainement pas pendant le combat.
+  Result: Dieser Befehl sollte nur wie erforderlich und sicherlich nicht während im Kampf verwendet werden.
 3732046729: TRANSLATED
   Original: Combat music cleared!
-  Result: La musique de combat est libre !
+  Result: Kampfmusik frei!
 983187747: TRANSLATED
   Original: <color=#90EE90>{parsedPrestigeType}</color> Prestige Info:
-  Result: [<color=#90EE90>][{parsedPrestigeType}[</color>] Info Prestige :
+  Result: [<color=#90EE90>][[{parsedPrestigeType}][</color>]] Prestige Info:
 3186346778: TRANSLATED
   Original: Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}
-  Result: Niveau actuel de prestige: [<color=yellow>][{prestigeLevel}[</color>]/[{maxPrestigeLevel}]
+  Result: Aktuelle Prestige-Ebene: [<color=yellow>][{prestigeLevel}][</color>]]/[{maxPrestigeLevel}]]
 3760020920: TRANSLATED
   Original: Growth rate increase for expertise and legacies: <color=green>{gainPercentage}</color>
-  Result: Augmentation du taux de croissance des compétences et des legs : [<color=green>][{gainPercentage}[</color>]
+  Result: Steigerung der Wachstumsraten bei Fachkenntnissen und Legazen: [<color=green>][{gainPercentage}][</color>]]
 3017333247: TRANSLATED
   Original: Growth rate reduction for experience: <color=yellow>{reductionPercentage}</color>
-  Result: Réduction du taux de croissance pour l'expérience: [<color=yellow>][{reductionPercentage}[</color>]
+  Result: Veränderungsrate der Erfahrung: [<color=yellow>][{reductionPercentage}][</color>]]]
 479209254: TRANSLATED
   Original: Experience rate reduction for leveling no longer applies for exo prestiging.
-  Result: La réduction du taux d'expérience pour le nivellement ne s'applique plus pour exo prestiging.
+  Result: Für die Exo-Prästigung gilt die Erprobungsratenverringerung für das Richten nicht mehr.
 854889988: TRANSLATED
   Original: Growth rate reduction from <color=#90EE90>{parsedPrestigeType}</color> prestige level: <color=yellow>-{percentageReductionString}</color>
-  Result: Réduction du taux de croissance par rapport à [<color=#90EE90>][{parsedPrestigeType}][</color>] niveau de prestige: [<color=yellow>[{percentageReductionString}][</color>]
+  Result: Veränderungsrate von [<color=#90EE90>][[{parsedPrestigeType}][[</color>]] prestige level: [<color=yellow>]]]-[[{percentageReductionString}]]][[[</color>]]]]]
 608840793: TRANSLATED
   Original: Stat bonuses improvement: <color=green>{statGainString}</color>
-  Result: Amélioration des primes Stat : [<color=green>][{statGainString}[</color>]
+  Result: Stat Boni Verbesserung: [<color=green>][{statGainString}]][</color>]]
 562341898: TRANSLATED
   Original: Total change in growth rate including leveling prestige bonus: <color=yellow>{totalEffectString}</color>
-  Result: Variation totale du taux de croissance, y compris la prime de prestige : [<color=yellow>][{totalEffectString}[</color>]
-1812818458: TRANSLATED
+  Result: Gesamtveränderung der Wachstumsrate einschließlich des Prästige-Bonus: [<color=yellow>][{totalEffectString}]][</color>]]
+1812818458: SKIPPED (token mismatch)
   Original: You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, experience from unit kills reduced by <color=red>{reductionPercentage}</color>.
-  Result: Vous avez fait du prestige dans [<color=#90EE90>]Expérience[</color>][[<color=white>[{prestigeLevel}][</color>]! Les taux de croissance de toutes les expertises/législations ont augmenté de [<color=green>][{gainPercentage}][</color>], l'expérience des tueries unitaires a diminué de [<color=red>[{reductionPercentage}][</color>].
-709298301: TRANSLATED
+  Result: Sie haben prestige in [[[TOKEN_0]]] Erfahrung [[[TOKEN_1]]][[[[[TOKEN_2]]]]][[[[[TOKEN_8]]]]]]]]]! Die Wachstumsraten für alle Sachkenntnis/Legalitäten stiegen um [[[TOKEN_4]][[[TOKEN_9]]]][[[[TOKEN_5]]]]]], die Erfahrung aus der Einheit tötet um [[[TOKEN_6]]][[[[TOKEN_10]]]]]].
+709298301: SKIPPED (token mismatch)
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>] prestiged successfully! Growth rate reduced by <color=red>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.
-  Result: [<color=#90EE90>][{parsedPrestigeType}[</color>][[<color=white>][{prestigeLevel}][</color>]] a obtenu du prestige! Taux de croissance réduit de [<color=red>][{percentageReductionString}[</color>] et bonus statistiques améliorés de [<color=green>][{statGainString}[</color>]. La variation totale du taux de croissance avec une prime de prestige est [<color=yellow>][{totalEffectString}[</color>].
+  Result: [[[TOKEN_0]]][[[[[TOKEN_10]]][[[[TOKEN_1]]]]]][[[[[[TOKEN_2]]]]]]]]]]]]][[[[[TOKEN_3]]]]]]]]]]]]]]]]]] erfolgreich prestiged angesehen! Die durch [[[TOKEN_4]]][[[[TOKEN_12]]][[[[TOKEN_5]]]] und durch [[TOKEN_6]]][[[[[TOKEN_13]]]]][[[[[TOKEN_7]]]]] verbesserte Wachstumsrate verringerte Wachstumsrate. Die Gesamtänderung der Wachstumsrate mit dem Prästige-Bonus ist [[[TOKEN_8]]][[[TOKEN_14]]]][[[TOKEN_9]]].
 1443941563: TRANSLATED
   Original: Removed prestige buffs from all players.
-  Result: Enlevez les buffs de prestige de tous les joueurs.
-1286090332: TRANSLATED
+  Result: Entfernt prestige buffs von allen Spielern.
+1286090332: SKIPPED (token mismatch)
   Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
-  Result: Vous êtes niveau [[<color=white>][{data.Key}[</color>][[<color=#90EE90>][{prestigeLevel}[</color>]] avec [<color=yellow>][{progress}][</color>] [<color=#FFC0CB>] [</color>] [[<color=white>][{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}]%[</color>]] dans [<color=red>[{handler.GetBloodType()}][</color>]!
+  Result: Sie sind Level [[[[TOKEN_0]]][[[[TOKEN_12]]]][[[[TOKEN_1]]]]]]][[[[[TOKEN_2]]]]]][[[[[TOKEN_3]]]]]]]]]]][[[[[[TOKEN_4]]]]]]][[[[[[[[[[[TOKEN_5]]]]]]]]]]]]]]] [[[TOKEN_6]]essence[[[TOKEN_7]]]] [[[[TOKEN_8]]]][[[TOKEN_15]]]]%[[[[TOKEN_9]]]]]]]]]]]] [[[[TOKEN_16]]]]]]]]][[[[[[TOKEN_11]]]]]]]]]!
