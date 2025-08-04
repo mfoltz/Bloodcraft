@@ -35,6 +35,7 @@
                 <EmbeddedResource Include="Resources\Localization\Messages\English.json" />
                 <EmbeddedResource Include="Resources\Localization\Messages\Spanish.json" />
                 <EmbeddedResource Include="Resources\Localization\Messages\German.json" />
+                <EmbeddedResource Include="Resources\Localization\Messages\French.json" />
                 <EmbeddedResource Include="Resources\secrets.json" />
         </ItemGroup>
 
