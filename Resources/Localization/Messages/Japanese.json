@@ -131,7 +131,7 @@
     "2196432591": "[[<color=red>][{BloodHandler.GetBloodType()}][</color>]のレガシーセット[[[<color=white>][{level}][</color>]]]]]] [<color=green>][{foundUser.CharacterName}][</color>]]",
     "85537047": "[<color=red>][{bloodTypesList}][</color>]]]",
     "1381058165": "ファミリアーズは有効ではありません。",
-    "1716911803": "[<color=white>][{box}][</color>]]:",
+    "1716911803": "<color=white>{box}</color>：",
     "863911874": "[<color=yellow>][{count}][</color>]]]| [<color=green>][{famName}][</color>]{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey)] ? ドル",
     "1066178325": "アクティブな箱無し! [[<color=white>]]'.fam sb [Name]'[[</color>] を使ってみてください。 (スペースで名前の引用)",
     "2462277004": "アクティブなボックスが見つからなかった!",

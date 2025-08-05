@@ -125,7 +125,7 @@
     "1108347105": "El nivel debe ser entre 0 y [{ConfigService.MaxBloodLevel}].",
     "85537047": "Legacías de sangre disponibles: [<color=red> [{bloodTypesList} [</color>]]",
     "1381058165": "Los familiares no están habilitados.",
-    "1716911803": "[<color=white> [{box}] [</color>]:",
+    "1716911803": "<color=white>{box}</color>:",
     "863911874": "<color=yellow> [{count} [</color> [<color=green> [{famName}]</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $",
     "1066178325": "¡No hay caja activa! Trate de usar [<color=white>'.fam sb [Name]'</color>] si sabe lo familiar que está buscando. (usar citas para nombres con un espacio)",
     "2462277004": "¡No pude encontrar una caja activa!",

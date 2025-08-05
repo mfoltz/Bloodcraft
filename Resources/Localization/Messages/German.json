@@ -106,7 +106,7 @@
     "1108347105": "Die Ebene muss zwischen 0 und [{ConfigService.MaxBloodLevel}] liegen.",
     "85537047": "Verfügbare Blutgesetze: [<color=red>][{bloodTypesList}][</color>]]",
     "1381058165": "Vertraute sind nicht aktiviert.",
-    "1716911803": "[<color=white>[[{box}][[</color>]]]:",
+    "1716911803": "<color=white>{box}</color>:",
     "863911874": "[<color=yellow>][[{count}][</color>]]] [<color=green>[[{famName}][[</color>]]{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $",
     "1066178325": "Keine aktive Box! Versuchen Sie, [<color=white>]]'.fam sb [Name]'[</color>]] zu verwenden, wenn Sie das vertraute wissen, nach dem Sie suchen. (Zitate für Namen mit einem Raum verwenden)",
     "2462277004": "Ich konnte keine aktive Box finden!",
