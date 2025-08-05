@@ -14,6 +14,8 @@ PLACEHOLDER = re.compile(r'\{[^{}]+\}')
 CSINTERP = re.compile(r'\$\{[^{}]+\}')
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
 TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
+# Matches stray TOKEN_n occurrences without surrounding brackets
+TOKEN_WORD = re.compile(r'(?<!\[)TOKEN_\s*(\d+)', re.I)
 
 ENGLISH_WORDS = re.compile(r'\b(the|and|of|with|you|your|for|an)\b', re.I)
 
@@ -41,6 +43,7 @@ def unprotect(text: str, tokens: List[str]) -> str:
 def normalize_tokens(text: str) -> str:
     """Normalize token formatting in Argos output."""
     text = TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
+    text = TOKEN_WORD.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
 
     placeholders: List[str] = []
 
