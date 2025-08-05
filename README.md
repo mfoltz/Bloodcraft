@@ -809,6 +809,8 @@ rm translate-en_es-1_0.zip translate-en_es-1_0.argosmodel
 Use `Tools/translate_argos.py` to generate missing strings. The script uses the `argostranslate` Python API and protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. Pass `--verbose` to display each entry as it is processed and `--log-file` to keep a record. After translating, run `check-translations --show-text` to pinpoint any skipped or untranslated strings. See `AGENTS.md` for the full workflow.
 `translate_argos.py` accepts `--batch-size`, `--max-retries`, and `--timeout` options. It processes strings in batches and retries failures up to the specified limit. Re-run it on a clean copy of `Spanish.json` to restart translations from scratch. `Tools/translate.py` remains for backward compatibility but will print a deprecation warning.
 
+Run `Tools/fix_tokens.py` after translating to restore `<...>` tags and `{...}` placeholders if any `[[TOKEN_n]]` markers remain. Use `--check-only` to report discrepancies without modifying files.
+
 The `.codex/install.sh` setup script also supports downloading Argos language models automatically. Set `FROM_LANG` and `TO_LANG` (or `ARGOS_LANGUAGE_PAIR` as `from:to`) before invoking the script. Example:
 
 ```bash
