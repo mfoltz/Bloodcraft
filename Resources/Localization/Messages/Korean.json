@@ -1,7 +1,7 @@
 {
   "Messages": {
-    "welcome": "환영합니다 Bloodcraft",
-    "3004207253": "[<color=green>][{famName}][</color>]{(buffsData.FamiliarBuffs.ContainsKey(familiar) 아이)? $ 6,000 원",
+  "welcome": "환영합니다 Bloodcraft",
+    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)",
     "2761093386": "배틀 그룹 - {familiarReply}",
     "3158650477": "전투 그룹에 익숙하지!",
     "4165788499": "대상은 모두 죽어, 그들을 respawn 할 수있는 기회를 제공합니다! [{QuestTypeColor[questType]}]]를 다시 불러야 합니다.",

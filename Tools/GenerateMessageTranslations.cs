@@ -6,12 +6,12 @@ namespace Bloodcraft.Tools;
 internal static class GenerateMessageTranslations
 {
     static readonly Regex _serviceRegex = new(
-        @"LocalizationService\.Reply\s*\([^,]*,\s*(?<lit>@?\$?""(?:[^""\\]|\\.)*"")",
-        RegexOptions.Compiled | RegexOptions.Singleline);
+        @"LocalizationService\.Reply\s*\([^,]*,\s*",
+        RegexOptions.Compiled);
 
     static readonly Regex _ctxRegex = new(
-        @"ctx\.Reply\s*\(\s*(?<lit>@?\$?""(?:[^""\\]|\\.)*"")",
-        RegexOptions.Compiled | RegexOptions.Singleline);
+        @"ctx\.Reply\s*\(\s*",
+        RegexOptions.Compiled);
 
     public static void Run(string rootPath)
     {
@@ -36,9 +36,17 @@ internal static class GenerateMessageTranslations
                 continue;
             string content = File.ReadAllText(file);
             foreach (Match m in _serviceRegex.Matches(content))
-                strings.Add(UnescapeLiteral(m.Groups["lit"].Value));
+            {
+                string? lit = ExtractLiteral(content, m.Index + m.Length);
+                if (lit != null)
+                    strings.Add(UnescapeLiteral(lit));
+            }
             foreach (Match m in _ctxRegex.Matches(content))
-                strings.Add(UnescapeLiteral(m.Groups["lit"].Value));
+            {
+                string? lit = ExtractLiteral(content, m.Index + m.Length);
+                if (lit != null)
+                    strings.Add(UnescapeLiteral(lit));
+            }
         }
 
         foreach (string s in strings)
@@ -49,6 +57,100 @@ internal static class GenerateMessageTranslations
 
         File.WriteAllText(engPath, JsonSerializer.Serialize(englishFile, new JsonSerializerOptions { WriteIndented = true }));
         Console.WriteLine("English.json updated.");
+    }
+
+    static string? ExtractLiteral(string content, int startIndex)
+    {
+        int i = startIndex;
+        while (i < content.Length && char.IsWhiteSpace(content[i])) i++;
+
+        int literalStart = i;
+        bool verbatim = false;
+        bool interpolated = false;
+
+        if (i < content.Length && content[i] == '@')
+        {
+            verbatim = true;
+            i++;
+        }
+        if (i < content.Length && content[i] == '$')
+        {
+            interpolated = true;
+            i++;
+        }
+        if (i < content.Length && content[i] == '@')
+        {
+            verbatim = true;
+            i++;
+        }
+
+        if (i >= content.Length || content[i] != '"')
+            return null;
+
+        i++;
+        int braceDepth = 0;
+
+        while (i < content.Length)
+        {
+            char c = content[i];
+
+            if (!verbatim && c == '\\')
+            {
+                i += 2;
+                continue;
+            }
+
+            if (interpolated)
+            {
+                if (c == '{')
+                {
+                    braceDepth++;
+                    i++;
+                    continue;
+                }
+                if (c == '}' && braceDepth > 0)
+                {
+                    braceDepth--;
+                    i++;
+                    continue;
+                }
+                if (braceDepth > 0)
+                {
+                    if (c == '$' && i + 1 < content.Length && content[i + 1] == '"')
+                    {
+                        string? nested = ExtractLiteral(content, i);
+                        if (nested != null)
+                        {
+                            i += nested.Length;
+                            continue;
+                        }
+                    }
+                    else if (c == '"')
+                    {
+                        string? nested = ExtractLiteral(content, i);
+                        if (nested != null)
+                        {
+                            i += nested.Length;
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            if (c == '"' && braceDepth == 0)
+            {
+                if (verbatim && i + 1 < content.Length && content[i + 1] == '"')
+                {
+                    i += 2;
+                    continue;
+                }
+                return content.Substring(literalStart, i - literalStart + 1);
+            }
+
+            i++;
+        }
+
+        return null;
     }
 
     static string UnescapeLiteral(string literal)

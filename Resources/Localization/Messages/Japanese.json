@@ -1,7 +1,7 @@
 {
   "Messages": {
-    "welcome": "ブラッドクラフトへようこそ",
-    "3004207253": "[<color=green>][{famName}][</color>]{(buffsData.FamiliarBuffs.ContainsKey(familiar) お問い合わせ ドル",
+  "welcome": "ブラッドクラフトへようこそ",
+    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)",
     "2761093386": "バトルグループ - [{familiarReply}",
     "3158650477": "バトルグループに馴染みのない!",
     "4165788499": "ターゲットは、すべて殺され、それらを再発するチャンスを与えます! もしそうでなければ、あなたの[[[{QuestTypeColor[questType]}]]をリロールするのは正しい考えではありません。",
