@@ -20,9 +20,9 @@ The Codex system uses the following keywords:
 1. Run the generator to refresh `English.json`:
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
 2. Copy `English.json` to `<Language>.json` and translate each value while keeping numeric hashes.
-3. Reassemble and install the Argos model before running translation scripts. The split files `translate-en_es-1_0.z01`–`translate-en_es-1_0.z04` live in `Resources/Localization/Messages/Models`:
+3. Reassemble and install the Argos model before running translation scripts. The split files `translate-en_es-1_0.z01`–`translate-en_es-1_0.z04` live in `Resources/Localization/Models/EN_ES`:
    ```bash
-   cd Resources/Localization/Messages/Models
+   cd Resources/Localization/Models/EN_ES
    cat translate-en_es-1_0.z* > translate-en_es-1_0.zip
    unzip translate-en_es-1_0.zip
    argos-translate install translate-en_es-1_0.argosmodel
