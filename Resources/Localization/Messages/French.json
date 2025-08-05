@@ -131,7 +131,7 @@
     "2196432591": "[<color=red>][{BloodHandler.GetBloodType()}][</color>] legs mis à [[<color=white>[{level}][</color>]] pour [<color=green>][{foundUser.CharacterName}][</color>]",
     "85537047": "Legs sanguins disponibles: [<color=red>][{bloodTypesList}[</color>]",
     "1381058165": "Les familiers ne sont pas activés.",
-    "1716911803": "[<color=white>][{box}[</color>]:",
+    "1716911803": "<color=white>{box}</color>:",
     "863911874": "[<color=yellow>][{count}][</color>] [<color=green>][{famName}][</color>]{(familiarBuffsData.FamiliarBuffs.ContientKey(familiarKey) ? $",
     "1066178325": "Pas de boîte active ! Essayez d'utiliser [<color=white>'.fam sb [Nom]'[</color>] si vous connaissez le familier que vous recherchez. (utiliser des citations pour les noms avec un espace)",
     "2462277004": "Je n'ai pas trouvé de boîte active !",
