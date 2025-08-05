@@ -1,7 +1,6 @@
 {
   "Messages": {
     "welcome": "Welcome to Bloodcraft",
-    "3004207253": "\u003Ccolor=green\u003E{famName}\u003C/color\u003E{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $",
     "2761093386": "Battle Group - {familiarReply}",
     "3158650477": "No familiars in battle group!",
     "4165788499": "Targets have all been killed, give them a chance to respawn! If this doesn\u0027t seem right consider rerolling your {QuestTypeColor[questType]}.",
@@ -301,6 +300,19 @@
     "1812818458": "You have prestiged in \u003Ccolor=#90EE90\u003EExperience\u003C/color\u003E[\u003Ccolor=white\u003E{prestigeLevel}\u003C/color\u003E]! Growth rates for all expertise/legacies increased by \u003Ccolor=green\u003E{gainPercentage}\u003C/color\u003E, experience from unit kills reduced by \u003Ccolor=red\u003E{reductionPercentage}\u003C/color\u003E.",
     "709298301": "\u003Ccolor=#90EE90\u003E{parsedPrestigeType}\u003C/color\u003E[\u003Ccolor=white\u003E{prestigeLevel}\u003C/color\u003E] prestiged successfully! Growth rate reduced by \u003Ccolor=red\u003E{percentageReductionString}\u003C/color\u003E and stat bonuses improved by \u003Ccolor=green\u003E{statGainString}\u003C/color\u003E. The total change in growth rate with leveling prestige bonus is \u003Ccolor=yellow\u003E{totalEffectString}\u003C/color\u003E.",
     "1443941563": "Removed prestige buffs from all players.",
-    "1286090332": "You\u0027re level [\u003Ccolor=white\u003E{data.Key}\u003C/color\u003E][\u003Ccolor=#90EE90\u003E{prestigeLevel}\u003C/color\u003E] with \u003Ccolor=yellow\u003E{progress}\u003C/color\u003E \u003Ccolor=#FFC0CB\u003Eessence\u003C/color\u003E (\u003Ccolor=white\u003E{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%\u003C/color\u003E) in \u003Ccolor=red\u003E{handler.GetBloodType()}\u003C/color\u003E!"
+    "1286090332": "You\u0027re level [\u003Ccolor=white\u003E{data.Key}\u003C/color\u003E][\u003Ccolor=#90EE90\u003E{prestigeLevel}\u003C/color\u003E] with \u003Ccolor=yellow\u003E{progress}\u003C/color\u003E \u003Ccolor=#FFC0CB\u003Eessence\u003C/color\u003E (\u003Ccolor=white\u003E{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%\u003C/color\u003E) in \u003Ccolor=red\u003E{handler.GetBloodType()}\u003C/color\u003E!",
+    "3066749917": "\u003Ccolor=green\u003E{famName}\u003C/color\u003E{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $\u0022{colorCode}*\u003C/color\u003E\u0022 : \u0022\u0022)} [\u003Ccolor=white\u003E{level}\u003C/color\u003E][\u003Ccolor=#90EE90\u003E{prestiges}\u003C/color\u003E] added to \u003Ccolor=white\u003E{groupName}\u003C/color\u003E! (\u003Ccolor=yellow\u003E{slotIndex}\u003C/color\u003E)",
+    "1465975319": "Reminders {(GetPlayerBool(steamId, REMINDERS_KEY) ? \u0022\u003Ccolor=green\u003Eenabled\u003C/color\u003E\u0022 : \u0022\u003Ccolor=red\u003Edisabled\u003C/color\u003E\u0022)}.",
+    "1945389717": "\u003Ccolor=white\u003E{sctType}\u003C/color\u003E scrolling text {(currentState ? \u0022\u003Ccolor=green\u003Eenabled\u003C/color\u003E\u0022 : \u0022\u003Ccolor=red\u003Edisabled\u003C/color\u003E\u0022)}.",
+    "2511919794": "\u003Ccolor=yellow\u003E{count}\u003C/color\u003E| \u003Ccolor=green\u003E{famName}\u003C/color\u003E{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $\u0022{colorCode}*\u003C/color\u003E {levelAndPrestiges}\u0022 : $\u0022 {levelAndPrestiges}\u0022)}",
+    "508045935": "Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? \u0022\u003Ccolor=green\u003Eenabled\u003C/color\u003E\u0022 : \u0022\u003Ccolor=red\u003Edisabled\u003C/color\u003E\u0022)}!",
+    "52573990": "Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? \u0022\u003Ccolor=green\u003Eenabled\u003C/color\u003E\u0022 : \u0022\u003Ccolor=red\u003Edisabled\u003C/color\u003E\u0022)}.",
+    "1904876515": "Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? \u0022\u003Ccolor=green\u003Eenabled\u003C/color\u003E\u0022 : \u0022\u003Ccolor=red\u003Edisabled\u003C/color\u003E\u0022)}.",
+    "3706417587": "Invalid quest type \u0027{questTypeName}\u0027. Valid values are: {string.Join(\u0022, \u0022, Enum.GetNames(typeof(QuestType)))}",
+    "1095669519": "Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? \u0022\u003Ccolor=green\u003Eenabled\u003C/color\u003E\u0022 : \u0022\u003Ccolor=red\u003Edisabled\u003C/color\u003E\u0022)}.",
+    "3112026815": "Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \u0022\u003Ccolor=green\u003Eenabled\u003C/color\u003E\u0022 : \u0022\u003Ccolor=red\u003Edisabled\u003C/color\u003E\u0022)}.",
+    "542066310": "Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \u0022\u003Ccolor=green\u003Eenabled\u003C/color\u003E\u0022 : \u0022\u003Ccolor=red\u003Edisabled\u003C/color\u003E\u0022)}.",
+    "881612152": "Exo form emote action (\u003Ccolor=white\u003Etaunt\u003C/color\u003E) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \u0022\u003Ccolor=green\u003Eenabled\u003C/color\u003E\u0022 : \u0022\u003Ccolor=red\u003Edisabled\u003C/color\u003E\u0022)}",
+    "2978826451": "\u003Ccolor=green\u003E{famName}\u003C/color\u003E{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \u0022{colorCode}*\u003C/color\u003E\u0022 : \u0022\u0022)} [\u003Ccolor=white\u003E{level}\u003C/color\u003E][\u003Ccolor=#90EE90\u003E{prestiges}\u003C/color\u003E] added to \u003Ccolor=white\u003E{groupName}\u003C/color\u003E! (\u003Ccolor=yellow\u003E{slotIndex}\u003C/color\u003E)"
   }
 }
