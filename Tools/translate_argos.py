@@ -40,7 +40,20 @@ def unprotect(text: str, tokens: List[str]) -> str:
 
 def normalize_tokens(text: str) -> str:
     """Normalize token formatting in Argos output."""
-    return TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
+    text = TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
+
+    placeholders: List[str] = []
+
+    def store(m: re.Match) -> str:
+        placeholders.append(m.group(0))
+        return f"@@{len(placeholders)-1}@@"
+
+    def restore(m: re.Match) -> str:
+        return placeholders[int(m.group(1))]
+
+    tmp = TOKEN_RE.sub(store, text)
+    tmp = tmp.replace("[", "").replace("]", "")
+    return re.sub(r"@@(\d+)@@", restore, tmp)
 
 
 def contains_english(text: str) -> bool:
@@ -177,6 +190,13 @@ def main():
             if token_only:
                 result = result.replace(" TRANSLATE", "")
             result = normalize_tokens(result)
+
+            stripped = TOKEN_RE.sub("", result)
+            if "[" in stripped or "]" in stripped:
+                log_entry(key, english[key], result, "stray brackets")
+                skipped.append(key)
+                continue
+
             if len(TOKEN_RE.findall(result)) != len(tokens):
                 log_entry(key, english[key], result, "token mismatch")
                 skipped.append(key)
