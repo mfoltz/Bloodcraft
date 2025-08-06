@@ -248,5 +248,8 @@
     "2480816305": "<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color>-Fachwissen auf [<color=white>{level}</color>] für <color=green>{playerInfo.User.CharacterName.Value}</color> gesetzt",
     "3761416018": "Erster unbewaffneter Slot auf <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> für <color=green>{playerInfo.User.CharacterName.Value}</color> gesetzt.",
     "1826355702": "Zweiter unbewaffneter Slot auf <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> für <color=green>{playerInfo.User.CharacterName.Value}</color> gesetzt."
+  },
+  "_meta": {
+    "1716911803": "Intentionally identical to English; dynamic placeholder"
   }
 }

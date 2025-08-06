@@ -314,5 +314,8 @@
     "542066310": "Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \u0022\u003Ccolor=green\u003Eenabled\u003C/color\u003E\u0022 : \u0022\u003Ccolor=red\u003Edisabled\u003C/color\u003E\u0022)}.",
     "881612152": "Exo form emote action (\u003Ccolor=white\u003Etaunt\u003C/color\u003E) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \u0022\u003Ccolor=green\u003Eenabled\u003C/color\u003E\u0022 : \u0022\u003Ccolor=red\u003Edisabled\u003C/color\u003E\u0022)}",
     "2978826451": "\u003Ccolor=green\u003E{famName}\u003C/color\u003E{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \u0022{colorCode}*\u003C/color\u003E\u0022 : \u0022\u0022)} [\u003Ccolor=white\u003E{level}\u003C/color\u003E][\u003Ccolor=#90EE90\u003E{prestiges}\u003C/color\u003E] added to \u003Ccolor=white\u003E{groupName}\u003C/color\u003E! (\u003Ccolor=yellow\u003E{slotIndex}\u003C/color\u003E)"
+  },
+  "_meta": {
+    "1716911803": "Intentionally identical to English; dynamic placeholder"
   }
 }

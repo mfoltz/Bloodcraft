@@ -280,5 +280,8 @@
     "562341898": "Variazione totale del tasso di crescita compreso il bonus di prestigio di livellamento: <color=yellow>{totalEffectString}</color>",
     "1812818458": "Avete prestigio in <color=#90EE90>Esperienza</color>[<color=white>{prestigeLevel}</color>]! Tassi di crescita per tutte le competenze/leganze aumentati di <color=green>{gainPercentage}</color>, esperienza da unità uccisi da <color=red>{reductionPercentage}</color>.",
     "1443941563": "Rimossa prestigio buffs da tutti i giocatori."
+  },
+  "_meta": {
+    "1716911803": "Intentionally identical to English; dynamic placeholder"
   }
 }

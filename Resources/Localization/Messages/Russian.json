@@ -223,5 +223,8 @@
     "562341898": "Общее изменение темпов роста, включая повышение престижа: <color=yellow>{totalEffectString}</color>",
     "1443941563": "Удалены престижные баффы от всех игроков.",
     "3706417587": "Недействительный квест типа «{questTypeName}». Действительные значения: {string.Join(\", \", Enum.GetNames(typeof(QuestType)))}"
+  },
+  "_meta": {
+    "1716911803": "Intentionally identical to English; dynamic placeholder"
   }
 }

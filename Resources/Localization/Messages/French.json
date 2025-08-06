@@ -295,5 +295,8 @@
     "709298301": "<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>] a obtenu du prestige! Taux de croissance réduit de <color=red>{percentageReductionString}</color> et bonus statistiques améliorés de <color=green>{statGainString}</color>. La variation totale du taux de croissance avec une prime de prestige est <color=yellow>{totalEffectString}</color>.",
     "1443941563": "Enlevez les buffs de prestige de tous les joueurs.",
     "1286090332": "Vous êtes niveau [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] avec <color=yellow>{progress}</color> <color=#FFC0CB> </color> <color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color> dans <color=red>{handler.GetBloodType()}</color>!"
+  },
+  "_meta": {
+    "1716911803": "Intentionally identical to English; dynamic placeholder"
   }
 }

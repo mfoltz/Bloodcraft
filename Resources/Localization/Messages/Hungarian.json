@@ -121,5 +121,8 @@
     "2480816305": "<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> szakértelem beállítva [<color=white>{level}</color>] <color=green>{playerInfo.User.CharacterName.Value}</color> számára",
     "3761416018": "Az első fegyvertelen nyílás <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> értékre állítva <color=green>{playerInfo.User.CharacterName.Value}</color> számára.",
     "1826355702": "A második fegyvertelen nyílás <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> értékre állítva <color=green>{playerInfo.User.CharacterName.Value}</color> számára."
+  },
+  "_meta": {
+    "1716911803": "Intentionally identical to English; dynamic placeholder"
   }
 }
