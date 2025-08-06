@@ -117,6 +117,9 @@
     "1345204457": "Polecenie to powinno być używane tylko zgodnie z wymaganiami, a na pewno nie podczas walki.",
     "3732046729": "Muzyka bojowa czysta!",
     "479209254": "Obniżenie poziomu doświadczenia w zakresie poziomowania nie ma już zastosowania do prestrowywania exo.",
-    "1443941563": "Usunięto premie prestiżowe od wszystkich graczy."
+    "1443941563": "Usunięto premie prestiżowe od wszystkich graczy.",
+    "2480816305": "<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> ustawiona na [<color=white>{level}</color>] dla <color=green>{playerInfo.User.CharacterName.Value}</color>",
+    "3761416018": "Pierwsze nieuzbrojone gniazdo ustawione na <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> dla <color=green>{playerInfo.User.CharacterName.Value}</color>.",
+    "1826355702": "Drugie nieuzbrojone gniazdo ustawione na <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> dla <color=green>{playerInfo.User.CharacterName.Value}</color>."
   }
 }

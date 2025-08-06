@@ -117,6 +117,9 @@
     "1345204457": "Ez a parancs csak akkor használható, ha szükséges, és természetesen nem harc közben.",
     "3732046729": "A harci zene tiszta!",
     "479209254": "Az exo presztízsre már nem vonatkozik a szintezés tapasztalati arányának csökkentése.",
-    "1443941563": "Eltávolított presztízs buffs minden játékos."
+    "1443941563": "Eltávolított presztízs buffs minden játékos.",
+    "2480816305": "<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> szakértelem beállítva [<color=white>{level}</color>] <color=green>{playerInfo.User.CharacterName.Value}</color> számára",
+    "3761416018": "Az első fegyvertelen nyílás <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> értékre állítva <color=green>{playerInfo.User.CharacterName.Value}</color> számára.",
+    "1826355702": "A második fegyvertelen nyílás <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> értékre állítva <color=green>{playerInfo.User.CharacterName.Value}</color> számára."
   }
 }
