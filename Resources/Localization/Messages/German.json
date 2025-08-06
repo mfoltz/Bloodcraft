@@ -217,7 +217,7 @@
     "1562141642": "Sie haben nicht das erforderliche Prestigeniveau für diesen Zauber!",
     "2001389111": "Invalide Schreibweise, verwenden Sie <color=white>'.class lsp'</color>, um Optionen zu sehen.",
     "20873033": "Sie haben keine Klasse ausgewählt oder Sie haben keine Schaltbuchstaben aktiviert! (<color=white>'.class s [Class]'</color> | <color=white>.class Shift'</color>)",
-    "4140406916": "Sie haben noch keine Klasse ausgewählt, stattdessen <color=white>.class s [Class]'</color>.",
+    "4140406916": "Sie haben noch keine Klasse ausgewählt, stattdessen <color=white>'.class s [Class]'</color>.",
     "1282509635": "Sie haben Klassenbuffs aktiviert, verwenden Sie <color=white>'.class Passivs'</color>, um sie vor dem Wechsel von Klassen zu deaktivieren!",
     "501637283": "Klasse geändert in {FormatClassName(playerClass)}!",
     "3938051122": "Klassen: {classTypes}",
