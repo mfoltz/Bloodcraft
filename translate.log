@@ -1,300 +1,48 @@
-welcome: TRANSLATED
-  Original: Welcome to Bloodcraft
-  Result: 欢迎来到血手
-2761093386: TRANSLATED
-  Original: Battle Group - {familiarReply}
-  Result: 战斗集团 - {familiarReply}
-3158650477: TRANSLATED
-  Original: No familiars in battle group!
-  Result: 没有熟悉的战斗群!
-4165788499: TRANSLATED
-  Original: Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {QuestTypeColor[questType]}.
-  Result: 目标都死了 给他们机会重生! 如果这似乎不正确 考虑转录您的  {QuestTypeColor[questType]}。
-2932385107: TRANSLATED
-  Original: Targets have all been killed, give them a chance to respawn!
-  Result: 目标都死了 给他们机会重生!
-1076291728: TRANSLATED
-  Original: Use the VBlood menu to track bosses!
-  Result: 用VBloud菜单追踪老板!
-3782703317: TRANSLATED
-  Original: Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection} <color=#F88380>{(int)seconds}</color>s ago.
-  Result: 最接近的<color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>是<color=#00FFFF>{(int)distance}</color>f 离{cardinalDirection}<color=#F88380>{(int)seconds}</color>远一点。
-1420278477: TRANSLATED
-  Original: Tracking is only available for incomplete kill quests.
-  Result: 追踪只能用于不完全的寻杀行动。
-3308780183: TRANSLATED
-  Original: Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection}!
-  Result: 最接近<color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>是<color=#00FFFF>{(int)distance}</color> f 离{cardinalDirection}远!
-465036552: SKIPPED (token mismatch)
-  Original: {QuestTypeColor[questType]}: <color=green>{questObjective.Objective.Goal}</color> <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>x<color=#FFC0CB>{questObjective.Objective.RequiredAmount}</color> [<color=white>{questObjective.Progress}</color>/<color=yellow>{questObjective.Objective.RequiredAmount}</color>]
-  Result: [[TOKEN_10]]:[[TOKEN_0]][[TOKEN_11]][[TOKEN_1]][[TOKEN_12]][[TOKEN_3]]x[[TOKEN_4]][[TOKEN_13]][[TOKEN_5]][[TOKEN_6]][[TOKEN_14]][[TOKEN_7]]/[[TOKEN_8]][[TOKEN_15]][[TOKEN_9]]。
-860647533: TRANSLATED
-  Original: Time until {questType} reset - <color=yellow>{timeLeft}</color> | {_questTargetType[questObjective.Objective.Goal]} Prefab: <color=white>{questObjective.Objective.Target.GetPrefabName()}</color>
-  Result: 直到{questType}重置 - <color=yellow> {timeLeft} </color> {_questTargetType[questObjective.Objective.Goal]} 预发:<color=white>{questObjective.Objective.Target.GetPrefabName()}</color>
-1707710671: TRANSLATED
-  Original: You've already completed your {QuestTypeColor[questType]}! Time until {questType} reset - <color=yellow>{timeLeft}</color>
-  Result: 你已经完成了你的{QuestTypeColor[questType]}! 直到{questType}重置的时间 - <color=yellow>{timeLeft}</color>
-319696654: TRANSLATED
-  Original: You don't have a {QuestTypeColor[questType]}.
-  Result: 你没有{QuestTypeColor[questType]}。
-3546356968: TRANSLATED
-  Original: Invalid unit prefab (match found but does not start with CHAR/char).
-  Result: 无效的单位预fab( 找到匹配但不从 CHAR/ char 开始) 。
-2886300456: TRANSLATED
-  Original: <color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.
-  Result: <color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> 添加到<color=white>{activeBox}</color>。
-2169578147: TRANSLATED
-  Original: Invalid unit name (match found but does not start with CHAR/char).
-  Result: 无效的单位名称( 找到匹配但不从 CHAR/ char 开始) 。
-2151120362: TRANSLATED
-  Original: <color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.
-  Result: <color=green>{match.GetLocalizedName()}</color>(<color=yellow>{match.GuidHash}</color>),加上<color=white>{activeBox}</color>。
-223311103: TRANSLATED
-  Original: Invalid unit name (no full or partial matches).
-  Result: 无效的单位名称( 没有完整或部分匹配 ) 。
-2155028867: TRANSLATED
-  Original: Invalid prefab (not an integer) or name (does not start with CHAR/char).
-  Result: 无效的预fab( 不是整数) 或名称( 不从 CHAR/ char 开始) 。
-3102592194: TRANSLATED
-  Original: Couldn't find active familiar!
-  Result: 感觉很熟
-1057342822: TRANSLATED
-  Original: Your familiar has already prestiged the maximum number of times! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)
-  Result: 你熟悉的已经赢得了最多次数的声望! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>).
-2689850927: TRANSLATED
-  Original: Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.
-  Result: 无效的熟悉的威望统计类型, 使用 `<color=white>. fam list </color> 来查看选项 。
-3125006928: TRANSLATED
-  Original: Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.
-  Result: 熟悉者已经从预设处<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>(<color=yellow>{value + 1}</color>),使用 '<color=white>.fam list </color>'来查看选项。
-2846646667: TRANSLATED
-  Original: Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.
-  Result: 无效的熟悉的声望 stat, 使用 `<color=white>. fam lst </color> 来查看选项 。
-705325693: TRANSLATED
-  Original: Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')
-  Result: 熟人已经拥有所有的威望统计! ('<color=white>.fam pr </color>,而不是'<color=white>.fam pr PrestigeStat</color>).
-2844729307: TRANSLATED
-  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!
-  Result: 你熟悉的<color=#90EE90>{prestigeLevel}</color>的声望;积累的知识使他们能保持自己的水平!
-2712718738: TRANSLATED
-  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
-  Result: 你熟悉的<color=#90EE90>{prestigeLevel}</color>的声望;积累的知识使他们得以保持自己的水平! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>).
-872190851: TRANSLATED
-  Original: Failed to remove schematics from your inventory!
-  Result: 从您的库存中删除图表失败 !
-329722985: TRANSLATED
-  Original: You do not have enough of the required item to change classes (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: 您没有足够的所需项目来更改分类(<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-3466860311: TRANSLATED
-  Original: Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: 移除所需项(<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)失败)
-3720524051: TRANSLATED
-  Original: {FormatClassName(playerClass)} passives not found!
-  Result: {FormatClassName(playerClass)} 被动者没有找到!
-3543031585: TRANSLATED
-  Original: {FormatClassName(playerClass)} passives:
-  Result: {FormatClassName(playerClass)} 被动:
-1106946472: TRANSLATED
-  Original: {replyMessage}
-  Result: {replyMessage} 翻译
-2164633984: TRANSLATED
-  Original: Couldn't find stat synergies for {FormatClassName(playerClass)}...
-  Result: 找不到 {FormatClassName(playerClass)} 的数据协同...
-1293896668: TRANSLATED
-  Original: No stat synergies found for {FormatClassName(playerClass)}.
-  Result: 没有发现{FormatClassName(playerClass)}的数据协同效应。
-2147420594: TRANSLATED
-  Original: {FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:
-  Result: {FormatClassName(playerClass)} 统计协同x<color=white>{ConfigService.SynergyMultiplier}</color>:
-999548370: TRANSLATED
-  Original: {FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:
-  Result: {FormatClassName(playerClass)} 统计协同x<color=white>{ConfigService.SynergyMultiplier}</color>:
-460602473: TRANSLATED
-  Original: {FormatClassName(playerClass)} has no spells configured...
-  Result: {FormatClassName(playerClass)} 没有配置拼写...
-442755566: TRANSLATED
-  Original: {FormatClassName(playerClass)} spells:
-  Result: {FormatClassName(playerClass)}咒语:
-2967576286: TRANSLATED
-  Original: Shift spell: <color=#CBC3E3>{spellName}</color>
-  Result: Shift 拼写: <color=#CBC3E3>{spellName}</color>
-3097011724: SKIPPED (token mismatch)
-  Original: Invalid class, use '<color=white>.class l</color>' to see options.
-  Result: 无效的类, 使用' Token_ 0. class l Token_ 1' 来查看选项 。
-1597216248: SKIPPED (token mismatch)
-  Original: Invalid class, use <color=white>'.class l'</color> to see options.
-  Result: 无效的类, 使用 TOKEN_ 0'. class l' [[TOKEN_1]] 来查看选项 。
-2747211297: TRANSLATED
-  Original: Removed all class buffs then applied current class buffs for all players.
-  Result: 删除了所有类的buffs,然后对所有玩家应用当前类buffs.
-2761429858: TRANSLATED
-  Original: Removed all class buffs for all players.
-  Result: 为所有玩家取消了所有类的 buffs 。
-327031724: TRANSLATED
-  Original: Active familiar already present in battle group!
-  Result: 已经是战斗组的熟人了
-625301684: TRANSLATED
-  Original: Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!
-  Result: 不能有超过<color=white>{MAX_BATTLE_GROUPS}</color>战斗群!
-3944404979: TRANSLATED
-  Original: Deleted battle group <color=white>{groupName}</color>!
-  Result: 已删除战斗群 <color=white>{groupName}</color>!
-2979158417: TRANSLATED
-  Original: Prestiging is not enabled.
-  Result: 未启用预览 。
-2350508902: TRANSLATED
-  Original: Invalid prestige type, use <color=white>'.prestige l'</color> to see options.
-  Result: 无效的威望类型, 使用 <color=white>'. prestige l' </color> 来查看选项 。
-1897692916: TRANSLATED
-  Original: You must reach max level before <color=#90EE90>Exo</color> prestiging again.
-  Result: 您必须在 <color=#90EE90> Exo </color> 预设前达到最大水平 。
-9816116: TRANSLATED
-  Original: You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges. (<color=white>{EXO_PRESTIGES}</color>)
-  Result: 您已经达到了 <color=#90EE90>  Exo </color> 的威望上限 。 (<color=white>{EXO_PRESTIGES}</color>).
-3729714988: TRANSLATED
-  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!
-  Result: <color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color>声望完成!.
-2402733055: TRANSLATED
-  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
-  Result: <color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color>声望完成!. 你们还被授予<color=#ffd9eb>{exoReward.GetLocalizedName()}</color><color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
-3961332984: TRANSLATED
-  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.
-  Result: <color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color>声望完成!. 你被授予<color=#ffd9eb>{exoReward.GetLocalizedName()}</color><color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! 它掉在地面上 让你的存货满了
-145841390: SKIPPED (token mismatch)
-  Original: You must reach the maximum level in <color=#90EE90>Experience</color> prestige before <color=#90EE90>Exo</color> prestiging.
-  Result: 您必须在 [[TOKEN_0]] 经验 [[TOKEN_1]] 威望前达到最大水平。
-2076214502: TRANSLATED
-  Original: <color=#90EE90>Exo</color> prestiging is not enabled.
-  Result: <color=#90EE90> Exo </color> 预置无法启用 。
-1641131342: SKIPPED (token mismatch)
-  Original: Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.
-  Result: 无效的声望, 使用 Token_ 0'. prestige l' [[TOKEN_1]] 来查看有效的选项 。
-484801240: TRANSLATED
-  Original: You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.
-  Result: 您尚未达到在 <color=#90EE90>{parsedPrestigeType}</color> 中所要求的声望水平,或处于最高声望水平。
-11642316: TRANSLATED
-  Original: Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s
-  Result: 当前 <color=#90EE90> </color> 优先级: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} 最大格式期限: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s
-836746607: TRANSLATED
-  Original: Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s
-  Result: 为<color=white>{(int)exoFormData.Value}</color>s保留表格所需的足够费用
-2332227846: TRANSLATED
-  Original: You have not prestiged in <color=#90EE90>Exo</color> yet.
-  Result: 您尚未在 <color=#90EE90> Exo </color> 中享有声望 。
-3706109126: TRANSLATED
-  Original: You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.
-  Result: 你在<color=#90EE90>{parsedPrestigeType}</color>中没有威望。
-1689690159: TRANSLATED
-  Original: Couldn't find player.
-  Result: 找不到球员。
-3055902112: TRANSLATED
-  Original: <color=#90EE90>{parsedPrestigeType}</color> prestiging is not enabled.
-  Result: <color=#90EE90>{parsedPrestigeType}</color>预置无法启用.
-3468772905: TRANSLATED
-  Original: The maximum level for <color=#90EE90>{parsedPrestigeType}</color> prestige is {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.
-  Result: <color=#90EE90>{parsedPrestigeType}</color>声望的最高水平是{PrestigeTypeToMaxPrestiges[parsedPrestigeType]}。
-3343555659: TRANSLATED
-  Original: Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.
-  Result: 玩家<color=green>{playerInfo.User.CharacterName.Value}</color>被设定为<color=white>{level}</color>在<color=#90EE90>{parsedPrestigeType}</color>威望中的级别.
-101395383: TRANSLATED
-  Original: Exo prestiging is not enabled.
-  Result: 未启用 exo 预览 。
-3878313095: TRANSLATED
-  Original: Couldn't find player...
-  Result: 找不到玩家...
-1411528307: TRANSLATED
-  Original: <color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.
-  Result: <color=#90EE90>{parsedPrestigeType}</color>为<color=white>{playerInfo.User.CharacterName.Value}</color>重新设置声望。
-3318828181: TRANSLATED
-  Original: Prestige buffs applied! (if they were missing)
-  Result: 预告布夫被应用了! (如果他们失踪)
-830139985: TRANSLATED
-  Original: You have not prestiged in <color=#90EE90>{PrestigeType.Experience}</color>.
-  Result: 你在<color=#90EE90>{PrestigeType.Experience}</color>中没有威望。
-2461283441: TRANSLATED
-  Original: Prestiges:
-  Result: 首饰 :
-3320998835: TRANSLATED
-  Original: {prestiges}
-  Result: {prestiges} 翻译
-947905559: TRANSLATED
-  Original: Leaderboards are not enabled.
-  Result: 领导板没有启用 。
-1182925736: TRANSLATED
-  Original: No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!
-  Result: 没有球员在<color=#90EE90>{parsedPrestigeType}</color>中享有威望!
-1687700552: TRANSLATED
-  Original: You must consume at least one primordial essence...
-  Result: 你必须消耗至少一个基本精髓...
-1763729577: TRANSLATED
-  Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? 
-  Result: Exo form emote action (<color=white> taunt </color>) (韩语). {(GetPlayerBool(SteamId, SHAPSHIFT_KEY)) ? ! –(GetPlayerBool(SteamId, SHAPSHIFT_KEY)) – (英语:
-1711247206: TRANSLATED
-  Original: You are not yet worthy...
-  Result: 你还不值得...
-3882215894: TRANSLATED
-  Original: Invalid shapeshift! Valid options: {shapeshifts}
-  Result: 无效的形状转换 ! 有效选项: {shapeshifts}
-1884272339: TRANSLATED
-  Original: You must consume Dracula's essence before manifesting his form...
-  Result: 你必须先消耗德古拉的精髓 然后再表现他的样子...
-816810753: TRANSLATED
-  Original: You must consume Megara's essence before manifesting her form...
-  Result: 你必须先消耗Megara的精华 然后再展现她的形态...
-3587073963: TRANSLATED
-  Original: Current Exoform: <color=white>{form}</color>
-  Result: 当前排版: <color=white>{form}</color>
-1440482998: TRANSLATED
-  Original: <color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore prestige leaderboard list!
-  Result: <color=green>{playerInfo.User.CharacterName.Value}</color> 在被忽略的名人榜上添加了!.
-2659109549: TRANSLATED
-  Original: <color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore prestige leaderboard list!
-  Result: <color=green>{playerInfo.User.CharacterName.Value}</color>从被忽略的领导牌榜中删除!.
-2178615132: SKIPPED (token mismatch)
-  Original: Permashroud <color=green>enabled</color>!
-  Result: TOMKEN_0 TOMKEN_1 启动!
-1797973559: TRANSLATED
-  Original: Permashroud <color=red>disabled</color>!
-  Result: Permashroud <color=red> 残疾 </color>!
-985830382: TRANSLATED
-  Original: Expertise is not enabled.
-  Result: 未启用专业知识 。
-3170250471: TRANSLATED
-  Original: Expertise handler for weapon is null; this shouldn't happen and you may want to inform the developer.
-  Result: 武器的专门知识处理器是无效的;这不应该发生,你可能要通知开发者.
-3591926048: TRANSLATED
-  Original: Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!
-  Result: 你的武器专长是<color=white>{ExpertiseData.Key}</color><color=#90EE90>{prestigeLevel}</color>,而且你有<color=yellow>{progress}</color>。 <color=#FFC0CB> </color> (<color=white>{GetLevelProgress(steamId, handler)})% </color> 与<color=#c0c0c0>{weaponType}</color> 一起获得专门知识!
-3489173133: TRANSLATED
-  Original: <color=#c0c0c0>{weaponType}</color> Stats: {bonuses}
-  Result: <color=#c0c0c0> {weaponType} </color> (中文(简体) ). {bonuses} (中文(简体) ).
-3863739608: TRANSLATED
-  Original: No bonuses from currently equipped weapon.
-  Result: 目前装备的武器没有奖金。
-4023020194: TRANSLATED
-  Original: You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet!
-  Result: 你还没有获得任何专门知识 <color=#c0c0c0>{weaponType}</color>!
-736301693: TRANSLATED
-  Original: Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? 
-  Result: 专家记录现在是 {( GetPlayerBool, WEAPON_LOG_KEY) ?
-27929505: SKIPPED (token mismatch)
-  Original: Invalid stat, use '<color=white>.wep lst</color>' to see valid options.
-  Result: 无效的 stat, 使用' Token_ 0. wep listt [[TOKEN_1]]' 来查看有效的选项 。
-1880632188: TRANSLATED
-  Original: <color=#00FFFF>{finalWeaponStat}</color> has been chosen for <color=#c0c0c0>{finalWeaponType}</color>!
-  Result: <color=#00FFFF>{finalWeaponStat}</color>被选为<color=#c0c0c0>{finalWeaponType}</color>!
-2008856310: TRANSLATED
-  Original: Invalid weapon choice, use '<color=white>.wep lst</color>' to see valid options.
-  Result: 无效的武器选择, 使用 '<color=white>. wep listt </color>' 来查看有效的选项 。
-3274700132: TRANSLATED
-  Original: Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!
-  Result: 您的武器数据已被重置  <color=#c0c0c0> {weaponType} </color> !
-719993404: TRANSLATED
-  Original: You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: 你没有重设武器数据所需的物品! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>).
-2128999876: TRANSLATED
-  Original: Level must be between 0 and {ConfigService.MaxExpertiseLevel}.
-  Result: 水平必须在0至{ConfigService.MaxExpertiseLevel}之间。
-2252129438: TRANSLATED
-  Original: Invalid weapon type.
-  Result: 无效的武器类型 。
+2480816305: SKIPPED (token mismatch)
+  Original: <color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>
+  Result: [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]] 专为[[TOKEN_2]][[TOKEN_7]][[TOKEN_3]] [[TOKEN_8]][[TOKEN_5]]而设的专
+3761416018: SKIPPED (token mismatch)
+  Original: First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
+  Result: 为[[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]设置的第一个非武装插槽。
+1826355702: SKIPPED (token mismatch)
+  Original: Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
+  Result: 为[[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]设定了第二个非武装插槽。
+1716911803: SKIPPED (looks untranslated)
+  Original: <color=white>{box}</color>:
+  Result: <color=white>{box}</color>:
+2001389111: SKIPPED (token mismatch)
+  Original: Invalid spell, use <color=white>'.class lsp'</color> to see options.
+  Result: 无效的拼写, 使用 TOKEN_ 0'. class Isp' [[TOKEN_1]] 来查看选项 。
+4140406916: SKIPPED (token mismatch)
+  Original: You haven't selected a class yet, use <color=white>'.class s [Class]'</color> instead.
+  Result: 您还没有选择一个类, 请使用  Token_ 0'. class s Class Token_ 1 代替 。
+3399068440: SKIPPED (token mismatch)
+  Original: <color=white>VBloods Slain</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Units Killed</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Deaths</color>: <color=#808080>{Deaths}</color> | <color=white>Time Online</color>: <color=#1E90FF>{OnlineTime}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Blood Consumed</color>: <color=red>{LitresBloodConsumed}</color>L
+  Result: [[TOKEN_0]]VBlouds slaids [[TOKEN_2]] [[TOKEN_24]] [[TOKEN_3]] [[TOKEN_4]] 被杀死的单位 [[TOKEN_6]] [[TOKEN_25]] [[TOKEN_7]] [[TOKEN_8]] 死亡 [[TOKEN_9]] [[TOKEN_10]] [[TOKEN_26]] [[TOKEN_12]] 时间在线 [[TOKEN_11]] [[TOKEN_13]]: [[TOKEN_27]] [[TOKEN_15]] hr [[TOKEN_16]] 分散旅行 [[TOKEN_17]]:[[TOKEN_18]] [[TOKEN_28]] [[TOKEN_19]]kf [[TOKEN_20]] [[TOKEN_20]] Bloud 假定 [[TOKEN_21]]:[[TOKEN_22]] [[TOKEN_29]] [[TOKEN_23]]
+1465975319: SKIPPED (token mismatch)
+  Original: Reminders {(GetPlayerBool(steamId, REMINDERS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: [[TOKEN_4]]。
+1945389717: SKIPPED (token mismatch)
+  Original: <color=white>{sctType}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]]滚动文本[[TOKEN_7]].
+508045935: SKIPPED (token mismatch)
+  Original: Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}!
+  Result: 模拟动作 [[TOKEN_4]]!
+52573990: SKIPPED (token mismatch)
+  Original: Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: 专门知识伐木现在是[[TOKEN_4]]。
+1904876515: SKIPPED (token mismatch)
+  Original: Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: 查询伐木现在是[[TOKEN_4]].
+1095669519: SKIPPED (token mismatch)
+  Original: Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: 平面记录[[TOKEN_4]]。
+3112026815: SKIPPED (token mismatch)
+  Original: Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: 职业伐木现在是[[TOKEN_4]]。
+542066310: SKIPPED (token mismatch)
+  Original: Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: 血迹记录[[TOKEN_4]].
+881612152: SKIPPED (token mismatch)
+  Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
+  Result: Exo form emote action ([[TOKEN_0]] 嘲讽 [[TOKEN_1]]) (中文(简体) ). [[TOKEN_6]]
