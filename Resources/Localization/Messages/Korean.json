@@ -259,6 +259,9 @@
     "608840793": "보너스 개선: <color=green> {statGainString} </color>",
     "562341898": "Total change in growth rate including leveling prestige bonus: <color=yellow> {totalEffectString} </color>",
     "1443941563": "모든 플레이어에서 prestige buffs 제거.",
-    "1286090332": "<color=white> {data.Key} </color> <color=#90EE90> {prestigeLevel} </color> <color=yellow> {progress} </color> </color> <color=#FFC0CB>essence</color> <color=white> {BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)} <color=red> {handler.GetBloodType()} </color>!"
+    "1286090332": "<color=white> {data.Key} </color> <color=#90EE90> {prestigeLevel} </color> <color=yellow> {progress} </color> </color> <color=#FFC0CB>essence</color> <color=white> {BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)} <color=red> {handler.GetBloodType()} </color>!",
+    "2480816305": "<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> 전문 지식이 [<color=white>{level}</color>]로 설정되었습니다 <color=green>{playerInfo.User.CharacterName.Value}</color> 위해",
+    "3761416018": "첫 번째 비무장 슬롯이 <color=white>{new PrefabGUID(ability).GetPrefabName()}</color>로 설정되어 <color=green>{playerInfo.User.CharacterName.Value}</color>에게 적용됩니다.",
+    "1826355702": "두 번째 비무장 슬롯이 <color=white>{new PrefabGUID(ability).GetPrefabName()}</color>로 설정되어 <color=green>{playerInfo.User.CharacterName.Value}</color>에게 적용됩니다."
   }
 }

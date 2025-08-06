@@ -99,6 +99,7 @@
     "719993404": "武器のステータスをリセットするのに必要なアイテムはありません! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)",
     "2128999876": "レベルは 0 と {ConfigService.MaxExpertiseLevel} の間でなければなりません。",
     "2252129438": "無効な武器タイプ。",
+    "2480816305": "<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> の専門知識が [<color=white>{level}</color>] に設定されました <color=green>{playerInfo.User.CharacterName.Value}</color>",
     "3013651462": "武器タイプのマッチング保存方法が見つからなかった...",
     "2965167816": "現時点では武器の統計は使用できません。",
     "3084457547": "利用可能な武器エキスパート: <color=#c0c0c0> {weaponTypes} </color>",

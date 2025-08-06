@@ -97,6 +97,7 @@
     "719993404": "Vous n'avez pas l'article nécessaire pour réinitialiser vos statistiques d'armes ! <color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>",
     "2128999876": "Le niveau doit être compris entre 0 et {ConfigService.MaxExpertiseLevel}.",
     "2252129438": "Type d'arme non valide.",
+    "2480816305": "<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> défini à [<color=white>{level}</color>] pour <color=green>{playerInfo.User.CharacterName.Value}</color>",
     "3013651462": "Impossible de trouver la méthode de sauvegarde correspondante pour le type d'arme...",
     "2965167816": "Pas de statistiques disponibles pour le moment.",
     "3084457547": "Expertises disponibles en matière d'armes: <color=#c0c0c0>{weaponTypes}</color>",

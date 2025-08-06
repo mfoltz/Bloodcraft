@@ -116,6 +116,9 @@
     "1345204457": "คําสั่งนี้ควรจะใช้เฉพาะเมื่อจําเป็นเท่านั้น และแน่นอนไม่ควรจะใช้ในระหว่างการต่อสู้",
     "3732046729": "การต่อสู้เพลงล้าง!",
     "479209254": "การลดอัตราการ leveling ไม่นํามาใช้สําหรับการกระตุ้น",
-    "1443941563": "เอากิตติมศักดิ์ออกจากผู้เล่นทุกคน"
+    "1443941563": "เอากิตติมศักดิ์ออกจากผู้เล่นทุกคน",
+    "2480816305": "กำหนด <color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> ไว้ที่ [<color=white>{level}</color>] สำหรับ <color=green>{playerInfo.User.CharacterName.Value}</color>",
+    "3761416018": "สล็อตไม่มีอาวุธช่องแรกตั้งค่าเป็น <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> สำหรับ <color=green>{playerInfo.User.CharacterName.Value}</color>.",
+    "1826355702": "สล็อตไม่มีอาวุธช่องที่สองตั้งค่าเป็น <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> สำหรับ <color=green>{playerInfo.User.CharacterName.Value}</color>."
   }
 }

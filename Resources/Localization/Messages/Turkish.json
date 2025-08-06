@@ -130,6 +130,9 @@
     "1345204457": "Bu komut sadece gerekli olarak kullanılmalıdır ve kesinlikle savaşta değil.",
     "3732046729": "Savaş müziği temizlendi!",
     "479209254": "Seviyeleme için deneyim oranı azaltımı artık exo prestij için geçerli değildir.",
-    "1443941563": "Tüm oyunculardan prestijli otobüsler kaldırıldı."
+    "1443941563": "Tüm oyunculardan prestijli otobüsler kaldırıldı.",
+    "2480816305": "<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> uzmanlığı [<color=white>{level}</color>] olarak ayarlandı <color=green>{playerInfo.User.CharacterName.Value}</color> için",
+    "3761416018": "İlk silahsız yuva <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> olarak ayarlandı <color=green>{playerInfo.User.CharacterName.Value}</color> için.",
+    "1826355702": "İkinci silahsız yuva <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> olarak ayarlandı <color=green>{playerInfo.User.CharacterName.Value}</color> için."
   }
 }
