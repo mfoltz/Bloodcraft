@@ -286,7 +286,7 @@
     "2316405313": "{items}",
     "2303740299": "Bạn đã sử dụng bộ khởi động của mình!",
     "3125108847": "Bây giờ bạn đã chuẩn bị cho cuộc săn lùng!",
-    "3399068440": "<color=white>vbloods Slain</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>units bị giết</color>: <color=#FFD700>{UnitKills}</color> | <color=white>deaths</color>: <color=#808080>{Deaths}</color> | <color=white>time trực tuyến</color>: <color=#1E90FF>{OnlineTime}</color>HR | <color=white>distance đã đi __1: <color=#32CD32>{DistanceTraveled}</color>KF | <color=white>blood tiêu thụ</color>: <color=red>{LitresBloodConsumed}</color>L",
+    "3399068440": "<color=white>vbloods Slain</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>units bị giết</color>: <color=#FFD700>{UnitKills}</color> | <color=white>deaths</color>: <color=#808080>{Deaths}</color> | <color=white>time trực tuyến</color>: <color=#1E90FF>{OnlineTime}</color>HR | <color=white>distance đã đi</color>: <color=#32CD32>{DistanceTraveled}</color>KF | <color=white>blood tiêu thụ</color>: <color=red>{LitresBloodConsumed}</color>L",
     "1345204457": "Lệnh này chỉ nên được sử dụng theo yêu cầu và chắc chắn không phải trong khi chiến đấu.",
     "3732046729": "Nhạc chiến đấu đã xóa!",
     "983187747": "<color=#90EE90>{parsedPrestigeType}</color> Thông tin uy tín:",
