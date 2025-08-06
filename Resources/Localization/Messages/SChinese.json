@@ -297,6 +297,22 @@
     "2978826451": "<color=green>{famName}</color>{(buken_5{prestiges}</color><color=white>{groupName}</color> 添加到<color=white>{groupName}</color> 的 [<color=#90EE90>{prestiges}</color>]中! (<color=yellow>{slotIndex}</color>).",
     "863911874": "<color=yellow> {count}</color> _______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________ <color=green>{famName}</color>{(familiar BuffsData.Familiar Buffs.ContersKey(famKey))?永久失效連結 (中文(简体) ). (单位:美元)",
     "2645405211": "无效的拼写, 使用 '<color=white>. class Isp </color>' 来查看选项 。",
-    "1282509635": "您启用了类 buffs, 使用 <color=white>'. class asseners' </color> 在更改类前禁用它们 !"
+    "1282509635": "您启用了类 buffs, 使用 <color=white>'. class asseners' </color> 在更改类前禁用它们 !",
+    "2480816305": "<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> 专精已设为[<color=white>{level}</color>]，对象为 <color=green>{playerInfo.User.CharacterName.Value}</color>",
+    "3761416018": "第一个徒手槽已为<color=green>{playerInfo.User.CharacterName.Value}</color>设置为<color=white>{new PrefabGUID(ability).GetPrefabName()}</color>.",
+    "1826355702": "第二个徒手槽已为<color=green>{playerInfo.User.CharacterName.Value}</color>设置为<color=white>{new PrefabGUID(ability).GetPrefabName()}</color>.",
+    "1716911803": "<color=white>{box}</color>:",
+    "2001389111": "法术无效，使用 <color=white>'.class lsp'</color> 查看选项。",
+    "4140406916": "你还没有选择职业，请使用 <color=white>'.class s [Class]'</color>。",
+    "3399068440": "<color=white>被击杀的VBloods</color>：<color=#FF5733>{VBloodKills}</color> | <color=white>击杀单位</color>：<color=#FFD700>{UnitKills}</color> | <color=white>死亡次数</color>：<color=#808080>{Deaths}</color> | <color=white>在线时间</color>：<color=#1E90FF>{OnlineTime}</color>小时 | <color=white>行走距离</color>：<color=#32CD32>{DistanceTraveled}</color>千米 | <color=white>消耗血量</color>：<color=red>{LitresBloodConsumed}</color>L",
+    "1465975319": "提醒{(GetPlayerBool(steamId, REMINDERS_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}.",
+    "1945389717": "<color=white>{sctType}</color>滚动文字{(currentState ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}.",
+    "508045935": "表情动作{(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}！",
+    "52573990": "专精记录现在{(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}。",
+    "1904876515": "任务记录现在{(GetPlayerBool(steamId, QUEST_LOG_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}。",
+    "1095669519": "等级记录{(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}。",
+    "3112026815": "职业记录现在{(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}。",
+    "542066310": "血统记录{(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}。",
+    "881612152": "Exo形态表情动作（<color=white>嘲讽</color>）{(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}"
   }
 }

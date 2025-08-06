@@ -301,6 +301,18 @@
     "4009901629": "Tu <color=#BF40BF>misión semanal</color> ha sido rerolada por <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!",
     "2305440578": "¡Completado {Quests.QuestTypeColor[questType]} para <color=green>{playerInfo.User.CharacterName.Value}</color>!",
     "216725398": "Eres nivel [<color=white>{data.Key}</color>] y tienes <color=yellow>{progress}</color> <color=#FFC0CB>pericia</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamId, professionHandler)}%</color>) en {professionHandler.GetProfessionName()}",
-    "3399068440": "<color=white>VBloods asesinados</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Unidades matadas</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Muertes</color>: <color=#808080>{Deaths}</color> | <color=white>Tiempo en línea</color>: <color=#1E90FF>{OnlineTime}</color>h | <color=white>Distancia recorrida</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Sangre consumida</color>: <color=red>{LitresBloodConsumed}</color>L"
+    "3399068440": "<color=white>VBloods asesinados</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Unidades matadas</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Muertes</color>: <color=#808080>{Deaths}</color> | <color=white>Tiempo en línea</color>: <color=#1E90FF>{OnlineTime}</color>h | <color=white>Distancia recorrida</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Sangre consumida</color>: <color=red>{LitresBloodConsumed}</color>L",
+    "3066749917": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] añadido a <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)",
+    "1465975319": "Recordatorios {(GetPlayerBool(steamId, REMINDERS_KEY) ? \"<color=green>habilitados</color>\" : \"<color=red>deshabilitados</color>\")}.",
+    "1945389717": "<color=white>{sctType}</color> texto desplazable {(currentState ? \"<color=green>habilitado</color>\" : \"<color=red>deshabilitado</color>\")}.",
+    "2511919794": "<color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? \"{colorCode}*</color> {levelAndPrestiges}\" : \" {levelAndPrestiges}\")}",
+    "508045935": "Acciones de emoticono {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? \"<color=green>habilitadas</color>\" : \"<color=red>deshabilitadas</color>\")}!",
+    "52573990": "El registro de pericia ahora está {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? \"<color=green>habilitado</color>\" : \"<color=red>deshabilitado</color>\")}",
+    "1904876515": "El registro de misiones ahora está {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? \"<color=green>habilitado</color>\" : \"<color=red>deshabilitado</color>\")}",
+    "3706417587": "Tipo de misión inválido '{questTypeName}'. Valores válidos: {string.Join(\", \", Enum.GetNames(typeof(QuestType)))}",
+    "1095669519": "El registro de nivel {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? \"<color=green>habilitado</color>\" : \"<color=red>deshabilitado</color>\")}",
+    "3112026815": "El registro de profesión ahora está {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>habilitado</color>\" : \"<color=red>deshabilitado</color>\")}",
+    "542066310": "El registro de Legado de Sangre {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>habilitado</color>\" : \"<color=red>deshabilitado</color>\")}",
+    "881612152": "Acción de gesto en forma Exo (<color=white>provocación</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>habilitada</color>\" : \"<color=red>deshabilitada</color>\")}"
   }
 }

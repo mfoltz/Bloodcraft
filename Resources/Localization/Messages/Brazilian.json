@@ -292,6 +292,27 @@
     "1443941563": "Aficionados prestígio removido de todos os jogadores.",
     "1286090332": "Você está no nível [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>]<color=yellow>{progress}</color> <color=#FFC0CB>essência</color> <color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color><color=red>{handler.GetBloodType()}</color>!",
     "2511919794": "<color=yellow> {count} </color> <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContémKey(famKey) ? $\"{colorCode}*</color> {levelAndPrestiges}\" : $\" {levelAndPrestiges})}",
-    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContémChave(familiarId) ? \"{colorCode}*</color>\" : \"} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]<color=white>{groupName}</color>! <color=yellow>{slotIndex}</color>"
+    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContémChave(familiarId) ? \"{colorCode}*</color>\" : \"} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]<color=white>{groupName}</color>! <color=yellow>{slotIndex}</color>",
+    "2761093386": "Grupo de Batalha - {familiarReply}",
+    "460602473": "{FormatClassName(playerClass)} não tem feitiços configurados...",
+    "11642316": "Nível de Prestígio <color=#90EE90>Exo</color> Atual: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Duração Máxima da Forma: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s",
+    "2461283441": "Prestígios:",
+    "1716911803": "<color=white>{box}</color>:",
+    "1469754031": "Parece que seu familiar ainda pode ser encontrado; desvincule-o normalmente após chamá-lo se for dispensado.",
+    "563018011": "Tipo de missão inválido '{questTypeName}'. Valores válidos: {string.Join(\", \", Enum.GetNames(typeof(QuestType)))}",
+    "3938051122": "Classes: {classTypes}",
+    "2320898349": "Feitiço de Shift <color=red>desativado</color>!",
+    "3399068440": "<color=white>VBloods Abatidos</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Unidades Mortas</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Mortes</color>: <color=#808080>{Deaths}</color> | <color=white>Tempo Online</color>: <color=#1E90FF>{OnlineTime}</color>h | <color=white>Distância Percorrida</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Sangue Consumido</color>: <color=red>{LitresBloodConsumed}</color>L",
+    "3066749917": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] adicionado a <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)",
+    "1465975319": "Lembretes {(GetPlayerBool(steamId, REMINDERS_KEY) ? \"<color=green>ativados</color>\" : \"<color=red>desativados</color>\")}.",
+    "1945389717": "<color=white>{sctType}</color> texto rolante {(currentState ? \"<color=green>ativado</color>\" : \"<color=red>desativado</color>\")}.",
+    "508045935": "Ações de emote {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? \"<color=green>ativadas</color>\" : \"<color=red>desativadas</color>\")}!",
+    "52573990": "O registro de perícia agora está {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? \"<color=green>ativado</color>\" : \"<color=red>desativado</color>\")}.",
+    "1904876515": "O registro de missões agora está {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? \"<color=green>ativado</color>\" : \"<color=red>desativado</color>\")}.",
+    "3706417587": "Tipo de missão inválido '{questTypeName}'. Valores válidos: {string.Join(\", \", Enum.GetNames(typeof(QuestType)))}",
+    "1095669519": "O registro de nível {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? \"<color=green>ativado</color>\" : \"<color=red>desativado</color>\")}.",
+    "3112026815": "O registro de profissão agora está {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>ativado</color>\" : \"<color=red>desativado</color>\")}.",
+    "542066310": "O registro de Legado de Sangue {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>ativado</color>\" : \"<color=red>desativado</color>\")}.",
+    "881612152": "Ação de emote da forma Exo (<color=white>provocar</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>ativada</color>\" : \"<color=red>desativada</color>\")}"
   }
 }
