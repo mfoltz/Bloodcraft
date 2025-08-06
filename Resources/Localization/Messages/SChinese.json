@@ -9,6 +9,7 @@
     "3782703317": "最接近的<color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>是<color=#00FFFF>{(int)distance}</color>f 离{cardinalDirection}<color=#F88380>{(int)seconds}</color>远一点。",
     "1420278477": "追踪只能用于不完全的寻杀行动。",
     "3308780183": "最接近<color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>是<color=#00FFFF>{(int)distance}</color> f 离{cardinalDirection}远!",
+    "465036552": "{QuestTypeColor[questType]}: <color=green>{questObjective.Objective.Goal}</color> <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>x<color=#FFC0CB>{questObjective.Objective.RequiredAmount}</color> [<color=white>{questObjective.Progress}</color>/<color=yellow>{questObjective.Objective.RequiredAmount}</color>]",
     "860647533": "直到{questType}重置 - <color=yellow> {timeLeft} </color> {_questTargetType[questObjective.Objective.Goal]} 预发:<color=white>{questObjective.Objective.Target.GetPrefabName()}</color>",
     "1707710671": "你已经完成了你的{QuestTypeColor[questType]}! 直到{questType}重置的时间 - <color=yellow>{timeLeft}</color>",
     "319696654": "你没有{QuestTypeColor[questType]}。",
@@ -39,6 +40,8 @@
     "460602473": "{FormatClassName(playerClass)} 没有配置拼写...",
     "442755566": "{FormatClassName(playerClass)}咒语:",
     "2967576286": "Shift 拼写: <color=#CBC3E3>{spellName}</color>",
+    "3097011724": "无效的职业，使用'<color=white>.class l</color>'来查看选项。",
+    "1597216248": "无效的职业，使用<color=white>'.class l'</color>来查看选项。",
     "2747211297": "删除了所有类的buffs,然后对所有玩家应用当前类buffs.",
     "2761429858": "为所有玩家取消了所有类的 buffs 。",
     "327031724": "已经是战斗组的熟人了",
@@ -51,7 +54,9 @@
     "3729714988": "<color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color>声望完成!.",
     "2402733055": "<color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color>声望完成!. 你们还被授予<color=#ffd9eb>{exoReward.GetLocalizedName()}</color><color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!",
     "3961332984": "<color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color>声望完成!. 你被授予<color=#ffd9eb>{exoReward.GetLocalizedName()}</color><color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! 它掉在地面上 让你的存货满了",
+    "145841390": "在<color=#90EE90>Exo</color>声望之前，你必须在<color=#90EE90>Experience</color>声望中达到最高等级。",
     "2076214502": "<color=#90EE90> Exo </color> 预置无法启用 。",
+    "1641131342": "无效的声望，使用<color=white>'.prestige l'</color>来查看有效选项。",
     "484801240": "您尚未达到在 <color=#90EE90>{parsedPrestigeType}</color> 中所要求的声望水平,或处于最高声望水平。",
     "11642316": "当前 <color=#90EE90> </color> 优先级: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} 最大格式期限: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s",
     "836746607": "为<color=white>{(int)exoFormData.Value}</color>s保留表格所需的足够费用",
@@ -79,6 +84,7 @@
     "3587073963": "当前排版: <color=white>{form}</color>",
     "1440482998": "<color=green>{playerInfo.User.CharacterName.Value}</color> 在被忽略的名人榜上添加了!.",
     "2659109549": "<color=green>{playerInfo.User.CharacterName.Value}</color>从被忽略的领导牌榜中删除!.",
+    "2178615132": "Permashroud <color=green>已启用</color>!",
     "1797973559": "Permashroud <color=red> 残疾 </color>!",
     "985830382": "未启用专业知识 。",
     "3170250471": "武器的专门知识处理器是无效的;这不应该发生,你可能要通知开发者.",
@@ -87,6 +93,7 @@
     "3863739608": "目前装备的武器没有奖金。",
     "4023020194": "你还没有获得任何专门知识 <color=#c0c0c0>{weaponType}</color>!",
     "736301693": "专家记录现在是 {( GetPlayerBool, WEAPON_LOG_KEY) ?",
+    "27929505": "无效的属性，使用'<color=white>.wep lst</color>'来查看有效选项。",
     "1880632188": "<color=#00FFFF>{finalWeaponStat}</color>被选为<color=#c0c0c0>{finalWeaponType}</color>!",
     "2008856310": "无效的武器选择, 使用 '<color=white>. wep listt </color>' 来查看有效的选项 。",
     "3274700132": "您的武器数据已被重置  <color=#c0c0c0> {weaponType} </color> !",
@@ -287,6 +294,9 @@
     "3066749917": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContinsKey(familiar)). {colorCode} * </color>: \"<color=white>{level}</color><color=#90EE90>{prestiges}</color>,加上<color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>).",
     "2511919794": "<color=yellow>{count}</color> <color=green>{famName}</color>{(familiar BuffsData.FamiliarBuffs.ContsKey(famKey)? $\"{colorCode}*</color>{levelAndPrestiges}:$\"{levelAndPrestiges}。",
     "3706417587": "无效的求寻类型 '{questTypeName}' 。 有效值为:{string.Join(\", \", Enum.GetNames(typeof(QuestType)))}",
-    "2978826451": "<color=green>{famName}</color>{(buken_5{prestiges}</color><color=white>{groupName}</color> 添加到<color=white>{groupName}</color> 的 <color=#90EE90>{prestiges}</color>中! (<color=yellow>{slotIndex}</color>)."
+    "2978826451": "<color=green>{famName}</color>{(buken_5{prestiges}</color><color=white>{groupName}</color> 添加到<color=white>{groupName}</color> 的 <color=#90EE90>{prestiges}</color>中! (<color=yellow>{slotIndex}</color>).",
+    "863911874": "<color=yellow> {count}</color> _______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________ <color=green>{famName}</color>{(familiar BuffsData.Familiar Buffs.ContersKey(famKey))?永久失效連結 (中文(简体) ). (单位:美元)",
+    "2645405211": "无效的拼写, 使用 '<color=white>. class Isp </color>' 来查看选项 。",
+    "1282509635": "您启用了类 buffs, 使用 <color=white>'. class asseners' </color> 在更改类前禁用它们 !"
   }
 }
