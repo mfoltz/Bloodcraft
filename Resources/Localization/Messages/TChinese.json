@@ -314,5 +314,8 @@
     "1443941563": "取消了所有玩家的聲望",
     "3066749917": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContesKey(familiar))_BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR_ Id) $\"{colorCode}*</color>\":\"[<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] 加上<color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)",
     "2511919794": "<color=yellow>{count}</color>** <color=green>{famName}</color>{(familiar BuffsData.FamiliarBuffs.ContsKey(famKey)? $\"{colorCode}*</color>{levelAndPrestiges}: ${levelAndPrestiges}"
+  },
+  "_meta": {
+    "1716911803": "Intentionally identical to English; dynamic placeholder"
   }
 }

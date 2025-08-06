@@ -314,5 +314,8 @@
     "542066310": "Ghi nhật ký di sản {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}.",
     "881612152": "Exo form hành động emote (<color=white>tain</color>) {(getPlayerBool (steamid, shapeshift_key)? \"<Color = green> enable</color>\": \"",
     "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color> \":\" \")} [<color=white>{level}</color>] <color=#90EE90>{prestiges}2"
+  },
+  "_meta": {
+    "1716911803": "Intentionally identical to English; dynamic placeholder"
   }
 }

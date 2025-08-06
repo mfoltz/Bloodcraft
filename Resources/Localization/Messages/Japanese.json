@@ -291,5 +291,8 @@
     "1812818458": "<color=#90EE90> で優先されている</color>[<color=white>{prestigeLevel}</color>]! <color=green>{gainPercentage}</color>によって増加したすべての専門知識/遺産の成長率、ユニットからの経験は<color=red>{reductionPercentage}</color>によって減少しました。",
     "709298301": "<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>]が正常に機能しました! <color=red>{percentageReductionString}</color>で成長率が低下し、<color=green>{statGainString}</color>によって改善された統計ボーナス。 プレステージボーナスをレベルアップした成長率の合計変更は<color=yellow>{totalEffectString}</color>です。",
     "1443941563": "すべてのプレーヤーからプレステージバフを削除します。"
+  },
+  "_meta": {
+    "1716911803": "Intentionally identical to English; dynamic placeholder"
   }
 }

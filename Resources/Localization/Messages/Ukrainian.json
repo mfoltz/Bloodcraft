@@ -262,5 +262,8 @@
     "2480816305": "<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> встановлено на [<color=white>{level}</color>] для <color=green>{playerInfo.User.CharacterName.Value}</color>",
     "3761416018": "Перший незбройний слот встановлено на <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> для <color=green>{playerInfo.User.CharacterName.Value}</color>.",
     "1826355702": "Другий незбройний слот встановлено на <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> для <color=green>{playerInfo.User.CharacterName.Value}</color>."
+  },
+  "_meta": {
+    "1716911803": "Intentionally identical to English; dynamic placeholder"
   }
 }

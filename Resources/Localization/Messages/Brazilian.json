@@ -314,5 +314,8 @@
     "3112026815": "O registro de profissão agora está {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>ativado</color>\" : \"<color=red>desativado</color>\")}.",
     "542066310": "O registro de Legado de Sangue {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>ativado</color>\" : \"<color=red>desativado</color>\")}.",
     "881612152": "Ação de emote da forma Exo (<color=white>provocar</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>ativada</color>\" : \"<color=red>desativada</color>\")}"
+  },
+  "_meta": {
+    "1716911803": "Intentionally identical to English; dynamic placeholder"
   }
 }

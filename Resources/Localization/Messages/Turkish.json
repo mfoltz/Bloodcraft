@@ -134,5 +134,8 @@
     "2480816305": "<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> uzmanlığı [<color=white>{level}</color>] olarak ayarlandı <color=green>{playerInfo.User.CharacterName.Value}</color> için",
     "3761416018": "İlk silahsız yuva <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> olarak ayarlandı <color=green>{playerInfo.User.CharacterName.Value}</color> için.",
     "1826355702": "İkinci silahsız yuva <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> olarak ayarlandı <color=green>{playerInfo.User.CharacterName.Value}</color> için."
+  },
+  "_meta": {
+    "1716911803": "Intentionally identical to English; dynamic placeholder"
   }
 }
