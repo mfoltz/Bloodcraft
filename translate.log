@@ -1,48 +1,58 @@
-2480816305: SKIPPED (token mismatch)
-  Original: <color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>
-  Result: [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]] 专为[[TOKEN_2]][[TOKEN_7]][[TOKEN_3]] [[TOKEN_8]][[TOKEN_5]]而设的专
-3761416018: SKIPPED (token mismatch)
-  Original: First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
-  Result: 为[[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]设置的第一个非武装插槽。
-1826355702: SKIPPED (token mismatch)
-  Original: Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
-  Result: 为[[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]设定了第二个非武装插槽。
-1716911803: SKIPPED (looks untranslated)
-  Original: <color=white>{box}</color>:
-  Result: <color=white>{box}</color>:
-2001389111: SKIPPED (token mismatch)
-  Original: Invalid spell, use <color=white>'.class lsp'</color> to see options.
-  Result: 无效的拼写, 使用 TOKEN_ 0'. class Isp' [[TOKEN_1]] 来查看选项 。
-4140406916: SKIPPED (token mismatch)
-  Original: You haven't selected a class yet, use <color=white>'.class s [Class]'</color> instead.
-  Result: 您还没有选择一个类, 请使用  Token_ 0'. class s Class Token_ 1 代替 。
-3399068440: SKIPPED (token mismatch)
+Translation error: 'NoneType' object has no attribute 'get_translation'
+1707710671: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You've already completed your {QuestTypeColor[questType]}! Time until {questType} reset - <color=yellow>{timeLeft}</color>
+  Result: 
+3125006928: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.
+  Result: 
+2147420594: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: {FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:
+  Result: 
+11642316: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s
+  Result: 
+1440602422: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Active familiar for <color=green>{user.CharacterName.Value}</color> has been set to level <color=white>{level}</color>.
+  Result: 
+3334433396: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.
+  Result: 
+3399068440: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: <color=white>VBloods Slain</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Units Killed</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Deaths</color>: <color=#808080>{Deaths}</color> | <color=white>Time Online</color>: <color=#1E90FF>{OnlineTime}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Blood Consumed</color>: <color=red>{LitresBloodConsumed}</color>L
-  Result: [[TOKEN_0]]VBlouds slaids [[TOKEN_2]] [[TOKEN_24]] [[TOKEN_3]] [[TOKEN_4]] 被杀死的单位 [[TOKEN_6]] [[TOKEN_25]] [[TOKEN_7]] [[TOKEN_8]] 死亡 [[TOKEN_9]] [[TOKEN_10]] [[TOKEN_26]] [[TOKEN_12]] 时间在线 [[TOKEN_11]] [[TOKEN_13]]: [[TOKEN_27]] [[TOKEN_15]] hr [[TOKEN_16]] 分散旅行 [[TOKEN_17]]:[[TOKEN_18]] [[TOKEN_28]] [[TOKEN_19]]kf [[TOKEN_20]] [[TOKEN_20]] Bloud 假定 [[TOKEN_21]]:[[TOKEN_22]] [[TOKEN_29]] [[TOKEN_23]]
-1465975319: SKIPPED (token mismatch)
+  Result: 
+3066749917: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)
+  Result: 
+1465975319: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Reminders {(GetPlayerBool(steamId, REMINDERS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: [[TOKEN_4]]。
-1945389717: SKIPPED (token mismatch)
+  Result: 
+1945389717: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: <color=white>{sctType}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]]滚动文本[[TOKEN_7]].
-508045935: SKIPPED (token mismatch)
+  Result: 
+2511919794: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color> {levelAndPrestiges}" : $" {levelAndPrestiges}")}
+  Result: 
+508045935: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}!
-  Result: 模拟动作 [[TOKEN_4]]!
-52573990: SKIPPED (token mismatch)
+  Result: 
+52573990: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 专门知识伐木现在是[[TOKEN_4]]。
-1904876515: SKIPPED (token mismatch)
+  Result: 
+1904876515: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 查询伐木现在是[[TOKEN_4]].
-1095669519: SKIPPED (token mismatch)
+  Result: 
+3706417587: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid quest type '{questTypeName}'. Valid values are: {string.Join(", ", Enum.GetNames(typeof(QuestType)))}
+  Result: 
+1095669519: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 平面记录[[TOKEN_4]]。
-3112026815: SKIPPED (token mismatch)
+  Result: 
+3112026815: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 职业伐木现在是[[TOKEN_4]]。
-542066310: SKIPPED (token mismatch)
+  Result: 
+542066310: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 血迹记录[[TOKEN_4]].
-881612152: SKIPPED (token mismatch)
+  Result: 
+881612152: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
-  Result: Exo form emote action ([[TOKEN_0]] 嘲讽 [[TOKEN_1]]) (中文(简体) ). [[TOKEN_6]]
+  Result: 
