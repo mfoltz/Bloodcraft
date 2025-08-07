@@ -247,7 +247,12 @@
     "1443941563": "Entfernt prestige buffs von allen Spielern.",
     "2480816305": "<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color>-Fachwissen auf [<color=white>{level}</color>] für <color=green>{playerInfo.User.CharacterName.Value}</color> gesetzt",
     "3761416018": "Erster unbewaffneter Slot auf <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> für <color=green>{playerInfo.User.CharacterName.Value}</color> gesetzt.",
-    "1826355702": "Zweiter unbewaffneter Slot auf <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> für <color=green>{playerInfo.User.CharacterName.Value}</color> gesetzt."
+    "1826355702": "Zweiter unbewaffneter Slot auf <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> für <color=green>{playerInfo.User.CharacterName.Value}</color> gesetzt.",
+    "1095669519": "Level-Protokollierung {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? \"<color=green>aktiviert</color>\" : \"<color=red>deaktiviert</color>\")}.",
+    "11642316": "Aktuelles <color=#90EE90>Exo</color>-Prestigelevel: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Maximale Formdauer: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s",
+    "1228611582": "Vertrauten-Kampfgruppen:",
+    "1286090332": "Du bist Stufe [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] mit <color=yellow>{progress}</color> <color=#FFC0CB>Essenz</color> (<color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!",
+    "1391708521": "Dein Vertrauter hat Prestigestufe [<color=#90EE90>{prestigeLevel}</color>] erreicht!"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"
