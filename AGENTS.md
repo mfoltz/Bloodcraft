@@ -44,12 +44,13 @@ Current PRDs and task lists are stored in `.project-management/current-prd/`, wh
 1. Run the generator to refresh `English.json`:
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
 2. Copy `English.json` to `<Language>.json` and translate each value while keeping numeric hashes.
-3. Reassemble and install the Argos model before running translation scripts. The split files `translate-en_es-1_0.z01`–`translate-en_es-1_0.z04` live in `Resources/Localization/Models/EN_ES`:
+3. Reassemble and install the Argos model before running translation scripts.
+   For each language directory under `Resources/Localization/Models` run:
    ```bash
-   cd Resources/Localization/Models/EN_ES
-   cat translate-en_es-1_0.z* > translate-en_es-1_0.zip
-   unzip translate-en_es-1_0.zip
-   argos-translate install translate-en_es-1_0.argosmodel
+   cd Resources/Localization/Models/<LANG>
+   cat translate-*.z[0-9][0-9] translate-*.zip > model.zip
+   unzip -o model.zip
+   argos-translate install translate-*.argosmodel
    ```
    Translation scripts require the model to be installed beforehand.
 4. Automatically translate missing strings with Argos:
