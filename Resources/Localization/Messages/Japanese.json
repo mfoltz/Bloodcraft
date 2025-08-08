@@ -202,6 +202,7 @@
     "480925981": "バトルグループが見つかりません。",
     "3862629133": "バトルグループ<color=white>{groupName}</color>を作成しました。",
     "3182929151": "スロット入力範囲! (<color=white>1, 2,</color>,<color=white>)3</color>))",
+    "1894878159": "<color=white>{groupName}</color> のスロット {slotIndex} に身近な人が割り当てられました。",
     "4162514026": "<color=white>{groupName}</color>を削除しました。",
     "907868427": "キューの位置: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)",
     "2129553669": "現在、戦闘のためにキュートされていない! '<color=white>.fam チャレンジ [PlayerName]</color>' を使用して、別のプレーヤーに挑戦します。",
@@ -227,6 +228,8 @@
     "4009901629": "<color=#BF40BF>Weekly Quest</color> <color=#C0C0C0>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>にリロールされました!",
     "707311945": "weklyをリロールする余裕はなかった...(<color=#C0C0C0>{item.GetLocalizedName()}</color>)x<color=white>{quantity}</color>)",
     "2402916111": "週単位のリロール項目が構成されていないか、プレイヤーの毎週のクエストエントリーが見つかりませんでした。",
+    "1952946751": "すでに<color=#00FFFF>デイリークエスト</color>を完了しています。明日また来てください。",
+    "1677522996": "すでに<color=#BF40BF>ウィークリークエスト</color>を完了しています。来週また来てください。",
     "3719118489": "プレイヤーはアクティブなクエストはありません!",
     "563018011": "無効なクエストタイプ '{questTypeName}'. 有効な値は {string です。 お問い合わせ",
     "3751423711": "プレイヤーはアクティブな {questType} クエストをクリアしていません。",
@@ -290,7 +293,10 @@
     "562341898": "プレステージボーナスを含む成長率の合計変更: <color=yellow>{totalEffectString}</color>",
     "1812818458": "<color=#90EE90> で優先されている</color>[<color=white>{prestigeLevel}</color>]! <color=green>{gainPercentage}</color>によって増加したすべての専門知識/遺産の成長率、ユニットからの経験は<color=red>{reductionPercentage}</color>によって減少しました。",
     "709298301": "<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>]が正常に機能しました! <color=red>{percentageReductionString}</color>で成長率が低下し、<color=green>{statGainString}</color>によって改善された統計ボーナス。 プレステージボーナスをレベルアップした成長率の合計変更は<color=yellow>{totalEffectString}</color>です。",
-    "1443941563": "すべてのプレーヤーからプレステージバフを削除します。"
+    "1443941563": "すべてのプレーヤーからプレステージバフを削除します。",
+    "1465975319": "リマインダー {(GetPlayerBool(steamId, REMINDERS_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}.",
+    "1286090332": "あなたは<color=red>{handler.GetBloodType()}</color>でレベル[<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>]、<color=yellow>{progress}</color> <color=#FFC0CB>エッセンス</color> (<color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color>)を持っています!",
+    "1095669519": "レベルのログは {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}。"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"
