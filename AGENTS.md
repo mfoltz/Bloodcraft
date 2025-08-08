@@ -15,9 +15,6 @@
 
 ## 2. Lifecycle — Canonical Flow
 
-### 0. Initialise repository tooling (once)
-./.codex/install.sh
-
 ### 1. Scaffold goals
 CreatePRD improve-codex-workflow
 CreateSubPRD improve-codex-workflow networking-enhancements  # >5 tasks rule
