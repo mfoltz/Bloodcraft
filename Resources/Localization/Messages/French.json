@@ -1,7 +1,7 @@
 {
   "Messages": {
     "welcome": "Bienvenue à Bloodcraft",
-    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)",
+    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] ajouté à <color=white>{groupName}</color> ! (<color=yellow>{slotIndex}</color>)",
     "2761093386": "Groupe tactique - {familiarReply}",
     "3158650477": "Pas de familiers dans le groupe de combat !",
     "4165788499": "Les cibles ont toutes été tuées, donnez-leur une chance de se reproduire ! Si cela ne semble pas juste envisager de reroller votre {QuestTypeColor[questType]}.",
@@ -271,7 +271,7 @@
     "4140406916": "Vous n'avez pas encore sélectionné de classe, utilisez <color=white>'.class s [Class]'</color> à la place.",
     "1282509635": "Vous avez activé les buffs de classe, utilisez <color=white>'.class passives'</color> pour les désactiver avant de changer de classe!",
     "501637283": "La classe est passée à {FormatClassName(playerClass)}!",
-    "3938051122": "Classes: {classTypes}",
+    "3938051122": "Classes : {classTypes}",
     "167244174": "Les classes ne sont pas activées et les sorts ne peuvent pas être réglés pour se déplacer.",
     "3730830670": "Les créneaux horaires ne sont pas activés.",
     "349267262": "Ne peut pas changer ou les sorts de classe active lorsque l'inventaire est plein, besoin d'au moins un espace pour manipuler les bijoux en toute sécurité lors de la commutation.",
@@ -299,9 +299,23 @@
     "1812818458": "Vous avez fait du prestige dans <color=#90EE90>Expérience</color>[<color=white>{prestigeLevel}</color>]! Les taux de croissance de toutes les expertises/législations ont augmenté de <color=green>{gainPercentage}</color>, l'expérience des tueries unitaires a diminué de <color=red>{reductionPercentage}</color>.",
     "709298301": "<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>] a obtenu du prestige! Taux de croissance réduit de <color=red>{percentageReductionString}</color> et bonus statistiques améliorés de <color=green>{statGainString}</color>. La variation totale du taux de croissance avec une prime de prestige est <color=yellow>{totalEffectString}</color>.",
     "1443941563": "Enlevez les buffs de prestige de tous les joueurs.",
-    "1286090332": "Vous êtes niveau [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] avec <color=yellow>{progress}</color> <color=#FFC0CB> </color> <color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color> dans <color=red>{handler.GetBloodType()}</color>!"
+    "1286090332": "Vous êtes niveau [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] avec <color=yellow>{progress}</color> <color=#FFC0CB> </color> <color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color> dans <color=red>{handler.GetBloodType()}</color>!",
+    "3066749917": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $\"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] ajouté à <color=white>{groupName}</color> ! (<color=yellow>{slotIndex}</color>)",
+    "1904876515": "L'enregistrement des quêtes est maintenant {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? \"<color=green>activé</color>\" : \"<color=red>désactivé</color>\")}.",
+    "1945389717": "<color=white>{sctType}</color> texte défilant {(currentState ? \"<color=green>activé</color>\" : \"<color=red>désactivé</color>\")}.",
+    "2147420594": "{FormatClassName(playerClass)} synergies statistiques [x<color=white>{ConfigService.SynergyMultiplier}</color>] :",
+    "2511919794": "<color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $\"{colorCode}*</color> {levelAndPrestiges}\" : $\" {levelAndPrestiges}\")}",
+    "3112026815": "L'enregistrement professionnel est maintenant {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>activé</color>\" : \"<color=red>désactivé</color>\")}.",
+    "3125006928": "Le familier possède déjà <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) grâce au prestige, utilisez '<color=white>.fam lst</color>' pour voir les options.",
+    "3334433396": "Le familier qui tente de gagner du prestige doit être au niveau maximum (<color=white>{ConfigService.MaxFamiliarLevel}</color>) ou nécessite <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.",
+    "3399068440": "<color=white>VBloods tués</color> : <color=#FF5733>{VBloodKills}</color> | <color=white>Unités tuées</color> : <color=#FFD700>{UnitKills}</color> | <color=white>Morts</color> : <color=#808080>{Deaths}</color> | <color=white>Temps en ligne</color> : <color=#1E90FF>{OnlineTime}</color>h | <color=white>Distance parcourue</color> : <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Sang consommé</color> : <color=red>{LitresBloodConsumed}</color>L",
+    "3706417587": "Type de quête invalide '{questTypeName}'. Les valeurs valides sont : {string.Join(\", \", Enum.GetNames(typeof(QuestType)))}",
+    "508045935": "Actions d'émote {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? \"<color=green>activées</color>\" : \"<color=red>désactivées</color>\")}!",
+    "52573990": "L'enregistrement de l'expertise est maintenant {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? \"<color=green>activé</color>\" : \"<color=red>désactivé</color>\")}.",
+    "542066310": "L'enregistrement de l'héritage du sang {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>activé</color>\" : \"<color=red>désactivé</color>\")}.",
+    "881612152": "Action d'émote de l'exoforme (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>activée</color>\" : \"<color=red>désactivée</color>\")}"
   },
   "_meta": {
-    "1716911803": "Intentionally identical to English; dynamic placeholder"
+    "1716911803": "Identique à l'anglais intentionnellement ; espace réservé dynamique"
   }
 }
