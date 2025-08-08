@@ -1,199 +1,102 @@
-Translation error: 'NoneType' object has no attribute 'get_translation'
-3782703317: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection} <color=#F88380>{(int)seconds}</color>s ago.
-  Result: 
-3308780183: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection}!
-  Result: 
-465036552: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+465036552: SKIPPED (token mismatch)
   Original: {QuestTypeColor[questType]}: <color=green>{questObjective.Objective.Goal}</color> <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>x<color=#FFC0CB>{questObjective.Objective.RequiredAmount}</color> [<color=white>{questObjective.Progress}</color>/<color=yellow>{questObjective.Objective.RequiredAmount}</color>]
-  Result: 
-860647533: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Time until {questType} reset - <color=yellow>{timeLeft}</color> | {_questTargetType[questObjective.Objective.Goal]} Prefab: <color=white>{questObjective.Objective.Target.GetPrefabName()}</color>
-  Result: 
-2886300456: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: <color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.
-  Result: 
-2151120362: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Result: [[TOKEN_10]]: [[TOKEN_0]] [[TOKEN_11]] [[TOKEN_1]] [[TOKEN_2]] [[TOKEN_12]][[TOKEN_3]] [[TOKEN_4]][[TOKEN_13]] [[TOKEN_5]]
+2151120362: SKIPPED (token mismatch)
   Original: <color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.
-  Result: 
-3125006928: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.
-  Result: 
-2844729307: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!
-  Result: 
-2712718738: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
-  Result: 
-329722985: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You do not have enough of the required item to change classes (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: 
-3466860311: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: 
-2147420594: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: {FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:
-  Result: 
-999548370: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: {FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:
-  Result: 
-3729714988: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Result: [[TOKEN_0]] [[TOKEN_6]][[TOKEN_1]] [[TOKEN_2]] [[TOKEN_3]] [[TOKEN_4]] [[TOKEN_8]] [[TOKEN_5]].
+2967576286: SKIPPED (token mismatch)
+  Original: Shift spell: <color=#CBC3E3>{spellName}</color>
+  Result: Traduzione:
+3729714988: SKIPPED (token mismatch)
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!
-  Result: 
-2402733055: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Result: [[TOKEN_0]] [[TOKEN_4]] [[TOKEN_1]] [[TOKEN_2]] [[TOKEN_5]] prestigio completo!
+2402733055: SKIPPED (token mismatch)
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
-  Result: 
-3961332984: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Result: [[TOKEN_0]] [[TOKEN_8]] [[TOKEN_1]] [[TOKEN_2]] [[TOKEN_9]] prestigio completo! Vi è stato anche assegnato [[TOKEN_4]][[TOKEN_10]][[TOKEN_5]]x[[TOKEN_6]][[TOKEN_11]][[TOKEN_7]]!
+3961332984: SKIPPED (token mismatch)
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.
-  Result: 
-11642316: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Result: [[TOKEN_0]] [[TOKEN_8]] [[TOKEN_1]] [[TOKEN_2]] [[TOKEN_9]] prestigio completo! Vi è stato assegnato [[TOKEN_4]][[TOKEN_10]][[TOKEN_5]]x[[TOKEN_6]][[TOKEN_11]][[TOKEN_7]]! E' caduto a terra, pero' il tuo inventario era pieno.
+1641131342: SKIPPED (token mismatch)
+  Original: Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.
+  Result: Prestige l'[[TOKEN_1]] per vedere le opzioni valide.
+11642316: SKIPPED (token mismatch)
   Original: Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s
-  Result: 
-3343555659: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Result: Corrente [[TOKEN_0]]Eso[[TOKEN_1]] Livello di previsione: [[TOKEN_2]][[TOKEN_6]][[TOKEN_3]]/[[TOKEN_7]] | Durata massima del modulo [[TOKEN_4]][[TOKEN_8]]
+836746607: SKIPPED (token mismatch)
+  Original: Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s
+  Result: Abbastanza carica per mantenere il modulo per [[TOKEN_0]][[TOKEN_2]]
+3343555659: SKIPPED (token mismatch)
   Original: Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.
-  Result: 
-1411528307: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: <color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.
-  Result: 
-3591926048: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!
-  Result: 
-1880632188: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: <color=#00FFFF>{finalWeaponStat}</color> has been chosen for <color=#c0c0c0>{finalWeaponType}</color>!
-  Result: 
-719993404: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: 
-3254231727: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
-  Result: 
-939340687: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: No stats selected for <color=red>{bloodType}</color>, use <color=white>'.bl lst'</color> to see valid options.
-  Result: 
-2785130336: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: <color=#00FFFF>{finalBloodStat}</color> selected for <color=red>{finalBloodType}</color>!
-  Result: 
-1449977777: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: 
-2196432591: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: <color=red>{BloodHandler.GetBloodType()}</color> legacy set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>
-  Result: 
-698362524: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Box <color=white>{current}</color> renamed - <color=yellow>{name}</color>
-  Result: 
-823180732: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: <color=green>{PrefabGUID.GetLocalizedName()}</color> moved - <color=white>{name}</color>
-  Result: 
-2191580006: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Not enough <color=#ffd9eb>{exoItem.GetLocalizedName()}</color>x<color=white>{factoredCost}</color> for {vBloodPrefabGuid.GetPrefabName()}!
-  Result: 
-1809964020: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Unable to verify tier for {vBloodPrefabGuid.GetPrefabName()}! Shouldn't really happen at this point and may want to inform the developer.
-  Result: 
-780970161: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: <color=green>{familiarId.GetLocalizedName()}</color> removed from <color=white>{activeBox}</color>.
-  Result: 
-2709293439: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Your familiar is level [<color=white>{xpData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
-  Result: 
-1391708521: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]!
-  Result: 
-3235862068: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>!
-  Result: 
-54858227: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
-  Result: 
-3334433396: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.
-  Result: 
-2682530289: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{clampedCost}</color>)
-  Result: 
-2486628899: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{changeQuantity}</color>)
-  Result: 
-1228611582: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Familiar Battle Groups:
-  Result: 
-907868427: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
-  Result: 
-2968342812: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You can't challenge another player while queued for battle! Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
-  Result: 
-3878896595: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Quests for <color=green>{playerInfo.User.CharacterName.Value}</color> have been refreshed.
-  Result: 
-1985982508: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You couldn't afford to reroll your daily... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)
-  Result: 
-707311945: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You couldn't afford to reroll your wekly... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)
-  Result: 
-743696282: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
-  Result: 
-3681675424: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Level must be between <color=white>0</color> and <color=white>{ConfigService.MaxLevel}</color>!
-  Result: 
-2437634726: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName.Value}</color>!
-  Result: 
-216725398: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamId, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}
-  Result: 
-714432788: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You've already selected {FormatClassName(currentClass.Value)}, use <color=white>'.class c [Class]'</color> to change. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)
-  Result: 
-3399068440: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: <color=white>VBloods Slain</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Units Killed</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Deaths</color>: <color=#808080>{Deaths}</color> | <color=white>Time Online</color>: <color=#1E90FF>{OnlineTime}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Blood Consumed</color>: <color=red>{LitresBloodConsumed}</color>L
-  Result: 
-1812818458: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, experience from unit kills reduced by <color=red>{reductionPercentage}</color>.
-  Result: 
-709298301: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>] prestiged successfully! Growth rate reduced by <color=red>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.
-  Result: 
-1286090332: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
-  Result: 
-3066749917: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)
-  Result: 
-1465975319: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Reminders {(GetPlayerBool(steamId, REMINDERS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 
-1945389717: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: <color=white>{sctType}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 
-2511919794: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: <color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color> {levelAndPrestiges}" : $" {levelAndPrestiges}")}
-  Result: 
-508045935: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}!
-  Result: 
-52573990: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 
-1904876515: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 
-3706417587: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Invalid quest type '{questTypeName}'. Valid values are: {string.Join(", ", Enum.GetNames(typeof(QuestType)))}
-  Result: 
-1095669519: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 
-3112026815: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 
-542066310: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 
-881612152: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Result: [[TOKEN_0]] [[TOKEN_6]][[TOKEN_1]] è stato impostato a livello [[TOKEN_2]][[TOKEN_7]][[TOKEN_3]] in [[TOKEN_4]][[TOKEN_8]] prestigio.
+1763729577: SKIPPED (token mismatch)
   Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
-  Result: 
+  Result: Azione di emote della forma exo ([[TOKEN_0]] [[TOKEN_6]]
+3254231727: SKIPPED (token mismatch)
+  Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
+  Result: [[TOKEN_0]] [[TOKEN_12]][[TOKEN_1]] [[TOKEN_2]] [[TOKEN_13]][[TOKEN_3]] con [[TOKEN_4]][[TOKEN_14]] [[TOKEN_5]] [[TOKEN_6]][[TOKEN_7]] [[TOKEN_8]][[TOKEN_15]][[TOKEN_9]] [[TOKEN_10]][[TOKEN_16]]
+2196432591: SKIPPED (token mismatch)
+  Original: <color=red>{BloodHandler.GetBloodType()}</color> legacy set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>
+  Result: [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]] [[TOKEN_2]] [[TOKEN_3]] [[TOKEN_4]] [[TOKEN_8]] [[TOKEN_5]]
+1716911803: SKIPPED (token mismatch)
+  Original: <color=white>{box}</color>:
+  Result: [[TOKEN_0]]
+863911874: SKIPPED (token mismatch)
+  Original: <color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $
+  Result: [[TOKEN_0]] [[TOKEN_4]] [[TOKEN_1]] [[TOKEN_2]] !
+54858227: SKIPPED (token mismatch)
+  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
+  Result: Il vostro familiare ha prestigio [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]] e ora è livello [[TOKEN_2]][[TOKEN_7]][[TOKEN_3]]! (+[[TOKEN_4]][[TOKEN_8]]
+3334433396: SKIPPED (token mismatch)
+  Original: Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.
+  Result: Il tentativo familiare di prestigio deve essere al massimo livello ([[TOKEN_0]][[TOKEN_8]] [[TOKEN_1]] o richiede [[TOKEN_2]][[TOKEN_9]][[TOKEN_3]][[TOKEN_4]][[TOKEN_5]][[TOKEN_6]]
+707311945: SKIPPED (token mismatch)
+  Original: You couldn't afford to reroll your wekly... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)
+  Result: [[TOKEN_4]] [[TOKEN_1]] [[TOKEN_5]] [[TOKEN_3]]
+216725398: SKIPPED (token mismatch)
+  Original: You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamId, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}
+  Result: [[TOKEN_1]] [[TOKEN_0]] [[TOKEN_8]] [[TOKEN_1]] [[TOKEN_2]] [[TOKEN_9]] [[TOKEN_3]] [[TOKEN_4]] [[TOKEN_5]] [[TOKEN_6]]
+3399068440: SKIPPED (token mismatch)
+  Original: <color=white>VBloods Slain</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Units Killed</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Deaths</color>: <color=#808080>{Deaths}</color> | <color=white>Time Online</color>: <color=#1E90FF>{OnlineTime}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Blood Consumed</color>: <color=red>{LitresBloodConsumed}</color>L
+  Result: Traduzione:
+709298301: SKIPPED (token mismatch)
+  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>] prestiged successfully! Growth rate reduced by <color=red>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.
+  Result: [[TOKEN_0]] [[TOKEN_10]] [[TOKEN_1]] [[TOKEN_2]] [[TOKEN_11]] [[TOKEN_3]]  [[TOKEN_3]]  Tasso di crescita ridotto da [[TOKEN_4]][[TOKEN_12]][[TOKEN_5]] e bonus di statistiche migliorati da [[TOKEN_6]][[TOKEN_13]][[TOKEN_7]]. Il cambiamento totale del tasso di crescita con bonus di prestigio livellamento è [[TOKEN_8]][[TOKEN_14]][[TOKEN_9]].
+1286090332: SKIPPED (token mismatch)
+  Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
+  Result: [[TOKEN_0]] [[TOKEN_12]][[TOKEN_1]] [[TOKEN_2]] [[TOKEN_13]][[TOKEN_3]] con [[TOKEN_4]][[TOKEN_14]] [[TOKEN_5]] [[TOKEN_6]][[TOKEN_7]] [[TOKEN_8]][[TOKEN_15]][[TOKEN_9]] [[TOKEN_10]][[TOKEN_16]]
+3066749917: SKIPPED (token mismatch)
+  Original: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)
+  Result: [[TOKEN_0]] [[TOKEN_2]] [[TOKEN_2]] [[TOKEN_4]] [[TOKEN_3]][[TOKEN_4]][[TOKEN_5]][[TOKEN_14]] [[TOKEN_6]] aggiunto  [[TOKEN_9]][[TOKEN_16]] [[TOKEN_10]]
+1465975319: SKIPPED (token mismatch)
+  Original: Reminders {(GetPlayerBool(steamId, REMINDERS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: [[TOKEN_4]].
+1945389717: SKIPPED (token mismatch)
+  Original: <color=white>{sctType}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]] testo di scorrimento [[TOKEN_7]].
+2511919794: SKIPPED (token mismatch)
+  Original: <color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color> {levelAndPrestiges}" : $" {levelAndPrestiges}")}
+  Result: [[TOKEN_0]] [[TOKEN_2]] [[TOKEN_6]] [[TOKEN_3]] (familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $"[[TOKEN_7]]*[[TOKEN_4]] [[TOKEN_8]]
+508045935: SKIPPED (token mismatch)
+  Original: Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}!
+  Result: Emote action [[TOKEN_4]]!
+52573990: SKIPPED (token mismatch)
+  Original: Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: La registrazione è ora [[TOKEN_4]].
+1904876515: SKIPPED (token mismatch)
+  Original: Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: Questa registrazione è ora [[TOKEN_4]].
+3706417587: TRANSLATED
+  Original: Invalid quest type '{questTypeName}'. Valid values are: {string.Join(", ", Enum.GetNames(typeof(QuestType)))}
+  Result: Invalid quest type '{questTypeName}'. I valori validi sono: {string.Join(", ", Enum.GetNames(typeof(QuestType)))}
+1095669519: SKIPPED (token mismatch)
+  Original: Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: Registrazione di livello [[TOKEN_4]].
+3112026815: SKIPPED (token mismatch)
+  Original: Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: La registrazione di professione è ora [[TOKEN_4]].
+542066310: SKIPPED (token mismatch)
+  Original: Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: Eredità di sangue che scava [[TOKEN_4]].
+881612152: SKIPPED (token mismatch)
+  Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
+  Result: Azione di emote della forma exo ([[TOKEN_0]] [[TOKEN_6]]
