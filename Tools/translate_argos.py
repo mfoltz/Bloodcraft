@@ -5,7 +5,7 @@ import argparse
 import json
 import os
 import re
-from typing import List
+from typing import List, Tuple
 
 from argostranslate import translate as argos_translate
 
@@ -16,6 +16,7 @@ TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
 TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
 # Matches stray TOKEN_n occurrences without surrounding brackets
 TOKEN_WORD = re.compile(r'(?<!\[)TOKEN_\s*(\d+)', re.I)
+TOKEN_PLACEHOLDER = re.compile(r'\[\[[^\]]+\]\]')
 
 ENGLISH_WORDS = re.compile(r'\b(the|and|of|with|you|your|for|an)\b', re.I)
 
@@ -57,6 +58,16 @@ def normalize_tokens(text: str) -> str:
     tmp = TOKEN_RE.sub(store, text)
     tmp = tmp.replace("[", "").replace("]", "")
     return re.sub(r"@@(\d+)@@", restore, tmp)
+
+
+def replace_placeholders(value: str, tokens: List[str]) -> Tuple[str, bool, bool]:
+    placeholders = TOKEN_PLACEHOLDER.findall(value)
+    if not placeholders:
+        return value, False, True
+    mismatch = len(placeholders) != len(tokens)
+    for ph, token in zip(placeholders, tokens):
+        value = value.replace(ph, token, 1)
+    return value, True, mismatch
 
 
 def contains_english(text: str) -> bool:
@@ -201,9 +212,13 @@ def main():
                 continue
 
             if len(TOKEN_RE.findall(result)) != len(tokens):
-                log_entry(key, english[key], result, "token mismatch")
-                skipped.append(key)
-                continue
+                result, replaced, mismatch = replace_placeholders(result, tokens)
+                if mismatch:
+                    log_entry(key, english[key], result, "token mismatch")
+                    skipped.append(key)
+                    continue
+                if replaced:
+                    log_verbose(f"{key}: tokens restored")
             un = unprotect(result, tokens)
             un = un.replace("\\u003C", "<").replace("\\u003E", ">")
             if un == english[key] or contains_english(un):
