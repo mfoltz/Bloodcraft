@@ -300,7 +300,7 @@
     "1716911803": "<color=white>{box}</color>:",
     "1469754031": "Parece que seu familiar ainda pode ser encontrado; desvincule-o normalmente após chamá-lo se for dispensado.",
     "563018011": "Tipo de missão inválido '{questTypeName}'. Valores válidos: {string.Join(\", \", Enum.GetNames(typeof(QuestType)))}",
-    "3938051122": "Classes: {classTypes}",
+    "3938051122": "Classes disponíveis: {classTypes}",
     "2320898349": "Feitiço de Shift <color=red>desativado</color>!",
     "3399068440": "<color=white>VBloods Abatidos</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Unidades Mortas</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Mortes</color>: <color=#808080>{Deaths}</color> | <color=white>Tempo Online</color>: <color=#1E90FF>{OnlineTime}</color>h | <color=white>Distância Percorrida</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Sangue Consumido</color>: <color=red>{LitresBloodConsumed}</color>L",
     "3066749917": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] adicionado a <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)",
@@ -316,6 +316,6 @@
     "881612152": "Ação de emote da forma Exo (<color=white>provocar</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>ativada</color>\" : \"<color=red>desativada</color>\")}"
   },
   "_meta": {
-    "1716911803": "Intentionally identical to English; dynamic placeholder"
+    "1716911803": "Intencionalmente idêntico ao inglês; placeholder dinâmico"
   }
 }
