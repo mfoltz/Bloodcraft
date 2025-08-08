@@ -1,4 +1,10 @@
 Translation error: 'NoneType' object has no attribute 'get_translation'
+2761093386: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Battle Group - {familiarReply}
+  Result: 
+4165788499: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {QuestTypeColor[questType]}.
+  Result: 
 3782703317: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection} <color=#F88380>{(int)seconds}</color>s ago.
   Result: 
@@ -11,14 +17,32 @@ Translation error: 'NoneType' object has no attribute 'get_translation'
 860647533: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Time until {questType} reset - <color=yellow>{timeLeft}</color> | {_questTargetType[questObjective.Objective.Goal]} Prefab: <color=white>{questObjective.Objective.Target.GetPrefabName()}</color>
   Result: 
+1707710671: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You've already completed your {QuestTypeColor[questType]}! Time until {questType} reset - <color=yellow>{timeLeft}</color>
+  Result: 
+319696654: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You don't have a {QuestTypeColor[questType]}.
+  Result: 
 2886300456: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: <color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.
   Result: 
 2151120362: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: <color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.
   Result: 
+1057342822: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Your familiar has already prestiged the maximum number of times! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)
+  Result: 
+2689850927: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.
+  Result: 
 3125006928: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.
+  Result: 
+2846646667: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.
+  Result: 
+705325693: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')
   Result: 
 2844729307: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!
@@ -32,11 +56,56 @@ Translation error: 'NoneType' object has no attribute 'get_translation'
 3466860311: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
   Result: 
+3720524051: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: {FormatClassName(playerClass)} passives not found!
+  Result: 
+3543031585: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: {FormatClassName(playerClass)} passives:
+  Result: 
+1106946472: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: {replyMessage}
+  Result: 
+2164633984: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Couldn't find stat synergies for {FormatClassName(playerClass)}...
+  Result: 
+1293896668: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: No stat synergies found for {FormatClassName(playerClass)}.
+  Result: 
 2147420594: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: {FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:
   Result: 
 999548370: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: {FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:
+  Result: 
+460602473: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: {FormatClassName(playerClass)} has no spells configured...
+  Result: 
+442755566: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: {FormatClassName(playerClass)} spells:
+  Result: 
+2967576286: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Shift spell: <color=#CBC3E3>{spellName}</color>
+  Result: 
+3097011724: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid class, use '<color=white>.class l</color>' to see options.
+  Result: 
+1597216248: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid class, use <color=white>'.class l'</color> to see options.
+  Result: 
+625301684: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!
+  Result: 
+3944404979: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Deleted battle group <color=white>{groupName}</color>!
+  Result: 
+2350508902: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid prestige type, use <color=white>'.prestige l'</color> to see options.
+  Result: 
+1897692916: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You must reach max level before <color=#90EE90>Exo</color> prestiging again.
+  Result: 
+9816116: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges. (<color=white>{EXO_PRESTIGES}</color>)
   Result: 
 3729714988: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!
@@ -47,8 +116,35 @@ Translation error: 'NoneType' object has no attribute 'get_translation'
 3961332984: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.
   Result: 
+145841390: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You must reach the maximum level in <color=#90EE90>Experience</color> prestige before <color=#90EE90>Exo</color> prestiging.
+  Result: 
+2076214502: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=#90EE90>Exo</color> prestiging is not enabled.
+  Result: 
+1641131342: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.
+  Result: 
+484801240: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.
+  Result: 
 11642316: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s
+  Result: 
+836746607: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s
+  Result: 
+2332227846: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You have not prestiged in <color=#90EE90>Exo</color> yet.
+  Result: 
+3706109126: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.
+  Result: 
+3055902112: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=#90EE90>{parsedPrestigeType}</color> prestiging is not enabled.
+  Result: 
+3468772905: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: The maximum level for <color=#90EE90>{parsedPrestigeType}</color> prestige is {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.
   Result: 
 3343555659: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.
@@ -56,29 +152,128 @@ Translation error: 'NoneType' object has no attribute 'get_translation'
 1411528307: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: <color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.
   Result: 
+830139985: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You have not prestiged in <color=#90EE90>{PrestigeType.Experience}</color>.
+  Result: 
+3320998835: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: {prestiges}
+  Result: 
+1182925736: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!
+  Result: 
+1763729577: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
+  Result: 
+3882215894: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid shapeshift! Valid options: {shapeshifts}
+  Result: 
+3587073963: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Current Exoform: <color=white>{form}</color>
+  Result: 
+1440482998: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore prestige leaderboard list!
+  Result: 
+2659109549: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore prestige leaderboard list!
+  Result: 
+2178615132: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Permashroud <color=green>enabled</color>!
+  Result: 
+1797973559: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Permashroud <color=red>disabled</color>!
+  Result: 
 3591926048: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!
+  Result: 
+3489173133: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=#c0c0c0>{weaponType}</color> Stats: {bonuses}
+  Result: 
+4023020194: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet!
+  Result: 
+27929505: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid stat, use '<color=white>.wep lst</color>' to see valid options.
   Result: 
 1880632188: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: <color=#00FFFF>{finalWeaponStat}</color> has been chosen for <color=#c0c0c0>{finalWeaponType}</color>!
   Result: 
+2008856310: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid weapon choice, use '<color=white>.wep lst</color>' to see valid options.
+  Result: 
+3274700132: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!
+  Result: 
 719993404: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
+  Result: 
+2128999876: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Level must be between 0 and {ConfigService.MaxExpertiseLevel}.
+  Result: 
+3084457547: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>
+  Result: 
+2998300513: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid slot (<color=white>1</color> for Q or <color=white>2</color> for E)
   Result: 
 3254231727: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
   Result: 
+1711931034: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=red>{bloodType}</color> Stats: {bonuses}
+  Result: 
 939340687: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: No stats selected for <color=red>{bloodType}</color>, use <color=white>'.bl lst'</color> to see valid options.
+  Result: 
+226227140: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: No progress in <color=red>{handler.GetBloodType()}</color> yet.
+  Result: 
+2194796157: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid blood stat, use '<color=white>.bl lst</color>' to see valid options.
   Result: 
 2785130336: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: <color=#00FFFF>{finalBloodStat}</color> selected for <color=red>{finalBloodType}</color>!
   Result: 
+4126149106: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid blood type, use '<color=white>.bl l</color>' to see valid options.
+  Result: 
+4258273173: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid blood legacy, use '<color=white>.bl l</color>' to see valid options.
+  Result: 
+1298892920: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: No legacy available for <color=white>{bloodType}</color>.
+  Result: 
+1740355579: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Your blood stats have been reset for <color=red>{bloodType}</color>!
+  Result: 
 1449977777: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
   Result: 
+1690022722: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Your blood stats have been reset for <color=red>{bloodType}</color>.
+  Result: 
+1108347105: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Level must be between 0 and {ConfigService.MaxBloodLevel}.
+  Result: 
 2196432591: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: <color=red>{BloodHandler.GetBloodType()}</color> legacy set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>
+  Result: 
+85537047: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Available Blood Legacies: <color=red>{bloodTypesList}</color>
+  Result: 
+1716911803: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=white>{box}</color>:
+  Result: 
+863911874: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $
+  Result: 
+1066178325: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: No active box! Try using <color=white>'.fam sb [Name]'</color> if you know the familiar you're looking for. (use quotes for names with a space)
+  Result: 
+2321621014: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: {fams}
+  Result: 
+321106656: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Box Selected - <color=white>{name}</color>
   Result: 
 698362524: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Box <color=white>{current}</color> renamed - <color=yellow>{name}</color>
@@ -86,17 +281,54 @@ Translation error: 'NoneType' object has no attribute 'get_translation'
 823180732: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: <color=green>{PrefabGUID.GetLocalizedName()}</color> moved - <color=white>{name}</color>
   Result: 
+2213724716: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Deleted box - <color=white>{name}</color>
+  Result: 
+3279926559: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Added box - <color=white>{name}</color>
+  Result: 
+2724064627: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Must have at least one unit unlocked to start adding boxes. Additionally, the total number of boxes cannot exceed <color=yellow>{BOX_CAP}</color>.
+  Result: 
+3052690511: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is not available per configured familiar bans!
+  Result: 
+3195375072: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is already unlocked!
+  Result: 
+3380184352: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Unable to verify cost for {vBloodPrefabGuid.GetPrefabName()}!
+  Result: 
+Translation error: 'NoneType' object has no attribute 'get_translation'
+3498334942: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Unable to verify exo prestige reward item! (<color=yellow>{exoItem}</color>)
+  Result: 
+4255236631: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: New unit unlocked: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>
+  Result: 
 2191580006: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Not enough <color=#ffd9eb>{exoItem.GetLocalizedName()}</color>x<color=white>{factoredCost}</color> for {vBloodPrefabGuid.GetPrefabName()}!
   Result: 
 1809964020: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Unable to verify tier for {vBloodPrefabGuid.GetPrefabName()}! Shouldn't really happen at this point and may want to inform the developer.
   Result: 
+1057363547: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid choice, please use <color=white>1</color> to <color=white>{familiarSet.Count}</color> (Current List:<color=yellow>{activeBox}</color>)
+  Result: 
 780970161: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: <color=green>{familiarId.GetLocalizedName()}</color> removed from <color=white>{activeBox}</color>.
   Result: 
 2709293439: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Your familiar is level [<color=white>{xpData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
+  Result: 
+2794958495: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: {line}
+  Result: 
+488752679: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Level must be between 1 and {ConfigService.MaxFamiliarLevel}
+  Result: 
+1440602422: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Active familiar for <color=green>{user.CharacterName.Value}</color> has been set to level <color=white>{level}</color>.
   Result: 
 1391708521: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]!
@@ -110,32 +342,95 @@ Translation error: 'NoneType' object has no attribute 'get_translation'
 3334433396: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.
   Result: 
+1581983564: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Shiny added! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).
+  Result: 
 2682530289: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{clampedCost}</color>)
+  Result: 
+53933494: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Shiny changed! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).
   Result: 
 2486628899: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{changeQuantity}</color>)
   Result: 
-1228611582: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
-  Original: Familiar Battle Groups:
+1354182381: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Valid options: {validOptions}
+  Result: 
+1081599663: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: No active battle group selected! Use <color=white>.fam cbg [Name]</color> to select one.
+  Result: 
+3628025920: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Active battle group set to <color=white>{groupName}</color>.
+  Result: 
+3862629133: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Battle group <color=white>{groupName}</color> created.
+  Result: 
+3182929151: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Slot input out of range! (use <color=white>1, 2,</color> or <color=white>3</color>)
+  Result: 
+1894878159: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Familiar assigned to <color=white>{groupName}</color> in slot {slotIndex}.
+  Result: 
+4162514026: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Deleted battle group <color=white>{groupName}</color>.
   Result: 
 907868427: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
   Result: 
+2129553669: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You're not currently queued for battle! Use '<color=white>.fam challenge [PlayerName]</color>' to challenge another player.
+  Result: 
 2968342812: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: You can't challenge another player while queued for battle! Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
+  Result: 
+2228202821: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=green>{playerInfo.User.CharacterName}</color> is already queued for battle!
+  Result: 
+2817263998: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=green>{playerInfo.User.CharacterName}</color> already has a pending challenge!
+  Result: 
+1231839381: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Challenged <color=white>{playerInfo.User.CharacterName.Value}</color> to a battle! (<color=yellow>30s</color> until it expires)
   Result: 
 3878896595: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Quests for <color=green>{playerInfo.User.CharacterName.Value}</color> have been refreshed.
   Result: 
+1952946751: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You've already completed your <color=#00FFFF>Daily Quest</color> today. Check back tomorrow.
+  Result: 
+860320001: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!
+  Result: 
 1985982508: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: You couldn't afford to reroll your daily... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)
+  Result: 
+1677522996: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You've already completed your <color=#BF40BF>Weekly Quest</color>. Check back next week.
+  Result: 
+4009901629: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!
   Result: 
 707311945: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: You couldn't afford to reroll your wekly... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)
   Result: 
+563018011: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid quest type '{questTypeName}'. Valid values are: {string.Join(
+  Result: 
+3751423711: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Player does not have an active {questType} quest to complete.
+  Result: 
+998944061: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: The {questType} quest is already complete for {playerInfo.User.CharacterName.Value}.
+  Result: 
+2305440578: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Completed {Quests.QuestTypeColor[questType]} for <color=green>{playerInfo.User.CharacterName.Value}</color>!
+  Result: 
 743696282: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
+  Result: 
+2051256929: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=#FFD700>{roundedXP}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~
   Result: 
 3681675424: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Level must be between <color=white>0</color> and <color=white>{ConfigService.MaxLevel}</color>!
@@ -143,14 +438,98 @@ Translation error: 'NoneType' object has no attribute 'get_translation'
 2437634726: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName.Value}</color>!
   Result: 
+1254994229: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Couldn't find experience data for {foundUser.CharacterName.Value}
+  Result: 
+160628229: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore shared experience list!
+  Result: 
+1725928464: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore shared experience list!
+  Result: 
+2935471585: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Valid professions: {ProfessionFactory.GetProfessionNames()}
+  Result: 
 216725398: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamId, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}
+  Result: 
+1201875369: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: No progress in {professionHandler.GetProfessionName()} yet!
+  Result: 
+2095668308: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Level must be between 0 and {MAX_PROFESSION_LEVEL}.
+  Result: 
+2554001784: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: {professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>
+  Result: 
+3320804900: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Available professions: {ProfessionFactory.GetProfessionNames()}
+  Result: 
+947371822: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You've selected {FormatClassName(playerClass)}!
   Result: 
 714432788: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: You've already selected {FormatClassName(currentClass.Value)}, use <color=white>'.class c [Class]'</color> to change. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)
   Result: 
+2497805382: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: No spells for {FormatClassName(playerClass.Value)} configured!
+  Result: 
+2645405211: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid spell, use '<color=white>.class lsp</color>' to see options.
+  Result: 
+2001389111: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Invalid spell, use <color=white>'.class lsp'</color> to see options.
+  Result: 
+20873033: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You haven't selected a class or you haven't activated shift spells! (<color=white>'.class s [Class]'</color> | <color=white>'.class shift'</color>)
+  Result: 
+4140406916: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You haven't selected a class yet, use <color=white>'.class s [Class]'</color> instead.
+  Result: 
+1282509635: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: You have class buffs enabled, use <color=white>'.class passives'</color> to disable them before changing classes!
+  Result: 
+501637283: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Class changed to {FormatClassName(playerClass)}!
+  Result: 
+3938051122: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Classes: {classTypes}
+  Result: 
+4066899438: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Shift spell <color=green>enabled</color>!
+  Result: 
+2320898349: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Shift spell <color=red>disabled</color>!
+  Result: 
+4003734136: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=white>{sctType}</color> scrolling text {(currentState ? 
+  Result: 
+2316405313: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: {items}
+  Result: 
 3399068440: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: <color=white>VBloods Slain</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Units Killed</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Deaths</color>: <color=#808080>{Deaths}</color> | <color=white>Time Online</color>: <color=#1E90FF>{OnlineTime}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Blood Consumed</color>: <color=red>{LitresBloodConsumed}</color>L
+  Result: 
+983187747: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=#90EE90>{parsedPrestigeType}</color> Prestige Info:
+  Result: 
+3186346778: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}
+  Result: 
+3760020920: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Growth rate increase for expertise and legacies: <color=green>{gainPercentage}</color>
+  Result: 
+3017333247: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Growth rate reduction for experience: <color=yellow>{reductionPercentage}</color>
+  Result: 
+854889988: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Growth rate reduction from <color=#90EE90>{parsedPrestigeType}</color> prestige level: <color=yellow>-{percentageReductionString}</color>
+  Result: 
+608840793: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Stat bonuses improvement: <color=green>{statGainString}</color>
+  Result: 
+562341898: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: Total change in growth rate including leveling prestige bonus: <color=yellow>{totalEffectString}</color>
   Result: 
 1812818458: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, experience from unit kills reduced by <color=red>{reductionPercentage}</color>.
@@ -196,4 +575,7 @@ Translation error: 'NoneType' object has no attribute 'get_translation'
   Result: 
 881612152: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
   Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
+  Result: 
+2978826451: SKIPPED (batch error: 'NoneType' object has no attribute 'get_translation')
+  Original: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? "{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)
   Result: 
