@@ -1,19 +1,46 @@
-## Codex Keywords & Workflow
+## Codex Workflow Contract
 
-The Codex system uses the following keywords:
+### 1. Glossary — Command Index
 
-* **CreatePrd** – create a Product Requirements Document.
-* **CreateTasks** – generate task lists from the PRD.
-* **TaskMaster** – execute tasks and update their status.
-* **ClosePrd** – finalize and archive completed PRDs.
+| Keyword                                   | Purpose                                                    |
+|-------------------------------------------|------------------------------------------------------------|
+| `CreatePRD <id> {context}`                | Start a new Project Requirement Document.                  |
+| `CreateSubPRD <parent> <child> {context}` | Nest a PRD inside another.                                 |
+| `AddTasks <id>`                           | Autogenerate task list for a PRD.                          |
+| `RunTasks <id>`                           | Execute pending tasks and update status.                   |
+| `SummarizePRD <id>`                       | Produce a progress report.                                 |
+| `ClosePRD <id>`                           | Finalise and archive a completed PRD.                      |
 
-0. Codex-related workflow items belong in `AGENTS.md`, NOT `README.md`!
-1. Run `.codex/install.sh` once to install dependencies. This will also generate
-   `Resources/secrets.json` with default development secrets.
-2. Build and deploy locally with `./dev_init.sh`
-3. Update message hashes when needed using `Tools/GenerateMessageTranslations`:
-   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
-4. Use the keywords (**CreatePrd**, **CreateTasks**, **TaskMaster**, **ClosePrd**) to manage PRDs and tasks
+> **ID conventions:** Lower-case, hyphenated (`feature-x-api`). Duplicate IDs **MUST** error.
+
+### 2. Lifecycle — Canonical Flow
+
+# 0. Initialise repository tooling (once)
+./.codex/install.sh
+
+# 1. Scaffold goals
+CreatePRD improve-codex-workflow
+CreateSubPRD improve-codex-workflow networking-enhancements  # >5 tasks rule
+
+# 2. Plan work
+AddTasks improve-codex-workflow
+AddTasks networking-enhancements
+
+# 3. Execute & iterate
+RunTasks improve-codex-workflow
+RunTasks networking-enhancements
+
+# 4. Inspect
+SummarizePRD improve-codex-workflow
+SummarizePRD networking-enhancements
+
+# 5. Close out
+ClosePRD networking-enhancements
+ClosePRD improve-codex-workflow
+
+Current PRDs and task lists are stored in `.project-management/current-prd/`, while completed items are moved to `.project-management/closed-prd/`. Codex is expected to own as much as it feels capable of doing so in terms of completion, furthering goals, and being generally proactive with managing tasks to completion of state project goals. Compile with .NET 8 to build with preview features, though do note VRising runs on the .NET 6 runtime as the .csproj implies; be mindful to stay within the .NET 6 API surface to avoid surprises.
+
+---
 
 ### Translation Workflow
 
@@ -36,8 +63,6 @@ The Codex system uses the following keywords:
 6. After translation, run the checker to ensure nothing remains in English:
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations`
    Use `--show-text` to also print the English string and existing translation alongside each hash.
-
-Current PRDs and task lists are stored in `.project-management/current-prd/`, while completed items are moved to `.project-management/closed-prd/`. Codex is expected to own as much as it feels capable of doing so in terms of completion, furthering goals, and being generally proactive with managing tasks to completion of state project goals. Compile with .NET 8 to build with preview features, though do note VRising runs on the .NET 6 runtime as the .csproj implies; be mindful to stay within the .NET 6 API surface to avoid surprises.
 
 ---
 
