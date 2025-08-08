@@ -1,6 +1,6 @@
-## Codex Workflow Contract
+# Codex Workflow Contract
 
-### 1. Glossary — Command Index
+## 1. Glossary — Command Index
 
 | Keyword                                   | Purpose                                                    |
 |-------------------------------------------|------------------------------------------------------------|
@@ -13,28 +13,28 @@
 
 > **ID conventions:** Lower-case, hyphenated (`feature-x-api`). Duplicate IDs **MUST** error.
 
-### 2. Lifecycle — Canonical Flow
+## 2. Lifecycle — Canonical Flow
 
-# 0. Initialise repository tooling (once)
+### 0. Initialise repository tooling (once)
 ./.codex/install.sh
 
-# 1. Scaffold goals
+### 1. Scaffold goals
 CreatePRD improve-codex-workflow
 CreateSubPRD improve-codex-workflow networking-enhancements  # >5 tasks rule
 
-# 2. Plan work
+### 2. Plan work
 AddTasks improve-codex-workflow
 AddTasks networking-enhancements
 
-# 3. Execute & iterate
+### 3. Execute & iterate
 RunTasks improve-codex-workflow
 RunTasks networking-enhancements
 
-# 4. Inspect
+### 4. Inspect
 SummarizePRD improve-codex-workflow
 SummarizePRD networking-enhancements
 
-# 5. Close out
+### 5. Close out
 ClosePRD networking-enhancements
 ClosePRD improve-codex-workflow
 
