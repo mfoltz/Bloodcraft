@@ -56,8 +56,10 @@ Before translating, reassemble and install the Argos model for each language und
 cd Resources/Localization/Models/<LANG>
 cat translate-*.z[0-9][0-9] translate-*.zip > model.zip
 unzip -o model.zip
+unzip -p translate-*.argosmodel */metadata.json | jq '.from_code, .to_code'
 argos-translate install translate-*.argosmodel
 ```
+Confirm `from_code`/`to_code` in `metadata.json` match the directory's language pair. Repeat this check whenever models are added or updated so scripts reference the correct language pair.
 The translation script hides `<...>` tags and `{...}` placeholders as `[[TOKEN_n]]` tokens. Tokens must be preserved but may be reordered if grammar requires; the script warns when order differs. Lines consisting only of tokens are given a `[[TOKEN_SENTINEL]]` suffix so Argos will process them. `fix_tokens.py` restores any altered tokens afterward. **DO NOT** edit text inside these tokens, tags, or variables.
 
 ---

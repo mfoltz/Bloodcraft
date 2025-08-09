@@ -805,16 +805,37 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 4. **Verify translations.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text`
    This command confirms every hash exists and no English text remains.
-
-`Resources/Localization/Messages/Models` contains a split Argos English→Spanish model (`translate-en_es-1_0.z01`–`translate-en_es-1_0.z04`). Combine the parts and install the model before running any translation scripts:
+Each language model resides under `Resources/Localization/Models/<DIR>`. Combine the split archives, inspect `metadata.json` to confirm the language pair, and then install:
 
 ```bash
-cd Resources/Localization/Messages/Models
-cat translate-en_es-1_0.z01 translate-en_es-1_0.z02 translate-en_es-1_0.z03 translate-en_es-1_0.z04 > translate-en_es-1_0.zip
-unzip translate-en_es-1_0.zip
-argos-translate install translate-en_es-1_0.argosmodel
-rm translate-en_es-1_0.zip translate-en_es-1_0.argosmodel
+cd Resources/Localization/Models/<DIR>
+cat translate-*.z[0-9][0-9] translate-*.zip > model.zip
+unzip -o model.zip
+unzip -p translate-*.argosmodel */metadata.json | jq '.from_code, .to_code'
+argos-translate install translate-*.argosmodel
 ```
+
+`metadata.json` must report `from_code` = `en` and the expected `to_code`. Re-run this verification whenever models are added or updated so scripts reference the correct language pair.
+
+#### Model directories
+
+| Directory | Target language | Notes |
+|-----------|-----------------|------|
+| EN_DE | German (`de`) |
+| EN_ES | Spanish (`es`) |
+| EN_FR | French (`fr`) |
+| EN_HU | Hungarian (`hu`) |
+| EN_IT | Italian (`it`) |
+| EN_JA | Japanese (`ja`) |
+| EN_KO | Korean (`ko`) |
+| EN_PB | Brazilian Portuguese (`pt-BR`) — non‑ISO `pb` |
+| EN_PL | Polish (`pl`) |
+| EN_RU | Russian (`ru`) |
+| EN_TH | Thai (`th`) |
+| EN_TR | Turkish (`tr`) |
+| EN_UK | Ukrainian (`uk`) |
+| EN_ZH | Simplified Chinese (`zh`) |
+| EN_ZT | Traditional Chinese — non‑ISO `zt` |
 
 `Tools/translate_argos.py` uses the `argostranslate` Python API and protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Tokens must be preserved, but they may be reordered when grammar requires; the script logs a warning if their order changes. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. Pass `--verbose` to display each entry as it is processed, `--log-file` to keep a record, and `--report-file skipped.csv` (or `.json`) to capture skipped hashes with reasons and the original English text for manual follow-up. `translate_argos.py` accepts `--batch-size`, `--max-retries`, and `--timeout` options. Re-run it on a clean copy of `Spanish.json` to restart translations from scratch. `Tools/translate.py` remains for backward compatibility but prints a deprecation warning.
 
