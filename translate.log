@@ -1,582 +1,540 @@
 2761093386: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Battle Group - {familiarReply}
-  Result: กลุ่มต่อสู้ - TOGN
-4165788499: SKIPPED (token mismatch (expected ['0'], got []))
+  Result: Battle Group -TOZE_0)
+4165788499: TRANSLATED
   Original: Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {QuestTypeColor[questType]}.
-  Result: เป้าหมายทั้งหมดถูกฆ่า ให้โอกาสพวกเขากลับมาสู้อีกครั้ง ถ้านี่ดูไม่ถูกต้อง ให้พิจารณาซ้ํา TOGN ของคุณ
-3782703317: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], got []))
+  Result: Hedefler hepsi öldürüldü, onları yeniden canlanmak için bir şans verin! Eğer bu doğru gözükmüyorsa, İZ{QuestTypeColor[questType]}'nızı yeniden kayıt altına almayı kabul etmez.
+3782703317: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], got ['0', '6', '1', '7', '3']))
   Original: Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection} <color=#F88380>{(int)seconds}</color>s ago.
-  Result: TOKN TOKN TOKN THNTHN เป็น TIVNTIGN 2 2 22 2 2 2    ห่างออกไปถึง 2.
-3308780183: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
+  Result: En yakın [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]][[TOKEN_7]][[TOKEN_3]] GÖRTÜNCÜŞÜNÜŞÜNCÜŞÜNCÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜŞÜNÜ
+3308780183: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '5', '3', '6']))
   Original: Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection}!
-  Result: ใกล้เคียง TOKN TOKN TOKN THNN เป็น TOGNTIGN 2222  fIKN ห่างออกไปยัง TIKN!
+  Result: En yakın [[TOKEN_0]][[TOKEN_4]][[TOKEN_1]][[TOKEN_5]][[TOKEN_3]][[TOKEN_6]]
 465036552: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'], got []))
   Original: {QuestTypeColor[questType]}: <color=green>{questObjective.Objective.Goal}</color> <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>x<color=#FFC0CB>{questObjective.Objective.RequiredAmount}</color> [<color=white>{questObjective.Progress}</color>/<color=yellow>{questObjective.Objective.RequiredAmount}</color>]
-  Result: TIGNTIVNTHNN TIKNN 2 22 2 2 2 2 2 2 2 1 2 2 2 หน้า หน้า 9
+  Result: Âdem-i İmrân-i İmrân-i İmrân-i İmrân-i İmrân-i İmrân-i İmrân-ı Hakk'a yemin ederim.
 860647533: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
   Original: Time until {questType} reset - <color=yellow>{timeLeft}</color> | {_questTargetType[questObjective.Objective.Goal]} Prefab: <color=white>{questObjective.Objective.Target.GetPrefabName()}</color>
-  Result: เวลาจนกว่า TOKNN ตั้งค่าใหม่ -TOKNTOKN_5 TOGN TOGN | TIKNN TIVN 2 2 2
-1707710671: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
+  Result: KEN KEN KEN KEN KEN KEN KEN KEN KEN
+1707710671: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['0', '4', '1']))
   Original: You've already completed your {QuestTypeColor[questType]}! Time until {questType} reset - <color=yellow>{timeLeft}</color>
-  Result: คุณเสร็จ TOKN ของคุณแล้ว เวลาจนกว่า TOKNN_3 ตั้งค่าใหม่ - TOKN_0TOGNTHN TIKNN TIKNN
+  Result: Sen zaten seninkini tamamladın.” Zaman sıfıra kadar - [[TOKEN_0]][[TOKEN_4]][[TOKEN_1]]
 319696654: SKIPPED (token mismatch (expected ['0'], got []))
   Original: You don't have a {QuestTypeColor[questType]}.
-  Result: คุณไม่มี a Taken.
-2886300456: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Siz bir Âdem-0’a sahip değilsiniz.
+2886300456: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['4', '1', '2', '5', '3']))
   Original: <color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.
-  Result: TOKNN_0TOKNN TOKN เพิ่ม TOKNN 2 22 2 2 2 2 2 2 2 2
-2151120362: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
+  Result: FOKENTO_0[[TOKEN_4]][[TOKEN_1]][[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]).
+2151120362: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['6', '1', '7', '3', '4', '4', '5', '4', '5']))
   Original: <color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.
-  Result: TIKNTOGNTOGNTRIGN2222 เพิ่ม 2 เพิ่ม 2 2 2.
-1057342822: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: FOKENTO_0[[TOKEN_6]][[TOKEN_1]][[TOKEN_7]][[TOKEN_3]][[TOKEN_4]][[TOKEN_4]][[TOKEN_5]][[TOKEN_4]][[TOKEN_5]].
+1057342822: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Your familiar has already prestiged the maximum number of times! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)
-  Result: ความคุ้นเคยของคุณ ได้มีชื่อเสียงสูงสุดครั้ง! TIKNTHETOGNN THNTHE TIKNN
-2689850927: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Bilinenin zaten en fazla zaman sayısına prestitü! [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+2689850927: TRANSLATED
   Original: Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.
-  Result: ชนิดของข้อมูลสถิติที่คุ้นเคยไม่ถูกต้อง ให้ใช้ 'TakeN_ 0.fim lastTakeen_1' เพื่อดูตัวเลือก
-3125006928: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
+  Result: Invalid tanıdık prestij istatistik türü, “<color=white>.fam lst</color>) seçenekleri görmek için.
+3125006928: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '6', '1', '2', '7', '3', '4', '5']))
   Original: Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.
-  Result: Familyer มี TOGNTHNNTHNNTIGNTRIGNTIGN22222222    2 จาก 3 จาก 3 จาก3 จาก  จาก  จาก หม่, ใช้ ' TNCNNTNTNNNNNTNNNTNNNNTNNNNNNNNNNTNNNNNNTNTNTNTNT
-2846646667: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Familiar zaten [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]][[TOKEN_2]][[TOKEN_7]][[TOKEN_3]] prestijden, “[[TOKEN_4]] kullanmak.fam lst[[TOKEN_5]] seçenekleri görmek için.
+2846646667: TRANSLATED
   Original: Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.
-  Result: ค่าสถิติความคุ้นเคยไม่ถูกต้อง, ใช้ 'Takeen_ 0.fam lastTakeen_1' เพื่อดูตัวเลือก
+  Result: Invalid tanıdık prestij stat, "<color=white>.fam lst</color>) seçenekleri görmek için.
 705325693: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')
-  Result: ฟามิเลียร์มีสถิติการมีชื่อเสียงอยู่แล้ว (TOGN.fam prTOKN_1' แทน 'TOGN_2. pham pr prestengstatTIKNN'.
-2844729307: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
-  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!
-  Result: ความคุ้นเคยของคุณได้รับการยกย่อง TOKNTCNNTHN TOKN TTOGN; ความรู้สะสมของพวกเขาอนุญาตให้พวกเขารักษาระดับของพวกเขา!
-2712718738: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Familiar zaten tüm prestijli istatistiklere sahiptir! (değiştir | kaynağı değiştir) ^ (İngilizce).
+2712718738: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3']))
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
-  Result: ความคุ้นเคยของคุณได้รับการยกย่อง TOKNTCNNTCN TCNN_4) TOGN; ความรู้สะสมของพวกเขาอนุญาตให้พวกเขารักษาระดับของพวกเขา! TOGNTOKNN_5TOGN
-329722985: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Sizin tanıdıkınız [[TOKEN_0]][[TOKEN_4]][[TOKEN_1]]; Birleşmiş bilgi onların seviyesini korumalarına izin verdi! [[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]).
+329722985: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2']))
   Original: You do not have enough of the required item to change classes (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: คุณไม่มีของที่จําเป็นพอที่จะเปลี่ยนคลาส (TOKN_0TOKN_4)THNNTHNN xTIKNN 2 2 2 THNKN THNKNN
-3466860311: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Sınıfları değiştirmek için yeterli miktarda eşyanız yoktur ([[TOKEN_0]][[TOKEN_4]][[TOKEN_1]]}x[[TOKEN_2]]
+3466860311: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3']))
   Original: Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: การลบรายการที่ต้องการล้มเหลว (TOKN_ 0TOKN_4)TRIGN TRIGN xTRIGNTRING 3
+  Result: Gerekli eşyayı yeterince ortadan kaldırmak için başarısız oldu ([[TOKEN_0]][[TOKEN_4]][[TOKEN_1]][[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]).
 3720524051: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {FormatClassName(playerClass)} passives not found!
-  Result: TOKN_0 ไม่ปรากฏตัว!
+  Result: KENTO_0, pasifler bulunamadı!
 3543031585: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {FormatClassName(playerClass)} passives:
-  Result: TOKN_0 ยืดหยุ่น:
+  Result: KENTO_0, pasifler:
 1106946472: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {replyMessage}
-  Result: TOGN พารามิเตอร์
+  Result: KEN
 2164633984: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Couldn't find stat synergies for {FormatClassName(playerClass)}...
-  Result: ไม่สามารถหาอาการจําลองสําหรับ TOGN...
+  Result: Yasal sinerjileri aritmemek mümkün değil...
 1293896668: SKIPPED (token mismatch (expected ['0'], got []))
   Original: No stat synergies found for {FormatClassName(playerClass)}.
-  Result: ไม่พบข้อมูลสถิติสําหรับ Takeen_ 0.
-2147420594: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
-  Original: {FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:
-  Result: TOCKN สถิติ Syndergies TOKNTIKNN_3TIKNN
-999548370: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
+  Result: Hiçbir istatistiki sinerjikler, 0
+999548370: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got ['0', '3']))
   Original: {FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:
-  Result: TOCKN_2 สถิติ SyncergiesTOKNNTIKNNTICKNNTIKNN
+  Result: FONT_2 istatistik sinerjileri x[[TOKEN_0]][[TOKEN_3]]
 460602473: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {FormatClassName(playerClass)} has no spells configured...
-  Result: TOKN_0 ไม่มีคาถาที่ปรับแต่ง...
+  Result: KENTO_0) Hiçbir büyüye sahip değildir...
 442755566: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {FormatClassName(playerClass)} spells:
-  Result: TOGN สะกด:
-2967576286: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: KENTO_0) büyüler:
+2967576286: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: Shift spell: <color=#CBC3E3>{spellName}</color>
-  Result: มนต์ Shift: TOGNTOKNN_2TOGN
-3097011724: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Tartışma:TOZE_0[[TOKEN_2]][[TOKEN_1]]).
+3097011724: TRANSLATED
   Original: Invalid class, use '<color=white>.class l</color>' to see options.
-  Result: คลาสไม่ถูกต้อง ใช้ 'Takeen_ 0. ชั้น LTakeen_1' เพื่อดูตัวเลือก
-1597216248: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Invalid sınıfı, "<color=white>.class l</color>) seçeneği görmek için.
+1597216248: TRANSLATED
   Original: Invalid class, use <color=white>'.class l'</color> to see options.
-  Result: คลาสไม่ถูกต้อง ใช้ TOKN_ 0. คลาส I'Takeen_1 เพื่อดูตัวเลือก.
-625301684: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
-  Original: Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!
-  Result: ไม่สามารถมีมากกว่าTOKN0TOKNN 2TOGN กลุ่มรบ!
-3944404979: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Invalid sınıfı, ES<color=white>) kullanır. sınıf l'</color>) seçenekleri görmek için.
+3944404979: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Deleted battle group <color=white>{groupName}</color>!
-  Result: ทีมรบที่ลบไปแล้ว TOKN TOKNN_2TOKN!
-2350508902: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Deleted savaş grubu [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+2350508902: SKIPPED (token mismatch (expected ['0', '1'], got ['1']))
   Original: Invalid prestige type, use <color=white>'.prestige l'</color> to see options.
-  Result: ชนิดของชื่อเสียงไม่ถูกต้อง, ใช้ Takeen_ 0. Pristage lTakeen_1 เพื่อดูตัวเลือก
-1897692916: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Invalid prestie türü,  .prestige l'[[TOKEN_1]] seçenekleri görmek için.
+1897692916: SKIPPED (token mismatch (expected ['0', '1'], got ['1']))
   Original: You must reach max level before <color=#90EE90>Exo</color> prestiging again.
-  Result: คุณต้องไปถึงระดับสูงสุดก่อน TOCKN_0 ExoTOKN_1 ล่วงหน้าอีกครั้ง
-9816116: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
+  Result: Daha önce max seviyesine ulaşmak zorundasınız.Exo[[TOKEN_1]] tekrar prestij.
+9816116: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['0', '1', '2', '4', '3']))
   Original: You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges. (<color=white>{EXO_PRESTIGES}</color>)
-  Result: คุณได้อันดับสูงสุดของ TOKN_0 Exo TIKN_1 เกียรตินิยม. TIKNTHTOGNN THNTHE THNN
-3729714988: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: En yüksek miktarda Exo[[TOKEN_0]]Exo[[TOKEN_1]]) prestijlere ulaştınız. [[TOKEN_2]][[TOKEN_4]][[TOKEN_3]]).
+3729714988: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['4', '1', '2', '5', '3']))
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!
-  Result: TOKNNTOKNN TOKN THNNTIKNTICKNN เกียรตินิยมสมบูรณ์!
-2402733055: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got []))
-  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
-  Result: TOKNNTOKNN TOKN THNTHNTHETIKN เกียรตินิยมสมบูรณ์! คุณได้รับรางวัลด้วย TakeN_4)TOKNN_10TOGN_5xTOGN TOGN TIKNN THNKNN 7.
-3961332984: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got []))
+  Result: FOKENTO_0[[TOKEN_4]][[TOKEN_1]][[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]
+3961332984: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got ['8', '1', '9', '9', '3', '10', '5', '6', '6', '7', '7']))
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.
-  Result: TOKNNTOKNN TOKN THNTHNTHETIKN เกียรตินิยมสมบูรณ์! คุณได้รับรางวัลด้วย TOKNTOKN_10TOKN_5xTOGN TOGN TOGN THNKN EKNKN 7. มันหล่นลงบนพื้นแล้ว ข้าวของของคุณเต็มแล้ว
-145841390: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
+  Result: FOKENTO_0[[TOKEN_8]][[TOKEN_1]][[TOKEN_9]][[TOKEN_9]][[TOKEN_3]] FOKEN_4[[TOKEN_10]][[TOKEN_5]][[TOKEN_6]][[TOKEN_6]][[TOKEN_7]][[TOKEN_7]]). Bu, envanterinizin dolu olduğu zeminde düştü.
+145841390: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got ['1', '2']))
   Original: You must reach the maximum level in <color=#90EE90>Experience</color> prestige before <color=#90EE90>Exo</color> prestiging.
-  Result: คุณต้องถึงระดับสูงสุดใน TOKN_0 ความสูง TOKNN_1 เกียรตินิยม ก่อน TOKN ExoTOKN_3.
-2076214502: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: En yüksek seviyeye ulaşmanız gerekir.Experience[[TOKEN_1]] önceki [[TOKEN_2]])Exo KEN_3).
+2076214502: SKIPPED (token mismatch (expected ['0', '1'], got ['1']))
   Original: <color=#90EE90>Exo</color> prestiging is not enabled.
-  Result: TOKN_0 Exo TOGN_1 การเตรียมล่วงหน้ายังไม่เปิดใช้งาน
-1641131342: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: FONT_0Exo[[TOKEN_1]] prestij etkinleştirilmemektedir.
+1641131342: TRANSLATED
   Original: Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.
-  Result: เกียรตินิยมไม่ถูกต้อง, ใช้ TRIGN_ 0'. Prestage lTakeen_1 เพื่อดูตัวเลือกที่ถูกต้อง
-484801240: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Invalid prestie, useETH<color=white>.prestige l'</color>) geçerli seçenekleri görmek için.
+484801240: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.
-  Result: คุณยังไม่ได้ถึงระดับที่ต้องการเพื่อชื่อเสียงในTOKN_0TOKN_2THNTIKNN TRIKNN หรืออยู่ในระดับเกียรติยศสูงสุด
-11642316: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
+  Result: Gerekli seviyeye, prestijiye inanca /0'a ulaşamadınız.[[TOKEN_2]][[TOKEN_1]]) veya maksimum prestij seviyesindedir.
+11642316: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['6', '3', '7', '4', '5', '6']))
   Original: Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s
-  Result: ปัจจุบัน TOCKN_0 Exo TOKNN_1 ระดับ Prestage: Takeen_2TOKNTHNN_3/TIGNN | Max Form time: TOKNN TIKNTHNTIKNTHUKN TIVN22 2
-836746607: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Şuraya yemin ederim. Prestige Seviye:TOZE_2[[TOKEN_6]][[TOKEN_3]])[[TOKEN_7]]) | Max Form Süre:ASI[[TOKEN_4]] KEN_8[[TOKEN_5]][[TOKEN_6]]
+836746607: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s
-  Result: ชาร์จพอที่จะรักษารูปแบบสําหรับ TOKN_0TOKN_2TOGNTHN
+  Result: Form forfen[[TOKEN_0]]) için yeterli ücret [[TOKEN_2]][[TOKEN_1]]
 2332227846: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: You have not prestiged in <color=#90EE90>Exo</color> yet.
-  Result: คุณยังไม่ได้มีชื่อเสียงใน TOCKN ExoTOGN ยัง.
-3706109126: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Henüz KEN_0'da prestij etmediniz.
+3706109126: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.
-  Result: TOKNN 2TOKKNN 22.
-3055902112: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Ücretsiz değil mi?[[TOKEN_2]][[TOKEN_1]]).
+3055902112: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: <color=#90EE90>{parsedPrestigeType}</color> prestiging is not enabled.
-  Result: TOKNN_0TOKNN TOKN TIKNN_1 ล่วงหน้ายังไม่เปิดใช้งาน
-3468772905: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
+  Result: FOKENTO_0[[TOKEN_2]][[TOKEN_1]] prestij etkinleştirilmemektedir.
+3468772905: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got ['0', '2', '1']))
   Original: The maximum level for <color=#90EE90>{parsedPrestigeType}</color> prestige is {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.
-  Result: จุดสูงสุดของ TOKN TOKNN_2TOGN เกียรติศักดิ์คือ TOKN.
+  Result: En yüksek seviyede [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]) prestijidir.
 3343555659: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.
-  Result: ผู้เล่น Toughen_sTOGNTHN TOKNN ได้รับการแต่งตั้งเป็นระดับ TOGN TOGN2 22 in 2 in TOKNN 2 2  ชื่อเพลง.
-1411528307: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Oyuncu: KEN KEN KEN . . . . . . . . .
+1411528307: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['4', '1', '2', '5', '3']))
   Original: <color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.
-  Result: TOKNN_0TOKNN TOKNN_1 การรีเซ็ตยศศักดิ์สําหรับ TOKNN22 2 2 2 2 2 2 2 2 2.
-830139985: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: FOKENTO_0[[TOKEN_4]][[TOKEN_1]][[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]).
+830139985: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: You have not prestiged in <color=#90EE90>{PrestigeType.Experience}</color>.
-  Result: TOKNN 2TOKKNN 22.
+  Result: Ücretsiz değil mi?[[TOKEN_2]][[TOKEN_1]]).
+2461283441: SKIPPED (looks untranslated)
+  Original: Prestiges:
+  Result: Prestiges:
 3320998835: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {prestiges}
-  Result: TOGN พารามิเตอร์
-1182925736: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: KEN
+1182925736: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!
-  Result: ไม่มีผู้เล่นคนไหนเคยมีชื่อเสียงใน TOKN TOKNTH 2TOGN ยัง!
-1763729577: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
+  Result: Hiçbir oyuncu henüz [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]] henüz!
+1763729577: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '1']))
   Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
-  Result: Exo ฟอร์มการกระทํา (TOKN_ 0 taunt TOKNN_1 TOGN
+  Result: Exo form emote action ([[TOKEN_0]])taunt[[TOKEN_1]]). KEN
 3882215894: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Invalid shapeshift! Valid options: {shapeshifts}
-  Result: การเปลี่ยนรูปร่างไม่ถูกต้อง! ตัวเลือกที่ใช้ได้:
-3587073963: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Invalid formchange! Geçerli seçenekler:TORAN_0).
+3587073963: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Current Exoform: <color=white>{form}</color>
-  Result: เอ็กซ์โซฟอร์มปัจจุบัน: TOKN_0TOKN_2TOGN
-1440482998: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Mevcut Exoform: [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+1440482998: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore prestige leaderboard list!
-  Result: TOKNN_0TOKNNTOKNN_1 เพิ่มเข้าในรายการผู้นําชื่อเสียง
-2659109549: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: FOKENTO_0[[TOKEN_2]][[TOKEN_1]] Ölmüş lider listesine eklendi!
+2659109549: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore prestige leaderboard list!
-  Result: TOKNN_0TOKNN TOKN TOKNN_1 ถอนออกจากรายชื่อผู้นําผู้เกิ
-2178615132: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: FOKENTO_0[[TOKEN_2]][[TOKEN_1]] görmezden gelen prestijli lider listesinden kaldırıldı!
+2178615132: TRANSLATED
   Original: Permashroud <color=green>enabled</color>!
-  Result: Permashrud TOKN eniable (TOKNN_1!
-1797973559: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: PermashroudOUR<color=green>) etkinleştirilir</color>).
+1797973559: SKIPPED (token mismatch (expected ['0', '1'], got ['0']))
   Original: Permashroud <color=red>disabled</color>!
-  Result: Permashrud TOKN disable (TIKNN_1!
-3591926048: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got []))
-  Original: Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!
-  Result: ความเชี่ยวชาญด้านอาวุธคือ TOKNTOKNTHNTHNNTHNTIGN2 22 2 2 2. TOKN_6 อนุมาน TOKNNTOGN TOGN TOGNN% TING22!
-3489173133: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
+  Result: PermashroudOUR[[TOKEN_0]]).
+3489173133: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got ['2', '1']))
   Original: <color=#c0c0c0>{weaponType}</color> Stats: {bonuses}
-  Result: TOKNN_0TOKNN THNTHE TIKNN THNN สถิติ:
-4023020194: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: FONT_0[[TOKEN_2]][[TOKEN_1]]). Stats:TORAN_3).
+4023020194: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet!
-  Result: คุณยังไม่ได้รับความเชี่ยวชาญอะไรเลยสําหรับ TOKN TIKNN 2 ยัง!
-27929505: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Hiçbir uzmanlık elde etmediniz, [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]] henüz!
+27929505: TRANSLATED
   Original: Invalid stat, use '<color=white>.wep lst</color>' to see valid options.
-  Result: ค่าสถิติไม่ถูกต้อง, ใช้ 'TOKN_ 0. wep lastTIKN_1' เพื่อดูตัวเลือกที่ถูกต้อง
-1880632188: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
-  Original: <color=#00FFFF>{finalWeaponStat}</color> has been chosen for <color=#c0c0c0>{finalWeaponType}</color>!
-  Result: TOKNNTOKNN TOKN ได้รับคัดเลือกสําหรับ TIKNN22222 2 2 2 2 2 2
-2008856310: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Invalid stat, “<color=white>.wep lst</color>) geçerli seçenekleri görmek için.
+2008856310: TRANSLATED
   Original: Invalid weapon choice, use '<color=white>.wep lst</color>' to see valid options.
-  Result: ตัวเลือกการใช้อาวุธไม่ถูกต้อง ให้ใช้ 'Takeen_0. wep lastTakeen_1' เพื่อดูตัวเลือกที่ถูกต้อง
-3274700132: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
-  Original: Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!
-  Result: สถิติอาวุธของคุณได้รับการรีเซ็ตสําหรับ TakeN_0TOKNN 2TRIGN THNN!
-719993404: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Invalid silah seçimi, “<color=white>) kullanın.wep lst</color>) geçerli seçenekleri görmek için.
+719993404: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3']))
   Original: You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: คุณไม่มีของที่จําเป็นที่จะรีเซ็ตสถิติอาวุธของคุณ! TOKNNTOKNNTHNTHNN xTIKNN222 2 2 2 2 2
-2128999876: SKIPPED (token mismatch (expected ['0'], got []))
+  Result: Silah statlerinizi sıfırlamak için gerekli eşyaya sahip değilsiniz! [[TOKEN_0]][[TOKEN_4]][[TOKEN_1]][[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]).
+2128999876: TRANSLATED
   Original: Level must be between 0 and {ConfigService.MaxExpertiseLevel}.
-  Result: ระดับต้องอยู่ระหว่าง 0 กับ TOCKN_0.
-3084457547: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Seviye 0 ve {ConfigService.MaxExpertiseLevel}) arasında olmalıdır.
+3084457547: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>
-  Result: อาวุธที่มีอยู่:TOKN_0TOKNN_2TIKNNTIKN
-2998300513: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
+  Result: Mevcut Silah Uzmanlığı: [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+2998300513: TRANSLATED
   Original: Invalid slot (<color=white>1</color> for Q or <color=white>2</color> for E)
-  Result: ช่องว่างไม่ถูกต้อง (TRIGN_ 01TOKN_1 สําหรับ Q หรือ TRIGN2TRIGN สําหรับ E
-3254231727: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got []))
+  Result: Invalid slot (<color=white>)1</color> Q veya <color=white>).2</color>).
+3254231727: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '12', '1', '2', '13', '4', '4', '5']))
   Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
-  Result: คุณอยู่ในระดับ TOGNTOKNTHNNTOGNTHNGN222 TOKN_6 ความเหลื่อ TOGN TOGN TOGN TTOVN % TIGN in TINGN in TIVN 2 2
-1711931034: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
+  Result: Sen seviyedir.[[TOKEN_0]][[TOKEN_12]][[TOKEN_1]][[TOKEN_2]][[TOKEN_13]][[TOKEN_4]][[TOKEN_4]][[TOKEN_5]]). KEN KEN KEN KEN KEN KEN 7 7 ! ! ! ! !
+1711931034: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got ['2', '1']))
   Original: <color=red>{bloodType}</color> Stats: {bonuses}
-  Result: TOKNN_0TOKNN THNTHE TIKNN THNN สถิติ:
-939340687: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
+  Result: FONT_0[[TOKEN_2]][[TOKEN_1]]). Stats:TORAN_3).
+939340687: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4', '1', '2', '3']))
   Original: No stats selected for <color=red>{bloodType}</color>, use <color=white>'.bl lst'</color> to see valid options.
-  Result: ไม่มีการเลือกสถิติสําหรับ TOCKN_0TOKN_4TOKN_1 ใช้ TRIKN'. abl lst' TOKNN_3 เพื่อดูตัวเลือกที่ถูกต้อง
-226227140: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: FOKEN_0[[TOKEN_4]][[TOKEN_1]][[TOKEN_2]] için seçilen istatistikler, geçerli seçenekleri görmek için [[TOKEN_3]]).
+226227140: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: No progress in <color=red>{handler.GetBloodType()}</color> yet.
-  Result: ยังไม่มีความคืบหน้าใน TOGN TOKNTH TOKN_2 TOKNN ยัง.
-2194796157: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: KENDİ KEN_0[[TOKEN_2]][[TOKEN_1]] henüz.
+2194796157: TRANSLATED
   Original: Invalid blood stat, use '<color=white>.bl lst</color>' to see valid options.
-  Result: ค่าสถิติของเลือดไม่ถูกต้อง, ใช้ 'Takeen_ 0. bllastTakeen_1' เพื่อดูตัวเลือกที่ถูกต้อง
-2785130336: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Invalid kan stat, “<color=white>.bl lst</color>) geçerli seçenekleri görmek için.
+2785130336: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['4', '1', '5', '3', '4']))
   Original: <color=#00FFFF>{finalBloodStat}</color> selected for <color=red>{finalBloodType}</color>!
-  Result: TOKNN_0TOKNN TOKN เลือกสําหรับ TIKNN222 TIKNN 2 2 2 2 2!
-4126149106: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: FOKENTO_0[[TOKEN_4]][[TOKEN_1]][[TOKEN_5]][[TOKEN_3]][[TOKEN_4]]
+4126149106: TRANSLATED
   Original: Invalid blood type, use '<color=white>.bl l</color>' to see valid options.
-  Result: กรุ๊ปเลือดไม่ถูกต้อง, ใช้ 'Takeen_ 0. blblTakeen_1' เพื่อดูตัวเลือกที่ถูกต้อง
-4258273173: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Invalid kan türü, “<color=white>.bl l</color>) geçerli seçenekleri görmek için.
+4258273173: TRANSLATED
   Original: Invalid blood legacy, use '<color=white>.bl l</color>' to see valid options.
-  Result: มรดกของเลือดไม่ถูกต้อง, ใช้ 'Takeen_ 0.blTakeen_1' เพื่อดูตัวเลือกที่ถูกต้อง
-1298892920: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Invalid kan mirası, “<color=white>.bl l</color>) geçerli seçenekleri görmek için.
+1298892920: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: No legacy available for <color=white>{bloodType}</color>.
-  Result: ไม่มีมรดกให้ TOKN_0TOKNN_2TOGN.
-1740355579: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
-  Original: Your blood stats have been reset for <color=red>{bloodType}</color>!
-  Result: สถิติเลือดของคุณได้รับการรีเซ็ตสําหรับ TakeN_0TOKN 2TICKNNTIGN!
-1449977777: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Hiçbir miras mevcut değildir.[[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+1449977777: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '3', '3']))
   Original: You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: คุณไม่มีของที่จําเป็นที่จะรีเซ็ตค่าเลือดของคุณ (TOKN_0TOGN_4)TOGNTIKNN_1xTIKNN 2 TOICKN TIKNN
-1690022722: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
-  Original: Your blood stats have been reset for <color=red>{bloodType}</color>.
-  Result: สถิติเลือดของคุณได้รับการรีเซ็ตสําหรับ TakeN_0TOKNN 2TRIGN TOKNN.
-1108347105: SKIPPED (token mismatch (expected ['0'], got []))
+  Result: Kan statlerinizi sıfırlamanız için gerekli eşyanız yoktur ([[TOKEN_0]][[TOKEN_4]][[TOKEN_1]]}x[[TOKEN_2]][[TOKEN_3]][[TOKEN_3]]).
+1108347105: TRANSLATED
   Original: Level must be between 0 and {ConfigService.MaxBloodLevel}.
-  Result: ระดับต้องอยู่ระหว่าง 0 กับ TOCKN_0.
-2196432591: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
+  Result: Seviye 0 ve {ConfigService.MaxBloodLevel}) arasında olmalıdır.
+2196432591: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['6', '1', '2', '7', '3', '4', '4', '5']))
   Original: <color=red>{BloodHandler.GetBloodType()}</color> legacy set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>
-  Result: TIKNNTOGNTOKN มรดก ตกTIKNN222222 2
-85537047: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: FOKENTO_0[[TOKEN_6]][[TOKEN_1]][[TOKEN_2]][[TOKEN_7]][[TOKEN_3]][[TOKEN_4]][[TOKEN_4]][[TOKEN_5]]).
+85537047: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Available Blood Legacies: <color=red>{bloodTypesList}</color>
-  Result: COKN TOKN TOKNN 2TIGN
-1716911803: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Mevcut Kan Yaralanmaları: [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+1716911803: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: <color=white>{box}</color>:
-  Result: TOKNN_0TOKNN THNTHE TIKNN :
-863911874: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: FOKENTO_0[[TOKEN_2]][[TOKEN_1]]
+863911874: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['4', '1', '5', '3']))
   Original: <color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $
-  Result: TOKNN_0TOKNN THNTHE TIKNN 2 TakeN_2TOKNN_5TOKN_3FFEMMIABFFSData. Familyerbffs.CNNKEKEKE (FFFAKNKY). $
-1066178325: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: FONT_0[[TOKEN_4]][[TOKEN_1]] FOKENTO_2[[TOKEN_5]][[TOKEN_3]] familiarBuffsData.FamiliarBuffsData.ContainsKey(famKey)? $ $ $ $ $ $ $
+1066178325: SKIPPED (token mismatch (expected ['0', '1'], got ['1']))
   Original: No active box! Try using <color=white>'.fam sb [Name]'</color> if you know the familiar you're looking for. (use quotes for names with a space)
-  Result: ไม่มีกล่องใช้งาน! ลองใช้ Takeen_0 '.fam sb ชื่อ'TOKN_1 ถ้าคุณรู้จักความคุ้นเคยที่คุณมองหา (ใช้คําพูดแทนชื่อที่มีช่องว่าง)
+  Result: Aktif bir kutu yok! KEN.fam sb Name[[TOKEN_1]] Eğer aradığınızı biliyorsan. (Bir uzayla isimleri için alıntılar)
 2321621014: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {fams}
-  Result: TOGN พารามิเตอร์
-321106656: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: KEN
+321106656: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: Box Selected - <color=white>{name}</color>
-  Result: กล่องที่ถูกเลือก - TOGN TOKNTH TOKN 2THNN
-698362524: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Kutu Seçilmiş -TOZE_0[[TOKEN_2]][[TOKEN_1]]).
+698362524: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['4', '1', '2', '5', '3']))
   Original: Box <color=white>{current}</color> renamed - <color=yellow>{name}</color>
-  Result: กล่อง TOKNN_0TOKNN THNTH เปลี่ยนชื่อ - TIKNNTIKNN 2 2 2 2 2 2 2 2
-823180732: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: BoxKENTO_0[[TOKEN_4]][[TOKEN_1]][[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]).
+823180732: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['4', '1', '2', '5', '3']))
   Original: <color=green>{PrefabGUID.GetLocalizedName()}</color> moved - <color=white>{name}</color>
-  Result: TOKNN_0TOKNN THNN ย้ายTIKNN 222 2 2 2 2 2 2
-2213724716: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: FOKENTO_0[[TOKEN_4]][[TOKEN_1]][[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]).
+2213724716: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Deleted box - <color=white>{name}</color>
-  Result: กล่องลบ -TOGNTOKNN_2TOGN
-3279926559: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Deleted box -ahi[[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+3279926559: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: Added box - <color=white>{name}</color>
-  Result: เพิ่มกล่อง - TOGNTOKNN_2TOKNN
-2724064627: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Eklenen kutu -TOZE_0[[TOKEN_2]][[TOKEN_1]]).
+2724064627: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Must have at least one unit unlocked to start adding boxes. Additionally, the total number of boxes cannot exceed <color=yellow>{BOX_CAP}</color>.
-  Result: ต้องล๊อคอย่างน้อย 1 หน่วย เพื่อเพิ่มกล่อง นอกจากนี้ จํานวนของกล่องไม่สามารถเกิน TOKN0 TOKNN 2 TOKKNN TIKNN.
-3052690511: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Kutu eklemeye başlamak için en az bir üniteye sahip olmalıdır. Buna ek olarak, toplam kutu sayısı [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+3052690511: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is not available per configured familiar bans!
-  Result: TOKNN_0TOKNN TOKN TOKNTN_1 ไม่ว่างตามคําสั่งห้ามที่คุ้นเคย!
-3195375072: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: FOKENTO_0[[TOKEN_2]][[TOKEN_1]] yapılandırılmış yasaklar için mevcut değildir!
+3195375072: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is already unlocked!
-  Result: TOKNNTOKNN TOKN TCKNN ปลดล็อคแล้ว!
+  Result: FOKENTO_0[[TOKEN_2]][[TOKEN_1]] zaten ortaya çıktı!
 3380184352: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Unable to verify cost for {vBloodPrefabGuid.GetPrefabName()}!
-  Result: ไม่สามารถตรวจสอบค่าใช้จ่ายสําหรับ TOCKN_0!
-3498334942: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Maliyeti doğrulamak için uygun değildir.)
+3498334942: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Unable to verify exo prestige reward item! (<color=yellow>{exoItem}</color>)
-  Result: ไม่สามารถตรวจสอบรายการรางวัล Exo เกียรตินิยม! TIKNTHETOGNN THNTHE TIKNN
-4255236631: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: exo prestij ödülü öğeyi doğrulamak için kullanılamaz! [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+4255236631: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: New unit unlocked: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>
-  Result: หน่วยใหม่ปลดล็อค:TOKNTOKNN_2TOGN
-2191580006: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
+  Result: Yeni bir birim ortaya çıktı: [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+2191580006: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['4', '1', '2', '5', '3', '6']))
   Original: Not enough <color=#ffd9eb>{exoItem.GetLocalizedName()}</color>x<color=white>{factoredCost}</color> for {vBloodPrefabGuid.GetPrefabName()}!
-  Result: ไม่พอ TOGN TOKN TOKN THNN 1 x TIKNN222 22 สําหรับ TIKNN
-1809964020: SKIPPED (token mismatch (expected ['0'], got []))
+  Result: Yeterince iyi değil; [[TOKEN_4]][[TOKEN_1]][[TOKEN_2]][[TOKEN_5]][[TOKEN_3]][[TOKEN_6]] için).
+1809964020: TRANSLATED
   Original: Unable to verify tier for {vBloodPrefabGuid.GetPrefabName()}! Shouldn't really happen at this point and may want to inform the developer.
-  Result: ไม่สามารถตรวจสอบตัวเสมอได้! ไม่ควรจะเกิดขึ้น ณ จุดนี้ และอาจต้องแจ้งนักพัฒนา
-1057363547: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
+  Result: ►{vBloodPrefabGuid.GetPrefabName()} için tier'i doğrulamak mümkün değil! Bu noktada gerçekten gerçekleşmemeli ve geliştiriciyi bilgilendirmek isteyebilir.
+1057363547: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '1', '2', '6', '3', '4', '7', '5']))
   Original: Invalid choice, please use <color=white>1</color> to <color=white>{familiarSet.Count}</color> (Current List:<color=yellow>{activeBox}</color>)
-  Result: ตัวเลือกไม่ถูกต้อง โปรดใช้ TakeN_01TakeN_1 toTOKNN_2TRIGNTRIGN TIKNNTIKN TIKN (รายชื่อ:TOKNN_4)TOKNN_7TOGN
-780970161: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Invalid seçeneği, lütfen [[TOKEN_0]]1[[TOKEN_1]][[TOKEN_2]][[TOKEN_6]][[TOKEN_3]]). (Current List:[[TOKEN_4]][[TOKEN_7]][[TOKEN_5]]).
+780970161: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['4', '1', '5', '3', '3', '4']))
   Original: <color=green>{familiarId.GetLocalizedName()}</color> removed from <color=white>{activeBox}</color>.
-  Result: TOKNN_0TOKNN TOKN ย้ายจาก TIKNN 222 2 2 2 2 2 2 2 2.
-2709293439: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got []))
+  Result: FOKENTO_0[[TOKEN_4]][[TOKEN_1]][[TOKEN_5]][[TOKEN_3]][[TOKEN_3]][[TOKEN_4]]
+2709293439: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got ['0', '10', '1', '2', '2', '3', '4']))
   Original: Your familiar is level [<color=white>{xpData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
-  Result: ความคุ้นเคยของคุณคือระดับ TOGNTOKNTHNTHNTHN TOGN THNTHE 2 2 2 2 2. TOGN TOGN TOGN TOGN TIKN TIKN TIKNN % TIGN!
+  Result: Tanıklık seviyesi [[TOKEN_0]][[TOKEN_10]][[TOKEN_1]][[TOKEN_2]][[TOKEN_2]][[TOKEN_3]][[TOKEN_4]]değiştir | kaynağı değiştirdeğiştir | kaynağı değiştir
 2794958495: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {line}
-  Result: TOGN พารามิเตอร์
-488752679: SKIPPED (token mismatch (expected ['0'], got []))
+  Result: KEN
+488752679: TRANSLATED
   Original: Level must be between 1 and {ConfigService.MaxFamiliarLevel}
-  Result: ระดับต้องอยู่ระหว่าง 1 กับ TOKN
-1440602422: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Seviye 1 ve {ConfigService.MaxFamiliarLevel}) arasında olmalıdır.
+1440602422: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['4', '1', '2', '5', '3']))
   Original: Active familiar for <color=green>{user.CharacterName.Value}</color> has been set to level <color=white>{level}</color>.
-  Result: คุ้นเคยกับ TOKN TOKNN TOKN TOKN_1 ถูกตั้งค่าให้อยู่ในระดับ TRIGN2 2 2 2 2 2 2 2.
-1391708521: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
-  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]!
-  Result: TOGN TOKKN 2TOKNNTIKNN!
-3235862068: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
-  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>!
-  Result: ความคุ้นเคยของคุณได้รับการยกย่อง TOKNTOKNTHN TOGN TRIKN 1 และปัจจุบันระดับ TRIKNN 2 2 2 2 2 2!
-54858227: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
+  Result: İLGİLİ_0[[TOKEN_4]][[TOKEN_1]] Örnek_2[[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]).
+54858227: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '7', '3', '4', '5', '8', '4', '5']))
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
-  Result: TOGN TOGN TOGN THNN THNN และปัจจุบันระดับ TRIGN222 2 2 2 2
-3334433396: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got []))
+  Result: Tanıkınız [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]] ve şimdi seviye[[TOKEN_2]][[TOKEN_7]][[TOKEN_3]]TOKEN_[[TOKEN_4]][[TOKEN_5]][[TOKEN_8]][[TOKEN_4]][[TOKEN_5]]).
+3334433396: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['0', '1', '1', '0', '4', '4', '6', '7', '7']))
   Original: Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.
-  Result: TOGN TRIGN หรือต้องการTOGN2222 7 7.
-628275031: SKIPPED (looks untranslated)
-  Original: Familiar actives and followers cleared.
-  Result: Familyer Actives and Passy excury.
-1581983564: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Familiar prestijinin maksimum düzeyde olması gerekir ([[TOKEN_0]][[TOKEN_1]][[TOKEN_1]]) veya KEN_2[[TOKEN_0]][[TOKEN_4]][[TOKEN_4]][[TOKEN_6]][[TOKEN_7]][[TOKEN_7]].
+1581983564: TRANSLATED
   Original: Shiny added! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).
-  Result: เพิ่มความเย้ายวน คุ้นเคยกับผลกระทบ ใช้ 'TIKN_ 0. fam  optionsgirl TCOKN_1' เพื่อสลับไปมา (ไม่มีโอกาสใช้คาถาแบบ debuff on bitle foots boys).
-2682530289: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
-  Original: You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{clampedCost}</color>)
-  Result: คุณไม่มีปริมาณที่ต้องใช้ TOKNTHNNTHN TIKN TRIGN!
-53933494: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Shiny ekledi! Rebind etkileri görmeye tanıdık. "<color=white>.fam seçeneği parlak</color>)" toggle (eski okul debuff'u parlak otobüsler devre dışı bırakılırsa vurma şansı yok).
+53933494: TRANSLATED
   Original: Shiny changed! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).
-  Result: ชินีเปลี่ยนไป! คุ้นเคยกับผลกระทบ ใช้ 'TIKN_ 0. fam  optionsgirl TCOKN_1' เพื่อสลับไปมา (ไม่มีโอกาสใช้คาถาแบบ debuff on bitle foots boys).
-2486628899: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
-  Original: You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{changeQuantity}</color>)
-  Result: คุณไม่มีปริมาณที่ต้องใช้ TOKNTHNNTHN TIKN TRIGN!
+  Result: Shiny değişti! Rebind etkileri görmeye tanıdık. "<color=white>.fam seçeneği parlak</color>)" toggle (eski okul debuff'u parlak otobüsler devre dışı bırakılırsa vurma şansı yok).
 1354182381: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Valid options: {validOptions}
-  Result: ตัวเลือกที่ใช้ได้:
-1081599663: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Geçerli seçenekler:TORAN_0).
+1081599663: SKIPPED (token mismatch (expected ['0', '1'], got ['1']))
   Original: No active battle group selected! Use <color=white>.fam cbg [Name]</color> to select one.
-  Result: ยังไม่มีการเลือกกลุ่มรบ! ใช้ TOCKN_0.fam cbg ชื่อTOKN_1 เพื่อเลือกหนึ่ง.
-3628025920: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Aktif bir savaş grubu seçilmedi! KEN.fam cbg Name[[TOKEN_1]] birini seçmek için.
+3628025920: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Active battle group set to <color=white>{groupName}</color>.
-  Result: TOKN ทีมรบที่เคลื่อนไหวตั้ง TOKNN TOKN_2TOGN.
-3862629133: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Aktif savaş grubu, [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+3862629133: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Battle group <color=white>{groupName}</color> created.
-  Result: กลุ่มรบ TOKNN TOKNTH TOKN TOKN สร้าง.
-3182929151: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
+  Result: Savaş grubu [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]] oluşturuldu.
+3182929151: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got ['1', '2', '3']))
   Original: Slot input out of range! (use <color=white>1, 2,</color> or <color=white>3</color>)
-  Result: ส่งสัญญาณจากระยะ! ใช้TOKNN 1, 2,TOKNN_1 หรือTOGN_23TOGN
-1894878159: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
+  Result: Slot girişi aralığından! (d)1, 2,[[TOKEN_1]]) veya [[TOKEN_2]]).3[[TOKEN_3]]).
+1894878159: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got ['0', '2', '1']))
   Original: Familiar assigned to <color=white>{groupName}</color> in slot {slotIndex}.
-  Result: Familyer มอบหมายให้ TakeN_0TOKN_2TOGN TIKNN_1 ในช่อง TIKNN.
-4162514026: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Familiar, [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]) tarafından yuvada bulunan.
+4162514026: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Deleted battle group <color=white>{groupName}</color>.
-  Result: TOKN ทีมรบที่ถูกลบ TOKNNTCNNTOGN.
-907868427: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Deleted savaş grubu [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+907868427: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3']))
   Original: Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
-  Result: ตําแหน่งของคิว:TOKNTOKNN_4)TOKN_1 (TOGNTIKNN 22TOKNN 2
-2129553669: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Sırada Pozisyon: [[TOKEN_0]][[TOKEN_4]][[TOKEN_1]][[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]).
+2129553669: SKIPPED (token mismatch (expected ['0', '1'], got ['0']))
   Original: You're not currently queued for battle! Use '<color=white>.fam challenge [PlayerName]</color>' to challenge another player.
-  Result: เจ้ายังไม่ได้เข้าคิวรบ ใช้ 'TOKN_0. ความท้าทาย ชื่อผู้เล่นTakeen_1' เพื่อท้าทายผู้เล่นคนอื่น
-2968342812: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Şu anda savaş için kuyruklanmadın! Başka bir oyuncuya meydan okumak için ‘[[TOKEN_0]]).
+2968342812: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3']))
   Original: You can't challenge another player while queued for battle! Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
-  Result: คุณไม่สามารถท้าทายผู้เล่นคนอื่นในขณะที่ คิวสําหรับการต่อสู้! ตําแหน่งของคิว:TOKNTOKNN_4)TOKN_1 (TOGNTIKNN 22TOKNN 2
-2228202821: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Savaş için kuyruklandığında başka bir oyuncuya meydan okumazsınız! Sırada Pozisyon: [[TOKEN_0]][[TOKEN_4]][[TOKEN_1]][[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]).
+2228202821: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: <color=green>{playerInfo.User.CharacterName}</color> is already queued for battle!
-  Result: TOKNN_0TOKNN TOKN TIKNTHN ได้เข้าคิวรบแล้ว!
-2817263998: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: FOKENTO_0[[TOKEN_2]][[TOKEN_1]] zaten savaş için sıralanmıştır!
+2817263998: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: <color=green>{playerInfo.User.CharacterName}</color> already has a pending challenge!
-  Result: TOKNN_0TOKNN TOKN TOKN มีความท้าทายที่รอมานาน!
-1231839381: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
+  Result: FOKENTO_0[[TOKEN_2]][[TOKEN_1]] zaten bir meydan okuma var!
+1231839381: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4', '2', '3']))
   Original: Challenged <color=white>{playerInfo.User.CharacterName.Value}</color> to a battle! (<color=yellow>30s</color> until it expires)
-  Result: ท้าท้ายTOKN TOKNN TOKN THN TIKN ไปรบ! TIKNTH 30sTOKNN_3 จนกว่ามันจะหมดอายุ
-3878896595: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Zorluklar0[[TOKEN_4]] ([[TOKEN_2]]).30s[[TOKEN_3]]).
+3878896595: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: Quests for <color=green>{playerInfo.User.CharacterName.Value}</color> have been refreshed.
-  Result: สืบค้นเมื่อ TOKN TOKNTH TOKN THNTHE ได้รับความสดชื่น
-1952946751: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: KEN_0 için boşluklar [[TOKEN_2]][[TOKEN_1]] yenilenmiştir.
+1952946751: TRANSLATED
   Original: You've already completed your <color=#00FFFF>Daily Quest</color> today. Check back tomorrow.
-  Result: คุณเสร็จ TOKN ของคุณแล้ว เดลี่ เควส วันนี้ ตรวจดูอีกทีพรุ่งนี้
+  Result: Zaten bugünden beri <color=#00FFFF>Daily Quest</color>) tamamladınız. Yarın geri dönün.
 860320001: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
   Original: Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!
-  Result: TOKN ของคุณ (TOKN0 สืบค้น TOKN ได้รับการโอนอีกครั้งสําหรับ TOGN TOGNTIGN 22 2 2 2 2!
-1985982508: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: KEN KEN KEN KEN KEN KEN KEN KEN KEN KEN KEN KEN
+1985982508: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '3']))
   Original: You couldn't afford to reroll your daily... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)
-  Result: TOKN TOKN TOKN THNN xTOGN2222 2
-1677522996: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Her gün yeniden kayıt yaptırmayı göze alamazsınız... ([[TOKEN_0]][[TOKEN_4]][[TOKEN_1]]) x KEN_2[[TOKEN_3]]).
+1677522996: SKIPPED (token mismatch (expected ['0', '1'], got ['0']))
   Original: You've already completed your <color=#BF40BF>Weekly Quest</color>. Check back next week.
-  Result: คุณเสร็จ TOKN Weekly ProfileTIKN. อาทิตย์หน้าก็กลับมา
-4009901629: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
+  Result: Haftaya kadar Quest[[TOKEN_0]] tamamladınız. Önümüzdeki hafta geri kontrol edin.
+4009901629: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['1', '2', '6', '3', '4', '5']))
   Original: Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!
-  Result: TOGN TOGN สืบค้นเมื่อ TOKN ได้รับการโอนสําหรับ TOGNTIGN 2222 2 2 2 2
-707311945: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: 3. Haftaya göre Quest[[TOKEN_1]][[TOKEN_2]][[TOKEN_6]][[TOKEN_3]] x[[TOKEN_4]][[TOKEN_5]]).
+707311945: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '3', '4', '5', '3']))
   Original: You couldn't afford to reroll your wekly... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)
-  Result: (TOKN_4) TOKNN TOKN TIKNN THNNTRIGN x22 2 2 2
-563018011: SKIPPED (token mismatch (expected ['0'], got []))
+  Result: Wekly'yi yeniden kaydetmeye karşı çıkamadınız... ([[TOKEN_0]][[TOKEN_4]][[TOKEN_1]]) x[[TOKEN_2]][[TOKEN_3]][[TOKEN_4]][[TOKEN_5]][[TOKEN_3]]
+563018011: TRANSLATED
   Original: Invalid quest type '{questTypeName}'. Valid values are: {string.Join(
-  Result: ชนิดของการค้นหาไม่ถูกต้อง ค่าที่ใช้ได้คือ: {ข้อความ เข้าร่วม
-3751423711: SKIPPED (token mismatch (expected ['0'], got []))
-  Original: Player does not have an active {questType} quest to complete.
-  Result: ผู้เล่นไม่มีการทํางาน TOKN_ 0 สืบค้นเพื่อเสร็จสมบูรณ์
-998944061: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Invalid search type '{questTypeName}). Geçerli değerler şunlardır: {string. Katıl(Kategori)
+998944061: SKIPPED (token mismatch (expected ['0', '1'], got ['1']))
   Original: The {questType} quest is already complete for {playerInfo.User.CharacterName.Value}.
-  Result: TOKN_0 การแสวงหาเสร็จสมบูรณ์แล้ว TOKNN_1.
+  Result: KENTO_0) Görevi zaten İZ[[TOKEN_1]] için tamamlandı.
 2305440578: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: Completed {Quests.QuestTypeColor[questType]} for <color=green>{playerInfo.User.CharacterName.Value}</color>!
-  Result: เสร็จสมบูรณ์ TOKNN สําหรับ TOKNN TOKN THNN THNN 2 2!
-743696282: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got []))
+  Result: Tamamlanan s. s. .. . . . . .
+743696282: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got ['0', '10', '1', '2', '2', '3', '4', '5', '12', '4', '5']))
   Original: You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
-  Result: คุณอยู่ในระดับ TOGNTOKNTHNNTOGNTTOHN2222 TOGN TOGN TOGN TOGN TIKN TIKN TIKNN % TIGN!
-2051256929: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
+  Result: Sen seviyedir [[TOKEN_0]][[TOKEN_10]][[TOKEN_1]][[TOKEN_2]][[TOKEN_2]][[TOKEN_3]][[TOKEN_4]][[TOKEN_5]][[TOKEN_12]][[TOKEN_4]][[TOKEN_5]]). değiştir | kaynağı değiştirdeğiştir | kaynağı değiştir
+2051256929: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['6', '1', '2', '3', '4', '4']))
   Original: <color=#FFD700>{roundedXP}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~
-  Result: TOKN_0TOKNN TOKN โบนัส TIKNN TIKNN เหลือจาก TIKNN TIVN TIKNTHE การถอนเงิน TIKN
-3681675424: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
+  Result: FOKENTO_0[[TOKEN_6]][[TOKEN_1]][[TOKEN_2]]) Deneyim[[TOKEN_3]], [[TOKEN_4]] tarafından geri kalan [[TOKEN_4]]
+3681675424: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['0', '1', '2', '4', '3']))
   Original: Level must be between <color=white>0</color> and <color=white>{ConfigService.MaxLevel}</color>!
-  Result: ระดับต้องอยู่ระหว่าง TCOKN0TOKNN_1 และ TOKNN_2 TOGN TIKNN 2 TIKNKN.
-2437634726: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Seviye, [[TOKEN_0]]0[[TOKEN_1]] ve [[TOKEN_2]][[TOKEN_4]][[TOKEN_3]]).
+2437634726: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['4', '1', '2', '5', '3']))
   Original: Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName.Value}</color>!
-  Result: TOKN TOKN TOKN TOKN THNN สําหรับ TOGN TICKNN 222!
-1254994229: SKIPPED (token mismatch (expected ['0'], got []))
+  Result: 3. Seviyeye göre; [[TOKEN_4]][[TOKEN_1]][[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]).
+1254994229: TRANSLATED
   Original: Couldn't find experience data for {foundUser.CharacterName.Value}
-  Result: หาข้อมูลประสบการณ์ไม่ได้
-160628229: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: OL{foundUser.CharacterName.Value} için deneyim verilerini bulamazsın).
+160628229: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore shared experience list!
-  Result: TOKNN_0TOKNN TOKN TOKNN_1 เพิ่มข้อมูลประสบการณ์ร่วม!
-1725928464: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: FOKENTO_0[[TOKEN_2]][[TOKEN_1]], paylaşılan deneyim listesine ekledi!
+1725928464: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore shared experience list!
-  Result: TOKNN_0TOKNN TOKN TOKNN_1 เอาออกจากรายชื่อประสบการณ์ร่วม!
-2935471585: SKIPPED (token mismatch (expected ['0'], got []))
+  Result: FOKENTO_0[[TOKEN_2]][[TOKEN_1]], göz ardı edilen deneyim listesinden kaldırıldı!
+2935471585: TRANSLATED
   Original: Valid professions: {ProfessionFactory.GetProfessionNames()}
-  Result: อาชีพที่ใช้ได้:
-216725398: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got []))
+  Result: Geçerli meslekler:ASI{ProfessionFactory.GetProfessionNames()}).
+216725398: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got ['0', '8', '1', '9', '3', '4']))
   Original: You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamId, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}
-  Result: คุณอยู่ในระดับ TOGNTOKNTHNN และมี TOGN2 2222 2 2 2 2 2 2 2 2.
+  Result: Sen seviyedir.[[TOKEN_0]][[TOKEN_8]][[TOKEN_1]] ve% 10[[TOKEN_9]][[TOKEN_3]][[TOKEN_4]]
 1201875369: SKIPPED (token mismatch (expected ['0'], got []))
   Original: No progress in {professionHandler.GetProfessionName()} yet!
-  Result: ยังไม่คืบหน้าเลย!
-2095668308: SKIPPED (token mismatch (expected ['0'], got []))
+  Result: Henüz gelişme yok!
+2095668308: TRANSLATED
   Original: Level must be between 0 and {MAX_PROFESSION_LEVEL}.
-  Result: ระดับต้องอยู่ระหว่าง 0 กับ TOCKN_0.
-2554001784: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
+  Result: Seviye 0 ve {MAX_PROFESSION_LEVEL}) arasında olmalıdır.
+2554001784: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '5', '1', '6', '3', '6']))
   Original: {professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>
-  Result: TIKN วาง TOKNN 5TOGNTIVN222 2 2 2 2 2 2
-3320804900: SKIPPED (token mismatch (expected ['0'], got []))
+  Result: Köpek_4[[TOKEN_0]][[TOKEN_5]][[TOKEN_1]][[TOKEN_6]][[TOKEN_3]][[TOKEN_6]]
+3320804900: TRANSLATED
   Original: Available professions: {ProfessionFactory.GetProfessionNames()}
-  Result: อาชีพที่มีอยู่: TOGN
+  Result: Mevcut meslekler:ASI{ProfessionFactory.GetProfessionNames()}).
 947371822: SKIPPED (token mismatch (expected ['0'], got []))
   Original: You've selected {FormatClassName(playerClass)}!
-  Result: คุณเลือก TOKN!
-714432788: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
+  Result: Siz seçilmişsiniz.
+714432788: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['1', '2', '7', '3', '4', '8', '5']))
   Original: You've already selected {FormatClassName(currentClass.Value)}, use <color=white>'.class c [Class]'</color> to change. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)
-  Result: คุณได้เลือก TOKN แล้ว, ใช้TOKN_0'. ชั้น c Class'TOKN เพื่อเปลี่ยน. TIKNTHTOKNN 7THNN xTIKNN 2TIKNN 2 2 2 2 2 2
+  Result: Siz zaten seçilmişsiniz. ”.class c Class[[TOKEN_1]] değiştir. [[TOKEN_2]][[TOKEN_7]][[TOKEN_3]][[TOKEN_4]][[TOKEN_8]][[TOKEN_5]]).
 2497805382: SKIPPED (token mismatch (expected ['0'], got []))
   Original: No spells for {FormatClassName(playerClass.Value)} configured!
-  Result: ไม่มีคาถาสําหรับ TOKN_0 กําหนด!
-2645405211: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Hiçbir büyü yapılandırılmadı!
+2645405211: TRANSLATED
   Original: Invalid spell, use '<color=white>.class lsp</color>' to see options.
-  Result: สะกดผิด, ใช้ 'Takeen_ 0. คลาส ISpTOKN_1' เพื่อดูตัวเลือก
-2001389111: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Invalid spell, use '<color=white>).class lsp</color>).
+2001389111: TRANSLATED
   Original: Invalid spell, use <color=white>'.class lsp'</color> to see options.
-  Result: สะกดผิด, ใช้ TOKN_ 0. คลาส ISp'TOKN_1 เพื่อดูตัวเลือก
+  Result: Invalid spell, useETH<color=white>.class lsp'</color> seçenekleri görmek için.
 20873033: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: You haven't selected a class or you haven't activated shift spells! (<color=white>'.class s [Class]'</color> | <color=white>'.class shift'</color>)
-  Result: คุณยังไม่ได้เลือกชั้นเรียนหรือคุณไม่ได้เปิดใช้งานคาถาเปลี่ยน! (TOKN_0. s ชั้น คลาส Class 'TOKN_1 | TOKNN'. ชนชั้นเปลี่ยน 'TIKN
-4140406916: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Bir sınıf seçmediniz ya da aktif değişim büyüleri yapmadınız! (değiştir | kaynağı değiştir) ^ (İngilizce).
+4140406916: SKIPPED (token mismatch (expected ['0', '1'], got ['1']))
   Original: You haven't selected a class yet, use <color=white>'.class s [Class]'</color> instead.
-  Result: คุณยังไม่ได้เลือกชั้นเรียนยังใช้ TOKN_0. ชั้น s Clas'TIKN แทน.
-1282509635: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Henüz bir sınıf seçmediniz,  Sınıfın s Class[[TOKEN_1]] yerine.
+1282509635: TRANSLATED
   Original: You have class buffs enabled, use <color=white>'.class passives'</color> to disable them before changing classes!
-  Result: คุณมีการเปิดใช้งาน Friends คลาส ใช้ TOKN_0. คลาส Audios TOKN_1 เพื่อปิดการใช้งานพวกเขาก่อนที่จะเปลี่ยนคลาส!
+  Result: Sınıf otobüsü etkinleştirildiniz, Ş<color=white>.class pasifs'</color>) onları değiştirmeden önce devre dışı bırakmak için.
 501637283: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Class changed to {FormatClassName(playerClass)}!
-  Result: เปลี่ยนชั้นเป็น TOKN!
+  Result: Sınıf,TORAN_0'a değiştirildi!
 3938051122: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Classes: {classTypes}
-  Result: คลาส: TOGN
+  Result: Sınıflar:
 4066899438: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Shift spell <color=green>enabled</color>!
-  Result: มนต์ Shift TOKN_0 ออกเสียง TOKNN_1!
+  Result: Değiştirilebilirdeğiştir | kaynağı değiştir
 2320898349: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Shift spell <color=red>disabled</color>!
-  Result: มนต์ Shift TOKN_0 Disabled TOKN_1!
-4003734136: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Değiştirilebilirlikdeğiştir | kaynağı değiştir
+4003734136: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: <color=white>{sctType}</color> scrolling text {(currentState ? 
-  Result: TOKNN_0TIKNN TOKNN_1 เลื่อนข้อความ REMTHTHTHTHE?
+  Result: FOKENTO_0[[TOKEN_2]][[TOKEN_1]]Yazılı metin {(currentState?
 2316405313: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {items}
-  Result: TOGN พารามิเตอร์
-3399068440: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], got []))
+  Result: KEN
+3399068440: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], got ['1']))
   Original: <color=white>VBloods Slain</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Units Killed</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Deaths</color>: <color=#808080>{Deaths}</color> | <color=white>Time Online</color>: <color=#1E90FF>{OnlineTime}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Blood Consumed</color>: <color=red>{LitresBloodConsumed}</color>L
-  Result: TIGNTIKN VTETIKN TIKN TIKN TIGN TIV THE 2 2 2 หน้า หน้า2 หน้า 2 หน้า 2 หน้า 2 หน้า 2 หน้า หน้า 2 หน้า2 หน้า2 หน้า2 หน้า2 หน้า22222222222.
-983187747: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: KENTO_0V Bloods Slain [[TOKEN_1]]değiştir | kaynağı değiştirdeğiştir | kaynağı değiştirdeğiştir | kaynağı değiştir
+983187747: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['2', '1']))
   Original: <color=#90EE90>{parsedPrestigeType}</color> Prestige Info:
-  Result: TOKNN_0TOKNN THNTHE TIKNN THNN ข้อมูลหลัก:
-3186346778: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
+  Result: FONT_0[[TOKEN_2]][[TOKEN_1]]). Prestige Info:
+3186346778: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got ['0', '2', '1']))
   Original: Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}
-  Result: TIKNTH TCOKNN 2TRIGNN/TRIKNN
-3760020920: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Current Prestige Level: [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]])
+3760020920: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Growth rate increase for expertise and legacies: <color=green>{gainPercentage}</color>
-  Result: อัตราการเติบโตเพิ่มขึ้นสําหรับผู้เชี่ยวชาญและนิติบัญญัติ : TOGN TOKNTHNN 2 TOKNKNN 2
-3017333247: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Uzmanlık ve legacies için büyüme oranı artışı: [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+3017333247: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Growth rate reduction for experience: <color=yellow>{reductionPercentage}</color>
-  Result: อัตราการเติบโตที่ลดลงสําหรับประสบการณ์:TOKN_0TOKN_2TOGNTHNN
-854889988: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
+  Result: Deneyim için büyüme oranı azaltımı: [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+854889988: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2']))
   Original: Growth rate reduction from <color=#90EE90>{parsedPrestigeType}</color> prestige level: <color=yellow>-{percentageReductionString}</color>
-  Result: อัตราการเติบโตลดลงจาก TOCKN_0TOKNN_4) TOKN_1 ระดับกิตติคุณ: TOGN TOGNN 2 2 2 2 2 2
-608840793: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Büyüme oranı azaltımı [[TOKEN_0]][[TOKEN_4]][[TOKEN_1]]) prestij seviyesi: [[TOKEN_2]]).
+608840793: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Stat bonuses improvement: <color=green>{statGainString}</color>
-  Result: TCOKN TOKNN 2TOGN THNN
-562341898: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
+  Result: Stat bonusları iyileştirme:ASI[[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+562341898: SKIPPED (token mismatch (expected ['0', '1', '2'], got ['0', '2', '1']))
   Original: Total change in growth rate including leveling prestige bonus: <color=yellow>{totalEffectString}</color>
-  Result: อัตราการเติบโตทั้งหมด รวมถึงโบนัสระดับชั้น: TOKN_0 TOKN TOKNN 2 TOKKNN
-1812818458: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got []))
+  Result: Üst düzey prestij bonusları da dahil olmak üzere büyüme oranında toplam değişim: [[TOKEN_0]][[TOKEN_2]][[TOKEN_1]]).
+1812818458: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['4', '9', '5', '6', '7']))
   Original: You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, experience from unit kills reduced by <color=red>{reductionPercentage}</color>.
-  Result: คุณได้รับการยกย่องในTOKN ExperienceTOKN_1TRIGNTRIGN2TIKN! TOKN_9 TOCKN TOGN TOGN TRIKNN ประสบการณ์จากหน่วยฆ่าลดลงโดย TRIKN TOKN 2.
-709298301: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14'], got []))
+  Result: Âyet-i İmrân'a yemin etmişsiniz. Tüm uzmanlık / hepatitler için büyüme oranları artıyordu.[[TOKEN_4]][[TOKEN_9]][[TOKEN_5]], üniteden gelen tecrübeler [[TOKEN_6]][[TOKEN_7]]).
+709298301: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14'], got ['10', '1', '2', '11', '3', '4', '12', '5', '6', '13', '7', '8', '14', '9']))
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>] prestiged successfully! Growth rate reduced by <color=red>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.
-  Result: TOKNNTOKNNTHN TOKNN THNTHETICKN เกียรตินิยมประสบความสําเร็จ! อัตราการเติบโตลดลงโดย TOKNTOKN_12 TOGNTHN TOGN_5 และค่าโบนัสตามสถิติที่ดีขึ้นโดย TIGNTIKN TIKNTHN7. อัตราการเติบโตที่เปลี่ยนไปทั้งหมด โบนัสระดับที่เพิ่มขึ้นคือ TakeN_8 Takeen_14 Takeen_9.
-1286090332: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got []))
+  Result: FOKENTO_0[[TOKEN_10]][[TOKEN_1]][[TOKEN_2]][[TOKEN_11]][[TOKEN_3]] Büyüme oranı, [[TOKEN_4]][[TOKEN_12]][[TOKEN_5]]) tarafından geliştirilmiş ve yasal bonuslar [[TOKEN_6]][[TOKEN_13]]KEN_[[TOKEN_7]]). In growth rate with leveling prestij bonus isETH[[TOKEN_8]][[TOKEN_14]][[TOKEN_9]]).
+1286090332: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '12', '1', '2', '13', '4', '4', '5']))
   Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
-  Result: คุณอยู่ในระดับ TOGNTOKNTHNNTOGNTHNGN222 TOKN_6 ความเหลื่อ TOGN TOGN TOGN TTOVN % TIGN in TINGN in TIVN 2 2
-3066749917: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0']))
+  Result: Sen seviyedir.[[TOKEN_0]][[TOKEN_12]][[TOKEN_1]][[TOKEN_2]][[TOKEN_13]][[TOKEN_4]][[TOKEN_4]][[TOKEN_5]]). KEN KEN KEN KEN KEN KEN 7 7 ! ! ! ! !
+3066749917: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['11', '1', '12', '2', '2', '3', '13', '4', '4', '14', '6', '7', '15']))
   Original: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)
-  Result: [[TOKEN_0]]TOKNN_11TOKNN_1bffsData.familyerbuffs.ContainsKey (fffifitions). Id) $ (TIVN*TOKNN สืบค้นเมื่อ 22 พฤษภาคม พ.ศ. TOKNN_9TOKNN THNTHN THNN
+  Result: FOKENTO_0[[TOKEN_11]][[TOKEN_1]] buffsData.FamiliarBuffs.ContainsKey(familiarar_11 Id) ? $ [[TOKEN_12]]*[[TOKEN_2]][[TOKEN_2]][[TOKEN_3]][[TOKEN_13]][[TOKEN_4]][[TOKEN_4]][[TOKEN_14]][[TOKEN_6]][[TOKEN_7]][[TOKEN_15]]TOKEN_TOKEN_ 10
 1465975319: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Reminders {(GetPlayerBool(steamId, REMINDERS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: เตือนความจํา
-1945389717: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
+  Result: Kur'ân'a andolsun.
+1945389717: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['6', '1', '7']))
   Original: <color=white>{sctType}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: TOKNN_0TIKNN 6 TOKNN_1 ม้วนข้อความ 2.
-2511919794: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], got []))
+  Result: FOKENTO_0[[TOKEN_6]][[TOKEN_1]]([[TOKEN_7]])
+2511919794: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], got ['5', '1', '6', '3', '3', '4']))
   Original: <color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color> {levelAndPrestiges}" : $" {levelAndPrestiges}")}
-  Result: TOKNN_0TOKNN THNTHE TIKNN THNNTIKNNTOKNNTCNN_3FEKNFFFIMBBFFSDATA. Familys.coffs.CNKE (FFEKEKNKEKEKEKEKEKEKKEKE. สืบค้นเมื่อ 27 พฤษภาคม พ.ศ.
+  Result: FONT_0[[TOKEN_5]][[TOKEN_1]][[TOKEN_6]][[TOKEN_3]][[TOKEN_3]] familiarBuffsData.FamiliarBuffs.ContainsKey(famKey)? $[[TOKEN_4]]
 508045935: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}!
-  Result: การกระทําที่น่าดึงดูด TOKN_4)!
+  Result: Duygu eylemleri / 4)
 52573990: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: ปัจจุบัน Taken_4.
+  Result: Uzmanlaşma Girişi şimdi FOKEN_4.
 1904876515: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: การค้นหาคือตอนนี้ TOKN_4).
-3706417587: SKIPPED (token mismatch (expected ['0', '1'], got []))
+  Result: Quest logu şu anda KEN_4'dür.
+3706417587: SKIPPED (token mismatch (expected ['0', '1'], got ['0']))
   Original: Invalid quest type '{questTypeName}'. Valid values are: {string.Join(", ", Enum.GetNames(typeof(QuestType)))}
-  Result: ชนิดของการค้นหาไม่ถูกต้อง ค่าที่ใช้ได้คือ: TOGN_1
+  Result: Invalid search type '[[TOKEN_0]]). Geçerli değerler şunlardır:ENKEN_1).
 1095669519: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: การบันทึกระดับ TOKN_4).
+  Result: Seviye Girişi / 4)
 3112026815: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: ปัจจุบัน Takeen_4).
+  Result: Meslek Girişi şimdi FOKEN_4.
 542066310: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: การคัดกรองเลือด TOKN_4).
-881612152: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
+  Result: Kan Mirası GirişTORAN_4).
+881612152: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '1']))
   Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
-  Result: Exo ฟอร์มการกระทํา (TOKN_ 0 taunt TOKNN_1 TOGN
-2978826451: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got []))
+  Result: Exo form emote action ([[TOKEN_0]])taunt[[TOKEN_1]]). KEN
+2978826451: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['11', '1', '12', '04', '2', '15', '3', '15', '04']))
   Original: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? "{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)
-  Result: TIGNTOKNTHNNTHNN2 22 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 22 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 TOKNN_9TOKNN THNTHN THNN
+  Result: FOKENTO_0[[TOKEN_11]][[TOKEN_1]] buffsData.FamiliarBuffs.ContainsKey (familiarId)?[[TOKEN_12]][[TOKEN_04]][[TOKEN_2]][[TOKEN_15]][[TOKEN_3]][[TOKEN_15]][[TOKEN_04]]10
