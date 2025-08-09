@@ -10,6 +10,7 @@ import sys
 from typing import List
 
 from argostranslate import translate as argos_translate
+from language_utils import contains_english
 
 RICHTEXT = re.compile(r'<[^>]+>')
 PLACEHOLDER = re.compile(r'\{[^{}]+\}')
@@ -19,8 +20,6 @@ TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
 # Matches stray TOKEN_n occurrences regardless of surrounding context
 TOKEN_WORD = re.compile(r'TOKEN_\s*(\d+)', re.I)
 TOKEN_SENTINEL = "[[TOKEN_SENTINEL]]"
-
-ENGLISH_WORDS = re.compile(r'\b(the|and|of|with|you|your|for|an)\b', re.I)
 
 
 def protect(text: str):
@@ -61,12 +60,6 @@ def normalize_tokens(text: str) -> str:
     tmp = TOKEN_RE.sub(store, text)
     tmp = tmp.replace("[", "").replace("]", "")
     return re.sub(r"@@(\d+)@@", restore, tmp)
-
-
-def contains_english(text: str) -> bool:
-    return bool(ENGLISH_WORDS.search(text))
-
-
 def translate_batch(
     translator,
     lines: List[str],

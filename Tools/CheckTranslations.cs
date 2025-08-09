@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -6,6 +7,7 @@ internal static class CheckTranslations
 {
     public static void Run(string rootPath, bool showText = false)
     {
+        englishStopWords = LoadStopWords(rootPath);
         string messagesDir = Path.Combine(rootPath, "Resources", "Localization", "Messages");
         string engPath = Path.Combine(messagesDir, "English.json");
         if (!File.Exists(engPath))
@@ -78,15 +80,35 @@ internal static class CheckTranslations
         public Dictionary<string, string> Messages { get; set; } = new();
     }
 
-    static readonly Regex EnglishWords = new(
-        @"\b(the|and|of|with|you|your|for|an)\b",
-        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    static HashSet<string> englishStopWords = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Load the English stop words file from the repository.
+    /// </summary>
+    /// <param name="rootPath">Root path of the repository.</param>
+    /// <returns>Set containing stop words for English detection.</returns>
+    static HashSet<string> LoadStopWords(string rootPath)
+    {
+        string path = Path.Combine(rootPath, "Tools", "english_stopwords.txt");
+        if (!File.Exists(path))
+            return new(StringComparer.OrdinalIgnoreCase);
+
+        return new HashSet<string>(
+            File.ReadAllLines(path).Where(l => !string.IsNullOrWhiteSpace(l)),
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Determines whether the provided text appears to be English by checking for common stop words.
+    /// </summary>
+    /// <param name="txt">Text to examine.</param>
+    /// <returns><see langword="true"/> if the text contains English stop words; otherwise, <see langword="false"/>.</returns>
     static bool LooksEnglish(string txt)
     {
         if (string.IsNullOrWhiteSpace(txt))
             return false;
 
-        return EnglishWords.IsMatch(txt);
+        var words = Regex.Matches(txt, "\\b\\w+\\b").Select(m => m.Value);
+        return words.Any(w => englishStopWords.Contains(w));
     }
 }

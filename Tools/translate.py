@@ -8,6 +8,7 @@ import sys
 from typing import List
 
 from argostranslate import translate as argos_translate
+from language_utils import contains_english
 
 print(
     "WARNING: Tools/translate.py is deprecated. Use Tools/translate_argos.py instead.",
@@ -18,8 +19,6 @@ RICHTEXT = re.compile(r'<[^>]+>')
 PLACEHOLDER = re.compile(r'\{[^{}]+\}')
 CSINTERP = re.compile(r'\$\{[^{}]+\}')
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
-
-ENGLISH_WORDS = re.compile(r'\b(the|and|of|with|you|your|for|an)\b', re.I)
 
 
 def protect(text: str):
@@ -40,10 +39,6 @@ def unprotect(text: str, tokens: List[str]) -> str:
         idx = int(m.group(1))
         return tokens[idx] if 0 <= idx < len(tokens) else m.group(0)
     return TOKEN_RE.sub(repl, text)
-
-
-def contains_english(text: str) -> bool:
-    return bool(ENGLISH_WORDS.search(text))
 
 
 def translate_batch(
