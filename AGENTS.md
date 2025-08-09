@@ -56,7 +56,7 @@ Current PRDs and task lists are stored in `.project-management/current-prd/`, wh
 4. Automatically translate missing strings with Argos:
    `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --verbose --log-file translate.log`
    `--verbose` and `--log-file` help pinpoint skipped or untranslated strings. `translate.py` still exists but prints a deprecation warning.
-5. The script hides `<...>` tags and `{...}` placeholders as `[[TOKEN_n]]` tokens. Lines consisting only of tokens are given a dummy `TRANSLATE` suffix so Argos will process them.
+5. The script hides `<...>` tags and `{...}` placeholders as `[[TOKEN_n]]` tokens. Lines consisting only of tokens are given a `[[TOKEN_SENTINEL]]` suffix so Argos will process them. The placeholder is stripped afterward and `fix_tokens.py` restores any altered tokens.
    **DO NOT** edit text inside these tokens, tags, or variables.
 6. After translation, run the checker to ensure nothing remains in English:
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations`
