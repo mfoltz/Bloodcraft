@@ -2,6 +2,7 @@
 """Translate message JSON files using the argostranslate Python API."""
 
 import argparse
+import csv
 import json
 import os
 import re
@@ -98,6 +99,10 @@ def main():
     ap.add_argument("--overwrite", action="store_true", help="Translate all messages even if already present")
     ap.add_argument("--verbose", action="store_true", help="Print per-message translation details")
     ap.add_argument("--log-file", help="Write verbose output to this file")
+    ap.add_argument(
+        "--report-file",
+        help="Write skipped hashes and reasons to this JSON or CSV file",
+    )
     args = ap.parse_args()
 
     argos_translate.load_installed_languages()
@@ -157,12 +162,14 @@ def main():
 
     translated: dict[str, str] = {}
     skipped: List[str] = []
+    report: list[dict[str, str]] = []
 
     def log_entry(key: str, original: str, result: str, reason: str | None = None) -> None:
         status = "SKIPPED" if reason else "TRANSLATED"
         msg = f"{key}: {status}"
         if reason:
             msg += f" ({reason})"
+            report.append({"hash": key, "english": original, "reason": reason})
         msg += f"\n  Original: {original}\n  Result: {result}"
         log_verbose(msg)
 
@@ -240,6 +247,19 @@ def main():
 
     if log_fp:
         log_fp.close()
+
+    if args.report_file:
+        ext = os.path.splitext(args.report_file)[1].lower()
+        with open(args.report_file, "w", encoding="utf-8", newline="") as fp:
+            if ext == ".json":
+                json.dump(report, fp, indent=2, ensure_ascii=False)
+            elif ext == ".csv":
+                writer = csv.DictWriter(fp, fieldnames=["hash", "english", "reason"])
+                writer.writeheader()
+                writer.writerows(report)
+            else:
+                raise RuntimeError("Report file must end with .json or .csv")
+        print(f"Wrote skip report to {args.report_file}")
 
     if skipped:
         print("Skipped the following message hashes due to repeated errors:")
