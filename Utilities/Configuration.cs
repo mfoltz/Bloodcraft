@@ -9,9 +9,10 @@ using Stunlock.Core;
 namespace Bloodcraft.Utilities;
 internal static class Configuration
 {
+    static PrefabCollectionSystem PrefabCollectionSystem => Core.SystemService.PrefabCollectionSystem;
     public static void GetExcludedFamiliars()
     {
-        List<PrefabGUID> unitBans = [..ParseIntegersFromString(ConfigService.BannedUnits).Select(unit => new PrefabGUID(unit))];
+        List<PrefabGUID> unitBans = ParsePrefabGuidsFromString(ConfigService.BannedUnits);
 
         foreach (PrefabGUID unit in unitBans)
         {
@@ -27,6 +28,65 @@ internal static class Configuration
                 FamiliarUnlockSystem.ConfiguredCategoryBans.Add(unitCategory);
             }
         }
+    }
+
+    public static List<PrefabGUID> ParsePrefabGuidsFromString(string configString)
+    {
+        if (string.IsNullOrWhiteSpace(configString))
+            return [];
+
+        List<PrefabGUID> result = [];
+
+        foreach (string part in configString.Split(','))
+        {
+            string token = part.Trim();
+            if (string.IsNullOrEmpty(token)) continue;
+
+            if (int.TryParse(token, out int hash))
+            {
+                result.Add(new PrefabGUID(hash));
+                continue;
+            }
+
+            PrefabGUID prefabGuid;
+            bool resolved = false;
+
+            if (PrefabCollectionSystem.SpawnableNameToPrefabGuidDictionary.TryGetValue(token, out prefabGuid))
+            {
+                result.Add(prefabGuid);
+                continue;
+            }
+
+            foreach (var kvp in PrefabCollectionSystem.SpawnableNameToPrefabGuidDictionary)
+            {
+                if (kvp.Key.Equals(token, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.Add(kvp.Value);
+                    resolved = true;
+                    break;
+                }
+            }
+
+            if (!resolved)
+            {
+                foreach (var kvp in LocalizationService.PrefabGuidNames)
+                {
+                    if (kvp.Value.Equals(token, StringComparison.OrdinalIgnoreCase))
+                    {
+                        result.Add(kvp.Key);
+                        resolved = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!resolved)
+            {
+                Core.Log.LogWarning($"Unable to resolve prefab GUID from '{token}'.");
+            }
+        }
+
+        return result;
     }
     public static List<int> ParseIntegersFromString(string configString)
     {
