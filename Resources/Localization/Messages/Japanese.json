@@ -1,7 +1,7 @@
 {
   "Messages": {
     "welcome": "ブラッドクラフトへようこそ",
-    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)",
+    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]が<color=white>{groupName}</color>に追加されました! (<color=yellow>{slotIndex}</color>)",
     "2761093386": "バトルグループ - {familiarReply}",
     "3158650477": "バトルグループに馴染みのない!",
     "4165788499": "ターゲットは、すべて殺され、それらを再発するチャンスを与えます! もしそうでなければ、あなたの{QuestTypeColor[questType]}をリロールするのは正しい考えではありません。",
@@ -271,8 +271,8 @@
     "167244174": "クラスが有効になっておらず、 呪文はシフトするように設定できません。",
     "3730830670": "シフトスロットは有効ではありません。",
     "349267262": "在庫が満たしたら、またはアクティブなクラスの呪文を変更したり、アクティブなクラスの呪文を切り替えるときに、少なくとも1つのスペースを必要としません。",
-    "4066899438": "Shift spell <color=green>enabled</color>!",
-    "2320898349": "Shift spell <color=red>disabled</color>!",
+    "4066899438": "シフトスペルが<color=green>有効</color>になりました!",
+    "2320898349": "シフトスペルが<color=red>無効</color>になりました!",
     "3756348742": "{(GetPlayerBool(steamId, REMINDERS_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}.",
     "1769980541": "テキストタイプをスクロールして bool キーが見つからなかった...",
     "4003734136": "<color=white>{sctType}</color> スクロールテキスト {(currentState ?)",
@@ -296,7 +296,24 @@
     "1443941563": "すべてのプレーヤーからプレステージバフを削除します。",
     "1465975319": "リマインダー {(GetPlayerBool(steamId, REMINDERS_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}.",
     "1286090332": "あなたは<color=red>{handler.GetBloodType()}</color>でレベル[<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>]、<color=yellow>{progress}</color> <color=#FFC0CB>エッセンス</color> (<color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color>)を持っています!",
-    "1095669519": "レベルのログは {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}。"
+    "1095669519": "レベルのログは {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}。",
+    "3591926048": "あなたの武器の熟練度は[<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>]で、<color=#c0c0c0>{weaponType}</color>の<color=yellow>{progress}</color> <color=#FFC0CB>熟練度</color>（<color=white>{GetLevelProgress(steamId, handler)}%</color>）を持っています!",
+    "2008856310": "無効な武器の選択です。有効なオプションを見るには'<color=white>.wep lst</color>'を使用してください。",
+    "3254231727": "あなたは<color=red>{handler.GetBloodType()}</color>でレベル[<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>]、<color=yellow>{progress}</color> <color=#FFC0CB>エッセンス</color>（<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>）を持っています!",
+    "2785130336": "<color=red>{finalBloodType}</color>に<color=#00FFFF>{finalBloodStat}</color>を選択しました!",
+    "2191580006": "{vBloodPrefabGuid.GetPrefabName()}には<color=#ffd9eb>{exoItem.GetLocalizedName()}</color>x<color=white>{factoredCost}</color>が足りません!",
+    "2051256929": "<color=green>休息</color>による<color=#FFC0CB>経験値</color>ボーナスが<color=#FFD700>{roundedXP}</color>残っています~",
+    "3399068440": "<color=white>倒したVBlood</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>倒したユニット</color>: <color=#FFD700>{UnitKills}</color> | <color=white>死亡数</color>: <color=#808080>{Deaths}</color> | <color=white>オンライン時間</color>: <color=#1E90FF>{OnlineTime}</color>hr | <color=white>移動距離</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>消費した血液</color>: <color=red>{LitresBloodConsumed}</color>L",
+    "3066749917": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]が<color=white>{groupName}</color>に追加されました! (<color=yellow>{slotIndex}</color>)",
+    "1945389717": "<color=white>{sctType}</color>のスクロールテキストは{(currentState ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}です。",
+    "2511919794": "<color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? \"{colorCode}*</color> {levelAndPrestiges}\" : \" {levelAndPrestiges}\")}",
+    "508045935": "エモートアクションは{(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}です!",
+    "52573990": "熟練度ログは現在{(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}です。",
+    "1904876515": "クエストログは現在{(GetPlayerBool(steamId, QUEST_LOG_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}です。",
+    "3706417587": "無効なクエストタイプ '{questTypeName}' です。有効な値: {string.Join(\", \", Enum.GetNames(typeof(QuestType)))}",
+    "3112026815": "職業ログは現在{(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}です。",
+    "542066310": "血のレガシーログは{(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}です。",
+    "881612152": "エクソフォームのエモートアクション（<color=white>挑発</color>）は{(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}です。"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"
