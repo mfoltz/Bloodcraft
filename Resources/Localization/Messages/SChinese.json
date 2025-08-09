@@ -9,7 +9,7 @@
     "3782703317": "最接近的<color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>是<color=#00FFFF>{(int)distance}</color>f 离{cardinalDirection}<color=#F88380>{(int)seconds}</color>远一点。",
     "1420278477": "追踪只能用于不完全的寻杀行动。",
     "3308780183": "最接近<color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>是<color=#00FFFF>{(int)distance}</color> f 离{cardinalDirection}远!",
-    "465036552": "{QuestTypeColor[questType]}: <color=green>{questObjective.Objective.Goal}</color> <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>x<color=#FFC0CB>{questObjective.Objective.RequiredAmount}</color> [<color=white>{questObjective.Progress}</color>/<color=yellow>{questObjective.Objective.RequiredAmount}</color>]",
+    "465036552": "{QuestTypeColor[questType]}：<color=green>{questObjective.Objective.Goal}</color> <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>x<color=#FFC0CB>{questObjective.Objective.RequiredAmount}</color> [<color=white>{questObjective.Progress}</color>/<color=yellow>{questObjective.Objective.RequiredAmount}</color>]",
     "860647533": "直到{questType}重置 - <color=yellow> {timeLeft} </color> {_questTargetType[questObjective.Objective.Goal]} 预发:<color=white>{questObjective.Objective.Target.GetPrefabName()}</color>",
     "1707710671": "你已经完成了你的{QuestTypeColor[questType]}! 直到{questType}重置的时间 - <color=yellow>{timeLeft}</color>",
     "319696654": "你没有{QuestTypeColor[questType]}。",
@@ -301,7 +301,7 @@
     "2480816305": "<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> 专精已设为[<color=white>{level}</color>]，对象为 <color=green>{playerInfo.User.CharacterName.Value}</color>",
     "3761416018": "第一个徒手槽已设置为<color=white>{new PrefabGUID(ability).GetPrefabName()}</color>，适用于<color=green>{playerInfo.User.CharacterName.Value}</color>。",
     "1826355702": "第二个徒手槽已设置为<color=white>{new PrefabGUID(ability).GetPrefabName()}</color>，适用于<color=green>{playerInfo.User.CharacterName.Value}</color>。",
-    "1716911803": "<color=white>{box}</color>:",
+    "1716911803": "<color=white>{box}</color>：",
     "2001389111": "法术无效，使用 <color=white>'.class lsp'</color> 查看选项。",
     "4140406916": "你还没有选择职业，请使用 <color=white>'.class s [Class]'</color>。",
     "3399068440": "<color=white>被击杀的VBloods</color>：<color=#FF5733>{VBloodKills}</color> | <color=white>击杀单位</color>：<color=#FFD700>{UnitKills}</color> | <color=white>死亡次数</color>：<color=#808080>{Deaths}</color> | <color=white>在线时间</color>：<color=#1E90FF>{OnlineTime}</color>小时 | <color=white>行走距离</color>：<color=#32CD32>{DistanceTraveled}</color>千米 | <color=white>消耗血量</color>：<color=red>{LitresBloodConsumed}</color>L",
@@ -314,8 +314,5 @@
     "3112026815": "职业记录现在{(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}。",
     "542066310": "血统记录{(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}。",
     "881612152": "Exo形态表情动作（<color=white>嘲讽</color>）{(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}"
-  },
-  "_meta": {
-    "1716911803": "Intentionally identical to English; dynamic placeholder"
   }
 }
