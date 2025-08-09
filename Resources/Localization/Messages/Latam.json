@@ -76,7 +76,7 @@
     "947905559": "Las tablas no están habilitadas.",
     "1182925736": "Ningún jugador ha prestigio en <color=#90EE90> {parsedPrestigeType} </color> todavía!",
     "1687700552": "Debes consumir al menos una esencia primordial...",
-    "1763729577": "Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}",
+    "1763729577": "Acción de gesto de forma Exo (<color=white>burla</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>habilitada</color>\" : \"<color=red>deshabilitada</color>\")}",
     "1711247206": "Aún no eres digno...",
     "3882215894": "¡Invalid shapehift! Opciones válidas: {shapeshifts}",
     "1884272339": "Debes consumir la esencia de Drácula antes de manifestar su forma...",
@@ -312,10 +312,13 @@
     "1095669519": "Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}.",
     "3112026815": "Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}.",
     "542066310": "Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}.",
-    "881612152": "Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}",
+    "881612152": "Acción de gesto de forma Exo (<color=white>burla</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>habilitada</color>\" : \"<color=red>deshabilitada</color>\")}",
     "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)"
   },
   "_meta": {
-    "1716911803": "Intentionally identical to English; dynamic placeholder"
+    "1716911803": "Intentionally identical to English; dynamic placeholder",
+    "465036552": "Intentionally identical to English; placeholders only",
+    "1106946472": "Intentionally identical to English; placeholder only",
+    "3320998835": "Intentionally identical to English; placeholder only"
   }
 }
