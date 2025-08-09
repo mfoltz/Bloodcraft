@@ -14,8 +14,8 @@ PLACEHOLDER = re.compile(r'\{[^{}]+\}')
 CSINTERP = re.compile(r'\$\{[^{}]+\}')
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
 TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
-# Matches stray TOKEN_n occurrences without surrounding brackets
-TOKEN_WORD = re.compile(r'(?<!\[)TOKEN_\s*(\d+)', re.I)
+# Matches stray TOKEN_n occurrences regardless of surrounding context
+TOKEN_WORD = re.compile(r'TOKEN_\s*(\d+)', re.I)
 
 ENGLISH_WORDS = re.compile(r'\b(the|and|of|with|you|your|for|an)\b', re.I)
 
@@ -44,6 +44,7 @@ def normalize_tokens(text: str) -> str:
     """Normalize token formatting in Argos output."""
     text = TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
     text = TOKEN_WORD.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
+    text = re.sub(r"\]\s+\[\[", "][[", text)
 
     placeholders: List[str] = []
 
@@ -96,7 +97,8 @@ def translate_batch(
 
 def main():
     ap = argparse.ArgumentParser(
-        description="Translate message JSON files with Argos Translate"
+        description="Translate message JSON files with Argos Translate",
+        epilog="Reassemble and install the Argos model before running this script.",
     )
     ap.add_argument("target_file", help="Path to the target language JSON file")
     ap.add_argument("--from", dest="src", default="en", help="Source language code (default: en)")
@@ -200,8 +202,11 @@ def main():
                 skipped.append(key)
                 continue
 
-            if len(TOKEN_RE.findall(result)) != len(tokens):
-                log_entry(key, english[key], result, "token mismatch")
+            found_tokens = TOKEN_RE.findall(result)
+            expected = [str(i) for i in range(len(tokens))]
+            if found_tokens != expected:
+                reason = f"token mismatch (expected {expected}, got {found_tokens})"
+                log_entry(key, english[key], result, reason)
                 skipped.append(key)
                 continue
             un = unprotect(result, tokens)
