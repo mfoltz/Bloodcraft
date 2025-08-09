@@ -203,11 +203,15 @@ def main():
 
             found_tokens = TOKEN_RE.findall(result)
             expected = [str(i) for i in range(len(tokens))]
-            if found_tokens != expected:
+            if set(found_tokens) != set(expected):
                 reason = f"token mismatch (expected {expected}, got {found_tokens})"
                 log_entry(key, english[key], result, reason)
                 skipped.append(key)
                 continue
+            if found_tokens != expected:
+                log_verbose(
+                    f"WARNING {key}: token order differs (expected {expected}, got {found_tokens})"
+                )
             un = unprotect(result, tokens)
             un = un.replace("\\u003C", "<").replace("\\u003E", ">")
             if un == english[key] or contains_english(un):
