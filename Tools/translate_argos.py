@@ -5,6 +5,8 @@ import argparse
 import json
 import os
 import re
+import subprocess
+import sys
 from typing import List
 
 from argostranslate import translate as argos_translate
@@ -16,6 +18,7 @@ TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
 TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
 # Matches stray TOKEN_n occurrences regardless of surrounding context
 TOKEN_WORD = re.compile(r'TOKEN_\s*(\d+)', re.I)
+TOKEN_SENTINEL = "[[TOKEN_SENTINEL]]"
 
 ENGLISH_WORDS = re.compile(r'\b(the|and|of|with|you|your|for|an)\b', re.I)
 
@@ -154,7 +157,7 @@ def main():
         safe, tokens = protect(text)
         token_only = TOKEN_RE.sub("", safe).strip() == ""
         if token_only:
-            safe += " TRANSLATE"
+            safe += f" {TOKEN_SENTINEL}"
         safe_lines.append(safe)
         tokens_list.append((tokens, token_only))
         keys.append(key)
@@ -193,7 +196,11 @@ def main():
             batch_keys, batch_results, batch_tokens
         ):
             if token_only:
-                result = result.replace(" TRANSLATE", "")
+                if TOKEN_SENTINEL not in result:
+                    log_entry(key, english[key], result, "sentinel missing")
+                    skipped.append(key)
+                    continue
+                result = result.replace(f" {TOKEN_SENTINEL}", "").replace(TOKEN_SENTINEL, "")
             result = normalize_tokens(result)
 
             stripped = TOKEN_RE.sub("", result)
@@ -222,6 +229,16 @@ def main():
     target["Messages"] = messages
     with open(target_path, "w", encoding="utf-8") as f:
         json.dump(target, f, indent=2, ensure_ascii=False)
+
+    subprocess.run(
+        [
+            sys.executable,
+            os.path.join(os.path.dirname(__file__), "fix_tokens.py"),
+            "--root",
+            root,
+        ],
+        check=True,
+    )
 
     print(f"Wrote translations to {target_path}")
 
