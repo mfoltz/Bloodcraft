@@ -41,26 +41,24 @@ Current PRDs and task lists are stored in `.project-management/current-prd/`, wh
 
 ### Translation Workflow
 
-1. Run the generator to refresh `English.json`:
+1. **Refresh the English source.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
-2. Copy `English.json` to `<Language>.json` and translate each value while keeping numeric hashes.
-3. Reassemble and install the Argos model before running translation scripts.
-   For each language directory under `Resources/Localization/Models` run:
-   ```bash
-   cd Resources/Localization/Models/<LANG>
-   cat translate-*.z[0-9][0-9] translate-*.zip > model.zip
-   unzip -o model.zip
-   argos-translate install translate-*.argosmodel
-   ```
-   Translation scripts require the model to be installed beforehand.
-4. Automatically translate missing strings with Argos:
+2. **Propagate new hashes.** Copy the refreshed `English.json` entries into each `Resources/Localization/Messages/<Language>.json` while preserving numeric hashes.
+3. **Translate missing entries.**
    `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --verbose --log-file translate.log --report-file skipped.csv`
-   `--verbose`, `--log-file`, and `--report-file` help pinpoint skipped or untranslated strings. The report lists skipped hashes, reasons, and the original English for manual follow-up. `translate.py` still exists but prints a deprecation warning.
-5. The script hides `<...>` tags and `{...}` placeholders as `[[TOKEN_n]]` tokens. Tokens must be preserved but may be reordered if grammar requires; the script will warn when order differs. Lines consisting only of tokens are given a `[[TOKEN_SENTINEL]]` suffix so Argos will process them. The placeholder is stripped afterward and `fix_tokens.py` restores any altered tokens.
-   **DO NOT** edit text inside these tokens, tags, or variables.
-6. After translation, review `skipped.csv` for any hashes requiring manual work, then run the checker to ensure nothing remains in English:
-   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations`
-   Use `--show-text` to also print the English string and existing translation alongside each hash.
+   `--verbose`, `--log-file`, and `--report-file` help pinpoint skipped or untranslated strings. Any hashes listed in `skipped.csv` must be manually translated and the script re‑run to confirm they are handled.
+4. **Verify translations.**
+   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text`
+   This ensures every hash is present and no English text remains.
+
+Before translating, reassemble and install the Argos model for each language under `Resources/Localization/Models`:
+```bash
+cd Resources/Localization/Models/<LANG>
+cat translate-*.z[0-9][0-9] translate-*.zip > model.zip
+unzip -o model.zip
+argos-translate install translate-*.argosmodel
+```
+The translation script hides `<...>` tags and `{...}` placeholders as `[[TOKEN_n]]` tokens. Tokens must be preserved but may be reordered if grammar requires; the script warns when order differs. Lines consisting only of tokens are given a `[[TOKEN_SENTINEL]]` suffix so Argos will process them. `fix_tokens.py` restores any altered tokens afterward. **DO NOT** edit text inside these tokens, tags, or variables.
 
 ---
 

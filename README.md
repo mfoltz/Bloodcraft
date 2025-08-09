@@ -796,6 +796,16 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 
 ### Translation Workflow
 
+1. **Refresh the English source.**
+   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
+2. **Propagate new hashes.** Copy the refreshed `English.json` entries into each `Resources/Localization/Messages/<Language>.json` while keeping numeric hashes intact.
+3. **Translate missing entries.**
+   `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --verbose --log-file translate.log --report-file skipped.csv`
+   Any hashes listed in `skipped.csv` must be manually translated and the script re-run to confirm they are handled.
+4. **Verify translations.**
+   `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text`
+   This command confirms every hash exists and no English text remains.
+
 `Resources/Localization/Messages/Models` contains a split Argos English→Spanish model (`translate-en_es-1_0.z01`–`translate-en_es-1_0.z04`). Combine the parts and install the model before running any translation scripts:
 
 ```bash
@@ -806,8 +816,7 @@ argos-translate install translate-en_es-1_0.argosmodel
 rm translate-en_es-1_0.zip translate-en_es-1_0.argosmodel
 ```
 
-Use `Tools/translate_argos.py` to generate missing strings. The script uses the `argostranslate` Python API and protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Tokens must be preserved, but they may be reordered when grammar requires; the script will log a warning if their order changes. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. Pass `--verbose` to display each entry as it is processed, `--log-file` to keep a record, and `--report-file skipped.csv` (or `.json`) to capture skipped hashes with reasons and the original English text for manual follow‑up. After translating, run `check-translations --show-text` to pinpoint any skipped or untranslated strings. See `AGENTS.md` for the full workflow.
-`translate_argos.py` accepts `--batch-size`, `--max-retries`, and `--timeout` options. It processes strings in batches and retries failures up to the specified limit. Re-run it on a clean copy of `Spanish.json` to restart translations from scratch. `Tools/translate.py` remains for backward compatibility but will print a deprecation warning.
+`Tools/translate_argos.py` uses the `argostranslate` Python API and protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Tokens must be preserved, but they may be reordered when grammar requires; the script logs a warning if their order changes. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. Pass `--verbose` to display each entry as it is processed, `--log-file` to keep a record, and `--report-file skipped.csv` (or `.json`) to capture skipped hashes with reasons and the original English text for manual follow-up. `translate_argos.py` accepts `--batch-size`, `--max-retries`, and `--timeout` options. Re-run it on a clean copy of `Spanish.json` to restart translations from scratch. `Tools/translate.py` remains for backward compatibility but prints a deprecation warning.
 
 Run `Tools/fix_tokens.py` after translating to restore `<...>` tags and `{...}` placeholders if any `[[TOKEN_n]]` markers remain. Use `--check-only` to report discrepancies without modifying files.
 
