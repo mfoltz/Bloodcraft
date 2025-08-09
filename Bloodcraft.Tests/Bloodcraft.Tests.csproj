@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
-
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -21,11 +20,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\Utilities\LocalizationHelpers.cs" Link="LocalizationHelpers.cs" />
+    <Compile Include="..\Utilities\Configuration.cs" Link="Configuration.cs" />
   </ItemGroup>
 
 </Project>

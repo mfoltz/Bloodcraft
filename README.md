@@ -628,7 +628,7 @@ Run `.codex/install.sh` once to install the .NET SDK and Argos Translate depende
 - **Allow Minions**: `AllowMinions` (bool, default: False)
   Allow Minions to be unlocked as familiars (leaving these excluded by default since some have undesirable behaviour and I am not sifting through them all to correct that, enable at own risk).
 - **Banned Units**: `BannedUnits` (string, default: "")
-  The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs.
+  Comma-separated Prefab GUID hashes or prefab names for units that cannot be used as familiars (e.g., `123456`, `CHAR_Vampire_Dracula_VBlood`).
 - **Banned Types**: `BannedTypes` (string, default: "")
   The types of units that cannot be used as familiars go here (Human, Undead, Demon, Mechanical, Beast).
 - **Unit Familiar Multiplier**: `UnitFamiliarMultiplier` (float, default: 7.5)
