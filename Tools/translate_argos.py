@@ -68,21 +68,13 @@ def contains_english(text: str) -> bool:
 
 
 def translate_batch(
-    src: str,
-    dst: str,
+    translator,
     lines: List[str],
     *,
     max_retries: int,
     timeout: int,
 ) -> List[str]:
     """Translate a list of lines using argostranslate."""
-    argos_translate.load_installed_languages()
-    translator = argos_translate.get_translation_from_codes(src, dst)
-    if translator is None:
-        raise RuntimeError(
-            f"No Argos translation model for {src}->{dst}. "
-            "Assemble or install the model, or run `.codex/install.sh`."
-        )
     results: List[str] = []
     for line in lines:
         for attempt in range(1, max_retries + 1):
@@ -114,6 +106,14 @@ def main():
     ap.add_argument("--verbose", action="store_true", help="Print per-message translation details")
     ap.add_argument("--log-file", help="Write verbose output to this file")
     args = ap.parse_args()
+
+    argos_translate.load_installed_languages()
+    translator = argos_translate.get_translation_from_codes(args.src, args.dst)
+    if translator is None:
+        raise RuntimeError(
+            f"No Argos translation model for {args.src}->{args.dst}. "
+            "Assemble or install the model, or run `.codex/install.sh`."
+        )
 
     log_fp = open(args.log_file, "w", encoding="utf-8") if args.log_file else None
 
@@ -179,8 +179,7 @@ def main():
         batch_tokens = tokens_list[i : i + args.batch_size]
         try:
             batch_results = translate_batch(
-                args.src,
-                args.dst,
+                translator,
                 batch_lines,
                 max_retries=args.max_retries,
                 timeout=args.timeout,
