@@ -1,23 +1,25 @@
 ## Table of Contents
 
 - [Eclipse](https://new.thunderstore.io/c/v-rising/p/zfolmt/Eclipse/) <--- **RECOMMENDED**
-- [Sponsors](#sponsors)
-- [Features](#features)
+- [Support Development](#support-development)
+- [Feature Summary](#feature-summary)
 - [Commands](#commands)
-- [Recipe Changes](#recipe-changes)
-- [Bleeding Edge](#bleeding-edge)
 - [Configuration](#configuration)
+- [Extra Recipes](#extra-recipes)
+- [Bleeding Edge](#bleeding-edge)
 - [Recommended Mods](#recommended-mods)
 
-## Sponsor this project
+## Support Development
 
 [![patreon](https://i.imgur.com/u6aAqeL.png)](https://www.patreon.com/join/4865914)  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfolmt)
 
-## Sponsors
+### Sponsors
 
 Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; Imperivm Draconis; Geoffrey D.; SirSaia; Robin C.; Colin F.; Jade K.; Jorge L.; Adrian L.;
 
-## Features
+---
+
+## Feature Summary
 
 ### Experience Leveling
 - Gain experience and level up, primarily from slaying enemies.
@@ -103,6 +105,9 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### Endgame Extras (section WIP)
 - Elite Primal Rifts automatically start Primal War events at the rate set by `PrimalRiftFrequency` when `ElitePrimalRifts` are enabled.
 - Elite Shard Bearers increases the challenge of shard bearers significantly when `EliteShardBearers` is enabled, and their levels can be uniformly set via `ShardBearerLevel`.
+
+<details>
+<summary><strong>Commands</strong></summary>
 
 ## Commands
 
@@ -385,6 +390,10 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).
   - Shortcut: *.wep spell [Name] [Slot] [PrefabGuid] [Radius]*
 
+</details>
+
+<details>
+<summary><strong>Configuration</strong></summary>
 
 ## Configuration
 
@@ -708,7 +717,9 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Death Mage Spells**: `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
   Death Mage shift spells, granted at levels of prestige.
 
-## Recipe Changes
+</details>
+
+## Extra Recipes
 
 ### Salvageable
 - **EMPs** (20s)
