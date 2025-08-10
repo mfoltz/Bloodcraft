@@ -20,7 +20,7 @@ internal static class GenerateREADME
         new("\\b(?<key>\\w+)\\s*:\\s*(?<value>\\\"[^\\\"]*\\\"|[^,\\)\\r\\n]+)",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    const string COMMANDS_HEADER = "## Commands";
+    const string COMMANDS_HEADER = "## Chat Commands";
     const string CONFIG_HEADER = "## Configuration";
 
     static readonly Dictionary<(string groupName, string groupShort), List<(string name, string shortHand, bool adminOnly, string usage, string description)>> _commandsByGroup
