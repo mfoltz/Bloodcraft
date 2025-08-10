@@ -2,7 +2,7 @@
 
 - [Eclipse](https://new.thunderstore.io/c/v-rising/p/zfolmt/Eclipse/) <--- **RECOMMENDED**
 - [Support Development](#support-development)
-- [Feature Summary](#feature-summary)
+- [Feature Overview](#feature-overview)
 - [Commands](#commands)
 - [Configuration](#configuration)
 - [Extra Recipes](#extra-recipes)
@@ -17,7 +17,12 @@
 
 Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; Imperivm Draconis; Geoffrey D.; SirSaia; Robin C.; Colin F.; Jade K.; Jorge L.; Adrian L.;
 
-## Feature Summary
+---
+
+<details>
+<summary><strong>Features</strong></summary>
+
+## Feature Overview
 
 ### Experience Leveling
 - Gain experience and level up, primarily from slaying enemies.
@@ -103,6 +108,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### Endgame Extras (section WIP)
 - Elite Primal Rifts automatically start Primal War events at the rate set by `PrimalRiftFrequency` when `ElitePrimalRifts` are enabled.
 - Elite Shard Bearers increases the challenge of shard bearers significantly when `EliteShardBearers` is enabled, and their levels can be uniformly set via `ShardBearerLevel`.
+
+</details>
 
 <details>
 <summary><strong>Commands</strong></summary>
