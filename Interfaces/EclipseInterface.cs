@@ -63,7 +63,7 @@ internal class VersionHandler_1_3 : IVersionHandler<ProgressDataV1_3>
         string message = BuildConfigMessage();
         string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMAC(message)}";
 
-        LocalizationService.HandleServerReply(Core.EntityManager, user, messageWithMAC);
+        LocalizationService.Reply(Core.EntityManager, user, messageWithMAC);
     }
     public void SendClientProgress(Entity playerCharacter, ulong steamId)
     {
@@ -85,7 +85,7 @@ internal class VersionHandler_1_3 : IVersionHandler<ProgressDataV1_3>
         string message = BuildProgressMessage(data);
         string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMAC(message)}";
 
-        LocalizationService.HandleServerReply(Core.EntityManager, user, messageWithMAC);
+        LocalizationService.Reply(Core.EntityManager, user, messageWithMAC);
     }
     public string BuildConfigMessage()
     {

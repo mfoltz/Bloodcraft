@@ -239,7 +239,7 @@ internal static class FamiliarBindingSystem
                 else
                 {
                     familiar.Destroy();
-                    LocalizationService.HandleServerReply(EntityManager, user, $"Binding failed...");
+                    LocalizationService.Reply(EntityManager, user, "Binding failed...");
 
                     return false;
                 }
@@ -793,8 +793,14 @@ internal static class FamiliarBindingSystem
                 }
             }
             
-            string message = isShiny ? $"<color=green>{familiarId.GetLocalizedName()}</color>{colorCode}*</color> <color=#00FFFF>bound</color>!" : $"<color=green>{familiarId.GetLocalizedName()}</color> <color=#00FFFF>bound</color>!";
-            LocalizationService.HandleServerReply(EntityManager, user, message);
+            if (isShiny)
+            {
+                LocalizationService.Reply(EntityManager, user, "<color=green>{0}</color>{1}*</color> <color=#00FFFF>bound</color>!", familiarId.GetLocalizedName(), colorCode);
+            }
+            else
+            {
+                LocalizationService.Reply(EntityManager, user, "<color=green>{0}</color> <color=#00FFFF>bound</color>!", familiarId.GetLocalizedName());
+            }
         }
     }
     static void HandleResistanceBuffForShiny(Entity familiar)

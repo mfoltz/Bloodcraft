@@ -326,8 +326,9 @@ internal static class WeaponSystem
 
         if (GetPlayerBool(steamId, WEAPON_LOG_KEY))
         {
-            LocalizationService.HandleServerReply(EntityManager, user,
-                $"+<color=yellow>{gainedIntXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
+            LocalizationService.Reply(EntityManager, user,
+                "+<color=yellow>{0}</color> <color=#c0c0c0>{1}</color> <color=#FFC0CB>expertise</color> (<color=white>{2}%</color>)",
+                gainedIntXP, weaponType.ToString().ToLower(), levelProgress);
         }
 
         if (GetPlayerBool(steamId, SCT_PLAYER_WEP_KEY))
@@ -340,8 +341,9 @@ internal static class WeaponSystem
     {
         if (newLevel <= _maxExpertiseLevel)
         {
-            LocalizationService.HandleServerReply(EntityManager, user,
-                $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]!");
+            LocalizationService.Reply(EntityManager, user,
+                "<color=#c0c0c0>{0}</color> improved to [<color=white>{1}</color>]!",
+                weaponType, newLevel);
         }
 
         if (GetPlayerBool(steamID, REMINDERS_KEY))
@@ -354,8 +356,9 @@ internal static class WeaponSystem
                     int choicesLeft = _expertiseStatChoices - currentStatCount;
                     string bonusString = choicesLeft > 1 ? "bonuses" : "bonus";
 
-                    LocalizationService.HandleServerReply(EntityManager, user,
-                        $"{choicesLeft} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=#c0c0c0>{weaponType.ToString().ToLower()}</color>; use '<color=white>.wep cst {weaponType} [Stat]</color>' to choose and '<color=white>.wep lst'</color> to view expertise stat options. (toggle reminders with <color=white>'.misc remindme'</color>)");
+                    LocalizationService.Reply(EntityManager, user,
+                        "{0} <color=white>stat</color> <color=#00FFFF>{1}</color> available for <color=#c0c0c0>{2}</color>; use '<color=white>.wep cst {3} [Stat]</color>' to choose and '<color=white>.wep lst'</color> to view expertise stat options. (toggle reminders with <color=white>'.misc remindme'</color>)",
+                        choicesLeft, bonusString, weaponType.ToString().ToLower(), weaponType);
                 }
             }
         }

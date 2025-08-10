@@ -112,7 +112,7 @@ internal static class Shapeshifts
     {
         string timeRemaining = GetTimeUntilCharged(steamId, value);
 
-        if (!string.IsNullOrEmpty(timeRemaining)) LocalizationService.HandleServerReply(EntityManager, user, $"Not enough energy to maintain form... (<color=yellow>{timeRemaining}</color>)");
+        if (!string.IsNullOrEmpty(timeRemaining)) LocalizationService.Reply(EntityManager, user, "Not enough energy to maintain form... (<color=yellow>{0}</color>)", timeRemaining);
     }
     static string GetTimeUntilCharged(ulong steamId, float value)
     {

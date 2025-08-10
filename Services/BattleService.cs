@@ -550,19 +550,19 @@ internal class BattleService
     {
         if (playerOne.TryGetPlayerInfo(out PlayerInfo playerInfo))
         {
-            LocalizationService.HandleServerReply(EntityManager, playerInfo.User, message);
+            LocalizationService.Reply(EntityManager, playerInfo.User, message);
         }
 
         if (playerTwo.TryGetPlayerInfo(out playerInfo))
         {
-            LocalizationService.HandleServerReply(EntityManager, playerInfo.User, message);
+            LocalizationService.Reply(EntityManager, playerInfo.User, message);
         }
     }
     static void NotifyPlayer(ulong steamId, string message)
     {
         if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.User.IsConnected)
         {
-            LocalizationService.HandleServerReply(EntityManager, playerInfo.User, message);
+            LocalizationService.Reply(EntityManager, playerInfo.User, message);
         }
     }
     static void GenerateBattleFormations(float3 battleCenter)

@@ -330,13 +330,13 @@ internal static class ProfessionSystem
         if (leveledUp)
         {
             int newLevel = ConvertXpToLevel(handler.GetProfessionData(steamID).Value);
-            if (newLevel < MAX_PROFESSION_LEVEL) LocalizationService.HandleServerReply(EntityManager, user, $"{professionName} improved to [<color=white>{newLevel}</color>]");
+            if (newLevel < MAX_PROFESSION_LEVEL) LocalizationService.Reply(EntityManager, user, "{0} improved to [<color=white>{1}</color>]", professionName, newLevel);
         }
 
         if (GetPlayerBool(steamID, PROFESSION_LOG_KEY))
         {
             int levelProgress = GetLevelProgress(steamID, handler);
-            LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{(int)gainedXP}</color> <color=#FFC0CB>proficiency</color> in {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
+            LocalizationService.Reply(EntityManager, user, "+<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>)", (int)gainedXP, professionName.ToLower(), levelProgress);
         }
 
         if (GetPlayerBool(steamID, SCT_PROFESSIONS_KEY))
@@ -388,7 +388,7 @@ internal static class ProfessionSystem
     }
     static void HandleExperienceAndBonusYield(User user, Entity userEntity, Entity playerCharacter, Entity target, PrefabGUID resource, string professionName, float bonusYield, bool professionLogging, bool sctYield, ref float delay)
     {
-        if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>{resource.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {professionName}");
+        if (professionLogging) LocalizationService.Reply(EntityManager, user, "<color=green>{0}</color>x<color=white>{1}</color> received from {2}", resource.GetLocalizedName(), bonusYield, professionName);
         if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, ref delay);
     }
     static int GoldOreRoll(int level)
@@ -415,13 +415,13 @@ internal static class ProfessionSystem
     {
         if (ServerGameManager.TryAddInventoryItem(playerCharacter, _goldOre, goldOre))
         {
-            if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Gold Ore</color>x<color=white>{goldOre}</color> received from {professionName}");
+            if (professionLogging) LocalizationService.Reply(EntityManager, user, "<color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}", goldOre, professionName);
             if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _goldOreColor, goldOre, ref delay);
         }
         else
         {
             InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, _goldOre, goldOre, new Entity());
-            if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Gold Ore</color>x<color=white>{goldOre}</color> received from {professionName}, but it dropped on the ground since your inventory is full.");
+            if (professionLogging) LocalizationService.Reply(EntityManager, user, "<color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.", goldOre, professionName);
             if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _goldOreColor, goldOre, ref delay);
         }
     }
@@ -449,14 +449,14 @@ internal static class ProfessionSystem
     {
         if (ServerGameManager.TryAddInventoryItem(playerCharacter, _radiantFibre, amount))
         {
-            if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Gold Ore</color>x<color=white>{amount}</color> received from {professionName}");
+            if (professionLogging) LocalizationService.Reply(EntityManager, user, "<color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}", amount, professionName);
             if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _radiantFiberColor, amount, ref delay);
         }
         else
         {
             InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, _radiantFibre, amount, new Entity());
 
-            if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Gold Ore</color>x<color=white>{amount}</color> received from {professionName}, but it dropped on the ground since your inventory is full.");
+            if (professionLogging) LocalizationService.Reply(EntityManager, user, "<color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.", amount, professionName);
             if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _radiantFiberColor, amount, ref delay);
         }
     }
@@ -510,11 +510,11 @@ internal static class ProfessionSystem
             {
                 if (!fellOnGround)
                 {
-                    LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Bonus Seed(s)</color>x<color=white>{quantity}</color> received from {professionName}!");
+                    LocalizationService.Reply(EntityManager, user, "<color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}!", quantity, professionName);
                 }
                 else
                 {
-                    LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Bonus Seed(s)</color>x<color=white>{quantity}</color> received from {professionName}, but some fell on the ground since your inventory is full.");
+                    LocalizationService.Reply(EntityManager, user, "<color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.", quantity, professionName);
                 }
             }
 
@@ -573,11 +573,11 @@ internal static class ProfessionSystem
             {
                 if (!fellOnGround)
                 {
-                    LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Bonus Saplings(s)</color>x<color=white>{quantity}</color> received from {professionName}!");
+                    LocalizationService.Reply(EntityManager, user, "<color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}!", quantity, professionName);
                 }
                 else
                 {
-                    LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Bonus Saplings(s)</color>x<color=white>{quantity}</color> received from {professionName}, but some fell on the ground since your inventory is full.");
+                    LocalizationService.Reply(EntityManager, user, "<color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.", quantity, professionName);
                 }
             }
 
@@ -591,7 +591,7 @@ internal static class ProfessionSystem
     {
         if (ServerGameManager.TryAddInventoryItem(playerCharacter, _mutantGrease, mutantGrease))
         {
-            if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Mutant Grease</color>x<color=white>{mutantGrease}</color> received from {professionName}");
+            if (professionLogging) LocalizationService.Reply(EntityManager, user, "<color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}", mutantGrease, professionName);
 
             if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _mutantGreaseColor, mutantGrease, ref delay);
         }
@@ -599,7 +599,7 @@ internal static class ProfessionSystem
         {
             InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, _mutantGrease, mutantGrease, new Entity());
 
-            if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Mutant Grease</color>x<color=white>{mutantGrease}</color> received from {professionName}, but it dropped on the ground since your inventory is full.");
+            if (professionLogging) LocalizationService.Reply(EntityManager, user, "<color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.", mutantGrease, professionName);
             if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _mutantGreaseColor, mutantGrease, ref delay);
         }
     }

@@ -234,25 +234,33 @@ internal static class LevelingSystem
 
             if (newLevel <= _maxPlayerLevel)
             {
-                LocalizationService.HandleServerReply(EntityManager, user,
-                    $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
+                LocalizationService.Reply(EntityManager, user,
+                    "Congratulations, you've reached level <color=white>{0}</color>!",
+                    newLevel);
             }
 
             if (_classes && GetPlayerBool(steamId, REMINDERS_KEY) && !steamId.HasClass(out PlayerClass? _))
             {
-                LocalizationService.HandleServerReply(EntityManager, user,
-                    $"Don't forget to choose a class! Use <color=white>'.class l'</color> to view choices and see what they have to offer with <color=white>'.class lb [Class]'</color> (buffs), <color=white>'.class lsp [Class]'</color> (spells), and <color=white>'.class lst [Class]'</color> (synergies). (toggle reminders with <color=white>'.misc remindme'</color>)");
+                LocalizationService.Reply(EntityManager, user,
+                    "Don't forget to choose a class! Use <color=white>'.class l'</color> to view choices and see what they have to offer with <color=white>'.class lb [Class]'</color> (buffs), <color=white>'.class lsp [Class]'</color> (spells), and <color=white>'.class lst [Class]'</color> (synergies). (toggle reminders with <color=white>'.misc remindme'</color>)");
             }
         }
 
         if (GetPlayerBool(steamId, EXPERIENCE_LOG_KEY))
         {
             int levelProgress = GetLevelProgress(steamId);
-            string message = restedXP > 0
-                ? $"+<color=yellow>{gainedIntXP}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)"
-                : $"+<color=yellow>{gainedIntXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)";
-
-            LocalizationService.HandleServerReply(EntityManager, user, message);
+            if (restedXP > 0)
+            {
+                LocalizationService.Reply(EntityManager, user,
+                    "+<color=yellow>{0}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> (<color=white>{1}%</color>)",
+                    gainedIntXP, levelProgress);
+            }
+            else
+            {
+                LocalizationService.Reply(EntityManager, user,
+                    "+<color=yellow>{0}</color> <color=#FFC0CB>experience</color> (<color=white>{1}%</color>)",
+                    gainedIntXP, levelProgress);
+            }
         }
 
         if (GetPlayerBool(steamId, SCT_PLAYER_LVL_KEY))
