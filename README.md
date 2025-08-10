@@ -17,7 +17,7 @@
 
 Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; Imperivm Draconis; Geoffrey D.; SirSaia; Robin C.; Colin F.; Jade K.; Jorge L.; Adrian L.;
 
----
+## Content Sections
 
 <details>
 <summary><strong>Features</strong></summary>
