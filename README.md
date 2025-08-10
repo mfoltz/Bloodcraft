@@ -3,10 +3,10 @@
 - [Eclipse](https://new.thunderstore.io/c/v-rising/p/zfolmt/Eclipse/) <--- **RECOMMENDED**
 - [Support Development](#support-development)
 - [Feature Overview](#feature-overview)
-- [Commands](#commands)
-- [Configuration](#configuration)
 - [Extra Recipes](#extra-recipes)
 - [Bleeding Edge](#bleeding-edge)
+- [Commands](#commands)
+- [Configuration](#configuration)
 - [Recommended Mods](#recommended-mods)
 
 ## Support Development
@@ -108,6 +108,69 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### Endgame Extras (section WIP)
 - Elite Primal Rifts automatically start Primal War events at the rate set by `PrimalRiftFrequency` when `ElitePrimalRifts` are enabled.
 - Elite Shard Bearers increases the challenge of shard bearers significantly when `EliteShardBearers` is enabled, and their levels can be uniformly set via `ShardBearerLevel`.
+
+## Extra Recipes
+
+### Salvageable
+- **EMPs** (20s)
+	- x2 Depleted Battery  
+	- x15 Tech Scrap
+- **Bat Hide** (15s)
+	- x3 Lesser Stygians
+	- x5 Blood Essence
+- **Copper Wires** (15s)
+	- x1 Electricity
+- **Primal Blood Essence** (10s)
+	- x5 Electricity
+- **Gold Ore** (10s)
+	- x2 Gold Jewelry
+- **Radiant Fiber** (10s)
+	- x8 Gem Dust
+	- x16 Plant Fiber
+	- x24 Pollen
+
+### Refinable
+- **Primal Jewel** (T04s with additional modifiers, random however spell school can be influenced via accompanying respective perfect gem which are awarded randomly from dailies/weeklies)
+	- Inputs: x1 Demon Fragment (default, configurable)
+	- Outputs: x1 Primal Jewel
+	- Station: Gem Cutting Table
+- **Primal Stygian Shard** (default currency for '.fam echoes', see config option for details)
+	- Inputs: x8 Greater Stygian Shards
+	- Outputs: x1 Primal Stygian Shard
+	- Station: Gem Cutting Table
+- **Charged Battery**
+	- Inputs: x1 Depleted Battery, x1 Electricity
+	- Outputs: x1 Charged Battery
+	- Station: Fabricator
+- **Blood Crystal**
+	- Inputs: x100 Crystals, 1x Greater Blood Essence
+	- Outputs: x100 Blood Crystal
+	- Station: Advanced Blood Press
+- **Copper Wires**
+	- Inputs: x3 Copper Ingots
+	- Outputs: x1 Copper Wires
+	- Station: Fabricator
+- **Vampiric Dust** (used to apply/change shiny buffs for familiars)
+	- Inputs: x8 Bleeding Hearts, x40 Blood Crystals
+	- Outputs: x1 Vampiric Dust
+	- Station: Advanced Grinder
+
+## Bleeding Edge
+
+### Slashers
+- Every 3rd primary attack (must chain to the last hit) will apply bleed, stacking up to 3 times.
+
+### Crossbow
+- Primary projectile is significantly faster.
+
+### TwinBlades
+- 2nd weapon skill (E) will apply shield from new frost spell when used on vBlood enemies.
+
+### Pistols
+- 25% increased primary attack projectile range.
+
+### Daggers
+- Stacks refresh even after unequipping daggers.
 
 </details>
 
@@ -723,69 +786,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Death Mage shift spells, granted at levels of prestige.
 
 </details>
-
-## Extra Recipes
-
-### Salvageable
-- **EMPs** (20s)
-	- x2 Depleted Battery  
-	- x15 Tech Scrap
-- **Bat Hide** (15s)
-	- x3 Lesser Stygians
-	- x5 Blood Essence
-- **Copper Wires** (15s)
-	- x1 Electricity
-- **Primal Blood Essence** (10s)
-	- x5 Electricity
-- **Gold Ore** (10s)
-	- x2 Gold Jewelry
-- **Radiant Fiber** (10s)
-	- x8 Gem Dust
-	- x16 Plant Fiber
-	- x24 Pollen
-
-### Refinable
-- **Primal Jewel** (T04s with additional modifiers, random however spell school can be influenced via accompanying respective perfect gem which are awarded randomly from dailies/weeklies)
-	- Inputs: x1 Demon Fragment (default, configurable)
-	- Outputs: x1 Primal Jewel
-	- Station: Gem Cutting Table
-- **Primal Stygian Shard** (default currency for '.fam echoes', see config option for details)
-	- Inputs: x8 Greater Stygian Shards
-	- Outputs: x1 Primal Stygian Shard
-	- Station: Gem Cutting Table
-- **Charged Battery**
-	- Inputs: x1 Depleted Battery, x1 Electricity
-	- Outputs: x1 Charged Battery
-	- Station: Fabricator
-- **Blood Crystal**
-	- Inputs: x100 Crystals, 1x Greater Blood Essence
-	- Outputs: x100 Blood Crystal
-	- Station: Advanced Blood Press
-- **Copper Wires**
-	- Inputs: x3 Copper Ingots
-	- Outputs: x1 Copper Wires
-	- Station: Fabricator
-- **Vampiric Dust** (used to apply/change shiny buffs for familiars)
-	- Inputs: x8 Bleeding Hearts, x40 Blood Crystals
-	- Outputs: x1 Vampiric Dust
-	- Station: Advanced Grinder
-
-## Bleeding Edge
-
-### Slashers
-- Every 3rd primary attack (must chain to the last hit) will apply bleed, stacking up to 3 times.
-
-### Crossbow
-- Primary projectile is significantly faster.
-
-### TwinBlades
-- 2nd weapon skill (E) will apply shield from new frost spell when used on vBlood enemies.
-
-### Pistols
-- 25% increased primary attack projectile range.
-
-### Daggers
-- Stacks refresh even after unequipping daggers.
 
 ## Recommended Mods
 
