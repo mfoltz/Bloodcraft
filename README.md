@@ -2,11 +2,11 @@
 
 - [Eclipse](https://new.thunderstore.io/c/v-rising/p/zfolmt/Eclipse/) <--- **RECOMMENDED**
 - [Support Development](#support-development)
-- [Feature Overview](#content-sections)
-- [Extra Recipes](#content-sections)
-- [Bleeding Edge](#content-sections)
-- [Chat Commands](#content-sections)
-- [Configuration](#content-sections)
+- [Feature Overview](#feature-overview)
+- [Extra Recipes](#extra-recipes)
+- [Bleeding Edge](#bleeding-edge)
+- [Chat Commands](#chat-commands)
+- [Configuration](#configuration)
 - [Recommended Mods](#recommended-mods)
 
 ## Support Development
