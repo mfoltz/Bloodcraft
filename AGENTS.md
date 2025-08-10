@@ -44,8 +44,10 @@ Current PRDs and task lists are stored in `.project-management/current-prd/`, wh
 1. **Refresh the English source.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
 2. **Propagate new hashes.** Copy the refreshed `English.json` entries into each `Resources/Localization/Messages/<Language>.json` while preserving numeric hashes.
+   Use `--overwrite` when translating after propagating hashes so English text is replaced by its translation.
 3. **Translate missing entries.**
-   `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --verbose --log-file translate.log --report-file skipped.csv`
+   `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --verbose --log-file translate.log --report-file skipped.csv --overwrite`
+   Verify the Argos model is installed before running translations: `argos-translate --from en --to tr - < /dev/null` (substitute the target code for `tr`).
    `--verbose`, `--log-file`, and `--report-file` help pinpoint skipped or untranslated strings. Any hashes listed in `skipped.csv` must be manually translated and the script re‑run to confirm they are handled.
 4. **Verify translations.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text`
