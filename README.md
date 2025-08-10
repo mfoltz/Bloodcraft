@@ -3,8 +3,8 @@
 - [Eclipse](https://new.thunderstore.io/c/v-rising/p/zfolmt/Eclipse/) <--- **RECOMMENDED**
 - [Support Development](#support-development)
 - [Feature Overview](#feature-overview)
-- [Extra Recipes](#extra-recipes)
 - [Bleeding Edge](#bleeding-edge)
+- [Extra Recipes](#extra-recipes)
 - [Chat Commands](#chat-commands)
 - [Configuration](#configuration)
 - [Recommended Mods](#recommended-mods)
@@ -109,6 +109,23 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - Elite Primal Rifts automatically start Primal War events at the rate set by `PrimalRiftFrequency` when `ElitePrimalRifts` are enabled.
 - Elite Shard Bearers increases the challenge of shard bearers significantly when `EliteShardBearers` is enabled, and their levels can be uniformly set via `ShardBearerLevel`.
 
+## Bleeding Edge
+
+### Slashers
+- Every 3rd primary attack (must chain to the last hit) will apply bleed, stacking up to 3 times.
+
+### Crossbow
+- Primary projectile is significantly faster.
+
+### TwinBlades
+- 2nd weapon skill (E) will apply shield from new frost spell when used on vBlood enemies.
+
+### Pistols
+- 25% increased primary attack projectile range.
+
+### Daggers
+- Stacks refresh even after unequipping daggers.
+  
 ## Extra Recipes
 
 ### Salvageable
@@ -155,23 +172,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 	- Outputs: x1 Vampiric Dust
 	- Station: Advanced Grinder
 
-## Bleeding Edge
-
-### Slashers
-- Every 3rd primary attack (must chain to the last hit) will apply bleed, stacking up to 3 times.
-
-### Crossbow
-- Primary projectile is significantly faster.
-
-### TwinBlades
-- 2nd weapon skill (E) will apply shield from new frost spell when used on vBlood enemies.
-
-### Pistols
-- 25% increased primary attack projectile range.
-
-### Daggers
-- Stacks refresh even after unequipping daggers.
-
 </details>
 
 <details>
@@ -179,7 +179,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 ## Chat Commands
 
-### Bloodlegacy Commands
+### Blood Commands
 - `.bloodlegacy choosestat [BloodOrStat] [BloodStat]`
   - Choose a bonus stat to enhance for your blood legacy.
   - Shortcut: *.bl cst [BloodOrStat] [BloodStat]*
