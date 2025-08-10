@@ -65,6 +65,36 @@ def normalize_tokens(text: str) -> str:
     tmp = TOKEN_RE.sub(store, text)
     tmp = tmp.replace("[", "").replace("]", "")
     return re.sub(r"@@(\d+)@@", restore, tmp)
+
+
+def ensure_model_installed(root: str, dst: str) -> None:
+    """Verify split Argos model segments are combined and installed.
+
+    Scans ``Resources/Localization/Models/<dst>`` for ``.z01`` segments.
+    If segments exist but no ``.argosmodel`` is present, instruct the user to
+    assemble and install the model.
+    """
+    model_dir = os.path.join(
+        root, "Resources", "Localization", "Models", dst
+    )
+    if not os.path.isdir(model_dir):
+        return
+
+    entries = os.listdir(model_dir)
+    has_segments = any(name.endswith(".z01") for name in entries)
+    has_model = any(name.endswith(".argosmodel") for name in entries)
+    if has_segments and not has_model:
+        snippet = (
+            f"cd Resources/Localization/Models/{dst}\n"
+            "cat translate-*.z[0-9][0-9] translate-*.zip > model.zip\n"
+            "unzip -o model.zip\n"
+            "unzip -p translate-*.argosmodel */metadata.json | jq '.from_code, .to_code'\n"
+            "argos-translate install translate-*.argosmodel"
+        )
+        raise RuntimeError(
+            "Split Argos model segments detected without an installed model. "
+            "Combine and install the model:\n" + snippet
+        )
 def translate_batch(
     translator,
     lines: List[str],
@@ -132,8 +162,13 @@ def main():
     )
     args = ap.parse_args()
 
-    argos_translate.load_installed_languages()
+    root = os.path.abspath(args.root)
+
     translator = argos_translate.get_translation_from_codes(args.src, args.dst)
+    if translator is None:
+        ensure_model_installed(root, args.dst)
+        argos_translate.load_installed_languages()
+        translator = argos_translate.get_translation_from_codes(args.src, args.dst)
     if translator is None:
         raise RuntimeError(
             f"No Argos translation model for {args.src}->{args.dst}. "
@@ -149,8 +184,6 @@ def main():
             log_fp.write(msg + "\n")
 
     print("NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.")
-
-    root = os.path.abspath(args.root)
     english_path = os.path.join(root, "Resources", "Localization", "Messages", "English.json")
     target_path = os.path.join(root, args.target_file)
 
