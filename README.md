@@ -5,9 +5,9 @@
 - [Features](#features)
 - [Commands](#commands)
 - [Recipes](#recipes)
-- [BleedingEdge](#bleedingedge)
+- [Bleeding Edge](#bleeding-edge)
 - [Configuration](#configuration)
-- [Recommended Mods](#recommended)
+- [Recommended Mods](#recommended-mods)
 
 ## Sponsor this project
 
@@ -785,6 +785,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Create custom portals and waygates for your server! Pairs great with KindredSchematics for making new areas.
 - [XPRising](https://thunderstore.io/c/v-rising/p/XPRising/XPRising/)
   If you like the idea of a mod with RPG features but Bloodcraft doesn't float your boat maybe this will!
-
+- [VRoles](https://thunderstore.io/c/v-rising/p/odjit/VRoles/)
+  Already using [VCF](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/) and need a feature-rich, role-based commands solution that's easy on the eyes? Look no further.
+   
 ## Credits
-Do my best to mention/attribute where ideas and bug reports come from in the changelog and commit history, if I've missed something or someone on a specific change please let me know!
+It's important to mention & attribute where novel ideas, critical bug reports or otherwise generally important contributions come from; I try (and usually succeed! ;D) to stay on top of that in the changelog and commit history, but if there are any big misses there please reach out for me to correct!
