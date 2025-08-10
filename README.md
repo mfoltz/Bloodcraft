@@ -754,7 +754,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 	- Outputs: x1 Vampiric Dust
 	- Station: Advanced Grinder
 
-## BleedingEdge
+## Bleeding Edge
 
 ### Slashers
 - Every 3rd primary attack (must chain to the last hit) will apply bleed, stacking up to 3 times.
@@ -771,7 +771,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### Daggers
 - Stacks refresh even after unequipping daggers.
 
-## Recommended
+## Recommended Mods
 
 - [KindredCommands](https://thunderstore.io/c/v-rising/p/odjit/KindredCommands/) 
   Highly recommend getting this if you plan on using Bloodcraft or any other mods for V Rising in general. Invaluable set of tools and options that will greatly improve your modding experience.
