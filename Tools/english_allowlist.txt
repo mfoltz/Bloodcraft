@@ -1,0 +1,3 @@
+# Words that should not trigger English detection.
+# Add one term per line.
+Bloodcraft

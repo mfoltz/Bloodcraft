@@ -806,6 +806,11 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 4. **Verify translations.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text`
    This command confirms every hash exists and no English text remains.
+
+### English detection allowlist
+
+`Tools/language_utils.py` flags untranslated strings by searching for common English stop words.
+To ignore project-specific terms like "Bloodcraft", add them to `Tools/english_allowlist.txt`, one per line.
 Each language model resides under `Resources/Localization/Models/<DIR>`. Combine the split archives, inspect `metadata.json` to confirm the language pair, and then install:
 
 ```bash
