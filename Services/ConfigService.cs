@@ -17,14 +17,14 @@ internal static class ConfigService
     static readonly Lazy<bool> _elitePrimalRifts = new(() => GetConfigValue<bool>("ElitePrimalRifts"));
     public static bool ElitePrimalRifts => _elitePrimalRifts.Value;
 
+    static readonly Lazy<int> _riftFrequency = new(() => GetConfigValue<int>("RiftFrequency"));
+    public static int RiftFrequency => _riftFrequency.Value;
+
     static readonly Lazy<bool> _eliteShardBearers = new(() => GetConfigValue<bool>("EliteShardBearers"));
     public static bool EliteShardBearers => _eliteShardBearers.Value;
 
     static readonly Lazy<int> _shardBearerLevel = new(() => GetConfigValue<int>("ShardBearerLevel"));
     public static int ShardBearerLevel => _shardBearerLevel.Value;
-
-    static readonly Lazy<int> _primalRiftFrequency = new(() => GetConfigValue<int>("PrimalRiftFrequency"));
-    public static int PrimalRiftFrequency => _primalRiftFrequency.Value;
 
     static readonly Lazy<bool> _potionStacking = new(() => GetConfigValue<bool>("PotionStacking"));
     public static bool PotionStacking => _potionStacking.Value;
@@ -523,7 +523,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
             new ConfigEntryDefinition("General", "Eclipsed", false, "Eclipse will be active if any features that sync with the client are enabled. Instead, this now controls the frequency; true for faster (0.1s), false for slower (2.5s)."),
             new ConfigEntryDefinition("General", "ElitePrimalRifts", false, "Enable or disable elite primal rifts."),
-            new ConfigEntryDefinition("General", "PrimalRiftFrequency", 0, "Number of primal rifts to start per day when they are enabled (24 max)."),
+            new ConfigEntryDefinition("General", "RiftFrequency", 0, "Number of primal rifts to start per day when they are enabled (24 max)."),
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
             new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01/t02 effects at the same time)."),

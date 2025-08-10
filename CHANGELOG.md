@@ -1,6 +1,8 @@
 `1.12.15`
-- added config option for # of primal rift events per day
-- added check in blacksmithing patch to ensure said profession is fully disabled when configured as such
+- added config option for  of primal rift events per day
+- added config option for KitFamiliar to grant a familiar with the starter kit
+- fixed blacksmithing and alchemy gating
+- fixed elite modifiers on Dracula after phase change
 
 `1.11.14`
 - added config option for ElitePrimalRifts (units/gateBosses are amped similarly to EliteShardBearers with some surprises ;D WIP feature, use admin console command to spawn primal war events for now)
