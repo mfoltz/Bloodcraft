@@ -31,7 +31,7 @@ internal static class MiscCommands
         ulong steamId = ctx.Event.User.PlatformId;
 
         TogglePlayerBool(steamId, REMINDERS_KEY);
-        LocalizationService.Reply(ctx, $"Reminders {(GetPlayerBool(steamId, REMINDERS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.Reply(ctx, "Reminders {0}.", GetPlayerBool(steamId, REMINDERS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>");
     }
 
     [Command(name: "sct", adminOnly: false, usage: ".misc sct [Type]", description: "Toggles various scrolling text elements.")]
@@ -65,7 +65,7 @@ internal static class MiscCommands
             TogglePlayerBool(steamId, boolKey);
             bool currentState = GetPlayerBool(steamId, boolKey);
 
-            LocalizationService.Reply(ctx, $"<color=white>{sctType}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+            LocalizationService.Reply(ctx, "<color=white>{0}</color> scrolling text {1}.", sctType, currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>");
         }
         else
         {
@@ -84,7 +84,7 @@ internal static class MiscCommands
             TogglePlayerBool(steamId, boolKey);
             bool currentState = GetPlayerBool(steamId, boolKey);
 
-            LocalizationService.Reply(ctx, $"<color=white>{sctType}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+            LocalizationService.Reply(ctx, "<color=white>{0}</color> scrolling text {1}.", sctType, currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>");
         }
     }
 
@@ -111,7 +111,7 @@ internal static class MiscCommands
 
             List<string> kitItems = StarterKitItemPrefabGUIDs.Select(x => $"<color=white>{x.Key.GetLocalizedName()}</color>").ToList();
 
-            LocalizationService.Reply(ctx, $"You've received a starting kit with:");
+            LocalizationService.Reply(ctx, "You've received a starting kit with:");
 
             const int maxPerMessage = 6;
             for (int i = 0; i < kitItems.Count; i += maxPerMessage)
@@ -119,7 +119,7 @@ internal static class MiscCommands
                 var batch = kitItems.Skip(i).Take(maxPerMessage);
                 string items = string.Join(", ", batch);
 
-                LocalizationService.Reply(ctx, $"{items}");
+                LocalizationService.Reply(ctx, "{0}", items);
             }
         }
         else
@@ -167,7 +167,7 @@ internal static class MiscCommands
         float LitresBloodConsumed = userStats.LitresBloodConsumed;
         LitresBloodConsumed = (int)LitresBloodConsumed;
 
-        LocalizationService.Reply(ctx, $"<color=white>VBloods Slain</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Units Killed</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Deaths</color>: <color=#808080>{Deaths}</color> | <color=white>Time Online</color>: <color=#1E90FF>{OnlineTime}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Blood Consumed</color>: <color=red>{LitresBloodConsumed}</color>L");
+        LocalizationService.Reply(ctx, "<color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L", VBloodKills, UnitKills, Deaths, OnlineTime, DistanceTraveled, LitresBloodConsumed);
     }
 
     [Command(name: "silence", adminOnly: false, usage: ".misc silence", description: "Resets stuck combat music if needed.")]
@@ -186,6 +186,6 @@ internal static class MiscCommands
         character.Write(combatMusicListener_Shared);
 
         CombatMusicSystemServer.OnUpdate();
-        LocalizationService.Reply(ctx, $"Combat music cleared!");
+        LocalizationService.Reply(ctx, "Combat music cleared!");
     }
 }
