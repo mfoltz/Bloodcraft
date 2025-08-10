@@ -51,27 +51,30 @@ fi
 
 dotnet restore "$ROOT_DIR/Bloodcraft.csproj"
 
-# Install a local Argos Translate model if segmented archives are present
-MODEL_DIR="$ROOT_DIR/Resources/Localization/Messages/Models"
-LOCAL_MODEL_BASE="$MODEL_DIR/translate-en_es-1_0"
+# Install local Argos Translate models if segmented archives are present
+MODEL_DIR="$ROOT_DIR/Resources/Localization/Models"
 MODEL_INSTALLED=false
-if [ -f "${LOCAL_MODEL_BASE}.z01" ]; then
-    echo "Installing local Argos Translate model for English to Spanish..."
-    if cat "${LOCAL_MODEL_BASE}".z0{1..4} > "${LOCAL_MODEL_BASE}.zip"; then
-        if unzip -o "${LOCAL_MODEL_BASE}.zip"; then
-            if argos-translate install "${LOCAL_MODEL_BASE}.argosmodel"; then
-                MODEL_INSTALLED=true
+for d in "$MODEL_DIR"/EN_*; do
+    [ -d "$d" ] || continue
+    if compgen -G "$d"/translate-*.z[0-9][0-9] >/dev/null; then
+        echo "Installing local Argos Translate model in $(basename "$d")..."
+        if cat "$d"/translate-*.z[0-9][0-9] "$d"/translate-*.zip > "$d/model.zip"; then
+            unzip -o "$d/model.zip" -d "$d" >/dev/null || true
+            if compgen -G "$d"/translate-*.argosmodel >/dev/null; then
+                if argos-translate install "$d"/translate-*.argosmodel; then
+                    MODEL_INSTALLED=true
+                else
+                    echo "Failed to install local model in $(basename "$d"); will attempt remote download if configured."
+                fi
+                rm -f "$d/model.zip" "$d"/translate-*.argosmodel
             else
-                echo "Failed to install local model; will attempt remote download if configured."
+                echo "Failed to unzip local model in $(basename "$d"); will attempt remote download if configured."
             fi
-            rm -f "${LOCAL_MODEL_BASE}.zip" "${LOCAL_MODEL_BASE}.argosmodel"
         else
-            echo "Failed to unzip local model; will attempt remote download if configured."
+            echo "Failed to combine local model segments in $(basename "$d"); will attempt remote download if configured."
         fi
-    else
-        echo "Failed to combine local model segments; will attempt remote download if configured."
     fi
-fi
+done
 
 # Optional: download an Argos Translate language pair if requested
 FROM_LANG="${FROM_LANG:-}"
