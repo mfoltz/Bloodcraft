@@ -155,10 +155,16 @@ def main():
     )
     ap.add_argument("--overwrite", action="store_true", help="Translate all messages even if already present")
     ap.add_argument("--verbose", action="store_true", help="Print per-message translation details")
-    ap.add_argument("--log-file", help="Write verbose output to this file")
+    ap.add_argument(
+        "--log-file",
+        help="Write verbose output to this file; missing directories are created",
+    )
     ap.add_argument(
         "--report-file",
-        help="Write skipped hashes and reasons to this JSON or CSV file",
+        help=(
+            "Write skipped hashes and reasons to this JSON or CSV file; "
+            "missing directories are created"
+        ),
     )
     args = ap.parse_args()
 
@@ -175,7 +181,12 @@ def main():
             "Assemble or install the model, or run `.codex/install.sh`."
         )
 
-    log_fp = open(args.log_file, "w", encoding="utf-8") if args.log_file else None
+    log_fp = None
+    if args.log_file:
+        log_dir = os.path.dirname(args.log_file)
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
+        log_fp = open(args.log_file, "w", encoding="utf-8")
 
     def log_verbose(msg: str) -> None:
         if args.verbose:
@@ -313,6 +324,9 @@ def main():
         log_fp.close()
 
     if args.report_file:
+        report_dir = os.path.dirname(args.report_file)
+        if report_dir:
+            os.makedirs(report_dir, exist_ok=True)
         ext = os.path.splitext(args.report_file)[1].lower()
         with open(args.report_file, "w", encoding="utf-8", newline="") as fp:
             if ext == ".json":
