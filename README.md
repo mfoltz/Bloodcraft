@@ -9,6 +9,7 @@
 - [Configuration](#configuration)
 - [Recommended Mods](#recommended-mods)
 - [Development Setup](#development-setup)
+- [Localization Guide](Docs/Localization.md)
 - [Codex Workflow](#codex-workflow)
 - [Workflow Source](#workflow-source)
 - [Credits](#credits)
@@ -786,6 +787,8 @@ Run `.codex/install.sh` once to install the .NET SDK and Argos Translate. The sc
 `~/.local/bin` to your `PATH` so the `argos-translate` CLI is available in future sessions.
 
 ## Localization (WIP)
+
+For guidelines on adding or updating messages, see [Localization Contributor Guide](Docs/Localization.md).
 
 Messages shown by the plugin are stored under `Resources/Localization/Messages`.
 To update `English.json` with the latest hashes run:
