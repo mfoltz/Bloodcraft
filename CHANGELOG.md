@@ -7,7 +7,7 @@
 - added config option for DisabledProfessions, valid options: Enchanting,Alchemy,Harvesting,Blacksmithing,Tailoring,Woodcutting,Mining,Fishing
 - added config option for EquipmentOnly (true for equipment slots without inventory, false for both)
 - modified config option for Eclipse; will be active by default if any features that can sync with the client are enabled, true for near-realtime client updates (requires Eclipse 1.3.11 to take advantage of this, will be pushed when this is) and false for old behavior.
-- PvP prevents calling/enabling familiar for the duration if dismissed during combat or not already present 
+- PvP prevents calling/enabling familiar for the duration if dismissed during combat or not already present
 
 `1.10.13`
 - if shiny chance for familiars is 0 they will no longer be guaranteed on second unlock

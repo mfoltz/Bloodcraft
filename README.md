@@ -1,23 +1,28 @@
 ## Table of Contents
 
 - [Eclipse](https://new.thunderstore.io/c/v-rising/p/zfolmt/Eclipse/) <--- **RECOMMENDED**
-- [Sponsors](#sponsors)
-- [Features](#features)
-- [Commands](#commands)
-- [Recipes](#recipes)
-- [BleedingEdge](#bleedingedge)
+- [Support Development](#support-development)
+- [Feature Overview](#feature-overview)
+- [Bleeding Edge](#bleeding-edge)
+- [Extra Recipes](#extra-recipes)
+- [Chat Commands](#chat-commands)
 - [Configuration](#configuration)
-- [Recommended Mods](#recommended)
+- [Recommended Mods](#recommended-mods)
 
-## Sponsor this project
+## Support Development
 
 [![patreon](https://i.imgur.com/u6aAqeL.png)](https://www.patreon.com/join/4865914)  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfolmt)
 
-## Sponsors
+### Sponsors ♥️
 
 Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; Imperivm Draconis; Geoffrey D.; SirSaia; Robin C.; Colin F.; Jade K.; Jorge L.; Adrian L.;
 
-## Features
+## Content Sections
+
+<details>
+<summary><strong>Features</strong></summary>
+
+## Feature Overview
 
 ### Experience Leveling
 - Gain experience and level up, primarily from slaying enemies.
@@ -73,6 +78,10 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - 20% chance for random shiny effect on first unit unlock, 100% chance on repeated unit unlock
   - Chance when dealing damage to apply respective spell school debuff, same proc chance as configured for class onhit effects
   - `.fam shiny [SpellSchool]` (apply or change shiny, requires vampiric dust)
+- Familiar unlocks can be shared with clan or party members within experience share distance when `ShareUnlocks` is enabled.
+- Familiars can equip gear when emote actions (`.fam e`, list available emote actions with `.fam actions`) are enabled; `beckon` to enter interact mode, setting `EquipmentOnly` to true limits this to equipment slots only without a useable inventory.
+- Spend exo prestige rewards to unlock VBlood familiars with `.fam echoes [VBloodName]`. Costs scale by unit level and tier and depend on the `PrimalEchoes` configuration and `EchoesFactor` multiplier.
+- Server owners can control which units are eligible through `AllowVBloods`, `AllowMinions`, `BannedUnits`, and `BannedTypes` settings.
 
 ### Quests
 - Players can complete daily and weekly quests for XP and rewards.
@@ -94,12 +103,84 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### Prestige
 - Resets player level, grants a permanent buff (REWORKING), reduces experience gained from units, and increases rate gains for expertise/legacies per prestige.
   - `.prestige me [Type]` (experience and/or various weapons and bloods, the latter variety will see increased bonus stat caps and reduced rate gains per prestige)
-  - `.prestige get [Type]` (view prestige progress and details)
+- `.prestige get [Type]` (view prestige progress and details)
 
-## Commands
+### Endgame Extras (section WIP)
+- Elite Primal Rifts automatically start Primal War events at the rate set by `PrimalRiftFrequency` when `ElitePrimalRifts` are enabled.
+- Elite Shard Bearers increases the challenge of shard bearers significantly when `EliteShardBearers` is enabled, and their levels can be uniformly set via `ShardBearerLevel`.
+
+## Bleeding Edge
+
+### Slashers
+- Every 3rd primary attack (must chain to the last hit) will apply bleed, stacking up to 3 times.
+
+### Crossbow
+- Primary projectile is significantly faster.
+
+### TwinBlades
+- 2nd weapon skill (E) will apply shield from new frost spell when used on vBlood enemies.
+
+### Pistols
+- 25% increased primary attack projectile range.
+
+### Daggers
+- Stacks refresh even after unequipping daggers.
+  
+## Extra Recipes
+
+### Salvageable
+- **EMPs** (20s)
+	- x2 Depleted Battery  
+	- x15 Tech Scrap
+- **Bat Hide** (15s)
+	- x3 Lesser Stygians
+	- x5 Blood Essence
+- **Copper Wires** (15s)
+	- x1 Electricity
+- **Primal Blood Essence** (10s)
+	- x5 Electricity
+- **Gold Ore** (10s)
+	- x2 Gold Jewelry
+- **Radiant Fiber** (10s)
+	- x8 Gem Dust
+	- x16 Plant Fiber
+	- x24 Pollen
+
+### Refinable
+- **Primal Jewel** (T04s with additional modifiers, random however spell school can be influenced via accompanying respective perfect gem which are awarded randomly from dailies/weeklies)
+	- Inputs: x1 Demon Fragment (default, configurable)
+	- Outputs: x1 Primal Jewel
+	- Station: Gem Cutting Table
+- **Primal Stygian Shard** (default currency for '.fam echoes', see config option for details)
+	- Inputs: x8 Greater Stygian Shards
+	- Outputs: x1 Primal Stygian Shard
+	- Station: Gem Cutting Table
+- **Charged Battery**
+	- Inputs: x1 Depleted Battery, x1 Electricity
+	- Outputs: x1 Charged Battery
+	- Station: Fabricator
+- **Blood Crystal**
+	- Inputs: x100 Crystals, 1x Greater Blood Essence
+	- Outputs: x100 Blood Crystal
+	- Station: Advanced Blood Press
+- **Copper Wires**
+	- Inputs: x3 Copper Ingots
+	- Outputs: x1 Copper Wires
+	- Station: Fabricator
+- **Vampiric Dust** (used to apply/change shiny buffs for familiars)
+	- Inputs: x8 Bleeding Hearts, x40 Blood Crystals
+	- Outputs: x1 Vampiric Dust
+	- Station: Advanced Grinder
+
+</details>
+
+<details>
+<summary><strong>Commands</strong></summary>
+
+## Chat Commands
 
 ### Blood Commands
-- `.blood choosestat [BloodOrStat] [BloodStat]`
+- `.bloodlegacy choosestat [BloodOrStat] [BloodStat]`
   - Choose a bonus stat to enhance for your blood legacy.
   - Shortcut: *.bl cst [BloodOrStat] [BloodStat]*
 - `.blood get [BloodType]`
@@ -377,6 +458,10 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).
   - Shortcut: *.wep spell [Name] [Slot] [PrefabGuid] [Radius]*
 
+</details>
+
+<details>
+<summary><strong>Configuration</strong></summary>
 
 ## Configuration
 
@@ -407,6 +492,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### StarterKit
 - **Starter Kit**: `StarterKit` (bool, default: False)
   Enable or disable the starter kit.
+- **Kit Familiar**: `KitFamiliar` (bool, default: False)
+  Grant players a familiar when the starter kit is enabled.
 - **Kit Prefabs**: `KitPrefabs` (string, default: "862477668,-1531666018,-1593377811,1821405450")
   Item prefabGuids for starting kit.
 - **Kit Quantities**: `KitQuantities` (string, default: "500,1000,1000,250")
@@ -698,70 +785,9 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Death Mage Spells**: `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
   Death Mage shift spells, granted at levels of prestige.
 
-## Recipes
+</details>
 
-### Salvageable
-- **EMPs** (20s)
-	- x2 Depleted Battery  
-	- x15 Tech Scrap
-- **Bat Hide** (15s)
-	- x3 Lesser Stygians
-	- x5 Blood Essence
-- **Copper Wires** (15s)
-	- x1 Electricity
-- **Primal Blood Essence** (10s)
-	- x5 Electricity
-- **Gold Ore** (10s)
-	- x2 Gold Jewelry
-- **Radiant Fiber** (10s)
-	- x8 Gem Dust
-	- x16 Plant Fiber
-	- x24 Pollen
-
-### Refinable
-- **Primal Jewel** (T04s with additional modifiers, random however spell school can be influenced via accompanying respective perfect gem which are awarded randomly from dailies/weeklies)
-	- Inputs: x1 Demon Fragment (default, configurable)
-	- Outputs: x1 Primal Jewel
-	- Station: Gem Cutting Table
-- **Primal Stygian Shard** (default currency for '.fam echoes', see config option for details)
-	- Inputs: x8 Greater Stygian Shards
-	- Outputs: x1 Primal Stygian Shard
-	- Station: Gem Cutting Table
-- **Charged Battery**
-	- Inputs: x1 Depleted Battery, x1 Electricity
-	- Outputs: x1 Charged Battery
-	- Station: Fabricator
-- **Blood Crystal**
-	- Inputs: x100 Crystals, 1x Greater Blood Essence
-	- Outputs: x100 Blood Crystal
-	- Station: Advanced Blood Press
-- **Copper Wires**
-	- Inputs: x3 Copper Ingots
-	- Outputs: x1 Copper Wires
-	- Station: Fabricator
-- **Vampiric Dust** (used to apply/change shiny buffs for familiars)
-	- Inputs: x8 Bleeding Hearts, x40 Blood Crystals
-	- Outputs: x1 Vampiric Dust
-	- Station: Advanced Grinder
-
-## BleedingEdge
-
-### Slashers
-- Every 3rd primary attack (must chain to the last hit) will apply bleed, stacking up to 3 times.
-
-### Crossbow
-- Primary projectile is significantly faster.
-
-### TwinBlades
-- 2nd weapon skill (E) will apply shield from new frost spell when used on vBlood enemies.
-
-### Pistols
-- 25% increased primary attack projectile range.
-
-### Daggers
-- Stacks refresh even after unequipping daggers.
-
-## Recommended
+## Recommended Mods
 
 - [KindredCommands](https://thunderstore.io/c/v-rising/p/odjit/KindredCommands/) 
   Highly recommend getting this if you plan on using Bloodcraft or any other mods for V Rising in general. Invaluable set of tools and options that will greatly improve your modding experience.
@@ -773,8 +799,14 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Closest thing to creative mode we'll likely ever get. Copy/paste castles, build wherever with whatever you want!
 - [KindredPortals](https://thunderstore.io/c/v-rising/p/odjit/KindredPortals/)
   Create custom portals and waygates for your server! Pairs great with KindredSchematics for making new areas.
+- [KinPoolParty](https://thunderstore.io/c/v-rising/p/Kindred/KinPoolParty/)
+  Even vampires need to relax sometimes, and now you can... in *style*.
+- [KinThrone](https://thunderstore.io/c/v-rising/p/Kindred/KinThrone/)
+  The shadow realm has much to offer; partake of its gifts wisely...
 - [XPRising](https://thunderstore.io/c/v-rising/p/XPRising/XPRising/)
   If you like the idea of a mod with RPG features but Bloodcraft doesn't float your boat maybe this will!
-
+- [VRoles](https://thunderstore.io/c/v-rising/p/odjit/VRoles/)
+  Already using [VCF](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/)? Need a feature-rich, role-based commands solution that's easy on the eyes? 🌠
+   
 ## Credits
-Do my best to mention/attribute where ideas and bug reports come from in the changelog and commit history, if I've missed something or someone on a specific change please let me know!
+It's important to mention & attribute where novel ideas, critical bug reports or otherwise generally important contributions come from; I try (and usually succeed! ;D) to stay on top of that in the changelog and commit history, but please reach out for any big misses there!
