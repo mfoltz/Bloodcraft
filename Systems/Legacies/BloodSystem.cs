@@ -292,8 +292,9 @@ internal static class BloodSystem
     {
         if (newLevel <= _maxBloodLevel)
         {
-            LocalizationService.HandleServerReply(EntityManager, user,
-                $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]!");
+            LocalizationService.Reply(EntityManager, user,
+                "<color=red>{0}</color> legacy improved to [<color=white>{1}</color>]!",
+                bloodType, newLevel);
         }
 
         if (GetPlayerBool(steamID, REMINDERS_KEY))
@@ -307,8 +308,9 @@ internal static class BloodSystem
                     int choicesLeft = _legacyStatChoices - currentStatCount;
                     string bonusString = choicesLeft > 1 ? "bonuses" : "bonus";
 
-                    LocalizationService.HandleServerReply(EntityManager, user,
-                        $"{choicesLeft} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=red>{bloodType.ToString().ToLower()}</color>; use '<color=white>.bl cst [Stat]</color>' to choose and '<color=white>.bl lst</color>' to see options. (toggle reminders with <color=white>'.misc remindme'</color>)");
+                    LocalizationService.Reply(EntityManager, user,
+                        "{0} <color=white>stat</color> <color=#00FFFF>{1}</color> available for <color=red>{2}</color>; use '<color=white>.bl cst [Stat]</color>' to choose and '<color=white>.bl lst</color>' to see options. (toggle reminders with <color=white>'.misc remindme'</color>)",
+                        choicesLeft, bonusString, bloodType.ToString().ToLower());
                 }
             }
         }
@@ -329,8 +331,9 @@ internal static class BloodSystem
 
         if (GetPlayerBool(steamId, BLOOD_LOG_KEY))
         {
-            LocalizationService.HandleServerReply(EntityManager, user,
-                $"+<color=yellow>{gainedIntXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
+            LocalizationService.Reply(EntityManager, user,
+                "+<color=yellow>{0}</color> <color=red>{1}</color> <color=#FFC0CB>essence</color> (<color=white>{2}%</color>)",
+                gainedIntXP, bloodType, levelProgress);
         }
 
         if (GetPlayerBool(steamId, SCT_PLAYER_BL_KEY))

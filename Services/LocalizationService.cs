@@ -289,6 +289,30 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         Reply(ctx, message);
     }
 
+    public static void Reply(EntityManager entityManager, User user, string englishText, params object[] args)
+    {
+        uint hash = ComputeHash(englishText);
+        string message = englishText;
+
+        if (_messageDictionary.TryGetValue(hash, out string localized))
+        {
+            message = args.Length > 0 ? string.Format(localized, args) : localized;
+        }
+        else if (args.Length > 0)
+        {
+            message = string.Format(englishText, args);
+        }
+
+        FixedString512Bytes fixedMessage = new(message);
+        ServerChatUtils.SendSystemMessageToClient(entityManager, user, ref fixedMessage);
+    }
+
+    [Obsolete("Use Reply instead")]
+    public static void HandleServerReply(EntityManager entityManager, User user, string message)
+    {
+        Reply(entityManager, user, message);
+    }
+
     static readonly ComponentType[] _networkEventComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<FromCharacter>()),
@@ -319,10 +343,4 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         networkEntity.Write(_networkEventType);
         networkEntity.Write(chatMessageEvent);
     }
-    public static void HandleServerReply(EntityManager entityManager, User user, string message)
-    {
-        FixedString512Bytes fixedMessage = new(message);
-        ServerChatUtils.SendSystemMessageToClient(entityManager, user, ref fixedMessage);
-    }
-
 }

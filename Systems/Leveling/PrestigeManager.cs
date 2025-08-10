@@ -556,7 +556,7 @@ internal static class PrestigeManager
         float gainMultiplier = ConfigService.PrestigeRateMultiplier * level;
 
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
-        LocalizationService.HandleServerReply(EntityManager, user, $"Player <color=green>{user.CharacterName.Value}</color> has prestiged in <color=#90EE90>Experience</color>[<color=white>{level}</color>]! Growth rates for expertise/legacies increased by <color=green>{gainPercentage}</color>, experience from unit kills reduced by <color=red>{reductionPercentage}</color>.");
+        LocalizationService.Reply(EntityManager, user, "Player <color=green>{0}</color> has prestiged in <color=#90EE90>Experience</color>[<color=white>{1}</color>]! Growth rates for expertise/legacies increased by <color=green>{2}</color>, experience from unit kills reduced by <color=red>{3}</color>.", user.CharacterName.Value, level, gainPercentage, reductionPercentage);
     }
     public static void ReplyOtherPrestigeEffects(User user, ulong playerId, PrestigeType parsedPrestigeType, int level)
     {
@@ -573,7 +573,7 @@ internal static class PrestigeManager
         string statGainString = (statGainIncrease * 100).ToString("F2") + "%";
 
         string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
-        LocalizationService.HandleServerReply(EntityManager, user, $"Player <color=green>{user.CharacterName.Value}</color> has prestiged in <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{level}</color>]! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
+        LocalizationService.Reply(EntityManager, user, "Player <color=green>{0}</color> has prestiged in <color=#90EE90>{1}</color>[<color=white>{2}</color>]! Growth rate reduced by <color=yellow>{3}</color> and stat bonuses improved by <color=green>{4}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{5}</color>.", user.CharacterName.Value, parsedPrestigeType, level, percentageReductionString, statGainString, totalEffectString);
     }
     public static bool TryParsePrestigeType(string prestigeType, out PrestigeType parsedPrestigeType)
     {

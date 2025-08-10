@@ -169,16 +169,16 @@ internal static class FamiliarUnlockSystem
 
             if (!isShiny)
             {
-                LocalizationService.HandleServerReply(EntityManager, user, $"New unit unlocked: <color=green>{targetPrefabGuid.GetLocalizedName()}</color>");
+                LocalizationService.Reply(EntityManager, user, "New unit unlocked: <color=green>{0}</color>", targetPrefabGuid.GetLocalizedName());
             }
             else if (isShiny)
             {
-                LocalizationService.HandleServerReply(EntityManager, user, $"New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{targetPrefabGuid.GetLocalizedName()}</color>");
+                LocalizationService.Reply(EntityManager, user, "New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{0}</color>", targetPrefabGuid.GetLocalizedName());
             }
         }
         else if (isShiny)
         {
-            LocalizationService.HandleServerReply(EntityManager, user, $"<color=#00FFFF>Shiny</color> unlocked: <color=green>{targetPrefabGuid.GetLocalizedName()}</color>");
+            LocalizationService.Reply(EntityManager, user, "<color=#00FFFF>Shiny</color> unlocked: <color=green>{0}</color>", targetPrefabGuid.GetLocalizedName());
         }
     }
     public static bool HandleShiny(int famKey, ulong steamId, float chance, int choice = -1)

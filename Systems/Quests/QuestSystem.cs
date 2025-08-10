@@ -455,13 +455,13 @@ internal static class QuestSystem
                     targets = [..GetGoalPrefabsForLevelEnumerable(goal, level)];
 
                     questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, now);
-                    LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#00FFFF>Daily Quest</color> has been refreshed!");
+                    LocalizationService.Reply(EntityManager, user, "Your <color=#00FFFF>Daily Quest</color> has been refreshed!");
 
                     goal = targetTypes.Last();
                     targets = [..GetGoalPrefabsForLevelEnumerable(goal, level)];
 
                     questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, QuestType.Weekly), 0, now);
-                    LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed!");
+                    LocalizationService.Reply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed!");
                 }
                 else if (refreshDaily)
                 {
@@ -469,7 +469,7 @@ internal static class QuestSystem
                     targets = [..GetGoalPrefabsForLevelEnumerable(goal, level)];
 
                     questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, now);
-                    LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#00FFFF>Daily Quest</color> has been refreshed!");
+                    LocalizationService.Reply(EntityManager, user, "Your <color=#00FFFF>Daily Quest</color> has been refreshed!");
                 }
                 else if (refreshWeekly)
                 {
@@ -477,7 +477,7 @@ internal static class QuestSystem
                     targets = [..GetGoalPrefabsForLevelEnumerable(goal, level)];
 
                     questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, QuestType.Weekly), 0, now);
-                    LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed!");
+                    LocalizationService.Reply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed!");
                 }
 
                 steamId.SetPlayerQuests(questData);
@@ -625,7 +625,7 @@ internal static class QuestSystem
                         questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, DateTime.UtcNow);
 
                         var dailyQuest = questData[QuestType.Daily];
-                        LocalizationService.HandleServerReply(EntityManager, user, $"New <color=#00FFFF>Daily Quest</color> available: <color=green>{dailyQuest.Objective.Goal}</color> <color=white>{dailyQuest.Objective.Target.GetLocalizedName()}</color>x<color=#FFC0CB>{dailyQuest.Objective.RequiredAmount}</color> [<color=white>{dailyQuest.Progress}</color>/<color=yellow>{dailyQuest.Objective.RequiredAmount}</color>]");
+                        LocalizationService.Reply(EntityManager, user, "New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>]", dailyQuest.Objective.Goal, dailyQuest.Objective.Target.GetLocalizedName(), dailyQuest.Objective.RequiredAmount, dailyQuest.Progress);
                     }
                 }
             }
@@ -657,14 +657,12 @@ internal static class QuestSystem
 
         if (ServerGameManager.TryAddInventoryItem(user.LocalCharacter._Entity, reward, quantity))
         {
-            string message = $"You've received <color=#ffd9eb>{reward.GetLocalizedName()}</color>x<color=white>{quantity}</color> for completing your {colorType}!";
-            LocalizationService.HandleServerReply(EntityManager, user, message);
+            LocalizationService.Reply(EntityManager, user, "You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}!", reward.GetLocalizedName(), quantity, colorType);
         }
         else
         {
             InventoryUtilitiesServer.CreateDropItem(EntityManager, user.LocalCharacter._Entity, reward, quantity, new Entity());
-            string message = $"You've received <color=#ffd9eb>{reward.GetLocalizedName()}</color>x<color=white>{quantity}</color> for completing your {colorType}! It dropped on the ground because your inventory was full.";
-            LocalizationService.HandleServerReply(EntityManager, user, message);
+            LocalizationService.Reply(EntityManager, user, "You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}! It dropped on the ground because your inventory was full.", reward.GetLocalizedName(), quantity, colorType);
         }
     }
     static void HandleExperienceReward(User user, QuestType questType)
@@ -677,8 +675,7 @@ internal static class QuestSystem
             float xpPercentage = XP_PERCENTAGE * _questMultipliers[questType] * 100;
             if (progressType.Contains("expertise") && progressType.Contains("essence")) xpPercentage *= 0.5f;
 
-            string xpMessage = $"You've been awarded <color=yellow>{xpPercentage:F1}%</color> of your total {progressType}!";
-            LocalizationService.HandleServerReply(EntityManager, user, xpMessage);
+            LocalizationService.Reply(EntityManager, user, "You've been awarded <color=yellow>{0:F1}%</color> of your total {1}!", xpPercentage, progressType);
         }
     }
     static string ProcessQuestExperienceGain(User user, int multiplier, float percentOfTotalXP)
@@ -880,11 +877,7 @@ internal static class QuestSystem
 
         if (GetPlayerBool(steamId, QUEST_LOG_KEY) && !quest.Value.Objective.Complete)
         {
-            string message = $"Progress added to {colorType}: <color=green>{quest.Value.Objective.Goal}</color> " +
-                             $"<color=white>{quest.Value.Objective.Target.GetLocalizedName()}</color> " +
-                             $"[<color=white>{questData[quest.Key].Progress}</color>/<color=yellow>{quest.Value.Objective.RequiredAmount}</color>]";
-
-            LocalizationService.HandleServerReply(EntityManager, user, message);
+            LocalizationService.Reply(EntityManager, user, "Progress added to {0}: <color=green>{1}</color> <color=white>{2}</color> [<color=white>{3}</color>/<color=yellow>{4}</color>]", colorType, quest.Value.Objective.Goal, quest.Value.Objective.Target.GetLocalizedName(), questData[quest.Key].Progress, quest.Value.Objective.RequiredAmount);
         }
 
         _delayedQuestMessages[steamId].Remove(quest.Key);

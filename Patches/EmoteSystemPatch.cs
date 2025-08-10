@@ -104,15 +104,15 @@ internal static class EmoteSystemPatch
                 {
                     if (playerCharacter.HasBuff(_dominateBuff) && EmoteActions.ContainsKey(useEmoteEvent.Action))
                     {
-                        LocalizationService.HandleServerReply(EntityManager, user, "You can't use emote actions when using dominate form!");
+                        LocalizationService.Reply(EntityManager, user, "You can't use emote actions when using dominate form!");
                     }
                     else if (playerCharacter.HasBuff(_takeFlightBuff) && EmoteActions.ContainsKey(useEmoteEvent.Action))
                     {
-                        LocalizationService.HandleServerReply(EntityManager, user, "You can't use emote actions when using bat form!");
+                        LocalizationService.Reply(EntityManager, user, "You can't use emote actions when using bat form!");
                     }
                     else if (useEmoteEvent.Action.Equals(_beckonAbilityGroup) && playerCharacter.PlayerInCombat())
                     {
-                        LocalizationService.HandleServerReply(EntityManager, user, "You can't interact with your familiar during combat!");
+                        LocalizationService.Reply(EntityManager, user, "You can't interact with your familiar during combat!");
                     }
                     else if (EmoteActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(user, playerCharacter, steamId);
                 }
@@ -128,7 +128,7 @@ internal static class EmoteSystemPatch
         if (!ShapeshiftCache.TryGetShapeshiftBuff(steamId, out PrefabGUID shapeshiftBuff))
         {
             BlockShapeshift.Add(steamId);
-            LocalizationService.HandleServerReply(EntityManager, user, "Select a form you've unlocked first! ('<color=white>.prestige sf [<color=orange>EvolvedVampire|CorruptedSerpent</color>]</color>')");
+            LocalizationService.Reply(EntityManager, user, "Select a form you've unlocked first! ('<color=white>.prestige sf [<color=orange>EvolvedVampire|CorruptedSerpent</color>]</color>')");
             return;
         }
 
@@ -171,7 +171,7 @@ internal static class EmoteSystemPatch
                 {
                     if (!_familiarPvP && playerCharacter.HasBuff(_pvpCombatBuff))
                     {
-                        LocalizationService.HandleServerReply(EntityManager, user, "You can't call your familiar during PvP combat!");
+                        LocalizationService.Reply(EntityManager, user, "You can't call your familiar during PvP combat!");
                         return;
                     }
                     else CallFamiliar(playerCharacter, familiar, user, steamId);
@@ -188,25 +188,25 @@ internal static class EmoteSystemPatch
             }
             else
             {
-                LocalizationService.HandleServerReply(EntityManager, user, "Active familiar doesn't exist! If that doesn't seem right try using '<color=white>.fam reset</color>'.");
+                LocalizationService.Reply(EntityManager, user, "Active familiar doesn't exist! If that doesn't seem right try using '<color=white>.fam reset</color>'.");
             }
         }
         else
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "Couldn't find active familiar...");
+            LocalizationService.Reply(EntityManager, user, "Couldn't find active familiar...");
         }
     }
     public static void CombatMode(User user, Entity playerCharacter, ulong steamId)
     {
         if (!_familiarCombat)
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "Familiar combat is not enabled.");
+            LocalizationService.Reply(EntityManager, user, "Familiar combat is not enabled.");
             return;
         }
 
         if (playerCharacter.PlayerInCombat())
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "You can't toggle familiar combat mode during PvE/PvP combat!");
+            LocalizationService.Reply(EntityManager, user, "You can't toggle familiar combat mode during PvE/PvP combat!");
             return;
         }
         else if (steamId.HasActiveFamiliar())
@@ -215,7 +215,7 @@ internal static class EmoteSystemPatch
 
             if (!familiar.Exists())
             {
-                LocalizationService.HandleServerReply(EntityManager, user, "Couldn't find active familiar...");
+                LocalizationService.Reply(EntityManager, user, "Couldn't find active familiar...");
                 return;
             }
             else if (familiar.HasBuff(_invulnerableBuff))
@@ -225,7 +225,7 @@ internal static class EmoteSystemPatch
                 EnableAggro(familiar);
                 Familiars.EnableAggroable(familiar);
 
-                LocalizationService.HandleServerReply(EntityManager, user, "Familiar combat <color=green>enabled</color>.");
+                LocalizationService.Reply(EntityManager, user, "Familiar combat <color=green>enabled</color>.");
             }
             else
             {
@@ -234,12 +234,12 @@ internal static class EmoteSystemPatch
                 DisableAggro(familiar);
                 Familiars.DisableAggroable(familiar);
 
-                LocalizationService.HandleServerReply(EntityManager, user, "Familiar combat <color=red>disabled</color>.");
+                LocalizationService.Reply(EntityManager, user, "Familiar combat <color=red>disabled</color>.");
             }
         }
         else
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "Couldn't find active familiar...");
+            LocalizationService.Reply(EntityManager, user, "Couldn't find active familiar...");
         }
     }
     public static void InteractMode(User user, Entity playerCharacter, ulong steamId)
@@ -252,14 +252,14 @@ internal static class EmoteSystemPatch
 
         if (activeFamiliarData.Dismissed)
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "Can't interact with familiar when dismissed!");
+            LocalizationService.Reply(EntityManager, user, "Can't interact with familiar when dismissed!");
             return;
         }
         else if (familiar.Exists() && servant.Exists() && coffin.Exists())
         {
             if (familiar.HasBuff(_vanishBuff))
             {
-                LocalizationService.HandleServerReply(EntityManager, user, "Can't interact with familiar when binding/unbinding!");
+                LocalizationService.Reply(EntityManager, user, "Can't interact with familiar when binding/unbinding!");
                 return;
             }
 

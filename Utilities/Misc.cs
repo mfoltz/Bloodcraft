@@ -509,14 +509,12 @@ internal static class Misc
 
         if (hasSpace && ServerGameManager.TryAddInventoryItem(playerCharacter, itemType, amount))
         {
-            string message = "Your bag feels slightly heavier...";
-            LocalizationService.HandleServerReply(EntityManager, user, message);
+            LocalizationService.Reply(EntityManager, user, "Your bag feels slightly heavier...");
         }
         else
         {
-            string message = "Something fell out of your bag!";
             InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, itemType, amount, new Entity()); // does this create multiple drops to account for excessive stacks? noting for later
-            LocalizationService.HandleServerReply(EntityManager, user, message);
+            LocalizationService.Reply(EntityManager, user, "Something fell out of your bag!");
         }
     }
     public static bool RollForChance(float chance)
