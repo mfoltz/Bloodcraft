@@ -799,6 +799,10 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Closest thing to creative mode we'll likely ever get. Copy/paste castles, build wherever with whatever you want!
 - [KindredPortals](https://thunderstore.io/c/v-rising/p/odjit/KindredPortals/)
   Create custom portals and waygates for your server! Pairs great with KindredSchematics for making new areas.
+- [KinPoolParty](https://thunderstore.io/c/v-rising/p/Kindred/KinPoolParty/)
+  Even vampires need to relax sometimes, and now you can... in *style*.
+- [KinThrone](https://thunderstore.io/c/v-rising/p/Kindred/KinThrone/)
+  The shadow realm has much to offer; partake of its gifts wisely...
 - [XPRising](https://thunderstore.io/c/v-rising/p/XPRising/XPRising/)
   If you like the idea of a mod with RPG features but Bloodcraft doesn't float your boat maybe this will!
 - [VRoles](https://thunderstore.io/c/v-rising/p/odjit/VRoles/)
