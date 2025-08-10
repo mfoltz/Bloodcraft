@@ -4,7 +4,7 @@
 - [Sponsors](#sponsors)
 - [Features](#features)
 - [Commands](#commands)
-- [Recipes](#recipes)
+- [Recipe Changes](#recipe-changes)
 - [Bleeding Edge](#bleeding-edge)
 - [Configuration](#configuration)
 - [Recommended Mods](#recommended-mods)
@@ -708,7 +708,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Death Mage Spells**: `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
   Death Mage shift spells, granted at levels of prestige.
 
-## Recipes
+## Recipe Changes
 
 ### Salvageable
 - **EMPs** (20s)
