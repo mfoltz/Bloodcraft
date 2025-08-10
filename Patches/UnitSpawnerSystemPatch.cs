@@ -12,7 +12,7 @@ internal static class UnitSpawnerPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(UnitSpawnerReactSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
 
         using NativeAccessor<Entity> entities = __instance.EntityQueries[0].ToEntityArrayAccessor();
 

@@ -17,7 +17,7 @@ internal static class PlayerTeleportSystemPatch
     [HarmonyPostfix]
     static void OnUpdatePrefix(PlayerTeleportSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[1].ToEntityArray(Allocator.Temp);

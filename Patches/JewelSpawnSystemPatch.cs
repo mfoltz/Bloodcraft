@@ -40,7 +40,7 @@ internal static class JewelSpawnSystemPatch
     [HarmonyPostfix]
     static void OnUpdatePostfix(JewelSpawnSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_extraRecipes) return;
 
         NativeArray<Entity> entities = __instance._JewelSpawnQuery.ToEntityArray(Allocator.Temp);

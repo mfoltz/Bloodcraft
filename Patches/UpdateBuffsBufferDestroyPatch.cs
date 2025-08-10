@@ -92,7 +92,7 @@ internal static class UpdateBuffsBufferDestroyPatch
     [HarmonyPostfix]
     static void OnUpdatePostfix(UpdateBuffsBuffer_Destroy __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!(_familiars || _prestige || _classes)) return;
 
         NativeArray<Entity> entities = _query.ToEntityArray(Allocator.Temp);

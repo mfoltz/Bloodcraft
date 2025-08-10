@@ -36,7 +36,7 @@ internal static class InitializationPatch
         {
             Core.Initialize();
 
-            if (Core._initialized)
+            if (Core.IsReady)
             {
                 Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized!");
             }

@@ -84,7 +84,7 @@ internal static class ReactToInventoryChangedSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ReactToInventoryChangedSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_professions && !_quests && !_extraRecipes) return;
 
         NativeArray<InventoryChangedEvent> inventoryChangedEvents = __instance.EntityQueries[0].ToComponentDataArray<InventoryChangedEvent>(Allocator.Temp);

@@ -39,7 +39,7 @@ internal static class DeathEventListenerSystemPatch
     [HarmonyPostfix]
     static unsafe void OnUpdatePostfix(DeathEventListenerSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
 
         using NativeAccessor<DeathEvent> deathEvents = __instance._DeathEventQuery.ToComponentDataArrayAccessor<DeathEvent>();
 

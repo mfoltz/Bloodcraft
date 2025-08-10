@@ -59,7 +59,8 @@ internal static class EmoteSystemPatch
         { _saluteAbilityGroup, CombatMode },
         { _clapAbilityGroup, BindUnbind },
         { _beckonAbilityGroup, InteractMode },
-        { _tauntAbilityGroup, HandleShapeshift }
+        { _tauntAbilityGroup, HandleShapeshift },
+        { _bowAbilityGroup, ZoomZoomMode }
     };
 
     static readonly Dictionary<PrefabGUID, Action<(ulong, ulong)>> _matchActions = new()
@@ -75,7 +76,7 @@ internal static class EmoteSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(EmoteSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_familiars && !_exoForm) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
@@ -115,6 +116,8 @@ internal static class EmoteSystemPatch
                     }
                     else if (EmoteActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(user, playerCharacter, steamId);
                 }
+
+                if (_emoteActions.TryGetValue(useEmoteEvent.Action, out var emoteAction)) emoteAction.Invoke(user, playerCharacter, steamId);
             }
         }
         finally
@@ -297,5 +300,16 @@ internal static class EmoteSystemPatch
     {
         BattleService.NotifyBothPlayers(match.Item1, match.Item2, "The challenge has been declined.");
         BattleChallenges.Remove(match);
+    }
+    static void ZoomZoomMode(User user, Entity playerCharacter, ulong steamId)
+    {
+        if (playerCharacter.HasBuff(PrefabGUIDs.AB_Vampire_Dracula_WolfLeap_ShapeshiftBuff))
+        {
+            playerCharacter.TryRemoveBuff(PrefabGUIDs.AB_Vampire_Dracula_WolfLeap_ShapeshiftBuff);
+        }
+        else
+        {
+            playerCharacter.TryApplyBuff(PrefabGUIDs.AB_Vampire_Dracula_WolfLeap_ShapeshiftBuff);
+        }
     }
 }

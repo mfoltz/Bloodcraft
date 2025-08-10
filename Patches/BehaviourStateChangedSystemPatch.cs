@@ -19,7 +19,7 @@ internal static class BehaviourStateChangedSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(CreateGameplayEventOnBehaviourStateChangedSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.__query_221632411_0.ToEntityArray(Allocator.Temp);

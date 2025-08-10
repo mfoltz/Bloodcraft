@@ -27,7 +27,7 @@ internal static class KnockbackSystemSpawnPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(KnockbackSystemSpawn __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.__query_1729431709_0.ToEntityArray(Allocator.Temp);
@@ -40,9 +40,6 @@ internal static class KnockbackSystemSpawnPatch
 
                 Entity buffTarget = entity.GetBuffTarget();
                 Entity owner = entityOwner.Owner;
-
-                // Core.Log.LogInfo($"KnockbackSystemSpawn - {owner.GetPrefabGuid().GetPrefabName()} | {entity.GetPrefabGuid().GetPrefabName()}"); // octavian stuff does go through here but should be already handled if that was all there was to it?
-                // maybe try destroying with main EntityManager destroyEntity?
 
                 if (buffTarget.IsDueling()) continue;
                 else if (owner.IsFollowingPlayer() && buffTarget.TryGetPlayer(out Entity player))

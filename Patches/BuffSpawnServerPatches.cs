@@ -67,7 +67,7 @@ internal static class BuffSystemSpawnPatches
     [HarmonyPrefix]
     static void OnUpdatePrefix(BuffSystem_Spawn_Server __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
 
         using NativeAccessor<Entity> entities = _query.ToEntityArrayAccessor();
         using NativeAccessor<PrefabGUID> prefabGuids = _query.ToComponentDataArrayAccessor<PrefabGUID>();

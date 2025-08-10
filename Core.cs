@@ -4,7 +4,6 @@ using Bloodcraft.Interfaces;
 using Bloodcraft.Patches;
 using Bloodcraft.Resources;
 using Bloodcraft.Services;
-using Bloodcraft.Systems;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
@@ -14,11 +13,9 @@ using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Physics;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Utilities.EntityQueries;
@@ -88,8 +85,8 @@ internal static class Core
     const int SECONDARY_SKILL_SLOT = 4;
     const int BLEED_STACKS = 3;
     public static byte[] NEW_SHARED_KEY { get; set; }
-
-    public static bool _initialized;
+    public static bool IsReady => _initialized;
+    static bool _initialized;
     public static void Initialize()
     {
         if (_initialized) return;
@@ -157,7 +154,6 @@ internal static class Core
         if (_resetShardBearers) ResetShardBearers();
 
         _initialized = true;
-        DebugLoggerPatch._initialized = true;
     }
     static World GetServerWorld()
     {

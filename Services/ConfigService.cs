@@ -520,7 +520,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
             new ConfigEntryDefinition("General", "Eclipsed", false, "Eclipse will be active if any features that sync with the client are enabled. Instead, this now controls the frequency; true for faster (0.1s), false for slower (2.5s)."),
             new ConfigEntryDefinition("General", "ElitePrimalRifts", false, "Enable or disable elite primal rifts."),
-            new ConfigEntryDefinition("General", "PrimalRiftFrequency", 0, "Number of primal rifts to start per day when they are enabled (12 max recommended)."),
+            new ConfigEntryDefinition("General", "PrimalRiftFrequency", 0, "Number of primal rifts to start per day when they are enabled (24 max)."),
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
             new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01/t02 effects at the same time)."),

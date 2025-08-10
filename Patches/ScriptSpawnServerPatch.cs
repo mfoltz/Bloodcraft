@@ -87,7 +87,7 @@ internal static class ScriptSpawnServerPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ScriptSpawnServer __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
 
         using NativeAccessor<Entity> entities = _query.ToEntityArrayAccessor();
         using NativeAccessor<PrefabGUID> prefabGuids = _query.ToComponentDataArrayAccessor<PrefabGUID>();
@@ -307,7 +307,7 @@ internal static class ScriptSpawnServerPatch
     [HarmonyPostfix]
     static void OnUpdatePostfix(ScriptSpawnServer __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
 
         bool handleLevel = _leveling;
 

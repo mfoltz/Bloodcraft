@@ -70,7 +70,7 @@ internal static class StatChangeSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(StatChangeSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
 
         // NativeArray<Entity> entities = __instance._DamageTakenEventQuery.ToEntityArray(Allocator.Temp);
         // NativeArray<DamageTakenEvent> damageTakenEvents = __instance._DamageTakenEventQuery.ToComponentDataArray<DamageTakenEvent>(Allocator.Temp);

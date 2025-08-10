@@ -18,7 +18,7 @@ internal static class ImprisonedBuffSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ImprisonedBuffSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.__query_1231815368_0.ToEntityArray(Allocator.Temp);

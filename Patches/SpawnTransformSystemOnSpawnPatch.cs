@@ -45,7 +45,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(SpawnTransformSystem_OnSpawn __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_eliteShardBearers) return;
 
         NativeArray<Entity> entities = __instance.__query_565030732_0.ToEntityArray(Allocator.Temp);

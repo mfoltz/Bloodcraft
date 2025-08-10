@@ -23,7 +23,7 @@ internal static class FamiliarServantPatches
     [HarmonyPrefix]
     public static void OnUpdatePrefix(EquipServantItemFromInventorySystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
@@ -88,7 +88,7 @@ internal static class FamiliarServantPatches
     [HarmonyPrefix]
     public static void OnUpdatePrefix(EquipServantItemSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
@@ -144,7 +144,7 @@ internal static class FamiliarServantPatches
     [HarmonyPrefix]
     public static void OnUpdatePrefix(UnEquipServantItemSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_familiars) return;
 
         NativeArray<UnequipServantItemEvent> unequipServantItemEvents = __instance.EntityQueries[0].ToComponentDataArray<UnequipServantItemEvent>(Allocator.Temp);
@@ -181,7 +181,7 @@ internal static class FamiliarServantPatches
     [HarmonyPrefix]
     public static void OnUpdatePrefix(EquipmentTransferSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
@@ -251,7 +251,7 @@ internal static class FamiliarServantPatches
     [HarmonyPrefix]
     public static void OnUpdatePrefix(ServantPowerSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
@@ -285,7 +285,7 @@ internal static class FamiliarServantPatches
     [HarmonyPrefix]
     public static void OnUpdatePrefix(MoveItemBetweenInventoriesSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_familiars) return;
 
         using NativeAccessor<Entity> entities = __instance._MoveItemBetweenInventoriesEventQuery.ToEntityArrayAccessor();

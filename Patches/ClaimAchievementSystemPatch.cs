@@ -28,7 +28,7 @@ internal static class ClaimAchievementSystemPatch
         FromCharacter fromCharacter,
         bool forceClaim)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_leveling) return;
 
         if (claimAchievementGUID.Equals(_shelter))

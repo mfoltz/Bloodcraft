@@ -28,7 +28,7 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(LinkMinionToOwnerOnSpawnSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp); // All Components: ProjectM.EntityOwner [ReadOnly], ProjectM.Minion [ReadOnly], Unity.Entities.SpawnTag [ReadOnly]

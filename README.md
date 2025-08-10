@@ -98,26 +98,26 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 ## Commands
 
-### Bloodlegacy Commands
-- `.bloodlegacy choosestat [BloodOrStat] [BloodStat]`
+### Blood Commands
+- `.blood choosestat [BloodOrStat] [BloodStat]`
   - Choose a bonus stat to enhance for your blood legacy.
   - Shortcut: *.bl cst [BloodOrStat] [BloodStat]*
-- `.bloodlegacy get [BloodType]`
+- `.blood get [BloodType]`
   - Display current blood legacy details.
   - Shortcut: *.bl get [BloodType]*
-- `.bloodlegacy list`
+- `.blood list`
   - Lists blood legacies available.
   - Shortcut: *.bl l*
-- `.bloodlegacy liststats`
+- `.blood liststats`
   - Lists blood stats available.
   - Shortcut: *.bl lst*
-- `.bloodlegacy log`
+- `.blood log`
   - Toggles Legacy progress logging.
   - Shortcut: *.bl log*
-- `.bloodlegacy resetstats`
+- `.blood resetstats`
   - Reset stats for current blood.
   - Shortcut: *.bl rst*
-- `.bloodlegacy set [Player] [Blood] [Level]` 🔒
+- `.blood set [Player] [Blood] [Level]` 🔒
   - Sets player blood legacy level.
   - Shortcut: *.bl set [Player] [Blood] [Level]*
 
@@ -388,7 +388,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Elite Primal Rifts**: `ElitePrimalRifts` (bool, default: False)
   Enable or disable elite primal rifts.
 - **Primal Rift Frequency**: `PrimalRiftFrequency` (int, default: 0)
-  Number of primal rifts to start per day when they are enabled (12 max recommended).
+  Number of primal rifts to start per day when they are enabled (24 max).
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
   Enable or disable elite shard bearers.
 - **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)

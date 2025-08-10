@@ -29,7 +29,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ReplaceAbilityOnSlotSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
 
         NativeArray<Entity> entities = __instance.__query_1482480545_0.ToEntityArray(Allocator.Temp);
 

@@ -18,7 +18,7 @@ internal static class SpawnMoveSpeedBuffSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(Spawn_MoveSpeedBuffSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);

@@ -83,7 +83,7 @@ internal static class CraftingSystemPatches
     [HarmonyPrefix]
     static void Prefix(ForgeSystem_Update __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_professions && !_quests) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
@@ -123,7 +123,7 @@ internal static class CraftingSystemPatches
                     float professionValue = BASE_PROFESSION_XP * ProfessionMappings.GetTierMultiplier(itemPrefab);
                     IProfession handler = ProfessionFactory.GetProfession(itemPrefab);
 
-                    if (handler != null)
+                    if (handler?.GetProfessionEnum().IsDisabled() == false)
                     {
                         if (itemEntity.Has<Durability>())
                         {
@@ -154,7 +154,7 @@ internal static class CraftingSystemPatches
     [HarmonyPrefix]
     static void OnUpdatePrefix(UpdateCraftingSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_professions && !_quests) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
@@ -190,7 +190,7 @@ internal static class CraftingSystemPatches
     [HarmonyPrefix]
     static void OnUpdatePrefix(UpdatePrisonSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_professions) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
@@ -224,7 +224,7 @@ internal static class CraftingSystemPatches
     [HarmonyPrefix]
     public static void OnUpdatePrefix(StartCraftingSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_professions && !_quests) return;
 
         NativeArray<Entity> entities = __instance._StartCraftItemEventQuery.ToEntityArray(Allocator.Temp);
@@ -280,7 +280,7 @@ internal static class CraftingSystemPatches
     [HarmonyPrefix]
     public static void OnUpdatePrefix(StopCraftingSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_professions && !_quests) return;
 
         NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
@@ -323,7 +323,7 @@ internal static class CraftingSystemPatches
     [HarmonyPrefix]
     public static void OnUpdatePrefix(MoveItemBetweenInventoriesSystem __instance)
     {
-        if (!Core._initialized) return;
+        if (!Core.IsReady) return;
         else if (!_professions && !_quests) return;
 
         NativeArray<Entity> entities = __instance._MoveItemBetweenInventoriesEventQuery.ToEntityArray(Allocator.Temp);
