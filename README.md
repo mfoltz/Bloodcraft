@@ -2,11 +2,11 @@
 
 - [Eclipse](https://new.thunderstore.io/c/v-rising/p/zfolmt/Eclipse/) <--- **RECOMMENDED**
 - [Support Development](#support-development)
-- [Feature Overview](#feature-overview)
-- [Extra Recipes](#extra-recipes)
-- [Bleeding Edge](#bleeding-edge)
-- [Commands](#commands)
-- [Configuration](#configuration)
+- [Feature Overview](#content-sections)
+- [Extra Recipes](#content-sections)
+- [Bleeding Edge](#content-sections)
+- [Chat Commands](#content-sections)
+- [Configuration](#content-sections)
 - [Recommended Mods](#recommended-mods)
 
 ## Support Development
@@ -177,7 +177,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 <details>
 <summary><strong>Commands</strong></summary>
 
-## Commands
+## Chat Commands
 
 ### Bloodlegacy Commands
 - `.bloodlegacy choosestat [BloodOrStat] [BloodStat]`
