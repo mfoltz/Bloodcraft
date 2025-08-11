@@ -24,7 +24,7 @@ internal static class LevelingCommands
         var SteamID = ctx.Event.User.PlatformId;
 
         TogglePlayerBool(SteamID, EXPERIENCE_LOG_KEY);
-        LocalizationService.Reply(ctx, $"Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.Reply(ctx, "Level logging {0}.", GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>");
     }
 
     [Command(name: "get", adminOnly: false, usage: ".lvl get", description: "Display current leveling progress.")]
@@ -46,13 +46,13 @@ internal static class LevelingCommands
             int progress = (int)(xpData.Value - ConvertLevelToXp(level));
             int percent = LevelingSystem.GetLevelProgress(steamId);
 
-            LocalizationService.Reply(ctx, $"You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!");
+            LocalizationService.Reply(ctx, "You're level [<color=white>{0}</color>][<color=#90EE90>{1}</color>] with <color=yellow>{2}</color> <color=#FFC0CB>experience</color> (<color=white>{3}%</color>)!", level, prestigeLevel, progress, percent);
 
             if (ConfigService.RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData) && restedData.Value > 0)
             {
                 int roundedXP = (int)(Math.Round(restedData.Value / 100.0) * 100);
 
-                LocalizationService.Reply(ctx, $"<color=#FFD700>{roundedXP}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~");
+                LocalizationService.Reply(ctx, "<color=#FFD700>{0}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~", roundedXP);
             }
         }
         else
@@ -73,7 +73,7 @@ internal static class LevelingCommands
         PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
-            LocalizationService.Reply(ctx, $"Couldn't find player.");
+            LocalizationService.Reply(ctx, "Couldn't find player.");
             return;
         }
 
@@ -81,7 +81,7 @@ internal static class LevelingCommands
 
         if (level < 0 || level > ConfigService.MaxLevel)
         {
-            LocalizationService.Reply(ctx, $"Level must be between <color=white>0</color> and <color=white>{ConfigService.MaxLevel}</color>!");
+            LocalizationService.Reply(ctx, "Level must be between <color=white>0</color> and <color=white>{0}</color>!", ConfigService.MaxLevel);
             return;
         }
 
@@ -93,11 +93,11 @@ internal static class LevelingCommands
             steamId.SetPlayerExperience(xpData);
 
             LevelingSystem.SetLevel(playerInfo.CharEntity);
-            LocalizationService.Reply(ctx, $"Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName.Value}</color>!");
+            LocalizationService.Reply(ctx, "Level set to <color=white>{0}</color> for <color=green>{1}</color>!", level, foundUser.CharacterName.Value);
         }
         else
         {
-            LocalizationService.Reply(ctx, $"Couldn't find experience data for {foundUser.CharacterName.Value}");
+            LocalizationService.Reply(ctx, "Couldn't find experience data for {0}", foundUser.CharacterName.Value);
         }
     }
 
@@ -122,14 +122,14 @@ internal static class LevelingCommands
             DataService.PlayerDictionaries._ignoreSharedExperience.Add(playerInfo.User.PlatformId);
             DataService.PlayerPersistence.SaveIgnoredSharedExperience();
 
-            LocalizationService.Reply(ctx, $"<color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore shared experience list!");
+            LocalizationService.Reply(ctx, "<color=green>{0}</color> added to the ignore shared experience list!", playerInfo.User.CharacterName.Value);
         }
         else if (DataService.PlayerDictionaries._ignoreSharedExperience.Contains(playerInfo.User.PlatformId))
         {
             DataService.PlayerDictionaries._ignoreSharedExperience.Remove(playerInfo.User.PlatformId);
             DataService.PlayerPersistence.SaveIgnoredSharedExperience();
 
-            LocalizationService.Reply(ctx, $"<color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore shared experience list!");
+            LocalizationService.Reply(ctx, "<color=green>{0}</color> removed from the ignore shared experience list!", playerInfo.User.CharacterName.Value);
         }
     }
 }
