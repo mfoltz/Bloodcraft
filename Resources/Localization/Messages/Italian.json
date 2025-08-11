@@ -280,8 +280,5 @@
     "608689499": "Riduzione del tasso di crescita da <color=#90EE90>{0}</color> livello di prestigio: <color=yellow>-{1}</color>",
     "2383766993": "Miglioramento dei bonus: <color=green>{0}</color>",
     "1223341524": "<color=#90EE90>{0}</color><color=white>{1}</color></color> Tasso di crescita ridotto da <color=red>{2}</color> e bonus di statistiche migliorati da <color=green>{3}</color>. Il cambiamento totale del tasso di crescita con bonus di prestigio livellamento è <color=yellow>{4}</color>."
-  },
-  "_meta": {
-    "1716911803": "Identico intenzionalmente all'inglese; segnaposto dinamico"
   }
 }
