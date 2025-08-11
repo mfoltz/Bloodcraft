@@ -780,7 +780,12 @@ Run `.codex/install.sh` once to install the .NET SDK and Argos Translate depende
   Create custom portals and waygates for your server! Pairs great with KindredSchematics for making new areas.
 - [XPRising](https://thunderstore.io/c/v-rising/p/XPRising/XPRising/)
   If you like the idea of a mod with RPG features but Bloodcraft doesn't float your boat maybe this will!
-
+- [VRoles](https://thunderstore.io/c/v-rising/p/odjit/VRoles/) <br/>
+  <img src="https://thunderstore.io/c/v-rising/p/odjit/VRoles/icon.png" alt="VRoles icon" width="48" height="48" style="border-radius:8px; vertical-align:middle; margin-right:6px;"/>
+  <strong>Feature-rich, role-based command system</strong> with a clean, modern UI. Perfect for managing permissions and powers without the clutter. Pairs wonderfully with <a href="https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/">VCF</a>.<br/>
+  <img alt="tag" src="https://img.shields.io/badge/Commands-1f6feb" />
+  <img alt="tag" src="https://img.shields.io/badge/UX-polished-ff69b4" />
+  
 ## Development Setup
 
 Run `.codex/install.sh` once to install the .NET SDK and Argos Translate. The script adds
