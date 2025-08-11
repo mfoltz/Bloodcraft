@@ -313,7 +313,9 @@
     "3112026815": "Ghi nhật ký nghề bây giờ là {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>bật</color>\" : \"<color=red>tắt</color>\")}",
     "542066310": "Ghi nhật ký di sản {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>bật</color>\" : \"<color=red>tắt</color>\")}",
     "881612152": "Exo form hành động emote (<color=white>tain</color>) {(getPlayerBool (steamid, shapeshift_key)? \"<Color = green> enable</color>\": \"",
-    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color> \":\" \")} [<color=white>{level}</color>] <color=#90EE90>{prestiges}2"
+    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color> \":\" \")} [<color=white>{level}</color>] <color=#90EE90>{prestiges}2",
+    "1669157395": "Túi của bạn cảm thấy nặng hơn một chút...",
+    "2346236465": "Có thứ gì đó rơi ra khỏi túi của bạn!"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

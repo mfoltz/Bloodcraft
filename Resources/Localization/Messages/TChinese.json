@@ -313,7 +313,9 @@
     "1812818458": "你在<color=#90EE90> 經驗</color>[<color=white>{prestigeLevel}</color>] 中享有威望。 <color=green>{gainPercentage}</color>, 單位殺人的經驗減少<color=red>{reductionPercentage}</color>。",
     "1443941563": "取消了所有玩家的聲望",
     "3066749917": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContesKey(familiar))_BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR_ Id) $\"{colorCode}*</color>\":\"[<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] 加上<color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)",
-    "2511919794": "<color=yellow>{count}</color>** <color=green>{famName}</color>{(familiar BuffsData.FamiliarBuffs.ContsKey(famKey)? $\"{colorCode}*</color>{levelAndPrestiges}: ${levelAndPrestiges}"
+    "2511919794": "<color=yellow>{count}</color>** <color=green>{famName}</color>{(familiar BuffsData.FamiliarBuffs.ContsKey(famKey)? $\"{colorCode}*</color>{levelAndPrestiges}: ${levelAndPrestiges},",
+    "1669157395": "你的包包感覺稍微重了一點...",
+    "2346236465": "有東西從你的包包掉出來了！"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

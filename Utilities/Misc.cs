@@ -186,6 +186,9 @@ internal static class Misc
         public const string DAGGERS_KEY = nameof(WeaponType.Daggers);
         public const string CLAWS_KEY = nameof(WeaponType.Claws);
 
+        const string BAG_HEAVIER_MESSAGE = "Your bag feels slightly heavier...";
+        const string ITEM_DROPPED_MESSAGE = "Something fell out of your bag!";
+
         public static readonly Dictionary<string, bool> DefaultBools = new()
         {
             [EXPERIENCE_LOG_KEY] = false,
@@ -509,12 +512,12 @@ internal static class Misc
 
         if (hasSpace && ServerGameManager.TryAddInventoryItem(playerCharacter, itemType, amount))
         {
-            LocalizationService.Reply(EntityManager, user, "Your bag feels slightly heavier...");
+            LocalizationService.Reply(EntityManager, user, BAG_HEAVIER_MESSAGE);
         }
         else
         {
             InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, itemType, amount, new Entity()); // does this create multiple drops to account for excessive stacks? noting for later
-            LocalizationService.Reply(EntityManager, user, "Something fell out of your bag!");
+            LocalizationService.Reply(EntityManager, user, ITEM_DROPPED_MESSAGE);
         }
     }
     public static bool RollForChance(float chance)

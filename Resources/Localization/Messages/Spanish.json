@@ -313,7 +313,9 @@
     "1095669519": "El registro de nivel {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? \"<color=green>habilitado</color>\" : \"<color=red>deshabilitado</color>\")}",
     "3112026815": "El registro de profesión ahora está {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>habilitado</color>\" : \"<color=red>deshabilitado</color>\")}",
     "542066310": "El registro de Legado de Sangre {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>habilitado</color>\" : \"<color=red>deshabilitado</color>\")}",
-    "881612152": "Acción de gesto en forma Exo (<color=white>provocación</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>habilitada</color>\" : \"<color=red>deshabilitada</color>\")}"
+    "881612152": "Acción de gesto en forma Exo (<color=white>provocación</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>habilitada</color>\" : \"<color=red>deshabilitada</color>\")}",
+    "1669157395": "Tu bolsa se siente un poco más pesada...",
+    "2346236465": "¡Algo se cayó de tu bolsa!"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

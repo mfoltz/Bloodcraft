@@ -313,6 +313,8 @@
     "1095669519": "等级记录{(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}。",
     "3112026815": "职业记录现在{(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}。",
     "542066310": "血统记录{(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}。",
-    "881612152": "Exo形态表情动作（<color=white>嘲讽</color>）{(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}"
+    "881612152": "Exo形态表情动作（<color=white>嘲讽</color>）{(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>已启用</color>\" : \"<color=red>已禁用</color>\")}",
+    "1669157395": "你的包感觉稍微重了一点...",
+    "2346236465": "有东西从你的包里掉出来了！"
   }
 }

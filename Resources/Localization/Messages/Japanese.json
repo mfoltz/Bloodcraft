@@ -313,7 +313,9 @@
     "3706417587": "無効なクエストタイプ '{questTypeName}' です。有効な値: {string.Join(\", \", Enum.GetNames(typeof(QuestType)))}",
     "3112026815": "職業ログは現在{(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}です。",
     "542066310": "血のレガシーログは{(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}です。",
-    "881612152": "エクソフォームのエモートアクション（<color=white>挑発</color>）は{(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}です。"
+    "881612152": "エクソフォームのエモートアクション（<color=white>挑発</color>）は{(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>有効</color>\" : \"<color=red>無効</color>\")}です。",
+    "1669157395": "バッグが少し重くなった気がする...",
+    "2346236465": "何かがバッグから落ちた!"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

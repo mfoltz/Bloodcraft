@@ -313,7 +313,9 @@
     "3112026815": "Rejestrowanie zawodu jest teraz [[token_4]].",
     "542066310": "Logowanie z dziedzictwa krwi [[token_4]].",
     "881612152": "Exo Form Form Action ([[token_0]] taunt [[token_1]]) [[token_6]]]",
-    "2978826451": "[[Token_0]] [[token_11]] [[token_1]] {(BuffsData.familiarBuffs.ContainsKey (znajomość)? ”[[Token_12]]*[[token_2]]\": \"\")}} [[[Token_3]] [[token_13]] [[token_4]]]] [[[token_5]] [[token_14]]] [[token_6]]] Dodano do [[token_7]]] [[token_15]] [[token_8]]]! ([[Token_9]] [[token_16]] [[token_10]])"
+    "2978826451": "[[Token_0]] [[token_11]] [[token_1]] {(BuffsData.familiarBuffs.ContainsKey (znajomość)? ”[[Token_12]]*[[token_2]]\": \"\")}} [[[Token_3]] [[token_13]] [[token_4]]]] [[[token_5]] [[token_14]]] [[token_6]]] Dodano do [[token_7]]] [[token_15]] [[token_8]]]! ([[Token_9]] [[token_16]] [[token_10]])",
+    "1669157395": "Twoja torba wydaje się nieco cięższa...",
+    "2346236465": "Coś wypadło z twojej torby!"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

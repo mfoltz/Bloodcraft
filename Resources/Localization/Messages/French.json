@@ -313,7 +313,9 @@
     "508045935": "Actions d'émote {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? \"<color=green>activées</color>\" : \"<color=red>désactivées</color>\")}!",
     "52573990": "L'enregistrement de l'expertise est maintenant {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? \"<color=green>activé</color>\" : \"<color=red>désactivé</color>\")}.",
     "542066310": "L'enregistrement de l'héritage du sang {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>activé</color>\" : \"<color=red>désactivé</color>\")}.",
-    "881612152": "Action d'émote de l'exoforme (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>activée</color>\" : \"<color=red>désactivée</color>\")}"
+    "881612152": "Action d'émote de l'exoforme (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>activée</color>\" : \"<color=red>désactivée</color>\")}",
+    "1669157395": "Votre sac paraît légèrement plus lourd...",
+    "2346236465": "Quelque chose est tombé de votre sac !"
   },
   "_meta": {
     "2316405313": "Identique à l'anglais intentionnellement ; espace réservé dynamique",
