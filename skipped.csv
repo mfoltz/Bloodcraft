@@ -1,26 +1,35 @@
 hash,english,reason
-profession-improved,{0} improved to [<color=white>{1}</color>],"token mismatch (expected ['0', '1', '2', '3'], got ['2', '0', '3'])"
-3125006928,"Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.","token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '6', '1', '2', '7', '3', '3'])"
-1106946472,{replyMessage},looks untranslated
-2147420594,{FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:,"token mismatch (expected ['0', '1', '2', '3'], got ['2', '0', '3'])"
-11642316,Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s,"token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '1', '2', '6', '3', '7'])"
-3320998835,{prestiges},looks untranslated
+profession-proficiency-gain,+<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>),looks untranslated
+profession-mutant-grease-dropped,"<color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.","token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '3'])"
+872190851,Failed to remove schematics from your inventory!,looks untranslated
+3720524051,{FormatClassName(playerClass)} passives not found!,"token mismatch (expected ['0'], got [])"
+3543031585,{FormatClassName(playerClass)} passives:,"token mismatch (expected ['0'], got [])"
+1106946472,{replyMessage},sentinel missing
+2461283441,Prestiges:,looks untranslated
+3320998835,{prestiges},sentinel missing
 1763729577,"Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? ""<color=green>enabled</color>"" : ""<color=red>disabled</color>"")}","token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '1', '6'])"
+2178615132,Permashroud <color=green>enabled</color>!,looks untranslated
+1797973559,Permashroud <color=red>disabled</color>!,looks untranslated
+3591926048,"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!",looks untranslated
+3489173133,<color=#c0c0c0>{weaponType}</color> Stats: {bonuses},looks untranslated
 736301693,"Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? ""<color=green>enabled</color>"" : ""<color=red>disabled</color>"")}.","token mismatch (expected ['0', '1', '2', '3', '4'], got ['4'])"
+3254231727,"You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!",looks untranslated
+1711931034,<color=red>{bloodType}</color> Stats: {bonuses},looks untranslated
 4051608029,"Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? ""<color=green>enabled</color>"" : ""<color=red>disabled</color>"")}.","token mismatch (expected ['0', '1', '2', '3', '4'], got ['4'])"
 1716911803,<color=white>{box}</color>:,looks untranslated
-2321621014,{fams},looks untranslated
+2321621014,{fams},sentinel missing
 3946665029,"Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? ""<color=green>enabled</color>"" : ""<color=red>disabled</color>"")}!","token mismatch (expected ['0', '1', '2', '3', '4'], got ['4'])"
-2794958495,{line},looks untranslated
-3334433396,Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.,"token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['0', '8', '5', '5', '6', '10', '7', '7', '10', '7', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'])"
-1469754031,Looks like your familiar is still able to be found; unbind it normally after calling if it's dismissed instead.,looks untranslated
+2794958495,{line},sentinel missing
+3334433396,Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.,"token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['0', '8', '1', '2', '9', '3', '4', '5', '6', '6'])"
 2271729042,"Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? ""<color=green>enabled</color>"" : ""<color=red>disabled</color>"")}.","token mismatch (expected ['0', '1', '2', '3', '4'], got ['4'])"
 107297214,"Level logging {(GetPlayerBool(steamId, EXPERIENCE_LOG_KEY) ? ""<color=green>enabled</color>"" : ""<color=red>disabled</color>"")}.","token mismatch (expected ['0', '1', '2', '3', '4'], got ['4'])"
-400324857,You haven't earned any experience yet!,looks untranslated
+2051256929,<color=#FFD700>{roundedXP}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~,looks untranslated
 1548584430,"Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? ""<color=green>enabled</color>"" : ""<color=red>disabled</color>"")}.","token mismatch (expected ['0', '1', '2', '3', '4'], got ['4'])"
-3938051122,Classes: {classTypes},looks untranslated
-2316405313,{0},looks untranslated
-3399068440,<color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L,"token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], got ['0', '1', '2', '24', '3', '4', '4', '5', '6', '25', '7', '8', '8', '9', '10', '26', '11', '12', '13', '14', '27', '15', '15', '17', '18'])"
+216725398,"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamId, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}","token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got ['0', '8', '1', '2', '9', '3', '4', '4', '5', '10'])"
+2316405313,{0},sentinel missing
+3399068440,<color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L,"token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], got ['0'])"
+1286090332,"You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!",looks untranslated
+3066749917,"<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $""{colorCode}*</color>"" : """")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)","token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '11', '1', '12', '2', '3', '13', '4', '5', '14', '6', '6', '9', '16', '10'])"
 508045935,"Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? ""<color=green>enabled</color>"" : ""<color=red>disabled</color>"")}!","token mismatch (expected ['0', '1', '2', '3', '4'], got ['4'])"
 52573990,"Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? ""<color=green>enabled</color>"" : ""<color=red>disabled</color>"")}.","token mismatch (expected ['0', '1', '2', '3', '4'], got ['4'])"
 1904876515,"Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? ""<color=green>enabled</color>"" : ""<color=red>disabled</color>"")}.","token mismatch (expected ['0', '1', '2', '3', '4'], got ['4'])"
@@ -28,9 +37,15 @@ profession-improved,{0} improved to [<color=white>{1}</color>],"token mismatch (
 3112026815,"Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? ""<color=green>enabled</color>"" : ""<color=red>disabled</color>"")}.","token mismatch (expected ['0', '1', '2', '3', '4'], got ['4'])"
 542066310,"Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? ""<color=green>enabled</color>"" : ""<color=red>disabled</color>"")}.","token mismatch (expected ['0', '1', '2', '3', '4'], got ['4'])"
 881612152,"Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? ""<color=green>enabled</color>"" : ""<color=red>disabled</color>"")}","token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '1', '6'])"
-3055272330,Familiar attempting to prestige must be at max level (<color=white>{0}</color>) or requires <color=#ffd9eb>{1}</color><color=yellow>x</color><color=white>{2}</color>.,"token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['0', '8', '5', '5', '6', '10', '7', '7', '10', '7', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'])"
-931800025,{0},looks untranslated
-3402815477,<color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L,"token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], got ['0', '1', '2', '24', '3', '4', '4', '5', '6', '25', '7', '8', '8', '9', '10', '26', '11', '12', '13', '14', '27', '15', '15', '17', '18'])"
-2615857787,You've already completed your {0}! Time until {1} reset - <color=yellow>{2}</color>,"token mismatch (expected ['0', '1', '2', '3', '4'], got ['3', '0', '4', '1'])"
-935039462,"Familiar already has <color=#00FFFF>{0}</color> (<color=yellow>{1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.","token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '6', '1', '2', '7', '3', '3'])"
-3613050716,{0} stat synergies [x<color=white>{1}</color>]:,"token mismatch (expected ['0', '1', '2', '3'], got ['2', '0', '3'])"
+2978826451,"<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? ""{colorCode}*</color>"" : """")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)","token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '11', '1', '12', '2', '9', '16', '10'])"
+3055272330,Familiar attempting to prestige must be at max level (<color=white>{0}</color>) or requires <color=#ffd9eb>{1}</color><color=yellow>x</color><color=white>{2}</color>.,"token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['0', '8', '1', '2', '9', '3', '4', '5', '6', '6'])"
+931800025,{0},sentinel missing
+3402815477,<color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L,"token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], got ['0'])"
+2537547396,<color=#FFD700>{0}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~,looks untranslated
+2137562404,Quest logging is now {0}.,looks untranslated
+2174214346,Completed {0} for <color=green>{1}</color>!,looks untranslated
+3637474013,<color=green>{0}</color>{1} [<color=white>{2}</color>][<color=#90EE90>{3}</color>] added to <color=white>{4}</color>! (<color=yellow>{5}</color>),"token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'], got ['0', '10', '1', '11', '2', '12', '3', '4', '13', '5', '8', '15', '9'])"
+800655279,{0}: <color=green>{1}</color> <color=white>{2}</color>x<color=#FFC0CB>{3}</color> [<color=white>{4}</color>/<color=yellow>{3}</color>],"token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'], got ['10', '0', '11', '1', '2', '12', '3', '4', '13', '5'])"
+835968431,{0} passives not found!,"token mismatch (expected ['0'], got [])"
+559704045,{0} passives:,"token mismatch (expected ['0'], got [])"
+2214985381,<color=#90EE90>{0}</color> Prestige Info:,looks untranslated
