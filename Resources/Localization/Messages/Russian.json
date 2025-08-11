@@ -313,6 +313,8 @@
     "3112026815": "Журнал профессий теперь {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>включен</color>\" : \"<color=red>отключен</color>\")}.",
     "542066310": "Журнал Blood Legacy {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>включен</color>\" : \"<color=red>отключен</color>\")}.",
     "881612152": "Действие эмоции формы Exo (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>включено</color>\" : \"<color=red>отключено</color>\")}.",
-    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] добавлено в <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)"
+    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] добавлено в <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)",
+    "1669157395": "Твоя сумка кажется немного тяжелее...",
+    "2346236465": "Из твоей сумки что-то выпало!"
   }
 }

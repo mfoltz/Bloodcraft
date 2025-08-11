@@ -313,7 +313,9 @@
     "3112026815": "Журнал професій {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>увімкнено</color>\" : \"<color=red>вимкнено</color>\")}.",
     "542066310": "Журнал спадщини крові {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>увімкнено</color>\" : \"<color=red>вимкнено</color>\")}.",
     "881612152": "Дія емодзі форми Exo (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>увімкнено</color>\" : \"<color=red>вимкнено</color>\")}",
-    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")}[<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] додано до <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)"
+    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")}[<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] додано до <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)",
+    "1669157395": "Твоя сумка здається трохи важчою...",
+    "2346236465": "Щось випало з твоєї сумки!"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder",

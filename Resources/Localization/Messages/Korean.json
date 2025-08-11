@@ -313,7 +313,9 @@
     "3112026815": "직업 로그가 이제 {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>활성화됨</color>\" : \"<color=red>비활성화됨</color>\")}.",
     "542066310": "혈통 로그가 {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>활성화됨</color>\" : \"<color=red>비활성화됨</color>\")}.",
     "881612152": "엑소 형태 감정표현 (<color=white>도발</color>)이 {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>활성화됨</color>\" : \"<color=red>비활성화됨</color>\")}",
-    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]이(가) <color=white>{groupName}</color>에 추가되었습니다! (<color=yellow>{slotIndex}</color>)"
+    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]이(가) <color=white>{groupName}</color>에 추가되었습니다! (<color=yellow>{slotIndex}</color>)",
+    "1669157395": "가방이 약간 무거워진 것 같다...",
+    "2346236465": "뭔가 가방에서 떨어졌어요!"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

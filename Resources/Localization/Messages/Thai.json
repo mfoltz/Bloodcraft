@@ -313,6 +313,8 @@
     "3112026815": "การบันทึกอาชีพคือ {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>เปิดใช้งาน</color>\" : \"<color=red>ปิดใช้งาน</color>\")}.",
     "542066310": "การบันทึกมรดกเลือด {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>เปิดใช้งาน</color>\" : \"<color=red>ปิดใช้งาน</color>\")}.",
     "881612152": "การแสดงอารมณ์รูปแบบ Exo (<color=white>ท้าทาย</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>เปิดใช้งาน</color>\" : \"<color=red>ปิดใช้งาน</color>\")}",
-    "2978826451": "<color=green>{famName}</color>(buffsData. famifitionrbuffs. ContunesKey (fifilitionrid) ?\"{colorCode}*</color>\":\"\") [<color=white>{level}</color>) [<color=#90EE90>{prestiges}</color>) เพิ่ม<color=white>{groupName}</color>ไม่! (<color=yellow>{slotIndex}</color>)"
+    "2978826451": "<color=green>{famName}</color>(buffsData. famifitionrbuffs. ContunesKey (fifilitionrid) ?\"{colorCode}*</color>\":\"\") [<color=white>{level}</color>) [<color=#90EE90>{prestiges}</color>) เพิ่ม<color=white>{groupName}</color>ไม่! (<color=yellow>{slotIndex}</color>)",
+    "1669157395": "กระเป๋าของคุณรู้สึกหนักขึ้นเล็กน้อย...",
+    "2346236465": "มีบางอย่างหล่นออกจากกระเป๋าของคุณ!"
   }
 }

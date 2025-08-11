@@ -313,7 +313,9 @@
     "3112026815": "El registro de la profesión ahora está {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>habilitado</color>\" : \"<color=red>deshabilitado</color>\")}.",
     "542066310": "Registro de Legado de sangre {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>habilitado</color>\" : \"<color=red>deshabilitado</color>\")}.",
     "881612152": "Acción de gesto de forma Exo (<color=white>burla</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>habilitada</color>\" : \"<color=red>deshabilitada</color>\")}",
-    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)"
+    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)",
+    "1669157395": "Tu bolsa se siente un poco más pesada...",
+    "2346236465": "¡Algo se cayó de tu bolsa!"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder",

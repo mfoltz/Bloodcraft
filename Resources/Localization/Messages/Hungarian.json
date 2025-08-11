@@ -313,6 +313,8 @@
     "3112026815": "A munkavégzési naplózás {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}.",
     "542066310": "Vérörökségi naplózás {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}.",
     "881612152": "Exo formában emote action (<color=white> taunt </color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}",
-    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? '{colorCode}*</color>' : '')} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] hozzáadva <color=white>{groupName}</color>-hoz! (<color=yellow>{slotIndex}</color>)"
+    "2978826451": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? '{colorCode}*</color>' : '')} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] hozzáadva <color=white>{groupName}</color>-hoz! (<color=yellow>{slotIndex}</color>)",
+    "1669157395": "A táskád kissé nehezebbnek tűnik...",
+    "2346236465": "Valami kiesett a táskádból!"
   }
 }

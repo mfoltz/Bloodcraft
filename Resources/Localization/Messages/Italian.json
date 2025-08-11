@@ -313,7 +313,9 @@
     "1095669519": "Registrazione livello {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? \"<color=green>abilitata</color>\" : \"<color=red>disabilitata</color>\")}",
     "3112026815": "La registrazione delle professioni è ora {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>abilitata</color>\" : \"<color=red>disabilitata</color>\")}",
     "542066310": "Registrazione dell'Eredità del Sangue {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>abilitata</color>\" : \"<color=red>disabilitata</color>\")}",
-    "881612152": "Azione emote della forma Exo (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>abilitata</color>\" : \"<color=red>disabilitata</color>\")}"
+    "881612152": "Azione emote della forma Exo (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>abilitata</color>\" : \"<color=red>disabilitata</color>\")}",
+    "1669157395": "La tua borsa sembra leggermente più pesante...",
+    "2346236465": "Qualcosa è caduto dalla tua borsa!"
   },
   "_meta": {
     "1716911803": "Identico intenzionalmente all'inglese; segnaposto dinamico"

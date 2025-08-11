@@ -313,6 +313,8 @@
     "3112026815": "Meslek günlüğü şimdi {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}.",
     "542066310": "Kan Mirası kaydı {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>etkin</color>\" : \"<color=red>devre dışı</color>\")}.",
     "881612152": "Exo formu emote eylemi (<color=white>alay</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>etkin</color>\" : \"<color=red>devre dışı</color>\")}",
-    "2978826451": "<color=green>{famName}</color>{(Buffsdata.familiarbuffs.containskey (tanıdık)? \"{colorCode}*</color>\":\" \")} [<color=white>{level}</color>] [<color=#90EE90>{prestiges}</color>] ekledi<color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)"
+    "2978826451": "<color=green>{famName}</color>{(Buffsdata.familiarbuffs.containskey (tanıdık)? \"{colorCode}*</color>\":\" \")} [<color=white>{level}</color>] [<color=#90EE90>{prestiges}</color>] ekledi<color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)",
+    "1669157395": "Çantan biraz daha ağırlaştı...",
+    "2346236465": "Bir şey çantandan düştü!"
   }
 }

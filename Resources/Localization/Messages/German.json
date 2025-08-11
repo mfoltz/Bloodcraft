@@ -313,7 +313,9 @@
     "3706417587": "Ungültiger Quest-Typ '{questTypeName}'. Gültige Werte sind: {string.Join(\", \", Enum.GetNames(typeof(QuestType)))}",
     "3112026815": "Berufs-Protokollierung ist nun {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>aktiviert</color>\" : \"<color=red>deaktiviert</color>\")}.",
     "542066310": "Blut-Vermächtnis-Protokollierung {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? \"<color=green>aktiviert</color>\" : \"<color=red>deaktiviert</color>\")}.",
-    "881612152": "Exo-Form-Emote-Aktion (<color=white>Spott</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>aktiviert</color>\" : \"<color=red>deaktiviert</color>\")}"
+    "881612152": "Exo-Form-Emote-Aktion (<color=white>Spott</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>aktiviert</color>\" : \"<color=red>deaktiviert</color>\")}",
+    "1669157395": "Deine Tasche fühlt sich etwas schwerer an...",
+    "2346236465": "Etwas ist aus deiner Tasche gefallen!"
   },
   "_meta": {
     "1716911803": "Absichtlich identisch mit Englisch; dynamischer Platzhalter"
