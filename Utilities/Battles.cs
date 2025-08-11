@@ -180,7 +180,14 @@ internal static class Battles
             prestiges = prestigeData.FamiliarPrestige[familiarId].Key;
         }
 
-        LocalizationService.Reply(ctx, $"<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)");
+        LocalizationService.Reply(ctx,
+            "<color=green>{0}</color>{1} [<color=white>{2}</color>][<color=#90EE90>{3}</color>] added to <color=white>{4}</color>! (<color=yellow>{5}</color>)",
+            famName,
+            buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $"{colorCode}*</color>" : string.Empty,
+            level,
+            prestiges,
+            groupName,
+            slotIndex);
     }
     */
     public static void HandleBattleGroupDetailsReply(ChatCommandContext ctx, ulong steamId, FamiliarBattleGroupsManager.FamiliarBattleGroup battleGroup)
@@ -194,7 +201,7 @@ internal static class Battles
             BuildBattleGroupDetailsReply(steamId, buffsData, prestigeData, battleGroup.Familiars, ref familiars);
 
             string familiarReply = string.Join(", ", familiars);
-            LocalizationService.Reply(ctx, $"Battle Group - {familiarReply}");
+            LocalizationService.Reply(ctx, "Battle Group - {0}", familiarReply);
             return;
         }
         else

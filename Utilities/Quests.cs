@@ -106,7 +106,7 @@ internal static class Quests
 
             if (!targetCache.IsCreated || !targetCache.ContainsKey(questObjective.Objective.Target))
             {
-                LocalizationService.Reply(ctx, $"Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {QuestTypeColor[questType]}.");
+                LocalizationService.Reply(ctx, "Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {0}.", QuestTypeColor[questType]);
                 return;
             }
 
@@ -153,10 +153,8 @@ internal static class Quests
             float distance = math.distance(userPosition, targetPosition);
             float3 direction = math.normalize(targetPosition - userPosition);
             string cardinalDirection = $"<color=yellow>{GetCardinalDirection(direction)}</color>";
-            double seconds = (DateTime.UtcNow - QuestService._lastUpdate).TotalSeconds;
 
-            // LocalizationService.HandleReply(ctx, $"Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection} <color=#F88380>{(int)seconds}</color>s ago.");
-            LocalizationService.Reply(ctx, $"Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection}!");
+            LocalizationService.Reply(ctx, "Nearest <color=white>{0}</color> was <color=#00FFFF>{1}</color>f away to the {2}!", questObjective.Objective.Target.GetLocalizedName(), (int)distance, cardinalDirection);
         }
         else
         {
@@ -168,17 +166,28 @@ internal static class Quests
         if (questData.TryGetValue(questType, out var questObjective) && !questObjective.Objective.Complete)
         {
             string timeLeft = GetTimeUntilReset(questObjective, questType);
-            LocalizationService.Reply(ctx, $"{QuestTypeColor[questType]}: <color=green>{questObjective.Objective.Goal}</color> <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>x<color=#FFC0CB>{questObjective.Objective.RequiredAmount}</color> [<color=white>{questObjective.Progress}</color>/<color=yellow>{questObjective.Objective.RequiredAmount}</color>]");
-            LocalizationService.Reply(ctx, $"Time until {questType} reset - <color=yellow>{timeLeft}</color> | {_questTargetType[questObjective.Objective.Goal]} Prefab: <color=white>{questObjective.Objective.Target.GetPrefabName()}</color>");
+            LocalizationService.Reply(ctx,
+                "{0}: <color=green>{1}</color> <color=white>{2}</color>x<color=#FFC0CB>{3}</color> [<color=white>{4}</color>/<color=yellow>{3}</color>]",
+                QuestTypeColor[questType],
+                questObjective.Objective.Goal,
+                questObjective.Objective.Target.GetLocalizedName(),
+                questObjective.Objective.RequiredAmount,
+                questObjective.Progress);
+            LocalizationService.Reply(ctx,
+                "Time until {0} reset - <color=yellow>{1}</color> | {2} Prefab: <color=white>{3}</color>",
+                questType,
+                timeLeft,
+                _questTargetType[questObjective.Objective.Goal],
+                questObjective.Objective.Target.GetPrefabName());
         }
         else if (questObjective.Objective.Complete)
         {
             string timeLeft = GetTimeUntilReset(questObjective, questType);
-            LocalizationService.Reply(ctx, $"You've already completed your {QuestTypeColor[questType]}! Time until {questType} reset - <color=yellow>{timeLeft}</color>");
+            LocalizationService.Reply(ctx, "You've already completed your {0}! Time until {1} reset - <color=yellow>{2}</color>", QuestTypeColor[questType], questType, timeLeft);
         }
         else
         {
-            LocalizationService.Reply(ctx, $"You don't have a {QuestTypeColor[questType]}.");
+            LocalizationService.Reply(ctx, "You don't have a {0}.", QuestTypeColor[questType]);
         }
     }
     static string GetTimeUntilReset((QuestObjective Objective, int Progress, DateTime LastReset) questObjective, QuestType questType)

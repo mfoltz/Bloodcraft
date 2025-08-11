@@ -359,7 +359,7 @@ internal static class Familiars
             data.FamiliarUnlocks[activeBox].Add(prefabHash);
             SaveFamiliarUnlocksData(steamId, data);
 
-            LocalizationService.Reply(ctx, $"<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.");
+            LocalizationService.Reply(ctx, "<color=green>{0}</color> added to <color=white>{1}</color>.", new PrefabGUID(prefabHash).GetLocalizedName(), activeBox);
         }
         else if (unit.ToLower().StartsWith("char")) // search for full and/or partial name match
         {
@@ -390,7 +390,7 @@ internal static class Familiars
                 data.FamiliarUnlocks[activeBox].Add(match.GuidHash);
                 SaveFamiliarUnlocksData(steamId, data);
 
-                LocalizationService.Reply(ctx, $"<color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.");
+                LocalizationService.Reply(ctx, "<color=green>{0}</color> (<color=yellow>{1}</color>) added to <color=white>{2}</color>.", match.GetLocalizedName(), match.GuidHash, activeBox);
             }
             else
             {
@@ -909,7 +909,7 @@ internal static class Familiars
 
         if (prestigeData.FamiliarPrestige[familiarId] >= ConfigService.MaxFamiliarPrestiges)
         {
-            LocalizationService.Reply(ctx, $"Your familiar has already prestiged the maximum number of times! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)");
+            LocalizationService.Reply(ctx, "Your familiar has already prestiged the maximum number of times! (<color=white>{0}</color>)", ConfigService.MaxFamiliarPrestiges);
             return;
         }
 
@@ -936,13 +936,13 @@ internal static class Familiars
                 }
                 else
                 {
-                    LocalizationService.Reply(ctx, $"Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.");
+                    LocalizationService.Reply(ctx, "Familiar already has <color=#00FFFF>{0}</color> (<color=yellow>{1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.", FamiliarPrestigeStats[value], value + 1);
                     return;
                 }
             }
             else
             {
-                LocalizationService.Reply(ctx, $"Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.");
+                LocalizationService.Reply(ctx, "Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.");
                 return;
             }
         }
@@ -962,7 +962,7 @@ internal static class Familiars
             Entity familiar = GetActiveFamiliar(playerCharacter);
             ModifyUnitStats(familiar, xpData.FamiliarExperience[familiarId].Key, steamId, familiarId);
 
-            LocalizationService.Reply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!");
+            LocalizationService.Reply(ctx, "Your familiar has prestiged [<color=#90EE90>{0}</color>]; the accumulated knowledge allowed them to retain their level!", prestigeLevel);
 
             /*
             if (value == -1)

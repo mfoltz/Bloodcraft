@@ -1189,7 +1189,7 @@ internal static class DataService
                 var data = LoadFamiliarBattleGroupsData(steamId);
                 if (data.BattleGroups.Count >= MAX_BATTLE_GROUPS)
                 {
-                    LocalizationService.Reply(ctx, $"Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!");
+                    LocalizationService.Reply(ctx, "Can't have more than <color=white>{0}</color> battle groups!", MAX_BATTLE_GROUPS);
                     return false;
                 }
 
@@ -1207,7 +1207,7 @@ internal static class DataService
 
                 data.BattleGroups.Remove(group);
                 SaveFamiliarBattleGroupsData(steamId, data);
-                LocalizationService.Reply(ctx, $"Deleted battle group <color=white>{groupName}</color>!");
+                LocalizationService.Reply(ctx, "Deleted battle group <color=white>{0}</color>!", groupName);
                 return true;
             }
             public static bool SetActiveBattleGroup(ChatCommandContext ctx, ulong steamId, string groupName)
@@ -1234,7 +1234,7 @@ internal static class DataService
                     BuildBattleGroupDetailsReply(steamId, buffsData, prestigeData, battleGroup, ref familiars);
 
                     string familiarReply = string.Join(", ", familiars);
-                    LocalizationService.Reply(ctx, $"Battle Group - {familiarReply}");
+                    LocalizationService.Reply(ctx, "Battle Group - {0}", familiarReply);
                 }
                 else
                 {

@@ -279,7 +279,7 @@ internal static class FamiliarCommands
                 }
 
                 PrefabGUID PrefabGUID = new(familiarId);
-                LocalizationService.Reply(ctx, $"<color=green>{PrefabGUID.GetLocalizedName()}</color> moved - <color=white>{name}</color>");
+                LocalizationService.Reply(ctx, "<color=green>{0}</color> moved - <color=white>{1}</color>", PrefabGUID.GetLocalizedName(), name);
             }
         }
         else if (data.FamiliarUnlocks.ContainsKey(name))
@@ -430,7 +430,7 @@ internal static class FamiliarCommands
 
         if (IsBannedPrefabGuid(vBloodPrefabGuid))
         {
-            LocalizationService.Reply(ctx, $"<color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is not available per configured familiar bans!");
+            LocalizationService.Reply(ctx, "<color=white>{0}</color> is not available per configured familiar bans!", vBloodPrefabGuid.GetLocalizedName());
             return;
         }
         else
@@ -442,7 +442,7 @@ internal static class FamiliarCommands
 
                 if (unlocksData.FamiliarUnlocks.Values.Any(list => list.Contains(vBloodPrefabGuid.GuidHash)))
                 {
-                    LocalizationService.Reply(ctx, $"<color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is already unlocked!");
+                    LocalizationService.Reply(ctx, "<color=white>{0}</color> is already unlocked!", vBloodPrefabGuid.GetLocalizedName());
                     return;
                 }
 
@@ -478,20 +478,20 @@ internal static class FamiliarCommands
                             unlocksData.FamiliarUnlocks[lastBoxName].Add(vBloodPrefabGuid.GuidHash);
 
                             SaveFamiliarUnlocksData(steamId, unlocksData);
-                            LocalizationService.Reply(ctx, $"New unit unlocked: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>");
+                            LocalizationService.Reply(ctx, "New unit unlocked: <color=green>{0}</color>", vBloodPrefabGuid.GetLocalizedName());
                         }
                         else if (unlocksData.FamiliarUnlocks.ContainsKey(lastBoxName))
                         {
                             unlocksData.FamiliarUnlocks[lastBoxName].Add(vBloodPrefabGuid.GuidHash);
 
                             SaveFamiliarUnlocksData(steamId, unlocksData);
-                            LocalizationService.Reply(ctx, $"New unit unlocked: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>");
+                            LocalizationService.Reply(ctx, "New unit unlocked: <color=green>{0}</color>", vBloodPrefabGuid.GetLocalizedName());
                         }
                     }
                 }
                 else
                 {
-                    LocalizationService.Reply(ctx, $"Not enough <color=#ffd9eb>{exoItem.GetLocalizedName()}</color>x<color=white>{factoredCost}</color> for {vBloodPrefabGuid.GetPrefabName()}!");
+                    LocalizationService.Reply(ctx, "Not enough <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for {2}!", exoItem.GetLocalizedName(), factoredCost, vBloodPrefabGuid.GetPrefabName());
                 }
             }
             else
@@ -527,7 +527,7 @@ internal static class FamiliarCommands
             familiarSet.RemoveAt(choice - 1);
             SaveFamiliarUnlocksData(steamId, data);
 
-            LocalizationService.Reply(ctx, $"<color=green>{familiarId.GetLocalizedName()}</color> removed from <color=white>{activeBox}</color>.");
+            LocalizationService.Reply(ctx, "<color=green>{0}</color> removed from <color=white>{1}</color>.", familiarId.GetLocalizedName(), activeBox);
         }
         else
         {
@@ -955,7 +955,7 @@ internal static class FamiliarCommands
             }
             else
             {
-                LocalizationService.Reply(ctx, $"Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.");
+                LocalizationService.Reply(ctx, "Familiar attempting to prestige must be at max level (<color=white>{0}</color>) or requires <color=#ffd9eb>{1}</color><color=yellow>x</color><color=white>{2}</color>.", ConfigService.MaxFamiliarLevel, _itemSchematic.GetLocalizedName(), clampedCost);
             }
         }
         else
@@ -1225,7 +1225,7 @@ internal static class FamiliarCommands
                 }
                 else
                 {
-                    LocalizationService.Reply(ctx, $"You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{clampedCost}</color>)");
+                    LocalizationService.Reply(ctx, "You don't have the required amount of <color=#ffd9eb>{0}</color>! (x<color=white>{1}</color>)", _vampiricDust.GetLocalizedName(), clampedCost);
                 }
             }
             else if (buffsData.FamiliarBuffs.ContainsKey(famKey))
@@ -1242,7 +1242,7 @@ internal static class FamiliarCommands
                 }
                 else
                 {
-                    LocalizationService.Reply(ctx, $"You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{changeQuantity}</color>)");
+                    LocalizationService.Reply(ctx, "You don't have the required amount of <color=#ffd9eb>{0}</color>! (x<color=white>{1}</color>)", _vampiricDust.GetLocalizedName(), changeQuantity);
                 }
             }
         }

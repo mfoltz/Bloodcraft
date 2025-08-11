@@ -186,8 +186,8 @@ internal static class Misc
         public const string DAGGERS_KEY = nameof(WeaponType.Daggers);
         public const string CLAWS_KEY = nameof(WeaponType.Claws);
 
-        const string BAG_HEAVIER_MESSAGE = "Your bag feels slightly heavier...";
-        const string ITEM_DROPPED_MESSAGE = "Something fell out of your bag!";
+        public const string BAG_HEAVIER_MESSAGE = "Your bag feels slightly heavier...";
+        public const string ITEM_DROPPED_MESSAGE = "Something fell out of your bag!";
 
         public static readonly Dictionary<string, bool> DefaultBools = new()
         {
