@@ -226,9 +226,9 @@
     "349267262": "Kann nicht ändern oder aktive Klassenbuchstaben, wenn die Inventar ist voll, brauchen mindestens einen Raum, um sicher zu handhaben Juwelen beim Schalten.",
     "4066899438": "Schaltbuch <color=green> aktiviert</color>!",
     "2320898349": "Schaltbuch <color=red> deaktiviert</color>!",
-    "3756348742": "Reminders {0}.",
+    "3756348742": "Erinnerungen {0}.",
     "1769980541": "Kann nicht finden bool key aus scrolling text type...",
-    "4003734136": "<color=white>{0}</color> scrolling text {1}.",
+    "4003734136": "<color=white>{0}</color> scrollender Text {1}.",
     "2069903402": "Starter Kit ist nicht aktiviert.",
     "2817800174": "Sie haben ein Startset mit:",
     "2316405313": "{0}",
@@ -300,12 +300,12 @@
     "2437634726": "Level für <color=green>{foundUser.CharacterName.Value}</color> auf <color=white>{level}</color> gesetzt!",
     "216725398": "Du bist Level [<color=white>{data.Key}</color>] und hast <color=yellow>{progress}</color> <color=#FFC0CB>Fertigkeit</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamId, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}",
     "714432788": "Du hast bereits {FormatClassName(currentClass.Value)} gewählt, verwende <color=white>'.class c [Class]'</color>, um zu wechseln. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)",
-    "3399068440": "<color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L",
+    "3399068440": "<color=white>VBloods getötet</color>: <color=#FF5733>{0}</color> | <color=white>Einheiten getötet</color>: <color=#FFD700>{1}</color> | <color=white>Tode</color>: <color=#808080>{2}</color> | <color=white>Online-Zeit</color>: <color=#1E90FF>{3}</color>Std | <color=white>Zurückgelegte Distanz</color>: <color=#32CD32>{4}</color>kf | <color=white>Verbrauchtes Blut</color>: <color=red>{5}</color>L",
     "1812818458": "Du hast im Bereich <color=#90EE90>Erfahrung</color>[<color=white>{prestigeLevel}</color>] prestigiert! Wachstumsraten für alle Expertisen/Vermächtnisse um <color=green>{gainPercentage}</color> erhöht, Erfahrung durch Einheitenkills um <color=red>{reductionPercentage}</color> reduziert.",
     "709298301": "<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>] erfolgreich prestigiert! Wachstumsrate um <color=red>{percentageReductionString}</color> reduziert und Stat-Boni um <color=green>{statGainString}</color> verbessert. Die Gesamtänderung der Wachstumsrate mit Level-Prestige-Bonus beträgt <color=yellow>{totalEffectString}</color>.",
     "3066749917": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? \"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] zu <color=white>{groupName}</color> hinzugefügt! (<color=yellow>{slotIndex}</color>)",
-    "1465975319": "Reminders {0}.",
-    "1945389717": "<color=white>{0}</color> scrolling text {1}.",
+    "1465975319": "Erinnerungen {0}.",
+    "1945389717": "<color=white>{0}</color> scrollender Text {1}.",
     "2511919794": "<color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? \"{colorCode}*</color> {levelAndPrestiges}\" : \" {levelAndPrestiges}\")}",
     "508045935": "Emote-Aktionen {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? \"<color=green>aktiviert</color>\" : \"<color=red>deaktiviert</color>\")}!",
     "52573990": "Expertise-Protokollierung ist nun {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? \"<color=green>aktiviert</color>\" : \"<color=red>deaktiviert</color>\")}.",
@@ -316,6 +316,6 @@
     "881612152": "Exo-Form-Emote-Aktion (<color=white>Spott</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>aktiviert</color>\" : \"<color=red>deaktiviert</color>\")}"
   },
   "_meta": {
-    "1716911803": "Intentionally identical to English; dynamic placeholder"
+    "1716911803": "Absichtlich identisch mit Englisch; dynamischer Platzhalter"
   }
 }
