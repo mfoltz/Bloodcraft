@@ -31,68 +31,6 @@ internal static class Quests
         { TargetType.Fish, "Fishing" }
     };
 
-    /*
-    public static void QuestTrackReply(ChatCommandContext ctx, Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, QuestType questType)
-    {
-        Entity character = ctx.Event.SenderCharacterEntity;
-        ulong steamId = ctx.Event.User.PlatformId;
-
-        if (questData.TryGetValue(questType, out var questObjective) && questObjective.Objective.Goal.Equals(TargetType.Kill) && !questObjective.Objective.Complete)
-        {
-            if (!QuestService.TargetCache.TryGetValue(questObjective.Objective.Target, out HashSet<Entity> entities))
-            {
-                LocalizationService.Reply(ctx, $"Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {QuestTypeColor[questType]}.");
-            }
-            else if (entities.Count > 0)
-            {
-                float3 userPosition = character.GetPosition();
-                Entity closest = entities
-                    .Where(entity =>
-                        entity.Exists()
-                        && !entity.HasBuff(_imprisonedBuff)
-                        && !entity.IsFamiliar())
-                    .Select(entity => new
-                    {
-                        Entity = entity,
-                        Distance = math.distance(userPosition, entity.GetPosition())
-                    })
-                    .Where(x => x.Distance <= MAX_DISTANCE)
-                    .OrderBy(x => x.Distance)
-                    .Select(x => x.Entity)
-                    .FirstOrDefault();
-
-                if (!closest.Exists())
-                {
-                    LocalizationService.Reply(ctx, "Targets have all been killed, give them a chance to respawn!");
-                    return;
-                }
-                else if (closest.IsVBloodOrGateBoss())
-                {
-                    LocalizationService.Reply(ctx, "Use the VBlood menu to track bosses!");
-                    return;
-                }
-
-                float3 targetPosition = closest.GetPosition();
-                float distance = math.distance(userPosition, targetPosition);
-
-                float3 direction = math.normalize(targetPosition - userPosition);
-                string cardinalDirection = $"<color=yellow>{GetCardinalDirection(direction)}</color>";
-                double seconds = (DateTime.UtcNow - QuestService._lastUpdate).TotalSeconds;
-
-                LocalizationService.Reply(ctx, $"Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection} <color=#F88380>{(int)seconds}</color>s ago.");
-            }
-            else if (entities.Count == 0)
-            {
-                LocalizationService.Reply(ctx, "Targets have all been killed, give them a chance to respawn!");
-            }
-        }
-        else
-        {
-            LocalizationService.Reply(ctx, "Tracking is only available for incomplete kill quests.");
-        }
-    }
-    */
-
     public static void QuestTrackReply(ChatCommandContext ctx, Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, QuestType questType)
     {
         Entity character = ctx.Event.SenderCharacterEntity;
@@ -152,7 +90,7 @@ internal static class Quests
             float3 targetPosition = closest.GetPosition();
             float distance = math.distance(userPosition, targetPosition);
             float3 direction = math.normalize(targetPosition - userPosition);
-            string cardinalDirection = $"<color=yellow>{GetCardinalDirection(direction)}</color>";
+            string cardinalDirection = string.Format("<color=yellow>{0}</color>", GetCardinalDirection(direction));
 
             LocalizationService.Reply(ctx, "Nearest <color=white>{0}</color> was <color=#00FFFF>{1}</color>f away to the {2}!", questObjective.Objective.Target.GetLocalizedName(), (int)distance, cardinalDirection);
         }
