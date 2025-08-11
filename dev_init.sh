@@ -5,7 +5,7 @@ set -e
 BEPINEX_PLUGIN_DIR="/path/to/BepInEx/plugins"
 
 if ! command -v dotnet >/dev/null; then
-    echo ".NET SDK is required. Run .codex/install.sh first." >&2
+    echo ".NET SDK and .NET 6 runtime are required. Run .codex/install.sh first." >&2
     exit 1
 fi
 
