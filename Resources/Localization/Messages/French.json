@@ -135,7 +135,7 @@
     "2196432591": "<color=red>{BloodHandler.GetBloodType()}</color> legs mis à [<color=white>{level}</color>] pour <color=green>{foundUser.CharacterName}</color>",
     "85537047": "Legs sanguins disponibles: <color=red>{bloodTypesList}</color>",
     "1381058165": "Les familiers ne sont pas activés.",
-    "1716911803": "<color=white>{box}</color>:",
+    "1716911803": "<color=white>{box}</color> :",
     "863911874": "<color=yellow>{count}</color> <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContientKey(familiarKey) ? $",
     "1066178325": "Pas de boîte active ! Essayez d'utiliser <color=white>'.fam sb Nom'</color> si vous connaissez le familier que vous recherchez. (utiliser des citations pour les noms avec un espace)",
     "2462277004": "Je n'ai pas trouvé de boîte active !",
@@ -277,10 +277,10 @@
     "349267262": "Ne peut pas changer ou les sorts de classe active lorsque l'inventaire est plein, besoin d'au moins un espace pour manipuler les bijoux en toute sécurité lors de la commutation.",
     "4066899438": "<color=green>activé</color>!",
     "2320898349": "Le sort de changement <color=red> est désactivé</color>!",
-    "3756348742": "Reminders {0}.",
-    "1465975319": "Reminders {0}.",
+    "3756348742": "Rappels {0}.",
+    "1465975319": "Rappels {0}.",
     "1769980541": "Impossible de trouver la clé de bool à partir du type de texte défilant...",
-    "4003734136": "<color=white>{0}</color> scrolling text {1}.",
+    "4003734136": "<color=white>{0}</color> texte défilant {1}.",
     "2069903402": "Le kit de démarrage n'est pas activé.",
     "2817800174": "Vous avez reçu un kit de départ avec :",
     "2316405313": "{0}",
@@ -302,13 +302,13 @@
     "1286090332": "Vous êtes niveau [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] avec <color=yellow>{progress}</color> <color=#FFC0CB> </color> <color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color> dans <color=red>{handler.GetBloodType()}</color>!",
     "3066749917": "<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $\"{colorCode}*</color>\" : \"\")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] ajouté à <color=white>{groupName}</color> ! (<color=yellow>{slotIndex}</color>)",
     "1904876515": "L'enregistrement des quêtes est maintenant {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? \"<color=green>activé</color>\" : \"<color=red>désactivé</color>\")}.",
-    "1945389717": "<color=white>{0}</color> scrolling text {1}.",
+    "1945389717": "<color=white>{0}</color> texte défilant {1}.",
     "2147420594": "{FormatClassName(playerClass)} synergies statistiques [x<color=white>{ConfigService.SynergyMultiplier}</color>] :",
-    "2511919794": "<color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $\"{colorCode}*</color> {levelAndPrestiges}\" : $\" {levelAndPrestiges}\")}",
+    "2511919794": "<color=yellow>{count}</color> | <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $\"{colorCode}*</color> {levelAndPrestiges}\" : $\" {levelAndPrestiges}\")}",
     "3112026815": "L'enregistrement professionnel est maintenant {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? \"<color=green>activé</color>\" : \"<color=red>désactivé</color>\")}.",
     "3125006928": "Le familier possède déjà <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) grâce au prestige, utilisez '<color=white>.fam lst</color>' pour voir les options.",
     "3334433396": "Le familier qui tente de gagner du prestige doit être au niveau maximum (<color=white>{ConfigService.MaxFamiliarLevel}</color>) ou nécessite <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.",
-    "3399068440": "<color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L",
+    "3399068440": "<color=white>VBloods tués</color> : <color=#FF5733>{0}</color> | <color=white>Unités tuées</color> : <color=#FFD700>{1}</color> | <color=white>Morts</color> : <color=#808080>{2}</color> | <color=white>Temps en ligne</color> : <color=#1E90FF>{3}</color>h | <color=white>Distance parcourue</color> : <color=#32CD32>{4}</color>kf | <color=white>Sang consommé</color> : <color=red>{5}</color>L",
     "3706417587": "Type de quête invalide '{questTypeName}'. Les valeurs valides sont : {string.Join(\", \", Enum.GetNames(typeof(QuestType)))}",
     "508045935": "Actions d'émote {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? \"<color=green>activées</color>\" : \"<color=red>désactivées</color>\")}!",
     "52573990": "L'enregistrement de l'expertise est maintenant {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? \"<color=green>activé</color>\" : \"<color=red>désactivé</color>\")}.",
@@ -316,6 +316,7 @@
     "881612152": "Action d'émote de l'exoforme (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>activée</color>\" : \"<color=red>désactivée</color>\")}"
   },
   "_meta": {
-    "1716911803": "Identique à l'anglais intentionnellement ; espace réservé dynamique"
+    "2316405313": "Identique à l'anglais intentionnellement ; espace réservé dynamique",
+    "2511919794": "Identique à l'anglais intentionnellement ; espace réservé dynamique"
   }
 }
