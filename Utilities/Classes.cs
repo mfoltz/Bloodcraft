@@ -416,7 +416,7 @@ internal static class Classes
                 prefabName = prefabName[..prefabIndex].TrimEnd();
             }
 
-            return $"<color=yellow>{index + 1}</color>| {(prefabEntity.Has<ModifyUnitStatBuff_DOTS>() ? FormatModifyUnitStatBuffer(prefabEntity) : prefabName)} at level <color=green>{level}</color>";
+            return string.Format("<color=yellow>{0}</color>| {1} at level <color=green>{2}</color>", index + 1, prefabEntity.Has<ModifyUnitStatBuff_DOTS>() ? FormatModifyUnitStatBuffer(prefabEntity) : prefabName, level);
         }).ToList();
 
         LocalizationService.Reply(ctx, "{0} passives:", FormatClassName(playerClass));
@@ -444,12 +444,12 @@ internal static class Classes
 
         if (hasWeaponStats && weaponStats is { Count: > 0 })
         {
-            allStats.AddRange(weaponStats.Select(stat => $"<color=white>{stat}</color> (<color=#00FFFF>Weapon</color>)"));
+            allStats.AddRange(weaponStats.Select(stat => string.Format("<color=white>{0}</color> (<color=#00FFFF>Weapon</color>)", stat)));
         }
 
         if (hasBloodStats && bloodStats is { Count: > 0 })
         {
-            allStats.AddRange(bloodStats.Select(stat => $"<color=white>{stat}</color> (<color=red>Blood</color>)"));
+            allStats.AddRange(bloodStats.Select(stat => string.Format("<color=white>{0}</color> (<color=red>Blood</color>)", stat)));
         }
 
         if (allStats.Count == 0)
@@ -468,39 +468,6 @@ internal static class Classes
         }
     }
 
-    /*
-    public static void ReplyClassSynergies(ChatCommandContext ctx, PlayerClass playerClass)
-    {
-        if (ClassWeaponBloodMap.TryGetValue(playerClass, out var weaponBloodStats))
-        {
-            var weaponStats = weaponBloodStats.Item1.Split(',').Select(v => ((WeaponStatType)int.Parse(v)).ToString()).ToList();
-            var bloodStats = weaponBloodStats.Item2.Split(',').Select(v => ((BloodStatType)int.Parse(v)).ToString()).ToList();
-
-            if (weaponStats.Count == 0 && bloodStats.Count == 0)
-            {
-                LocalizationService.Reply(ctx, $"No stat synergies found for {FormatClassName(playerClass)}.");
-                return;
-            }
-
-            var allStats = new List<string>();
-            allStats.AddRange(weaponStats.Select(stat => $"<color=white>{stat}</color> (<color=#00FFFF>Weapon</color>)"));
-            allStats.AddRange(bloodStats.Select(stat => $"<color=white>{stat}</color> (<color=red>Blood</color>)"));
-
-            LocalizationService.Reply(ctx, $"{FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:");
-
-            for (int i = 0; i < allStats.Count; i += 6)
-            {
-                var batch = allStats.Skip(i).Take(6);
-                string replyMessage = string.Join(", ", batch);
-                LocalizationService.Reply(ctx, $"{replyMessage}");
-            }
-        }
-        else
-        {
-            LocalizationService.Reply(ctx, $"Couldn't find stat synergies for {FormatClassName(playerClass)}...");
-        }
-    }
-    */
     public static void ReplyClassSpells(ChatCommandContext ctx, PlayerClass playerClass)
     {
         List<int> spells = Configuration.ParseIntegersFromString(ClassSpellsMap[playerClass]);
@@ -516,7 +483,7 @@ internal static class Classes
             PrefabGUID spellPrefabGuid = new(spell);
             string spellName = GetClassSpellName(spellPrefabGuid);
 
-            return $"<color=yellow>{index + 1}</color>| <color=white>{spellName}</color>";
+            return string.Format("<color=yellow>{0}</color>| <color=white>{1}</color>", index + 1, spellName);
         }).ToList();
 
         if (!ConfigService.DefaultClassSpell.Equals(0))
@@ -524,7 +491,7 @@ internal static class Classes
             PrefabGUID spellPrefabGuid = new(ConfigService.DefaultClassSpell);
             string spellName = GetClassSpellName(spellPrefabGuid);
 
-            classSpells.Insert(0, $"<color=yellow>{0}</color>| <color=white>{spellName}</color>");
+            classSpells.Insert(0, string.Format("<color=yellow>0</color>| <color=white>{0}</color>", spellName));
         }
 
         LocalizationService.Reply(ctx, "{0} spells:", FormatClassName(playerClass));
@@ -869,7 +836,7 @@ internal static class Classes
 
         if (_classColorMap.TryGetValue(classType, out string classColor))
         {
-            return $"<color={classColor}>{className}</color>";
+            return string.Format("<color={0}>{1}</color>", classColor, className);
         }
         else
         {
@@ -1101,7 +1068,7 @@ internal static class Classes
                     formattedValue = FormatPercentStatValue(value);
                 }
 
-                string colorizedStat = $"<color=#00FFFF>{statName}</color>: <color=white>{formattedValue}</color>";
+                string colorizedStat = string.Format("<color=#00FFFF>{0}</color>: <color=white>{1}</color>", statName, formattedValue);
                 formattedStats.Add(colorizedStat);
             }
 

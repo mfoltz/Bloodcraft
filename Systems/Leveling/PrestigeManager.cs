@@ -392,14 +392,14 @@ internal static class PrestigeManager
             string reductionPercentage = (reductionFactor * 100).ToString("F2") + "%";
             string gainPercentage = (gainFactor * 100).ToString("F2") + "%";
 
-            LocalizationService.Reply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
-            LocalizationService.Reply(ctx, $"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
-            LocalizationService.Reply(ctx, $"Growth rate increase for expertise and legacies: <color=green>{gainPercentage}</color>");
-            LocalizationService.Reply(ctx, $"Growth rate reduction for experience: <color=yellow>{reductionPercentage}</color>");
+            LocalizationService.Reply(ctx, "<color=#90EE90>{0}</color> Prestige Info:", parsedPrestigeType);
+            LocalizationService.Reply(ctx, "Current Prestige Level: <color=yellow>{0}</color>/{1}", prestigeLevel, maxPrestigeLevel);
+            LocalizationService.Reply(ctx, "Growth rate increase for expertise and legacies: <color=green>{0}</color>", gainPercentage);
+            LocalizationService.Reply(ctx, "Growth rate reduction for experience: <color=yellow>{0}</color>", reductionPercentage);
 
             if (prestigeData.TryGetValue(PrestigeType.Exo, out var exoData) && exoData > 0)
             {
-                LocalizationService.Reply(ctx, $"Experience rate reduction for leveling no longer applies for exo prestiging.");
+                LocalizationService.Reply(ctx, "Experience rate reduction for leveling no longer applies for exo prestiging.");
             }
         }
         else
@@ -424,11 +424,11 @@ internal static class PrestigeManager
 
             string totalEffectString = (combinedFactor >= 0 ? "+" : "-") + (combinedFactor * 100).ToString("F2") + "%";
 
-            LocalizationService.Reply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
-            LocalizationService.Reply(ctx, $"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
-            LocalizationService.Reply(ctx, $"Growth rate reduction from <color=#90EE90>{parsedPrestigeType}</color> prestige level: <color=yellow>-{percentageReductionString}</color>");
-            LocalizationService.Reply(ctx, $"Stat bonuses improvement: <color=green>{statGainString}</color>");
-            LocalizationService.Reply(ctx, $"Total change in growth rate including leveling prestige bonus: <color=yellow>{totalEffectString}</color>");
+            LocalizationService.Reply(ctx, "<color=#90EE90>{0}</color> Prestige Info:", parsedPrestigeType);
+            LocalizationService.Reply(ctx, "Current Prestige Level: <color=yellow>{0}</color>/{1}", prestigeLevel, maxPrestigeLevel);
+            LocalizationService.Reply(ctx, "Growth rate reduction from <color=#90EE90>{0}</color> prestige level: <color=yellow>-{1}</color>", parsedPrestigeType, percentageReductionString);
+            LocalizationService.Reply(ctx, "Stat bonuses improvement: <color=green>{0}</color>", statGainString);
+            LocalizationService.Reply(ctx, "Total change in growth rate including leveling prestige bonus: <color=yellow>{0}</color>", totalEffectString);
         }
     }
     public static bool CanPrestige(ulong steamId, PrestigeType parsedPrestigeType, int xpKey)
@@ -490,7 +490,7 @@ internal static class PrestigeManager
         }
         */
 
-        LocalizationService.Reply(ctx, $"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, experience from unit kills reduced by <color=red>{reductionPercentage}</color>.");
+        LocalizationService.Reply(ctx, "You have prestiged in <color=#90EE90>Experience</color>[<color=white>{0}</color>]! Growth rates for all expertise/legacies increased by <color=green>{1}</color>, experience from unit kills reduced by <color=red>{2}</color>.", prestigeLevel, gainPercentage, reductionPercentage);
     }
     static void HandleOtherPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, int prestigeLevel)
     {
@@ -528,7 +528,7 @@ internal static class PrestigeManager
         }
         */
 
-        LocalizationService.Reply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>] prestiged successfully! Growth rate reduced by <color=red>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
+        LocalizationService.Reply(ctx, "<color=#90EE90>{0}</color>[<color=white>{1}</color>] prestiged successfully! Growth rate reduced by <color=red>{2}</color> and stat bonuses improved by <color=green>{3}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{4}</color>.", parsedPrestigeType, prestigeLevel, percentageReductionString, statGainString, totalEffectString);
     }
     public static void RemovePrestigeBuffs(Entity character)
     {
