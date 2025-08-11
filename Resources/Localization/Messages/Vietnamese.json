@@ -314,7 +314,20 @@
     "3499636759": "Thời gian cho đến {0} Đặt lại - <color=yellow>{1}</color> | {2} prefab: <color=white>{3}</color>",
     "2615857787": "Bạn đã hoàn thành {0}! Thời gian cho đến {1} Đặt lại - <color=yellow>{2}</color>",
     "743202161": "Bạn không có {0}.",
-    "2174214346": "Đã hoàn thành {0} cho <color=green>{1}</color>!"
+    "2174214346": "Đã hoàn thành {0} cho <color=green>{1}</color>!",
+    "profession-improved": "{0} improved to [<color=white>{1}</color>]",
+    "profession-proficiency-gain": "+<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>)",
+    "profession-bonus-received": "<color=green>{0}</color>x<color=white>{1}</color> received from {2}",
+    "profession-gold-ore-received": "<color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}",
+    "profession-gold-ore-dropped": "<color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.",
+    "profession-radiant-fiber-received": "<color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}",
+    "profession-radiant-fiber-dropped": "<color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.",
+    "profession-bonus-seeds-received": "<color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}!",
+    "profession-bonus-seeds-dropped": "<color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.",
+    "profession-bonus-saplings-received": "<color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}!",
+    "profession-bonus-saplings-dropped": "<color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.",
+    "profession-mutant-grease-received": "<color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}",
+    "profession-mutant-grease-dropped": "<color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full."
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"
