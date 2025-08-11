@@ -14,10 +14,16 @@ if ! command -v dotnet >/dev/null; then
     bash "$SCRIPT_DIR/dotnet-install.sh" --channel "$DOTNET_VERSION" --install-dir "$HOME/.dotnet"
 fi
 
-# Install .NET 6 targeting pack if not already present
+# Install .NET 6 SDK if not already present
 if ! dotnet --list-sdks 2>/dev/null | grep -q '^6\.'; then
-    echo "Installing .NET 6 targeting pack..."
+    echo "Installing .NET 6 SDK..."
     bash "$SCRIPT_DIR/dotnet-install.sh" --channel "6.0" --install-dir "$HOME/.dotnet" --no-path
+fi
+
+# Install .NET 6 runtime if missing
+if ! dotnet --list-runtimes 2>/dev/null | grep -q '^Microsoft.NETCore.App 6\.'; then
+    echo "Installing .NET 6 runtime..."
+    bash "$SCRIPT_DIR/dotnet-install.sh" --channel "6.0" --runtime "dotnet" --install-dir "$HOME/.dotnet" --no-path
 fi
 
 export DOTNET_ROOT="$HOME/.dotnet"
