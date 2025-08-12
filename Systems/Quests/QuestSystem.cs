@@ -172,6 +172,12 @@ internal static class QuestSystem
     static readonly Dictionary<ulong, Dictionary<QuestType, (int Progress, bool Active)>> _delayedQuestMessages = [];
     static readonly WaitForSeconds _questMessageDelay = new(0.1f);
 
+    const string QUEST_DAILY_REFRESHED_MESSAGE = "Your <color=#00FFFF>Daily Quest</color> has been refreshed!";
+    const string QUEST_WEEKLY_REFRESHED_MESSAGE = "Your <color=#BF40BF>Weekly Quest</color> has been refreshed!";
+    const string QUEST_NEW_DAILY_MESSAGE = "New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>]";
+    const string QUEST_REWARD_RECEIVED_MESSAGE = "You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}!";
+    const string QUEST_REWARD_DROPPED_MESSAGE = "You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}! It dropped on the ground because your inventory was full.";
+
     /*
     static IEnumerable<PrefabGUID> GetKillPrefabsForLevelEnumerable(int playerLevel)
     {
@@ -455,13 +461,13 @@ internal static class QuestSystem
                     targets = [..GetGoalPrefabsForLevelEnumerable(goal, level)];
 
                     questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, now);
-                    LocalizationService.Reply(EntityManager, user, "Your <color=#00FFFF>Daily Quest</color> has been refreshed!");
+                    LocalizationService.Reply(EntityManager, user, QUEST_DAILY_REFRESHED_MESSAGE);
 
                     goal = targetTypes.Last();
                     targets = [..GetGoalPrefabsForLevelEnumerable(goal, level)];
 
                     questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, QuestType.Weekly), 0, now);
-                    LocalizationService.Reply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed!");
+                    LocalizationService.Reply(EntityManager, user, QUEST_WEEKLY_REFRESHED_MESSAGE);
                 }
                 else if (refreshDaily)
                 {
@@ -469,7 +475,7 @@ internal static class QuestSystem
                     targets = [..GetGoalPrefabsForLevelEnumerable(goal, level)];
 
                     questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, now);
-                    LocalizationService.Reply(EntityManager, user, "Your <color=#00FFFF>Daily Quest</color> has been refreshed!");
+                    LocalizationService.Reply(EntityManager, user, QUEST_DAILY_REFRESHED_MESSAGE);
                 }
                 else if (refreshWeekly)
                 {
@@ -477,7 +483,7 @@ internal static class QuestSystem
                     targets = [..GetGoalPrefabsForLevelEnumerable(goal, level)];
 
                     questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, QuestType.Weekly), 0, now);
-                    LocalizationService.Reply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed!");
+                    LocalizationService.Reply(EntityManager, user, QUEST_WEEKLY_REFRESHED_MESSAGE);
                 }
 
                 steamId.SetPlayerQuests(questData);
@@ -625,7 +631,7 @@ internal static class QuestSystem
                         questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, DateTime.UtcNow);
 
                         var dailyQuest = questData[QuestType.Daily];
-                        LocalizationService.Reply(EntityManager, user, "New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>]", dailyQuest.Objective.Goal, dailyQuest.Objective.Target.GetLocalizedName(), dailyQuest.Objective.RequiredAmount, dailyQuest.Progress);
+                        LocalizationService.Reply(EntityManager, user, QUEST_NEW_DAILY_MESSAGE, dailyQuest.Objective.Goal, dailyQuest.Objective.Target.GetLocalizedName(), dailyQuest.Objective.RequiredAmount, dailyQuest.Progress);
                     }
                 }
             }
@@ -655,15 +661,15 @@ internal static class QuestSystem
 
         if (objective.Target.GetPrefabName().Contains("vblood", StringComparison.OrdinalIgnoreCase)) quantity *= VBLOOD_FACTOR;
 
-        if (ServerGameManager.TryAddInventoryItem(user.LocalCharacter._Entity, reward, quantity))
-        {
-            LocalizationService.Reply(EntityManager, user, "You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}!", reward.GetLocalizedName(), quantity, colorType);
-        }
-        else
-        {
-            InventoryUtilitiesServer.CreateDropItem(EntityManager, user.LocalCharacter._Entity, reward, quantity, new Entity());
-            LocalizationService.Reply(EntityManager, user, "You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}! It dropped on the ground because your inventory was full.", reward.GetLocalizedName(), quantity, colorType);
-        }
+            if (ServerGameManager.TryAddInventoryItem(user.LocalCharacter._Entity, reward, quantity))
+            {
+                LocalizationService.Reply(EntityManager, user, QUEST_REWARD_RECEIVED_MESSAGE, reward.GetLocalizedName(), quantity, colorType);
+            }
+            else
+            {
+                InventoryUtilitiesServer.CreateDropItem(EntityManager, user.LocalCharacter._Entity, reward, quantity, new Entity());
+                LocalizationService.Reply(EntityManager, user, QUEST_REWARD_DROPPED_MESSAGE, reward.GetLocalizedName(), quantity, colorType);
+            }
     }
     static void HandleExperienceReward(User user, QuestType questType)
     {
