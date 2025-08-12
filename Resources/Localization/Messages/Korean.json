@@ -14,6 +14,8 @@
     "profession-bonus-saplings-dropped": "<color=green>Bonus Saplings(s)</color>x<color=white>{0}</color>에서 수신 {1}, 하지만 재고가 풀기 때문에 땅에 떨어졌다.",
     "profession-mutant-grease-received": "<color=green>Mutant Grease</color>x<color=white>{0}</color>{1}",
     "profession-mutant-grease-dropped": "<color=green>Mutant Grease</color>x<color=white>{0}</color>에서 수신된 {1}, 하지만 당신의 재고가 가득 차 있기 때문에 땅에 떨어졌다.",
+    "quest-daily-refreshed": "<color=#00FFFF>Daily Quest</color>가 새로워졌습니다!",
+    "quest-weekly-refreshed": "<color=#BF40BF>Weekly Quest</color>가 새로워졌습니다!",
     "2761093386": "배틀 그룹 - {familiarReply}",
     "3158650477": "전투 그룹에 익숙하지!",
     "2932385107": "대상은 모두 죽어, 그들을 respawn 할 수있는 기회를 제공합니다!",
