@@ -37,6 +37,9 @@ def test_creates_directories_for_logs_and_reports(tmp_path, monkeypatch):
     class DummyTranslator:
         def translate(self, text):
             return "Bonjour"
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
 
     monkeypatch.setattr(
         translate_argos.argos_translate,
@@ -47,7 +50,7 @@ def test_creates_directories_for_logs_and_reports(tmp_path, monkeypatch):
         translate_argos.argos_translate, "load_installed_languages", lambda: None
     )
     monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
-    monkeypatch.setattr(subprocess, "run", lambda *a, **k: None)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
     monkeypatch.setattr(
         sys,
         "argv",
@@ -69,4 +72,102 @@ def test_creates_directories_for_logs_and_reports(tmp_path, monkeypatch):
     translate_argos.main()
 
     assert log_path.is_file()
+    assert report_path.is_file()
+
+
+def test_exit_on_fix_tokens_failure(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "Bonjour"
+
+    class DummyCompleted:
+        def __init__(self, code=1):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert exc.value.code == 1
+
+
+def test_exit_when_skipped_report_has_entries(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    report_path = root / "skipped.csv"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "Hello"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--report-file",
+            str(report_path),
+            "--overwrite",
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert exc.value.code == 1
     assert report_path.is_file()

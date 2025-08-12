@@ -103,15 +103,24 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Fix token placeholders in localization JSON files")
     ap.add_argument("--root", default=Path(__file__).resolve().parents[1], help="Repo root")
     ap.add_argument("--check-only", action="store_true", help="Report issues without modifying files")
+    ap.add_argument("paths", nargs="*", help="Specific localization JSON files to process")
     args = ap.parse_args()
 
     root = Path(args.root).resolve()
     messages_tokens = load_english_messages(root)
     node_tokens = load_english_nodes(root)
 
-    files = list((root / "Resources" / "Localization" / "Messages").glob("*.json"))
-    files = [p for p in files if p.name != "English.json"]
-    files += [p for p in (root / "Resources" / "Localization").glob("*.json") if p.name != "English.json"]
+    if args.paths:
+        files = []
+        for p in args.paths:
+            path = Path(p)
+            if not path.is_absolute():
+                path = (root / path).resolve()
+            files.append(path)
+    else:
+        files = list((root / "Resources" / "Localization" / "Messages").glob("*.json"))
+        files = [p for p in files if p.name != "English.json"]
+        files += [p for p in (root / "Resources" / "Localization").glob("*.json") if p.name != "English.json"]
 
     issues = False
     for path in files:

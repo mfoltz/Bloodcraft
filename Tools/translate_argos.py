@@ -308,15 +308,16 @@ def main():
     with open(target_path, "w", encoding="utf-8") as f:
         json.dump(target, f, indent=2, ensure_ascii=False)
 
-    subprocess.run(
+    result = subprocess.run(
         [
             sys.executable,
             os.path.join(os.path.dirname(__file__), "fix_tokens.py"),
-            "--root",
-            root,
-        ],
-        check=True,
+            "--check-only",
+            target_path,
+        ]
     )
+    if result.returncode != 0:
+        raise SystemExit(result.returncode)
 
     print(f"Wrote translations to {target_path}")
 
@@ -340,9 +341,15 @@ def main():
         print(f"Wrote skip report to {args.report_file}")
 
     if skipped:
-        print("Skipped the following message hashes due to repeated errors:")
-        for k in skipped:
-            print(f" - {k}")
+        if args.report_file and os.path.exists(args.report_file):
+            print("Untranslated message hashes detected:")
+            with open(args.report_file, "r", encoding="utf-8") as fp:
+                print(fp.read())
+        else:
+            print("Skipped the following message hashes due to repeated errors:")
+            for k in skipped:
+                print(f" - {k}")
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
