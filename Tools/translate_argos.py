@@ -23,7 +23,8 @@ CSINTERP = re.compile(r'\$\{[^{}]+\}')
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
 TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
 # Matches stray TOKEN_n occurrences regardless of surrounding context
-TOKEN_WORD = re.compile(r'TOKEN_\s*(\d+)', re.I)
+# Matches cases like ``TOKEN_1`` and ``TOKEN _ 1``
+TOKEN_WORD = re.compile(r'TOKEN\s*_\s*(\d+)', re.I)
 TOKEN_SENTINEL = "[[TOKEN_SENTINEL]]"
 
 
