@@ -105,7 +105,8 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         {"Spanish", "Bloodcraft.Resources.Localization.Messages.Spanish.json"},
         {"Italian", "Bloodcraft.Resources.Localization.Messages.Italian.json"},
         {"Hungarian", "Bloodcraft.Resources.Localization.Messages.Hungarian.json"},
-        {"Brazilian", "Bloodcraft.Resources.Localization.Messages.Brazilian.json"}
+        {"Brazilian", "Bloodcraft.Resources.Localization.Messages.Brazilian.json"},
+        {"Japanese", "Bloodcraft.Resources.Localization.Messages.Japanese.json"}
     };
 
     static readonly Dictionary<uint, string> _messageDictionary = [];
