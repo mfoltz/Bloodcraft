@@ -402,6 +402,19 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "バインディングが失敗しました..."
+    "binding-failed": "バインディングが失敗しました...",
+    "emote-actions-dominate-form": "ドミネートフォームを使用する場合、Emoteアクションを使用することはできません！",
+    "emote-actions-bat-form": "BATフォームを使用するとき、Emoteアクションを使用することはできません！",
+    "familiar-interact-combat": "戦闘中に馴染みのあるものとやり取りすることはできません！",
+    "shapeshift-select-form": "最初にロックを解除したフォームを選択してください！ （ '<color=white>。prestige sf <color=orange> evolvedvampire | corruptedserpent </color>] </color>'）",
+    "familiar-call-pvp-combat": "PVP戦闘中に馴染みのある電話をかけることはできません！",
+    "familiar-active-not-exist": "アクティブななじみは存在しません！それが正しくないように見える場合は、 '<color=white>。fam reset </color>'を使用してみてください。",
+    "familiar-not-found": "アクティブなおなじみを見つけることができませんでした...",
+    "familiar-combat-not-enabled": "おなじみの戦闘は有効になりません。",
+    "familiar-combat-toggle-in-combat": "PVE/PVP戦闘中におなじみの戦闘モードを切り替えることはできません！",
+    "familiar-combat-enabled": "馴染みのある戦闘<color=green>有効</color>。",
+    "familiar-combat-disabled": "おなじみの戦闘<color=red>無効</color>。",
+    "familiar-interact-dismissed": "却下されたときに馴染みのあるものとやり取りすることはできません！",
+    "familiar-interact-binding": "バインディング/バインディングの際に馴染みのあるものとやり取りすることはできません！"
   }
 }

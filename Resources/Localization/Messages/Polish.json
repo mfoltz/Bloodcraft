@@ -402,7 +402,20 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "Wiązanie nie powiodło się..."
+    "binding-failed": "Wiązanie nie powiodło się...",
+    "emote-actions-dominate-form": "Nie możesz używać działań emote podczas korzystania z formularza dominującego!",
+    "emote-actions-bat-form": "Nie możesz używać działań emote podczas korzystania z formularza nietoperza!",
+    "familiar-interact-combat": "Nie możesz wchodzić w interakcje ze swoim znajomym podczas walki!",
+    "shapeshift-select-form": "Najpierw wybierz formę, którą odblokowałeś! ('<color=white>.prestige sf [<color=orange>EvolvedVampire|CorruptedSerpent</color>]</color>')",
+    "familiar-call-pvp-combat": "Nie możesz zadzwonić do swojego znajomego podczas walki z PVP!",
+    "familiar-active-not-exist": "Aktywny znajomy nie istnieje! Jeśli to nie wydaje się właściwe, spróbuj użyć „<color=white>. Fam reset </color>”.",
+    "familiar-not-found": "Nie mogłem znaleźć aktywnego znajomego ...",
+    "familiar-combat-not-enabled": "Znana walka nie jest włączona.",
+    "familiar-combat-toggle-in-combat": "Nie można przełączać znanego trybu walki podczas walki PVE/PVP!",
+    "familiar-combat-enabled": "Znasz Combat <color=green> włączony </color>.",
+    "familiar-combat-disabled": "Znasz Combat <color=red> niepełnosprawny </color>.",
+    "familiar-interact-dismissed": "Nie można wchodzić w interakcje z znajomym po zwolnieniu!",
+    "familiar-interact-binding": "Nie można wchodzić w interakcje ze znajomym podczas wiązania/rozpięcia!"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

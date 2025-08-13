@@ -402,6 +402,19 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "Переплет не удался..."
+    "binding-failed": "Переплет не удался...",
+    "emote-actions-dominate-form": "Вы не можете использовать эмоциональные действия при использовании доминирующей формы!",
+    "emote-actions-bat-form": "Вы не можете использовать эмоциональные действия при использовании формы летучей мыши!",
+    "familiar-interact-combat": "Вы не можете взаимодействовать со своим знакомым во время боя!",
+    "shapeshift-select-form": "Выберите форму, которую вы разблокировали в первую очередь! ('<color=white>. Prestige sf <color=orange> evolvedvampire | corruptedSerpent </color>] </color>')",
+    "familiar-call-pvp-combat": "Вы не можете назвать свое знакомое во время Pvp Combat!",
+    "familiar-active-not-exist": "Активного знакомства не существует! Если это не кажется правильным, попробуйте использовать '<color=white>. Fam reset </color>'.",
+    "familiar-not-found": "Не мог найти активного знакомого ...",
+    "familiar-combat-not-enabled": "Знакомый бой не включен.",
+    "familiar-combat-toggle-in-combat": "Вы не можете переключить знакомый боевой режим во время боя PVE/PVP!",
+    "familiar-combat-enabled": "Знакомый бой <color=green> включен </color>.",
+    "familiar-combat-disabled": "Знакомый бой <color=red> отключен </color>.",
+    "familiar-interact-dismissed": "Не могу взаимодействовать со знакомым при увольнении!",
+    "familiar-interact-binding": "Не могу взаимодействовать со знакомым при связывании/рассеивании!"
   }
 }

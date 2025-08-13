@@ -402,6 +402,19 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "Bağlayıcı başarısız oldu..."
+    "binding-failed": "Bağlayıcı başarısız oldu...",
+    "emote-actions-dominate-form": "Dominat formunu kullanırken Emote eylemlerini kullanamazsınız!",
+    "emote-actions-bat-form": "BAT formunu kullanırken Emote eylemlerini kullanamazsınız!",
+    "familiar-interact-combat": "Savaş sırasında tanıdıklarınızla etkileşime giremezsiniz!",
+    "shapeshift-select-form": "Önce kilidini açtığınız bir form seçin! ('<color=white>.",
+    "familiar-call-pvp-combat": "PVP savaşı sırasında tanıdıklarınızı arayamazsınız!",
+    "familiar-active-not-exist": "Aktif tanıdık mevcut değil! Bu doğru görünmüyorsa '<color=white>. Fam sıfırlama </color>' kullanmayı deneyin.",
+    "familiar-not-found": "Aktif tanıdık bulamadım ...",
+    "familiar-combat-not-enabled": "Tanıdık savaş etkin değildir.",
+    "familiar-combat-toggle-in-combat": "PVE/PVP savaşı sırasında tanıdık savaş modunu değiştiremezsiniz!",
+    "familiar-combat-enabled": "Tanıdık savaş <color=green> etkin </color>.",
+    "familiar-combat-disabled": "Tanıdık savaş <color=red> devre dışı </color>.",
+    "familiar-interact-dismissed": "İşten çıkarıldığında tanıdık ile etkileşim kuramıyorum!",
+    "familiar-interact-binding": "Bağlama/bağlama sırasında tanıdık ile etkileşim kuramıyorum!"
   }
 }

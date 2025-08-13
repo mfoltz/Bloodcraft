@@ -402,7 +402,20 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "Binding thất bại..."
+    "binding-failed": "Binding thất bại...",
+    "emote-actions-dominate-form": "Bạn không thể sử dụng các hành động Emote khi sử dụng biểu mẫu thống trị!",
+    "emote-actions-bat-form": "Bạn không thể sử dụng các hành động Emote khi sử dụng biểu mẫu Bat!",
+    "familiar-interact-combat": "Bạn không thể tương tác với quen thuộc của bạn trong khi chiến đấu!",
+    "shapeshift-select-form": "Chọn một biểu mẫu bạn đã mở khóa trước! .",
+    "familiar-call-pvp-combat": "Bạn không thể gọi quen thuộc của bạn trong chiến đấu PVP!",
+    "familiar-active-not-exist": "Hoạt động quen thuộc không tồn tại! Nếu điều đó có vẻ không đúng, hãy thử sử dụng '<color=white>. Fam reset </color>'.",
+    "familiar-not-found": "Không thể thấy hoạt động quen thuộc ...",
+    "familiar-combat-not-enabled": "Chiến đấu quen thuộc không được kích hoạt.",
+    "familiar-combat-toggle-in-combat": "Bạn không thể chuyển đổi chế độ chiến đấu quen thuộc trong chiến đấu PVE/PVP!",
+    "familiar-combat-enabled": "Combat quen thuộc <color=green> đã bật </color>.",
+    "familiar-combat-disabled": "Combat quen thuộc <color=red> bị vô hiệu hóa </color>.",
+    "familiar-interact-dismissed": "Không thể tương tác với quen thuộc khi bị loại bỏ!",
+    "familiar-interact-binding": "Không thể tương tác với quen thuộc khi ràng buộc/không liên kết!"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

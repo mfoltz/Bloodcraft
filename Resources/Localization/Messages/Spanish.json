@@ -402,7 +402,20 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "La vinculación falló..."
+    "binding-failed": "La vinculación falló...",
+    "emote-actions-dominate-form": "¡No puedes usar acciones de emote al usar la forma dominante!",
+    "emote-actions-bat-form": "¡No puedes usar acciones de emote al usar Forma BAT!",
+    "familiar-interact-combat": "¡No puedes interactuar con tu familiar durante el combate!",
+    "shapeshift-select-form": "¡Seleccione un formulario que haya desbloqueado primero! ('<color=white>. Prestige SF <color=orange> EvolvedVampire | CorruptedSerpent </color>] </color>'))",
+    "familiar-call-pvp-combat": "¡No puede llamar a su familiar durante el combate PVP!",
+    "familiar-active-not-exist": "¡No existe un familiar activo! Si eso no parece correcto, intente usar '<color=white>. FAM Reset </color>'.",
+    "familiar-not-found": "No pude encontrar un familiar activo ...",
+    "familiar-combat-not-enabled": "El combate familiar no está habilitado.",
+    "familiar-combat-toggle-in-combat": "¡No puede alternar el modo de combate familiar durante el combate PVE/PVP!",
+    "familiar-combat-enabled": "Combate familiar <color=green> habilitado </color>.",
+    "familiar-combat-disabled": "Combate familiar <color=red> deshabilitado </color>.",
+    "familiar-interact-dismissed": "¡No se puede interactuar con familiares cuando se descarta!",
+    "familiar-interact-binding": "¡No se puede interactuar con familiares cuando se ata/desabre anulación!"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

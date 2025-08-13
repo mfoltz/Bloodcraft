@@ -402,6 +402,19 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "A kötés meghibásodott..."
+    "binding-failed": "A kötés meghibásodott...",
+    "emote-actions-dominate-form": "Nem használhatja az emote műveleteket, ha domináns űrlapot használ!",
+    "emote-actions-bat-form": "Nem használhatja az Emote műveleteket a BAT forma használatakor!",
+    "familiar-interact-combat": "A harc során nem léphet kapcsolatba az ismerőseivel!",
+    "shapeshift-select-form": "Válassza ki az első kinyitott űrlapot! ('<color=white>. Prestige sf <color=orange> evolvedvampire | CruptedSerpent </color>]] </color>')",
+    "familiar-call-pvp-combat": "Nem hívhatja meg ismerősedet a PVP -harc során!",
+    "familiar-active-not-exist": "Az aktív ismerős nem létezik! Ha ez nem tűnik helyesnek, próbálja meg használni a '<color=white>. Fam reset </color>' használatát.",
+    "familiar-not-found": "Nem találtak aktív ismerősöket ...",
+    "familiar-combat-not-enabled": "Az ismerős harc nem engedélyezve.",
+    "familiar-combat-toggle-in-combat": "Nem válthat meg az ismerős harci módot a PVE/PVP harc során!",
+    "familiar-combat-enabled": "Ismerős harci <color=green> engedélyezve </color>.",
+    "familiar-combat-disabled": "Ismerős harc <color=red> letiltva </color>.",
+    "familiar-interact-dismissed": "Nem tudok kapcsolatba lépni az ismerősökkel, ha elbocsátják!",
+    "familiar-interact-binding": "Nem lehet kölcsönhatásba lépni az ismerősökkel, ha kötés/kötés!"
   }
 }

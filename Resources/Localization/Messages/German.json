@@ -402,6 +402,19 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "Bindung fehlgeschlagen..."
+    "binding-failed": "Bindung fehlgeschlagen...",
+    "emote-actions-dominate-form": "Sie können keine Emote -Aktionen verwenden, wenn Sie das dominierte Formular verwenden!",
+    "emote-actions-bat-form": "Sie können keine Emote -Aktionen verwenden, wenn Sie Fledermausform verwenden!",
+    "familiar-interact-combat": "Sie können im Kampf nicht mit Ihrem Vertrauten interagieren!",
+    "shapeshift-select-form": "Wählen Sie ein Formular aus, das Sie zuerst entsperrt haben! ('<color=white>. Prestige SF <color=orange> EvolvedVampire | beschädigt </color> </color>')",
+    "familiar-call-pvp-combat": "Sie können Ihren Vertrauten während des PVP -Kampfes nicht nennen!",
+    "familiar-active-not-exist": "Active vertraut existiert nicht! Wenn das nicht richtig erscheint, versuchen Sie es mit '<color=white>. Fam Reset </color>'.",
+    "familiar-not-found": "Konnte nicht aktiv vertraut finden ...",
+    "familiar-combat-not-enabled": "Der vertraute Kampf ist nicht aktiviert.",
+    "familiar-combat-toggle-in-combat": "Sie können den bekannten Kampfmodus während des PVE/PVP -Kampfes nicht umschalten!",
+    "familiar-combat-enabled": "Vertrauter Kampf <color=green> aktiviert </color>.",
+    "familiar-combat-disabled": "Vertrauter Kampf <color=red> deaktiviert </color>.",
+    "familiar-interact-dismissed": "Ich kann nicht mit Vertrauten interagieren, wenn er entlassen wird!",
+    "familiar-interact-binding": "Ich kann nicht mit Vertrauten interagieren, wenn sie Bindung/Entbindung entlassen!"
   }
 }

@@ -402,6 +402,19 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "การผูกมัดล้มเหลว..."
+    "binding-failed": "การผูกมัดล้มเหลว...",
+    "emote-actions-dominate-form": "คุณไม่สามารถใช้การกระทำ EMOTE เมื่อใช้แบบฟอร์มครอบงำ!",
+    "emote-actions-bat-form": "คุณไม่สามารถใช้การกระทำ EMOTE เมื่อใช้แบบฟอร์ม BAT!",
+    "familiar-interact-combat": "คุณไม่สามารถโต้ตอบกับความคุ้นเคยระหว่างการต่อสู้ได้!",
+    "shapeshift-select-form": "เลือกแบบฟอร์มที่คุณปลดล็อคก่อน! ('<color=white>. Prestige SF [<color=orange> EvolvedVampire | Corruptedserpent </color>] </color>') ')",
+    "familiar-call-pvp-combat": "คุณไม่สามารถโทรหาที่คุ้นเคยระหว่างการต่อสู้ PVP!",
+    "familiar-active-not-exist": "ไม่คุ้นเคยไม่มีอยู่จริง! หากดูเหมือนว่าไม่ถูกต้องลองใช้ '<color=white>. FAM รีเซ็ต </color>'",
+    "familiar-not-found": "ไม่พบที่คุ้นเคย ...",
+    "familiar-combat-not-enabled": "การต่อสู้ที่คุ้นเคยไม่ได้เปิดใช้งาน",
+    "familiar-combat-toggle-in-combat": "คุณไม่สามารถสลับโหมดการต่อสู้ที่คุ้นเคยระหว่างการต่อสู้ PVE/PVP!",
+    "familiar-combat-enabled": "การต่อสู้ที่คุ้นเคย <color=green> เปิดใช้งาน </color>",
+    "familiar-combat-disabled": "การต่อสู้ที่คุ้นเคย <color=red> ปิดการใช้งาน </color>",
+    "familiar-interact-dismissed": "ไม่สามารถโต้ตอบกับคุ้นเคยเมื่อถูกไล่ออก!",
+    "familiar-interact-binding": "ไม่สามารถโต้ตอบกับความคุ้นเคยเมื่อมีผลผูกพัน/ปลดปล่อย!"
   }
 }

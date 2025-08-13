@@ -402,7 +402,20 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "바인딩 실패..."
+    "binding-failed": "바인딩 실패...",
+    "emote-actions-dominate-form": "DoMinate Form을 사용할 때 감정 동작을 사용할 수 없습니다!",
+    "emote-actions-bat-form": "박쥐 형태를 사용할 때 감정 동작을 사용할 수 없습니다!",
+    "familiar-interact-combat": "전투 중에 친숙한 것과 상호 작용할 수 없습니다!",
+    "shapeshift-select-form": "먼저 잠금 해제 한 양식을 선택하십시오! ( '<color=white>. Prestige SF <color=orange>] EvolvedVampire | FruptedSerpent </color> </color>')",
+    "familiar-call-pvp-combat": "PVP 전투 중에 친숙한 전화를 할 수 없습니다!",
+    "familiar-active-not-exist": "활성 친숙한 존재가 존재하지 않습니다! 그것이 올바르게 보이지 않는 경우 '<color=white>. Fam Reset </color>'을 사용해보십시오.",
+    "familiar-not-found": "친숙한 친숙한 것을 찾을 수 없었습니다 ...",
+    "familiar-combat-not-enabled": "친숙한 전투는 활성화되지 않습니다.",
+    "familiar-combat-toggle-in-combat": "PVE/PVP 전투 중에 친숙한 전투 모드를 전환 할 수 없습니다!",
+    "familiar-combat-enabled": "친숙한 전투 <color=green> 활성화 </color>.",
+    "familiar-combat-disabled": "친숙한 전투 <color=red> 비활성화 </color>.",
+    "familiar-interact-dismissed": "해고 될 때 친숙한 것과 상호 작용할 수 없습니다!",
+    "familiar-interact-binding": "바인딩/풀릴 때 친숙한 것과 상호 작용할 수 없습니다!"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"
