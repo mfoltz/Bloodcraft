@@ -380,7 +380,24 @@
     "2383766993": "Poprawa stanu premii: <color=green>{0}</color>",
     "1899346128": "Całkowita zmiana stopy wzrostu, w tym premia wyrównawcza: <color=yellow>{0}</color>",
     "1178832936": "Masz prestiż w <color=#90EE90> Doświadczenie </color><color=white>{0}</color>! Stopy wzrostu w odniesieniu do wszystkich rodzajów wiedzy specjalistycznej / legacji wzrosły o <color=green>{1}</color>, doświadczenie w zakresie zabójstw jednostek zredukowane o <color=red>{2}</color>.",
-    "1223341524": "<color=#90EE90>{0}</color><color=white>{1}</color> z powodzeniem! Stopa wzrostu zmniejszyła się o <color=red>{2}</color> oraz o <color=green>{3}</color>. Całkowita zmiana stopy wzrostu z wyrównaniem premii prestiż wynosi <color=yellow>{4}</color>."
+    "1223341524": "<color=#90EE90>{0}</color><color=white>{1}</color> z powodzeniem! Stopa wzrostu zmniejszyła się o <color=red>{2}</color> oraz o <color=green>{3}</color>. Całkowita zmiana stopy wzrostu z wyrównaniem premii prestiż wynosi <color=yellow>{4}</color>.",
+    "3443164458": "Shiny familiars <color=green>enabled</color>.",
+    "4052025947": "Shiny familiars <color=red>disabled</color>.",
+    "421960942": "VBlood emotes <color=green>enabled</color>.",
+    "2740121583": "VBlood emotes <color=red>disabled</color>.",
+    "1248377615": "<color=yellow>Familiar</color> <color=green>enabled</color>!",
+    "406861876": "Can't dismiss familiar when binding/unbinding!",
+    "1014495694": "<color=yellow>Familiar</color> <color=red>disabled</color>!",
+    "1762641650": "You already have an active familiar! Unbind that one first.",
+    "2495105303": "You can't bind in combat or when using certain forms! (dominating presence, bat)",
+    "861952046": "Couldn't find active box! Use '<color=white>.fam listboxes</color>' and select one with '<color=white>.fam cb [BoxName]</color>'",
+    "85794626": "Invalid index for active box, try binding or smartbind via command.",
+    "2925666850": "Couldn't find binding preset, try binding or smartbind via command.",
+    "1318067012": "Invalid index, use <color=white>1</color>-<color=white>{0}</color>! (Active Box - <color=yellow>{1}</color>)",
+    "2577116713": "Couldn't find familiar actives or familiar already active! If this doesn't seem right try using '<color=white>.fam reset</color>'.",
+    "179462471": "Can't unbind familiar right now! (interacting)",
+    "1744159514": "Can't unbind familiar right now! (dismissed)",
+    "2471836655": "Couldn't find familiar to unbind! If this doesn't seem right try using '<color=white>.fam reset</color>'."
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"
