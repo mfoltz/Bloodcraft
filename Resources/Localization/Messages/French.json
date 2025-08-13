@@ -402,6 +402,19 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "La reliure a échoué..."
+    "binding-failed": "La reliure a échoué...",
+    "emote-actions-dominate-form": "Vous ne pouvez pas utiliser les actions EMOTE lors de l'utilisation de Domined Form!",
+    "emote-actions-bat-form": "Vous ne pouvez pas utiliser les actions EMOTE lors de l'utilisation du formulaire de chauve-souris!",
+    "familiar-interact-combat": "Vous ne pouvez pas interagir avec votre familier pendant le combat!",
+    "shapeshift-select-form": "Sélectionnez un formulaire que vous avez déverrouillé en premier! ('<color=white>. Prestige sf <color=orange> evolvedVampire | corruptedSerper </color>] </color>')",
+    "familiar-call-pvp-combat": "Vous ne pouvez pas appeler votre familier pendant le combat PVP!",
+    "familiar-active-not-exist": "Un familier actif n'existe pas! Si cela ne semble pas juste, essayez d'utiliser '<color=white>. Fam réinitialisation </color>'.",
+    "familiar-not-found": "Je ne pouvais pas trouver actif familier ...",
+    "familiar-combat-not-enabled": "Le combat familier n'est pas activé.",
+    "familiar-combat-toggle-in-combat": "Vous ne pouvez pas basculer le mode de combat familier pendant le combat PVE / PVP!",
+    "familiar-combat-enabled": "COMBAT familier <color=green> activé </color>.",
+    "familiar-combat-disabled": "Combat familier <color=red> désactivé </color>.",
+    "familiar-interact-dismissed": "Je ne peux pas interagir avec familier lorsqu'il est licencié!",
+    "familiar-interact-binding": "Impossible d'interagir avec Familier lors de la liaison / non liée!"
   }
 }

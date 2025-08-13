@@ -402,6 +402,19 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "Binding non è riuscito..."
+    "binding-failed": "Binding non è riuscito...",
+    "emote-actions-dominate-form": "Non puoi usare le azioni EMOTE quando si utilizza il modulo dominante!",
+    "emote-actions-bat-form": "Non puoi usare le azioni Emote quando si utilizza il modulo BAT!",
+    "familiar-interact-combat": "Non puoi interagire con il tuo familiare durante il combattimento!",
+    "shapeshift-select-form": "Seleziona un modulo che hai sbloccato per primo! ;",
+    "familiar-call-pvp-combat": "Non puoi chiamare il tuo familiare durante il combattimento PVP!",
+    "familiar-active-not-exist": "Active Familial non esiste! Se questo non sembra giusto, prova a usare '<color=white>. FAM RESET </color>'.",
+    "familiar-not-found": "Non sono riuscito a trovare familiari attivi ...",
+    "familiar-combat-not-enabled": "Il combattimento familiare non è abilitato.",
+    "familiar-combat-toggle-in-combat": "Non è possibile attivare la modalità di combattimento familiare durante il combattimento PVE/PVP!",
+    "familiar-combat-enabled": "Combat familiare <color=green> abilitato </color>.",
+    "familiar-combat-disabled": "Combat familiare <color=red> disabilitato </color>.",
+    "familiar-interact-dismissed": "Non riesco a interagire con familiari se licenziati!",
+    "familiar-interact-binding": "Non riesco a interagire con familiarità quando legatura/senza pendenza!"
   }
 }

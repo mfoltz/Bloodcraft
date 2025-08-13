@@ -402,7 +402,20 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "Не вдалося обов'язково..."
+    "binding-failed": "Не вдалося обов'язково...",
+    "emote-actions-dominate-form": "Ви не можете використовувати емоційні дії при використанні домінуючої форми!",
+    "emote-actions-bat-form": "Ви не можете використовувати емоційні дії під час використання форми BAT!",
+    "familiar-interact-combat": "Ви не можете взаємодіяти зі своїм знайомим під час бою!",
+    "shapeshift-select-form": "Виберіть форму, яку ви розблокували спочатку! ('<color=white>. Prestige sf <color=orange> evolvedvampire | пошкоджений серпен </color>] </color>') ')') '",
+    "familiar-call-pvp-combat": "Ви не можете зателефонувати своїм знайомим під час бою PVP!",
+    "familiar-active-not-exist": "Активний фамільяр не існує! Якщо це здається неправильним, спробуйте використати '<color=white>.fam reset</color>'.",
+    "familiar-not-found": "Не міг знайти активного знайомого ...",
+    "familiar-combat-not-enabled": "Знайомий бій не ввімкнено.",
+    "familiar-combat-toggle-in-combat": "Ви не можете перемикати знайомий бойовий режим під час бою PVE/PVP!",
+    "familiar-combat-enabled": "Знайомий бій <color=green> увімкнено </color>.",
+    "familiar-combat-disabled": "Знайомий бій <color=red> вимкнено </color>.",
+    "familiar-interact-dismissed": "Не можу взаємодіяти зі знайомим, коли звільнився!",
+    "familiar-interact-binding": "Не можу взаємодіяти зі знайомим при прив'язці/роз'єднанні!"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder",

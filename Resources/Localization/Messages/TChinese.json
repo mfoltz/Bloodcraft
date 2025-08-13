@@ -402,7 +402,20 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "約束失敗..."
+    "binding-failed": "約束失敗...",
+    "emote-actions-dominate-form": "使用統治表單時，您不能使用表情動作！",
+    "emote-actions-bat-form": "使用蝙蝠表單時，您不能使用表情動作！",
+    "familiar-interact-combat": "您無法在戰鬥中與熟悉的互動！",
+    "shapeshift-select-form": "請先選擇您已解鎖的形態！('<color=white>.prestige sf [<color=orange>EvolvedVampire|CorruptedSerpent</color>]</color>')",
+    "familiar-call-pvp-combat": "您不能在PVP戰鬥中打電話給您的熟悉！",
+    "familiar-active-not-exist": "主動熟悉不存在！如果這似乎不正確，請嘗試使用'<color=white>。 fam reset </color>'。",
+    "familiar-not-found": "找不到熟悉的活躍...",
+    "familiar-combat-not-enabled": "未啟用熟悉的戰鬥。",
+    "familiar-combat-toggle-in-combat": "您無法在PVE/PVP戰鬥中切換熟悉的戰鬥模式！",
+    "familiar-combat-enabled": "熟悉的戰鬥<color=green>啟用</color>。",
+    "familiar-combat-disabled": "熟悉的戰鬥<color=red>禁用</color>。",
+    "familiar-interact-dismissed": "被解僱時無法與熟悉的互動！",
+    "familiar-interact-binding": "綁定/解開時無法與熟悉的互動！"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"
