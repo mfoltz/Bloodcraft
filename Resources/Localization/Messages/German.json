@@ -324,6 +324,7 @@
     "4226920647": "<color=white>{0}</color> ist nicht pro konfigurierten vertrauten Verboten verfügbar!",
     "1695244872": "<color=white>{0}</color> ist bereits entriegelt!",
     "2428442751": "Neue Einheit entsperrt: <color=green>{0}</color>",
+    "1271017097": "New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{0}</color>",
     "3938781329": "Not enough <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for {2}!",
     "3139406824": "<color=green>{0}</color> removed from <color=white>{1}</color>.",
     "3055272330": "Familiar attempting to prestige must be at max level (<color=white>{0}</color>) or requires <color=#ffd9eb>{1}</color><color=yellow>x</color><color=white>{2}</color>.",

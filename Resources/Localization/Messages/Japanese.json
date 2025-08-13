@@ -324,6 +324,7 @@
     "4226920647": "<color=white>{0}</color>は、設定された馴染みの禁止ごとに利用できません!",
     "1695244872": "<color=white>{0}</color>は既に解除されています!",
     "2428442751": "<color=green>{0}</color>の新規ユニットをロック解除",
+    "1271017097": "New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{0}</color>",
     "3938781329": "<color=#ffd9eb>{0}</color>x<color=white>{1}</color>の{2}の{2}の{2}の</color>の{2}のトークン、トークン、",
     "3139406824": "<color=green>{0}</color>から削除された<color=white>{1}</color>。",
     "3055272330": "仮説しようとするファミリアは、最大レベル(<color=white>{0}</color>)で、または<color=#ffd9eb>{1}</color><color=yellow>x</color><color=white>{2}</color>でなければならない。",
