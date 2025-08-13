@@ -400,7 +400,8 @@
     "2471836655": "Couldn't find familiar to unbind! If this doesn't seem right try using '<color=white>.fam reset</color>'.",
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
-    "2772168133": "{0}[<color=white>{1}</color>]"
+    "2772168133": "{0}[<color=white>{1}</color>]",
+    "binding-failed": "約束失敗..."
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

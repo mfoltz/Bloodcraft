@@ -1,6 +1,7 @@
 {
   "Messages": {
     "welcome": "Welcome to Bloodcraft",
+    "binding-failed": "Binding failed...",
     "profession-improved": "{0} improved to [\u003Ccolor=white\u003E{1}\u003C/color\u003E]",
     "profession-proficiency-gain": "\u002B\u003Ccolor=yellow\u003E{0}\u003C/color\u003E \u003Ccolor=#FFC0CB\u003Eproficiency\u003C/color\u003E in {1} (\u003Ccolor=white\u003E{2}%\u003C/color\u003E)",
     "profession-bonus-received": "\u003Ccolor=green\u003E{0}\u003C/color\u003Ex\u003Ccolor=white\u003E{1}\u003C/color\u003E received from {2}",
