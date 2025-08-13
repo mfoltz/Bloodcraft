@@ -1,6 +1,7 @@
 {
   "Messages": {
     "welcome": "환영합니다 Bloodcraft",
+    "binding-failed": "바인딩 실패...",
     "profession-improved": "{0}<color=white>{1}</color>에 개선",
     "profession-proficiency-gain": "+<color=yellow>{0}</color><color=#FFC0CB>proficiency</color>{1}<color=white>{2}%</color>)",
     "profession-bonus-received": "<color=green>{0}</color>x<color=white>{1}</color>{2}{2}</color>{0}{0}{0}{0}{0}{0}{0} TOKEN_{0} TOKEN_TOKEN_<color=white> TOKEN_TOKEN_TOKEN_<color=white>TOKEN_TOKEN_<color=white>",
@@ -402,7 +403,6 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "바인딩 실패...",
     "emote-actions-dominate-form": "DoMinate Form을 사용할 때 감정 동작을 사용할 수 없습니다!",
     "emote-actions-bat-form": "박쥐 형태를 사용할 때 감정 동작을 사용할 수 없습니다!",
     "familiar-interact-combat": "전투 중에 친숙한 것과 상호 작용할 수 없습니다!",
@@ -415,7 +415,19 @@
     "familiar-combat-enabled": "친숙한 전투 <color=green> 활성화 </color>.",
     "familiar-combat-disabled": "친숙한 전투 <color=red> 비활성화 </color>.",
     "familiar-interact-dismissed": "해고 될 때 친숙한 것과 상호 작용할 수 없습니다!",
-    "familiar-interact-binding": "바인딩/풀릴 때 친숙한 것과 상호 작용할 수 없습니다!"
+    "familiar-interact-binding": "바인딩/풀릴 때 친숙한 것과 상호 작용할 수 없습니다!",
+    "3133295357": "Your weapon expertise is [<color=white>{0}</color>][<color=#90EE90>{1}</color>] and you have <color=yellow>{2}</color> <color=#FFC0CB>expertise</color> (<color=white>{3}%</color>) with <color=#c0c0c0>{4}</color>!",
+    "4190631897": "<color=#c0c0c0>{0}</color> Stats: {1}",
+    "1641855254": "You haven't gained any expertise for <color=#c0c0c0>{0}</color> yet!",
+    "2881393089": "Expertise logging is now {0}.",
+    "2997561401": "<color=#00FFFF>{0}</color> has been chosen for <color=#c0c0c0>{1}</color>!",
+    "2687655344": "Your weapon stats have been reset for <color=#c0c0c0>{0}</color>!",
+    "1454481026": "You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{0}</color>x<color=white>{1}</color>)",
+    "2508084566": "Level must be between 0 and {0}.",
+    "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
+    "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
+    "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
+    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>."
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

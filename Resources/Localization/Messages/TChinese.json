@@ -1,6 +1,7 @@
 {
   "Messages": {
     "welcome": "歡迎來到血手",
+    "binding-failed": "約束失敗...",
     "profession-improved": "{0} 改进到<color=white>{1}</color>",
     "profession-proficiency-gain": "+ <color=yellow>{0}</color><color=#FFC0CB></color> 在{1} (<color=white>{2}% </color>)",
     "profession-bonus-received": "<color=green>{0}</color>x <color=white>{1}</color> 收自{2}",
@@ -402,7 +403,6 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "約束失敗...",
     "emote-actions-dominate-form": "使用統治表單時，您不能使用表情動作！",
     "emote-actions-bat-form": "使用蝙蝠表單時，您不能使用表情動作！",
     "familiar-interact-combat": "您無法在戰鬥中與熟悉的互動！",
@@ -415,7 +415,19 @@
     "familiar-combat-enabled": "熟悉的戰鬥<color=green>啟用</color>。",
     "familiar-combat-disabled": "熟悉的戰鬥<color=red>禁用</color>。",
     "familiar-interact-dismissed": "被解僱時無法與熟悉的互動！",
-    "familiar-interact-binding": "綁定/解開時無法與熟悉的互動！"
+    "familiar-interact-binding": "綁定/解開時無法與熟悉的互動！",
+    "3133295357": "Your weapon expertise is [<color=white>{0}</color>][<color=#90EE90>{1}</color>] and you have <color=yellow>{2}</color> <color=#FFC0CB>expertise</color> (<color=white>{3}%</color>) with <color=#c0c0c0>{4}</color>!",
+    "4190631897": "<color=#c0c0c0>{0}</color> Stats: {1}",
+    "1641855254": "You haven't gained any expertise for <color=#c0c0c0>{0}</color> yet!",
+    "2881393089": "Expertise logging is now {0}.",
+    "2997561401": "<color=#00FFFF>{0}</color> has been chosen for <color=#c0c0c0>{1}</color>!",
+    "2687655344": "Your weapon stats have been reset for <color=#c0c0c0>{0}</color>!",
+    "1454481026": "You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{0}</color>x<color=white>{1}</color>)",
+    "2508084566": "Level must be between 0 and {0}.",
+    "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
+    "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
+    "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
+    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>."
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"
