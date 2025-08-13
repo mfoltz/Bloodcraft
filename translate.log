@@ -1,1287 +1,1143 @@
 welcome: TRANSLATED
   Original: Welcome to Bloodcraft
-  Result: 歡迎來到血手
-WARNING profession-improved: token order differs (expected ['0', '1', '2', '3'], got ['2', '0', '3', '1'])
-profession-improved: TRANSLATED
+  Result: ยินดี ต้อนรับ สู่ หัตถกรรม
+profession-improved: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: {0} improved to [<color=white>{1}</color>]
-  Result: {0} 改进到<color=white>{1}</color>
-WARNING profession-proficiency-gain: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '3', '7', '4', '8', '5'])
-profession-proficiency-gain: TRANSLATED
+  Result: TOKNN_2 ปรับเป็น TOKNTOGNTHNNTICKNN
+profession-proficiency-gain: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: +<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>)
-  Result: + <color=yellow>{0}</color><color=#FFC0CB></color> 在{1} (<color=white>{2}% </color>)
-WARNING profession-bonus-received: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '2', '5', '3', '6'])
-profession-bonus-received: TRANSLATED
+  Result: +TOGNTOKNN THNTHN THNKN THNN TOKN_2 procienceTOKN_3 in TOKN_7 (TOGNTOGNTIGNTIGN TIKNN % 2
+profession-bonus-received: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
   Original: <color=green>{0}</color>x<color=white>{1}</color> received from {2}
-  Result: <color=green>{0}</color>x <color=white>{1}</color> 收自{2}
-WARNING profession-gold-ore-received: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
-profession-gold-ore-received: TRANSLATED
+  Result: TOKNN_0TOKNNTOKN xTIKNNTRIKNN 2 TIKNN รับจาก TIKNKN
+profession-gold-ore-received: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}
-  Result: <color=green> 黄金</color>x <color=white>{0}</color> 收自{1}
-WARNING profession-gold-ore-dropped: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
-profession-gold-ore-dropped: TRANSLATED
+  Result: TOKKN_0 Gold OreTOKN_1 xTOKN_2 TIKN TIKNN TIKNN TIKNN TIKN รับจาก TIKN
+profession-gold-ore-dropped: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
-  Result: <color=green> 金奧雷 </color>x <color=white>{0}</color> 從{1} 接收到,但自你的清查量滿了,它就落在地上。
-WARNING profession-radiant-fiber-received: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
-profession-radiant-fiber-received: TRANSLATED
+  Result: TOKKN_0 Gold OreTOKNN_1 xTOKN_2 TOKN TOKN TIKNN TIKN ได้รับจาก TOKN แต่ลดลงบนพื้นตั้งแต่คลังสินค้าของคุณเต็ม
+profession-radiant-fiber-received: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}
-  Result: <color=green></color>x <color=white>{0}</color> 從{1}收到
-WARNING profession-radiant-fiber-dropped: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
-profession-radiant-fiber-dropped: TRANSLATED
+  Result: TOKNN_0 : ราดินันท์ ฟีแบร์ TOKN_1 xTOKN TOGN TOGN TIKNN TIKNN รับจาก TIKN
+profession-radiant-fiber-dropped: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
-  Result: <color=green> Radiant Fiber </color>x <color=white>{0}</color> 從{1} 接收,但自您的數據已滿, 已落地。
-WARNING profession-bonus-seeds-received: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
-profession-bonus-seeds-received: TRANSLATED
+  Result: TOKNN_0 : ราดินันท์ ฟีเบอร์TOKN_1 xTOKN_2TOKNN TOKNN TIKN ได้รับจาก TIKN แต่ลดลงบนพื้นตั้งแต่คลังสินค้าของคุณเต็ม
+profession-bonus-seeds-received: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}!
-  Result: <color=green> Bonus种子</color>x <color=white>{0}</color> 收自{1}!
-WARNING profession-bonus-seeds-dropped: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
-profession-bonus-seeds-dropped: TRANSLATED
+  Result: TOKNN_0 TOKNN เมล็ดพืช TOKNN xTOGN TOGN TRIKN TIKNN รับจาก TIKNTHE.
+profession-bonus-seeds-dropped: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.
-  Result: <color=green> Bonus种子 </color>x <color=white>{0}</color> 從{1}收到,但有些自你的數據滿了就掉到地上。
-WARNING profession-bonus-saplings-received: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
-profession-bonus-saplings-received: TRANSLATED
+  Result: TOKNN_0 TOKNN เมล็ดพันธุ์ S TOKNN xTIKN TRIKNN TIKNN TIKNN ได้รับจาก TIKN แต่บางคนตกบนพื้นตั้งแต่คลังสินค้าของคุณเต็ม
+profession-bonus-saplings-received: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}!
-  Result: <color=green> Bonus saplings </color>x <color=white>{0}</color> 從{1}收到!
-WARNING profession-bonus-saplings-dropped: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
-profession-bonus-saplings-dropped: TRANSLATED
+  Result: TOKNN_0 โบนุส แซปลิงส์ (TOKN_1xTOKNNTIKNNTIVN TIKN TIKN รับจาก TIKNN!
+profession-bonus-saplings-dropped: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.
-  Result: <color=green> Bonus saplings </color>x <color=white>{0}</color> 從{1}收到,但有些自你的清查量已滿而倒在地上。
-WARNING profession-mutant-grease-received: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
-profession-mutant-grease-received: TRANSLATED
+  Result: TOKNN TOKNN BOKNS Sapplings TOKNNxTIKNNTIVNTIKN TIKN TIKN ได้รับจาก TIKN แต่บางคนล้มทับพื้นตั้งแต่คลังสินค้าของคุณเต็ม
+profession-mutant-grease-received: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}
-  Result: <color=green> 混合油脂</color>x <color=white>{0}</color> 收自{1}
-WARNING profession-mutant-grease-dropped: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
-profession-mutant-grease-dropped: TRANSLATED
+  Result: TOKNN_0 TOKNTAGE TOKN_1 xTOKN_2 TOKNN TIKNN TIKNN TIKN รับจาก TIKN
+profession-mutant-grease-dropped: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
-  Result: <color=green> 有毒油 </color>x <color=white>{0}</color> 從{1} 接收到,但自您的清查量滿了,它就掉到地上。
-quest-daily-refreshed: TRANSLATED
+  Result: TOKNN_0 TOKNTAGE TOKN xTOKN_2 TOKNN TOKNN TOKN TIKN ได้รับจาก TIKN แต่ลดลงบนพื้นตั้งแต่คลังสินค้าของคุณเต็ม
+quest-daily-refreshed: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Your <color=#00FFFF>Daily Quest</color> has been refreshed!
-  Result: 您的 <color=#00FFFF> 每日查詢 </color> 已刷新 !
-quest-weekly-refreshed: TRANSLATED
+  Result: ดาลี เควส (TOKN_1) ของคุณ ได้รับความสดชื่น!
+quest-weekly-refreshed: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Your <color=#BF40BF>Weekly Quest</color> has been refreshed!
-  Result: 您的 <color=#BF40BF> 網絡追蹤 </color> 已刷新 !
-quest-new-daily: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '2', '12', '3', '4', '13', '5', '6', '14', '7', '8', '15', '9', '10', '16', '11']))
+  Result: (TOKN 0 ของคุณ TOKNTHE. สืบค้นเมื่อ 20 พฤษภาคม พ.ศ.
+quest-new-daily: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got []))
   Original: New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>]
-  Result: 新增 [[TOKEN_0]] 每日查询 [[TOKEN_2]][[TOKEN_12]][[TOKEN_3]][[TOKEN_4]][[TOKEN_13]][[TOKEN_5]] x [[TOKEN_6]][[TOKEN_14]][[TOKEN_7]][[TOKEN_8]][[TOKEN_15]][[TOKEN_9]]/[[TOKEN_10]][[TOKEN_16]][[TOKEN_11]]
-WARNING quest-reward-received: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '2', '5', '3', '6'])
-quest-reward-received: TRANSLATED
+  Result: NewTIVE New TOGN สืบค้น TOKN พร้อม: TOGN TOGN TIGN 222 2 2 2 2 2 2 2.
+quest-reward-received: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
   Original: You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}!
-  Result: <color=#ffd9eb>{0}</color> x <color=white>{1}</color> 完成你的{2}!
-WARNING quest-reward-dropped: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '2', '5', '3', '6'])
-quest-reward-dropped: TRANSLATED
+  Result: คุณได้รับ TOGNTOKN TOKNTHN xTOGN TIKNNTIKNN 2 222 สําหรับการทํา TCOKNN ของคุณเสร็จ THNKN!
+quest-reward-dropped: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
   Original: You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}! It dropped on the ground because your inventory was full.
-  Result: <color=#ffd9eb>{0}</color> x <color=white>{1}</color> 完成你的{2}! 它掉在地上 因為你的數據滿了
-2761093386: TRANSLATED
+  Result: คุณได้รับ TOGNTOKN TOKNTHN xTOGN TIKNNTIKNN 2 222 สําหรับการทํา TCOKNN ของคุณเสร็จ THNKN! มันหล่นลงบนพื้นเพราะสินค้าของคุณเต็ม
+2761093386: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Battle Group - {familiarReply}
-  Result: 戰鬥群組 - {familiarReply}
+  Result: กลุ่มต่อสู้ - TOKN
 3158650477: TRANSLATED
   Original: No familiars in battle group!
-  Result: 在戰鬥群組里沒有熟人!
+  Result: ไม่คุ้นเคยกับกลุ่มรบ!
 2932385107: TRANSLATED
   Original: Targets have all been killed, give them a chance to respawn!
-  Result: 目標都死了 給他們一次重生的機會
+  Result: เป้าหมายทั้งหมดถูกฆ่า ให้โอกาสพวกมันได้กลับมา
 1076291728: TRANSLATED
   Original: Use the VBlood menu to track bosses!
-  Result: 用 VBloud 選單追蹤老闆!
+  Result: ใช้เมนูเลือด V เพื่อติดตามหัวหน้า!
 1420278477: TRANSLATED
   Original: Tracking is only available for incomplete kill quests.
-  Result: 追蹤只能做不完全的殺人任務
+  Result: การติดตามมีไว้สําหรับภารกิจฆ่าที่ไม่สมบูรณ์เท่านั้น
 3546356968: TRANSLATED
   Original: Invalid unit prefab (match found but does not start with CHAR/char).
-  Result: 不合法的單位 prefab( 找到匹配但不從 CHAR/ char 開始) 。
-WARNING 2886300456: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-2886300456: TRANSLATED
+  Result: นําหน้าหน่วยไม่ถูกต้อง (พบตรงกันแต่ไม่ได้ขึ้นต้นด้วย CHAR/Char)
+2886300456: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.
-  Result: <color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> 加入<color=white>{activeBox}</color>。
+  Result: TOKNN_0TOKNNTOKN THNN เพิ่ม TIKN TIKNN 2 2 2 2 2 2 3.
 2169578147: TRANSLATED
   Original: Invalid unit name (match found but does not start with CHAR/char).
-  Result: 不合法的單位名稱( 找到匹配但不從 CHAR/ char 開始 ) 。
-WARNING 2151120362: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '7', '3', '4', '8', '5'])
-2151120362: TRANSLATED
+  Result: ชื่อหน่วยไม่ถูกต้อง (พบที่ภาพแต่ไม่ได้ขึ้นต้นด้วย CHAR/Char)
+2151120362: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: <color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.
-  Result: <color=green>{match.GetLocalizedName()}</color>(<color=yellow>{match.GuidHash}</color>) 添加到<color=white>{activeBox}</color> 。
+  Result: TIKNTOGNTOGNTRIGN2222 เพิ่ม 2 เพิ่ม 2 2 2 2.
 223311103: TRANSLATED
   Original: Invalid unit name (no full or partial matches).
-  Result: 不合法的單位名稱( 沒有完全匹配或部分匹配 ) 。
+  Result: ชื่อหน่วยไม่ถูกต้อง (ไม่มีตรงกันเต็มหรือตรงกันบางส่วน)
 2155028867: TRANSLATED
   Original: Invalid prefab (not an integer) or name (does not start with CHAR/char).
-  Result: 無效的 prefab( 不是整數) 或名稱( 不從 CHAR/ char 開始 ) 。
+  Result: prefab ไม่ถูกต้อง (ไม่ใช่จํานวนเต็ม) หรือชื่อ (ไม่ได้เริ่มด้วย CHAR/Char)
 3102592194: TRANSLATED
   Original: Couldn't find active familiar!
-  Result: 感覺不太熟!
-WARNING 1057342822: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1057342822: TRANSLATED
+  Result: หาความคุ้นเคยไม่ได้!
+1057342822: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Your familiar has already prestiged the maximum number of times! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)
-  Result: 你熟悉的已經聲名大噪了! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)
-2689850927: TRANSLATED
+  Result: ความคุ้นเคยของคุณ ได้มีชื่อเสียงสูงสุด TOKNNTOKNNTIKNNTIKNN
+2689850927: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.
-  Result: 無效的熟悉的聲望stat 類型, 使用 `<color=white>. fam lst </color> 查看選項 。
-WARNING 3125006928: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '6', '1', '2', '7', '3', '4', '5'])
-3125006928: TRANSLATED
+  Result: ชนิดชื่อเพลงที่คุ้นเคยไม่ถูกต้อง ให้ใช้ 'TakeN_ 0.fim lastTakeen_1' เพื่อดูตัวเลือก
+3125006928: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
   Original: Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.
-  Result: 熟人已經有 <color=#00FFFF> {FamiliarPrestigeStats[value]} </color> (<color=yellow>{value + 1}</color> ) 從預估, 使用 '<color=white>. fam lst </color> 查看選項 。
-2846646667: TRANSLATED
+  Result: Familyer มี TOGNTOKNTHNNTIGNTRIGNTIKNN 7222222222 จาก      2 จาก 3 จาก 3 จาก3 จาก3 ง จาก3 ง, ใช้ ', ใช้ ' (ท่ หม่
+2846646667: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.
-  Result: 無效的熟悉聲望stat, 使用 '<color=white>. fam lst </color>' 來查看選項 。
-705325693: TRANSLATED
+  Result: ค่าสถิติคุณสมบัติที่คุ้นเคยไม่ถูกต้อง ให้ใช้ 'Takeen_ 0.fim lastTakeen_1' เพื่อดูตัวเลือก
+705325693: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')
-  Result: 熟人已經有名聲了! (“<color=white>.fam pr </color> 而不是“<color=white>.fam pr PrestigeStat</color>”)
+  Result: ฟามิเลียร์มีสถิติการมีชื่อเสียงอยู่แล้ว (TOKN0. fam pr TOKN_1' แทน 'TIKN2. pham pr prestengsatTIKNN_3'.
 2844729307: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!
-  Result: 你熟悉的知識使他們得以保持自己的水平。
-2712718738: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['2', '5', '3']))
+  Result: ความคุ้นเคยของคุณได้รับการยกย่อง TOKN TOKNN 2TTOGN; ความรู้สะสมของพวกเขาอนุญาตให้พวกเขารักษาระดับของพวกเขา!
+2712718738: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
-  Result: 你熟悉的知識使他們得以保持自己的水平! (+[[TOKEN_2]][[TOKEN_5]][[TOKEN_3]])
+  Result: ความคุ้นเคยของคุณได้รับการยกย่อง TOKNTOKN TOKN_4) TCUGN TOGN; ความรู้สะสมของพวกเขาอนุญาตให้พวกเขารักษาระดับของพวกเขา! TOGNNTOKNNTOKNN
 872190851: TRANSLATED
   Original: Failed to remove schematics from your inventory!
-  Result: 從清單中移除圖片失敗 !
-329722985: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['4', '1', '2', '5', '3']))
+  Result: ล้มเหลวในการลบผังแป้นพิมพ์ออกจากคลังแพกเกจของคุณ!
+329722985: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You do not have enough of the required item to change classes (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: 您沒有足夠的項目來變更類別( Token_  [[TOKEN_4]] [[TOKEN_1]] x [[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]) 。
-WARNING 3466860311: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-3466860311: TRANSLATED
+  Result: คุณไม่มีของที่จําเป็นพอที่จะเปลี่ยนคลาส (TOKN_0TOKN_4)TOKNN_4) TOKNN_1xTIKNN 2 2 2 2 2
+3466860311: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: 移除所需項目失敗 (<color=#ffd9eb>{item.GetLocalizedName()}</color>x <color=white>{quantity}</color>)
-3720524051: TRANSLATED
+  Result: ล้มเหลวในการลบรายการที่ต้องการ (TOKN_ 0TOKN_4) TRIGN TRIGN xTRIGNTIKNN 3
+3720524051: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {FormatClassName(playerClass)} passives not found!
-  Result: {FormatClassName(playerClass)} 被动者找不到!
-3543031585: TRANSLATED
+  Result: (TOKN_0) ไม่พบการนิ่งเฉย!
+3543031585: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {FormatClassName(playerClass)} passives:
-  Result: {FormatClassName(playerClass)} 被动:
+  Result: TOKN_0 เคลื่อนไหว:
 1106946472: SKIPPED (sentinel missing)
   Original: {replyMessage}
-  Result: [[Token_0]]] [ [敲門]
-2164633984: TRANSLATED
+  Result: [TOGN] [TIKINE]
+2164633984: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Couldn't find stat synergies for {FormatClassName(playerClass)}...
-  Result: 找不到  {FormatClassName(playerClass)} 的數據合力...
-1293896668: TRANSLATED
+  Result: ไม่สามารถหาอาการจําลองสําหรับ TOGN...
+1293896668: SKIPPED (token mismatch (expected ['0'], got []))
   Original: No stat synergies found for {FormatClassName(playerClass)}.
-  Result: 找不到 {FormatClassName(playerClass)} 的狀態合 。
-WARNING 2147420594: token order differs (expected ['0', '1', '2', '3'], got ['2', '0', '3', '1'])
-2147420594: TRANSLATED
+  Result: ไม่พบข้อมูลสถิติสําหรับ Takeen_ 0.
+2147420594: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: {FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:
-  Result: {FormatClassName(playerClass)} 统计协同x<color=white>{ConfigService.SynergyMultiplier}</color>:
-WARNING 999548370: token order differs (expected ['0', '1', '2', '3'], got ['2', '0', '3', '1'])
-999548370: TRANSLATED
+  Result: TOKNN_2 สถิติ Syndergies TOKNNTIKNNTIKNNTIKNN
+999548370: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: {FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:
-  Result: {FormatClassName(playerClass)} 建立协同x<color=white>{ConfigService.SynergyMultiplier}</color>:
-460602473: TRANSLATED
+  Result: TOKNN_2 สถิติ SyncergiesTOKNNTIKNNTIKNNTIKNN
+460602473: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {FormatClassName(playerClass)} has no spells configured...
-  Result:  {FormatClassName(playerClass)} 沒有設定拼字...
-442755566: TRANSLATED
+  Result: TOKN_0 ไม่มีคาถาที่ปรับแต่ง...
+442755566: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {FormatClassName(playerClass)} spells:
-  Result: {FormatClassName(playerClass)} 拼法:
-WARNING 2967576286: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2967576286: TRANSLATED
+  Result: TOKN สะกด:
+2967576286: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Shift spell: <color=#CBC3E3>{spellName}</color>
-  Result: Shift 咒語 : <color=#CBC3E3> {spellName} </color>
-3097011724: TRANSLATED
+  Result: มนต์ Shift:TOKN_0TOKNN_2TOKNTHN
+3097011724: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid class, use '<color=white>.class l</color>' to see options.
-  Result: 無效的類別, 使用 '<color=white>. class l </color>' 查看選項 。
-1597216248: TRANSLATED
+  Result: คลาสไม่ถูกต้อง ให้ใช้ 'Takeen_ 0. ชั้น LTakeen_1' เพื่อดูตัวเลือก
+1597216248: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid class, use <color=white>'.class l'</color> to see options.
-  Result: 無效的類別, 請使用 <color=white>'. class l' </color> 來查看選項 。
+  Result: คลาสไม่ถูกต้อง ใช้ Takeen_ 0. คลาส I'Takeen_1 เพื่อดูตัวเลือก
 2747211297: TRANSLATED
   Original: Removed all class buffs then applied current class buffs for all players.
-  Result: 移除所有類別的 buff 後將目前類別 buff 套用到所有玩家 。
+  Result: เอา Friends คลาสทั้งหมดออก แล้วปรับใช้ Footers ปัจจุบันสําหรับผู้เล่นทั้งหมด
 2761429858: TRANSLATED
   Original: Removed all class buffs for all players.
-  Result: 移除所有玩家的課程 。
+  Result: เอาเพื่อนทุกชั้นของผู้เล่นทั้งหมดออก
 327031724: TRANSLATED
   Original: Active familiar already present in battle group!
-  Result: 在戰鬥團隊中已經有熟人了!
-WARNING 625301684: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-625301684: TRANSLATED
+  Result: เคลื่อนไหวอย่างคุ้นเคย มีอยู่ในกลุ่มรบแล้ว!
+625301684: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!
-  Result: <color=white>{MAX_BATTLE_GROUPS}</color>的戰鬥群組!
-WARNING 3944404979: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3944404979: TRANSLATED
+  Result: ไม่สามารถมีมากกว่าTOKNTOKNN2TTOGN กลุ่มรบ!
+3944404979: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Deleted battle group <color=white>{groupName}</color>!
-  Result: 已刪除的戰鬥群組 <color=white>{groupName}</color>!
+  Result: TOKN ทีมรบที่ถูกลบTOKNNTCNN2!
 2979158417: TRANSLATED
   Original: Prestiging is not enabled.
-  Result: 預覽未開啟 。
-2350508902: TRANSLATED
+  Result: ไม่เปิดใช้งานการคิดล่วงหน้า
+2350508902: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid prestige type, use <color=white>'.prestige l'</color> to see options.
-  Result: 無效的聲望類型, 請使用 <color=white>'. prestige l' </color> 查看選項 。
-1897692916: SKIPPED (token mismatch (expected ['0', '1'], got ['0']))
+  Result: ประเภทชื่อเสียงไม่ถูกต้อง, ใช้ Takeen_ 0. Pristage lTakeen_1 เพื่อดูตัวเลือก
+1897692916: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: You must reach max level before <color=#90EE90>Exo</color> prestiging again.
-  Result: 您必須在 [[TOKEN_0]]  重新預期前達到最大水平 。
-9816116: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['0', '2', '4', '3']))
+  Result: คุณต้องไปถึงระดับสูงสุดก่อน TOKN_0 ExoTIKN_1 ล่วงหน้าอีกครั้ง
+9816116: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges. (<color=white>{EXO_PRESTIGES}</color>)
-  Result: 您已達到最大  [[TOKEN_0]]  聲譽 。 ([[TOKEN_2]][[TOKEN_4]][[TOKEN_3]])
-WARNING 3729714988: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-3729714988: TRANSLATED
+  Result: คุณได้อันดับสูงสุดของ TOKN_0 ExoTOKN_1 เกียรตินิยม. TIKNTHTOGNN THNTHE TIKNN
+3729714988: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!
-  Result: <color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color>的威望完成!
-WARNING 2402733055: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got ['0', '8', '1', '2', '9', '3', '4', '10', '5', '6', '11', '7'])
-2402733055: TRANSLATED
+  Result: TOKNNTOKNN TOKN THNNTIKN222 22 2 2 เกียรติสมบรู
+2402733055: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got []))
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
-  Result: <color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color> 威望完成! 你們也獲得了<color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
-WARNING 3961332984: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got ['0', '8', '1', '2', '9', '3', '4', '10', '5', '6', '11', '7'])
-3961332984: TRANSLATED
+  Result: TOKNN0TOKNN TOKN THNTHNTHETIKN เกียรตินิยมสมบูรณ์! คุณได้รับรางวัลด้วย TOKNTOKN_10TOKN_5xTOGN TOGN TIKN THNKN 2 2.
+3961332984: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got []))
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.
-  Result: <color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color> 威望完成! 你被授予<color=#ffd9eb>{exoReward.GetLocalizedName()}</color><color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! 它掉在地上 讓你的數據滿了
-145841390: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got ['0', '1']))
+  Result: TOKNN0TOKNN TOKN THNTHNTHETIKN เกียรตินิยมสมบูรณ์! คุณได้รับรางวัลด้วย TOKNTOKN_10TOKN_5xTOGN TOGN TOKN THNKN EKNKN 7. มันหล่นลงบนพื้นแล้ว ข้าวของของคุณเต็มแล้ว
+145841390: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: You must reach the maximum level in <color=#90EE90>Experience</color> prestige before <color=#90EE90>Exo</color> prestiging.
-  Result: 您必須在 [[TOKEN_0]] 經驗 [[TOKEN_1]] 威望之前達到最大水平 。
-2076214502: TRANSLATED
+  Result: คุณต้องถึงระดับสูงสุดใน TOKN_0 ความสูง TOKNN_1 เกียรตินิยม ก่อน TOKN ExoTIKN_3 planguage.
+2076214502: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: <color=#90EE90>Exo</color> prestiging is not enabled.
-  Result: <color=#90EE90> Exo </color> 預覽無法啟動 。
-1641131342: TRANSLATED
+  Result: TOKN_0 Exo TOGN_1 การเตรียมล่วงหน้ายังไม่เปิดใช้งาน
+1641131342: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.
-  Result: 無效的聲譽, 使用 <color=white>'. prestige l' </color> 來查看有效的選項 。
-WARNING 484801240: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-484801240: TRANSLATED
+  Result: เกียรตินิยมไม่ถูกต้อง, ใช้ TOKN_ 0. Pristage lTakeen_1 เพื่อดูตัวเลือกที่ถูกต้อง
+484801240: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.
-  Result: 您尚未達到在 <color=#90EE90>{parsedPrestigeType}</color> 的威望, 或處於最高威望水平 。
-WARNING 11642316: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '1', '2', '6', '3', '7', '4', '8', '5'])
-11642316: TRANSLATED
+  Result: คุณยังไม่ได้ถึงระดับที่ต้องการเพื่อชื่อเสียงใน TOKN_0TOKN_2THEKN TOKNN TIKNN หรืออยู่ในระดับเกียรติยศสูงสุด
+11642316: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s
-  Result: 目前 <color=#90EE90></color> 預期 : <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} 最大表期: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s
-WARNING 836746607: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-836746607: TRANSLATED
+  Result: ปัจจุบัน TOCKN_0 Exo TOKNN_1 ระดับ Prestage: TakeN_2TOKN_6TIKN_3/TIGNE TIGN Max Form time: TOKN TIKNN TIKNTHNTIKNVN2 2 2 2
+836746607: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s
-  Result: 足以維持 <color=white>{(int)exoFormData.Value}</color>s 的表格
-2332227846: TRANSLATED
+  Result: ค่าใช้จ่ายพอที่จะรักษารูปแบบสําหรับ TOKN_0TOKN_2TOGN TOKNN
+2332227846: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: You have not prestiged in <color=#90EE90>Exo</color> yet.
-  Result: 您尚未在 <color=#90EE90> Exo </color> 中聲望 。
-WARNING 3706109126: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3706109126: TRANSLATED
+  Result: คุณยังไม่ได้มีชื่อเสียงใน TOCKN ExoTOGN ยัง.
+3706109126: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.
-  Result: 您在 <color=#90EE90>{parsedPrestigeType}</color> 中沒有聲望 。
+  Result: TOKNN 2TOKKNNTCNKN.
 1689690159: TRANSLATED
   Original: Couldn't find player.
-  Result: 找不到玩家
-WARNING 3055902112: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3055902112: TRANSLATED
+  Result: หาผู้เล่นไม่เจอ
+3055902112: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=#90EE90>{parsedPrestigeType}</color> prestiging is not enabled.
-  Result: <color=#90EE90>{parsedPrestigeType}</color> 預置無法啟動 。
-WARNING 3468772905: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-3468772905: TRANSLATED
+  Result: TOKNN_0TOKNN TOKN TIKNN_1 ล่วงหน้ายังไม่เปิดใช้งาน
+3468772905: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: The maximum level for <color=#90EE90>{parsedPrestigeType}</color> prestige is {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.
-  Result: <color=#90EE90>{parsedPrestigeType}</color> 威望的最大水平是{PrestigeTypeToMaxPrestiges[parsedPrestigeType]}。
-WARNING 3343555659: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '7', '3', '4', '8', '5'])
-3343555659: TRANSLATED
+  Result: จุดสูงสุดของ TOKN TOKNN_2TOGN เกียรติศักดิ์คือ TOKN.
+3343555659: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.
-  Result: 玩家  <color=green> {playerInfo.User.CharacterName.Value} </color> 已被設定為 <color=white>{level}</color> 在 <color=#90EE90>{parsedPrestigeType}</color> 聲望的關卡 。
+  Result: ผู้เล่น TOKNNTOKNN 6 TOKNN ได้รับการแต่งตั้งเป็นระดับ TOGN TOGNTOGN 22 2 in TOKNN 2  อภินันทัศน ดี.
 101395383: TRANSLATED
   Original: Exo prestiging is not enabled.
-  Result: Exo prestiging 無法啟動 。
+  Result: ไม่เปิดใช้งานการประมวลผลก่อน
 3878313095: TRANSLATED
   Original: Couldn't find player...
-  Result: 找不到玩家...
-WARNING 1411528307: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-1411528307: TRANSLATED
+  Result: หาผู้เล่นไม่ได้...
+1411528307: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.
-  Result: <color=#90EE90>{parsedPrestigeType}</color> 威望重置<color=white>{playerInfo.User.CharacterName.Value}</color>。
+  Result: TOKNN_0TOKNN TOKNN_1 การรีเซ็ตยศศักดิ์สําหรับ TOKKNNTIKNN2 2 2 2 2 2 2 2 2 2 2 2 2.
 3318828181: TRANSLATED
   Original: Prestige buffs applied! (if they were missing)
-  Result: 施展优雅布法! (如果他們失蹤)
-WARNING 830139985: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-830139985: TRANSLATED
+  Result: prestage footers ใช้! (ถ้ามันหายไป)
+830139985: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: You have not prestiged in <color=#90EE90>{PrestigeType.Experience}</color>.
-  Result: 您在 <color=#90EE90>{PrestigeType.Experience}</color> 中沒有聲望 。
+  Result: TOKNN 2TOKKNNTCNKN.
 2461283441: TRANSLATED
   Original: Prestiges:
-  Result: 封面 :
+  Result: prestages:
 3320998835: SKIPPED (sentinel missing)
   Original: {prestiges}
-  Result: [[Token_0]]] [ [敲門]
+  Result: [TOGN] [TIKINE]
 947905559: TRANSLATED
   Original: Leaderboards are not enabled.
-  Result: 領導板沒有開啟 。
-WARNING 1182925736: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1182925736: TRANSLATED
+  Result: ไม่เปิดใช้งานแผงควบคุม
+1182925736: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!
-  Result: 沒有球員在<color=#90EE90>{parsedPrestigeType}</color>中享有威望!
+  Result: ไม่มีผู้เล่นคนไหนเคยมีชื่อเสียงใน TOKN TOKNT 2TOKKN ยัง!
 1687700552: TRANSLATED
   Original: You must consume at least one primordial essence...
-  Result: 你必須消耗至少一個原始精髓...
-1763729577: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '1', '6']))
+  Result: คุณต้องบริโภคอย่างน้อยที่สุดหนึ่งสาระสําคัญ
+1763729577: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
   Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
-  Result: exo form emote 動作 ([[TOKEN_0]] 突擊 [[TOKEN_1]]) ([[TOKEN_6]])
+  Result: Exo ฟอร์มการกระทํา (TOKN_0 taunt TOKNN_1 TOGN
 1711247206: TRANSLATED
   Original: You are not yet worthy...
-  Result: 你不配...
-3882215894: TRANSLATED
+  Result: เจ้ายังไม่คู่ควร...
+3882215894: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Invalid shapeshift! Valid options: {shapeshifts}
-  Result: 不合法的變形檔 。 有效的選項 : {shapeshifts}
+  Result: การเปลี่ยนรูปร่างไม่ถูกต้อง! ตัวเลือกที่ใช้ได้:
 1884272339: TRANSLATED
   Original: You must consume Dracula's essence before manifesting his form...
-  Result: 在表達德古拉的形狀前 你必須消耗德古拉的精髓
+  Result: คุณต้องกินแก่นแท้ของแดร็กคิวล่า ก่อนที่จะเผยรูปร่างของเขา
 816810753: TRANSLATED
   Original: You must consume Megara's essence before manifesting her form...
-  Result: 你必須先消耗Megara的精髓 然后再展示她的形狀...
-WARNING 3587073963: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3587073963: TRANSLATED
+  Result: คุณต้องกินแก่นแท้ของมาการา ก่อนที่จะเผยรูปร่างของเธอ
+3587073963: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Current Exoform: <color=white>{form}</color>
-  Result: 目前排版 : <color=white> {form} </color>
-WARNING 1440482998: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1440482998: TRANSLATED
+  Result: เอ็กซ์โซฟอร์มปัจจุบัน: TOKN_0TOKN_2TOGN
+1440482998: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore prestige leaderboard list!
-  Result: <color=green>{playerInfo.User.CharacterName.Value}</color>新增到被忽略的領導人名單中!
-WARNING 2659109549: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2659109549: TRANSLATED
+  Result: TOKNN_0TOKNNTOKNN_1 เพิ่มเข้าในรายการผู้นําชื่อเสียง
+2659109549: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore prestige leaderboard list!
-  Result: <color=green>{playerInfo.User.CharacterName.Value}</color> 從被忽略的領導人名單上移除!
+  Result: TOKNN_0TOKNN 2 TOKNN_1 ถอนออกจากรายชื่อผู้นําผู้เกิ
 2178615132: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Permashroud <color=green>enabled</color>!
-  Result: TOMKEN_0 啟動!
-1797973559: TRANSLATED
+  Result: Permashrured TOKN ออกเสียง TOKKN!
+1797973559: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Permashroud <color=red>disabled</color>!
-  Result: Permashroud  <color=red> 残疾 </color> !
+  Result: Permashrured TOKN diversable (TIKNN_1!
 985830382: TRANSLATED
   Original: Expertise is not enabled.
-  Result: 專業沒有開啟 。
+  Result: ไม่ถูกเปิดใช้ความเชี่ยวชาญ
 3170250471: TRANSLATED
   Original: Expertise handler for weapon is null; this shouldn't happen and you may want to inform the developer.
-  Result: 武器專業處理器是無效的; 這不該發生, 您可能要通知開發者 。
-WARNING 3591926048: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '12', '1', '2', '13', '3', '4', '14', '5', '6', '7', '8', '15', '9', '10', '16', '11'])
-3591926048: TRANSLATED
+  Result: ผู้ดูแลอาวุธผู้เชี่ยวชาญเป็นโมฆะ; นี้ไม่ควรจะเกิดขึ้นและคุณอาจจะต้องการที่จะแจ้งนักพัฒนา
+3591926048: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got []))
   Original: Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!
-  Result: 你的專業武器是<color=white>{ExpertiseData.Key}</color><color=#90EE90>{prestigeLevel}</color>,你有<color=yellow>{progress}</color>。 <color=#FFC0CB></color> (<color=white>{GetLevelProgress(steamId, handler)})% </color> 与<color=#c0c0c0>{weaponType}</color>的專家!
-WARNING 3489173133: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-3489173133: TRANSLATED
+  Result: TOGN ความเชี่ยวชาญในการใช้อาวุธคือ TOGNTHNNTHNN THNTHE THNGN THE THNKN THNKN และคุณมี THNKN 2 2 2 2 TOKN_6 อนุมาน TOKNN7TOGN TOGN TOGN% TINGN กับ 2 TOKNN THN TCNKN THN
+3489173133: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: <color=#c0c0c0>{weaponType}</color> Stats: {bonuses}
-  Result: <color=#c0c0c0>{weaponType}</color>{bonuses}
+  Result: TOKNN_0TOKNN THNTHE THEKNN THNN สถิติ:
 3863739608: TRANSLATED
   Original: No bonuses from currently equipped weapon.
-  Result: 目前武器沒有獎金
-WARNING 4023020194: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-4023020194: TRANSLATED
+  Result: ไม่มีโบนัสจากอาวุธที่ใช้อยู่ในปัจจุบัน
+4023020194: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet!
-  Result: 你還沒獲得任何專業資訊<color=#c0c0c0>{weaponType}</color>呢!
-736301693: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
+  Result: คุณยังไม่ได้รับความเชี่ยวชาญอะไรเลยสําหรับ TOKNTIKNN 2TTOKN ยัง!
+736301693: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 專業伐木現在[[TOKEN_4]]。
-27929505: TRANSLATED
+  Result: ปัจจุบัน Taken_4.
+27929505: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid stat, use '<color=white>.wep lst</color>' to see valid options.
-  Result: 不合法的stat, 使用 `<color=white>. wep Ist </color>' 來查看有效的選項 。
-WARNING 1880632188: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-1880632188: TRANSLATED
+  Result: ค่าสถิติไม่ถูกต้อง, ใช้ 'TCNN_ 0. wep lastTIKN_1' เพื่อดูตัวเลือกที่ถูกต้อง
+1880632188: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=#00FFFF>{finalWeaponStat}</color> has been chosen for <color=#c0c0c0>{finalWeaponType}</color>!
-  Result: <color=#00FFFF>{finalWeaponStat}</color>被選為<color=#c0c0c0>{finalWeaponType}</color>!
-2008856310: TRANSLATED
+  Result: TOKNN_0TOKNN TOKN ได้รับเลือกสําหรับ TOKN TOGNTICKN 2 2 2 2 2 2 2 2
+2008856310: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid weapon choice, use '<color=white>.wep lst</color>' to see valid options.
-  Result: 無效的武器選擇, 使用 ' <color=white>. wep Ist </color> 以查看有效的選項 。
-WARNING 3274700132: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3274700132: TRANSLATED
+  Result: ตัวเลือกการใช้อาวุธไม่ถูกต้อง, ใช้ 'Takeen_0. wep lastTakeen_1' เพื่อดูตัวเลือกที่ถูกต้อง
+3274700132: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!
-  Result: 您的武器數據已重置  <color=#c0c0c0> {weaponType} </color> !
-WARNING 719993404: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-719993404: TRANSLATED
+  Result: สถิติอาวุธของคุณได้รับการรีเซ็ตสําหรับ TOKN_0TOKN 2TICKNN TOKNN!
+719993404: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: 你沒必要重設武器數據! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x <color=white>{quantity}</color>).
-2128999876: TRANSLATED
+  Result: คุณไม่มีของที่จําเป็นที่จะรีเซ็ตสถิติอาวุธของคุณ! TOKNNTOKNN THN TOKN xTIKNTIKNN 2 2 2 2 TIKNN 3
+2128999876: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Level must be between 0 and {ConfigService.MaxExpertiseLevel}.
-  Result: 等級必須在 0 到 {ConfigService.MaxExpertiseLevel} 之間 。
+  Result: ระดับต้องอยู่ระหว่าง 0 กับ TOCKN_0.
 2252129438: TRANSLATED
   Original: Invalid weapon type.
-  Result: 不合法的武器類型 。
-2480816305: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '7', '3', '8', '5']))
+  Result: ชนิดของอาวุธไม่ถูกต้อง
+2480816305: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: <color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>
-  Result: [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]] 專家被設為[[TOKEN_2]][[TOKEN_7]][[TOKEN_3]][[TOKEN_8]][[TOKEN_5]]。
+  Result: TOKNTOKNN TOKN ความเชี่ยวชาญตั้งค่า TOGN TOGNNTIKNN22 2 2 2 2
 3013651462: TRANSLATED
   Original: Couldn't find matching save method for weapon type...
-  Result: 找不到武器類型的匹配保存方法...
+  Result: ไม่พบวิธีบันทึกชนิดอาวุธ
 2965167816: TRANSLATED
   Original: No weapon stats available at this time.
-  Result: 目前沒有武器數據
-WARNING 3084457547: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3084457547: TRANSLATED
+  Result: ไม่มีสถิติอาวุธในตอนนี้
+3084457547: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>
-  Result: 可用的武器專家 : <color=#c0c0c0>{weaponTypes}</color>
+  Result: อาวุธที่มีอยู่:TOKN_0TOKNN2TOGN
 2202242526: TRANSLATED
   Original: Extra spell slots are not enabled.
-  Result: 未開啟附加的拼字槽 。
-2998300513: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got ['2', '3']))
+  Result: ไม่เปิดใช้ช่องสําหรับสะกดพิเศษ
+2998300513: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: Invalid slot (<color=white>1</color> for Q or <color=white>2</color> for E)
-  Result: Q 或 [[TOKEN_2]] 2 [[TOKEN_3]] E 的不合法槽(TKEN_01
-WARNING 3761416018: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-3761416018: TRANSLATED
+  Result: ช่องว่างไม่ถูกต้อง (TOKN_ 01TOKN_1 สําหรับ Q หรือ TRIGN2TIGN สําหรับ E
+3761416018: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
-  Result: <color=white>{new PrefabGUID(ability).GetPrefabName()}</color>用于<color=green>{playerInfo.User.CharacterName.Value}</color>的第一个非武装插槽。
-WARNING 1826355702: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-1826355702: TRANSLATED
+  Result: TOKNN_4) TOKNN TCNN TCNN TCNN สําหรับ TIKNN TIKNN 2 2.
+1826355702: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
-  Result: <color=white>{new PrefabGUID(ability).GetPrefabName()}</color>的第二个非武装插槽,用于<color=green>{playerInfo.User.CharacterName.Value}</color>。
+  Result: TCOKN_4) TOKNN TOKN TCNN THNN สําหรับ TOKNN TOKKNN 2 2.
 2712082651: TRANSLATED
   Original: Radius must be positive!
-  Result: 半徑一定是正數 !
+  Result: รัศมีต้องเป็นบวก!
 1846116445: TRANSLATED
   Original: Extra spell slots for unarmed are not enabled.
-  Result: 不啟用非武裝的附加拼字槽 。
+  Result: ยังไม่ได้ถูกเปิดใช้ช่องว่างของคําสะกดพิเศษสําหรับไม่มีอาวุธ
 446698782: TRANSLATED
   Original: Spells cannot be locked when using exoform.
-  Result: 使用外形時不能鎖定拼字 。
+  Result: ไม่สามารถล็อคการสะกดได้เมื่อใช้โปรแกรม exocorm
 313887201: TRANSLATED
   Original: Change spells to the ones you want in your unarmed slots. When done, toggle this again.
-  Result: 把咒語換成你手無寸鐵的空位 完成後,再切一次
+  Result: เปลี่ยนคาถาให้ตัวที่คุณต้องการ ในช่องที่ไม่มีอาวุธของคุณ เมื่อทํา, จะสลับนี้อีกครั้ง
 121410310: TRANSLATED
   Original: Spells locked.
-  Result: 拼字鎖定 。
+  Result: สะกดล็อค
 4061888430: TRANSLATED
   Original: Blood Legacies are not enabled.
-  Result: 血液遺產無法啟動 。
+  Result: ไม่ มี การ เปิด ช่อง เลือด.
 3361608225: TRANSLATED
   Original: Invalid blood, use '.bl l' to see options.
-  Result: 無效的血液, 請使用 '. blll' 來查看選擇 。
+  Result: เลือดไม่ถูกต้อง ให้ใช้ '.bl' เพื่อดูตัวเลือก
 18401539: TRANSLATED
   Original: Invalid blood legacy.
-  Result: 無效的血統
-3254231727: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '12', '1', '2', '13', '3', '14', '5', '6', '7', '8', '15', '9', '10', '16', '11']))
+  Result: มรดกเลือดไม่ถูกต้อง
+3254231727: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got []))
   Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
-  Result: 您的關卡  [[TOKEN_0]] [[TOKEN_12]] [[TOKEN_1]][[TOKEN_2]][[TOKEN_13]][[TOKEN_3]] , [[TOKEN_14]][[TOKEN_5]][[TOKEN_6]][[TOKEN_7]] ([[TOKEN_8]][[TOKEN_15]])% [[TOKEN_9]] 在[[TOKEN_10]][[TOKEN_16]][[TOKEN_11]]中!
-WARNING 1711931034: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-1711931034: TRANSLATED
+  Result: คุณอยู่ในระดับ TOGNTOKNTOKNTHNTIGN22 2 2 2 2 2 2 TOKN_6 ความเหลื่อ TOKNN TOKN TOGN TTOVN % TINGN in TIGN in 2/10 2 2!
+1711931034: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: <color=red>{bloodType}</color> Stats: {bonuses}
-  Result: <color=red>{bloodType}</color>{bonuses}
-WARNING 939340687: token order differs (expected ['0', '1', '2', '3', '4'], got ['0', '4', '1', '2', '3'])
-939340687: TRANSLATED
+  Result: TOKNN_0TOKNN THNTHE THEKNN THNN สถิติ:
+939340687: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: No stats selected for <color=red>{bloodType}</color>, use <color=white>'.bl lst'</color> to see valid options.
-  Result: 沒有選取 <color=red>{bloodType}</color> 、 使用 <color=white>'. blist </color> 來查看有效的選項 。
-WARNING 226227140: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-226227140: TRANSLATED
+  Result: ไม่มีการเลือกสถิติสําหรับ TOCKN_0TOKN_4TOKN_1 ใช้ TOKN_2'.bl lst' เพื่อดูตัวเลือกที่ถูกต้อง
+226227140: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: No progress in <color=red>{handler.GetBloodType()}</color> yet.
-  Result: <color=red>{handler.GetBloodType()}</color> 尚未進步。
-4051608029: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
+  Result: ยังไม่มีความคืบหน้าใน TOKN TOKNTH TOKN_2 TOGN ยัง.
+4051608029: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 血統伐木[[TOKEN_4]]。
+  Result: การบันทึกเลือด Takeen_4).
 3335571950: TRANSLATED
   Original: Legacies are not enabled.
-  Result: 遺產未啟用 。
-2194796157: TRANSLATED
+  Result: เลกซี่ยังไม่ถูกเปิดใช้
+2194796157: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid blood stat, use '<color=white>.bl lst</color>' to see valid options.
-  Result: 無效的血液stat, 使用 '<color=white>. blist </color>' 來查看有效的選項 。
-WARNING 2785130336: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-2785130336: TRANSLATED
+  Result: ค่าสถิติของเลือดไม่ถูกต้อง, ใช้ 'Takeen_0. bllastTaken_1' เพื่อดูตัวเลือกที่ถูกต้อง
+2785130336: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=#00FFFF>{finalBloodStat}</color> selected for <color=red>{finalBloodType}</color>!
-  Result: <color=#00FFFF>{finalBloodStat}</color>被選入<color=red>{finalBloodType}</color>!
-4126149106: TRANSLATED
+  Result: TOKNN_0TOKNN TOKN เลือกสําหรับ TIKNN22 2 2 2 2 2 2 2 2 2!
+4126149106: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid blood type, use '<color=white>.bl l</color>' to see valid options.
-  Result: 無效的血型, 使用 '<color=white>. bl l </color>' 查看有效的選項 。
-4258273173: TRANSLATED
+  Result: กรุ๊ปเลือดไม่ถูกต้อง, ใช้ 'Takeen_ 0. blblTakeen_1' เพื่อดูตัวเลือกที่ถูกต้อง
+4258273173: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid blood legacy, use '<color=white>.bl l</color>' to see valid options.
-  Result: 無效的血傳統, 使用 '<color=white>. bl l </color>' 來查看有效的選項 。
-WARNING 1298892920: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1298892920: TRANSLATED
+  Result: มรดกของเลือดไม่ถูกต้อง, ใช้ 'Takeen_ 0.blTakeen_1' เพื่อดูตัวเลือกที่ถูกต้อง
+1298892920: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: No legacy available for <color=white>{bloodType}</color>.
-  Result: 找不到 <color=white>{bloodType}</color> 的遺產。
-WARNING 1740355579: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1740355579: TRANSLATED
+  Result: ไม่มีมรดกให้ TOKN_0TOKNN_2TOKN.
+1740355579: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Your blood stats have been reset for <color=red>{bloodType}</color>!
-  Result: 您的血數已重置  <color=red> {bloodType} </color> !
-WARNING 1449977777: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-1449977777: TRANSLATED
+  Result: สถิติเลือดของคุณได้รับการรีเซ็ตสําหรับ TakeN_0TOKNN 2TIKNNTICKNN!
+1449977777: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: 您沒有重置血液數據所需的項目( <color=#ffd9eb>{item.GetLocalizedName()}</color>x <color=white>{quantity}</color>) 。
-WARNING 1690022722: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1690022722: TRANSLATED
+  Result: คุณไม่มีของที่จําเป็นที่จะรีเซ็ตค่าเลือดของคุณ (TOKN_0TOKN_4)TOGN TOGN x TRIKNN 2 THNKN THNKNN
+1690022722: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Your blood stats have been reset for <color=red>{bloodType}</color>.
-  Result: 您的血液數據已重置 <color=red> {bloodType} </color> 。
+  Result: สถิติเลือดของคุณได้รับการรีเซ็ตสําหรับ TakeN_0TOKNN 2TICKNN TOKNN.
 1680589832: TRANSLATED
   Original: No blood stats available at this time.
-  Result: 目前沒有血液數據
-1108347105: TRANSLATED
+  Result: ตอนนี้ไม่มีเลือดเหลือ
+1108347105: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Level must be between 0 and {ConfigService.MaxBloodLevel}.
-  Result: 等級必須在 0 到 {ConfigService.MaxBloodLevel} 之間 。
-2196432591: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '7', '3', '8', '5']))
+  Result: ระดับต้องอยู่ระหว่าง 0 กับ TOCKN_0.
+2196432591: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: <color=red>{BloodHandler.GetBloodType()}</color> legacy set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>
-  Result: [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]] 遺產被設為[[TOKEN_2]][[TOKEN_7]][[TOKEN_3]][[TOKEN_8]][[TOKEN_5]]。
-WARNING 85537047: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-85537047: TRANSLATED
+  Result: TOKNNTOKNN TOKN มรดก TIKNN222 2 2 22 2 2
+85537047: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Available Blood Legacies: <color=red>{bloodTypesList}</color>
-  Result: 可用的血液遺產 : <color=red>{bloodTypesList}</color>
+  Result: TOKKN TOKN TOKNN 2TIGN
 1381058165: TRANSLATED
   Original: Familiars are not enabled.
-  Result: 相識者無法啟動 。
-WARNING 1716911803: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1716911803: SKIPPED (looks untranslated)
+  Result: ไม่เปิดใช้งานตัวรับสัญญาณ
+1716911803: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=white>{box}</color>:
-  Result: <color=white>{box}</color>:
-WARNING 863911874: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-863911874: TRANSLATED
+  Result: TOKNN_0TOKNNTIKNN THNN :
+863911874: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $
-  Result: <color=yellow>{count}</color> ** <color=green>{famName}</color>{(familiar BuffsData.FamiliarBuffs.ContinsKey(famKey)) ? $
-1066178325: TRANSLATED
+  Result: TOKNN_0TOKNN THNTHE TIKNN THNNTOKNN_2TOKNN_5 TOKNN_3FFEMMFFFFFFSData. Familyerbuffs.CNNKEKEE (FFFMKEKY). $
+1066178325: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: No active box! Try using <color=white>'.fam sb [Name]'</color> if you know the familiar you're looking for. (use quotes for names with a space)
-  Result: 沒有有效的盒子! 試著使用 <color=white>'. fam sb Name' </color>, 如果你知道自己要找的熟悉人。 (有空格的名字使用引文)
+  Result: ไม่มีกล่องใช้งาน! ลองใช้ Takeen_0'.fam sb ชื่อ'TOKN_1 ถ้าคุณรู้จักความคุ้นเคยที่คุณมองหา (ใช้คําพูดแทนชื่อที่มีช่องว่าง)
 2462277004: TRANSLATED
   Original: Couldn't find active box!
-  Result: 找不到有效的盒子!
+  Result: ไม่พบกล่องใช้งาน!
 1977482431: TRANSLATED
   Original: Familiar Boxes:
-  Result: 熟悉的盒子 :
+  Result: กล่องข้อมูล:
 2321621014: SKIPPED (sentinel missing)
   Original: {fams}
-  Result: [[Token_0]]] [ [敲門]
+  Result: [TOGN] [TIKINE]
 854134032: TRANSLATED
   Original: You don't have any unlocks yet!
-  Result: 你還沒有解鎖!
-WARNING 321106656: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-321106656: TRANSLATED
+  Result: คุณยังไม่มีกุญแจ
+321106656: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Box Selected - <color=white>{name}</color>
-  Result: 選取的框 - <color=white>{name}</color>
+  Result: กล่องที่เลือก - TOGN TOKNTH TOKN_2THEKN
 2465841402: TRANSLATED
   Original: Couldn't find box!
-  Result: 找不到盒子!
-WARNING 698362524: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-698362524: TRANSLATED
+  Result: หากล่องไม่เจอ!
+698362524: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Box <color=white>{current}</color> renamed - <color=yellow>{name}</color>
-  Result: 框 <color=white>{current}</color> 更名 - <color=yellow>{name}</color>
+  Result: กล่อง TOKNN_0TOKNNTHNN เปลี่ยนชื่อ - TIKNNTIKNN 2 2 2 2 2 2 2 2 2
 1575879194: TRANSLATED
   Original: Couldn't find box to rename or there's already a box with that name!
-  Result: 找不到可以重命名的盒子 不然就已經有這個名字的盒子了
-WARNING 823180732: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-823180732: TRANSLATED
+  Result: ไม่พบกล่องที่จะเปลี่ยนชื่อ หรือกล่องที่ชื่อนั้นอยู่แล้ว!
+823180732: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>{PrefabGUID.GetLocalizedName()}</color> moved - <color=white>{name}</color>
-  Result: <color=green>{PrefabGUID.GetLocalizedName()}</color> 移 - <color=white>{name}</color>
+  Result: TOKNN_0TOKNN TOKNN ย้ายTIKNN 222 2 2 2 2 2 2
 3236338434: TRANSLATED
   Original: Box is full!
-  Result: 箱子滿了!
-WARNING 2213724716: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2213724716: TRANSLATED
+  Result: กล่องเต็มแล้ว
+2213724716: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Deleted box - <color=white>{name}</color>
-  Result: 已刪除的框 -  <color=white>{name}</color>
+  Result: กล่องลบ - TOKNTOKNN_2TOKN_1
 4289445665: TRANSLATED
   Original: Box is not empty!
-  Result: 盒子不是空的!
-WARNING 3279926559: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3279926559: TRANSLATED
+  Result: กล่องไม่ได้ว่างเปล่า!
+3279926559: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Added box - <color=white>{name}</color>
-  Result: 新增框 - <color=white>{name}</color>
-WARNING 2724064627: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2724064627: TRANSLATED
+  Result: เพิ่มกล่อง - TOGNTOKNN_2TOKN
+2724064627: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Must have at least one unit unlocked to start adding boxes. Additionally, the total number of boxes cannot exceed <color=yellow>{BOX_CAP}</color>.
-  Result: 必須有至少一個單位解鎖, 才能開始新增盒子 。 此外,盒的總數不得超过<color=yellow>{BOX_CAP}</color>。
+  Result: ต้องมีอย่างน้อยหนึ่งหน่วยที่ปลดล็อค เพื่อเริ่มเพิ่มกล่อง นอกจากนี้ จํานวนของกล่องไม่สามารถเกิน TOKN_0TOGN TOKN 2TIKNN.
 2648123409: TRANSLATED
   Original: VBlood familiars are not enabled.
-  Result: VBloud 熟悉的無法啟用 。
+  Result: ไม่เปิดการใช้งาน v Bloods
 2179875375: TRANSLATED
   Original: VBlood purchasing is not enabled.
-  Result: VBloud 購物無法啟動 。
+  Result: ยังไม่มีการเปิดใช้งานการซื้อ VBR
 2721627196: TRANSLATED
   Original: Couldn't find matching vBlood!
-  Result: 找不到匹配的VBLOOD!
+  Result: หาเลือดที่เข้ากันไม่ได้
 1976698463: TRANSLATED
   Original: Multiple matches, please be more specific!
-  Result: 多點火柴,請說清楚!
-WARNING 3052690511: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3052690511: TRANSLATED
+  Result: ตรงกันหลายนัด กรุณาเจาะจงกว่านี้
+3052690511: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is not available per configured familiar bans!
-  Result: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color>不可用每一個設定的熟悉的禁止!
-WARNING 3195375072: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3195375072: TRANSLATED
+  Result: TOKN_0TOKNN TOKN TOKN_1 ไม่สามารถใช้ได้ต่อการสั่งห้ามที่คุ้นเคย!
+3195375072: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is already unlocked!
-  Result: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> 已經解鎖了!
-3380184352: TRANSLATED
+  Result: TOCKNTOKN TOKN TOKN ปลดล็อคแล้ว!
+3380184352: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Unable to verify cost for {vBloodPrefabGuid.GetPrefabName()}!
-  Result: 無法驗證 {vBloodPrefabGuid.GetPrefabName()} 的費用 !
-WARNING 3498334942: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3498334942: TRANSLATED
+  Result: ไม่สามารถตรวจสอบค่าใช้จ่ายสําหรับ TOCKN_0)!
+3498334942: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Unable to verify exo prestige reward item! (<color=yellow>{exoItem}</color>)
-  Result: 無法驗證 Exo 威望獎賞項目 ! (<color=yellow>{exoItem}</color>)
-WARNING 4255236631: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-4255236631: TRANSLATED
+  Result: ไม่สามารถตรวจสอบรายการเงินรางวัล Exo! TOKNNTOKNNTIKNNTIKNN
+4255236631: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: New unit unlocked: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>
-  Result: 新單位解鎖 : <color=green> {vBloodPrefabGuid.GetLocalizedName()} </color>
-2191580006: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '2', '5', '3']))
+  Result: หน่วยใหม่ปลดล็อค:TOKNTOKNN_2TOGN
+2191580006: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
   Original: Not enough <color=#ffd9eb>{exoItem.GetLocalizedName()}</color>x<color=white>{factoredCost}</color> for {vBloodPrefabGuid.GetPrefabName()}!
-  Result: [[TOKEN_0]][[TOKEN_4]][[TOKEN_1]]x [[TOKEN_2]][[TOKEN_5]][[TOKEN_3]] 不夠!
-1809964020: TRANSLATED
+  Result: ไม่พอ TOGN TOKN TOKN THNN 1 x TIKNN222 22 สําหรับ TIKNN TIKN THN
+1809964020: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Unable to verify tier for {vBloodPrefabGuid.GetPrefabName()}! Shouldn't really happen at this point and may want to inform the developer.
-  Result: 無法驗證 {vBloodPrefabGuid.GetPrefabName()} 的等級 ! 此刻不該真的發生 可能要通知開發者 。
-WARNING 1057363547: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '1', '2', '6', '3', '4', '7', '5'])
-1057363547: TRANSLATED
+  Result: ไม่สามารถตรวจสอบติมอร์สําหรับ Takeen_ 0! ไม่ควรเกิดขึ้น ณ จุดนี้ และอาจต้องการแจ้งนักพัฒนา
+1057363547: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
   Original: Invalid choice, please use <color=white>1</color> to <color=white>{familiarSet.Count}</color> (Current List:<color=yellow>{activeBox}</color>)
-  Result: 無效的選項, 請使用  <color=white> 1  </color> 到  <color=white>  {familiarSet.Count}  </color> 。 (目前的列表:<color=yellow>{activeBox}</color>)
-WARNING 780970161: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-780970161: TRANSLATED
+  Result: ตัวเลือกไม่ถูกต้อง, โปรดใช้ TakeN_01TakeN_1 to TOKNN_2TIKNNTRIKN TIKN TIKN TIKN (รายชื่อ:TOKNN_4)TOKNN_7TOGN
+780970161: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>{familiarId.GetLocalizedName()}</color> removed from <color=white>{activeBox}</color>.
-  Result: <color=green>{familiarId.GetLocalizedName()}</color> 被移出<color=white>{activeBox}</color>。
+  Result: TOKNN_0TOKNN TOKN ย้ายจาก TOKNN 222 2 2 2 2 2 2 2
 615667259: TRANSLATED
   Original: Couldn't find active familiar box to remove from...
-  Result: 找不到可用的熟悉的盒子可以移除...
+  Result: ไม่พบกล่องที่คุ้นเคยในการเอาออกจาก...
 210979117: TRANSLATED
   Original: You can't call a familiar when using dominating presence!
-  Result: 你不能用支配性的存在來稱呼熟人!
+  Result: คุณไม่สามารถเรียกความคุ้นเคยเมื่อใช้ครอบครอง!
 744989655: TRANSLATED
   Original: You can't call a familiar when using batform!
-  Result: 你用蝙蝠形的時候不能叫熟人!
+  Result: คุณไม่สามารถเรียกคนคุ้นเคยเมื่อใช้ค้างคาว!
 3960937922: TRANSLATED
   Original: You can't toggle combat for a familiar when using dominating presence!
-  Result: 你不能為了熟悉的戰鬥 利用支配性的存在
+  Result: คุณไม่สามารถสลับการต่อสู้เพื่อความคุ้นเคยเมื่อใช้ครอบครอง!
 3219279796: TRANSLATED
   Original: You can't toggle combat for a familiar when using batform!
-  Result: 你不能為了熟悉的戰鬥 利用蝙蝠形
+  Result: คุณไม่สามารถสลับการต่อสู้ สําหรับความคุ้นเคยเมื่อใช้ค้างคาว!
 2720898024: TRANSLATED
   Original: You can't toggle combat for a familiar in PvP/PvE combat!
-  Result: 你不能為了熟悉的 PvP/PvE 戰鬥而切換戰鬥!
-3946665029: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
+  Result: คุณไม่สามารถสลับการต่อสู้ สําหรับความคุ้นเคยในการต่อสู้ PvP/PvE!
+3946665029: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}!
-  Result: 啟動 [[TOKEN_4]] !
-WARNING 2709293439: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got ['0', '10', '1', '2', '11', '3', '4', '12', '5', '6', '7', '8', '13', '9'])
-2709293439: TRANSLATED
+  Result: การกระทําที่น่าดึงดูด TOKN_4)!
+2709293439: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got []))
   Original: Your familiar is level [<color=white>{xpData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
-  Result: 你的熟悉度是<color=white>{xpData.Key}</color><color=#90EE90>{prestigeLevel}</color>,并且有<color=yellow>{progress}</color>。 <color=#FFC0CB></color> (<color=white>{percent})% </color>!
+  Result: TOGN TOGN ความคุ้นเคยของคุณคือระดับ TOGNTHN THNN TOGN THNTHE THN 2 2 THNKNN และมี THNKN 2 2 2 2 2 TOCKN TOKNTOGN TOGN THN TIKN TIKNN % TIKNN!
 2794958495: SKIPPED (sentinel missing)
   Original: {line}
-  Result: [[Token_0]]] [ [敲門]
-488752679: TRANSLATED
+  Result: [TOGN] [TIKINE]
+488752679: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Level must be between 1 and {ConfigService.MaxFamiliarLevel}
-  Result: 等級必須在 1 到  {ConfigService.MaxFamiliarLevel} 之間 。
-WARNING 1440602422: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-1440602422: TRANSLATED
+  Result: ระดับต้องอยู่ระหว่าง 1 กับ TOKN
+1440602422: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Active familiar for <color=green>{user.CharacterName.Value}</color> has been set to level <color=white>{level}</color>.
-  Result: <color=green>{user.CharacterName.Value}</color>的活性熟悉度已定為 <color=white>{level}</color>。
+  Result: คุ้นเคยสําหรับ TOKN TOKNN_4) TOKN TOKNN_1 ได้รับการตั้งค่าให้อยู่ในระดับ TOGN TOGN 2 2 2 2 2 2 2.
 2526362535: TRANSLATED
   Original: Couldn't find active familiar....
-  Result: 感覺不太熟悉...
+  Result: หาความคุ้นเคยไม่ได้...
 701382701: TRANSLATED
   Original: Familiar prestige is not enabled.
-  Result: 熟悉的聲望無法啟動。
+  Result: ยัง ไม่ ได้ รับ การ เปิด ให้ มี เกียรติ อัน สูง ส่ง.
 802918832: TRANSLATED
   Original: Familiar is already at maximum number of prestiges!
-  Result: 熟人已經是最高聲望了!
-WARNING 1391708521: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1391708521: TRANSLATED
+  Result: Femitioner อยู่ที่จํานวนสูงสุดของชื่อเสียง!
+1391708521: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]!
-  Result: 你熟悉的威望<color=#90EE90>{prestigeLevel}</color>!
-WARNING 3235862068: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-3235862068: TRANSLATED
+  Result: ความคุ้นเคยของคุณได้รับการยกย่อง TOKN TOKNN 2TOGN!
+3235862068: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>!
-  Result: 您熟悉的聲望 <color=#90EE90>{prestigeLevel}</color> , 現在為平面 <color=white>{newXP.Key}</color>!
-WARNING 54858227: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '7', '3', '4', '8', '5'])
-54858227: TRANSLATED
+  Result: ความคุ้นเคยของคุณได้รับการยกย่อง TOKNTHNNTHNTIKNTIKN 1 และปัจจุบันอยู่ในระดับ TRIKNN2 2 2 2 2 2 2!
+54858227: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
-  Result: 你熟悉的聲望<color=#90EE90>{prestigeLevel}</color>,現在是水平<color=white>{newXP.Key}</color>! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)).
-WARNING 3334433396: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['0', '8', '1', '2', '9', '3', '4', '5', '6', '10', '7'])
-3334433396: TRANSLATED
+  Result: TOKN TOGN TOKNN 2 TCNN และปัจจุบันคือระดับ TOKNN22 2 2 2 2 2 2
+3334433396: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got []))
   Original: Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.
-  Result: 想要聲望的熟人必須在最大水平(<color=white>{ConfigService.MaxFamiliarLevel}</color>)或需要<color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>)。
+  Result: TIGN TRIGN หรือต้องการTOGN22222 2.
 2169705185: TRANSLATED
   Original: Couldn't find active familiar for prestiging!
-  Result: 無法找到活性熟悉的豫章!
+  Result: หาความคุ้นเคยในการเตรียมก่อนไม่ได้!
 1469754031: TRANSLATED
   Original: Looks like your familiar is still able to be found; unbind it normally after calling if it's dismissed instead.
-  Result: 看來你的熟人還是能找到的, 通常在打完電話後把它拆掉, 如果它被撤銷了。
-628275031: TRANSLATED
+  Result: ดูเหมือนว่าความคุ้นเคยของคุณ จะยังคงสามารถพบได้ โดยปกติการถอดมัน หลังจากโทรออกถ้ามันยกเลิก
+628275031: SKIPPED (looks untranslated)
   Original: Familiar actives and followers cleared.
-  Result: 熟人和追隨者被清除。
+  Result: Familyer Actives and Pseses เคลียร์
 2474938940: TRANSLATED
   Original: Couldn't find matching familiar in boxes.
-  Result: 在盒子里找不到相配的
+  Result: ในกล่องไม่คุ้นเลย
 4055019293: TRANSLATED
   Original: Couldn't find any matches...
-  Result: 找不到火柴...
+  Result: ไม่เจออะไรที่ตรงกันเลย
 1939118629: TRANSLATED
   Original: You don't have any unlocked familiars yet.
-  Result: 你還沒有解鎖的熟人
+  Result: คุณยังไม่มีที่คุ้นเคยเลย
 1516467471: TRANSLATED
   Original: You haven't unlocked any familiars yet!
-  Result: 你還沒解開任何熟人!
+  Result: คุณยังไม่ได้ปลดล็อคเลย
 284459823: TRANSLATED
   Original: Multiple matches found! SmartBind doesn't support this yet... (WIP)
-  Result: 找到多個火柴! SmartBind還不支持這個... (WIP)
+  Result: พบหลายชุด! สมาร์ทเบิร์ดยังไม่สนับสนุน... (WIP)
 2165480178: TRANSLATED
   Original: Couldn't find matching shinyBuff from entered spell school. (options: blood, storm, unholy, chaos, frost, illusion)
-  Result: 找不到相配的閃亮的魔咒學校 (選擇:血液、暴風雨、惡毒、混亂、霜霜、幻覺)
-1581983564: TRANSLATED
+  Result: ไม่เจออะไรที่เข้ากันเลย จากโรงเรียนเวทมนตร์ (ทางเลือก: เลือด, พายุ, ความไม่ศักดิ์สิทธิ์, ความวุ่นวาย, น้ําค้างแข็ง, ภาพลวงตา)
+1581983564: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Shiny added! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).
-  Result: 光亮加了! 重視效果很熟悉 用 '<color=white>. fam 選項閃亮 </color>' 來切換( 如果閃亮的 buffs 已關閉, 沒有機會施用拼字學校去除按鍵 )。
-WARNING 2682530289: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-2682530289: TRANSLATED
+  Result: เผ็ด! คุ้นเคยกับผลกระทบ ใช้ 'TOKN_0. fam ตัวเลือกเงา TakeN_1' เพื่อสลับไปมา (ไม่มีโอกาสใช้คาถาแบบ debuff on bit foots blooks).
+2682530289: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{clampedCost}</color>)
-  Result: 您沒有所需的數量  <color=#ffd9eb> {_vampiricDust.GetLocalizedName()} </color> ! (x <color=white>{clampedCost}</color>) 。
-53933494: TRANSLATED
+  Result: คุณไม่มีปริมาณที่ต้องใช้ TOGNTHNNTHN TOKN TIGN!
+53933494: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Shiny changed! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).
-  Result: 光亮變了! 重視效果很熟悉 用 '<color=white>. fam 選項閃亮 </color>' 來切換( 如果閃亮的 buffs 已關閉, 沒有機會施用拼字學校去除按鍵 )。
-WARNING 2486628899: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-2486628899: TRANSLATED
+  Result: ชินีเปลี่ยนไป! คุ้นเคยกับผลกระทบ ใช้ 'TOKN_0. fam ตัวเลือกเงา TakeN_1' เพื่อสลับไปมา (ไม่มีโอกาสใช้คาถาแบบ debuff on bit foots blooks).
+2486628899: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{changeQuantity}</color>)
-  Result: 您沒有所需的數量  <color=#ffd9eb> {_vampiricDust.GetLocalizedName()} </color> ! (x <color=white>{changeQuantity}</color>) 。
+  Result: คุณไม่มีปริมาณที่ต้องใช้ TOGNTHNNTHN TOKN TIGN!
 3170335283: TRANSLATED
   Original: Couldn't find active familiar...
-  Result: 找不到熟悉的...
-1354182381: TRANSLATED
+  Result: หาความคุ้นเคยไม่ได้...
+1354182381: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Valid options: {validOptions}
-  Result: 有效的選項 : {validOptions}
+  Result: ตัวเลือกที่ใช้ได้:
 318734715: TRANSLATED
   Original: Familiar battles are not enabled.
-  Result: 熟悉的戰鬥無法啟動 。
+  Result: การต่อสู้แบบฟามิเลียร์ยังไม่ถูกเปิดใช้
 1228611582: TRANSLATED
   Original: Familiar Battle Groups:
-  Result: 熟悉的戰鬥群組:
+  Result: กลุ่มรบฟามีเลีย:
 3819833139: TRANSLATED
   Original: You have no battle groups.
-  Result: 你們沒有戰鬥團體
-1081599663: TRANSLATED
+  Result: คุณไม่มีกลุ่มรบ
+1081599663: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: No active battle group selected! Use <color=white>.fam cbg [Name]</color> to select one.
-  Result: 沒有選擇正戰群組 ! 使用 <color=white>. fam cbg 名稱</color> 選取 。
-WARNING 3628025920: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3628025920: TRANSLATED
+  Result: ยังไม่มีการเลือกกลุ่มรบ! ใช้TIKN_0.fam cbg ชื่อTOKN_1 เพื่อเลือกหนึ่ง.
+3628025920: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Active battle group set to <color=white>{groupName}</color>.
-  Result: <color=white>{groupName}</color>。
+  Result: TakeN_2TOKNNTOKNNTCNN TOKNN.
 480925981: TRANSLATED
   Original: Battle group not found.
-  Result: 找不到戰鬥群組 。
-WARNING 3862629133: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3862629133: TRANSLATED
+  Result: ไม่พบกลุ่มรบ
+3862629133: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Battle group <color=white>{groupName}</color> created.
-  Result: <color=white>{groupName}</color>。
-3182929151: TRANSLATED
+  Result: กลุ่มรบ TOKNN TOKNTH TOKN TOKN สร้าง.
+3182929151: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: Slot input out of range! (use <color=white>1, 2,</color> or <color=white>3</color>)
-  Result: 輸入過程 ! (使用 <color=white> 1、2 </color> 或 <color=white> 3 </color>)
-WARNING 1894878159: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-1894878159: TRANSLATED
+  Result: ส่งสัญญาณจากระยะ! (ใช้TOKN_0 1, 2,TOKN_1 หรือTOGN3TOGN
+1894878159: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: Familiar assigned to <color=white>{groupName}</color> in slot {slotIndex}.
-  Result: 分配到 <color=white> {groupName}</color> 插槽 {slotIndex} 的熟悉者。
-WARNING 4162514026: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-4162514026: TRANSLATED
+  Result: Familyer มอบหมายให้ TOKN_0TOKN_2TIKNN_1 ในช่อง 2.
+4162514026: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Deleted battle group <color=white>{groupName}</color>.
-  Result: 已刪除的戰鬥群組 <color=white>{groupName}</color>。
-WARNING 907868427: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-907868427: TRANSLATED
+  Result: TOKN ทีมรบที่ถูกลบ TOKNN TOKNN 2TOGN.
+907868427: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
-  Result: 排隊位置 : <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
-2129553669: TRANSLATED
+  Result: ตําแหน่งของคิว: TOKN TOKNN_4)THNTOKNN_1TOGNNTIKNN 2
+2129553669: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: You're not currently queued for battle! Use '<color=white>.fam challenge [PlayerName]</color>' to challenge another player.
-  Result: 你們目前沒有排隊打仗! 用 '<color=white>. fam 挑戰 PlayerName</color> 挑戰另一個玩家 。
-WARNING 2968342812: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-2968342812: TRANSLATED
+  Result: เจ้ายังไม่ได้เข้าคิวรบ ใช้ 'TOKN_ 0. ท้าท้าย ชื่อผู้เล่นTakeen_1' เพื่อท้าทายผู้เล่นคนอื่น
+2968342812: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You can't challenge another player while queued for battle! Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
-  Result: 你不能在排隊打仗的時候挑戰另一個玩家! 排隊位置 : <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
+  Result: คุณไม่สามารถท้าทายผู้เล่นอื่น ๆ ในขณะที่คิวสําหรับการต่อสู้! ตําแหน่งของคิว: TOKN TOKNN_4)THNTOKNN_1TOGNNTIKNN 2
 3664649404: TRANSLATED
   Original: You can't challenge yourself!
-  Result: 你不能挑戰自己!
-WARNING 2228202821: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2228202821: TRANSLATED
+  Result: คุณท้าทายตัวเองไม่ได้
+2228202821: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=green>{playerInfo.User.CharacterName}</color> is already queued for battle!
-  Result: <color=green>{playerInfo.User.CharacterName}</color> 已經排隊打仗了!
+  Result: TOKNN_0TOKNN TOKN TOKNN_1 ได้เข้าคิวรบแล้ว!
 349704338: TRANSLATED
   Original: Can't challenge another player until an existing challenge expires or is declined!
-  Result: 不能挑戰另一個玩家, 直到目前的挑戰結束或被拒絕 !
-WARNING 2817263998: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2817263998: TRANSLATED
+  Result: ไม่สามารถท้าทายผู้เล่นคนอื่นได้ จนกว่าความท้าทายที่มีอยู่จะหมดอายุ หรือถูกปฏิเสธ
+2817263998: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=green>{playerInfo.User.CharacterName}</color> already has a pending challenge!
-  Result: <color=green>{playerInfo.User.CharacterName}</color> 已經有一個待決的挑戰了!
-WARNING 1231839381: token order differs (expected ['0', '1', '2', '3', '4'], got ['0', '4', '1', '2', '3'])
-1231839381: TRANSLATED
+  Result: TOKNN_0TOKNN TOKN TIKN มีความท้าทายที่รอมานาน!
+1231839381: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Challenged <color=white>{playerInfo.User.CharacterName.Value}</color> to a battle! (<color=yellow>30s</color> until it expires)
-  Result: <color=white>{playerInfo.User.CharacterName.Value}</color> 戰鬥! (<color=yellow> 30s </color> 直至到期)
+  Result: ท้าทาย TOKN TOKN TOKN TOKN THN TIKN ไปรบ! TIKN30sTIKNN_3 จนกว่ามันจะหมดอายุ
 3761848707: TRANSLATED
   Original: Familiar arena position set, battle service started! (only one arena currently allowed)
-  Result: 熟悉的竞技場位置,戰役開始了! (目前只允許一個竞技場)
+  Result: การตั้งตําแหน่งสนามฟามิเลียร์ หน่วยรบเริ่มแล้ว (มีสนามประลองเพียงสนามเดียว)
 2557313311: TRANSLATED
   Original: Familiar arena position changed! (only one arena currently allowed)
-  Result: 熟悉的竞技場位置改變了! (目前只允許一個竞技場)
+  Result: ตําแหน่งสนามกีฬาเปลี่ยนแปลง! (มีสนามประลองเพียงสนามเดียว)
 1836101498: TRANSLATED
   Original: Quests are not enabled.
-  Result: 查詢沒有開啟 。
-2271729042: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
+  Result: ไม่เปิดใช้งานการค้นหา
+2271729042: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 查詢記錄現在是 [[TOKEN_4]] 。
+  Result: การค้นหาคือตอนนี้ TOKN_4).
 1955962459: TRANSLATED
   Original: Invalid quest type. (daily/weekly or d/w)
-  Result: 不合法的探險類型 。 (每日/每周或每日)
+  Result: ชนิดของการค้นหาไม่ถูกต้อง (หมุน/ สัปดาห์ หรือ d/w)
 4007697799: TRANSLATED
   Original: You don't have any quests yet, check back soon.
-  Result: 你還沒有任何探險,快回去吧
+  Result: คุณยังไม่มีภารกิจอะไร เช็คกลับไปเร็วๆ นี้
 2563987683: TRANSLATED
   Original: Target cache isn't ready yet, check back shortly!
-  Result: 目標缓存還沒準備好 快回去
+  Result: แคชเป้าหมายยังไม่พร้อม เช็คกลับไปเร็ว ๆ นี้
 3823143990: TRANSLATED
   Original: You don't have any quests yet, check back soon!
-  Result: 你還沒有任何探險,快回來!
-WARNING 3878896595: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3878896595: TRANSLATED
+  Result: คุณยังไม่มีภารกิจอะไร เช็คกลับไปเร็ว ๆ นี้
+3878896595: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Quests for <color=green>{playerInfo.User.CharacterName.Value}</color> have been refreshed.
-  Result: <color=green>{playerInfo.User.CharacterName.Value}</color> 的查詢已刷新。
+  Result: สืบค้นเมื่อ TOKN TOKNN TOKN TOKN TOKN ได้รับความสดชื่น
 334075444: TRANSLATED
   Original: Invalid quest type. (Daily/Weekly)
-  Result: 不合法的探險類型 。 (每日/周刊)
-1952946751: TRANSLATED
+  Result: ชนิดของการค้นหาไม่ถูกต้อง (Daily/Weekly)
+1952946751: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: You've already completed your <color=#00FFFF>Daily Quest</color> today. Check back tomorrow.
-  Result: 今天你已經完成了你的<color=#00FFFF>每日查询</color>。 明天再查一遍
-WARNING 860320001: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '1', '2', '6', '3', '4', '7', '5'])
-860320001: TRANSLATED
+  Result: คุณเสร็จ TOKN ของคุณแล้ว เดลี่ เควส วันนี้ เช็คกลับไปพรุ่งนี้
+860320001: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
   Original: Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!
-  Result: 您的 <color=#00FFFF> 每日查詢 </color> 已重新輸入 <color=#C0C0C0>{item.GetLocalizedName()}</color> x <color=white>{quantity}</color> !
-WARNING 1985982508: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-1985982508: TRANSLATED
+  Result: TOKN ของคุณ TOKN สืบค้น TOKN ได้รับการม้วนสําหรับ TOGN TIKNTIGN 22 22 2 2 2!
+1985982508: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You couldn't afford to reroll your daily... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)
-  Result: (<color=#C0C0C0>{item.GetLocalizedName()}</color><color=white>{quantity}</color>)
+  Result: (TOKN_4) TOKNN TOKN TIKNN 1 xTIKNN222 TIKNKN 2
 677562659: TRANSLATED
   Original: No daily reroll item configured or couldn't find daily quest entry for player.
-  Result: 沒有設定每日回滾項目, 或找不到玩家的每日搜尋項目 。
-1677522996: TRANSLATED
+  Result: ไม่มีรายการที่จะม้วนทุกวันปรับแต่ง หรือไม่สามารถค้นหารายการรายวันสําหรับผู้เล่น
+1677522996: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: You've already completed your <color=#BF40BF>Weekly Quest</color>. Check back next week.
-  Result: 你已經完成了你的<color=#BF40BF> Weekly Quest </color>. 下周再查
-WARNING 4009901629: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '1', '2', '6', '3', '4', '7', '5'])
-4009901629: TRANSLATED
+  Result: คุณทําสําเร็จแล้ว TOKN. วีคลีย์ เควสต์ Taken_1. อาทิตย์หน้าเช็คกลับไป
+4009901629: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
   Original: Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!
-  Result: 您的 <color=#BF40BF></color> 已重新輸入 <color=#C0C0C0>{item.GetLocalizedName()}</color> x <color=white>{quantity}</color> !
-WARNING 707311945: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-707311945: TRANSLATED
+  Result: TOGN TOGN สืบค้นเมื่อ TOKN ได้รับการต่อ TOGN TICE TTOVN2 2 2 2 2 2 2
+707311945: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You couldn't afford to reroll your wekly... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)
-  Result: (<color=#C0C0C0>{item.GetLocalizedName()}</color><color=white>{quantity}</color>)
+  Result: (TOKN_4) TOKNN TOKN TIKNN TIKNTICKNN x2 2 2 2 2
 2402916111: TRANSLATED
   Original: No weekly reroll item configured or couldn't find weekly quest entry for player.
-  Result: 沒有設定每周回滾項目, 或是找不到玩家每周的搜尋項目 。
+  Result: ยังไม่มีการกําหนดรายการซ้ํา หรือไม่สามารถค้นหารายการสําหรับผู้เล่นรายสัปดาห์ได้
 3719118489: TRANSLATED
   Original: Player has no active quests!
-  Result: 玩家沒有行動的追求!
-563018011: TRANSLATED
+  Result: ผู้เล่นไม่มีภารกิจ
+563018011: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Invalid quest type '{questTypeName}'. Valid values are: {string.Join(
-  Result: 無效的探險類型 '{questTypeName}' 。 有效的值是 : { string. 加入( C)
-3751423711: TRANSLATED
+  Result: ชนิดของการค้นหาไม่ถูกต้อง ค่าที่ใช้ได้คือ: {ข้อความ เข้าร่วม
+3751423711: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Player does not have an active {questType} quest to complete.
-  Result: 玩家沒有執行 {questType} 的求完成 。
-998944061: SKIPPED (token mismatch (expected ['0', '1'], got ['0']))
+  Result: ผู้เล่นไม่มีการทํางาน TOKN_0. สืบค้นเพื่อเสร็จสมบูรณ์.
+998944061: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: The {questType} quest is already complete for {playerInfo.User.CharacterName.Value}.
-  Result: [[TOKEN_0]]的探險已經完成。
+  Result: TOKN_0 การแสวงหาเสร็จสมบูรณ์แล้ว TOKNN_1.
 1496603105: TRANSLATED
   Original: Leveling is not enabled.
-  Result: 關閉未開啟 。
-107297214: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
+  Result: ไม่สามารถปรับระดับเสียงได้
+107297214: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Level logging {(GetPlayerBool(steamId, EXPERIENCE_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 等級日志 [[TOKEN_4]]。
-WARNING 743696282: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got ['0', '10', '1', '2', '11', '3', '4', '12', '5', '6', '7', '8', '13', '9'])
-743696282: TRANSLATED
+  Result: การบันทึกระดับ TOKN_4).
+743696282: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got []))
   Original: You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
-  Result: <color=white>{level}</color><color=#90EE90>{prestigeLevel}</color> 与<color=yellow>{progress}</color>的關卡。 <color=#FFC0CB></color> (<color=white>{percent})% </color>!
-2051256929: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '6', '1', '2', '3']))
+  Result: คุณอยู่ในระดับ TOGNTHNNTOKN THNNTTOHN2 22 2 2 2 TOCKN TOKNTOGN TOGN THN TIKN TIKNN % TIKNN!
+2051256929: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
   Original: <color=#FFD700>{roundedXP}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~
-  Result: [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]] 獎金[[TOKEN_2]][[TOKEN_3]]
+  Result: TOKN_0TOKNN TOKN โบนัส TIKNN TIKNN เหลืออยู่จาก TIKNN TIVN TIKNTHE การถอนเงิน TOKN
 400324857: TRANSLATED
   Original: You haven't earned any experience yet!
-  Result: 你還沒獲得任何經驗!
-WARNING 3681675424: token order differs (expected ['0', '1', '2', '3', '4'], got ['0', '1', '2', '4', '3'])
-3681675424: TRANSLATED
+  Result: คุณยังไม่ได้ได้รับประสบการณ์อะไรเลย!
+3681675424: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Level must be between <color=white>0</color> and <color=white>{ConfigService.MaxLevel}</color>!
-  Result: 等級必須介于 <color=white> 0 </color> 和 <color=white>{ConfigService.MaxLevel}</color> 之間 !
-WARNING 2437634726: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-2437634726: TRANSLATED
+  Result: ระดับต้องอยู่ระหว่าง TCOKN0TOKN_1 และTOGN TRIGN TOGN TRIKN TIKNN TIKN.
+2437634726: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName.Value}</color>!
-  Result: <color=white>{level}</color>的關卡 <color=green>{foundUser.CharacterName.Value}</color>!
-1254994229: TRANSLATED
+  Result: TOKNTHE TOKNN TOKN THNN_1 สําหรับ TOKNN TIKNN 22 2 2 2 2 2!
+1254994229: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Couldn't find experience data for {foundUser.CharacterName.Value}
-  Result: 找不到 {foundUser.CharacterName.Value} 的經驗資料 。
-WARNING 160628229: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-160628229: TRANSLATED
+  Result: หาข้อมูลประสบการณ์ไม่ได้
+160628229: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore shared experience list!
-  Result: <color=green>{playerInfo.User.CharacterName.Value}</color>新增到被忽略的共享經驗清單中!
-WARNING 1725928464: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1725928464: TRANSLATED
+  Result: TOKNN_0TOKNN TOKN TOKNN_1 เพิ่มข้อมูลประสบการณ์ร่วมกัน
+1725928464: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore shared experience list!
-  Result: <color=green>{playerInfo.User.CharacterName.Value}</color> 從被忽略的分享經驗清單中移除!
+  Result: TOKNN_0TOKNN2 TOKNN_1 เอาออกจากรายชื่อประสบการณ์ร่วม!
 317079168: TRANSLATED
   Original: Professions are not enabled.
-  Result: 職業不能啟動 。
-1548584430: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
+  Result: ไม่เปิดใช้งานการขอข้อมูล
+1548584430: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 專業伐木現在是[[TOKEN_4]]。
-2935471585: TRANSLATED
+  Result: ปัจจุบัน Takeen_4).
+2935471585: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Valid professions: {ProfessionFactory.GetProfessionNames()}
-  Result: 有效职业:{ProfessionFactory.GetProfessionNames()}
+  Result: อาชีพที่ใช้ได้:
 134200388: TRANSLATED
   Original: Invalid profession.
-  Result: 不合法的專業 。
-216725398: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got ['0', '8', '1', '2', '9', '3', '4', '6', '10', '7', '11']))
+  Result: อาชีพใช้ไม่ได้
+216725398: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got []))
   Original: You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamId, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}
-  Result: 你們是[[TOKEN_0]][[TOKEN_8]][[TOKEN_1]],而且有[[TOKEN_2]][[TOKEN_9]][[TOKEN_3]][[TOKEN_4]] 效率[[TOKEN_6]][[TOKEN_10]]%[[TOKEN_7]]在[[TOKEN_11]]中。
-1201875369: TRANSLATED
+  Result: คุณอยู่ในระดับ TOGNTOKNTHNN (TOGN และมี TCOGN 2 22 2 2 2 2 2 1.
+1201875369: SKIPPED (token mismatch (expected ['0'], got []))
   Original: No progress in {professionHandler.GetProfessionName()} yet!
-  Result: {professionHandler.GetProfessionName()} 尚未進步 !
-2095668308: TRANSLATED
+  Result: ยังไม่คืบหน้าเลย!
+2095668308: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Level must be between 0 and {MAX_PROFESSION_LEVEL}.
-  Result: 等級必須在 0 到 {MAX_PROFESSION_LEVEL} 之間 。
-WARNING 2554001784: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['4', '0', '5', '1', '2', '6', '3'])
-2554001784: TRANSLATED
+  Result: ระดับต้องอยู่ระหว่าง 0 กับ TOCKN_0.
+2554001784: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
   Original: {professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>
-  Result: {professionHandler.GetProfessionName()} 设定為 <color=white>{level}</color><color=green>{playerInfo.User.CharacterName.Value}</color>。
-3320804900: TRANSLATED
+  Result: TOKN_4) วาง TOKNN 5TOGNTIKNNTIKNN2 22 2 2 2 2 2 2 2
+3320804900: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Available professions: {ProfessionFactory.GetProfessionNames()}
-  Result: 现有专业:{ProfessionFactory.GetProfessionNames()}
+  Result: อาชีพที่มีอยู่: TOKN
 2410464917: TRANSLATED
   Original: Classes are not enabled.
-  Result: 類別未開啟 。
-947371822: TRANSLATED
+  Result: ไม่เปิดใช้คลาส
+947371822: SKIPPED (token mismatch (expected ['0'], got []))
   Original: You've selected {FormatClassName(playerClass)}!
-  Result: 你已經選擇了 {FormatClassName(playerClass)} !
-WARNING 714432788: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['6', '0', '1', '2', '7', '3', '4', '8', '5'])
-714432788: TRANSLATED
+  Result: คุณเลือก TOKN!
+714432788: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: You've already selected {FormatClassName(currentClass.Value)}, use <color=white>'.class c [Class]'</color> to change. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)
-  Result: 您已選擇 {FormatClassName(currentClass.Value)} , 請使用 <color=white> 的 c 級 Class</color> 來改變 。 (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x <color=white>{ConfigService.ChangeClassQuantity}</color>).
+  Result: คุณได้เลือก Taken_6 แล้ว, ใช้ Takeen_0'. ชั้น c Clas'Takeen_1 เพื่อเปลี่ยน. TIKNTHTOKNN 7 TOKNN_3 x TIGNNTIKNN 2 22 2 2 2
 173404118: TRANSLATED
   Original: Shift spells are not enabled.
-  Result: 無法啟動 Shift 咒語 。
+  Result: ไม่เปิดใช้การสะกด Shift
 24953571: TRANSLATED
   Original: Can't change or activate class spells when inventory is full, need at least one space to safely handle jewels when switching.
-  Result: 不能變更或啟動等級咒語, 切換時至少需要一個空間來安全處理珠寶 。
-2497805382: TRANSLATED
+  Result: ไม่สามารถเปลี่ยนหรือเปิดใช้งานคาถาคลาส เมื่อรายการสินค้าเต็ม ต้องมีพื้นที่อย่างน้อยหนึ่งที่ ที่จะจัดการอัญมณีได้อย่างปลอดภัยเมื่อเปลี่ยน
+2497805382: SKIPPED (token mismatch (expected ['0'], got []))
   Original: No spells for {FormatClassName(playerClass.Value)} configured!
-  Result: 沒有設定 {FormatClassName(playerClass.Value)} 的拼法 !
-2645405211: TRANSLATED
+  Result: ไม่มีคาถาสําหรับ TOKN_0 กําหนด!
+2645405211: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid spell, use '<color=white>.class lsp</color>' to see options.
-  Result: 無效的拼寫, 使用 ' <color=white>. class Isp </color> 以查看選項 。
+  Result: สะกดใช้ไม่ได้, ใช้ 'Takeen_ 0. คลาส ISpTOKN_1' เพื่อดูตัวเลือก
 677404705: TRANSLATED
   Original: No spell for class default configured!
-  Result: 沒有設定類別預設的拼字 !
+  Result: ไม่มีการสะกดสําหรับค่าปริยายของคลาส!
 1562141642: TRANSLATED
   Original: You don't have the required prestige level for that spell!
-  Result: 你對咒語沒權力
-2001389111: TRANSLATED
+  Result: คุณไม่มีระดับชื่อเสียงสําหรับคาถานั่น
+2001389111: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid spell, use <color=white>'.class lsp'</color> to see options.
-  Result: 無效的拼寫, 使用 <color=white>'. class Isp' </color> 來查看選項 。
-20873033: TRANSLATED
+  Result: สะกดผิด, ใช้ TOKN_ 0. คลาส ISp'TOKN_1 เพื่อดูตัวเลือก
+20873033: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: You haven't selected a class or you haven't activated shift spells! (<color=white>'.class s [Class]'</color> | <color=white>'.class shift'</color>)
-  Result: 你沒有選擇課,或者你沒有啟動值班咒語! (<color=white>'. class s </color><color=white>'. class shift' </color>).
-4140406916: TRANSLATED
+  Result: คุณยังไม่ได้เลือกชั้นเรียนหรือคุณไม่ได้เปิดใช้งานคาถาเปลี่ยน! (TOKN_0. s ชั้น s Class 'TOKN_1 |TIKNN'. ชนชั้นเปลี่ยน'TIKN
+4140406916: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: You haven't selected a class yet, use <color=white>'.class s [Class]'</color> instead.
-  Result: 您尚未選擇類別, 請使用 <color=white>'. class s Class' </color> 代替 。
-1282509635: TRANSLATED
+  Result: คุณยังไม่ได้เลือกชั้นเรียนยังใช้ TOKN_0. ชั้น s Clas'TIKN แทน.
+1282509635: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: You have class buffs enabled, use <color=white>'.class passives'</color> to disable them before changing classes!
-  Result: 您已啟動類別的 buffs, 使用 <color=white> 的. class 被动檔 </color> 在換課前禁用它們 !
-501637283: TRANSLATED
+  Result: คุณมีการเปิดใช้งาน Friends คลาส ใช้ TOKN_0. คลาส Audios TOKN_1 เพื่อปิดการใช้งานพวกเขาก่อนที่จะเปลี่ยนคลาส!
+501637283: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Class changed to {FormatClassName(playerClass)}!
-  Result: 班級改為 {FormatClassName(playerClass)} !
-3938051122: TRANSLATED
+  Result: เปลี่ยนชั้นเป็น TOKN!
+3938051122: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Classes: {classTypes}
-  Result: 類別 : {classTypes}
+  Result: คลาส: TOGN
 167244174: TRANSLATED
   Original: Classes are not enabled and spells can't be set to shift.
-  Result: 課程未啟動, 拼寫無法設定移動 。
+  Result: คลาสยังไม่ถูกเปิดใช้ และคาถาไม่สามารถตั้งค่าให้เลื่อนได้
 3730830670: TRANSLATED
   Original: Shift slots are not enabled.
-  Result: 移位未開啟 。
+  Result: เปิดการใช้งานช่อง Shift
 349267262: TRANSLATED
   Original: Can't change or active class spells when inventory is full, need at least one space to safely handle jewels when switching.
-  Result: 不能變更或啟動的類別咒語 。
-4066899438: TRANSLATED
+  Result: ไม่สามารถเปลี่ยน หรือสะกดคลาสที่ใช้งานได้ เมื่อรายการสินค้าเต็ม ต้องการพื้นที่อย่างน้อยหนึ่งที่
+4066899438: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Shift spell <color=green>enabled</color>!
-  Result: 移動符咒 <color=green> 啟動 </color> !
-2320898349: TRANSLATED
+  Result: มนต์ Shift TOKN_0 ออกเสียง TOKKN_1!
+2320898349: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Shift spell <color=red>disabled</color>!
-  Result: Shift 拼寫  <color=red> 已失效 </color> !
-3756348742: TRANSLATED
+  Result: มนต์ Shift TOKN_0 Disabled TOKN_1!
+3756348742: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Reminders {0}.
-  Result: {0}。
+  Result: เตือนความจํา
 1769980541: TRANSLATED
   Original: Couldn't find bool key from scrolling text type...
-  Result: 從滚动的文字型態中找不到 bol 金鑰...
-WARNING 4003734136: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-4003734136: TRANSLATED
+  Result: ไม่พบกุญแจ Boll จากประเภทการเลื่อนข้อความ...
+4003734136: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: <color=white>{0}</color> scrolling text {1}.
-  Result: <color=white>{0}</color> 滚动文本{1}。
+  Result: TOKNN_0TOKNNTOKNN_1 ม้วนข้อความ TIKNN.
 2069903402: TRANSLATED
   Original: Starter kit is not enabled.
-  Result: 未啟動啟動套件 。
+  Result: ไม่เปิดใช้งานชุดเครื่องมือเริ่มการทํางาน
 2817800174: TRANSLATED
   Original: You've received a starting kit with:
-  Result: 你收到了一個啟動器:
+  Result: คุณได้รับชุดเริ่มต้นด้วย
 2316405313: SKIPPED (sentinel missing)
   Original: {0}
-  Result: [[Token_0]]] [ [敲門]
+  Result: [TOGN] [TIKINE]
 2303740299: TRANSLATED
   Original: You've already used your starting kit!
-  Result: 你已經用過你的起步套了!
+  Result: คุณใช้ชุดเริ่มต้นของคุณไปแล้ว
 3125108847: TRANSLATED
   Original: You are now prepared for the hunt!
-  Result: 你已經準備好去打獵了!
-3399068440: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], got ['0', '10', '26', '12', '24', '3', '4', '6', '25', '7', '8', '9', '10', '26', '12', '11', '13', '14', '15', '16']))
+  Result: เจ้าพร้อมแล้วสําหรับการล่า
+3399068440: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], got []))
   Original: <color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L
-  Result: [[TOKEN_0]]:[[TOKEN_10]][[TOKEN_26]][[TOKEN_12]]Time在线[[TOKEN_24]][[TOKEN_3]][[TOKEN_4]] 被殺的單位:[[TOKEN_6]][[TOKEN_25]][[TOKEN_7]][[TOKEN_8]]死亡[[TOKEN_9]]:[[TOKEN_10]][[TOKEN_26]][[TOKEN_12]]Time在线[[TOKEN_11]]:[[TOKEN_13]]:[[TOKEN_14]][[TOKEN_15]][[TOKEN_16]]
+  Result: TIGNTIKNTHEGNTIKN TIGNTIVE TIVE TIV2 2 2 2 หน้า หน้า หน้า22 หน้า 2 หน้า 2 หน้า 2 หน้า หน้า222222.
 1345204457: TRANSLATED
   Original: This command should only be used as required and certainly not while in combat.
-  Result: 此命令只應按要求使用,
+  Result: คําสั่งนี้ควรจะใช้เฉพาะเมื่อต้องการเท่านั้น และแน่นอนไม่ควรจะใช้ในระหว่างการต่อสู้
 3732046729: TRANSLATED
   Original: Combat music cleared!
-  Result: 戰鬥音樂清除!
+  Result: เพลงต่อสู้เคลียร์!
 479209254: TRANSLATED
   Original: Experience rate reduction for leveling no longer applies for exo prestiging.
-  Result: 平整的經驗降低率 不再适用于預期外觀
+  Result: อัตราการลดระดับ ไม่นํามาใช้สําหรับการกระตุ้น
 1443941563: TRANSLATED
   Original: Removed prestige buffs from all players.
-  Result: 取消了所有玩家的聲望
-1286090332: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '12', '1', '2', '13', '3', '14', '5', '6', '7', '8', '15', '9', '10', '16', '11']))
+  Result: เอากิตติมศักดิ์ออกจากผู้เล่นทุกคน
+1286090332: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got []))
   Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
-  Result: 您的關卡  [[TOKEN_0]] [[TOKEN_12]] [[TOKEN_1]][[TOKEN_2]][[TOKEN_13]][[TOKEN_3]] , [[TOKEN_14]][[TOKEN_5]][[TOKEN_6]][[TOKEN_7]] ([[TOKEN_8]][[TOKEN_15]])% [[TOKEN_9]] 在[[TOKEN_10]][[TOKEN_16]][[TOKEN_11]]中!
-WARNING 3066749917: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '11', '1', '12', '2', '3', '13', '4', '5', '14', '6', '7', '15', '8', '9', '16', '10'])
-3066749917: TRANSLATED
+  Result: คุณอยู่ในระดับ TOGNTOKNTOKNTHNTIGN22 2 2 2 2 2 2 TOKN_6 ความเหลื่อ TOKNN TOKN TOGN TTOVN % TINGN in TIGN in 2/10 2 2!
+3066749917: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0']))
   Original: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)
-  Result: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContesKey(familiar))_BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR__BAR_ Id) $"{colorCode}*</color>":"<color=white>{level}</color><color=#90EE90>{prestiges}</color> 加上<color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)
-1465975319: TRANSLATED
+  Result: [[TOKEN_0]]TOKNN_11TOKNN_1 {bffsData.familyrbuffs.ContainsKey(ffasitions). Id) $ (TOKN*TOKNN "HOKN" TOGNTOGNTIKN22 2 2 2 2 2 2 2 2 2 2 2 2. TOKNN_9TOGNN THNTHE TIKNN
+1465975319: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Reminders {0}.
-  Result: {0}。
-WARNING 1945389717: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-1945389717: TRANSLATED
+  Result: เตือนความจํา
+1945389717: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: <color=white>{0}</color> scrolling text {1}.
-  Result: <color=white>{0}</color> 滚动文本{1}。
-WARNING 2511919794: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], got ['0', '5', '1', '2', '6', '3', '7', '4', '8', '9'])
-2511919794: TRANSLATED
+  Result: TOKNN_0TOKNNTOKNN_1 ม้วนข้อความ TIKNN.
+2511919794: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], got []))
   Original: <color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color> {levelAndPrestiges}" : $" {levelAndPrestiges}")}
-  Result: <color=yellow>{count}</color>** <color=green>{famName}</color>{(familiar BuffsData.FamiliarBuffs.ContsKey(famKey)? $"{colorCode}*</color>{levelAndPrestiges}: ${levelAndPrestiges}
-508045935: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
+  Result: TOKNN_0TOKNN THNTHE TIKKNN 1 TOKNN_2TOKNNTOKNN_3FEKNFFE FEKNDFEBNDNDAVDATE. Familys.Famitures.CNKEKEKE สืบค้นเมื่อ 27 พฤษภาคม พ.ศ.
+508045935: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}!
-  Result: 啟動 [[TOKEN_4]] !
-52573990: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
+  Result: การกระทําที่น่าดึงดูด TOKN_4)!
+52573990: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 專業伐木現在[[TOKEN_4]]。
-1904876515: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
+  Result: ปัจจุบัน Taken_4.
+1904876515: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 查詢記錄現在是 [[TOKEN_4]] 。
-3706417587: TRANSLATED
+  Result: การค้นหาคือตอนนี้ TOKN_4).
+3706417587: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid quest type '{questTypeName}'. Valid values are: {string.Join(", ", Enum.GetNames(typeof(QuestType)))}
-  Result: 無效的探險類型 '{questTypeName}' 。 有效值是 : {string.Join(", ", Enum.GetNames(typeof(QuestType)))}
-1095669519: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
+  Result: ชนิดของการค้นหาไม่ถูกต้อง ค่าที่ใช้ได้คือ: TOGN_1
+1095669519: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 等級日志 [[TOKEN_4]]。
-3112026815: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
+  Result: การบันทึกระดับ TOKN_4).
+3112026815: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 專業伐木現在是[[TOKEN_4]]。
-542066310: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
+  Result: ปัจจุบัน Takeen_4).
+542066310: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: 血統伐木[[TOKEN_4]]。
-881612152: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '1', '6']))
+  Result: การบันทึกเลือด Takeen_4).
+881612152: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
   Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
-  Result: exo form emote 動作 ([[TOKEN_0]] 突擊 [[TOKEN_1]]) ([[TOKEN_6]])
-2978826451: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '11', '1', '14', '6', '7', '15', '8', '9', '16', '10']))
+  Result: Exo ฟอร์มการกระทํา (TOKN_0 taunt TOKNN_1 TOGN
+2978826451: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got []))
   Original: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? "{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)
-  Result: [[TOKEN_0]][[TOKEN_11]][[TOKEN_1]]{(buken_5[[TOKEN_14]][[TOKEN_6]] 加入[[TOKEN_7]][[TOKEN_15]][[TOKEN_8]]! ([[TOKEN_9]][[TOKEN_16]][[TOKEN_10]])
+  Result: TIKNNTOKNTHNNTHNN 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 TOKNN_9TOGNN THNTHE TIKNN
 1669157395: TRANSLATED
   Original: Your bag feels slightly heavier...
-  Result: 你的包有點重...
+  Result: กระเป๋าคุณรู้สึกหนักขึ้นนิดหน่อย
 2346236465: TRANSLATED
   Original: Something fell out of your bag!
-  Result: 你的包里有東西掉出來了!
-WARNING 835889078: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-835889078: TRANSLATED
+  Result: บางอย่างหล่นออกมาจากกระเป๋าคุณ
+835889078: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Can't have more than <color=white>{0}</color> battle groups!
-  Result: <color=white>{0}</color>的戰鬥群組!
-WARNING 361092587: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-361092587: TRANSLATED
+  Result: ไม่สามารถมีมากกว่าTOKNTOKNN2TTOGN กลุ่มรบ!
+361092587: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Deleted battle group <color=white>{0}</color>!
-  Result: 已刪除的戰鬥群組 <color=white>{0}</color>!
-2673031653: TRANSLATED
+  Result: TOKN ทีมรบที่ถูกลบTOKNNTCNN2!
+2673031653: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Battle Group - {0}
-  Result: 戰鬥群組 - {0}
-WARNING 2272306226: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-2272306226: TRANSLATED
+  Result: กลุ่มต่อสู้ - TOKN
+2272306226: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>{0}</color> moved - <color=white>{1}</color>
-  Result: <color=green>{0}</color> 移 - <color=white>{1}</color>
-WARNING 4226920647: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-4226920647: TRANSLATED
+  Result: TOKNN_0TOKNN TOKNN ย้ายTIKNN 222 2 2 2 2 2 2
+4226920647: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=white>{0}</color> is not available per configured familiar bans!
-  Result: <color=white>{0}</color>不可用每一個設定的熟悉的禁止!
-WARNING 1695244872: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1695244872: TRANSLATED
+  Result: TOKN_0TOKNN TOKN TOKN_1 ไม่สามารถใช้ได้ต่อการสั่งห้ามที่คุ้นเคย!
+1695244872: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=white>{0}</color> is already unlocked!
-  Result: <color=white>{0}</color> 已經解鎖了!
-WARNING 2428442751: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2428442751: TRANSLATED
+  Result: TOCKNTOKN TOKN TOKN ปลดล็อคแล้ว!
+2428442751: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: New unit unlocked: <color=green>{0}</color>
-  Result: 新單位解鎖 : <color=green> {0} </color>
-3938781329: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '2', '5', '3']))
+  Result: หน่วยใหม่ปลดล็อค:TOKNTOKNN_2TOGN
+3938781329: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
   Original: Not enough <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for {2}!
-  Result: [[TOKEN_0]][[TOKEN_4]][[TOKEN_1]]x [[TOKEN_2]][[TOKEN_5]][[TOKEN_3]] 不夠!
-WARNING 3139406824: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-3139406824: TRANSLATED
+  Result: ไม่พอ TOGN TOKN TOKN THNN 1 x TIKNN222 22 สําหรับ TIKNN TIKN THN
+3139406824: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>{0}</color> removed from <color=white>{1}</color>.
-  Result: <color=green>{0}</color> 被移出<color=white>{1}</color>。
-WARNING 3055272330: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['0', '8', '1', '2', '9', '3', '4', '5', '6', '10', '7'])
-3055272330: TRANSLATED
+  Result: TOKNN_0TOKNN TOKN ย้ายจาก TOKNN 222 2 2 2 2 2 2 2
+3055272330: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got []))
   Original: Familiar attempting to prestige must be at max level (<color=white>{0}</color>) or requires <color=#ffd9eb>{1}</color><color=yellow>x</color><color=white>{2}</color>.
-  Result: 想要聲望的熟人必須在最大水平(<color=white>{0}</color>)或需要<color=#ffd9eb>{1}</color><color=yellow>x</color><color=white>{2}</color>)。
-WARNING 66882170: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-66882170: TRANSLATED
+  Result: TIGN TRIGN หรือต้องการTOGN22222 2.
+66882170: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You don't have the required amount of <color=#ffd9eb>{0}</color>! (x<color=white>{1}</color>)
-  Result: 您沒有所需的數量  <color=#ffd9eb> {0} </color> ! (x <color=white>{1}</color>) 。
-617911048: TRANSLATED
+  Result: คุณไม่มีปริมาณที่ต้องใช้ TOGNTHNNTHN TOKN TIGN!
+617911048: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Reminders {0}.
-  Result: {0}。
-WARNING 1651916565: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-1651916565: TRANSLATED
+  Result: เตือนความจํา
+1651916565: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: <color=white>{0}</color> scrolling text {1}.
-  Result: <color=white>{0}</color> 滚动文本{1}。
+  Result: TOKNN_0TOKNNTOKNN_1 ม้วนข้อความ TIKNN.
 931800025: SKIPPED (sentinel missing)
   Original: {0}
-  Result: [[Token_0]]] [ [敲門]
-3402815477: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], got ['0', '10', '26', '12', '24', '3', '4', '6', '25', '7', '8', '9', '10', '26', '12', '11', '13', '14', '15', '16']))
+  Result: [TOGN] [TIKINE]
+3402815477: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], got []))
   Original: <color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L
-  Result: [[TOKEN_0]]:[[TOKEN_10]][[TOKEN_26]][[TOKEN_12]]Time在线[[TOKEN_24]][[TOKEN_3]][[TOKEN_4]] 被殺的單位:[[TOKEN_6]][[TOKEN_25]][[TOKEN_7]][[TOKEN_8]]死亡[[TOKEN_9]]:[[TOKEN_10]][[TOKEN_26]][[TOKEN_12]]Time在线[[TOKEN_11]]:[[TOKEN_13]]:[[TOKEN_14]][[TOKEN_15]][[TOKEN_16]]
-493237764: TRANSLATED
+  Result: TIGNTIKNTHEGNTIKN TIGNTIVE TIVE TIV2 2 2 2 หน้า หน้า หน้า22 หน้า 2 หน้า 2 หน้า 2 หน้า หน้า222222.
+493237764: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Level logging {0}.
-  Result: 等級記錄 {0}.
-WARNING 3326145371: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got ['0', '10', '1', '2', '11', '3', '4', '12', '5', '6', '7', '8', '13', '9'])
-3326145371: TRANSLATED
+  Result: การลงบันทึกระดับ TOKN_0.
+3326145371: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got []))
   Original: You're level [<color=white>{0}</color>][<color=#90EE90>{1}</color>] with <color=yellow>{2}</color> <color=#FFC0CB>experience</color> (<color=white>{3}%</color>)!
-  Result: <color=white>{0}</color><color=#90EE90>{1}</color> 与<color=yellow>{2}</color>的關卡。 <color=#FFC0CB></color> (<color=white>{3})% </color>!
-2537547396: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '6', '1', '2', '3']))
+  Result: คุณอยู่ในระดับ TOGNTHNNTOKN THNNTTOHN2 22 2 2 2 TOCKN TOKNTOGN TOGN THN TIKN TIKNN % TIKNN!
+2537547396: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
   Original: <color=#FFD700>{0}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~
-  Result: [[TOKEN_0]][[TOKEN_6]][[TOKEN_1]] 獎金[[TOKEN_2]][[TOKEN_3]]
-WARNING 842146063: token order differs (expected ['0', '1', '2', '3', '4'], got ['0', '1', '2', '4', '3'])
-842146063: TRANSLATED
+  Result: TOKN_0TOKNN TOKN โบนัส TIKNN TIKNN เหลืออยู่จาก TIKNN TIVN TIKNTHE การถอนเงิน TOKN
+842146063: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Level must be between <color=white>0</color> and <color=white>{0}</color>!
-  Result: 等級必須介于 <color=white> 0 </color> 和 <color=white>{0}</color> 之間 !
-WARNING 566938273: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-566938273: TRANSLATED
+  Result: ระดับต้องอยู่ระหว่าง TCOKN0TOKN_1 และTOGN TRIGN TOGN TRIKN TIKNN TIKN.
+566938273: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Level set to <color=white>{0}</color> for <color=green>{1}</color>!
-  Result: <color=white>{0}</color>的關卡 <color=green>{1}</color>!
-2828720719: TRANSLATED
+  Result: TOKNTHE TOKNN TOKN THNN_1 สําหรับ TOKNN TIKNN 22 2 2 2 2 2!
+2828720719: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Couldn't find experience data for {0}
-  Result: 找不到 {0} 的經驗資料 。
-WARNING 3097544876: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3097544876: TRANSLATED
+  Result: หาข้อมูลประสบการณ์ไม่ได้
+3097544876: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=green>{0}</color> added to the ignore shared experience list!
-  Result: <color=green>{0}</color>新增到被忽略的共享經驗清單中!
-WARNING 1446811317: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1446811317: TRANSLATED
+  Result: TOKNN_0TOKNN TOKN TOKNN_1 เพิ่มข้อมูลประสบการณ์ร่วมกัน
+1446811317: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=green>{0}</color> removed from the ignore shared experience list!
-  Result: <color=green>{0}</color> 從被忽略的分享經驗清單中移除!
-2137562404: TRANSLATED
+  Result: TOKNN_0TOKNN2 TOKNN_1 เอาออกจากรายชื่อประสบการณ์ร่วม!
+2137562404: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Quest logging is now {0}.
-  Result: {0}。
-WARNING 2698551496: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2698551496: TRANSLATED
+  Result: การค้นหาคือตอนนี้ TOKN.
+2698551496: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Quests for <color=green>{0}</color> have been refreshed.
-  Result: <color=green>{0}</color> 的查詢已刷新。
-WARNING 2286869349: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '1', '2', '6', '3', '4', '7', '5'])
-2286869349: TRANSLATED
+  Result: สืบค้นเมื่อ TOKN TOKNN TOKN TOKN TOKN ได้รับความสดชื่น
+2286869349: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
   Original: Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{0}</color> x<color=white>{1}</color>!
-  Result: 您的 <color=#00FFFF> 每日查詢 </color> 已重新輸入 <color=#C0C0C0>{0}</color> x <color=white>{1}</color> !
-WARNING 4273383622: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-4273383622: TRANSLATED
+  Result: TOKN ของคุณ TOKN สืบค้น TOKN ได้รับการม้วนสําหรับ TOGN TIKNTIGN 22 22 2 2 2!
+4273383622: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You couldn't afford to reroll your daily... (<color=#C0C0C0>{0}</color> x<color=white>{1}</color>)
-  Result: (<color=#C0C0C0>{0}</color><color=white>{1}</color>)
-WARNING 370730849: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '1', '2', '6', '3', '4', '7', '5'])
-370730849: TRANSLATED
+  Result: (TOKN_4) TOKNN TOKN TIKNN 1 xTIKNN222 TIKNKN 2
+370730849: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
   Original: Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{0}</color> x<color=white>{1}</color>!
-  Result: 您的 <color=#BF40BF></color> 已重新輸入 <color=#C0C0C0>{0}</color> x <color=white>{1}</color> !
-WARNING 1315865629: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-1315865629: TRANSLATED
+  Result: TOGN TOGN สืบค้นเมื่อ TOKN ได้รับการต่อ TOGN TICE TTOVN2 2 2 2 2 2 2
+1315865629: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You couldn't afford to reroll your wekly... (<color=#C0C0C0>{0}</color> x<color=white>{1}</color>)
-  Result: (<color=#C0C0C0>{0}</color><color=white>{1}</color>)
-3744708697: TRANSLATED
+  Result: (TOKN_4) TOKNN TOKN TIKNN TIKNTICKNN x2 2 2 2 2
+3744708697: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Invalid quest type '{0}'. Valid values are: {1}
-  Result: 無效的探險類型 '{0}' 。 有效值是 : {1}
-3648038609: TRANSLATED
+  Result: ชนิดของการค้นหาไม่ถูกต้อง ค่าที่ใช้ได้คือ: TOGN_1
+3648038609: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Player does not have an active {0} quest to complete.
-  Result: 玩家沒有執行 {0} 的求完成 。
-692006723: SKIPPED (token mismatch (expected ['0', '1'], got ['0']))
+  Result: ผู้เล่นไม่มีการทํางาน TOKN_0. สืบค้นเพื่อเสร็จสมบูรณ์.
+692006723: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: The {0} quest is already complete for {1}.
-  Result: [[TOKEN_0]]的探險已經完成。
-2174214346: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got ['0', '3', '1']))
+  Result: TOKN_0 การแสวงหาเสร็จสมบูรณ์แล้ว TOKNN_1.
+2174214346: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: Completed {0} for <color=green>{1}</color>!
-  Result: [[TOKEN_0]][[TOKEN_3]][[TOKEN_1]]完成 !
-3637474013: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'], got ['0', '10', '1', '11', '2', '12', '3', '4', '13', '5', '8', '15', '9']))
+  Result: เสร็จสมบูรณ์ TOKN สําหรับ TOKNN TOKN_0TOKNN_32!
+3637474013: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'], got []))
   Original: <color=green>{0}</color>{1} [<color=white>{2}</color>][<color=#90EE90>{3}</color>] added to <color=white>{4}</color>! (<color=yellow>{5}</color>)
-  Result: [[TOKEN_0]][[TOKEN_10]][[TOKEN_1]][[TOKEN_11]][[TOKEN_2]][[TOKEN_12]][[TOKEN_3]][[TOKEN_4]][[TOKEN_13]][[TOKEN_5]] ([[TOKEN_8]][[TOKEN_15]][[TOKEN_9]])
+  Result: TIKNNTIKNNTOGN TIKNTHETIGN22 2 2 2 2 2 2 2 2. TIKNTVNTOGNN THNTHE TIKNN
 1218917876: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {0}.
-  Result: 目標都死了 給他們一次重生的機會 如果這看來不正確,
-WARNING 1105957988: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '2', '5', '3', '6'])
-1105957988: TRANSLATED
+  Result: เป้าหมายทั้งหมดถูกฆ่า ให้โอกาสพวกมันได้กลับมา ถ้านี่ดูไม่ถูกต้อง ให้พิจารณาซ้ํา TOGN ของคุณ
+1105957988: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
   Original: Nearest <color=white>{0}</color> was <color=#00FFFF>{1}</color>f away to the {2}!
-  Result: <color=white>{0}</color>是<color=#00FFFF>{1}</color> 離{2}遠一點!
-800655279: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'], got ['10', '0', '11', '1', '12', '3', '4', '13', '5', '6', '14', '7', '8', '15', '9']))
+  Result: TOKNN TOKN TOKN TOKN เป็น TIKNN2TIGN 2 22   ห่างออกไปยัง TIKNN!
+800655279: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'], got []))
   Original: {0}: <color=green>{1}</color> <color=white>{2}</color>x<color=#FFC0CB>{3}</color> [<color=white>{4}</color>/<color=yellow>{3}</color>]
-  Result: [[TOKEN_10]]:[[TOKEN_0]][[TOKEN_11]][[TOKEN_1]][[TOKEN_12]][[TOKEN_3]]x[[TOKEN_4]][[TOKEN_13]][[TOKEN_5]][[TOKEN_6]][[TOKEN_14]][[TOKEN_7]][[TOKEN_8]][[TOKEN_15]][[TOKEN_9]]
-WARNING 3499636759: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['4', '0', '5', '1', '6', '2', '7', '3'])
-3499636759: TRANSLATED
+  Result: TIKNTOGNTHN TIKNN 2 222 2 2 2 2 2 2 2 2 2 2 2 หน้า 3
+3499636759: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
   Original: Time until {0} reset - <color=yellow>{1}</color> | {2} Prefab: <color=white>{3}</color>
-  Result: {0}重置 - <color=yellow>{1}</color>{2}前置: <color=white>{3}</color>
-WARNING 2615857787: token order differs (expected ['0', '1', '2', '3', '4'], got ['2', '3', '0', '4', '1'])
-2615857787: TRANSLATED
+  Result: เวลาจนกว่า TOKN จะรีเซ็ต -TOKNTHNTOKN TOGN TIKNN |TIKNN 2 2 2
+2615857787: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: You've already completed your {0}! Time until {1} reset - <color=yellow>{2}</color>
-  Result: 你已經完成了你的{0}! 直到{1}重置 - <color=yellow>{2}</color>
-743202161: TRANSLATED
+  Result: คุณเสร็จ TOKN ของคุณแล้ว เวลาจนกว่า TOKNN_3 ตั้งค่าใหม่ - TOKN_0TOGN TOKN TIKNN 2
+743202161: SKIPPED (token mismatch (expected ['0'], got []))
   Original: You don't have a {0}.
-  Result: 你沒有{0}。
-WARNING 3914295487: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-3914295487: TRANSLATED
+  Result: คุณไม่มี Taken_0)
+3914295487: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>{0}</color> added to <color=white>{1}</color>.
-  Result: <color=green>{0}</color> 加入<color=white>{1}</color>。
-WARNING 4052165110: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '7', '3', '4', '8', '5'])
-4052165110: TRANSLATED
+  Result: TOKNN_0TOKNNTOKN THNN เพิ่ม TIKN TIKNN 2 2 2 2 2 2 3.
+4052165110: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: <color=green>{0}</color> (<color=yellow>{1}</color>) added to <color=white>{2}</color>.
-  Result: <color=green>{0}</color>(<color=yellow>{1}</color>) 添加到<color=white>{2}</color> 。
-WARNING 2121377442: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2121377442: TRANSLATED
+  Result: TIKNTOGNTOGNTRIGN2222 เพิ่ม 2 เพิ่ม 2 2 2 2.
+2121377442: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Your familiar has already prestiged the maximum number of times! (<color=white>{0}</color>)
-  Result: 你熟悉的已經聲名大噪了! (<color=white>{0}</color>)
-WARNING 935039462: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '6', '1', '2', '7', '3', '4', '5'])
-935039462: TRANSLATED
+  Result: ความคุ้นเคยของคุณ ได้มีชื่อเสียงสูงสุด TOKNNTOKNNTIKNNTIKNN
+935039462: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
   Original: Familiar already has <color=#00FFFF>{0}</color> (<color=yellow>{1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.
-  Result: 熟人已經有 <color=#00FFFF> {0} </color> (<color=yellow>{1}</color> ) 從預估, 使用 '<color=white>. fam lst </color> 查看選項 。
+  Result: Familyer มี TOGNTOKNTHNNTIGNTRIGNTIKNN 7222222222 จาก      2 จาก 3 จาก 3 จาก3 จาก3 ง จาก3 ง, ใช้ ', ใช้ ' (ท่ หม่
 4049081768: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Your familiar has prestiged [<color=#90EE90>{0}</color>]; the accumulated knowledge allowed them to retain their level!
-  Result: 你熟悉的知識使他們得以保持自己的水平。
-1757634753: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['4', '1', '2', '5', '3']))
+  Result: ความคุ้นเคยของคุณได้รับการยกย่อง TOKN TOKNN 2TTOGN; ความรู้สะสมของพวกเขาอนุญาตให้พวกเขารักษาระดับของพวกเขา!
+1757634753: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You do not have enough of the required item to change classes (<color=#ffd9eb>{0}</color>x<color=white>{1}</color>)
-  Result: 您沒有足夠的項目來變更類別( Token_  [[TOKEN_4]] [[TOKEN_1]] x [[TOKEN_2]][[TOKEN_5]][[TOKEN_3]]) 。
-WARNING 3637584655: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-3637584655: TRANSLATED
+  Result: คุณไม่มีของที่จําเป็นพอที่จะเปลี่ยนคลาส (TOKN_0TOKN_4)TOKNN_4) TOKNN_1xTIKNN 2 2 2 2 2
+3637584655: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Failed to remove enough of the item required (<color=#ffd9eb>{0}</color>x<color=white>{1}</color>)
-  Result: 移除所需項目失敗 (<color=#ffd9eb>{0}</color>x <color=white>{1}</color>)
-835968431: TRANSLATED
+  Result: ล้มเหลวในการลบรายการที่ต้องการ (TOKN_ 0TOKN_4) TRIGN TRIGN xTRIGNTIKNN 3
+835968431: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {0} passives not found!
-  Result: {0} 被动者找不到!
-559704045: TRANSLATED
+  Result: (TOKN_0) ไม่พบการนิ่งเฉย!
+559704045: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {0} passives:
-  Result: {0} 被动:
-2637421818: TRANSLATED
+  Result: TOKN_0 เคลื่อนไหว:
+2637421818: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Couldn't find stat synergies for {0}...
-  Result: 找不到  {0} 的數據合力...
-2323778454: TRANSLATED
+  Result: ไม่สามารถหาอาการจําลองสําหรับ TOGN...
+2323778454: SKIPPED (token mismatch (expected ['0'], got []))
   Original: No stat synergies found for {0}.
-  Result: 找不到 {0} 的狀態合 。
-WARNING 3613050716: token order differs (expected ['0', '1', '2', '3'], got ['2', '0', '3', '1'])
-3613050716: TRANSLATED
+  Result: ไม่พบข้อมูลสถิติสําหรับ Takeen_ 0.
+3613050716: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: {0} stat synergies [x<color=white>{1}</color>]:
-  Result: {0} 统计协同x<color=white>{1}</color>:
-9562573: TRANSLATED
+  Result: TOKNN_2 สถิติ Syndergies TOKNNTIKNNTIKNNTIKNN
+9562573: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {0} has no spells configured...
-  Result:  {0} 沒有設定拼字...
-2421466322: TRANSLATED
+  Result: TOKN_0 ไม่มีคาถาที่ปรับแต่ง...
+2421466322: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {0} spells:
-  Result: {0} 拼法:
-WARNING 885434933: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-885434933: TRANSLATED
+  Result: TOKN สะกด:
+885434933: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Shift spell: <color=#CBC3E3>{0}</color>
-  Result: Shift 咒語 : <color=#CBC3E3> {0} </color>
-WARNING 2214985381: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2214985381: TRANSLATED
+  Result: มนต์ Shift:TOKN_0TOKNN_2TOKNTHN
+2214985381: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=#90EE90>{0}</color> Prestige Info:
-  Result: <color=#90EE90>{0}</color> 預覽資訊 :
-WARNING 2316242941: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-2316242941: TRANSLATED
+  Result: TOKNN_0TOKNN THNTHE THEKNN THNN ข้อมูลหลัก:
+2316242941: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: Current Prestige Level: <color=yellow>{0}</color>/{1}
-  Result: 目前預覽等級 : <color=yellow>{0}</color>/{1}
-WARNING 203356865: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-203356865: TRANSLATED
+  Result: ระดับ Prestage ปัจจุบัน: TakeN_0TOKN 2TIGNN/TIKN
+203356865: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Growth rate increase for expertise and legacies: <color=green>{0}</color>
-  Result: <color=green>{0}</color>
-WARNING 132267140: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-132267140: TRANSLATED
+  Result: อัตราการเติบโตเพิ่มขึ้นสําหรับผู้เชี่ยวชาญและนิติบัญญัติ: TOKNN_0TOKNN 2TOGN TRIKNN
+132267140: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Growth rate reduction for experience: <color=yellow>{0}</color>
-  Result: <color=yellow>{0}</color>
-WARNING 608689499: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-608689499: TRANSLATED
+  Result: อัตราการเติบโตที่ลดลงสําหรับประสบการณ์:TOKN_0TOKN_2TOGNTHN
+608689499: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Growth rate reduction from <color=#90EE90>{0}</color> prestige level: <color=yellow>-{1}</color>
-  Result: 從<color=#90EE90>{0}</color>聲望水平降低:<color=yellow>-{1}</color>
-WARNING 2383766993: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2383766993: TRANSLATED
+  Result: อัตราการเติบโตลดลงจาก TOCKN_0TOKNN_4) TOKN_1 ระดับความนิยม: TOGN TOGN 2 2 2 2 2 2 2/3
+2383766993: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Stat bonuses improvement: <color=green>{0}</color>
-  Result: 增益:<color=green>{0}</color>
-WARNING 1899346128: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1899346128: TRANSLATED
+  Result: TCOKN TOKNN 2TOKKN
+1899346128: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Total change in growth rate including leveling prestige bonus: <color=yellow>{0}</color>
-  Result: <color=yellow>{0}</color>
-WARNING 1178832936: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['0', '1', '2', '8', '3', '4', '9', '5', '6', '10', '7'])
-1178832936: TRANSLATED
+  Result: อัตราการเติบโตทั้งหมดรวมถึง โบนัสระดับความนิยม: TOKN_0 TOKN TOKNN2TIKNN 2
+1178832936: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got []))
   Original: You have prestiged in <color=#90EE90>Experience</color>[<color=white>{0}</color>]! Growth rates for all expertise/legacies increased by <color=green>{1}</color>, experience from unit kills reduced by <color=red>{2}</color>.
-  Result: 你在<color=#90EE90> 經驗</color><color=white>{0}</color> 中享有威望。 <color=green>{1}</color>, 單位殺人的經驗減少<color=red>{2}</color>。
-1223341524: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14'], got ['0', '10', '1', '2', '11', '3', '4', '12', '5', '6', '13', '7']))
+  Result: คุณได้รับการยกย่องในTOKN ExperienceTOKN_1TIKNNTIGNTIKN2! TOKN_9 TOCKN TOKNN_9 TOKNN_5 ประสบการณ์จากหน่วยฆ่าลดลงโดย TIKN TOKNN 2.
+1223341524: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14'], got []))
   Original: <color=#90EE90>{0}</color>[<color=white>{1}</color>] prestiged successfully! Growth rate reduced by <color=red>{2}</color> and stat bonuses improved by <color=green>{3}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{4}</color>.
-  Result: [[TOKEN_0]][[TOKEN_10]][[TOKEN_1]][[TOKEN_2]][[TOKEN_11]][[TOKEN_3]]聲望成功! [[TOKEN_4]][[TOKEN_12]][[TOKEN_5]] 的增長率和[[TOKEN_6]][[TOKEN_13]][[TOKEN_7]]的增益。 增長率的總變化,
+  Result: TOKNNTOKNN TOKN THNTHNTIKNTIKN เกียรตินิยมประสบความสําเร็จ! อัตราการเติบโตลดลงโดย TOKNTOKN_12TOKN TOKN THNN และค่าโบนัสตามสถิติที่ดีขึ้นโดย TOGN TIKNTIKNTHN 7. อัตราการเติบโตที่เปลี่ยนไปทั้งหมด กับโบนัสระดับที่เพิ่มขึ้นคือ TakeN_8 Takeen_14 Takeen_9.
