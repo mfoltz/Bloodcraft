@@ -1,1297 +1,952 @@
 welcome: TRANSLATED
   Original: Welcome to Bloodcraft
-  Result: Bienvenido a Bloodcraft
-WARNING profession-improved: token order differs (expected ['0', '1', '2', '3'], got ['2', '0', '3', '1'])
-profession-improved: TRANSLATED
+  Result: Добро пожаловать в Bloodcraft
+profession-improved: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: {0} improved to [<color=white>{1}</color>]
-  Result: {0} mejoró <color=white>{1}</color>
-WARNING profession-proficiency-gain: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '3', '7', '4', '8', '5'])
-profession-proficiency-gain: SKIPPED (looks untranslated)
+  Result: Токен_2 улучшился до Токен_0Токен_3Токен_1
+profession-proficiency-gain: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['2', '3', '7', '4', '8', '5']))
   Original: +<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>)
-  Result: <color=yellow>{0}</color><color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>
-WARNING profession-bonus-received: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '2', '5', '3', '6'])
-profession-bonus-received: TRANSLATED
+  Result: +Токен_0Токен_6Токен_1[[TOKEN_2]]proficiency[[TOKEN_3]] in [[TOKEN_7]][[TOKEN_4]][[TOKEN_8]]%[[TOKEN_5]]
+profession-bonus-received: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
   Original: <color=green>{0}</color>x<color=white>{1}</color> received from {2}
-  Result: <color=green>{0}</color>x <color=white>{1}</color> recibida de {2}
-WARNING profession-gold-ore-received: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '3', '5'])
+  Result: Токен_0Токен_4Токен_1xТокен_2Токен_5Токен_3 получен от Токен_6
+WARNING profession-gold-ore-received: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
 profession-gold-ore-received: TRANSLATED
   Original: <color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}
-  Result: <color=green>Gold Ore</color>x<color=white>{0}</color></color> recibido de {1}
-WARNING profession-gold-ore-dropped: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
-profession-gold-ore-dropped: TRANSLATED
+  Result: <color=green>Золотая руда</color>x<color=white>{0}</color> получена от {1}
+profession-gold-ore-dropped: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
-  Result: <color=green>Gold Ore</color>x<color=white>{0}</color> recibido de {1}, pero cayó sobre el terreno ya que su inventario está lleno.
-WARNING profession-radiant-fiber-received: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '3', '5'])
-profession-radiant-fiber-received: TRANSLATED
+  Result: Токен_0Золотая рудаТокен_1хТокен_2Токен_4Токен_3 получена от Токен_5, но она упала на землю, так как ваш инвентарь полон.
+profession-radiant-fiber-received: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}
-  Result: <color=green>Radiant Fiber</color>x<color=white>{0}</color></color> recibido de {1}
-WARNING profession-radiant-fiber-dropped: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '3', '5'])
-profession-radiant-fiber-dropped: TRANSLATED
+  Result: Токен_0Радиантное волокноТокен_1хТокен_2Токен_4Токен_3 получено от Токен_5
+profession-radiant-fiber-dropped: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
-  Result: <color=green>Radiant Fiber</color>x<color=white>{0}</color></color> recibido de {1}, pero cayó sobre el terreno desde que su inventario está lleno.
-WARNING profession-bonus-seeds-received: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '3', '5'])
-profession-bonus-seeds-received: TRANSLATED
+  Result: Токен_0Радиантное волокноТокен_1хТокен_2Токен_4Токен_3 получено от Токен_5, но оно упало на землю, так как ваш инвентарь полон.
+profession-bonus-seeds-received: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}!
-  Result: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color></color> recibida de {1}!
+  Result: ТОКЕН_0 Бонусное семя ТОКЕН_1хТОКЕН_2ТОКЕН_4ТОКЕН_3 получено от ТОКЕН_5!
 WARNING profession-bonus-seeds-dropped: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
 profession-bonus-seeds-dropped: TRANSLATED
   Original: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.
-  Result: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> recibido de {1}, pero algunos cayeron sobre el terreno ya que su inventario está lleno.
+  Result: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> получен от {1}, но некоторые упали на землю, так как ваш инвентарь полон.
 WARNING profession-bonus-saplings-received: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
 profession-bonus-saplings-received: TRANSLATED
   Original: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}!
-  Result: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> recibido de {1}!
+  Result: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color>, полученный от {1}!
 WARNING profession-bonus-saplings-dropped: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
 profession-bonus-saplings-dropped: TRANSLATED
   Original: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.
-  Result: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> recibido de {1}, pero algunos cayeron sobre el terreno ya que su inventario está lleno.
-WARNING profession-mutant-grease-received: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '3', '5'])
+  Result: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> получили от {1}, но некоторые упали на землю, так как ваш инвентарь полон.
+WARNING profession-mutant-grease-received: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
 profession-mutant-grease-received: TRANSLATED
   Original: <color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}
-  Result: <color=green>Mutant Grease</color>x<color=white>{0}</color></color> recibido de {1}
-WARNING profession-mutant-grease-dropped: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '3', '5'])
+  Result: <color=green>Mutant Grease</color>x<color=white>{0}</color> получен от {1}
+WARNING profession-mutant-grease-dropped: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '1', '2', '4', '3', '5'])
 profession-mutant-grease-dropped: TRANSLATED
   Original: <color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
-  Result: <color=green>Mutant Grease</color>x<color=white>{0}</color></color> recibido de {1}, pero cayó sobre el terreno desde que su inventario está lleno.
-quest-daily-refreshed: TRANSLATED
+  Result: <color=green>Mutant Grease</color>x<color=white>{0}</color> получен от {1}, но он упал на землю, так как ваш инвентарь полон.
+quest-daily-refreshed: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Your <color=#00FFFF>Daily Quest</color> has been refreshed!
-  Result: Su <color=#00FFFF> Quest de Día </color> ha sido refrescado!
-quest-weekly-refreshed: TRANSLATED
+  Result: Ваш ежедневный поиск был обновлен!
+quest-weekly-refreshed: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Your <color=#BF40BF>Weekly Quest</color> has been refreshed!
-  Result: ¡Su <color=#BF40BF>Misssto </color> ha sido refrescado!
-quest-new-daily: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '1', '2', '12', '3', '4', '13', '5', '6']))
+  Result: Ваш ТОКЕН_0Еженедельный поиск ТОКЕН_1 был обновлен!
+quest-new-daily: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '1', '2', '12', '3', '4', '13', '5', '6', '14', '8', '15', '9', '10', '16', '11']))
   Original: New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>]
-  Result: [[TOKEN_0]]Daily Quest[[TOKEN_1]] disponible: [[TOKEN_2]][[TOKEN_12]][[TOKEN_3]][[TOKEN_4]][[TOKEN_13]][[TOKEN_5]] 12[[TOKEN_6]] 1212******************
+  Result: Новый [[TOKEN_0]] Ежедневный поиск [[TOKEN_1]] доступен: [[TOKEN_2]][[TOKEN_12]][[TOKEN_3]][[TOKEN_4]][[TOKEN_13]][[TOKEN_5]]x[[TOKEN_6]][[TOKEN_14]][[TOKEN_8]][[TOKEN_15]][[TOKEN_9]]/[[TOKEN_10]][[TOKEN_16]][[TOKEN_11]]
 WARNING quest-reward-received: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '2', '5', '3', '6'])
 quest-reward-received: TRANSLATED
   Original: You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}!
-  Result: Usted ha recibido <color=#ffd9eb>{0}</color>x <color=white>{1}</color> para completar su {2}!
+  Result: Вы получили <color=#ffd9eb>{0}</color>x<color=white>{1}</color> для завершения {2}!
 WARNING quest-reward-dropped: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '2', '5', '3', '6'])
 quest-reward-dropped: TRANSLATED
   Original: You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}! It dropped on the ground because your inventory was full.
-  Result: Usted ha recibido <color=#ffd9eb>{0}</color>x <color=white>{1}</color> para completar su {2}! Se cayó sobre el suelo porque su inventario estaba lleno.
+  Result: Вы получили <color=#ffd9eb>{0}</color>x<color=white>{1}</color> для завершения {2}! Он упал на землю, потому что ваш инвентарь был полон.
 2761093386: TRANSLATED
   Original: Battle Group - {familiarReply}
-  Result: Grupo de batalla - {familiarReply}
+  Result: Боевая группа — {familiarReply}
 3158650477: TRANSLATED
   Original: No familiars in battle group!
-  Result: ¡Ningún familiar en el grupo de batalla!
+  Result: Никаких знакомых в боевой группе!
 2932385107: TRANSLATED
   Original: Targets have all been killed, give them a chance to respawn!
-  Result: ¡Todos los blancos han sido asesinados, darles la oportunidad de reaparecer!
+  Result: Все цели убиты, дайте им шанс возродиться!
 1076291728: TRANSLATED
   Original: Use the VBlood menu to track bosses!
-  Result: ¡Usa el menú VBlood para rastrear a los jefes!
+  Result: Используйте меню VBlood для отслеживания боссов!
 1420278477: TRANSLATED
   Original: Tracking is only available for incomplete kill quests.
-  Result: El seguimiento sólo está disponible para misiones de muerte incompletas.
+  Result: Отслеживание доступно только для неполных квестов.
 3546356968: TRANSLATED
   Original: Invalid unit prefab (match found but does not start with CHAR/char).
-  Result: Prefab de unidad inválida (se encuentra pero no comienza con CHAR/char).
-WARNING 2886300456: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-2886300456: TRANSLATED
+  Result: Недействительный модуль префаб (матч найден, но не начинается с CHAR/char).
+2886300456: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.
-  Result: <color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> añadió a <color=white>{activeBox}</color>.
+  Result: Токен_0Токен_4Токен_1 добавлен к Токен_2Токен_5Токен_3.
 2169578147: TRANSLATED
   Original: Invalid unit name (match found but does not start with CHAR/char).
-  Result: Nombre de la unidad inválida (lote encontrado pero no comienza con CHAR/char).
-WARNING 2151120362: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '7', '3', '4', '8', '5'])
-2151120362: TRANSLATED
+  Result: Недействительное название единицы (матч найден, но не начинается с CHAR/char).
+2151120362: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: <color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.
-  Result: <color=green>{match.GetLocalizedName()}</color><color=yellow>{match.GuidHash}</color><color=white>{activeBox}</color>.
+  Result: Токен_0Токен_6Токен_1Токен_2Токен_7Токен_3Токен_4Токен_8Токен_5.
 223311103: TRANSLATED
   Original: Invalid unit name (no full or partial matches).
-  Result: Nombre de unidad inválido (sin partidos completos o parciales).
+  Result: Недействительное название единицы (отсутствие полных или частичных совпадений).
 2155028867: TRANSLATED
   Original: Invalid prefab (not an integer) or name (does not start with CHAR/char).
-  Result: Prefab inválido (no un entero) o nombre (no comienza con CHAR/char).
+  Result: Недействительный префаб (не целое число) или имя (не начинается с CHAR/char).
 3102592194: TRANSLATED
   Original: Couldn't find active familiar!
-  Result: ¡No pude encontrar un familiar activo!
-WARNING 1057342822: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1057342822: TRANSLATED
+  Result: Не смог найти активного знакомого!
+1057342822: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Your familiar has already prestiged the maximum number of times! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)
-  Result: Su familiar ya ha prestigio el número máximo de veces! <color=white>{ConfigService.MaxFamiliarPrestiges}</color>
+  Result: Ваш знакомый уже превзошел максимальное количество раз! Токен_0Токен_2Токен_1
 2689850927: TRANSLATED
   Original: Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.
-  Result: Invalide familiar prestigio stat type, use '<color=white>.fam lst</color> para ver opciones.
-WARNING 3125006928: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '6', '1', '2', '7', '3', '4', '5'])
-3125006928: TRANSLATED
+  Result: Недействительный знакомый тип состояния престижа, используйте '<color=white>.fam lst</color>', чтобы увидеть варианты.
+3125006928: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
   Original: Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.
-  Result: El familiar ya tiene <color=#00FFFF>{FamiliarPrestigeStats[value]}</color><color=yellow>{value + 1}</color>) de prestigiar, utilizar '<color=white>.fam lst</color> para ver opciones.
+  Result: Токен_0Токен_6Токен_1Токен_2Токен_7Токен_3 от престижирования, используйте Токен_4.fam lstТокен_5, чтобы увидеть варианты.
 2846646667: TRANSLATED
   Original: Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.
-  Result: Estante de prestigio familiar inválido, use '<color=white>.fam lst</color> para ver opciones.
+  Result: Недействительный знакомый статус престижа, используйте ‘<color=white>.fam lst</color>, чтобы увидеть варианты.
 705325693: TRANSLATED
   Original: Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')
-  Result: Familiar ya tiene todas las estadísticas de prestigio! ('<color=white>.fam pr</color>' en lugar de '<color=white>.fam pr PrestigeStat</color>'
-WARNING 2844729307: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2844729307: TRANSLATED
+  Result: У знакомых уже есть все показатели престижа! <color=white>.fam pr</color> вместо <color=white>.fam pr </color>
+2844729307: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!
-  Result: Tu familiar ha reconocido <color=#90EE90>{prestigeLevel}</color>; el conocimiento acumulado les permitió mantener su nivel!
-WARNING 2712718738: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-2712718738: TRANSLATED
+  Result: Ваш знакомый престижно Токен_0Токен_2Токен_1; накопленные знания позволили им сохранить свой уровень!
+2712718738: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['2', '5', '3']))
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
-  Result: Su familiaridad ha prestigio <color=#90EE90>{prestigeLevel}</color>; el conocimiento acumulado les permitió mantener su nivel! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>
-872190851: SKIPPED (looks untranslated)
+  Result: Ваш знакомый престижно Токен_0Токен_4Токен_1; накопленные знания позволили им сохранить свой уровень! (+[[TOKEN_2]][[TOKEN_5]][[TOKEN_3]])
+872190851: TRANSLATED
   Original: Failed to remove schematics from your inventory!
-  Result: ¡Failed to remove schematics from your inventory!
+  Result: Не удалось удалить схемы из вашего инвентаря!
 WARNING 329722985: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
 329722985: TRANSLATED
   Original: You do not have enough of the required item to change classes (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: Usted no tiene suficiente del artículo requerido para cambiar clases (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>
-WARNING 3466860311: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '0', '4', '1', '2', '5', '3'])
+  Result: Вам не хватает необходимого элемента для изменения классов (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
+WARNING 3466860311: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
 3466860311: TRANSLATED
   Original: Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: <color=#ffd9eb><color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>
+  Result: Не удалось удалить достаточное количество требуемого элемента <color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>
 3720524051: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {FormatClassName(playerClass)} passives not found!
-  Result: ¡Pasivos no encontrados!
+  Result: Пассивные не найдены!
 3543031585: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {FormatClassName(playerClass)} passives:
-  Result: Pasivos:
+  Result: ТОКЕН_0 Пассивные:
 1106946472: SKIPPED (sentinel missing)
   Original: {replyMessage}
-  Result: [[TOKEN_0] [[TOKEN_SENTINEL]
+  Result: [[Токен_0]] [[Токен_Сентинель]]
 2164633984: TRANSLATED
   Original: Couldn't find stat synergies for {FormatClassName(playerClass)}...
-  Result: No pude encontrar sinergias para {FormatClassName(playerClass)}...
+  Result: Не удалось найти синергию состояния для {FormatClassName(playerClass)}...
 1293896668: TRANSLATED
   Original: No stat synergies found for {FormatClassName(playerClass)}.
-  Result: No se han encontrado sinergias para {FormatClassName(playerClass)}.
+  Result: Не найдено синергий состояния для {FormatClassName(playerClass)}.
 WARNING 2147420594: token order differs (expected ['0', '1', '2', '3'], got ['2', '0', '3', '1'])
 2147420594: TRANSLATED
   Original: {FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:
-  Result: {FormatClassName(playerClass)} stat synergies x<color=white>{ConfigService.SynergyMultiplier}</color>:
+  Result: {FormatClassName(playerClass)} синергия состояния x<color=white>{ConfigService.SynergyMultiplier}</color>:
 WARNING 999548370: token order differs (expected ['0', '1', '2', '3'], got ['2', '0', '3', '1'])
 999548370: TRANSLATED
   Original: {FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:
   Result: {FormatClassName(playerClass)} stat synergiesx<color=white>{ConfigService.SynergyMultiplier}</color>:
-460602473: TRANSLATED
+460602473: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {FormatClassName(playerClass)} has no spells configured...
-  Result: {FormatClassName(playerClass)} no tiene hechizos configurados...
-442755566: TRANSLATED
+  Result: Токен_0 не имеет заклинаний, настроенных ...
+442755566: SKIPPED (token mismatch (expected ['0'], got []))
   Original: {FormatClassName(playerClass)} spells:
-  Result: {FormatClassName(playerClass)} hechizos:
+  Result: Токен_0 заклинания:
 WARNING 2967576286: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 2967576286: TRANSLATED
   Original: Shift spell: <color=#CBC3E3>{spellName}</color>
-  Result: El hechizo del cambio: <color=#CBC3E3>{spellName}</color>
+  Result: Сдвиг заклинания: <color=#CBC3E3>{spellName}</color>
 3097011724: TRANSLATED
   Original: Invalid class, use '<color=white>.class l</color>' to see options.
-  Result: Clase inválida, utilice '<color=white>.clase l</color> para ver opciones.
+  Result: Недействительный класс, используйте '<color=white>.class l</color>', чтобы увидеть варианты.
 1597216248: TRANSLATED
   Original: Invalid class, use <color=white>'.class l'</color> to see options.
-  Result: Clase inválida, use <color=white>.clase l'</color> para ver opciones.
+  Result: Недействительный класс, используйте <color=white>'.class l'</color>, чтобы увидеть варианты.
 2747211297: TRANSLATED
   Original: Removed all class buffs then applied current class buffs for all players.
-  Result: Eliminado todos los buffs de clase y luego aplicados buffs de clase actual para todos los jugadores.
+  Result: Удалил всех любителей класса, а затем применил текущие любители класса для всех игроков.
 2761429858: TRANSLATED
   Original: Removed all class buffs for all players.
-  Result: Quitó todos los buffs de clase para todos los jugadores.
+  Result: Удалил всех любителей класса для всех игроков.
 327031724: TRANSLATED
   Original: Active familiar already present in battle group!
-  Result: ¡Activo familiar ya presente en grupo de batalla!
+  Result: Активно знакомы уже присутствующие в боевой группе!
 WARNING 625301684: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 625301684: TRANSLATED
   Original: Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!
-  Result: No puede tener más que <color=white>{MAX_BATTLE_GROUPS}</color> grupos de batalla!
+  Result: Не может быть больше, чем <color=white>{MAX_BATTLE_GROUPS}</color> боевых групп!
 WARNING 3944404979: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 3944404979: TRANSLATED
   Original: Deleted battle group <color=white>{groupName}</color>!
-  Result: Grupo de batalla eliminado <color=white>{groupName}</color>!
+  Result: Удаленная боевая группа <color=white>{groupName}</color>!
 2979158417: TRANSLATED
   Original: Prestiging is not enabled.
-  Result: La incitación no está habilitada.
+  Result: Престиж не допускается.
 2350508902: TRANSLATED
   Original: Invalid prestige type, use <color=white>'.prestige l'</color> to see options.
-  Result: Tipo de prestigio inválido, use <color=white>.prestige l'</color> para ver opciones.
+  Result: Недействительный тип престижа, используйте <color=white>'.prestige l'</color>, чтобы увидеть варианты.
 1897692916: TRANSLATED
   Original: You must reach max level before <color=#90EE90>Exo</color> prestiging again.
-  Result: Usted debe alcanzar el nivel máximo antes de <color=#90EE90>Exo</color> que prestigie de nuevo.
-WARNING 9816116: token order differs (expected ['0', '1', '2', '3', '4'], got ['0', '1', '2', '4', '3'])
-9816116: TRANSLATED
+  Result: Вы должны достичь максимального уровня, прежде чем <color=#90EE90>Exo </color> предвещать снова.
+9816116: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['0', '1']))
   Original: You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges. (<color=white>{EXO_PRESTIGES}</color>)
-  Result: Usted ha alcanzado la cantidad máxima de <color=#90EE90>Exo</color> prestigios. <color=white>{EXO_PRESTIGES}</color>
-WARNING 3729714988: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-3729714988: TRANSLATED
+  Result: Вы достигли максимального количества [[TOKEN_0]]Exo[[TOKEN_1]] престижа. Токен_2Токен_4Токен_3
+3729714988: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!
-  Result: <color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color> prestigio completo!
-WARNING 2402733055: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got ['0', '8', '1', '2', '9', '3', '4', '10', '5', '6', '11', '7'])
-2402733055: TRANSLATED
+  Result: ТОКЕН_0ТОКЕН_4ТОКЕН_1ТОКЕН_2ТОКЕН_5ТОКЕН_3 Престиж завершен!
+2402733055: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got ['4', '10', '5', '6', '11', '7']))
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
-  Result: <color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color> prestigio completo! Usted también ha sido galardonado con <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x <color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
-WARNING 3961332984: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got ['0', '8', '1', '2', '9', '3', '4', '10', '5', '6', '11', '7'])
-3961332984: TRANSLATED
+  Result: ТОКЕН_0ТОКЕН_8ТОКЕН_1ТОКЕН_2ТОКЕН_9ТОКЕН_3 престиж полный! Вы также были награждены [[TOKEN_4]][[TOKEN_10]][[TOKEN_5]]x[[TOKEN_6]][[TOKEN_11]][[TOKEN_7]]!
+3961332984: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got ['4', '10', '5', '6', '11', '7']))
   Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.
-  Result: <color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color> prestigio completo! Usted ha sido galardonado con <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x <color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! Se cayó en el suelo porque su inventario estaba lleno.
+  Result: ТОКЕН_0ТОКЕН_8ТОКЕН_1ТОКЕН_2ТОКЕН_9ТОКЕН_3 престиж полный! Вы были награждены [[TOKEN_4]][[TOKEN_10]][[TOKEN_5]]x[[TOKEN_6]][[TOKEN_11]][[TOKEN_7]]! Она упала на землю, потому что ваш инвентарь был полон.
 145841390: TRANSLATED
   Original: You must reach the maximum level in <color=#90EE90>Experience</color> prestige before <color=#90EE90>Exo</color> prestiging.
-  Result: Usted debe alcanzar el nivel máximo en <color=#90EE90>Experiencia</color> prestigio antes de <color=#90EE90>Exo</color>.
-2076214502: TRANSLATED
+  Result: Вы должны достичь максимального уровня в <color=#90EE90> Опыт </color> престижа перед <color=#90EE90>Exo </color> престижирование.
+2076214502: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: <color=#90EE90>Exo</color> prestiging is not enabled.
-  Result: <color=#90EE90>Exo </color> no está habilitada la instrucción.
+  Result: Токен_0ЭкзоТокен_1 не включен.
 1641131342: TRANSLATED
   Original: Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.
-  Result: prestigio inválido, use <color=white>.prestige l'</color> para ver opciones válidas.
+  Result: Недействительный престиж, используйте <color=white>'.prestige l'</color>, чтобы увидеть действительные варианты.
 WARNING 484801240: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 484801240: TRANSLATED
   Original: You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.
-  Result: Usted no ha alcanzado el nivel requerido para el prestigio en <color=#90EE90>{parsedPrestigeType}</color> o están al máximo nivel de prestigio.
-11642316: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '1', '2', '6', '3', '7']))
+  Result: Вы не достигли необходимого уровня престижа в <color=#90EE90>{parsedPrestigeType}</color> или находитесь на максимальном уровне престижа.
+WARNING 11642316: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '1', '2', '6', '3', '7', '4', '8', '5'])
+11642316: TRANSLATED
   Original: Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s
-  Result: [[TOKEN_0]]Exo[[TOKEN_1]] Prestige Level: [[TOKEN_2]][[TOKEN_6]][[TOKEN_3]]/[[TOKEN_7]]
+  Result: Текущий <color=#90EE90>Exo</color> Уровень престижа: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Длительность формы: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>
 WARNING 836746607: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 836746607: TRANSLATED
   Original: Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s
-  Result: Suficiente carga para mantener la forma <color=white>{(int)exoFormData.Value}</color>s
-2332227846: TRANSLATED
+  Result: Достаточное количество заряда для поддержания формы <color=white>{(int)exoFormData.Value}</color>
+2332227846: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: You have not prestiged in <color=#90EE90>Exo</color> yet.
-  Result: Usted no ha prestigio en <color=#90EE90>Exo</color> todavía.
-WARNING 3706109126: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3706109126: TRANSLATED
+  Result: Вы не можете быть уверены в том, что у вас есть 1.
+3706109126: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.
-  Result: No has prestigio en <color=#90EE90>{parsedPrestigeType}</color>.
+  Result: Вы не имеете никакого отношения к Токен_0Токен_2Токен_1.
 1689690159: TRANSLATED
   Original: Couldn't find player.
-  Result: No pude encontrar un jugador.
-WARNING 3055902112: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3055902112: TRANSLATED
+  Result: Не смог найти игрока.
+3055902112: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=#90EE90>{parsedPrestigeType}</color> prestiging is not enabled.
-  Result: <color=#90EE90>{parsedPrestigeType}</color> no está habilitada la instrucción.
+  Result: Токен_0Токен_2Токен_1 не включен.
 WARNING 3468772905: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
 3468772905: TRANSLATED
   Original: The maximum level for <color=#90EE90>{parsedPrestigeType}</color> prestige is {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.
-  Result: El nivel máximo para <color=#90EE90>{parsedPrestigeType}</color> prestigio es {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.
-WARNING 3343555659: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '7', '3', '4', '8', '5'])
-3343555659: TRANSLATED
+  Result: Максимальный уровень престижа <color=#90EE90>{parsedPrestigeType}</color>{PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.
+3343555659: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.
-  Result: El jugador <color=green>{playerInfo.User.CharacterName.Value}</color> ha sido establecido en el nivel <color=white>{level}</color><color=#90EE90>{parsedPrestigeType}</color> prestigio.
+  Result: Игрок Токен_0Токен_6Токен_1 был установлен на уровень Токен_2Токен_7Токен_3Токен_4Токен_8Токен_5 престижа.
 101395383: TRANSLATED
   Original: Exo prestiging is not enabled.
-  Result: Exo no está habilitado.
+  Result: Exo Prestiging не допускается.
 3878313095: TRANSLATED
   Original: Couldn't find player...
-  Result: No pude encontrar al jugador...
-WARNING 1411528307: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-1411528307: TRANSLATED
+  Result: Не удалось найти игрока...
+1411528307: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.
-  Result: <color=#90EE90>{parsedPrestigeType}</color><color=white>{playerInfo.User.CharacterName.Value}</color>.
+  Result: Токен_0Токен_4Токен_1Токен_2Токен_5Токен_3Токен_3.
 3318828181: TRANSLATED
   Original: Prestige buffs applied! (if they were missing)
-  Result: ¡Prestigio Buffs aplicado! (si estaban desaparecidos)
-WARNING 830139985: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-830139985: TRANSLATED
+  Result: Применяются престиж-баффы! (если они отсутствуют)
+830139985: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: You have not prestiged in <color=#90EE90>{PrestigeType.Experience}</color>.
-  Result: No has prestigio en <color=#90EE90>{PrestigeType.Experience}</color>.
-2461283441: SKIPPED (looks untranslated)
+  Result: Вы не имеете никакого отношения к Токен_0Токен_2Токен_1.
+2461283441: TRANSLATED
   Original: Prestiges:
-  Result: Prestiges:
+  Result: Предлоги:
 3320998835: SKIPPED (sentinel missing)
   Original: {prestiges}
-  Result: [[TOKEN_0] [[TOKEN_SENTINEL]
+  Result: [[Токен_0]] [[Токен_Сентинель]]
 947905559: TRANSLATED
   Original: Leaderboards are not enabled.
-  Result: Las tablas no están habilitadas.
+  Result: Лидеры не включены.
 WARNING 1182925736: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 1182925736: TRANSLATED
   Original: No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!
-  Result: Ningún jugador ha prestigio en <color=#90EE90>{parsedPrestigeType}</color> todavía!
+  Result: Ни один из игроков еще не получил престижа в <color=#90EE90>{parsedPrestigeType}</color>!
 1687700552: TRANSLATED
   Original: You must consume at least one primordial essence...
-  Result: Debes consumir al menos una esencia primordial...
-1763729577: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '1', '6']))
+  Result: Вы должны поглотить хотя бы одну первичную сущность.
+1763729577: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '1']))
   Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
-  Result: Exo form emote action ([[TOKEN_0]]taunt[[TOKEN_1]]) [[TOKEN_6]]
+  Result: Exo form emote action[[TOKEN_0]]taunt[[TOKEN_1]]Токен_6
 1711247206: TRANSLATED
   Original: You are not yet worthy...
-  Result: Aún no eres digno...
+  Result: Ты еще не достоин...
 3882215894: TRANSLATED
   Original: Invalid shapeshift! Valid options: {shapeshifts}
-  Result: ¡Invalide shapehift! Opciones válidas: {shapeshifts}
+  Result: Недействительное изменение формы! Действительные варианты: {shapeshifts}
 1884272339: TRANSLATED
   Original: You must consume Dracula's essence before manifesting his form...
-  Result: Debes consumir la esencia de Drácula antes de manifestar su forma...
+  Result: Вы должны поглотить сущность Дракулы, прежде чем проявить его форму...
 816810753: TRANSLATED
   Original: You must consume Megara's essence before manifesting her form...
-  Result: Debes consumir la esencia de Megara antes de manifestar su forma...
+  Result: Вы должны поглотить сущность Мегары, прежде чем проявить ее форму...
 WARNING 3587073963: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 3587073963: TRANSLATED
   Original: Current Exoform: <color=white>{form}</color>
-  Result: Exoform actual: <color=white>{form}</color>
+  Result: Текущая форма: <color=white>{form}</color>
 WARNING 1440482998: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 1440482998: TRANSLATED
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore prestige leaderboard list!
-  Result: <color=green>{playerInfo.User.CharacterName.Value}</color> añadido a la lista de líderes de prestigio ignorante!
+  Result: <color=green>{playerInfo.User.CharacterName.Value}</color> добавлен в список лидеров престижа игнорирования!
 WARNING 2659109549: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 2659109549: TRANSLATED
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore prestige leaderboard list!
-  Result: <color=green>{playerInfo.User.CharacterName.Value}</color> eliminado de la lista de líderes de prestigio ignorado!
-2178615132: SKIPPED (looks untranslated)
+  Result: <color=green>{playerInfo.User.CharacterName.Value}</color> исключены из списка лидеров престижа!
+2178615132: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Permashroud <color=green>enabled</color>!
-  Result: Permashroud <color=green>enabled</color>!
-1797973559: SKIPPED (looks untranslated)
+  Result: Токен_0 с поддержкой Токен_1
+1797973559: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: Permashroud <color=red>disabled</color>!
-  Result: Permashroud <color=red>disabled</color>!
+  Result: Токен_0 отключен Токен_1
 985830382: TRANSLATED
   Original: Expertise is not enabled.
-  Result: La experiencia no está habilitada.
+  Result: Экспертиза не допускается.
 3170250471: TRANSLATED
   Original: Expertise handler for weapon is null; this shouldn't happen and you may want to inform the developer.
-  Result: El manipulador experto para arma es nulo; esto no debe suceder y es posible que desee informar al desarrollador.
-WARNING 3591926048: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '12', '1', '2', '13', '3', '4', '14', '5', '6', '7', '8', '15', '9', '10', '16', '11'])
-3591926048: SKIPPED (looks untranslated)
+  Result: Опытный обработчик оружия не имеет силы; этого не должно произойти, и вы можете сообщить об этом разработчику.
+3591926048: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '12', '1', '2', '13', '3', '4', '14', '5']))
   Original: Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!
-  Result: Su experiencia en armas es <color=white>{ExpertiseData.Key}</color><color=#90EE90>{prestigeLevel}</color> y usted tiene <color=yellow>{progress}</color><color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!
-WARNING 3489173133: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-3489173133: SKIPPED (looks untranslated)
+  Result: Ваш опыт в оружии [[TOKEN_0]][[TOKEN_12]][[TOKEN_1]][[TOKEN_2]][[TOKEN_13]][[TOKEN_3]], и у вас есть [[TOKEN_4]][[TOKEN_14]][[TOKEN_5]]ТОКЕН_6ТОКЕН_7ТОКЕН_8ТОКЕН_15% ТОКЕН_9ТОКЕН_10ТОКЕН_16ТОКЕН_11
+3489173133: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: <color=#c0c0c0>{weaponType}</color> Stats: {bonuses}
-  Result: <color=#c0c0c0>{weaponType}</color> Stats: {bonuses}
+  Result: Токен_0Токен_2Токен_1 Статистика: ТОКЕН_3
 3863739608: TRANSLATED
   Original: No bonuses from currently equipped weapon.
-  Result: No hay bonificaciones de arma actualmente equipada.
+  Result: Никаких бонусов от уже оснащённого оружия.
 WARNING 4023020194: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 4023020194: TRANSLATED
   Original: You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet!
-  Result: Usted no ha ganado ninguna experiencia para <color=#c0c0c0>{weaponType}</color> todavía!
+  Result: Вы не получили никакого опыта для <color=#c0c0c0>{weaponType}</color> пока!
 736301693: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
   Original: Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: El registro de expertos es ahora [[TOKEN_4]].
+  Result: В настоящее время ведется экспертиза [[TOKEN_4]].
 27929505: TRANSLATED
   Original: Invalid stat, use '<color=white>.wep lst</color>' to see valid options.
-  Result: Estante inválido, utilice '<color=white>.wep lst</color> para ver opciones válidas.
-WARNING 1880632188: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-1880632188: TRANSLATED
+  Result: Недействительный stat, используйте '<color=white>.wep lst</color>', чтобы увидеть действительные варианты.
+1880632188: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=#00FFFF>{finalWeaponStat}</color> has been chosen for <color=#c0c0c0>{finalWeaponType}</color>!
-  Result: <color=#00FFFF>{finalWeaponStat}</color> ha sido elegido para <color=#c0c0c0>{finalWeaponType}</color>!
+  Result: Токен_0Токен_4Токен_1 был выбран для Токен_2Токен_5Токен_3!
 2008856310: TRANSLATED
   Original: Invalid weapon choice, use '<color=white>.wep lst</color>' to see valid options.
-  Result: Elección de armas inválidas, use '<color=white>.wep lst</color> para ver opciones válidas.
+  Result: Недействительный выбор оружия, используйте <color=white>.wep lst </color>, чтобы увидеть действительные варианты.
 WARNING 3274700132: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 3274700132: TRANSLATED
   Original: Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!
-  Result: Sus estadísticas de armas han sido reajustadas para <color=#c0c0c0>{weaponType}</color>!
-WARNING 719993404: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-719993404: TRANSLATED
+  Result: Ваша статистика оружия была сброшена для <color=#c0c0c0>{weaponType}</color>!
+719993404: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: ¡No tienes el artículo requerido para restablecer tus estadísticas de armas! <color=#ffd9eb>{item.GetLocalizedName()}</color>x <color=white>{quantity}</color>
+  Result: У вас нет необходимого элемента для сброса статистики оружия! Токен_0Токен_4Токен_1xТокен_2Токен_5Токен_3
 2128999876: TRANSLATED
   Original: Level must be between 0 and {ConfigService.MaxExpertiseLevel}.
-  Result: El nivel debe ser entre 0 y {ConfigService.MaxExpertiseLevel}.
+  Result: Уровень должен быть между 0 и {ConfigService.MaxExpertiseLevel}.
 2252129438: TRANSLATED
   Original: Invalid weapon type.
-  Result: Tipo de arma inválida.
-WARNING 2480816305: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '7', '3', '4', '8', '5', '5'])
-2480816305: TRANSLATED
+  Result: Недействительный тип оружия.
+2480816305: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: <color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>
-  Result: <color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color><color=white>{level}</color><color=green>{playerInfo.User.CharacterName.Value}</color></color>
+  Result: Токен_0Токен_6Токен_1Токен_2Токен_7Токен_3Токен_4Токен_8Токен_5
 3013651462: TRANSLATED
   Original: Couldn't find matching save method for weapon type...
-  Result: No pude encontrar el método de ahorro para el tipo de arma...
+  Result: Не смог найти подходящий метод сохранения для типа оружия...
 2965167816: TRANSLATED
   Original: No weapon stats available at this time.
-  Result: No hay estadísticas de armas disponibles en este momento.
+  Result: Статистика оружия на данный момент отсутствует.
 WARNING 3084457547: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 3084457547: TRANSLATED
   Original: Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>
-  Result: Expertas en arma disponible: <color=#c0c0c0>{weaponTypes}</color>
+  Result: Оригинальное название: Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>
 2202242526: TRANSLATED
   Original: Extra spell slots are not enabled.
-  Result: Las ranuras de hechizo extra no están habilitadas.
+  Result: Дополнительные слоты заклинаний не включены.
 2998300513: TRANSLATED
   Original: Invalid slot (<color=white>1</color> for Q or <color=white>2</color> for E)
-  Result: ranura inválida (<color=white>1</color> para Q o <color=white>2</color> para E)
+  Result: Недействительный слот <color=white>1</color> для Q или <color=white>2</color> для E
 WARNING 3761416018: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
 3761416018: TRANSLATED
   Original: First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
-  Result: Primera ranura desarmada fijada <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> para <color=green>{playerInfo.User.CharacterName.Value}</color>.
+  Result: Первый невооруженный слот, установленный на <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> для <color=green>{playerInfo.User.CharacterName.Value}</color>.
 WARNING 1826355702: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
 1826355702: TRANSLATED
   Original: Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
-  Result: Segunda ranura desarmada fijada <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> para <color=green>{playerInfo.User.CharacterName.Value}</color>.
+  Result: Второй невооруженный слот установлен на <color=white>{new PrefabGUID(ability).GetPrefabName()}</color><color=green>{playerInfo.User.CharacterName.Value}</color>.
 2712082651: TRANSLATED
   Original: Radius must be positive!
-  Result: ¡El radio debe ser positivo!
+  Result: Радиус должен быть позитивным!
 1846116445: TRANSLATED
   Original: Extra spell slots for unarmed are not enabled.
-  Result: No se permiten ranuras de hechizos adicionales para desarmados.
+  Result: Дополнительные слоты для безоружных не включены.
 446698782: TRANSLATED
   Original: Spells cannot be locked when using exoform.
-  Result: Los hechizos no se pueden bloquear cuando usan exoform.
+  Result: Заклинания нельзя блокировать при использовании экзоформы.
 313887201: TRANSLATED
   Original: Change spells to the ones you want in your unarmed slots. When done, toggle this again.
-  Result: Cambia hechizos a los que quieres en tus ranuras desarmadas. Cuando esté hecho, vuelva a cambiar esto.
+  Result: Меняйте заклинания на те, которые вы хотите в своих безоружных слотах. Когда закончите, переключите это снова.
 121410310: TRANSLATED
   Original: Spells locked.
-  Result: Paga cerrada.
+  Result: Заклинания заперты.
 4061888430: TRANSLATED
   Original: Blood Legacies are not enabled.
-  Result: Las Legacías de Sangre no están habilitadas.
+  Result: Кровавое наследие не разрешено.
 3361608225: TRANSLATED
   Original: Invalid blood, use '.bl l' to see options.
-  Result: Sangre inválida, usa '.bl l' para ver opciones.
+  Result: Недействительная кровь, используйте '.bl l', чтобы увидеть варианты.
 18401539: TRANSLATED
   Original: Invalid blood legacy.
-  Result: Herencia sanguínea inválida.
-WARNING 3254231727: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '12', '1', '2', '13', '3', '4', '14', '5', '6', '7', '8', '15', '9', '10', '16', '11'])
-3254231727: SKIPPED (looks untranslated)
+  Result: Недействительное наследие крови.
+3254231727: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got []))
   Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
-  Result: Estás en el nivel <color=white>{data.Key}</color><color=#90EE90>{prestigeLevel}</color> con <color=yellow>{progress}</color><color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
-WARNING 1711931034: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-1711931034: SKIPPED (looks untranslated)
+  Result: Токен_0Токен_12Токен_1Токен_2Токен_13Токен_3Токен_4Токен_14Токен_5ТОКЕН_6Сущность ТОКЕН_7ТОКЕН_8ТОКЕН_15%ТОКЕН_9 в ТОКЕН_10ТОКЕН_16ТОКЕН_11
+1711931034: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: <color=red>{bloodType}</color> Stats: {bonuses}
-  Result: <color=red>{bloodType}</color> Stats: {bonuses}
-WARNING 939340687: token order differs (expected ['0', '1', '2', '3', '4'], got ['0', '4', '1', '2', '3'])
-939340687: TRANSLATED
+  Result: Токен_0Токен_2Токен_1 Статистика: ТОКЕН_3
+939340687: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: No stats selected for <color=red>{bloodType}</color>, use <color=white>'.bl lst'</color> to see valid options.
-  Result: No hay estadísticas seleccionadas para <color=red>{bloodType}</color>, use <color=white>.bl lst'</color> para ver opciones válidas.
-WARNING 226227140: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-226227140: TRANSLATED
+  Result: Токен_0Токен_4Токен_1, используйте Токен_2.bl lst'Токен_3, чтобы увидеть действительные варианты.
+226227140: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: No progress in <color=red>{handler.GetBloodType()}</color> yet.
-  Result: No hay progreso en <color=red>{handler.GetBloodType()}</color> todavía.
+  Result: В этом нет никакого смысла Токен_0Токен_2Токен_1.
 4051608029: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
   Original: Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: Sangre Legacy logging [[TOKEN_4]].
+  Result: Наследие крови [[TOKEN_4]].
 3335571950: TRANSLATED
   Original: Legacies are not enabled.
-  Result: Las leyes no están habilitadas.
+  Result: Наследства не допускаются.
 2194796157: TRANSLATED
   Original: Invalid blood stat, use '<color=white>.bl lst</color>' to see valid options.
-  Result: Estaño de sangre inválido, use '<color=white>.bl lst</color> para ver opciones válidas.
-WARNING 2785130336: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-2785130336: TRANSLATED
+  Result: Недействительный уровень крови, используйте ‘<color=white>.bl lst</color>, чтобы увидеть действительные варианты.
+2785130336: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=#00FFFF>{finalBloodStat}</color> selected for <color=red>{finalBloodType}</color>!
-  Result: <color=#00FFFF>{finalBloodStat}</color> seleccionado para <color=red>{finalBloodType}</color>!
+  Result: ТОКЕН_0ТОКЕН_4ТОКЕН_1 выбран для ТОКЕН_2ТОКЕН_5ТОКЕН_3!
 4126149106: TRANSLATED
   Original: Invalid blood type, use '<color=white>.bl l</color>' to see valid options.
-  Result: Tipo de sangre inválido, use '<color=white>.bl l</color> para ver opciones válidas.
+  Result: Недействительная группа крови, используйте ‘<color=white>.bl l</color>, чтобы увидеть действительные варианты.
 4258273173: TRANSLATED
   Original: Invalid blood legacy, use '<color=white>.bl l</color>' to see valid options.
-  Result: Herencia sanguínea inválida, use '<color=white>.bl l</color> para ver opciones válidas.
-WARNING 1298892920: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1298892920: TRANSLATED
+  Result: Недействительное наследие крови, используйте ‘<color=white>.bl l</color>, чтобы увидеть действительные варианты.
+1298892920: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: No legacy available for <color=white>{bloodType}</color>.
-  Result: No hay legado disponible para <color=white>{bloodType}</color>.
+  Result: Токен_0Токен_2Токен_1Токен_1.
 WARNING 1740355579: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 1740355579: TRANSLATED
   Original: Your blood stats have been reset for <color=red>{bloodType}</color>!
-  Result: Sus estadísticas de sangre han sido reajustadas para <color=red>{bloodType}</color>!
+  Result: Ваши данные о крови были сброшены для <color=red>{bloodType}</color>!
 WARNING 1449977777: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
 1449977777: TRANSLATED
   Original: You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
-  Result: Usted no tiene el artículo requerido para restablecer sus estadísticas de sangre (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>
+  Result: У вас нет необходимого элемента для сброса статистики крови (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
 WARNING 1690022722: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 1690022722: TRANSLATED
   Original: Your blood stats have been reset for <color=red>{bloodType}</color>.
-  Result: Sus estadísticas de sangre se han reajustado para <color=red>{bloodType}</color>.
+  Result: Ваши данные о крови были сброшены для <color=red>{bloodType}</color>.
 1680589832: TRANSLATED
   Original: No blood stats available at this time.
-  Result: No hay estadísticas de sangre disponibles en este momento.
+  Result: Кровь в настоящее время не доступна.
 1108347105: TRANSLATED
   Original: Level must be between 0 and {ConfigService.MaxBloodLevel}.
-  Result: El nivel debe ser entre 0 y {ConfigService.MaxBloodLevel}.
-WARNING 2196432591: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '7', '3', '4', '8', '5', '5'])
-2196432591: TRANSLATED
+  Result: Уровень должен быть между 0 и {ConfigService.MaxBloodLevel}.
+2196432591: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: <color=red>{BloodHandler.GetBloodType()}</color> legacy set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>
-  Result: <color=red>{BloodHandler.GetBloodType()}</color><color=white>{level}</color><color=green>{foundUser.CharacterName}</color></color>
+  Result: Токен_0Токен_6Токен_1Токен_2Токен_7Токен_3Токен_4Токен_8Токен_5
 WARNING 85537047: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 85537047: TRANSLATED
   Original: Available Blood Legacies: <color=red>{bloodTypesList}</color>
-  Result: Legacías de sangre disponibles: <color=red>{bloodTypesList}</color>
+  Result: Доступные кровяные наследства: <color=red>{bloodTypesList}</color>
 1381058165: TRANSLATED
   Original: Familiars are not enabled.
-  Result: Los familiares no están habilitados.
-WARNING 1716911803: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1716911803: SKIPPED (looks untranslated)
+  Result: Родственники не допускаются.
+1716911803: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=white>{box}</color>:
-  Result: <color=white>{box}</color>:
-WARNING 863911874: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-863911874: TRANSLATED
+  Result: Токен_0Токен_2Токен_1:
+863911874: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got ['2', '5', '3']))
   Original: <color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $
-  Result: <color=yellow>{count}</color><color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $
+  Result: ТОКЕН_0ТОКЕН_4ТОКЕН_1[[TOKEN_2]][[TOKEN_5]][[TOKEN_3]](familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) $
 1066178325: TRANSLATED
   Original: No active box! Try using <color=white>'.fam sb [Name]'</color> if you know the familiar you're looking for. (use quotes for names with a space)
-  Result: ¡No hay caja activa! Trate de usar <color=white>'.fam sb Name'</color> si sabe lo familiar que está buscando. (usar citas para nombres con un espacio)
+  Result: Без активной коробки! Попробуйте использовать <color=white>.fam sb Name</color>, если вы знаете, что вы ищете. (используйте цитаты для имен с пробелом)
 2462277004: TRANSLATED
   Original: Couldn't find active box!
-  Result: ¡No pude encontrar una caja activa!
+  Result: Не удалось найти активную коробку!
 1977482431: TRANSLATED
   Original: Familiar Boxes:
-  Result: Cajas familiares:
+  Result: Знакомые коробки:
 2321621014: SKIPPED (sentinel missing)
   Original: {fams}
-  Result: [[TOKEN_0] [[TOKEN_SENTINEL]
+  Result: [[Токен_0]] [[Токен_Сентинель]]
 854134032: TRANSLATED
   Original: You don't have any unlocks yet!
-  Result: ¡No tienes ningún desbloqueo todavía!
+  Result: У тебя пока нет никаких разблокировок!
 WARNING 321106656: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 321106656: TRANSLATED
   Original: Box Selected - <color=white>{name}</color>
-  Result: Recuadro seleccionado - <color=white>{name}</color>
+  Result: Избранное поле — <color=white>{name}</color>
 2465841402: TRANSLATED
   Original: Couldn't find box!
-  Result: ¡No pude encontrar caja!
+  Result: Я не смог найти коробку!
 WARNING 698362524: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-698362524: SKIPPED (looks untranslated)
+698362524: TRANSLATED
   Original: Box <color=white>{current}</color> renamed - <color=yellow>{name}</color>
-  Result: Box <color=white>{current}</color> renamed - <color=yellow>{name}</color>
+  Result: Коробка <color=white>{current}</color> переименована — <color=yellow>{name}</color>
 1575879194: TRANSLATED
   Original: Couldn't find box to rename or there's already a box with that name!
-  Result: No pude encontrar caja para cambiar de nombre o ya hay una caja con ese nombre!
-WARNING 823180732: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-823180732: TRANSLATED
+  Result: Не смог найти коробку, чтобы переименовать, или уже есть коробка с таким названием!
+823180732: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>{PrefabGUID.GetLocalizedName()}</color> moved - <color=white>{name}</color>
-  Result: <color=green>{PrefabGUID.GetLocalizedName()}</color> movido <color=white>{name}</color>
+  Result: Токен_0Токен_4Токен_1 перемещен — Токен_2Токен_5Токен_3
 3236338434: TRANSLATED
   Original: Box is full!
-  Result: ¡Box está lleno!
+  Result: Коробка полная!
 WARNING 2213724716: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 2213724716: TRANSLATED
   Original: Deleted box - <color=white>{name}</color>
-  Result: Caja suprimida - <color=white>{name}</color>
+  Result: Удаленный бокс — <color=white>{name}</color>
 4289445665: TRANSLATED
   Original: Box is not empty!
-  Result: ¡La caja no está vacía!
+  Result: Коробка не пустая!
 WARNING 3279926559: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 3279926559: TRANSLATED
   Original: Added box - <color=white>{name}</color>
-  Result: Añadido box - <color=white>{name}</color>
+  Result: Добавлено поле — <color=white>{name}</color>
 WARNING 2724064627: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 2724064627: TRANSLATED
   Original: Must have at least one unit unlocked to start adding boxes. Additionally, the total number of boxes cannot exceed <color=yellow>{BOX_CAP}</color>.
-  Result: Debe tener al menos una unidad desbloqueada para empezar a agregar cajas. Además, el número total de cajas no puede exceder <color=yellow>{BOX_CAP}</color>.
+  Result: Нужно разблокировать хотя бы один блок, чтобы начать добавлять коробки. Кроме того, общее количество ящиков не может превышать <color=yellow>{BOX_CAP}</color>.
 2648123409: TRANSLATED
   Original: VBlood familiars are not enabled.
-  Result: VBlood familiars no están habilitados.
+  Result: Знакомые VBlood не включены.
 2179875375: TRANSLATED
   Original: VBlood purchasing is not enabled.
-  Result: La compra de VBlood no está habilitada.
+  Result: Покупка VBlood не допускается.
 2721627196: TRANSLATED
   Original: Couldn't find matching vBlood!
-  Result: ¡No pude encontrar a VBlood!
+  Result: Не смог найти подходящего VBlood!
 1976698463: TRANSLATED
   Original: Multiple matches, please be more specific!
-  Result: ¡Múltiples coincidencias, por favor sean más específicas!
-WARNING 3052690511: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3052690511: TRANSLATED
+  Result: Несколько матчей, будьте конкретнее!
+3052690511: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is not available per configured familiar bans!
-  Result: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> no está disponible por las prohibiciones familiares configuradas!
-WARNING 3195375072: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3195375072: TRANSLATED
+  Result: Токен_0Токен_2Токен_1 недоступен для сконфигурированных знакомых запретов!
+3195375072: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is already unlocked!
-  Result: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> ya está desbloqueado!
+  Result: Токен_0Токен_2Токен_1 уже разблокирован!
 3380184352: TRANSLATED
   Original: Unable to verify cost for {vBloodPrefabGuid.GetPrefabName()}!
-  Result: Incapaz de verificar el costo {vBloodPrefabGuid.GetPrefabName()}!
-WARNING 3498334942: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3498334942: TRANSLATED
+  Result: Невозможно проверить стоимость {vBloodPrefabGuid.GetPrefabName()}!
+3498334942: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Unable to verify exo prestige reward item! (<color=yellow>{exoItem}</color>)
-  Result: Incapaz de verificar exo prestigio recompensa artículo! <color=yellow>{exoItem}</color>
+  Result: Невозможно проверить предмет престижа exo! Токен_0Токен_2Токен_1
 WARNING 4255236631: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 4255236631: TRANSLATED
   Original: New unit unlocked: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>
-  Result: Nueva unidad desbloqueada: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>
-WARNING 2191580006: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '2', '5', '3', '3', '6'])
+  Result: Новый блок разблокирован: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>
+WARNING 2191580006: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '2', '5', '3', '6'])
 2191580006: TRANSLATED
   Original: Not enough <color=#ffd9eb>{exoItem.GetLocalizedName()}</color>x<color=white>{factoredCost}</color> for {vBloodPrefabGuid.GetPrefabName()}!
-  Result: <color=#ffd9eb>{exoItem.GetLocalizedName()}</color>x<color=white>{factoredCost}</color></color>{vBloodPrefabGuid.GetPrefabName()}!
+  Result: Недостаточно <color=#ffd9eb>{exoItem.GetLocalizedName()}</color>x<color=white>{factoredCost}</color> для {vBloodPrefabGuid.GetPrefabName()}!
 1809964020: TRANSLATED
   Original: Unable to verify tier for {vBloodPrefabGuid.GetPrefabName()}! Shouldn't really happen at this point and may want to inform the developer.
-  Result: Incapaz de verificar el tier para {vBloodPrefabGuid.GetPrefabName()}! No debería ocurrir realmente en este punto y tal vez desee informar al desarrollador.
-WARNING 1057363547: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '1', '2', '6', '3', '4', '7', '5'])
-1057363547: TRANSLATED
+  Result: Невозможно проверить уровень {vBloodPrefabGuid.GetPrefabName()}! На данный момент этого не должно произойти, и, возможно, вы захотите сообщить об этом разработчику.
+1057363547: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '1', '2', '6', '3']))
   Original: Invalid choice, please use <color=white>1</color> to <color=white>{familiarSet.Count}</color> (Current List:<color=yellow>{activeBox}</color>)
-  Result: Elección inválida, por favor utilice <color=white>1</color><color=white>{familiarSet.Count}</color> (Lista actual: <color=yellow>{activeBox}</color>)
-WARNING 780970161: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-780970161: TRANSLATED
+  Result: Недействительный выбор, пожалуйста, используйте [[TOKEN_0]]1[[TOKEN_1]][[TOKEN_2]][[TOKEN_6]][[TOKEN_3]]Токен_4Токен_7Токен_5
+780970161: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: <color=green>{familiarId.GetLocalizedName()}</color> removed from <color=white>{activeBox}</color>.
-  Result: <color=green>{familiarId.GetLocalizedName()}</color><color=white>{activeBox}</color>.
+  Result: Токен_0Токен_4Токен_1 удален из Токен_2Токен_5Токен_3.
 615667259: TRANSLATED
   Original: Couldn't find active familiar box to remove from...
-  Result: No pude encontrar una caja familiar activa para quitar de...
+  Result: Не удалось найти активную знакомую коробку для удаления из...
 210979117: TRANSLATED
   Original: You can't call a familiar when using dominating presence!
-  Result: ¡No puedes llamar familiar cuando usas la presencia dominante!
+  Result: Вы не можете назвать знакомое при использовании доминирующего присутствия!
 744989655: TRANSLATED
   Original: You can't call a familiar when using batform!
-  Result: ¡No puedes llamar familiar cuando usas batform!
+  Result: Вы не можете позвонить знакомому при использовании batform!
 3960937922: TRANSLATED
   Original: You can't toggle combat for a familiar when using dominating presence!
-  Result: ¡No puedes luchar contra el combate por familiar cuando usas la presencia dominante!
+  Result: Вы не можете переключать бой за знакомое при использовании доминирующего присутствия!
 3219279796: TRANSLATED
   Original: You can't toggle combat for a familiar when using batform!
-  Result: ¡No puedes luchar contra el combate por un conocido cuando usas batform!
+  Result: Вы не можете переключать бой для знакомого при использовании batform!
 2720898024: TRANSLATED
   Original: You can't toggle combat for a familiar in PvP/PvE combat!
-  Result: ¡No puedes luchar contra un combate familiar en el combate PvP/PvE!
-3946665029: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
+  Result: Вы не можете переключать бой для знакомого в PvP / PvE бою!
+3946665029: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}!
-  Result: Emote actions [[TOKEN_4]]!
-WARNING 2709293439: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got ['0', '10', '1', '2', '11', '3', '4', '12', '5', '6', '7', '8', '13', '9'])
-2709293439: TRANSLATED
+  Result: Поступки ТОКЕН_4!
+2709293439: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got ['0', '10', '1', '2', '11', '3', '4', '12', '5']))
   Original: Your familiar is level [<color=white>{xpData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
-  Result: Tu familiar es el nivel <color=white>{xpData.Key}</color><color=#90EE90>{prestigeLevel}</color> y tiene <color=yellow>{progress}</color><color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
+  Result: Ваш знакомый уровень [[TOKEN_0]][[TOKEN_10]][[TOKEN_1]][[TOKEN_2]][[TOKEN_11]][[TOKEN_3]] и имеет [[TOKEN_4]][[TOKEN_12]][[TOKEN_5]]ТОКЕН_6 Опыт ТОКЕН_7ТОКЕН_8ТОКЕН_13% ТОКЕН_9
 2794958495: SKIPPED (sentinel missing)
   Original: {line}
-  Result: [[TOKEN_0] [[TOKEN_SENTINEL]
+  Result: [[Токен_0]] [[Токен_Сентинель]]
 488752679: TRANSLATED
   Original: Level must be between 1 and {ConfigService.MaxFamiliarLevel}
-  Result: El nivel debe ser entre 1 y {ConfigService.MaxFamiliarLevel}
-WARNING 1440602422: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-1440602422: TRANSLATED
+  Result: Уровень должен быть между 1 и {ConfigService.MaxFamiliarLevel}
+1440602422: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Active familiar for <color=green>{user.CharacterName.Value}</color> has been set to level <color=white>{level}</color>.
-  Result: Activo familiar para <color=green>{user.CharacterName.Value}</color> se ha establecido en el nivel <color=white>{level}</color>.
+  Result: Токен_0Токен_4Токен_1 был установлен на уровень Токен_2Токен_5Токен_3.
 2526362535: TRANSLATED
   Original: Couldn't find active familiar....
-  Result: No pude encontrar un familiar activo...
+  Result: Не смог найти активного знакомого...
 701382701: TRANSLATED
   Original: Familiar prestige is not enabled.
-  Result: El prestigio familiar no está habilitado.
+  Result: Знакомый престиж не допускается.
 802918832: TRANSLATED
   Original: Familiar is already at maximum number of prestiges!
-  Result: Familiar ya tiene el máximo de prestigios!
+  Result: Знакомство уже при максимальном количестве престижей!
 WARNING 1391708521: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 1391708521: TRANSLATED
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]!
-  Result: Tu familiar ha reconocido <color=#90EE90>{prestigeLevel}</color>!
-WARNING 3235862068: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-3235862068: TRANSLATED
+  Result: Ваш знакомый превозносил <color=#90EE90>{prestigeLevel}</color>!
+3235862068: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>!
-  Result: Su familiaridad ha prestigio <color=#90EE90>{prestigeLevel}</color> y ahora es nivel <color=white>{newXP.Key}</color>!
-WARNING 54858227: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '7', '3', '4', '8', '5'])
-54858227: TRANSLATED
+  Result: Ваш знакомый престижно Токен_0Токен_4Токен_1 и теперь уровень Токен_2Токен_5Токен_3!
+54858227: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got []))
   Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
-  Result: Su familiaridad ha prestigio <color=#90EE90>{prestigeLevel}</color> y ahora es nivel <color=white>{newXP.Key}</color>! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>
-3334433396: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['0', '8', '1', '2', '9', '3', '4', '5', '6', '6']))
+  Result: Ваш знакомый престижно Токен_0Токен_6Токен_1 и теперь уровень Токен_2Токен_7Токен_3! Токен_4Токен_8Токен_5.
+WARNING 3334433396: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['0', '8', '1', '2', '9', '3', '4', '5', '6', '10', '7'])
+3334433396: TRANSLATED
   Original: Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.
-  Result: Los intentos familiares de prestigio deben estar en el nivel máximo ([[TOKEN_0]][[TOKEN_8]][[TOKEN_1]] o requiere [[TOKEN_2]][[TOKEN_9]][[TOKEN_3]][[TOKEN_4]]x[[TOKEN_5]][[TOKEN_6]][[TOKEN_6]] TOKEN_________
+  Result: Знакомая попытка престижа должна быть на максимальном уровне <color=white>{ConfigService.MaxFamiliarLevel}</color> или требует <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.
 2169705185: TRANSLATED
   Original: Couldn't find active familiar for prestiging!
-  Result: ¡No pude encontrar un familiar activo para prestigiar!
+  Result: Не смог найти активного знакомого для престижирования!
 1469754031: TRANSLATED
   Original: Looks like your familiar is still able to be found; unbind it normally after calling if it's dismissed instead.
-  Result: Parece que tu familiar todavía es capaz de ser encontrado; unbind normalmente después de llamar si es despedido en su lugar.
+  Result: Похоже, ваш знакомый все еще можно найти; развязать его обычно после звонка, если он отклоняется вместо этого.
 628275031: TRANSLATED
   Original: Familiar actives and followers cleared.
-  Result: Activos y seguidores familiares despejados.
+  Result: Знакомые активисты и последователи очищены.
 2474938940: TRANSLATED
   Original: Couldn't find matching familiar in boxes.
-  Result: No pude encontrar coincidencia familiar en cajas.
+  Result: Не могу найти совпадение в коробках.
 4055019293: TRANSLATED
   Original: Couldn't find any matches...
-  Result: No pude encontrar coincidencias...
+  Result: Не удалось найти ни одного матча...
 1939118629: TRANSLATED
   Original: You don't have any unlocked familiars yet.
-  Result: Aún no tienes ningún familiar desbloqueado.
+  Result: У тебя еще нет незапертых знакомых.
 1516467471: TRANSLATED
   Original: You haven't unlocked any familiars yet!
-  Result: ¡No has desbloqueado a ningún familiar todavía!
+  Result: Вы еще не открыли никаких знакомых!
 284459823: TRANSLATED
   Original: Multiple matches found! SmartBind doesn't support this yet... (WIP)
-  Result: ¡Encontraron múltiples coincidencias! SmartBind todavía no soporta esto...
+  Result: Найдено несколько матчей! SmartBind пока не поддерживает эту технологию (WIP)
 2165480178: TRANSLATED
   Original: Couldn't find matching shinyBuff from entered spell school. (options: blood, storm, unholy, chaos, frost, illusion)
-  Result: No pude encontrar a ShinyBuff en la escuela de hechizos. (opciones: sangre, tormenta, impío, caos, helada, ilusión)
+  Result: Не смог найти подходящего блестящего Баффа из школы заклинаний. (варианты: кровь, буря, нечестие, хаос, мороз, иллюзия)
 1581983564: TRANSLATED
   Original: Shiny added! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).
-  Result: ¡Shiny agregó! Rebinado familiar para ver efectos. Use '<color=white>.fam option shiny</color> para cambiar (sin posibilidad de aplicar el debuff de la escuela de ortografía en el golpe si los buffs brillantes están discapacitados).
+  Result: Шинни добавил! Обновите знакомое, чтобы увидеть эффекты. Используйте ‘<color=white>.fam опцию shiny</color>’, чтобы переключаться (нет возможности применить дебафф школы орфографии при ударе, если блестящие баффы отключены).
 WARNING 2682530289: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
 2682530289: TRANSLATED
   Original: You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{clampedCost}</color>)
-  Result: Usted no tiene la cantidad necesaria de <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{clampedCost}</color>)
+  Result: У вас нет необходимого количества <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! <color=white>{clampedCost}</color>
 53933494: TRANSLATED
   Original: Shiny changed! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).
-  Result: ¡Shiny cambió! Rebinado familiar para ver efectos. Use '<color=white>.fam option shiny</color> para cambiar (sin posibilidad de aplicar el debuff de la escuela de ortografía en el golpe si los buffs brillantes están discapacitados).
+  Result: Сияние изменилось! Обновите знакомое, чтобы увидеть эффекты. Используйте ‘<color=white>.fam опцию shiny</color>’, чтобы переключаться (нет возможности применить дебафф школы орфографии при ударе, если блестящие баффы отключены).
 WARNING 2486628899: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
 2486628899: TRANSLATED
   Original: You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{changeQuantity}</color>)
-  Result: Usted no tiene la cantidad necesaria de <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{changeQuantity}</color>)
+  Result: У вас нет необходимого количества <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! <color=white>{changeQuantity}</color>
 3170335283: TRANSLATED
   Original: Couldn't find active familiar...
-  Result: No pude encontrar un familiar activo...
+  Result: Не удалось найти активных знакомых...
 1354182381: TRANSLATED
   Original: Valid options: {validOptions}
-  Result: Opciones válidas: {validOptions}
+  Result: Действительные варианты: {validOptions}
 318734715: TRANSLATED
   Original: Familiar battles are not enabled.
-  Result: Las batallas familiares no están habilitadas.
+  Result: Знакомые сражения не допускаются.
 1228611582: TRANSLATED
   Original: Familiar Battle Groups:
-  Result: Grupos de batalla conocidos:
+  Result: Известные боевые группы:
 3819833139: TRANSLATED
   Original: You have no battle groups.
-  Result: No tienes grupos de batalla.
+  Result: У вас нет боевых групп.
 1081599663: TRANSLATED
   Original: No active battle group selected! Use <color=white>.fam cbg [Name]</color> to select one.
-  Result: ¡No se ha seleccionado ningún grupo de batalla activo! Use <color=white>.fam cbg Name</color> para seleccionar uno.
+  Result: Активная боевая группа не выбрана! Используйте <color=white>.fam cbg Имя</color>, чтобы выбрать один.
 WARNING 3628025920: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 3628025920: TRANSLATED
   Original: Active battle group set to <color=white>{groupName}</color>.
-  Result: Grupo de batalla activo establecido en <color=white>{groupName}</color>.
+  Result: Активная боевая группа настроена на <color=white>{groupName}</color>.
 480925981: TRANSLATED
   Original: Battle group not found.
-  Result: Grupo de batalla no encontrado.
+  Result: Боевая группа не найдена.
 WARNING 3862629133: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 3862629133: TRANSLATED
   Original: Battle group <color=white>{groupName}</color> created.
-  Result: Grupo de batalla <color=white>{groupName}</color> creado.
-3182929151: TRANSLATED
+  Result: Боевая группа <color=white>{groupName}</color> создана.
+3182929151: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: Slot input out of range! (use <color=white>1, 2,</color> or <color=white>3</color>)
-  Result: Entrada de ranura fuera de rango! (utiliza <color=white>1, 2, </color> o <color=white>3 </color>
-WARNING 1894878159: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-1894878159: TRANSLATED
+  Result: Ввод слота из диапазона! Токен_01, 2, Токен_1 или Токен_23 Токен_3
+1894878159: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: Familiar assigned to <color=white>{groupName}</color> in slot {slotIndex}.
-  Result: Familiar asignado a <color=white>{groupName}</color> en ranura {slotIndex}.
+  Result: Токен_0Токен_2Токен_1 в слоте Токен_3.
 WARNING 4162514026: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 4162514026: TRANSLATED
   Original: Deleted battle group <color=white>{groupName}</color>.
-  Result: Grupo de batalla eliminado <color=white>{groupName}</color>.
-WARNING 907868427: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-907868427: TRANSLATED
+  Result: Удаленная боевая группа <color=white>{groupName}</color>.
+907868427: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
-  Result: Posición en cola: <color=white>{position}</color><color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>
+  Result: Положение в очереди: Токен_0Токен_4Токен_1Токен_2Токен_5Токен_3
 2129553669: TRANSLATED
   Original: You're not currently queued for battle! Use '<color=white>.fam challenge [PlayerName]</color>' to challenge another player.
-  Result: ¡Ahora no estás preparado para la batalla! Use '<color=white>.fam challenge PlayerName</color> para desafiar a otro jugador.
-WARNING 2968342812: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-2968342812: TRANSLATED
+  Result: Вы сейчас не в очереди на бой! Используйте ‘<color=white>.fam challenge PlayerName</color>, чтобы бросить вызов другому игроку.
+2968342812: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: You can't challenge another player while queued for battle! Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)
-  Result: ¡No puedes desafiar a otro jugador mientras te buscas para la batalla! Posición en cola: <color=white>{position}</color><color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>
+  Result: Вы не можете бросить вызов другому игроку, стоя в очереди на бой! Положение в очереди: Токен_0Токен_4Токен_1Токен_2Токен_5Токен_3
 3664649404: TRANSLATED
   Original: You can't challenge yourself!
-  Result: ¡No puedes desafiarte!
-WARNING 2228202821: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2228202821: TRANSLATED
+  Result: Вы не можете бросить вызов себе!
+2228202821: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=green>{playerInfo.User.CharacterName}</color> is already queued for battle!
-  Result: <color=green>{playerInfo.User.CharacterName}</color> ya está demandado por la batalla!
+  Result: Токен_0Токен_2Токен_1 уже стоит в очереди на бой!
 349704338: TRANSLATED
   Original: Can't challenge another player until an existing challenge expires or is declined!
-  Result: No se puede desafiar a otro jugador hasta que un desafío existente expira o se disminuye!
-WARNING 2817263998: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2817263998: TRANSLATED
+  Result: Нельзя бросать вызов другому игроку, пока существующий вызов не истечет или не будет отклонен!
+2817263998: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=green>{playerInfo.User.CharacterName}</color> already has a pending challenge!
-  Result: <color=green>{playerInfo.User.CharacterName}</color> ya tiene un reto pendiente!
-WARNING 1231839381: token order differs (expected ['0', '1', '2', '3', '4'], got ['0', '4', '1', '2', '3'])
-1231839381: TRANSLATED
+  Result: Токен_0Токен_2Токен_1 уже находится в ожидании испытания!
+1231839381: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got []))
   Original: Challenged <color=white>{playerInfo.User.CharacterName.Value}</color> to a battle! (<color=yellow>30s</color> until it expires)
-  Result: Reto <color=white>{playerInfo.User.CharacterName.Value}</color> a una batalla! <color=yellow>30s </color> hasta que expire
+  Result: Токен_0Токен_4Токен_1 в бою! ТОКЕН_230s ТОКЕН_3 до истечения срока его действия
 3761848707: TRANSLATED
   Original: Familiar arena position set, battle service started! (only one arena currently allowed)
-  Result: Juego de posición de arena familiar, el servicio de batalla comenzó! (sólo se admite una arena)
+  Result: Знакомая позиция арены, боевая служба началась! (в настоящее время разрешена только одна арена)
 2557313311: TRANSLATED
   Original: Familiar arena position changed! (only one arena currently allowed)
-  Result: Posición de arena familiar cambió! (sólo se admite una arena)
+  Result: Изменилась привычная позиция арены! (в настоящее время разрешена только одна арена)
 1836101498: TRANSLATED
   Original: Quests are not enabled.
-  Result: Las búsquedas no están habilitadas.
+  Result: Квесты не разрешены.
 2271729042: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
   Original: Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: Quest logging is now [[TOKEN_4]].
+  Result: В настоящее время ведутся поиски [[TOKEN_4]].
 1955962459: TRANSLATED
   Original: Invalid quest type. (daily/weekly or d/w)
-  Result: Tipo de búsqueda inválido. (de día/semana o d/w)
+  Result: Недействительный квест. (ежедневно/недельно или d/w)
 4007697799: TRANSLATED
   Original: You don't have any quests yet, check back soon.
-  Result: Aún no tienes ninguna misión, vuelve pronto.
+  Result: У тебя пока нет квестов, скоро проверь.
 2563987683: TRANSLATED
   Original: Target cache isn't ready yet, check back shortly!
-  Result: El caché de blanco todavía no está listo, ¡revisen pronto!
+  Result: Целевой кэш еще не готов, проверьте в ближайшее время!
 3823143990: TRANSLATED
   Original: You don't have any quests yet, check back soon!
-  Result: Aún no tienes ninguna misión, ¡mira pronto!
-WARNING 3878896595: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3878896595: TRANSLATED
+  Result: У вас пока нет квестов, быстро проверьте!
+3878896595: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: Quests for <color=green>{playerInfo.User.CharacterName.Value}</color> have been refreshed.
-  Result: Las búsquedas <color=green>{playerInfo.User.CharacterName.Value}</color> han sido refrescadas.
+  Result: Токен_0Токен_2Токен_1 были обновлены.
 334075444: TRANSLATED
   Original: Invalid quest type. (Daily/Weekly)
-  Result: Tipo de búsqueda inválido. (Daily/Weekly)
-1952946751: TRANSLATED
+  Result: Недействительный квест. (ежедневно/недельно)
+1952946751: SKIPPED (token mismatch (expected ['0', '1'], got ['0']))
   Original: You've already completed your <color=#00FFFF>Daily Quest</color> today. Check back tomorrow.
-  Result: Ya has completado tu <color=#00FFFF>Quest de Día</color> hoy. Vuelve mañana.
-WARNING 860320001: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '1', '2', '6', '3', '4', '7', '5'])
-860320001: TRANSLATED
+  Result: Вы уже завершили свой ежедневный поиск [[TOKEN_0]] сегодня. Проверь завтра.
+860320001: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
   Original: Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!
-  Result: Su <color=#00FFFF> Quest diario</color> ha sido rerollado para <color=#C0C0C0>{item.GetLocalizedName()}</color><color=white>{quantity}</color>!
+  Result: Токен_0 Ежедневный поиск Токен_1 был перезаписан для Токен_2Токен_6Токен_3 x Токен_4Токен_7Токен_5!
 WARNING 1985982508: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
 1985982508: TRANSLATED
   Original: You couldn't afford to reroll your daily... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)
-  Result: No podías permitirte rerollar tu diario... <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>
+  Result: Вы не можете позволить себе перезаписывать свой день... <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>
 677562659: TRANSLATED
   Original: No daily reroll item configured or couldn't find daily quest entry for player.
-  Result: Ningún artículo de reroll diario configurado o no pudo encontrar la entrada de búsqueda diaria para el jugador.
-1677522996: TRANSLATED
+  Result: Ни один ежедневный элемент перезаписи не был настроен или не мог найти ежедневный вход в квест для игрока.
+1677522996: SKIPPED (token mismatch (expected ['0', '1'], got ['0']))
   Original: You've already completed your <color=#BF40BF>Weekly Quest</color>. Check back next week.
-  Result: Usted ya ha completado su <color=#BF40BF>Weekly Quest </color>. Revisa la próxima semana.
-4009901629: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '1', '1', '2', '6', '3', '4', '5']))
+  Result: Вы уже завершили свой недельный поиск [[TOKEN_0]]. Проверь на следующей неделе.
+4009901629: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got []))
   Original: Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!
-  Result: Su [[TOKEN_0]][[TOKEN_1]] Weekly Quest [[TOKEN_1]] ha sido rerollado para [[TOKEN_2]][[TOKEN_6]][[TOKEN_3]][[TOKEN_4]][[TOKEN_5]]!
+  Result: Токен_0Еженедельный квест Токен_1 был отредактирован для Токен_2Токен_6Токен_3 xТокен_4Токен_7Токен_5!
 WARNING 707311945: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
 707311945: TRANSLATED
   Original: You couldn't afford to reroll your wekly... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)
-  Result: No podías permitirte rerollar tu wekly... <color=#C0C0C0>{item.GetLocalizedName()}</color><color=white>{quantity}</color>
+  Result: Вы не можете позволить себе прокручивать свой Wekly... <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>
 2402916111: TRANSLATED
   Original: No weekly reroll item configured or couldn't find weekly quest entry for player.
-  Result: Ningún artículo de reroll semanal configurado o no pudo encontrar la entrada semanal de búsqueda para el jugador.
+  Result: Ни один еженедельный элемент перезаписи не был настроен или не мог найти еженедельный вход в квест для игрока.
 3719118489: TRANSLATED
   Original: Player has no active quests!
-  Result: ¡El jugador no tiene misiones activas!
+  Result: У игрока нет активных квестов!
 563018011: TRANSLATED
   Original: Invalid quest type '{questTypeName}'. Valid values are: {string.Join(
-  Result: Búsqueda inválida tipo '{questTypeName}'. Valores válidos son: {string. Únase(
-3751423711: TRANSLATED
+  Result: Недействительный квест типа «{questTypeName}». Действительные значения: {string. Присоединяйся
+3751423711: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Player does not have an active {questType} quest to complete.
-  Result: El jugador no tiene una búsqueda activa {questType} para completar.
-998944061: TRANSLATED
+  Result: У игрока нет активного квеста для завершения.
+998944061: SKIPPED (token mismatch (expected ['0', '1'], got []))
   Original: The {questType} quest is already complete for {playerInfo.User.CharacterName.Value}.
-  Result: La búsqueda {questType} ya está completa para {playerInfo.User.CharacterName.Value}.
+  Result: Токен_0 квест уже завершен Токен_1.
 1496603105: TRANSLATED
   Original: Leveling is not enabled.
-  Result: El nivel no está habilitado.
+  Result: Выравнивание не допускается.
 107297214: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
   Original: Level logging {(GetPlayerBool(steamId, EXPERIENCE_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: Registro de nivel [[TOKEN_4]].
-WARNING 743696282: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got ['0', '10', '1', '2', '11', '3', '4', '12', '5', '6', '7', '8', '13', '9'])
-743696282: TRANSLATED
+  Result: Уровни регистрации [[TOKEN_4]].
+743696282: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got []))
   Original: You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
-  Result: Estás en el nivel <color=white>{level}</color><color=#90EE90>{prestigeLevel}</color> con <color=yellow>{progress}</color><color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!
+  Result: Токен_0Токен_10Токен_1Токен_2Токен_11Токен_3Токен_4Токен_12Токен_5ТОКЕН_6 Опыт ТОКЕН_7ТОКЕН_8ТОКЕН_13% ТОКЕН_9
 WARNING 2051256929: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '6', '1', '2', '3', '4', '5'])
-2051256929: SKIPPED (looks untranslated)
+2051256929: TRANSLATED
   Original: <color=#FFD700>{roundedXP}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~
-  Result: <color=#FFD700>{roundedXP}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~
+  Result: <color=#FFD700>{roundedXP}</color> бонус <color=#FFC0CB> опыт </color>, оставшийся от <color=green> отдыха </color>~
 400324857: TRANSLATED
   Original: You haven't earned any experience yet!
-  Result: ¡No te has ganado ninguna experiencia todavía!
+  Result: Вы еще не получили никакого опыта!
 WARNING 3681675424: token order differs (expected ['0', '1', '2', '3', '4'], got ['0', '1', '2', '4', '3'])
 3681675424: TRANSLATED
   Original: Level must be between <color=white>0</color> and <color=white>{ConfigService.MaxLevel}</color>!
-  Result: El nivel debe ser entre <color=white>0 </color> y <color=white>{ConfigService.MaxLevel}</color>!
-WARNING 2437634726: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-2437634726: TRANSLATED
+  Result: Уровни должны быть между <color=white>0 </color> и <color=white>{ConfigService.MaxLevel}</color>.
+2437634726: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5'], got []))
   Original: Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName.Value}</color>!
-  Result: Nivel establecido a <color=white>{level}</color><color=green>{foundUser.CharacterName.Value}</color>!
+  Result: Токен_0Токен_4Токен_1Токен_2Токен_5Токен_3
 1254994229: TRANSLATED
   Original: Couldn't find experience data for {foundUser.CharacterName.Value}
-  Result: No pude encontrar datos de experiencia para {foundUser.CharacterName.Value}
+  Result: Не удалось найти данные об опыте {foundUser.CharacterName.Value}
 WARNING 160628229: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
 160628229: TRANSLATED
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore shared experience list!
-  Result: <color=green>{playerInfo.User.CharacterName.Value}</color> añadió a la lista de experiencias compartidas ignorada!
-WARNING 1725928464: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1725928464: TRANSLATED
+  Result: <color=green>{playerInfo.User.CharacterName.Value}</color> добавлен в список игнорируемых общих переживаний!
+1725928464: SKIPPED (token mismatch (expected ['0', '1', '2'], got []))
   Original: <color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore shared experience list!
-  Result: <color=green>{playerInfo.User.CharacterName.Value}</color> eliminado de la lista de experiencias compartidas ignorada!
+  Result: ТОКЕН_0ТОКЕН_2ТОКЕН_1 удален из списка игнорируемых общих переживаний!
 317079168: TRANSLATED
   Original: Professions are not enabled.
-  Result: Las profesiones no están habilitadas.
+  Result: Профессии не допускаются.
 1548584430: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
   Original: Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: La tala de la profesión es ahora [[TOKEN_4]].
+  Result: Профессия лесозаготовки теперь [[TOKEN_4]].
 2935471585: TRANSLATED
   Original: Valid professions: {ProfessionFactory.GetProfessionNames()}
-  Result: Profesiones válidas: {ProfessionFactory.GetProfessionNames()}
+  Result: Действительные профессии: {ProfessionFactory.GetProfessionNames()}
 134200388: TRANSLATED
   Original: Invalid profession.
-  Result: Profesión inválida.
-216725398: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got ['0', '8', '1', '2', '9', '3', '4', '4']))
+  Result: Недействительная профессия.
+WARNING 216725398: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'], got ['0', '8', '1', '2', '9', '3', '4', '5', '6', '10', '7', '11'])
+216725398: TRANSLATED
   Original: You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamId, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}
-  Result: Tu nivel [[TOKEN_0]][[TOKEN_8]][[TOKEN_1]] y tienes [[TOKEN_2]][[TOKEN_9]][[TOKEN_3]][[TOKEN_4]][[TOKEN_4]]12 4
+  Result: Вы находитесь на уровне <color=white>{data.Key}</color> и имеете <color=yellow>{progress}</color><color=#FFC0CB></color><color=white>{ProfessionSystem.GetLevelProgress(steamId, professionHandler)}% </color> в {professionHandler.GetProfessionName()}.
 1201875369: TRANSLATED
   Original: No progress in {professionHandler.GetProfessionName()} yet!
-  Result: ¡No hay progreso en {professionHandler.GetProfessionName()} todavía!
+  Result: Нет никакого прогресса в {professionHandler.GetProfessionName()}!
 2095668308: TRANSLATED
   Original: Level must be between 0 and {MAX_PROFESSION_LEVEL}.
-  Result: El nivel debe ser entre 0 y {MAX_PROFESSION_LEVEL}.
-WARNING 2554001784: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['4', '0', '5', '1', '2', '6', '3'])
-2554001784: TRANSLATED
+  Result: Уровень должен быть между 0 и {MAX_PROFESSION_LEVEL}.
+2554001784: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got []))
   Original: {professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>
-  Result: {professionHandler.GetProfessionName()}<color=white>{level}</color><color=green>{playerInfo.User.CharacterName.Value}</color>
+  Result: Токен_4Токен_0Токен_5Токен_1Токен_2Токен_6Токен_3
 3320804900: TRANSLATED
   Original: Available professions: {ProfessionFactory.GetProfessionNames()}
-  Result: profesiones disponibles: {ProfessionFactory.GetProfessionNames()}
+  Result: Доступные профессии: {ProfessionFactory.GetProfessionNames()}
 2410464917: TRANSLATED
   Original: Classes are not enabled.
-  Result: Las clases no están habilitadas.
+  Result: Занятия не допускаются.
 947371822: TRANSLATED
   Original: You've selected {FormatClassName(playerClass)}!
-  Result: Usted ha seleccionado {FormatClassName(playerClass)}!
-WARNING 714432788: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['6', '0', '1', '2', '7', '3', '4', '8', '5'])
-714432788: TRANSLATED
+  Result: Вы выбрали {FormatClassName(playerClass)}!
+714432788: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['6', '0', '1']))
   Original: You've already selected {FormatClassName(currentClass.Value)}, use <color=white>'.class c [Class]'</color> to change. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)
-  Result: Ya has seleccionado {FormatClassName(currentClass.Value)}, use <color=white>.class c Class'</color> para cambiar. <color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x <color=white>{ConfigService.ChangeClassQuantity}</color>
+  Result: Вы уже выбрали [[TOKEN_6]], используйте [[TOKEN_0]].class c Class[[TOKEN_1]], чтобы изменить. Токен_2Токен_7Токен_3xТокен_4Токен_8Токен_5
 173404118: TRANSLATED
   Original: Shift spells are not enabled.
-  Result: Los hechizos no están habilitados.
+  Result: Заклинания сдвига не включены.
 24953571: TRANSLATED
   Original: Can't change or activate class spells when inventory is full, need at least one space to safely handle jewels when switching.
-  Result: No puede cambiar o activar hechizos de clase cuando el inventario está lleno, necesita por lo menos un espacio para manejar las joyas de forma segura al cambiar.
+  Result: Невозможно изменить или активировать заклинания класса, когда инвентарь полон, нужно хотя бы одно пространство для безопасного обращения с драгоценностями при переключении.
 2497805382: TRANSLATED
   Original: No spells for {FormatClassName(playerClass.Value)} configured!
-  Result: No hay hechizos para {FormatClassName(playerClass.Value)} configurados!
+  Result: Никаких заклинаний для {FormatClassName(playerClass.Value)} настроенных!
 2645405211: TRANSLATED
   Original: Invalid spell, use '<color=white>.class lsp</color>' to see options.
-  Result: Deletreo inválido, use '<color=white>.class lsp</color> para ver opciones.
+  Result: Недействительное заклинание, используйте '<color=white>.class lsp</color>', чтобы увидеть варианты.
 677404705: TRANSLATED
   Original: No spell for class default configured!
-  Result: ¡No hay hechizo para configuración predeterminada de clase!
+  Result: Никакого заклинания для класса по умолчанию настроен!
 1562141642: TRANSLATED
   Original: You don't have the required prestige level for that spell!
-  Result: ¡No tienes el nivel de prestigio requerido para ese hechizo!
+  Result: У тебя нет требуемого уровня престижа для этого заклинания!
 2001389111: TRANSLATED
   Original: Invalid spell, use <color=white>'.class lsp'</color> to see options.
-  Result: hechizo inválido, use <color=white>.class lsp'</color> para ver opciones.
+  Result: Недействительное заклинание, используйте <color=white>'.class lsp'</color>, чтобы увидеть варианты.
 20873033: TRANSLATED
   Original: You haven't selected a class or you haven't activated shift spells! (<color=white>'.class s [Class]'</color> | <color=white>'.class shift'</color>)
-  Result: ¡No has seleccionado una clase o no has activado hechizos de cambio! (<color=white>'.class s Class'</color><color=white>.class shift'</color>
+  Result: Вы не выбрали класс или не активировали заклинания смены! <color=white>.class s </color> | <color=white>.class shift</color>
 4140406916: TRANSLATED
   Original: You haven't selected a class yet, use <color=white>'.class s [Class]'</color> instead.
-  Result: Aún no has seleccionado una clase, usa <color=white>.clase s Class'</color>.
+  Result: Вы еще не выбрали класс, используйте вместо него <color=white>.class s </color>.
 1282509635: TRANSLATED
   Original: You have class buffs enabled, use <color=white>'.class passives'</color> to disable them before changing classes!
-  Result: Usted tiene las esposas de clase activadas, utilizar <color=white>.Pasivos de clase </color> para desactivarlas antes de cambiar clases!
+  Result: У вас есть включенные баффы класса, используйте <color=white>.class пассивные </color>, чтобы отключить их перед сменой классов!
 501637283: TRANSLATED
   Original: Class changed to {FormatClassName(playerClass)}!
-  Result: ¡La clase cambió a {FormatClassName(playerClass)}!
+  Result: Класс изменился на {FormatClassName(playerClass)}
 3938051122: TRANSLATED
   Original: Classes: {classTypes}
-  Result: Clases: {classTypes}
+  Result: Классы: {classTypes}
 167244174: TRANSLATED
   Original: Classes are not enabled and spells can't be set to shift.
-  Result: Las clases no están habilitadas y los hechizos no se pueden configurar para cambiar.
+  Result: Занятия не включены, и заклинания не могут быть установлены для изменения.
 3730830670: TRANSLATED
   Original: Shift slots are not enabled.
-  Result: Las ranuras de cambio no están habilitadas.
+  Result: Сдвиговые слоты не включены.
 349267262: TRANSLATED
   Original: Can't change or active class spells when inventory is full, need at least one space to safely handle jewels when switching.
-  Result: No puede cambiar o hechizos de clase activos cuando el inventario está lleno, necesita al menos un espacio para manejar las joyas de forma segura al cambiar.
+  Result: Невозможно изменить или активные заклинания класса, когда инвентарь полон, нужно хотя бы одно пространство для безопасного обращения с драгоценностями при переключении.
 4066899438: TRANSLATED
   Original: Shift spell <color=green>enabled</color>!
-  Result: El hechizo <color=green> se puede </color>!
+  Result: Сдвиг заклинания <color=green> с поддержкой </color>
 2320898349: TRANSLATED
   Original: Shift spell <color=red>disabled</color>!
-  Result: ¡Deshabilitado <color=red></color>!
-3756348742: TRANSLATED
+  Result: Сдвиг заклинания <color=red> отключен </color>!
+3756348742: SKIPPED (token mismatch (expected ['0'], got []))
   Original: Reminders {0}.
-  Result: Recordatorios {0}.
+  Result: Напоминание Токен_0.
 1769980541: TRANSLATED
   Original: Couldn't find bool key from scrolling text type...
-  Result: No pude encontrar la llave del bool del tipo de texto de desplazamiento...
-WARNING 4003734136: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-4003734136: TRANSLATED
+  Result: Не смог найти ключ от прокрутки текста...
+4003734136: SKIPPED (token mismatch (expected ['0', '1', '2', '3'], got []))
   Original: <color=white>{0}</color> scrolling text {1}.
-  Result: <color=white>{0}</color> texto de desplazamiento {1}.
+  Result: Токен_0Токен_2Токен_1 прокрутка текста Токен_3.
 2069903402: TRANSLATED
   Original: Starter kit is not enabled.
-  Result: El kit de arranque no está habilitado.
+  Result: Стартовый комплект не включен.
 2817800174: TRANSLATED
   Original: You've received a starting kit with:
-  Result: Usted ha recibido un kit inicial con:
+  Result: Вы получили стартовый комплект с:
 2316405313: SKIPPED (sentinel missing)
   Original: {0}
-  Result: [[TOKEN_0] [[TOKEN_SENTINEL]
+  Result: [[Токен_0]] [[Токен_Сентинель]]
 2303740299: TRANSLATED
   Original: You've already used your starting kit!
-  Result: ¡Ya has usado tu kit de inicio!
+  Result: Вы уже использовали свой стартовый комплект!
 3125108847: TRANSLATED
   Original: You are now prepared for the hunt!
-  Result: ¡Ahora estás preparado para la caza!
-3399068440: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], got ['0']))
+  Result: Теперь вы готовы к охоте!
+3399068440: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], got ['0', '1', '2', '24', '3', '4', '5', '25', '7', '9', '10', '11', '12', '13', '15', '16', '18', '28', '20', '21', '29', '23']))
   Original: <color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L
-  Result: [[TOKEN_0]] 12 12 12 12 12
+  Result: [[TOKEN_0]]VBloods Slain[[TOKEN_1]]: [[TOKEN_2]][[TOKEN_24]][[TOKEN_3]][[TOKEN_4]]Units Killed[[TOKEN_5]][[TOKEN_25]][[TOKEN_7]][[TOKEN_9]][[TOKEN_10]][[TOKEN_11]][[TOKEN_12]]Time Online[[TOKEN_13]][[TOKEN_15]]hr |[[TOKEN_16]][[TOKEN_18]][[TOKEN_28]]kf |[[TOKEN_20]]Blood Consumed[[TOKEN_21]][[TOKEN_29]][[TOKEN_23]]
 1345204457: TRANSLATED
   Original: This command should only be used as required and certainly not while in combat.
-  Result: Este comando sólo debe ser utilizado como necesario y ciertamente no mientras se combate.
+  Result: Эта команда должна использоваться только по мере необходимости и, конечно, не во время боя.
 3732046729: TRANSLATED
   Original: Combat music cleared!
-  Result: Música de combate despejada!
+  Result: Боевая музыка очищена!
 479209254: TRANSLATED
   Original: Experience rate reduction for leveling no longer applies for exo prestiging.
-  Result: La reducción de la tasa de experiencia para el nivelado ya no se aplica para el exo.
-1443941563: TRANSLATED
-  Original: Removed prestige buffs from all players.
-  Result: Eliminado de prestigio de todos los jugadores.
-WARNING 1286090332: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '12', '1', '2', '13', '3', '4', '14', '5', '6', '7', '8', '15', '9', '10', '16', '11'])
-1286090332: SKIPPED (looks untranslated)
-  Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
-  Result: Estás en el nivel <color=white>{data.Key}</color><color=#90EE90>{prestigeLevel}</color> con <color=yellow>{progress}</color><color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
-3066749917: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '11', '1', '6', '12', '2', '3', '13', '4', '5', '14', '6', '9', '16', '10']))
-  Original: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)
-  Result: [[TOKEN_0]][[TOKEN_11]][[TOKEN_1]]{(buffsData.FamiliarBuffs.ContainsKey(familiar) [[TOKEN_6]][[TOKEN_12]][[TOKEN_2]][[TOKEN_3]][[TOKEN_13]][[TOKEN_4]][[TOKEN_5]][[TOKEN_14]][[TOKEN_6]]EN_ 15 [[TOKEN_9]][[TOKEN_16]][[TOKEN_10]]
-1465975319: TRANSLATED
-  Original: Reminders {0}.
-  Result: Recordatorios {0}.
-WARNING 1945389717: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-1945389717: TRANSLATED
-  Original: <color=white>{0}</color> scrolling text {1}.
-  Result: <color=white>{0}</color> texto de desplazamiento {1}.
-WARNING 2511919794: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], got ['0', '5', '1', '2', '6', '3', '7', '4', '8', '9'])
-2511919794: TRANSLATED
-  Original: <color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color> {levelAndPrestiges}" : $" {levelAndPrestiges}")}
-  Result: <color=yellow>{count}</color><color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}* </color>{levelAndPrestiges}" : $" {levelAndPrestiges} 
-508045935: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
-  Original: Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}!
-  Result: Emote actions [[TOKEN_4]]!
-52573990: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
-  Original: Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: El registro de expertos es ahora [[TOKEN_4]].
-1904876515: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
-  Original: Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: Quest logging is now [[TOKEN_4]].
-3706417587: TRANSLATED
-  Original: Invalid quest type '{questTypeName}'. Valid values are: {string.Join(", ", Enum.GetNames(typeof(QuestType)))}
-  Result: Búsqueda inválida tipo '{questTypeName}'. Valores válidos son: {string.Join(", ", Enum.GetNames(typeof(QuestType)))}
-1095669519: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
-  Original: Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: Registro de nivel [[TOKEN_4]].
-3112026815: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
-  Original: Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: La tala de la profesión es ahora [[TOKEN_4]].
-542066310: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4'], got ['4']))
-  Original: Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
-  Result: Sangre Legacy logging [[TOKEN_4]].
-881612152: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '1', '6']))
-  Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
-  Result: Exo form emote action ([[TOKEN_0]]taunt[[TOKEN_1]]) [[TOKEN_6]]
-2978826451: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'], got ['0', '11', '1', '12', '2', '3', '9', '16', '10']))
-  Original: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? "{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)
-  Result: [[TOKEN_0]][[TOKEN_11]][[TOKEN_1]]{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? [[TOKEN_12]][[TOKEN_2]]"  [[TOKEN_3]]EN_ 4  [[TOKEN_9]][[TOKEN_16]][[TOKEN_10]]
-1669157395: TRANSLATED
-  Original: Your bag feels slightly heavier...
-  Result: Tu bolsa se siente un poco más pesada...
-2346236465: TRANSLATED
-  Original: Something fell out of your bag!
-  Result: ¡Algo cayó de tu bolsa!
-WARNING 835889078: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-835889078: TRANSLATED
-  Original: Can't have more than <color=white>{0}</color> battle groups!
-  Result: No puede tener más que <color=white>{0}</color> grupos de batalla!
-WARNING 361092587: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-361092587: TRANSLATED
-  Original: Deleted battle group <color=white>{0}</color>!
-  Result: Grupo de batalla eliminado <color=white>{0}</color>!
-2673031653: TRANSLATED
-  Original: Battle Group - {0}
-  Result: Grupo de batalla - {0}
-WARNING 2272306226: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-2272306226: TRANSLATED
-  Original: <color=green>{0}</color> moved - <color=white>{1}</color>
-  Result: <color=green>{0}</color> movido <color=white>{1}</color>
-WARNING 4226920647: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-4226920647: TRANSLATED
-  Original: <color=white>{0}</color> is not available per configured familiar bans!
-  Result: <color=white>{0}</color> no está disponible por las prohibiciones familiares configuradas!
-WARNING 1695244872: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1695244872: TRANSLATED
-  Original: <color=white>{0}</color> is already unlocked!
-  Result: <color=white>{0}</color> ya está desbloqueado!
-WARNING 2428442751: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2428442751: TRANSLATED
-  Original: New unit unlocked: <color=green>{0}</color>
-  Result: Nueva unidad desbloqueada: <color=green>{0}</color>
-WARNING 3938781329: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '2', '5', '3', '3', '6'])
-3938781329: TRANSLATED
-  Original: Not enough <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for {2}!
-  Result: <color=#ffd9eb>{0}</color>x<color=white>{1}</color></color>{2}!
-WARNING 3139406824: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-3139406824: TRANSLATED
-  Original: <color=green>{0}</color> removed from <color=white>{1}</color>.
-  Result: <color=green>{0}</color><color=white>{1}</color>.
-3055272330: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['0', '8', '1', '2', '9', '3', '4', '5', '6', '6']))
-  Original: Familiar attempting to prestige must be at max level (<color=white>{0}</color>) or requires <color=#ffd9eb>{1}</color><color=yellow>x</color><color=white>{2}</color>.
-  Result: Los intentos familiares de prestigio deben estar en el nivel máximo ([[TOKEN_0]][[TOKEN_8]][[TOKEN_1]] o requiere [[TOKEN_2]][[TOKEN_9]][[TOKEN_3]][[TOKEN_4]]x[[TOKEN_5]][[TOKEN_6]][[TOKEN_6]] TOKEN_________
-WARNING 66882170: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-66882170: TRANSLATED
-  Original: You don't have the required amount of <color=#ffd9eb>{0}</color>! (x<color=white>{1}</color>)
-  Result: Usted no tiene la cantidad necesaria de <color=#ffd9eb>{0}</color>! (x<color=white>{1}</color>)
-617911048: TRANSLATED
-  Original: Reminders {0}.
-  Result: Recordatorios {0}.
-WARNING 1651916565: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-1651916565: TRANSLATED
-  Original: <color=white>{0}</color> scrolling text {1}.
-  Result: <color=white>{0}</color> texto de desplazamiento {1}.
-931800025: SKIPPED (sentinel missing)
-  Original: {0}
-  Result: [[TOKEN_0] [[TOKEN_SENTINEL]
-3402815477: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], got ['0']))
-  Original: <color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L
-  Result: [[TOKEN_0]] 12 12 12 12 12
-493237764: TRANSLATED
-  Original: Level logging {0}.
-  Result: Registro de nivel {0}.
-WARNING 3326145371: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'], got ['0', '10', '1', '2', '11', '3', '4', '12', '5', '6', '7', '8', '13', '9'])
-3326145371: TRANSLATED
-  Original: You're level [<color=white>{0}</color>][<color=#90EE90>{1}</color>] with <color=yellow>{2}</color> <color=#FFC0CB>experience</color> (<color=white>{3}%</color>)!
-  Result: Estás en el nivel <color=white>{0}</color><color=#90EE90>{1}</color> con <color=yellow>{2}</color><color=#FFC0CB>experience</color> (<color=white>{3}%</color>)!
-WARNING 2537547396: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '6', '1', '2', '3', '4', '5'])
-2537547396: SKIPPED (looks untranslated)
-  Original: <color=#FFD700>{0}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~
-  Result: <color=#FFD700>{0}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~
-WARNING 842146063: token order differs (expected ['0', '1', '2', '3', '4'], got ['0', '1', '2', '4', '3'])
-842146063: TRANSLATED
-  Original: Level must be between <color=white>0</color> and <color=white>{0}</color>!
-  Result: El nivel debe ser entre <color=white>0 </color> y <color=white>{0}</color>!
-WARNING 566938273: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-566938273: TRANSLATED
-  Original: Level set to <color=white>{0}</color> for <color=green>{1}</color>!
-  Result: Nivel establecido a <color=white>{0}</color><color=green>{1}</color>!
-2828720719: TRANSLATED
-  Original: Couldn't find experience data for {0}
-  Result: No pude encontrar datos de experiencia para {0}
-WARNING 3097544876: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-3097544876: TRANSLATED
-  Original: <color=green>{0}</color> added to the ignore shared experience list!
-  Result: <color=green>{0}</color> añadió a la lista de experiencias compartidas ignorada!
-WARNING 1446811317: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1446811317: TRANSLATED
-  Original: <color=green>{0}</color> removed from the ignore shared experience list!
-  Result: <color=green>{0}</color> eliminado de la lista de experiencias compartidas ignorada!
-2137562404: SKIPPED (looks untranslated)
-  Original: Quest logging is now {0}.
-  Result: Quest logging is now {0}.
-WARNING 2698551496: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2698551496: TRANSLATED
-  Original: Quests for <color=green>{0}</color> have been refreshed.
-  Result: Las búsquedas <color=green>{0}</color> han sido refrescadas.
-WARNING 2286869349: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '1', '2', '6', '3', '4', '7', '5'])
-2286869349: TRANSLATED
-  Original: Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{0}</color> x<color=white>{1}</color>!
-  Result: Su <color=#00FFFF> Quest diario</color> ha sido rerollado para <color=#C0C0C0>{0}</color><color=white>{1}</color>!
-WARNING 4273383622: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-4273383622: TRANSLATED
-  Original: You couldn't afford to reroll your daily... (<color=#C0C0C0>{0}</color> x<color=white>{1}</color>)
-  Result: No podías permitirte rerollar tu diario... <color=#C0C0C0>{0}</color> x<color=white>{1}</color>
-370730849: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '1', '1', '2', '6', '3', '4', '5']))
-  Original: Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{0}</color> x<color=white>{1}</color>!
-  Result: Su [[TOKEN_0]][[TOKEN_1]] Weekly Quest [[TOKEN_1]] ha sido rerollado para [[TOKEN_2]][[TOKEN_6]][[TOKEN_3]][[TOKEN_4]][[TOKEN_5]]!
-WARNING 1315865629: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-1315865629: TRANSLATED
-  Original: You couldn't afford to reroll your wekly... (<color=#C0C0C0>{0}</color> x<color=white>{1}</color>)
-  Result: No podías permitirte rerollar tu wekly... <color=#C0C0C0>{0}</color><color=white>{1}</color>
-3744708697: TRANSLATED
-  Original: Invalid quest type '{0}'. Valid values are: {1}
-  Result: Búsqueda inválida tipo '{0}'. Valores válidos son: {1}
-3648038609: TRANSLATED
-  Original: Player does not have an active {0} quest to complete.
-  Result: El jugador no tiene una búsqueda activa {0} para completar.
-692006723: TRANSLATED
-  Original: The {0} quest is already complete for {1}.
-  Result: La búsqueda {0} ya está completa para {1}.
-WARNING 2174214346: token order differs (expected ['0', '1', '2', '3'], got ['2', '0', '3', '1'])
-2174214346: SKIPPED (looks untranslated)
-  Original: Completed {0} for <color=green>{1}</color>!
-  Result: Completed {0} for <color=green>{1}</color>!
-3637474013: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'], got ['0', '10', '1', '11', '2', '12', '3', '4', '13', '5', '8', '15', '9']))
-  Original: <color=green>{0}</color>{1} [<color=white>{2}</color>][<color=#90EE90>{3}</color>] added to <color=white>{4}</color>! (<color=yellow>{5}</color>)
-  Result: [[TOKEN_0]][[TOKEN_10]][[TOKEN_1]][[TOKEN_11]][[TOKEN_2]][[TOKEN_12]][[TOKEN_3]][[TOKEN_4]][[TOKEN_13]][[TOKEN_5]]EN_[[TOKEN_8]][[TOKEN_15]][[TOKEN_9]]
-1218917876: TRANSLATED
-  Original: Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {0}.
-  Result: ¡Todos los blancos han sido asesinados, darles la oportunidad de reaparecer! Si esto no parece correcto considerar rerollar su {0}.
-WARNING 1105957988: token order differs (expected ['0', '1', '2', '3', '4', '5', '6'], got ['0', '4', '1', '2', '5', '3', '3', '6'])
-1105957988: TRANSLATED
-  Original: Nearest <color=white>{0}</color> was <color=#00FFFF>{1}</color>f away to the {2}!
-  Result: <color=white>{0}</color><color=#00FFFF>{1}</color>  </color>{2}!
-800655279: SKIPPED (token mismatch (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'], got ['10', '0', '11', '1', '2', '12', '3', '4', '13']))
-  Original: {0}: <color=green>{1}</color> <color=white>{2}</color>x<color=#FFC0CB>{3}</color> [<color=white>{4}</color>/<color=yellow>{3}</color>]
-  Result: [[TOKEN_10]]: [[TOKEN_0]][[TOKEN_11]][[TOKEN_1]][[TOKEN_2]][[TOKEN_12]][[TOKEN_3]][[TOKEN_4]][[TOKEN_13]] TOKEN__  TOKEN_  EN   
-WARNING 3499636759: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['4', '0', '5', '1', '6', '2', '7', '3'])
-3499636759: TRANSLATED
-  Original: Time until {0} reset - <color=yellow>{1}</color> | {2} Prefab: <color=white>{3}</color>
-  Result: Tiempo hasta {0} reasentar - <color=yellow>{1}</color>{2} Prefab: <color=white>{3}</color>
-WARNING 2615857787: token order differs (expected ['0', '1', '2', '3', '4'], got ['2', '3', '0', '4', '1'])
-2615857787: TRANSLATED
-  Original: You've already completed your {0}! Time until {1} reset - <color=yellow>{2}</color>
-  Result: ¡Ya has completado tu {0}! Tiempo hasta {1} reajustar - <color=yellow>{2}</color>
-743202161: TRANSLATED
-  Original: You don't have a {0}.
-  Result: No tienes un {0}.
-WARNING 3914295487: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-3914295487: TRANSLATED
-  Original: <color=green>{0}</color> added to <color=white>{1}</color>.
-  Result: <color=green>{0}</color> añadió a <color=white>{1}</color>.
-WARNING 4052165110: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8'], got ['0', '6', '1', '2', '7', '3', '4', '8', '5'])
-4052165110: TRANSLATED
-  Original: <color=green>{0}</color> (<color=yellow>{1}</color>) added to <color=white>{2}</color>.
-  Result: <color=green>{0}</color><color=yellow>{1}</color><color=white>{2}</color>.
-WARNING 2121377442: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2121377442: TRANSLATED
-  Original: Your familiar has already prestiged the maximum number of times! (<color=white>{0}</color>)
-  Result: Su familiar ya ha prestigio el número máximo de veces! <color=white>{0}</color>
-WARNING 935039462: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7'], got ['0', '6', '1', '2', '7', '3', '4', '5'])
-935039462: TRANSLATED
-  Original: Familiar already has <color=#00FFFF>{0}</color> (<color=yellow>{1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.
-  Result: El familiar ya tiene <color=#00FFFF>{0}</color><color=yellow>{1}</color>) de prestigiar, utilizar '<color=white>.fam lst</color> para ver opciones.
-WARNING 4049081768: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-4049081768: TRANSLATED
-  Original: Your familiar has prestiged [<color=#90EE90>{0}</color>]; the accumulated knowledge allowed them to retain their level!
-  Result: Tu familiar ha reconocido <color=#90EE90>{0}</color>; el conocimiento acumulado les permitió mantener su nivel!
-WARNING 1757634753: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-1757634753: TRANSLATED
-  Original: You do not have enough of the required item to change classes (<color=#ffd9eb>{0}</color>x<color=white>{1}</color>)
-  Result: Usted no tiene suficiente del artículo requerido para cambiar clases (<color=#ffd9eb>{0}</color>x<color=white>{1}</color>
-WARNING 3637584655: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '0', '4', '1', '2', '5', '3'])
-3637584655: TRANSLATED
-  Original: Failed to remove enough of the item required (<color=#ffd9eb>{0}</color>x<color=white>{1}</color>)
-  Result: <color=#ffd9eb><color=#ffd9eb>{0}</color>x<color=white>{1}</color>
-835968431: SKIPPED (token mismatch (expected ['0'], got []))
-  Original: {0} passives not found!
-  Result: ¡Pasivos no encontrados!
-559704045: SKIPPED (token mismatch (expected ['0'], got []))
-  Original: {0} passives:
-  Result: Pasivos:
-2637421818: TRANSLATED
-  Original: Couldn't find stat synergies for {0}...
-  Result: No pude encontrar sinergias para {0}...
-2323778454: TRANSLATED
-  Original: No stat synergies found for {0}.
-  Result: No se han encontrado sinergias para {0}.
-WARNING 3613050716: token order differs (expected ['0', '1', '2', '3'], got ['2', '0', '3', '1'])
-3613050716: TRANSLATED
-  Original: {0} stat synergies [x<color=white>{1}</color>]:
-  Result: {0} stat synergies x<color=white>{1}</color>:
-9562573: TRANSLATED
-  Original: {0} has no spells configured...
-  Result: {0} no tiene hechizos configurados...
-2421466322: TRANSLATED
-  Original: {0} spells:
-  Result: {0} hechizos:
-WARNING 885434933: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-885434933: TRANSLATED
-  Original: Shift spell: <color=#CBC3E3>{0}</color>
-  Result: El hechizo del cambio: <color=#CBC3E3>{0}</color>
-WARNING 2214985381: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2214985381: SKIPPED (looks untranslated)
-  Original: <color=#90EE90>{0}</color> Prestige Info:
-  Result: <color=#90EE90>{0}</color> Prestige Info:
-WARNING 2316242941: token order differs (expected ['0', '1', '2', '3'], got ['0', '2', '1', '3'])
-2316242941: TRANSLATED
-  Original: Current Prestige Level: <color=yellow>{0}</color>/{1}
-  Result: Nivel de Prestigio actual: <color=yellow>{0}</color>/{1}
-WARNING 203356865: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-203356865: TRANSLATED
-  Original: Growth rate increase for expertise and legacies: <color=green>{0}</color>
-  Result: Aumento de la tasa de crecimiento para la experiencia y los legados: <color=green>{0}</color>
-WARNING 132267140: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-132267140: TRANSLATED
-  Original: Growth rate reduction for experience: <color=yellow>{0}</color>
-  Result: Reducción de la tasa de crecimiento de la experiencia <color=yellow>{0}</color>
-WARNING 608689499: token order differs (expected ['0', '1', '2', '3', '4', '5'], got ['0', '4', '1', '2', '5', '3'])
-608689499: TRANSLATED
-  Original: Growth rate reduction from <color=#90EE90>{0}</color> prestige level: <color=yellow>-{1}</color>
-  Result: Reducción de la tasa de crecimiento de <color=#90EE90>{0}</color> nivel de prestigio: <color=yellow>{1}</color>
-WARNING 2383766993: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-2383766993: TRANSLATED
-  Original: Stat bonuses improvement: <color=green>{0}</color>
-  Result: Mejora de las bonificaciones: <color=green>{0}</color>
-WARNING 1899346128: token order differs (expected ['0', '1', '2'], got ['0', '2', '1'])
-1899346128: TRANSLATED
-  Original: Total change in growth rate including leveling prestige bonus: <color=yellow>{0}</color>
-  Result: Cambio total en la tasa de crecimiento que incluye la bonificación de prestigio: <color=yellow>{0}</color>
-WARNING 1178832936: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['0', '1', '2', '8', '3', '4', '9', '5', '6', '10', '7'])
-1178832936: TRANSLATED
-  Original: You have prestiged in <color=#90EE90>Experience</color>[<color=white>{0}</color>]! Growth rates for all expertise/legacies increased by <color=green>{1}</color>, experience from unit kills reduced by <color=red>{2}</color>.
-  Result: Usted ha prestigio en <color=#90EE90>Experiencia </color><color=white>{0}</color>! Los índices de crecimiento de todos los conocimientos y las delegaciones aumentaron <color=green>{1}</color>, la experiencia de los asesinatos de unidades reducidos por <color=red>{2}</color>.
-WARNING 1223341524: token order differs (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14'], got ['0', '10', '1', '2', '11', '3', '4', '12', '5', '6', '13', '7', '8', '14', '9'])
-1223341524: TRANSLATED
-  Original: <color=#90EE90>{0}</color>[<color=white>{1}</color>] prestiged successfully! Growth rate reduced by <color=red>{2}</color> and stat bonuses improved by <color=green>{3}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{4}</color>.
-  Result: <color=#90EE90>{0}</color><color=white>{1}</color> prestigiosa! Tasa de crecimiento reducida por <color=red>{2}</color> y primas de stat mejoradas por <color=green>{3}</color>. El cambio total de la tasa de crecimiento con la bonificación de prestigio es <color=yellow>{4}</color>.
+  Result: Сокращение коэффициента опыта для выравнивания больше не применяется для прогнозирования exo.
