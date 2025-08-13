@@ -324,6 +324,7 @@
     "4226920647": "<color=white>{0}</color> 按配置的熟悉禁令不可用!",
     "1695244872": "<color=white>{0}</color> 已经解锁了!",
     "2428442751": "新单元解锁: <color=green>{0} </color>",
+    "1271017097": "New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{0}</color>",
     "3938781329": "<color=#ffd9eb>{0}</color>x <color=white>{1}</color>,用于{2}!",
     "3139406824": "<color=green>{0}</color>从<color=white>{1}</color>中移除。",
     "3055272330": "试图获得声望的熟悉者必须达到最高水平(<color=white>{0}</color>),或要求<color=#ffd9eb>{1}</color><color=yellow>x</color><color=white>{2}</color>。",

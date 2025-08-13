@@ -478,14 +478,14 @@ internal static class FamiliarCommands
                             unlocksData.FamiliarUnlocks[lastBoxName].Add(vBloodPrefabGuid.GuidHash);
 
                             SaveFamiliarUnlocksData(steamId, unlocksData);
-                            LocalizationService.Reply(ctx, "New unit unlocked: <color=green>{0}</color>", vBloodPrefabGuid.GetLocalizedName());
+                            LocalizationService.Reply(ctx, NEW_UNIT_UNLOCKED_MESSAGE, vBloodPrefabGuid.GetLocalizedName());
                         }
                         else if (unlocksData.FamiliarUnlocks.ContainsKey(lastBoxName))
                         {
                             unlocksData.FamiliarUnlocks[lastBoxName].Add(vBloodPrefabGuid.GuidHash);
 
                             SaveFamiliarUnlocksData(steamId, unlocksData);
-                            LocalizationService.Reply(ctx, "New unit unlocked: <color=green>{0}</color>", vBloodPrefabGuid.GetLocalizedName());
+                            LocalizationService.Reply(ctx, NEW_UNIT_UNLOCKED_MESSAGE, vBloodPrefabGuid.GetLocalizedName());
                         }
                     }
                 }
