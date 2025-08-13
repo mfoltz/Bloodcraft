@@ -1,6 +1,7 @@
 {
   "Messages": {
     "welcome": "ยินดี ต้อนรับ สู่ หัตถกรรม",
+    "binding-failed": "การผูกมัดล้มเหลว...",
     "profession-improved": "{0} improved to [<color=white>{1}</color>]",
     "profession-proficiency-gain": "+<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>)",
     "profession-bonus-received": "<color=green>{0}</color>x<color=white>{1}</color> received from {2}",
@@ -402,7 +403,6 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "การผูกมัดล้มเหลว...",
     "emote-actions-dominate-form": "คุณไม่สามารถใช้การกระทำ EMOTE เมื่อใช้แบบฟอร์มครอบงำ!",
     "emote-actions-bat-form": "คุณไม่สามารถใช้การกระทำ EMOTE เมื่อใช้แบบฟอร์ม BAT!",
     "familiar-interact-combat": "คุณไม่สามารถโต้ตอบกับความคุ้นเคยระหว่างการต่อสู้ได้!",
@@ -415,6 +415,18 @@
     "familiar-combat-enabled": "การต่อสู้ที่คุ้นเคย <color=green> เปิดใช้งาน </color>",
     "familiar-combat-disabled": "การต่อสู้ที่คุ้นเคย <color=red> ปิดการใช้งาน </color>",
     "familiar-interact-dismissed": "ไม่สามารถโต้ตอบกับคุ้นเคยเมื่อถูกไล่ออก!",
-    "familiar-interact-binding": "ไม่สามารถโต้ตอบกับความคุ้นเคยเมื่อมีผลผูกพัน/ปลดปล่อย!"
+    "familiar-interact-binding": "ไม่สามารถโต้ตอบกับความคุ้นเคยเมื่อมีผลผูกพัน/ปลดปล่อย!",
+    "3133295357": "Your weapon expertise is [<color=white>{0}</color>][<color=#90EE90>{1}</color>] and you have <color=yellow>{2}</color> <color=#FFC0CB>expertise</color> (<color=white>{3}%</color>) with <color=#c0c0c0>{4}</color>!",
+    "4190631897": "<color=#c0c0c0>{0}</color> Stats: {1}",
+    "1641855254": "You haven't gained any expertise for <color=#c0c0c0>{0}</color> yet!",
+    "2881393089": "Expertise logging is now {0}.",
+    "2997561401": "<color=#00FFFF>{0}</color> has been chosen for <color=#c0c0c0>{1}</color>!",
+    "2687655344": "Your weapon stats have been reset for <color=#c0c0c0>{0}</color>!",
+    "1454481026": "You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{0}</color>x<color=white>{1}</color>)",
+    "2508084566": "Level must be between 0 and {0}.",
+    "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
+    "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
+    "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
+    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>."
   }
 }

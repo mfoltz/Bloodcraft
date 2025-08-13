@@ -1,6 +1,7 @@
 {
   "Messages": {
     "welcome": "Ласкаво просимо до Bloodcraft",
+    "binding-failed": "Не вдалося обов'язково...",
     "profession-improved": "{0}<color=white>{1}</color>",
     "profession-proficiency-gain": "+<color=yellow>{0}</color><color=#FFC0CB>профіцит</color>{1}<color=white>{2}%</color>",
     "profession-bonus-received": "<color=green>{0}</color> кс<color=white>{1}</color>{2}",
@@ -402,7 +403,6 @@
     "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
     "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
     "2772168133": "{0}[<color=white>{1}</color>]",
-    "binding-failed": "Не вдалося обов'язково...",
     "emote-actions-dominate-form": "Ви не можете використовувати емоційні дії при використанні домінуючої форми!",
     "emote-actions-bat-form": "Ви не можете використовувати емоційні дії під час використання форми BAT!",
     "familiar-interact-combat": "Ви не можете взаємодіяти зі своїм знайомим під час бою!",
@@ -415,7 +415,19 @@
     "familiar-combat-enabled": "Знайомий бій <color=green> увімкнено </color>.",
     "familiar-combat-disabled": "Знайомий бій <color=red> вимкнено </color>.",
     "familiar-interact-dismissed": "Не можу взаємодіяти зі знайомим, коли звільнився!",
-    "familiar-interact-binding": "Не можу взаємодіяти зі знайомим при прив'язці/роз'єднанні!"
+    "familiar-interact-binding": "Не можу взаємодіяти зі знайомим при прив'язці/роз'єднанні!",
+    "3133295357": "Your weapon expertise is [<color=white>{0}</color>][<color=#90EE90>{1}</color>] and you have <color=yellow>{2}</color> <color=#FFC0CB>expertise</color> (<color=white>{3}%</color>) with <color=#c0c0c0>{4}</color>!",
+    "4190631897": "<color=#c0c0c0>{0}</color> Stats: {1}",
+    "1641855254": "You haven't gained any expertise for <color=#c0c0c0>{0}</color> yet!",
+    "2881393089": "Expertise logging is now {0}.",
+    "2997561401": "<color=#00FFFF>{0}</color> has been chosen for <color=#c0c0c0>{1}</color>!",
+    "2687655344": "Your weapon stats have been reset for <color=#c0c0c0>{0}</color>!",
+    "1454481026": "You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{0}</color>x<color=white>{1}</color>)",
+    "2508084566": "Level must be between 0 and {0}.",
+    "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
+    "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
+    "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
+    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>."
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder",
