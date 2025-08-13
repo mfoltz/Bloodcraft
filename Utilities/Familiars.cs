@@ -78,6 +78,9 @@ internal static class Familiars
     const string UNBIND_WHILE_INTERACTING_MESSAGE = "Can't unbind familiar right now! (interacting)";
     const string UNBIND_WHILE_DISMISSED_MESSAGE = "Can't unbind familiar right now! (dismissed)";
     const string FAMILIAR_NOT_FOUND_UNBIND_MESSAGE = "Couldn't find familiar to unbind! If this doesn't seem right try using '<color=white>.fam reset</color>'.";
+    const string FAMILIAR_UNBOUND_SHINY_MESSAGE = "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!";
+    const string FAMILIAR_UNBOUND_MESSAGE = "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!";
+    const string SHINY_INFO_MESSAGE = "{0}[<color=white>{1}</color>]";
 
     public enum FamiliarEquipmentType
     {
@@ -564,7 +567,7 @@ internal static class Familiars
 
             if (ShinyBuffSpellSchools.TryGetValue(shinyBuff, out string spellSchool) && familiar.TryGetBuffStacks(shinyBuff, out Entity _, out int stacks))
             {
-                return $"{spellSchool}[<color=white>{stacks}</color>]";
+                return string.Format(SHINY_INFO_MESSAGE, spellSchool, stacks);
             }
         }
 
@@ -756,11 +759,11 @@ internal static class Familiars
 
         if (!string.IsNullOrEmpty(shinyHexColor))
         {
-            LocalizationService.Reply(EntityManager, user, "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!", prefabGuid.GetLocalizedName(), shinyHexColor);
+            LocalizationService.Reply(EntityManager, user, FAMILIAR_UNBOUND_SHINY_MESSAGE, prefabGuid.GetLocalizedName(), shinyHexColor);
         }
         else
         {
-            LocalizationService.Reply(EntityManager, user, "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!", prefabGuid.GetLocalizedName());
+            LocalizationService.Reply(EntityManager, user, FAMILIAR_UNBOUND_MESSAGE, prefabGuid.GetLocalizedName());
         }
 
         if (smartBind)

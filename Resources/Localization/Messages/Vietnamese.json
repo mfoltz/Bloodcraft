@@ -397,7 +397,10 @@
     "2577116713": "Couldn't find familiar actives or familiar already active! If this doesn't seem right try using '<color=white>.fam reset</color>'.",
     "179462471": "Can't unbind familiar right now! (interacting)",
     "1744159514": "Can't unbind familiar right now! (dismissed)",
-    "2471836655": "Couldn't find familiar to unbind! If this doesn't seem right try using '<color=white>.fam reset</color>'."
+    "2471836655": "Couldn't find familiar to unbind! If this doesn't seem right try using '<color=white>.fam reset</color>'.",
+    "2814501768": "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!",
+    "3987763597": "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!",
+    "2772168133": "{0}[<color=white>{1}</color>]"
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"
