@@ -458,6 +458,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).
   - Shortcut: *.wep spell [Name] [Slot] [PrefabGuid] [Radius]*
 
+<details>
+<summary><strong>Config</strong></summary>
 
 ## Configuration
 
@@ -780,6 +782,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Arcane Sorcerer shift spells, granted at levels of prestige.
 - **Death Mage Spells**: `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
   Death Mage shift spells, granted at levels of prestige.
+
+</details>
 
 ## Recommended Mods
 
