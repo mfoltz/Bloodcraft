@@ -815,6 +815,13 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text`
    This command confirms every hash exists and no English text remains.
 
+   The CI pipeline also enforces this by running:
+
+   ```bash
+   python Tools/fix_tokens.py --check-only Resources/Localization/Messages/*.json
+   dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations
+   ```
+
 ### English detection allowlist
 
 `Tools/language_utils.py` flags untranslated strings by searching for common English stop words.

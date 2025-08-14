@@ -80,7 +80,7 @@ jobs:
       - name: Check tokens and translations
         run: |
           set -e
-          python Tools/fix_tokens.py --check-only
+          python Tools/fix_tokens.py --check-only Resources/Localization/Messages/*.json
           dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations
 
       - name: GH Release

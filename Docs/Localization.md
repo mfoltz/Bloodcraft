@@ -24,6 +24,15 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-trans
 
 The command should report no hash changes, confirming placeholders are aligned across languages.
 
+## Automated validation
+
+The CI pipeline runs the following checks and fails if any English text remains or tokens are malformed:
+
+```bash
+python Tools/fix_tokens.py --check-only Resources/Localization/Messages/*.json
+dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations
+```
+
 ## Build-time check
 
 A check runs during the build to ensure `LocalizationService.Reply` does not receive raw string
