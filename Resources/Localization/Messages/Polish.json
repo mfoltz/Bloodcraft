@@ -27,18 +27,13 @@
     "1076291728": "Użyj menu VBlood do śledzenia szefów!",
     "1420278477": "Śledzenie jest dostępne tylko dla niekompletnych zadań.",
     "3546356968": "Nieprawidłowa jednostka prefab (dopasowanie znalezione, ale nie zaczyna się od CHAR / char).",
-    "2886300456": "<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> dodany do <color=white>{activeBox}</color>.",
     "2169578147": "Nieprawidłowa nazwa jednostki (dopasowanie znalezione, ale nie zaczyna się od CHAR / char).",
-    "2151120362": "<color=green>{match.GetLocalizedName()}</color><color=yellow>{match.GuidHash}</color>) dodane do <color=white>{activeBox}</color>.",
     "223311103": "Nieprawidłowa nazwa jednostki (brak pełnego lub częściowego dopasowania).",
     "2155028867": "Nieprawidłowy prefab (nie jest liczbą całkowitą) lub nazwa (nie rozpoczyna się znakiem CHAR / char).",
-    "3102592194": "Nie mogłem znaleźć aktywnego znajomego!",
-    "1057342822": "Twoja znajoma już prestiżowała maksymalną liczbę razy! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>",
     "2689850927": "Nieprawidłowy znany typ stat prestiż, użyj '<color=white> .fam lst </color>' aby zobaczyć opcje.",
     "3125006928": "Znajomość posiada już <color=#00FFFF>{FamiliarPrestigeStats[value]}</color><color=yellow>{value + 1}</color> od prestiżu, użyj \"<color=white> .fam lst </color>\", aby zobaczyć opcje.",
     "2846646667": "Niepoprawny znany prestiż stat, użyj '<color=white> .fam lst </color>' aby zobaczyć opcje.",
     "705325693": "Znany ma już wszystkie prestiżowe statystyki! (\"<color=white> .fam pr </color>\" zamiast \"<color=white> .fam pr PrestigeStat</color>\")",
-    "2844729307": "Twój znajomy ma prestiż <color=#90EE90>{prestigeLevel}</color>; zgromadzona wiedza pozwoliła im zachować swój poziom!",
     "2712718738": "Twoja znajoma ma prestiż <color=#90EE90>{prestigeLevel}</color>; zgromadzona wiedza pozwoliła im zachować swój poziom! (+ <color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)",
     "872190851": "Nie udało się usunąć schematów z inwentarza!",
     "3466860311": "Nie udało się usunąć wystarczającej ilości wymaganych elementów (<color=#ffd9eb>{item.GetLocalizedName()}</color> x <color=white>{quantity}</color>)",
@@ -425,7 +420,8 @@
     "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
     "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
     "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
-    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>."
+    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
+    "3097011724": "Invalid class, use '<color=white>.class l</color>' to see options."
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

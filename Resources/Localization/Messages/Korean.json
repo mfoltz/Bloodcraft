@@ -27,18 +27,13 @@
     "1076291728": "보스를 추적하는 VBlood 메뉴를 사용하십시오!",
     "1420278477": "추적은 incomplete kill quests에서만 가능합니다.",
     "3546356968": "잘못된 단위 prefab (찾지 못했지만 CHAR/char로 시작하지 않습니다).",
-    "2886300456": "<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color><color=white>{activeBox}</color></color></color></color></color></color></color></color></color></color></color></color></color></color></color>TOKEN_TOKEN_<color=white>TOKEN_TOKEN_TOKEN_<color=white>TOKEN_TOKEN_TOKEN_<color=white>",
     "2169578147": "잘못된 단위 이름 (찾지 못했지만 CHAR/char로 시작하지 않습니다).",
-    "2151120362": "<color=green>{match.GetLocalizedName()}</color><color=yellow>{match.GuidHash}</color><color=white></color></color></color>{match.GetLocalizedName()}{match.GetLocalizedName()}{match.GetLocalizedName()}{match.GetLocalizedName()}</color>{match.GetLocalizedName()}{match.GetLocalizedName()}{match.GuidHash}{match.GuidHash}{activeBox}{activeBox}{activeBox}{activeBox}",
     "223311103": "잘못된 단위 이름 (전체 또는 부분 일치).",
     "2155028867": "유효하지 않은 prefab (integer) 또는 이름 (CHAR/char로 시작하지 않음).",
-    "3102592194": "적극적인 친밀감을 찾을 수 없습니다!",
-    "1057342822": "당신의 익숙한은 이미 시간의 최대 수를 예측했습니다! <color=white>{ConfigService.MaxFamiliarPrestiges}</color>",
     "2689850927": "잘못된 친숙한 prestige stat 유형, 사용 '<color=white>.fam lst</color> 옵션을 볼 수 있습니다.",
     "3125006928": "Familiar는 이미 <color=#00FFFF>{FamiliarPrestigeStats[value]}</color><color=yellow>{value + 1}</color>를 사전 제작하여 '<color=white>.fam lst</color> 옵션을 볼 수 있습니다.",
     "2846646667": "잘못된 익숙한 prestige 통계, 사용 '<color=white>.fam lst</color> 옵션을 볼 수 있습니다.",
     "705325693": "Familiar는 이미 모든 prestige 통계를 가지고 있습니다! ('<color=white>.fam pr</color>'<color=white>.fam pr PrestigeStat</color>')",
-    "2844729307": "당신의 친숙한 노력 <color=#90EE90>{prestigeLevel}</color>; 그들의 수준을 유지 할 수있는 축적 된 지식!",
     "2712718738": "당신의 친숙한 노력 <color=#90EE90>{prestigeLevel}</color>; 그들의 수준을 유지 할 수있는 축적 된 지식! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color></color>{FamiliarPrestigeStats[value]}{FamiliarPrestigeStats[value]}</color></color>{FamiliarPrestigeStats[value]}{FamiliarPrestigeStats[value]}{FamiliarPrestigeStats[value]}{FamiliarPrestigeStats[value]}{FamiliarPrestigeStats[value]}{FamiliarPrestigeStats[value]}{FamiliarPrestigeStats[value]}{FamiliarPrestigeStats[value]}{FamiliarPrestigeStats[value]}{FamiliarPrestigeStats[value]}{FamiliarPrestigeStats[value]}<color=#00FFFF><color=#00FFFF><color=#00FFFF>",
     "872190851": "재고에서 schematics를 제거하는 실패!",
     "3466860311": "<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>",
@@ -425,7 +420,8 @@
     "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
     "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
     "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
-    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>."
+    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
+    "3097011724": "Invalid class, use '<color=white>.class l</color>' to see options."
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

@@ -27,18 +27,13 @@
     "1076291728": "Use the VBlood menu to track bosses!",
     "1420278477": "Il monitoraggio è disponibile solo per missioni di uccisione incomplete.",
     "3546356968": "Invalid unit prefab (match trovato ma non inizia con CHAR/char).",
-    "2886300456": "<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> aggiunto a <color=white>{activeBox}</color>.",
     "2169578147": "Invalid unit name (match trovato ma non inizia con CHAR/char).",
-    "2151120362": "<color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.",
     "223311103": "Nome unità non valida (nessuna corrispondenza completa o parziale).",
     "2155028867": "Prefab non valido (non un intero) o nome (non inizia con CHAR/char).",
-    "3102592194": "Non sono riuscito a trovare attivo familiare!",
-    "1057342822": "Il vostro familiare ha già prestigio il numero massimo di volte! <color=white>{ConfigService.MaxFamiliarPrestiges}</color>",
     "2689850927": "Invalid familiari prestigio stat type, utilizzare '<color=white>.fam lst</color>' per vedere le opzioni.",
     "3125006928": "Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.",
     "2846646667": "Invalid familiari prestigio stat, utilizzare '<color=white>.fam lst</color>' per vedere le opzioni.",
     "705325693": "Familiar ha già tutte le statistiche di prestigio! ('<color=white>.fam pr</color>' invece di '<color=white>.fam pr PrestigeStat</color>'",
-    "2844729307": "Il vostro familiare ha prestigio <color=#90EE90>{prestigeLevel}</color>; la conoscenza accumulata ha permesso loro di mantenere il loro livello!",
     "2712718738": "Il vostro familiare ha prestigio <color=#90EE90>{prestigeLevel}</color>; la conoscenza accumulata ha permesso loro di mantenere il loro livello! <color=#00FFFF>{FamiliarPrestigeStats[value]}</color>",
     "872190851": "Non è riuscito a rimuovere gli schemi dal vostro inventario!",
     "3466860311": "Non è riuscito a rimuovere abbastanza della voce richiesta (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>",
@@ -425,6 +420,7 @@
     "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
     "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
     "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
-    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>."
+    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
+    "3097011724": "Invalid class, use '<color=white>.class l</color>' to see options."
   }
 }
