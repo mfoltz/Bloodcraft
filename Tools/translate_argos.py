@@ -28,6 +28,7 @@ TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
 # Matches cases like ``TOKEN_1`` and ``TOKEN _ 1``
 TOKEN_WORD = re.compile(r'TOKEN\s*_\s*(\d+)', re.I)
 TOKEN_SENTINEL = "[[TOKEN_SENTINEL]]"
+INTERP_BLOCK = re.compile(r'\{\(')
 
 
 def protect_strict(text: str) -> tuple[str, List[str]]:
@@ -250,8 +251,12 @@ def main():
     safe_lines: List[str] = []
     tokens_list: List[tuple[List[str], bool]] = []
     keys: List[str] = []
+    skipped_interp: List[tuple[str, str]] = []
 
     for key, text in to_translate:
+        if INTERP_BLOCK.search(text):
+            skipped_interp.append((key, text))
+            continue
         safe, tokens = protect_strict(text)
         token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
         if token_only:
@@ -274,6 +279,8 @@ def main():
             return "identical"
         if "untranslated" in r or "english" in r:
             return "untranslated"
+        if "interpolation" in r:
+            return "interpolation"
         return "other"
 
     def log_entry(
@@ -300,6 +307,13 @@ def main():
                 )
         msg += f"\n  Original: {original}\n  Result: {result}"
         log_verbose(msg)
+
+    for key, text in skipped_interp:
+        reason = "interpolation block"
+        category = "interpolation"
+        log_entry(key, english[key], english[key], reason, category=category)
+        translated[key] = english[key]
+        failures[key] = (reason, category)
 
     for i in range(0, len(safe_lines), args.batch_size):
         batch_lines = safe_lines[i : i + args.batch_size]
@@ -449,7 +463,9 @@ def main():
             return False, "contains English on strict retry"
         return True, un
 
-    for key, (_initial_reason, _category) in failures.items():
+    for key, (_initial_reason, category) in failures.items():
+        if category == "interpolation":
+            continue
         ok, out = strict_retry(key)
         if ok:
             translated[key] = out
