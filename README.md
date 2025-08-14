@@ -458,6 +458,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).
   - Shortcut: *.wep spell [Name] [Slot] [PrefabGuid] [Radius]*
 
+</details>
+
 <details>
 <summary><strong>Config</strong></summary>
 
