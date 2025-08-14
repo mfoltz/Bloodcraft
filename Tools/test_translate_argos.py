@@ -76,6 +76,59 @@ def test_creates_directories_for_logs_and_reports(tmp_path, monkeypatch):
     assert report_path.is_file()
 
 
+def test_translates_only_specified_hashes(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"h1": "Hello", "h2": "World"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    # existing translations to verify only h1 is replaced
+    (root / target_rel).write_text(
+        json.dumps({"Messages": {"h1": "Bonjour", "h2": "Monde"}})
+    )
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "Hola" if text == "Hello" else "Mundo"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--hash",
+            "h1",
+        ],
+    )
+
+    translate_argos.main()
+
+    data = json.loads((root / target_rel).read_text())
+    assert data["Messages"]["h1"] == "Hola"
+    assert data["Messages"]["h2"] == "Monde"
+
+
 def test_exit_on_fix_tokens_failure(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
