@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "Nie możesz używać działań emote podczas korzystania z formularza nietoperza!",
     "familiar-interact-combat": "Nie możesz wchodzić w interakcje ze swoim znajomym podczas walki!",
     "shapeshift-select-form": "Najpierw wybierz formę, którą odblokowałeś! ('<color=white>.prestige sf [<color=orange>EvolvedVampire|CorruptedSerpent</color>]</color>')",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "Nie możesz zadzwonić do swojego znajomego podczas walki z PVP!",
     "familiar-active-not-exist": "Aktywny znajomy nie istnieje! Jeśli to nie wydaje się właściwe, spróbuj użyć „<color=white>. Fam reset </color>”.",
     "familiar-not-found": "Nie mogłem znaleźć aktywnego znajomego ...",

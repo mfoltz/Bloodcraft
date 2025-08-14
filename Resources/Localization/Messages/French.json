@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "Vous ne pouvez pas utiliser les actions EMOTE lors de l'utilisation du formulaire de chauve-souris!",
     "familiar-interact-combat": "Vous ne pouvez pas interagir avec votre familier pendant le combat!",
     "shapeshift-select-form": "Sélectionnez un formulaire que vous avez déverrouillé en premier! ('<color=white>. Prestige sf <color=orange> evolvedVampire | corruptedSerper </color>] </color>')",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "Vous ne pouvez pas appeler votre familier pendant le combat PVP!",
     "familiar-active-not-exist": "Un familier actif n'existe pas! Si cela ne semble pas juste, essayez d'utiliser '<color=white>. Fam réinitialisation </color>'.",
     "familiar-not-found": "Je ne pouvais pas trouver actif familier ...",

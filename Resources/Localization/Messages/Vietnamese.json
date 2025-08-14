@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "Bạn không thể sử dụng các hành động Emote khi sử dụng biểu mẫu Bat!",
     "familiar-interact-combat": "Bạn không thể tương tác với quen thuộc của bạn trong khi chiến đấu!",
     "shapeshift-select-form": "Chọn một biểu mẫu bạn đã mở khóa trước! .",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "Bạn không thể gọi quen thuộc của bạn trong chiến đấu PVP!",
     "familiar-active-not-exist": "Hoạt động quen thuộc không tồn tại! Nếu điều đó có vẻ không đúng, hãy thử sử dụng '<color=white>. Fam reset </color>'.",
     "familiar-not-found": "Không thể thấy hoạt động quen thuộc ...",

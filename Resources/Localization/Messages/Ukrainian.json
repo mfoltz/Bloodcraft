@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "Ви не можете використовувати емоційні дії під час використання форми BAT!",
     "familiar-interact-combat": "Ви не можете взаємодіяти зі своїм знайомим під час бою!",
     "shapeshift-select-form": "Виберіть форму, яку ви розблокували спочатку! ('<color=white>. Prestige sf <color=orange> evolvedvampire | пошкоджений серпен </color>] </color>') ')') '",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "Ви не можете зателефонувати своїм знайомим під час бою PVP!",
     "familiar-active-not-exist": "Активний фамільяр не існує! Якщо це здається неправильним, спробуйте використати '<color=white>.fam reset</color>'.",
     "familiar-not-found": "Не міг знайти активного знайомого ...",

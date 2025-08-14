@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "Nem használhatja az Emote műveleteket a BAT forma használatakor!",
     "familiar-interact-combat": "A harc során nem léphet kapcsolatba az ismerőseivel!",
     "shapeshift-select-form": "Válassza ki az első kinyitott űrlapot! ('<color=white>. Prestige sf <color=orange> evolvedvampire | CruptedSerpent </color>]] </color>')",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "Nem hívhatja meg ismerősedet a PVP -harc során!",
     "familiar-active-not-exist": "Az aktív ismerős nem létezik! Ha ez nem tűnik helyesnek, próbálja meg használni a '<color=white>. Fam reset </color>' használatát.",
     "familiar-not-found": "Nem találtak aktív ismerősöket ...",

@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "¡No puedes usar acciones de emote al usar Forma BAT!",
     "familiar-interact-combat": "¡No puedes interactuar con tu familiar durante el combate!",
     "shapeshift-select-form": "¡Seleccione un formulario que haya desbloqueado primero! ('<color=white>. Prestige SF <color=orange> EvolvedVampire | CorruptedSerpent </color>] </color>'))",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "¡No puede llamar a su familiar durante el combate PVP!",
     "familiar-active-not-exist": "¡No existe un familiar activo! Si eso no parece correcto, intente usar '<color=white>. FAM Reset </color>'.",
     "familiar-not-found": "No pude encontrar un familiar activo ...",

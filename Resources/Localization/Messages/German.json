@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "Sie können keine Emote -Aktionen verwenden, wenn Sie Fledermausform verwenden!",
     "familiar-interact-combat": "Sie können im Kampf nicht mit Ihrem Vertrauten interagieren!",
     "shapeshift-select-form": "Wählen Sie ein Formular aus, das Sie zuerst entsperrt haben! ('<color=white>. Prestige SF <color=orange> EvolvedVampire | beschädigt </color> </color>')",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "Sie können Ihren Vertrauten während des PVP -Kampfes nicht nennen!",
     "familiar-active-not-exist": "Active vertraut existiert nicht! Wenn das nicht richtig erscheint, versuchen Sie es mit '<color=white>. Fam Reset </color>'.",
     "familiar-not-found": "Konnte nicht aktiv vertraut finden ...",

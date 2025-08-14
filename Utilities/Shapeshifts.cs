@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Interfaces;
 using Bloodcraft.Resources;
+using Bloodcraft.Resources.Localization;
 using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
@@ -112,7 +113,7 @@ internal static class Shapeshifts
     {
         string timeRemaining = GetTimeUntilCharged(steamId, value);
 
-        if (!string.IsNullOrEmpty(timeRemaining)) LocalizationService.Reply(EntityManager, user, "Not enough energy to maintain form... (<color=yellow>{0}</color>)", timeRemaining);
+        if (!string.IsNullOrEmpty(timeRemaining)) LocalizationService.Reply(EntityManager, user, MessageKeys.SHAPESHIFT_NOT_ENOUGH_ENERGY, timeRemaining);
     }
     static string GetTimeUntilCharged(ulong steamId, float value)
     {
