@@ -68,6 +68,32 @@ def normalize_tokens(text: str) -> str:
     return re.sub(r"@@(\d+)@@", restore, tmp)
 
 
+def reorder_tokens(text: str, token_count: int) -> tuple[str, bool]:
+    """Renumber TOKEN_n markers to match the English source order.
+
+    Argos may emit tokens with non-sequential or permuted indices. This
+    function rewrites them so ``[[TOKEN_0]]`` through
+    ``[[TOKEN_{token_count-1}]]`` appear in their expected order. The token
+    positions in the string are preserved; only the numeric identifiers are
+    remapped.
+    """
+    found = TOKEN_RE.findall(text)
+    if len(found) != token_count:
+        return text, False
+    expected = [str(i) for i in range(token_count)]
+    if found == expected:
+        return text, False
+
+    mapping: dict[str, str] = {}
+    for old, new in zip(found, expected):
+        mapping.setdefault(old, new)
+
+    remapped = TOKEN_RE.sub(
+        lambda m: f"[[TOKEN_{mapping.get(m.group(1), m.group(1))}]]", text
+    )
+    return remapped, True
+
+
 def ensure_model_installed(root: str, dst: str) -> None:
     """Verify split Argos model segments are combined and installed.
 
@@ -277,6 +303,7 @@ def main():
                     continue
                 result = result.replace(f" {TOKEN_SENTINEL}", "").replace(TOKEN_SENTINEL, "")
             result = normalize_tokens(result)
+            result, reordered = reorder_tokens(result, len(tokens))
 
             stripped = TOKEN_RE.sub("", result)
             if "[" in stripped or "]" in stripped:
@@ -291,10 +318,8 @@ def main():
                 log_entry(key, english[key], result, reason)
                 skipped.append(key)
                 continue
-            if found_tokens != expected:
-                log_verbose(
-                    f"WARNING {key}: token order differs (expected {expected}, got {found_tokens})"
-                )
+            if reordered:
+                log_verbose(f"Normalized token order for {key}: {found_tokens} -> {expected}")
             un = unprotect(result, tokens)
             un = un.replace("\\u003C", "<").replace("\\u003E", ">")
             if un == english[key] or contains_english(un):
