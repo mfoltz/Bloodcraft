@@ -804,6 +804,8 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 
 ### Translation Workflow
 
+This process applies only to files under `Resources/Localization/Messages`.
+
 1. **Refresh the English source.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
 2. **Propagate new hashes.** Copy the refreshed `English.json` entries into each `Resources/Localization/Messages/<Language>.json` while keeping numeric hashes intact.
@@ -811,7 +813,13 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 3. **Translate missing entries.**
    `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --verbose --log-file translate.log --report-file skipped.csv --overwrite`
    Verify the Argos model is installed before running translations: `argos-translate --from en --to tr - < /dev/null` (replace `tr` with the target code). Any hashes listed in `skipped.csv` must be manually translated and the script re-run to confirm they are handled.
-4. **Verify translations.**
+4. **Check and fix tokens.**
+   ```bash
+   python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
+   python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json
+   ```
+   Running with `--check-only` fails fast if tokens were altered.
+5. **Verify translations.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text`
    This command confirms every hash exists and no English text remains.
 
