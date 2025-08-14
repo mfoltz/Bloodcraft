@@ -46,6 +46,13 @@ Only the JSON files in `Resources/Localization/Messages` contain user-facing mes
    python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --verbose --log-file translate.log --report-file skipped.csv --overwrite
    ```
 
+   Omitting `--overwrite` translates only missing entries and keeps existing
+   translations intact. Use `--overwrite` sparingly, as it retranslates every
+   line and can reprocess thousands of entries unnecessarily.
+
+   To refresh specific messages without touching the rest, pass one or more
+   `--hash <hash>` options to translate only those hashes.
+
 3. **Handle skipped rows**
 
    Any hashes listed in `skipped.csv` must be translated manually. Re-run the translator until the file is empty.

@@ -2,6 +2,7 @@
 """Translate message JSON files using the argostranslate Python API.
 
 Lines exceeding the timeout are skipped and listed in the report.
+Use ``--hash`` to restrict translation to specific hashes for targeted updates.
 """
 
 import argparse
@@ -220,7 +221,10 @@ def _run_translation(args, root: str, log_fp) -> None:
         target = {"Messages": {}}
 
     messages = target.get("Messages", {})
-    if args.overwrite:
+    if args.hashes:
+        requested = set(args.hashes)
+        to_translate = [(k, v) for k, v in english.items() if k in requested]
+    elif args.overwrite:
         to_translate = list(english.items())
         messages = {}
     else:
@@ -577,7 +581,22 @@ def main():
         default=60,
         help="Abort a single line if it takes longer than this many seconds",
     )
-    ap.add_argument("--overwrite", action="store_true", help="Translate all messages even if already present")
+    ap.add_argument(
+        "--overwrite",
+        action="store_true",
+        help=(
+            "Translate all messages even if already present; "
+            "without this flag only missing entries are processed. "
+            "Use sparingly to avoid reprocessing thousands of lines."
+        ),
+    )
+    ap.add_argument(
+        "--hash",
+        dest="hashes",
+        action="append",
+        metavar="HASH",
+        help="Only translate entries matching this hash; can be repeated for targeted updates",
+    )
     ap.add_argument("--verbose", action="store_true", help="Print per-message translation details")
     ap.add_argument(
         "--log-file",
