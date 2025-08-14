@@ -171,3 +171,15 @@ def test_exit_when_skipped_report_has_entries(tmp_path, monkeypatch):
         translate_argos.main()
     assert exc.value.code == 1
     assert report_path.is_file()
+
+
+def test_reorder_tokens_swapped():
+    text, changed = translate_argos.reorder_tokens("[[TOKEN_1]] then [[TOKEN_0]]", 2)
+    assert text == "[[TOKEN_0]] then [[TOKEN_1]]"
+    assert changed
+
+
+def test_reorder_tokens_from_one_based():
+    text, changed = translate_argos.reorder_tokens("[[TOKEN_1]] then [[TOKEN_2]]", 2)
+    assert text == "[[TOKEN_0]] then [[TOKEN_1]]"
+    assert changed
