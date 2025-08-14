@@ -46,3 +46,20 @@ python Tools/check_localization_reply.py --update-baseline  # refresh baseline a
 If new string literals are introduced, the build will fail until they are removed or added to the
 baseline.
 
+## Scan source for untranslated strings
+
+Run `scan_english.py` to highlight English phrases in C# files that are not wrapped in
+`LocalizationService` helpers:
+
+```bash
+python Tools/scan_english.py
+```
+
+You can skip directories or file patterns that should not be scanned:
+
+```bash
+python Tools/scan_english.py --whitelist-dir Bloodcraft.Tests --whitelist-pattern "^Generated/"
+```
+
+Use this to quickly locate messages that still need localization.
+
