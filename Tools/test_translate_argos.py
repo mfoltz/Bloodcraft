@@ -172,8 +172,8 @@ def test_fallback_to_english_and_reports(tmp_path, monkeypatch):
     assert report_path.is_file()
     import csv
     rows = list(csv.DictReader(report_path.open()))
-    assert rows[0]["category"] == "untranslated"
-    assert "untranslated" in rows[0]["reason"]
+    assert rows[0]["category"] == "identical"
+    assert "identical" in rows[0]["reason"]
 
 
 def test_sentinel_missing_report(tmp_path, monkeypatch):
@@ -225,6 +225,57 @@ def test_sentinel_missing_report(tmp_path, monkeypatch):
     rows = list(csv.DictReader(report_path.open()))
     assert rows[0]["category"] == "sentinel"
     assert "sentinel" in rows[0]["reason"]
+
+
+def test_contains_english_report(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    report_path = root / "skipped.csv"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "Bonjour Hello"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: "Hello" in s)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--report-file",
+            str(report_path),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+    rows = list(csv.DictReader(report_path.open()))
+    assert rows[0]["category"] == "untranslated"
+    assert "English" in rows[0]["reason"]
 
 
 def test_strict_retry_succeeds(tmp_path, monkeypatch):

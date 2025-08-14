@@ -33,6 +33,7 @@ def test_reports_string_literal(tmp_path):
     )
     assert result.returncode == 1
     assert "LocalizationService.Reply(" in result.stdout
+    assert "Found LocalizationService.Reply calls with string literals" in result.stdout
 
 
 def test_reports_sentinel_string(tmp_path):
@@ -49,3 +50,4 @@ def test_reports_sentinel_string(tmp_path):
     )
     assert result.returncode == 1
     assert "[[TOKEN_SENTINEL]]" in result.stdout
+    assert "Found LocalizationService.Reply calls with string literals" in result.stdout

@@ -278,9 +278,12 @@ def main():
     def categorize(reason: str | None) -> str:
         if not reason:
             return ""
-        if "sentinel" in reason:
+        r = reason.lower()
+        if "sentinel" in r:
             return "sentinel"
-        if "untranslated" in reason:
+        if "identical" in r:
+            return "identical"
+        if "untranslated" in r or "english" in r:
             return "untranslated"
         return "other"
 
@@ -390,8 +393,21 @@ def main():
                 log_verbose(f"Normalized token order for {key}: {found_tokens} -> {expected}")
             un = unprotect(result, tokens)
             un = un.replace("\\u003C", "<").replace("\\u003E", ">")
-            if un == english[key] or contains_english(un):
-                reason = "looks untranslated"
+            if un == english[key]:
+                reason = "identical to source"
+                category = "identical"
+                log_entry(
+                    key,
+                    english[key],
+                    un,
+                    reason,
+                    category=category,
+                    record=False,
+                )
+                failures[key] = (reason, category)
+                continue
+            if contains_english(un):
+                reason = "contains English"
                 category = "untranslated"
                 log_entry(
                     key,
@@ -439,8 +455,10 @@ def main():
             return False, f"token mismatch on strict retry (expected {expected}, got {found_tokens})"
         un = unprotect(result, tokens)
         un = un.replace("\\u003C", "<").replace("\\u003E", ">")
-        if un == english[key] or contains_english(un):
-            return False, "looks untranslated on strict retry"
+        if un == english[key]:
+            return False, "identical to source on strict retry"
+        if contains_english(un):
+            return False, "contains English on strict retry"
         return True, un
 
     for key, (_initial_reason, _category) in failures.items():
