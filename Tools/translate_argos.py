@@ -22,24 +22,12 @@ PLACEHOLDER = re.compile(r'\{[^{}]+\}')
 CSINTERP = re.compile(r'\$\{[^{}]+\}')
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
 STRICT_TOKEN_RE = re.compile(r'__T(\d+)__')
+STRICT_TOKEN_CLEAN = re.compile(r'__\s*T\s*(\d+)\s*__', re.I)
 TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
 # Matches stray TOKEN_n occurrences regardless of surrounding context
 # Matches cases like ``TOKEN_1`` and ``TOKEN _ 1``
 TOKEN_WORD = re.compile(r'TOKEN\s*_\s*(\d+)', re.I)
 TOKEN_SENTINEL = "[[TOKEN_SENTINEL]]"
-
-
-def protect(text: str):
-    text = text.replace("\\u003C", "<").replace("\\u003E", ">")
-    tokens: List[str] = []
-    for regex in (RICHTEXT, PLACEHOLDER, CSINTERP):
-        text = regex.sub(lambda m: _store(tokens, m.group(0)), text)
-    return text, tokens
-
-
-def _store(tokens: List[str], value: str) -> str:
-    tokens.append(value)
-    return f"[[TOKEN_{len(tokens)-1}]]"
 
 
 def protect_strict(text: str) -> tuple[str, List[str]]:
@@ -63,6 +51,7 @@ def unprotect(text: str, tokens: List[str]) -> str:
 
 def normalize_tokens(text: str) -> str:
     """Normalize token formatting in Argos output."""
+    text = STRICT_TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
     text = TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
     text = TOKEN_WORD.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
     text = re.sub(r"\]\s+\[\[", "][[", text)
@@ -263,8 +252,8 @@ def main():
     keys: List[str] = []
 
     for key, text in to_translate:
-        safe, tokens = protect(text)
-        token_only = TOKEN_RE.sub("", safe).strip() == ""
+        safe, tokens = protect_strict(text)
+        token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
         if token_only:
             safe += f" {TOKEN_SENTINEL}"
         safe_lines.append(safe)
@@ -443,7 +432,6 @@ def main():
             if TOKEN_SENTINEL not in result:
                 return False, "sentinel missing on strict retry"
             result = result.replace(f" {TOKEN_SENTINEL}", "").replace(TOKEN_SENTINEL, "")
-        result = re.sub(r"__T(\d+)__", r"[[TOKEN_\1]]", result)
         result = normalize_tokens(result)
         result, _ = reorder_tokens(result, len(tokens))
         stripped = TOKEN_RE.sub("", result)

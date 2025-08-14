@@ -290,10 +290,14 @@ def test_strict_retry_succeeds(tmp_path, monkeypatch):
     report_path = root / "skipped.csv"
 
     class DummyTranslator:
+        def __init__(self):
+            self.calls = 0
+
         def translate(self, text):
-            if "__T0__" in text:
-                return "__T0__Bonjour__T1__"
-            return "[[TOKEN_1]]Bonjour[[TOKEN_0]]"
+            self.calls += 1
+            if self.calls == 1:
+                return "[[TOKEN_1]]Bonjour"
+            return "__T0__Bonjour__T1__"
 
     class DummyCompleted:
         def __init__(self, code=0):
@@ -342,4 +346,15 @@ def test_reorder_tokens_swapped():
 def test_reorder_tokens_from_one_based():
     text, changed = translate_argos.reorder_tokens("[[TOKEN_1]] then [[TOKEN_2]]", 2)
     assert text == "[[TOKEN_0]] then [[TOKEN_1]]"
+    assert changed
+
+
+def test_normalize_and_reorder_many_tokens():
+    raw = " ".join(f"__T{i}__" for i in range(12))
+    normalized = translate_argos.normalize_tokens(raw)
+    assert normalized == "".join(f"[[TOKEN_{i}]]" for i in range(12))
+    text, changed = translate_argos.reorder_tokens(
+        " ".join(f"[[TOKEN_{i}]]" for i in range(11, -1, -1)), 12
+    )
+    assert text == " ".join(f"[[TOKEN_{i}]]" for i in range(12))
     assert changed
