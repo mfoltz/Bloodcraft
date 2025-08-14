@@ -20,6 +20,37 @@ LocalizationService.Reply(ctx, "You're level {0}", level);
 
 When you add or change a message, update every JSON file under `Resources/Localization/Messages` to include the same numbered placeholders `{0}`, `{1}`, etc. so translations match the English template.
 
+## Automated Translation for Messages
+
+Only the JSON files in `Resources/Localization/Messages` contain user-facing messages. Use Argos Translate to automate translating these files:
+
+1. **Verify model installation**
+
+   Ensure the Argos model for your target language is installed:
+
+   ```bash
+   argos-translate --from en --to <iso-code> - < /dev/null
+   ```
+
+2. **Run the translator**
+
+   ```bash
+   python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --verbose --log-file translate.log --report-file skipped.csv --overwrite
+   ```
+
+3. **Handle skipped rows**
+
+   Any hashes listed in `skipped.csv` must be translated manually. Re-run the translator until the file is empty.
+
+4. **Fix tokens**
+
+   ```bash
+   python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
+   python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json
+   ```
+
+   Run the check-only mode first to fail fast if tokens were altered, then apply the fixes.
+
 ## Verify translation hashes
 
 After updating the files, run:
