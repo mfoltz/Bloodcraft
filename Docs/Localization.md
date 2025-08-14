@@ -24,3 +24,16 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-trans
 
 The command should report no hash changes, confirming placeholders are aligned across languages.
 
+## Build-time check
+
+A check runs during the build to ensure `LocalizationService.Reply` does not receive raw string
+literals or interpolated strings. Instead, reference a `MessageKeys` constant or other
+localization identifier. The script uses a baseline file to track existing violations:
+
+```bash
+python Tools/check_localization_reply.py --update-baseline  # refresh baseline after fixing strings
+```
+
+If new string literals are introduced, the build will fail until they are removed or added to the
+baseline.
+
