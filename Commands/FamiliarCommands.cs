@@ -61,6 +61,37 @@ internal static class FamiliarCommands
     static readonly PrefabGUID _itemSchematic = new(2085163661);
     static readonly PrefabGUID _vampiricDust = new(805157024);
 
+    const string FAMILIARS_DISABLED_MESSAGE = "Familiars are not enabled.";
+    const string FAMILIAR_BOX_HEADER_MESSAGE = "<color=white>{0}</color>:";
+    const string FAMILIAR_LIST_ENTRY_MESSAGE = "<color=yellow>{0}</color>| <color=green>{1}</color>{2}";
+    const string ACTIVE_BOX_NOT_FOUND_MESSAGE = "Couldn't find active box!";
+    const string FAMILIAR_BOXES_MESSAGE = "Familiar Boxes:";
+    const string NO_UNLOCKS_MESSAGE = "You don't have any unlocks yet!";
+    const string BOX_SELECTED_MESSAGE = "Box Selected - <color=white>{0}</color>";
+    const string BOX_NOT_FOUND_MESSAGE = "Couldn't find box!";
+    const string BOX_RENAMED_MESSAGE = "Box <color=white>{0}</color> renamed - <color=yellow>{1}</color>";
+    const string BOX_RENAME_FAILED_MESSAGE = "Couldn't find box to rename or there's already a box with that name!";
+    const string FAMILIAR_MOVED_MESSAGE = "<color=green>{0}</color> moved - <color=white>{1}</color>";
+    const string BOX_FULL_MESSAGE = "Box is full!";
+    const string BOX_NOT_EMPTY_MESSAGE = "Box is not empty!";
+    const string BOX_ADDED_MESSAGE = "Added box - <color=white>{0}</color>";
+    const string BOX_DELETED_MESSAGE = "Deleted box - <color=white>{0}</color>";
+    const string BOX_ADD_FAILED_MESSAGE = "Must have at least one unit unlocked to start adding boxes. Additionally, the total number of boxes cannot exceed <color=yellow>{0}</color>.";
+    const string PLAYER_NOT_FOUND_MESSAGE = "Couldn't find player.";
+    const string VBLOOD_FAMILIARS_DISABLED_MESSAGE = "VBlood familiars are not enabled.";
+    const string VBLOOD_PURCHASING_DISABLED_MESSAGE = "VBlood purchasing is not enabled.";
+    const string VBLOOD_NOT_FOUND_MESSAGE = "Couldn't find matching vBlood!";
+    const string VBLOOD_MULTIPLE_MATCHES_MESSAGE = "Multiple matches, please be more specific!";
+    const string VBLOOD_BANNED_MESSAGE = "<color=white>{0}</color> is not available per configured familiar bans!";
+    const string VBLOOD_ALREADY_UNLOCKED_MESSAGE = "<color=white>{0}</color> is already unlocked!";
+    const string VBLOOD_COST_VERIFY_FAILED_MESSAGE = "Unable to verify cost for {0}!";
+    const string VBLOOD_REWARD_VERIFY_FAILED_MESSAGE = "Unable to verify exo prestige reward item! (<color=yellow>{0}</color>)";
+    const string VBLOOD_NOT_ENOUGH_ITEMS_MESSAGE = "Not enough <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for {2}!";
+    const string VBLOOD_TIER_VERIFY_FAILED_MESSAGE = "Unable to verify tier for {0}! Shouldn't really happen at this point and may want to inform the developer.";
+    const string INVALID_CHOICE_MESSAGE = "Invalid choice, please use <color=white>1</color> to <color=white>{0}</color> (Current List:<color=yellow>{1}</color>)";
+    const string FAMILIAR_REMOVED_MESSAGE = "<color=green>{0}</color> removed from <color=white>{1}</color>.";
+    const string ACTIVE_BOX_REMOVE_NOT_FOUND_MESSAGE = "Couldn't find active familiar box to remove from...";
+
     static readonly Dictionary<string, Action<ChatCommandContext, ulong>> _familiarSettings = new()
     {
         {"VBloodEmotes", ToggleVBloodEmotes},
@@ -72,7 +103,7 @@ internal static class FamiliarCommands
     {
         if (!ConfigService.FamiliarSystem)
         {
-            LocalizationService.Reply(ctx, "Familiars are not enabled.");
+            LocalizationService.Reply(ctx, FAMILIARS_DISABLED_MESSAGE);
             return;
         }
 
@@ -87,7 +118,7 @@ internal static class FamiliarCommands
     {
         if (!ConfigService.FamiliarSystem)
         {
-            LocalizationService.Reply(ctx, "Familiars are not enabled.");
+            LocalizationService.Reply(ctx, FAMILIARS_DISABLED_MESSAGE);
             return;
         }
 
@@ -102,7 +133,7 @@ internal static class FamiliarCommands
     {
         if (!ConfigService.FamiliarSystem)
         {
-            LocalizationService.Reply(ctx, "Familiars are not enabled.");
+            LocalizationService.Reply(ctx, FAMILIARS_DISABLED_MESSAGE);
             return;
         }
 
@@ -118,7 +149,7 @@ internal static class FamiliarCommands
         if (!string.IsNullOrEmpty(box) && familiarUnlocksData.FamiliarUnlocks.TryGetValue(box, out var famKeys))
         {
             int count = 1;
-            LocalizationService.Reply(ctx, $"<color=white>{box}</color>:");
+            LocalizationService.Reply(ctx, FAMILIAR_BOX_HEADER_MESSAGE, box);
 
             foreach (var famKey in famKeys)
             {
@@ -139,14 +170,15 @@ internal static class FamiliarCommands
                 int prestiges = familiarPrestigeData_V2.FamiliarPrestige.TryGetValue(famKey, out var prestigeData) ? prestigeData : 0;
 
                 string levelAndPrestiges = prestiges > 0 ? $"[<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]" : $"[<color=white>{level}</color>]";
-                LocalizationService.Reply(ctx, $"<color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color> {levelAndPrestiges}" : $" {levelAndPrestiges}")}");
+                string suffix = familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color> {levelAndPrestiges}" : $" {levelAndPrestiges}";
+                LocalizationService.Reply(ctx, FAMILIAR_LIST_ENTRY_MESSAGE, count, famName, suffix);
                 count++;
             }
         }
         else if (string.IsNullOrEmpty(box))
         {
             // LocalizationService.Reply(ctx, "No active box! Try using <color=white>'.fam sb [Name]'</color> if you know the familiar you're looking for. (use quotes for names with a space)");
-            LocalizationService.Reply(ctx, "Couldn't find active box!");
+            LocalizationService.Reply(ctx, ACTIVE_BOX_NOT_FOUND_MESSAGE);
         }
     }
 
@@ -155,7 +187,7 @@ internal static class FamiliarCommands
     {
         if (!ConfigService.FamiliarSystem)
         {
-            LocalizationService.Reply(ctx, "Familiars are not enabled.");
+            LocalizationService.Reply(ctx, FAMILIARS_DISABLED_MESSAGE);
             return;
         }
 
@@ -170,7 +202,7 @@ internal static class FamiliarCommands
                 sets.Add(key);
             }
 
-            LocalizationService.Reply(ctx, $"Familiar Boxes:");
+            LocalizationService.Reply(ctx, FAMILIAR_BOXES_MESSAGE);
 
             List<string> colorizedBoxes = [..sets.Select(set => $"<color=white>{set}</color>")];
             const int maxPerMessage = 6;
@@ -184,7 +216,7 @@ internal static class FamiliarCommands
         }
         else
         {
-            LocalizationService.Reply(ctx, "You don't have any unlocks yet!");
+            LocalizationService.Reply(ctx, NO_UNLOCKS_MESSAGE);
         }
     }
 
@@ -193,7 +225,7 @@ internal static class FamiliarCommands
     {
         if (!ConfigService.FamiliarSystem)
         {
-            LocalizationService.Reply(ctx, "Familiars are not enabled.");
+            LocalizationService.Reply(ctx, FAMILIARS_DISABLED_MESSAGE);
             return;
         }
 
@@ -203,11 +235,11 @@ internal static class FamiliarCommands
         if (data.FamiliarUnlocks.TryGetValue(name, out var _))
         {
             steamId.SetFamiliarBox(name);
-            LocalizationService.Reply(ctx, $"Box Selected - <color=white>{name}</color>");
+            LocalizationService.Reply(ctx, BOX_SELECTED_MESSAGE, name);
         }
         else
         {
-            LocalizationService.Reply(ctx, "Couldn't find box!");
+            LocalizationService.Reply(ctx, BOX_NOT_FOUND_MESSAGE);
         }
     }
 
@@ -216,7 +248,7 @@ internal static class FamiliarCommands
     {
         if (!ConfigService.FamiliarSystem)
         {
-            LocalizationService.Reply(ctx, "Familiars are not enabled.");
+            LocalizationService.Reply(ctx, FAMILIARS_DISABLED_MESSAGE);
             return;
         }
 
@@ -238,11 +270,11 @@ internal static class FamiliarCommands
 
             // Save changes back to the FamiliarUnlocksManager
             SaveFamiliarUnlocksData(steamId, data);
-            LocalizationService.Reply(ctx, $"Box <color=white>{current}</color> renamed - <color=yellow>{name}</color>");
+            LocalizationService.Reply(ctx, BOX_RENAMED_MESSAGE, current, name);
         }
         else
         {
-            LocalizationService.Reply(ctx, "Couldn't find box to rename or there's already a box with that name!");
+            LocalizationService.Reply(ctx, BOX_RENAME_FAILED_MESSAGE);
         }
     }
 
@@ -251,7 +283,7 @@ internal static class FamiliarCommands
     {
         if (!ConfigService.FamiliarSystem)
         {
-            LocalizationService.Reply(ctx, "Familiars are not enabled.");
+            LocalizationService.Reply(ctx, FAMILIARS_DISABLED_MESSAGE);
             return;
         }
 
@@ -279,16 +311,16 @@ internal static class FamiliarCommands
                 }
 
                 PrefabGUID PrefabGUID = new(familiarId);
-                LocalizationService.Reply(ctx, "<color=green>{0}</color> moved - <color=white>{1}</color>", PrefabGUID.GetLocalizedName(), name);
+                LocalizationService.Reply(ctx, FAMILIAR_MOVED_MESSAGE, PrefabGUID.GetLocalizedName(), name);
             }
         }
         else if (data.FamiliarUnlocks.ContainsKey(name))
         {
-            LocalizationService.Reply(ctx, "Box is full!");
+            LocalizationService.Reply(ctx, BOX_FULL_MESSAGE);
         }
         else
         {
-            LocalizationService.Reply(ctx, "Couldn't find box!");
+            LocalizationService.Reply(ctx, BOX_NOT_FOUND_MESSAGE);
         }
     }
 
@@ -297,7 +329,7 @@ internal static class FamiliarCommands
     {
         if (!ConfigService.FamiliarSystem)
         {
-            LocalizationService.Reply(ctx, "Familiars are not enabled.");
+            LocalizationService.Reply(ctx, FAMILIARS_DISABLED_MESSAGE);
             return;
         }
 
@@ -310,15 +342,15 @@ internal static class FamiliarCommands
             data.FamiliarUnlocks.Remove(name);
             SaveFamiliarUnlocksData(steamId, data);
 
-            LocalizationService.Reply(ctx, $"Deleted box - <color=white>{name}</color>");
+            LocalizationService.Reply(ctx, BOX_DELETED_MESSAGE, name);
         }
         else if (data.FamiliarUnlocks.ContainsKey(name))
         {
-            LocalizationService.Reply(ctx, "Box is not empty!");
+            LocalizationService.Reply(ctx, BOX_NOT_EMPTY_MESSAGE);
         }
         else
         {
-            LocalizationService.Reply(ctx, "Couldn't find box!");
+            LocalizationService.Reply(ctx, BOX_NOT_FOUND_MESSAGE);
         }
     }
 
@@ -327,7 +359,7 @@ internal static class FamiliarCommands
     {
         if (!ConfigService.FamiliarSystem)
         {
-            LocalizationService.Reply(ctx, "Familiars are not enabled.");
+            LocalizationService.Reply(ctx, FAMILIARS_DISABLED_MESSAGE);
             return;
         }
 
@@ -340,11 +372,11 @@ internal static class FamiliarCommands
             data.FamiliarUnlocks.Add(name, []);
             SaveFamiliarUnlocksData(steamId, data);
 
-            LocalizationService.Reply(ctx, $"Added box - <color=white>{name}</color>");
+            LocalizationService.Reply(ctx, BOX_ADDED_MESSAGE, name);
         }
         else
         {
-            LocalizationService.Reply(ctx, $"Must have at least one unit unlocked to start adding boxes. Additionally, the total number of boxes cannot exceed <color=yellow>{BOX_CAP}</color>.");
+            LocalizationService.Reply(ctx, BOX_ADD_FAILED_MESSAGE, BOX_CAP);
         }
     }
 
@@ -353,14 +385,14 @@ internal static class FamiliarCommands
     {
         if (!ConfigService.FamiliarSystem)
         {
-            LocalizationService.Reply(ctx, "Familiars are not enabled.");
+            LocalizationService.Reply(ctx, FAMILIARS_DISABLED_MESSAGE);
             return;
         }
 
         PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
-            LocalizationService.Reply(ctx, $"Couldn't find player.");
+            LocalizationService.Reply(ctx, PLAYER_NOT_FOUND_MESSAGE);
             return;
         }
 
@@ -397,17 +429,17 @@ internal static class FamiliarCommands
     {
         if (!ConfigService.FamiliarSystem)
         {
-            LocalizationService.Reply(ctx, "Familiars are not enabled.");
+            LocalizationService.Reply(ctx, FAMILIARS_DISABLED_MESSAGE);
             return;
         }
         else if (!ConfigService.AllowVBloods)
         {
-            LocalizationService.Reply(ctx, "VBlood familiars are not enabled.");
+            LocalizationService.Reply(ctx, VBLOOD_FAMILIARS_DISABLED_MESSAGE);
             return;
         }
         else if (!ConfigService.PrimalEchoes)
         {
-            LocalizationService.Reply(ctx, "VBlood purchasing is not enabled.");
+            LocalizationService.Reply(ctx, VBLOOD_PURCHASING_DISABLED_MESSAGE);
             return;
         }
 
@@ -417,12 +449,12 @@ internal static class FamiliarCommands
 
         if (!vBloodPrefabGuids.Any())
         {
-            LocalizationService.Reply(ctx, "Couldn't find matching vBlood!");
+            LocalizationService.Reply(ctx, VBLOOD_NOT_FOUND_MESSAGE);
             return;
         }
         else if (vBloodPrefabGuids.Count > 1)
         {
-            LocalizationService.Reply(ctx, "Multiple matches, please be more specific!");
+            LocalizationService.Reply(ctx, VBLOOD_MULTIPLE_MATCHES_MESSAGE);
             return;
         }
 
@@ -430,7 +462,7 @@ internal static class FamiliarCommands
 
         if (IsBannedPrefabGuid(vBloodPrefabGuid))
         {
-            LocalizationService.Reply(ctx, "<color=white>{0}</color> is not available per configured familiar bans!", vBloodPrefabGuid.GetLocalizedName());
+            LocalizationService.Reply(ctx, VBLOOD_BANNED_MESSAGE, vBloodPrefabGuid.GetLocalizedName());
             return;
         }
         else
@@ -442,7 +474,7 @@ internal static class FamiliarCommands
 
                 if (unlocksData.FamiliarUnlocks.Values.Any(list => list.Contains(vBloodPrefabGuid.GuidHash)))
                 {
-                    LocalizationService.Reply(ctx, "<color=white>{0}</color> is already unlocked!", vBloodPrefabGuid.GetLocalizedName());
+                    LocalizationService.Reply(ctx, VBLOOD_ALREADY_UNLOCKED_MESSAGE, vBloodPrefabGuid.GetLocalizedName());
                     return;
                 }
 
@@ -458,11 +490,11 @@ internal static class FamiliarCommands
 
                 if (factoredCost <= 0)
                 {
-                    LocalizationService.Reply(ctx, $"Unable to verify cost for {vBloodPrefabGuid.GetPrefabName()}!");
+                    LocalizationService.Reply(ctx, VBLOOD_COST_VERIFY_FAILED_MESSAGE, vBloodPrefabGuid.GetPrefabName());
                 }
                 else if (!PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(exoItem))
                 {
-                    LocalizationService.Reply(ctx, $"Unable to verify exo prestige reward item! (<color=yellow>{exoItem}</color>)");
+                    LocalizationService.Reply(ctx, VBLOOD_REWARD_VERIFY_FAILED_MESSAGE, exoItem);
                 }
                 else if (InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.Event.SenderCharacterEntity, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, exoItem) >= factoredCost)
                 {
@@ -491,12 +523,12 @@ internal static class FamiliarCommands
                 }
                 else
                 {
-                    LocalizationService.Reply(ctx, "Not enough <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for {2}!", exoItem.GetLocalizedName(), factoredCost, vBloodPrefabGuid.GetPrefabName());
+                    LocalizationService.Reply(ctx, VBLOOD_NOT_ENOUGH_ITEMS_MESSAGE, exoItem.GetLocalizedName(), factoredCost, vBloodPrefabGuid.GetPrefabName());
                 }
             }
             else
             {
-                LocalizationService.Reply(ctx, $"Unable to verify tier for {vBloodPrefabGuid.GetPrefabName()}! Shouldn't really happen at this point and may want to inform the developer.");
+                LocalizationService.Reply(ctx, VBLOOD_TIER_VERIFY_FAILED_MESSAGE, vBloodPrefabGuid.GetPrefabName());
                 return;
             }
         }
@@ -507,7 +539,7 @@ internal static class FamiliarCommands
     {
         if (!ConfigService.FamiliarSystem)
         {
-            LocalizationService.Reply(ctx, "Familiars are not enabled.");
+            LocalizationService.Reply(ctx, FAMILIARS_DISABLED_MESSAGE);
             return;
         }
 
@@ -518,7 +550,7 @@ internal static class FamiliarCommands
         {
             if (choice < 1 || choice > familiarSet.Count)
             {
-                LocalizationService.Reply(ctx, $"Invalid choice, please use <color=white>1</color> to <color=white>{familiarSet.Count}</color> (Current List:<color=yellow>{activeBox}</color>)");
+                LocalizationService.Reply(ctx, INVALID_CHOICE_MESSAGE, familiarSet.Count, activeBox);
                 return;
             }
 
@@ -527,11 +559,11 @@ internal static class FamiliarCommands
             familiarSet.RemoveAt(choice - 1);
             SaveFamiliarUnlocksData(steamId, data);
 
-            LocalizationService.Reply(ctx, "<color=green>{0}</color> removed from <color=white>{1}</color>.", familiarId.GetLocalizedName(), activeBox);
+            LocalizationService.Reply(ctx, FAMILIAR_REMOVED_MESSAGE, familiarId.GetLocalizedName(), activeBox);
         }
         else
         {
-            LocalizationService.Reply(ctx, "Couldn't find active familiar box to remove from...");
+            LocalizationService.Reply(ctx, ACTIVE_BOX_REMOVE_NOT_FOUND_MESSAGE);
         }
     }
 
