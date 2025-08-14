@@ -250,6 +250,7 @@ def _run_translation(args, root: str, log_fp) -> None:
     translated: dict[str, str] = {}
     failures: dict[str, tuple[str, str]] = {}
     report: list[dict[str, str]] = []
+    category_counts: Counter[str] = Counter()
 
     def categorize(reason: str | None) -> str:
         if not reason:
@@ -281,14 +282,16 @@ def _run_translation(args, root: str, log_fp) -> None:
         if reason:
             msg += f" ({reason})"
             if record:
+                cat = category or categorize(reason)
                 report.append(
                     {
                         "hash": key,
                         "english": original,
                         "reason": reason,
-                        "category": category or categorize(reason),
+                        "category": cat,
                     }
                 )
+                category_counts[cat] += 1
         msg += f"\n  Original: {original}\n  Result: {result}"
         log_verbose(msg)
 
@@ -500,10 +503,9 @@ def _run_translation(args, root: str, log_fp) -> None:
     log_verbose(summary_msg)
     if not args.verbose:
         print(summary_msg)
-    if report:
-        counts = Counter(entry["category"] for entry in report)
+    if category_counts:
         breakdown_msg = "Report breakdown: " + ", ".join(
-            f"{k}: {v}" for k, v in sorted(counts.items())
+            f"{k}: {v}" for k, v in sorted(category_counts.items())
         )
     else:
         breakdown_msg = "Report breakdown: none"
