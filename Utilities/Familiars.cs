@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Resources;
+using Bloodcraft.Resources.Localization;
 using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Behaviours;
@@ -374,14 +375,14 @@ internal static class Familiars
             // Add to set if valid
             if (!prefabEntity.Read<PrefabGUID>().GetPrefabName().StartsWith("CHAR"))
             {
-                LocalizationService.Reply(ctx, "Invalid unit prefab (match found but does not start with CHAR/char).");
+                LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_INVALID_PREFAB);
                 return;
             }
 
             data.FamiliarUnlocks[activeBox].Add(prefabHash);
             SaveFamiliarUnlocksData(steamId, data);
 
-            LocalizationService.Reply(ctx, "<color=green>{0}</color> added to <color=white>{1}</color>.", new PrefabGUID(prefabHash).GetLocalizedName(), activeBox);
+            LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_ADD_SUCCESS, new PrefabGUID(prefabHash).GetLocalizedName(), activeBox);
         }
         else if (unit.ToLower().StartsWith("char")) // search for full and/or partial name match
         {
@@ -405,23 +406,23 @@ internal static class Familiars
             {
                 if (!prefabEntity.Read<PrefabGUID>().GetPrefabName().StartsWith("CHAR"))
                 {
-                    LocalizationService.Reply(ctx, "Invalid unit name (match found but does not start with CHAR/char).");
+                    LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_INVALID_NAME);
                     return;
                 }
 
                 data.FamiliarUnlocks[activeBox].Add(match.GuidHash);
                 SaveFamiliarUnlocksData(steamId, data);
 
-                LocalizationService.Reply(ctx, "<color=green>{0}</color> (<color=yellow>{1}</color>) added to <color=white>{2}</color>.", match.GetLocalizedName(), match.GuidHash, activeBox);
+                LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_ADD_SUCCESS_WITH_HASH, match.GetLocalizedName(), match.GuidHash, activeBox);
             }
             else
             {
-                LocalizationService.Reply(ctx, "Invalid unit name (no full or partial matches).");
+                LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_INVALID_NAME_NO_MATCH);
             }
         }
         else
         {
-            LocalizationService.Reply(ctx, "Invalid prefab (not an integer) or name (does not start with CHAR/char).");
+            LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_INVALID_PREFAB_OR_NAME);
         }
     }
     public static void TryReturnFamiliar(Entity playerCharacter, Entity familiar)
@@ -911,7 +912,7 @@ internal static class Familiars
 
         if (!steamId.HasActiveFamiliar())
         {
-            LocalizationService.Reply(ctx, "Couldn't find active familiar!");
+            LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_NOT_FOUND);
             return;
         }
 
@@ -931,7 +932,7 @@ internal static class Familiars
 
         if (prestigeData.FamiliarPrestige[familiarId] >= ConfigService.MaxFamiliarPrestiges)
         {
-            LocalizationService.Reply(ctx, "Your familiar has already prestiged the maximum number of times! (<color=white>{0}</color>)", ConfigService.MaxFamiliarPrestiges);
+            LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_PRESTIGE_MAX, ConfigService.MaxFamiliarPrestiges);
             return;
         }
 
@@ -984,7 +985,7 @@ internal static class Familiars
             Entity familiar = GetActiveFamiliar(playerCharacter);
             ModifyUnitStats(familiar, xpData.FamiliarExperience[familiarId].Key, steamId, familiarId);
 
-            LocalizationService.Reply(ctx, "Your familiar has prestiged [<color=#90EE90>{0}</color>]; the accumulated knowledge allowed them to retain their level!", prestigeLevel);
+            LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_PRESTIGE_RETAIN_LEVEL, prestigeLevel);
 
             /*
             if (value == -1)
@@ -999,7 +1000,7 @@ internal static class Familiars
         }
         else
         {
-            LocalizationService.Reply(ctx, "Failed to remove schematics from your inventory!");
+            LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_SCHEMATICS_REMOVE_FAILED);
         }
     }
     public static IEnumerator HandleFamiliarShapeshiftRoutine(User user, Entity playerCharacter, Entity familiar)

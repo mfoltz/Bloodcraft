@@ -16,6 +16,15 @@ internal static class MessageKeys
     public const string FAMILIAR_COMBAT_DISABLED = "Familiar combat <color=red>disabled</color>.";
     public const string FAMILIAR_INTERACT_DISMISSED = "Can't interact with familiar when dismissed!";
     public const string FAMILIAR_INTERACT_BINDING = "Can't interact with familiar when binding/unbinding!";
+    public const string FAMILIAR_INVALID_PREFAB = "Invalid unit prefab (match found but does not start with CHAR/char).";
+    public const string FAMILIAR_ADD_SUCCESS = "<color=green>{0}</color> added to <color=white>{1}</color>.";
+    public const string FAMILIAR_INVALID_NAME = "Invalid unit name (match found but does not start with CHAR/char).";
+    public const string FAMILIAR_ADD_SUCCESS_WITH_HASH = "<color=green>{0}</color> (<color=yellow>{1}</color>) added to <color=white>{2}</color>.";
+    public const string FAMILIAR_INVALID_NAME_NO_MATCH = "Invalid unit name (no full or partial matches).";
+    public const string FAMILIAR_INVALID_PREFAB_OR_NAME = "Invalid prefab (not an integer) or name (does not start with CHAR/char).";
+    public const string FAMILIAR_PRESTIGE_MAX = "Your familiar has already prestiged the maximum number of times! (<color=white>{0}</color>)";
+    public const string FAMILIAR_PRESTIGE_RETAIN_LEVEL = "Your familiar has prestiged [<color=#90EE90>{0}</color>]; the accumulated knowledge allowed them to retain their level!";
+    public const string FAMILIAR_SCHEMATICS_REMOVE_FAILED = "Failed to remove schematics from your inventory!";
 
     public const string CLASS_CHANGE_MISSING_ITEM = "You do not have enough of the required item to change classes (<color=#ffd9eb>{0}</color>x<color=white>{1}</color>)";
     public const string CLASS_CHANGE_REMOVE_FAILED = "Failed to remove enough of the item required (<color=#ffd9eb>{0}</color>x<color=white>{1}</color>)";

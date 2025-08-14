@@ -27,18 +27,13 @@
     "1076291728": "Sử dụng menu Vblood để theo dõi các ông chủ!",
     "1420278477": "Theo dõi chỉ có sẵn cho các nhiệm vụ tiêu diệt không đầy đủ.",
     "3546356968": "Đơn vị không hợp lệ prefab (kết hợp tìm thấy nhưng không bắt đầu với char/char).",
-    "2886300456": "<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> được thêm vào <color=white>{activeBox}</color>.",
     "2169578147": "Tên đơn vị không hợp lệ (được tìm thấy nhưng không bắt đầu với char/char).",
-    "2151120362": "<color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) được thêm vào <color=white>{activeBox}</color>.",
     "223311103": "Tên đơn vị không hợp lệ (không có kết hợp đầy đủ hoặc một phần).",
     "2155028867": "Prefab không hợp lệ (không phải số nguyên) hoặc tên (không bắt đầu với char/char).",
-    "3102592194": "Không thể tìm thấy hoạt động quen thuộc!",
-    "1057342822": "Sự quen thuộc của bạn đã có uy tín số lần tối đa! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)",
     "2689850927": "Loại thống kê uy tín quen thuộc không hợp lệ, sử dụng '<color=white>. Fam Lst</color>' để xem các tùy chọn.",
     "3125006928": "Quen thuộc đã có <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) từ uy tín, hãy sử dụng '<color=white>. Fam Lst</color>' để xem các tùy chọn.",
     "2846646667": "Chỉ số uy tín uy tín quen thuộc, sử dụng '<color=white>. Fam Lst</color>' để xem các tùy chọn.",
     "705325693": "Quen thuộc đã có tất cả các chỉ số uy tín! ('<color=white>. Fam pr</color>' thay vì '<color=white>.",
-    "2844729307": "Bạn quen thuộc của bạn đã uy tín [<color=#90EE90>{prestigeLevel}</color>]; Kiến thức tích lũy cho phép họ giữ lại cấp độ của họ!",
     "2712718738": "Bạn quen thuộc của bạn đã uy tín [<color=#90EE90>{prestigeLevel}</color>]; Kiến thức tích lũy cho phép họ giữ lại cấp độ của họ! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)",
     "872190851": "Không thể loại bỏ sơ đồ khỏi hàng tồn kho của bạn!",
     "3466860311": "Không thể loại bỏ đủ mục yêu cầu (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)",
@@ -425,7 +420,8 @@
     "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
     "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
     "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
-    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>."
+    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
+    "3097011724": "Invalid class, use '<color=white>.class l</color>' to see options."
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

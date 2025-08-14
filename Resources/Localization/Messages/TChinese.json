@@ -27,18 +27,13 @@
     "1076291728": "用 VBloud 選單追蹤老闆!",
     "1420278477": "追蹤只能做不完全的殺人任務",
     "3546356968": "不合法的單位 prefab( 找到匹配但不從 CHAR/ char 開始) 。",
-    "2886300456": "<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> 加入<color=white>{activeBox}</color>。",
     "2169578147": "不合法的單位名稱( 找到匹配但不從 CHAR/ char 開始 ) 。",
-    "2151120362": "<color=green>{match.GetLocalizedName()}</color>(<color=yellow>{match.GuidHash}</color>) 添加到<color=white>{activeBox}</color> 。",
     "223311103": "不合法的單位名稱( 沒有完全匹配或部分匹配 ) 。",
     "2155028867": "無效的 prefab( 不是整數) 或名稱( 不從 CHAR/ char 開始 ) 。",
-    "3102592194": "感覺不太熟!",
-    "1057342822": "你熟悉的已經聲名大噪了! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)",
     "2689850927": "無效的熟悉的聲望stat 類型, 使用 `<color=white>. fam lst </color> 查看選項 。",
     "3125006928": "熟人已經有 <color=#00FFFF> {FamiliarPrestigeStats[value]} </color> (<color=yellow>{value + 1}</color> ) 從預估, 使用 '<color=white>. fam lst </color> 查看選項 。",
     "2846646667": "無效的熟悉聲望stat, 使用 '<color=white>. fam lst </color>' 來查看選項 。",
     "705325693": "熟人已經有名聲了! (“<color=white>.fam pr </color> 而不是“<color=white>.fam pr PrestigeStat</color>”)",
-    "2844729307": "Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!",
     "2712718738": "Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)",
     "872190851": "從清單中移除圖片失敗 !",
     "3466860311": "移除所需項目失敗 (<color=#ffd9eb>{item.GetLocalizedName()}</color>x <color=white>{quantity}</color>)",
@@ -425,7 +420,8 @@
     "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
     "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
     "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
-    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>."
+    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
+    "3097011724": "Invalid class, use '<color=white>.class l</color>' to see options."
   },
   "_meta": {
     "1716911803": "Intentionally identical to English; dynamic placeholder"

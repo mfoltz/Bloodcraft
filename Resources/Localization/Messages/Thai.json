@@ -27,18 +27,13 @@
     "1076291728": "ใช้เมนูเลือด V เพื่อติดตามหัวหน้า!",
     "1420278477": "การติดตามมีไว้สําหรับภารกิจฆ่าที่ไม่สมบูรณ์เท่านั้น",
     "3546356968": "นําหน้าหน่วยไม่ถูกต้อง (พบตรงกันแต่ไม่ได้ขึ้นต้นด้วย CHAR/Char)",
-    "2886300456": "<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.",
     "2169578147": "ชื่อหน่วยไม่ถูกต้อง (พบที่ภาพแต่ไม่ได้ขึ้นต้นด้วย CHAR/Char)",
-    "2151120362": "<color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.",
     "223311103": "ชื่อหน่วยไม่ถูกต้อง (ไม่มีตรงกันเต็มหรือตรงกันบางส่วน)",
     "2155028867": "prefab ไม่ถูกต้อง (ไม่ใช่จํานวนเต็ม) หรือชื่อ (ไม่ได้เริ่มด้วย CHAR/Char)",
-    "3102592194": "หาความคุ้นเคยไม่ได้!",
-    "1057342822": "Your familiar has already prestiged the maximum number of times! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)",
     "2689850927": "Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.",
     "3125006928": "Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.",
     "2846646667": "Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.",
     "705325693": "Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')",
-    "2844729307": "Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!",
     "2712718738": "Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)",
     "872190851": "ล้มเหลวในการลบผังแป้นพิมพ์ออกจากคลังแพกเกจของคุณ!",
     "3466860311": "Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)",
@@ -425,6 +420,7 @@
     "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
     "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
     "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
-    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>."
+    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
+    "3097011724": "Invalid class, use '<color=white>.class l</color>' to see options."
   }
 }

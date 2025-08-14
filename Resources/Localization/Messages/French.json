@@ -27,18 +27,13 @@
     "1076291728": "Utilisez le menu VBlood pour suivre les patrons !",
     "1420278477": "Le suivi n'est disponible que pour les quêtes incomplètes.",
     "3546356968": "Unité non valide préfab (match trouvé mais ne commence pas avec CHAR/char).",
-    "2886300456": "<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> ajouté à <color=white>{activeBox}</color>.",
     "2169578147": "Nom de l'unité non valide (correspondant trouvé mais ne commence pas avec CHAR/char).",
-    "2151120362": "<color=green>{match.GetLocalizedName()}</color><color=yellow>{match.GuidHash}</color> ajouté à <color=white>{activeBox}</color>.",
     "223311103": "Nom de l'unité non valide (aucune correspondance complète ou partielle).",
     "2155028867": "Préfab non valide (pas un entier) ou nom (ne commence pas avec CHAR/char).",
-    "3102592194": "Je n'ai pas trouvé de familier actif !",
-    "1057342822": "Votre familier a déjà apprécié le nombre maximum de fois! <color=white>{ConfigService.MaxFamiliarPrestiges}</color>",
     "2689850927": "Type de statistique de prestige inconnu, utilisez '<color=white>.fam lst</color>' pour voir les options.",
     "3125006928": "Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.",
     "2846646667": "Statistiques de prestige familières non valides, utilisez '<color=white>.fam lst</color>' pour voir les options.",
     "705325693": "Familiar a déjà toutes les statistiques de prestige! ('<color=white>.fam pr</color>' au lieu de '<color=white>.fam pr PrestigeStat</color>')",
-    "2844729307": "Votre familier a connu <color=#90EE90>{prestigeLevel}</color>; les connaissances accumulées leur ont permis de conserver leur niveau!",
     "2712718738": "Votre familier a connu <color=#90EE90>{prestigeLevel}</color> ; les connaissances accumulées leur ont permis de conserver leur niveau ! <color=#00FFFF>{FamiliarPrestigeStats[value]}</color>",
     "872190851": "Impossible de supprimer les schémas de votre inventaire !",
     "3466860311": "Échec de l'enlèvement de l'élément requis <color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>",
@@ -425,6 +420,7 @@
     "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
     "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
     "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
-    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>."
+    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
+    "3097011724": "Invalid class, use '<color=white>.class l</color>' to see options."
   }
 }

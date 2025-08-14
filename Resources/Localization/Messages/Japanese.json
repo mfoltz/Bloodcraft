@@ -27,18 +27,13 @@
     "1076291728": "VBloodメニューを使ってボスを追跡!",
     "1420278477": "追跡は、不完全なキルクエストのためにのみ利用可能です。",
     "3546356968": "Invalidユニットプレハブ(マッチが見つかりませんが、CHAR/charでは起動しません)。",
-    "2886300456": "<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color>に<color=white>{activeBox}</color>を追加しました。",
     "2169578147": "無効なユニット名(マッチが見つかりませんが、CHAR/charでは起動しません)。",
-    "2151120362": "<color=green>{match.GetLocalizedName()}</color>(<color=yellow>{match.GuidHash}</color>)に<color=white>{activeBox}</color>を追加しました。",
     "223311103": "無効なユニット名(完全または部分的なマッチなし)。",
     "2155028867": "無効なプレハブ(整数ではなく)または名前(CHAR/charで起動しない)。",
-    "3102592194": "なかなか見つからない!",
-    "1057342822": "既にお馴染みの回数が最大で数回を優先しています! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>))",
     "2689850927": "無効なプリステージのstatタイプは、オプションを参照するために'<color=white>.fam lst</color>を使用します。",
     "3125006928": "Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.",
     "2846646667": "Invalid のよくある prestige のstat は、'<color=white>.fam lst</color>' を使用して、オプションが表示されます。",
     "705325693": "Familiarは既にすべての威信の統計を持っています! ('<color=white>).fam pr</color>' の代わりに '<color=white>.fam pr PrestigeStat</color>')')",
-    "2844729307": "身近な方は「<color=#90EE90>{prestigeLevel}</color>」を優先してあります。蓄積された知識は、そのレベルを維持できるようにしました!",
     "2712718738": "身近な方は「<color=#90EE90>{prestigeLevel}</color>」を優先しました。 (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>))",
     "872190851": "在庫から回路図を削除できない!",
     "3466860311": "必要な項目(<color=#ffd9eb>{item.GetLocalizedName()}</color>)x<color=white>{quantity}</color>)を十分に削除できなかった",
@@ -425,6 +420,7 @@
     "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
     "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
     "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
-    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>."
+    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
+    "3097011724": "Invalid class, use '<color=white>.class l</color>' to see options."
   }
 }

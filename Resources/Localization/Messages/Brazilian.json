@@ -27,18 +27,13 @@
     "1076291728": "Use o menu VBlood para rastrear chefes!",
     "1420278477": "O rastreamento só está disponível para missões incompletas.",
     "3546356968": "Unidade inválida pré-fabricada (match encontrado mas não começa com CHAR/char).",
-    "2886300456": "<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> adicionado a <color=white>{activeBox}</color>.",
     "2169578147": "Nome de unidade inválido (match encontrado mas não começa com CHAR/char).",
-    "2151120362": "<color=green>{match.GetLocalizedName()}</color><color=yellow>{match.GuidHash}</color> adicionado a <color=white>{activeBox}</color>.",
     "223311103": "Nome de unidade inválido (sem correspondências completas ou parciais).",
     "2155028867": "Prefab inválido (não um inteiro) ou nome (não começa com CHAR/char).",
-    "3102592194": "Não achei um familiar ativo!",
-    "1057342822": "Seu familiar já prestigiou o número máximo de vezes! <color=white>{ConfigService.MaxFamiliarPrestiges}</color>",
     "2689850927": "Tipo de estatísticas de prestígio familiar inválido, use '<color=white>.fam lst</color>' para ver opções.",
     "3125006928": "Familiar já tem <color=#00FFFF>{FamiliarPrestigeStats[value]}</color><color=yellow>{value + 1}</color></color></color><color=white>.fam lst</color>' para ver opções.",
     "2846646667": "Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.",
     "705325693": "Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')",
-    "2844729307": "Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!",
     "2712718738": "Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)",
     "872190851": "Não conseguiu remover os esquemas do seu inventário!",
     "3466860311": "Não foi possível remover o suficiente do item necessário <color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>",
@@ -425,7 +420,8 @@
     "3227554981": "<color=#c0c0c0>{0}</color> peritagem definida para <color=white>{1}</color><color=green>{2}</color>",
     "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
     "1601487032": "Primeira vaga desarmada definida para <color=white>{0}</color><color=green>{1}</color>.",
-    "3060695596": "Segundo lugar desarmado definido para <color=white>{0}</color><color=green>{1}</color>."
+    "3060695596": "Segundo lugar desarmado definido para <color=white>{0}</color><color=green>{1}</color>.",
+    "3097011724": "Invalid class, use '<color=white>.class l</color>' to see options."
   },
   "_meta": {
     "1716911803": "Intencionalmente idêntico ao inglês; placeholder dinâmico"

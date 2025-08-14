@@ -27,18 +27,13 @@
     "1076291728": "patronları takip etmek için V Blood menüsünü kullanın!",
     "1420278477": "Tracking is only available for incomplete kill quests.",
     "3546356968": "Invalid ünitesi prefab (eşit bulundu ama CHAR/char ile başlamaz).",
-    "2886300456": "<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.",
     "2169578147": "Invalid ünitesi adı (eşit bulundu ama CHAR/char ile başlamaz).",
-    "2151120362": "<color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.",
     "223311103": "Invalid ünitesi adı (tam veya kısmi maç yoktur).",
     "2155028867": "Invalid prefab (bir tamsayı değil) veya isim ( CHAR/char ile başlamaz).",
-    "3102592194": "Aktif tanıdık bulamaz!",
-    "1057342822": "Bilinenin zaten en fazla zaman sayısına prestitü! <color=white>{ConfigService.MaxFamiliarPrestiges}</color>).",
     "2689850927": "Invalid tanıdık prestij istatistik türü, “<color=white>.fam lst</color>) seçenekleri görmek için.",
     "3125006928": "Familiar zaten <color=#00FFFF>{FamiliarPrestigeStats[value]}</color><color=yellow>{value + 1}</color> prestijden, “<color=white> kullanmak.fam lst</color> seçenekleri görmek için.",
     "2846646667": "Invalid tanıdık prestij stat, \"<color=white>.fam lst</color>) seçenekleri görmek için.",
     "705325693": "Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')",
-    "2844729307": "Sizin tanıdıkınız <color=#90EE90>{prestigeLevel}</color>; Birleşmiş bilgi onların seviyesini korumalarına izin verdi!",
     "2712718738": "Sizin tanıdıkınız <color=#90EE90>{prestigeLevel}</color>; Birleşmiş bilgi onların seviyesini korumalarına izin verdi! <color=#00FFFF>{FamiliarPrestigeStats[value]}</color>).",
     "872190851": "Algoritmaları envanterinizden kaldırmak için başarısız oldu!",
     "3466860311": "Gerekli eşyayı yeterince ortadan kaldırmak için başarısız oldu (<color=#ffd9eb>{item.GetLocalizedName()}</color><color=white>{quantity}</color>).",
@@ -425,6 +420,7 @@
     "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
     "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
     "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
-    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>."
+    "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
+    "3097011724": "Invalid class, use '<color=white>.class l</color>' to see options."
   }
 }
