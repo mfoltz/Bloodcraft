@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "박쥐 형태를 사용할 때 감정 동작을 사용할 수 없습니다!",
     "familiar-interact-combat": "전투 중에 친숙한 것과 상호 작용할 수 없습니다!",
     "shapeshift-select-form": "먼저 잠금 해제 한 양식을 선택하십시오! ( '<color=white>. Prestige SF <color=orange>] EvolvedVampire | FruptedSerpent </color> </color>')",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "PVP 전투 중에 친숙한 전화를 할 수 없습니다!",
     "familiar-active-not-exist": "활성 친숙한 존재가 존재하지 않습니다! 그것이 올바르게 보이지 않는 경우 '<color=white>. Fam Reset </color>'을 사용해보십시오.",
     "familiar-not-found": "친숙한 친숙한 것을 찾을 수 없었습니다 ...",

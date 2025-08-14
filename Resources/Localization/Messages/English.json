@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "You can't use emote actions when using bat form!",
     "familiar-interact-combat": "You can't interact with your familiar during combat!",
     "shapeshift-select-form": "Select a form you've unlocked first! ('<color=white>.prestige sf [<color=orange>EvolvedVampire|CorruptedSerpent</color>]</color>')",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "You can't call your familiar during PvP combat!",
     "familiar-active-not-exist": "Active familiar doesn't exist! If that doesn't seem right try using '<color=white>.fam reset</color>'.",
     "familiar-not-found": "Couldn't find active familiar...",

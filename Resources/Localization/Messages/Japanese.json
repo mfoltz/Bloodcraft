@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "BATフォームを使用するとき、Emoteアクションを使用することはできません！",
     "familiar-interact-combat": "戦闘中に馴染みのあるものとやり取りすることはできません！",
     "shapeshift-select-form": "最初にロックを解除したフォームを選択してください！ （ '<color=white>。prestige sf <color=orange> evolvedvampire | corruptedserpent </color>] </color>'）",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "PVP戦闘中に馴染みのある電話をかけることはできません！",
     "familiar-active-not-exist": "アクティブななじみは存在しません！それが正しくないように見える場合は、 '<color=white>。fam reset </color>'を使用してみてください。",
     "familiar-not-found": "アクティブなおなじみを見つけることができませんでした...",

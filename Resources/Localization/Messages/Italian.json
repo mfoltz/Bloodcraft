@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "Non puoi usare le azioni Emote quando si utilizza il modulo BAT!",
     "familiar-interact-combat": "Non puoi interagire con il tuo familiare durante il combattimento!",
     "shapeshift-select-form": "Seleziona un modulo che hai sbloccato per primo! ;",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "Non puoi chiamare il tuo familiare durante il combattimento PVP!",
     "familiar-active-not-exist": "Active Familial non esiste! Se questo non sembra giusto, prova a usare '<color=white>. FAM RESET </color>'.",
     "familiar-not-found": "Non sono riuscito a trovare familiari attivi ...",

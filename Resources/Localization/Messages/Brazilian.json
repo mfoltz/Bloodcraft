@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "Você não pode usar ações emotivas quando usa forma de morcego!",
     "familiar-interact-combat": "Você não pode interagir com seu familiar durante o combate!",
     "shapeshift-select-form": "Selecione um formulário que você destrancou primeiro! <color=white>. Prestige sf <color=orange> Evoluído Vampire CorrompidoSerpente</color></color>'",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "Você não pode chamar seu familiar durante o combate PvP!",
     "familiar-active-not-exist": "Ativo familiar não existe! Se isso não parece certo tente usar '<color=white>.fam reset</color>'.",
     "familiar-not-found": "Não achei familiar...",

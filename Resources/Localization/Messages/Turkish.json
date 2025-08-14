@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "BAT formunu kullanırken Emote eylemlerini kullanamazsınız!",
     "familiar-interact-combat": "Savaş sırasında tanıdıklarınızla etkileşime giremezsiniz!",
     "shapeshift-select-form": "Önce kilidini açtığınız bir form seçin! ('<color=white>.",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "PVP savaşı sırasında tanıdıklarınızı arayamazsınız!",
     "familiar-active-not-exist": "Aktif tanıdık mevcut değil! Bu doğru görünmüyorsa '<color=white>. Fam sıfırlama </color>' kullanmayı deneyin.",
     "familiar-not-found": "Aktif tanıdık bulamadım ...",

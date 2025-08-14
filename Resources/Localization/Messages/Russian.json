@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "Вы не можете использовать эмоциональные действия при использовании формы летучей мыши!",
     "familiar-interact-combat": "Вы не можете взаимодействовать со своим знакомым во время боя!",
     "shapeshift-select-form": "Выберите форму, которую вы разблокировали в первую очередь! ('<color=white>. Prestige sf <color=orange> evolvedvampire | corruptedSerpent </color>] </color>')",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "Вы не можете назвать свое знакомое во время Pvp Combat!",
     "familiar-active-not-exist": "Активного знакомства не существует! Если это не кажется правильным, попробуйте использовать '<color=white>. Fam reset </color>'.",
     "familiar-not-found": "Не мог найти активного знакомого ...",

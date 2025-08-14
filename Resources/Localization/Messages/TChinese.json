@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "使用蝙蝠表單時，您不能使用表情動作！",
     "familiar-interact-combat": "您無法在戰鬥中與熟悉的互動！",
     "shapeshift-select-form": "請先選擇您已解鎖的形態！('<color=white>.prestige sf [<color=orange>EvolvedVampire|CorruptedSerpent</color>]</color>')",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "您不能在PVP戰鬥中打電話給您的熟悉！",
     "familiar-active-not-exist": "主動熟悉不存在！如果這似乎不正確，請嘗試使用'<color=white>。 fam reset </color>'。",
     "familiar-not-found": "找不到熟悉的活躍...",

@@ -404,6 +404,7 @@
     "emote-actions-bat-form": "คุณไม่สามารถใช้การกระทำ EMOTE เมื่อใช้แบบฟอร์ม BAT!",
     "familiar-interact-combat": "คุณไม่สามารถโต้ตอบกับความคุ้นเคยระหว่างการต่อสู้ได้!",
     "shapeshift-select-form": "เลือกแบบฟอร์มที่คุณปลดล็อคก่อน! ('<color=white>. Prestige SF [<color=orange> EvolvedVampire | Corruptedserpent </color>] </color>') ')",
+    "shapeshift-not-enough-energy": "Not enough energy to maintain form... (<color=yellow>{0}</color>)",
     "familiar-call-pvp-combat": "คุณไม่สามารถโทรหาที่คุ้นเคยระหว่างการต่อสู้ PVP!",
     "familiar-active-not-exist": "ไม่คุ้นเคยไม่มีอยู่จริง! หากดูเหมือนว่าไม่ถูกต้องลองใช้ '<color=white>. FAM รีเซ็ต </color>'",
     "familiar-not-found": "ไม่พบที่คุ้นเคย ...",
