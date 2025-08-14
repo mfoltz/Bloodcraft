@@ -20,6 +20,14 @@ LocalizationService.Reply(ctx, "You're level {0}", level);
 
 When you add or change a message, update every JSON file under `Resources/Localization/Messages` to include the same numbered placeholders `{0}`, `{1}`, etc. so translations match the English template.
 
+Propagate hash keys from the English source into each language file by running:
+
+```bash
+python Tools/propagate_hashes.py Resources/Localization/Messages/<Language>.json
+```
+
+The script preserves existing translations, adds any new English hashes, and removes obsolete ones. See [`Tools/propagate_hashes.py`](../Tools/propagate_hashes.py) for details.
+
 ## Automated Translation for Messages
 
 Only the JSON files in `Resources/Localization/Messages` contain user-facing messages. Use Argos Translate to automate translating these files:
