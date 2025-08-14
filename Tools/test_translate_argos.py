@@ -122,7 +122,7 @@ def test_exit_on_fix_tokens_failure(tmp_path, monkeypatch):
     assert exc.value.code == 1
 
 
-def test_exit_when_skipped_report_has_entries(tmp_path, monkeypatch):
+def test_fallback_to_english_and_reports(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
     messages_dir.mkdir(parents=True)
@@ -167,10 +167,63 @@ def test_exit_when_skipped_report_has_entries(tmp_path, monkeypatch):
         ],
     )
 
-    with pytest.raises(SystemExit) as exc:
-        translate_argos.main()
-    assert exc.value.code == 1
+    translate_argos.main()
     assert report_path.is_file()
+    contents = report_path.read_text()
+    assert "fallback" in contents
+
+
+def test_strict_retry_succeeds(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "<b>Hello</b>"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    report_path = root / "skipped.csv"
+
+    class DummyTranslator:
+        def translate(self, text):
+            if "__T0__" in text:
+                return "__T0__Bonjour__T1__"
+            return "[[TOKEN_1]]Bonjour[[TOKEN_0]]"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--report-file",
+            str(report_path),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+    data = json.loads((root / target_rel).read_text())
+    assert data["Messages"]["hash"] == "<b>Bonjour</b>"
+    assert report_path.read_text().strip().splitlines() == ["hash,english,reason"]
 
 
 def test_reorder_tokens_swapped():
