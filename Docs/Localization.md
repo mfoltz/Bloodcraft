@@ -136,6 +136,8 @@ Use this to quickly locate messages that still need localization.
   ```
 - **Slow translations**: The `--verbose` option can produce huge output and slow processing. Consider omitting it or lowering `--batch-size`.
 - **Missing SDKs**: `dotnet` may be absent on minimal systems; ensure the .NET SDK is installed before running checks.
+- **.NET 6 runtime**: The project targets .NET 6; install `dotnet-runtime-6.0` from Microsoft's package feed even if newer SDKs are present.
+- **Translator stalls**: After reporting skipped rows the translator may appear idle; lower `--batch-size` or drop `--verbose` to speed it up.
 - **Token mismatches**: Entries listed in `skipped.csv` often need manual review and translation.
 
 ### Follow-up
