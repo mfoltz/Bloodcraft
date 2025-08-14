@@ -52,6 +52,23 @@ def unprotect(text: str, tokens: List[str]) -> str:
 
 def normalize_tokens(text: str) -> str:
     """Normalize token formatting in Argos output."""
+    text = re.sub(r"\]\s+\[\[", "][[", text)
+
+    # Merge cases where Argos splits multi-digit token numbers.
+    # ``[[TOKEN_1 0]]`` -> ``[[TOKEN_10]]``
+    def merge_inner(m: re.Match) -> str:
+        digits = re.sub(r"\s+", "", m.group(1))
+        return f"[[TOKEN_{digits}]]"
+
+    text = re.sub(r"\[\[TOKEN_((?:\d\s*)+\d)\]\]", merge_inner, text)
+
+    # ``[[TOKEN_1]][[TOKEN_0]]`` -> ``[[TOKEN_10]]``
+    def merge_adjacent(m: re.Match) -> str:
+        digits = re.findall(r"TOKEN_(\d)", m.group(0))
+        return f"[[TOKEN_{''.join(digits)}]]"
+
+    text = re.sub(r"(?:\[\[TOKEN_\d\]\]){2,}", merge_adjacent, text)
+
     text = STRICT_TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
     text = TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
     text = TOKEN_WORD.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
