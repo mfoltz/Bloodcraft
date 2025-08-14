@@ -2,6 +2,12 @@
 
 Bloodcraft uses hash-based localization. Follow these steps when adding or editing messages.
 
+Before introducing a new message, check the catalog in
+`Docs/MessageKeys.md` to avoid creating duplicate entries. Run
+`python Tools/generate_message_catalog.py` if you change
+`Resources/Localization/Messages/English.json` so the catalog stays
+current.
+
 ## Replace interpolated strings
 
 Instead of C# string interpolation, use `LocalizationService.Reply` with numbered placeholders:
