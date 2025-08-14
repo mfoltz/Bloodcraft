@@ -281,6 +281,8 @@ def main():
             return "untranslated"
         if "interpolation" in r:
             return "interpolation"
+        if "placeholder" in r or "tokens only" in r or "token only" in r:
+            return "placeholder"
         return "other"
 
     def log_entry(
@@ -361,8 +363,20 @@ def main():
                 result = result.replace(f" {TOKEN_SENTINEL}", "").replace(TOKEN_SENTINEL, "")
             result = normalize_tokens(result)
             result, reordered = reorder_tokens(result, len(tokens))
-
             stripped = TOKEN_RE.sub("", result)
+            if stripped.strip() == "":
+                reason = "placeholders only"
+                category = categorize(reason)
+                log_entry(
+                    key,
+                    english[key],
+                    result,
+                    reason,
+                    category=category,
+                )
+                translated[key] = english[key]
+                failures[key] = (reason, category)
+                continue
             if "[" in stripped or "]" in stripped:
                 reason = "stray brackets"
                 category = categorize(reason)
@@ -464,7 +478,7 @@ def main():
         return True, un
 
     for key, (_initial_reason, category) in failures.items():
-        if category == "interpolation":
+        if category in ("interpolation", "placeholder"):
             continue
         ok, out = strict_retry(key)
         if ok:
