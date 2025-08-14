@@ -51,8 +51,12 @@
 		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRisingDedicatedServer\BepInEx\plugins" />
 	</Target>
 	
-	<Target Name="GenerateREADME" Condition="'$(RunGenerateREADME)' == 'true'" AfterTargets="Build">
-		<Exec Command="dotnet &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;$(ProjectDir)Commands&quot; &quot;$(ProjectDir)README.md&quot;" />
-	</Target>
-	
+        <Target Name="GenerateREADME" Condition="'$(RunGenerateREADME)' == 'true'" AfterTargets="Build">
+                <Exec Command="dotnet &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;$(ProjectDir)Commands&quot; &quot;$(ProjectDir)README.md&quot;" />
+        </Target>
+
+        <Target Name="CheckLocalizationStrings" BeforeTargets="BeforeBuild">
+                <Exec Command="python3 &quot;$(ProjectDir)Tools/check_localization_reply.py&quot;" />
+        </Target>
+
 </Project>
