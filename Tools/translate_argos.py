@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 import time
+import traceback
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from typing import List
@@ -183,59 +184,17 @@ def translate_batch(
     return results, timed_out
 
 
-def main():
-    ap = argparse.ArgumentParser(
-        description="Translate message JSON files with Argos Translate",
-        epilog="Reassemble and install the Argos model before running this script.",
-    )
-    ap.add_argument("target_file", help="Path to the target language JSON file")
-    ap.add_argument("--from", dest="src", default="en", help="Source language code (default: en)")
-    ap.add_argument("--to", dest="dst", required=True, help="Target language code")
-    ap.add_argument("--root", default=os.path.dirname(os.path.dirname(__file__)), help="Repo root")
-    ap.add_argument("--batch-size", type=int, default=100, help="Number of lines to translate per request")
-    ap.add_argument(
-        "--max-retries", type=int, default=3, help="Retry failed translations up to this many times"
-    )
-    ap.add_argument(
-        "--timeout",
-        type=int,
-        default=60,
-        help="Abort a single line if it takes longer than this many seconds",
-    )
-    ap.add_argument("--overwrite", action="store_true", help="Translate all messages even if already present")
-    ap.add_argument("--verbose", action="store_true", help="Print per-message translation details")
-    ap.add_argument(
-        "--log-file",
-        help="Write verbose output to this file; missing directories are created",
-    )
-    ap.add_argument(
-        "--report-file",
-        help=(
-            "Write skipped hashes and reasons to this JSON or CSV file; "
-            "missing directories are created"
-        ),
-    )
-    args = ap.parse_args()
-
-    root = os.path.abspath(args.root)
-
+def _run_translation(args, root: str, log_fp) -> None:
     translator = argos_translate.get_translation_from_codes(args.src, args.dst)
     if translator is None:
         ensure_model_installed(root, args.dst)
         argos_translate.load_installed_languages()
         translator = argos_translate.get_translation_from_codes(args.src, args.dst)
     if translator is None:
-        raise RuntimeError(
+        raise SystemExit(
             f"No Argos translation model for {args.src}->{args.dst}. "
             "Assemble or install the model, or run `.codex/install.sh`."
         )
-
-    log_fp = None
-    if args.log_file:
-        log_dir = os.path.dirname(args.log_file)
-        if log_dir:
-            os.makedirs(log_dir, exist_ok=True)
-        log_fp = open(args.log_file, "w", encoding="utf-8")
 
     def log_verbose(msg: str) -> None:
         if args.verbose:
@@ -243,8 +202,12 @@ def main():
         if log_fp:
             log_fp.write(msg + "\n")
 
-    print("NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.")
-    english_path = os.path.join(root, "Resources", "Localization", "Messages", "English.json")
+    print(
+        "NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables."
+    )
+    english_path = os.path.join(
+        root, "Resources", "Localization", "Messages", "English.json"
+    )
     target_path = os.path.join(root, args.target_file)
 
     with open(english_path, "r", encoding="utf-8") as f:
@@ -381,20 +344,21 @@ def main():
             if token_only:
                 if TOKEN_SENTINEL not in result:
                     reason = "sentinel missing"
-                    category = "sentinel"
+                    category = categorize(reason)
                     log_entry(
                         key,
                         english[key],
-                        result,
+                        english[key],
                         reason,
                         category=category,
-                        record=False,
                     )
                     failures[key] = (reason, category)
                     continue
-                result = result.replace(f" {TOKEN_SENTINEL}", "").replace(TOKEN_SENTINEL, "")
+                result = result.replace(f" {TOKEN_SENTINEL}", "").replace(
+                    TOKEN_SENTINEL, ""
+                )
             result = normalize_tokens(result)
-            result, reordered = reorder_tokens(result, len(tokens))
+            result, changed = reorder_tokens(result, len(tokens))
             stripped = TOKEN_RE.sub("", result)
             if stripped.strip() == "":
                 reason = "placeholders only"
@@ -422,7 +386,6 @@ def main():
                 )
                 failures[key] = (reason, category)
                 continue
-
             found_tokens = TOKEN_RE.findall(result)
             expected = [str(i) for i in range(len(tokens))]
             if set(found_tokens) != set(expected):
@@ -438,34 +401,27 @@ def main():
                 )
                 failures[key] = (reason, category)
                 continue
-            if reordered:
-                log_verbose(f"Normalized token order for {key}: {found_tokens} -> {expected}")
             un = unprotect(result, tokens)
             un = un.replace("\\u003C", "<").replace("\\u003E", ">")
             if un == english[key]:
                 reason = "identical to source"
-                category = "identical"
-                log_entry(
-                    key,
-                    english[key],
-                    un,
-                    reason,
-                    category=category,
-                    record=False,
-                )
+                category = categorize(reason)
+                log_entry(key, english[key], un, reason, category=category)
+                translated[key] = un
                 failures[key] = (reason, category)
                 continue
             if contains_english(un):
                 reason = "contains English"
-                category = "untranslated"
-                log_entry(
-                    key,
-                    english[key],
-                    un,
-                    reason,
-                    category=category,
-                    record=False,
-                )
+                category = categorize(reason)
+                log_entry(key, english[key], un, reason, category=category)
+                translated[key] = english[key]
+                failures[key] = (reason, category)
+                continue
+            if changed:
+                reason = "tokens reordered"
+                category = categorize(reason)
+                log_entry(key, english[key], un, reason, category=category)
+                translated[key] = un
                 failures[key] = (reason, category)
                 continue
             translated[key] = un
@@ -497,7 +453,9 @@ def main():
         if token_only:
             if TOKEN_SENTINEL not in result:
                 return False, "sentinel missing on strict retry"
-            result = result.replace(f" {TOKEN_SENTINEL}", "").replace(TOKEN_SENTINEL, "")
+            result = result.replace(f" {TOKEN_SENTINEL}", "").replace(
+                TOKEN_SENTINEL, ""
+            )
         result = normalize_tokens(result)
         result, _ = reorder_tokens(result, len(tokens))
         stripped = TOKEN_RE.sub("", result)
@@ -569,9 +527,6 @@ def main():
 
     print(f"Wrote translations to {target_path}")
 
-    if log_fp:
-        log_fp.close()
-
     if args.report_file:
         report_dir = os.path.dirname(args.report_file)
         if report_dir:
@@ -581,12 +536,80 @@ def main():
             if ext == ".json":
                 json.dump(report, fp, indent=2, ensure_ascii=False)
             elif ext == ".csv":
-                writer = csv.DictWriter(fp, fieldnames=["hash", "english", "reason", "category"])
+                writer = csv.DictWriter(
+                    fp, fieldnames=["hash", "english", "reason", "category"]
+                )
                 writer.writeheader()
                 writer.writerows(report)
             else:
                 raise RuntimeError("Report file must end with .json or .csv")
         print(f"Wrote skip report to {args.report_file}")
+
+def main():
+    ap = argparse.ArgumentParser(
+        description="Translate message JSON files with Argos Translate",
+        epilog="Reassemble and install the Argos model before running this script.",
+    )
+    ap.add_argument("target_file", help="Path to the target language JSON file")
+    ap.add_argument("--from", dest="src", default="en", help="Source language code (default: en)")
+    ap.add_argument("--to", dest="dst", required=True, help="Target language code")
+    ap.add_argument("--root", default=os.path.dirname(os.path.dirname(__file__)), help="Repo root")
+    ap.add_argument("--batch-size", type=int, default=100, help="Number of lines to translate per request")
+    ap.add_argument(
+        "--max-retries", type=int, default=3, help="Retry failed translations up to this many times",
+    )
+    ap.add_argument(
+        "--timeout",
+        type=int,
+        default=60,
+        help="Abort a single line if it takes longer than this many seconds",
+    )
+    ap.add_argument("--overwrite", action="store_true", help="Translate all messages even if already present")
+    ap.add_argument("--verbose", action="store_true", help="Print per-message translation details")
+    ap.add_argument(
+        "--log-file",
+        help="Write verbose output to this file; missing directories are created",
+    )
+    ap.add_argument(
+        "--report-file",
+        help=(
+            "Write skipped hashes and reasons to this JSON or CSV file; "
+            "missing directories are created"
+        ),
+    )
+    args = ap.parse_args()
+
+    log_fp = None
+    if args.log_file:
+        log_dir = os.path.dirname(args.log_file)
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
+        log_fp = open(args.log_file, "w", encoding="utf-8")
+
+    root = os.path.abspath(args.root)
+
+    try:
+        _run_translation(args, root, log_fp)
+    except SystemExit as e:
+        if e.code not in (0, None):
+            msg = str(e)
+            if not msg or msg == str(e.code):
+                msg = f"Exited with code {e.code}"
+            print(msg, file=sys.stderr)
+            if log_fp:
+                log_fp.write(msg + "\n")
+        raise
+    except Exception as e:
+        msg = f"Unhandled exception: {e}"
+        print(msg, file=sys.stderr)
+        if log_fp:
+            log_fp.write(msg + "\n")
+            log_fp.write(traceback.format_exc() + "\n")
+        raise SystemExit(1)
+    finally:
+        if log_fp:
+            log_fp.close()
+
 
 if __name__ == "__main__":
     main()
