@@ -12,7 +12,7 @@ using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 
 namespace Bloodcraft.Interfaces;
-internal class EclipseInterface
+internal static class EclipseInterface // terrible name but do later
 {
     public static readonly bool ExtraRecipes = ConfigService.ExtraRecipes;
     public static readonly int PrimalCost = ConfigService.PrimalJewelCost;

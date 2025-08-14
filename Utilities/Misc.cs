@@ -7,6 +7,7 @@ using Stunlock.Core;
 using System.Diagnostics;
 using System.Text;
 using Unity.Entities;
+using Unity.Mathematics;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
@@ -19,7 +20,7 @@ internal static class Misc
     static SystemService SystemService => Core.SystemService;
     static GameDataSystem GameDataSystem => SystemService.GameDataSystem;
 
-    static readonly Random _random = new();
+    static readonly System.Random _random = new();
     const string STAT_MOD = "StatMod";
     public enum SpellSchool : int
     {
@@ -263,9 +264,9 @@ internal static class Misc
         { new(-1700712765), 0.25f },
         { new(523084427), 0.15f },
         { new(1179205309), 0.15f },
-        { new(-2004879548), 0.10f },
+        { new(-2004879548), 0.1f },
         { new(539854831), 0.15f },
-        { new(-1274939577), 0.10f },
+        { new(-1274939577), 0.1f },
         { new(1032018140), 0.15f },
         { new(1842448780), 0.15f }
     };
@@ -332,78 +333,6 @@ internal static class Misc
         Core.Log.LogWarning($"Unmapped stat mod prefab: '{rawPrefabString}' → parsed '{baseName}'");
         return false;
     }
-
-    /*
-    public static bool TryGetStatTypeFromPrefabName(string rawPrefabString, out UnitStatType statType)
-    {
-        statType = default;
-
-        if (string.IsNullOrWhiteSpace(rawPrefabString))
-            return false;
-
-        // Step 1: Extract the filename portion (remove 'PrefabGuid(...)' etc.)
-        string baseName = rawPrefabString.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-        if (baseName is null)
-            return false;
-
-        // Step 2: Strip known prefixes and suffixes
-        baseName = baseName.Replace("StatMod_", "", StringComparison.CurrentCultureIgnoreCase)
-                           .Replace("Unique_", "", StringComparison.CurrentCultureIgnoreCase);
-
-        // Remove suffixes like "_Low", "_Mid", "_High"
-        string[] tierSuffixes = ["_Low", "_Mid", "_High"];
-        foreach (var suffix in tierSuffixes)
-        {
-            if (baseName.EndsWith(suffix, StringComparison.CurrentCultureIgnoreCase))
-            {
-                baseName = baseName[..^suffix.Length];
-                break;
-            }
-        }
-
-        // Step 3: Try to parse directly
-        if (Enum.TryParse(baseName, ignoreCase: true, out statType))
-            return true;
-
-        // Step 4: Fallback alias matching
-        switch (baseName.ToLowerInvariant())
-        {
-            case "attackspeed":
-                statType = UnitStatType.PrimaryAttackSpeed;
-                return true;
-            case "criticalstrikephysical":
-                statType = UnitStatType.PhysicalCriticalStrikeChance;
-                return true;
-            case "criticalstrikephysicalpower":
-                statType = UnitStatType.PhysicalCriticalStrikeDamage;
-                return true;
-            case "criticalstrikespellpower":
-                statType = UnitStatType.SpellCriticalStrikeDamage;
-                return true;
-            case "criticalstrikespells":
-                statType = UnitStatType.SpellCriticalStrikeChance;
-                return true;
-            case "criticalstrikespell":
-                statType = UnitStatType.SpellCriticalStrikeChance;
-                return true;
-            case "spellcooldownreduction":
-                statType = UnitStatType.SpellCooldownRecoveryRate;
-                return true;
-            case "weaponcooldownreduction":
-                statType = UnitStatType.WeaponCooldownRecoveryRate;
-                return true;
-            case "spellleech":
-                statType = UnitStatType.SpellLifeLeech;
-                return true;
-            case "vampiredamage":
-                statType = UnitStatType.DamageVsVampires;
-                return true;
-            default:
-                Core.Log.LogWarning($"Unmapped stat mod prefab! ('{rawPrefabString}' → parsed '{baseName}')");
-                return false;
-        }
-    }
-    */
     public static string FormatWeaponStatValue(WeaponStats.WeaponStatType statType, float value)
     {
         string formattedBonus = WeaponStats.WeaponStatFormats[statType] switch
@@ -442,15 +371,16 @@ internal static class Misc
     {
         var itemDataHashMap = GameDataSystem.ItemHashLookupMap;
         bool hasSpace = InventoryUtilities.HasFreeStackSpaceOfType(EntityManager, playerCharacter, itemDataHashMap, itemType, amount);
+        string message;
 
         if (hasSpace && ServerGameManager.TryAddInventoryItem(playerCharacter, itemType, amount))
         {
-            string message = "Your bag feels slightly heavier...";
+            message = "Your bag feels slightly heavier...";
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
         else
         {
-            string message = "Something fell out of your bag!";
+            message = "Something fell out of your bag!";
             InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, itemType, amount, new Entity()); // does this create multiple drops to account for excessive stacks? noting for later
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
@@ -459,88 +389,97 @@ internal static class Misc
     {
         return _random.NextDouble() < chance;
     }
-    public static class Performance
+    public static uint GetRandomSeed(uint salt = 0)
     {
-        static readonly Stopwatch _stopwatch = new();
-        static string _label = "";
-        static long _totalElapsedTicks = 0;
-        public static void Start(string label)
-        {
-            _label = label;
-            _stopwatch.Restart();
-            Core.Log.LogInfo($"[TIMER] Start - {_label}");
-        }
-        public static void Stop()
-        {
-            _stopwatch.Stop();
+        uint frame = (uint)Core.ServerGameManager.ServerFrame;
+        uint timeMs = (uint)((Core.ServerGameManager.ServerTime * 1000.0) % uint.MaxValue);
 
-            long elapsedTicks = _stopwatch.ElapsedTicks;
-            _totalElapsedTicks += elapsedTicks;
+        uint4 data = new(frame, timeMs, salt, 0x9E3779B9u);
+        uint h = math.hash(data);
 
-            double elapsedMilliseconds = _stopwatch.Elapsed.TotalMilliseconds;
-
-            Core.Log.LogInfo($"[TIMER] Stop - {_label} ({_totalElapsedTicks}t | {elapsedMilliseconds:F3}ms)");
-
-            // Reset
-            _totalElapsedTicks = 0;
-        }
+        return (h == 0u) ? 1u : h;
     }
-
-    /*
-    public static class PerformanceTimer
-    {
-        class TimerData
-        {
-            public Stopwatch Stopwatch = new();
-            public long TotalElapsedTicks = 0;
-        }
-
-        static readonly Dictionary<string, TimerData> _timers = [];
-        public static void Start(string label)
-        {
-            if (!_timers.TryGetValue(label, out var timerData))
-            {
-                timerData = new TimerData();
-                _timers[label] = timerData;
-            }
-
-            timerData.Stopwatch.Restart();
-            Core.Log.LogInfo($"[TIMER] Start - {label}");
-        }
-        public static void Stop(string label)
-        {
-            if (!_timers.TryGetValue(label, out var timerData))
-            {
-                Core.Log.LogWarning($"[TIMER] Attempted to stop unknown timer: {label}");
-                return;
-            }
-
-            timerData.Stopwatch.Stop();
-            long elapsedTicks = timerData.Stopwatch.ElapsedTicks;
-            timerData.TotalElapsedTicks += elapsedTicks;
-            double elapsedMilliseconds = timerData.Stopwatch.Elapsed.TotalMilliseconds;
-
-            Core.Log.LogInfo($"[TIMER] Stop - {label} ({timerData.TotalElapsedTicks}t | {elapsedMilliseconds:F3}ms)");
-        }
-        public static void Reset(string label)
-        {
-            _timers.Remove(label);
-        }
-        public static void ResetAll()
-        {
-            _timers.Clear();
-        }
-    }
-    */
-
-    /*
-    public static bool EarnedPermaShroud()
-    {
-        if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(ShroudBuff) && !character.HasBuff(ShroudBuff)
-    && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(ShroudBuff))
-        {
-            BuffUtilities.ApplyPermanentBuff(character, ShroudBuff);
-        }
-    }
-    */
 }
+
+/*
+public static bool EarnedPermaShroud()
+{
+    if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(ShroudBuff) && !character.HasBuff(ShroudBuff)
+&& steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(ShroudBuff))
+    {
+        BuffUtilities.ApplyPermanentBuff(character, ShroudBuff);
+    }
+}
+*/
+
+/*
+public static bool TryGetStatTypeFromPrefabName(string rawPrefabString, out UnitStatType statType)
+{
+    statType = default;
+
+    if (string.IsNullOrWhiteSpace(rawPrefabString))
+        return false;
+
+    // Step 1: Extract the filename portion (remove 'PrefabGuid(...)' etc.)
+    string baseName = rawPrefabString.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+    if (baseName is null)
+        return false;
+
+    // Step 2: Strip known prefixes and suffixes
+    baseName = baseName.Replace("StatMod_", "", StringComparison.CurrentCultureIgnoreCase)
+                       .Replace("Unique_", "", StringComparison.CurrentCultureIgnoreCase);
+
+    // Remove suffixes like "_Low", "_Mid", "_High"
+    string[] tierSuffixes = ["_Low", "_Mid", "_High"];
+    foreach (var suffix in tierSuffixes)
+    {
+        if (baseName.EndsWith(suffix, StringComparison.CurrentCultureIgnoreCase))
+        {
+            baseName = baseName[..^suffix.Length];
+            break;
+        }
+    }
+
+    // Step 3: Try to parse directly
+    if (Enum.TryParse(baseName, ignoreCase: true, out statType))
+        return true;
+
+    // Step 4: Fallback alias matching
+    switch (baseName.ToLowerInvariant())
+    {
+        case "attackspeed":
+            statType = UnitStatType.PrimaryAttackSpeed;
+            return true;
+        case "criticalstrikephysical":
+            statType = UnitStatType.PhysicalCriticalStrikeChance;
+            return true;
+        case "criticalstrikephysicalpower":
+            statType = UnitStatType.PhysicalCriticalStrikeDamage;
+            return true;
+        case "criticalstrikespellpower":
+            statType = UnitStatType.SpellCriticalStrikeDamage;
+            return true;
+        case "criticalstrikespells":
+            statType = UnitStatType.SpellCriticalStrikeChance;
+            return true;
+        case "criticalstrikespell":
+            statType = UnitStatType.SpellCriticalStrikeChance;
+            return true;
+        case "spellcooldownreduction":
+            statType = UnitStatType.SpellCooldownRecoveryRate;
+            return true;
+        case "weaponcooldownreduction":
+            statType = UnitStatType.WeaponCooldownRecoveryRate;
+            return true;
+        case "spellleech":
+            statType = UnitStatType.SpellLifeLeech;
+            return true;
+        case "vampiredamage":
+            statType = UnitStatType.DamageVsVampires;
+            return true;
+        default:
+            Core.Log.LogWarning($"Unmapped stat mod prefab! ('{rawPrefabString}' → parsed '{baseName}')");
+            return false;
+    }
+}
+*/

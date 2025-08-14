@@ -106,7 +106,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - `.prestige get [Type]` (view prestige progress and details)
 
 ### Endgame Extras (section WIP)
-- Elite Primal Rifts automatically start Primal War events at the rate set by `PrimalRiftFrequency` when `ElitePrimalRifts` are enabled.
+- Elite Primal Rifts automatically start Primal War events at the rate/interval set by `PrimalRiftFrequency` when `ElitePrimalRifts` are enabled.
 - Elite Shard Bearers increases the challenge of shard bearers significantly when `EliteShardBearers` is enabled, and their levels can be uniformly set via `ShardBearerLevel`.
 
 ## Bleeding Edge
@@ -457,6 +457,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - `.weapon setspells [Name] [Slot] [PrefabGuid] [Radius]` 🔒
   - Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).
   - Shortcut: *.wep spell [Name] [Slot] [PrefabGuid] [Radius]*
+
 
 ## Configuration
 

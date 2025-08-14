@@ -321,6 +321,7 @@ internal static class ScriptSpawnServerPatch
                 Entity buffEntity = entities[i];
                 Entity buffTarget = buffs[i].Target;
 
+                /*
                 if (_eliteShardBearers && buffEntity.GetPrefabGuid().Equals(Buffs.EvolvedVampireBuff) && !buffTarget.IsPlayer())
                 {
                     if (buffTarget.TryGetComponent(out PrefabGUID targetPrefab) && targetPrefab.Equals(_dracula))
@@ -328,6 +329,7 @@ internal static class ScriptSpawnServerPatch
                         ApplyEliteDraculaModifiers(buffTarget);
                     }
                 }
+                */
 
                 if (handleLevel && buffEntity.HasSpellLevel() && buffTarget.IsPlayer())
                 {

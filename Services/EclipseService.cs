@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Interfaces;
 using Bloodcraft.Patches;
+using Bloodcraft.Systems;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
@@ -37,10 +38,9 @@ internal class EclipseService
     static readonly bool _familiarPrestige = ConfigService.FamiliarPrestige;
     static readonly bool _professions = ConfigService.ProfessionSystem;
     static readonly bool _quests = ConfigService.QuestSystem;
+    static readonly bool _elitePrimalRifts = ConfigService.ElitePrimalRifts;
 
     static readonly WaitForSeconds _delay = new(ConfigService.Eclipsed ? 0.1f : 2.5f);
-
-    const int MAX_RETRIES = 20;
     const string V1_3 = "1.3";
 
     static readonly Regex _regex = new(@"^\[ECLIPSE\]\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
@@ -211,6 +211,11 @@ internal class EclipseService
                 }
 
                 yield return null;
+            }
+
+            if (_elitePrimalRifts)
+            {
+                PrimalWarEventSystem.OnSchedule();
             }
 
             yield return _delay;

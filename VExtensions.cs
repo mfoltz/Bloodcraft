@@ -1,3 +1,4 @@
+using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using Il2CppInterop.Runtime;
 using ProjectM;
@@ -19,19 +20,13 @@ internal static class VExtensions
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
     const string EMPTY_KEY = "LocalizationKey.Empty";
     const string PREFIX = "Entity(";
+    const string CHAR = "CHAR_";
+
     const int LENGTH = 7;
-    public enum DestroyMode
-    {
-        None = 0,
-        Immediate = 1,
-        Delayed = 2,
-        RemoveBuff = 3
-    }
 
     public delegate void WithRefHandler<T>(ref T item);
     public static void With<T>(this Entity entity, WithRefHandler<T> action) where T : struct
@@ -108,9 +103,18 @@ internal static class VExtensions
     {
         return EntityManager.HasComponent(entity, new(Il2CppType.Of<T>()));
     }
-    public static string GetPrefabName(this PrefabGUID prefabGuid)
+    public static bool IsCharacter(this PrefabGUID prefabGuid)
     {
-        return PrefabGuidNames.TryGetValue(prefabGuid, out string prefabName) ? $"{prefabName} {prefabGuid}" : EMPTY_KEY;
+        return prefabGuid.GetPrefabName().StartsWith(CHAR);
+    }
+    public static string GetPrefabName(this PrefabGUID prefabGuid, bool verbose = false)
+    {
+        if (PrefabGuidNames.TryGetValue(prefabGuid, out string prefabName))
+            return verbose
+                ? prefabName
+                : $"{prefabName} {prefabGuid}";
+
+        return EMPTY_KEY;
     }
     public static string GetSequenceName(this SequenceGUID sequenceGuid)
     {
@@ -578,6 +582,11 @@ internal static class VExtensions
     public static bool IsAllied(this Entity entity, Entity player)
     {
         return ServerGameManager.IsAllies(entity, player);
+    }
+    public static bool IsDreadful(this Entity entity)
+    {
+        return entity.GetPrefabGuid().Equals(PrefabGUIDs.CHAR_Legion_DreadHorn_Lesser,
+            PrefabGUIDs.CHAR_Legion_Dreadhorn);
     }
     public static bool IsPlayerOwned(this Entity entity)
     {

@@ -111,9 +111,10 @@ internal static class MiscCommands
             }
 
             string kitFamiliarName = string.Empty;
-            int familiarGuid = ConfigService.KitFamiliar;
+            PrefabGUID familiarPrefabGuid = new(ConfigService.KitFamiliar);
 
-            if (familiarGuid > 0)
+            if (familiarPrefabGuid.HasValue()
+                && familiarPrefabGuid.IsCharacter())
             {
                 FamiliarUnlocksData unlocksData = LoadFamiliarUnlocksData(steamId);
                 string boxName = steamId.TryGetFamiliarBox(out var currentBox) ? currentBox : string.Empty;
@@ -135,6 +136,8 @@ internal static class MiscCommands
                     unlocksData.FamiliarUnlocks[boxName] = familiars;
                 }
 
+                int familiarGuid = familiarPrefabGuid.GuidHash;
+
                 if (!familiars.Contains(familiarGuid))
                 {
                     familiars.Add(familiarGuid);
@@ -143,9 +146,9 @@ internal static class MiscCommands
                 }
             }
 
-            List<string> kitItems = StarterKitItemPrefabGUIDs.Select(x => $"<color=white>{x.Key.GetLocalizedName()}</color>").ToList();
+            List<string> kitItems = [..StarterKitItemPrefabGUIDs.Select(x => $"<color=#ffd9eb>{x.Key.GetLocalizedName()}</color>x<color=white>{x.Value}</color>")];
 
-            LocalizationService.HandleReply(ctx, $"You've received a starting kit with:");
+            LocalizationService.HandleReply(ctx, "You've received a <color=yellow>starter kit</color>:");
 
             const int maxPerMessage = 6;
             for (int i = 0; i < kitItems.Count; i += maxPerMessage)
@@ -158,12 +161,12 @@ internal static class MiscCommands
 
             if (!string.IsNullOrEmpty(kitFamiliarName))
             {
-                LocalizationService.HandleReply(ctx, $"Starter familiar unlocked: <color=white>{kitFamiliarName}</color>.");
+                LocalizationService.HandleReply(ctx, $"<color=green>{kitFamiliarName}</color>");
             }
         }
         else
         {
-            ctx.Reply("You've already used your starting kit!");
+            ctx.Reply("You've already used the <color=white>starter kit</color>!");
         }
     }
 

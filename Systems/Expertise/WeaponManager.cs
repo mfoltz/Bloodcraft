@@ -21,7 +21,7 @@ internal static class WeaponManager
     static readonly float _prestigeStatMultiplier = ConfigService.PrestigeStatMultiplier;
     static readonly int _maxExpertiseLevel = ConfigService.MaxExpertiseLevel;
     static readonly int _expertiseStatChoices = ConfigService.ExpertiseStatChoices;
-    public class WeaponStats
+    public static class WeaponStats
     {
         public enum WeaponStatType : int
         {

@@ -1,8 +1,8 @@
 `1.12.15`
+- primal rifts are slightly more deadly (and fun!) but dreadhorns are no longer quite as instant of a death either so it might balance out
 - added config option for  of primal rift events per day
-- added config option for KitFamiliar to grant a familiar with the starter kit
-- fixed blacksmithing and alchemy gating
-- fixed elite modifiers on Dracula after phase change
+- added config option for KitFamiliar, unlocks when using starter kit
+- various minor bug fixes
 
 `1.11.14`
 - added config option for ElitePrimalRifts (units/gateBosses are amped similarly to EliteShardBearers with some surprises ;D WIP feature, use admin console command to spawn primal war events for now)

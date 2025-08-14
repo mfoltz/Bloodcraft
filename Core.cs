@@ -177,24 +177,22 @@ internal static class Core
     {
         GetOrCreateMonoBehaviour().StopCoroutine(routine);
     }
-    public static void RunDelayed(Action action, float delay = 0.25f)
+    public static void Delayed(Action action, float delay = 0.25f)
     {
-        RunDelayedRoutine(delay, action).Run();
+        RunDelayed(delay, action).Run();
     }
-    public static void Delay(this Action action, float delay)
-    {
-        RunDelayedRoutine(delay, action).Run();
-    }
-    static IEnumerator RunDelayedRoutine(float delay, Action action)
+    static IEnumerator RunDelayed(float delay, Action action)
     {
         yield return new WaitForSeconds(delay);
         action?.Invoke();
     }
+
+    /*
     public static void DelayCall(float delay, Delegate method, params object[] args)
     {
         DelayedRoutine(delay, method, args).Run();
     }
-    private static IEnumerator DelayedRoutine(float delay, Delegate method, object[] args)
+    static IEnumerator DelayedRoutine(float delay, Delegate method, object[] args)
     {
         if (delay > 0f)
             yield return new WaitForSeconds(delay);
@@ -203,6 +201,7 @@ internal static class Core
 
         method.DynamicInvoke(args);
     }
+    */
     public static AddItemSettings GetAddItemSettings()
     {
         AddItemSettings addItemSettings = new()

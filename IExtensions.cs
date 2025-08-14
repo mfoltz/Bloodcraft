@@ -1,10 +1,10 @@
-﻿using System.Collections;
+﻿using Bloodcraft.Utilities;
+using System.Collections;
 using UnityEngine;
 
 namespace Bloodcraft;
 internal static class IExtensions
 {
-    static readonly System.Random _random = new();
     public static Dictionary<TValue, TKey> Reverse<TKey, TValue>(
         this IDictionary<TKey, TValue> source)
     {
@@ -59,6 +59,28 @@ internal static class IExtensions
 
         return true;
     }
+    public static T DrawRandom<T>(this IList<T> list)
+    {
+        if (list?.Any() != true)
+            return default;
+
+        var random = new System.Random((int)Misc.GetRandomSeed());
+        int index = random.Next(list.Count);
+
+        return list.IsIndexWithinRange(index) ? list[index] : default;
+    }
+
+    /*
+    public static T DrawRandom<T>(this IList<T> list)
+    {
+        int index = _random.Next(list.Count);
+
+        if (list.IsIndexWithinRange(index))
+            return list[index];
+
+        return default;
+    }
+    */
     public static bool ContainsAny(this string stringChars, List<string> strings, StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
     {
         foreach (string str in strings)
@@ -71,26 +93,19 @@ internal static class IExtensions
 
         return false;
     }
-    public static T DrawRandom<T>(this IList<T> list)
-    {
-        int index = _random.Next(list.Count);
-
-        if (list.IsIndexWithinRange(index))
-            return list[index];
-
-        return default;
-    }
     public static void Shuffle<T>(this IList<T> list)
     {
+        var random = new System.Random((int)Misc.GetRandomSeed());
         int n = list.Count;
+
         while (n > 1)
         {
             n--;
-            int k = _random.Next(n + 1);
+            int k = random.Next(n + 1);
             (list[n], list[k]) = (list[k], list[n]);
         }
     }
-    public static bool Equals<T>(this T value, params T[] options)
+    public static bool Equals<T>(this T value, params T[] options) where T : unmanaged
     {
         foreach (var option in options)
         {
@@ -108,9 +123,17 @@ internal static class IExtensions
 
         return false;
     }
-    public static void Run(this IEnumerator routine)
+    public static void Run(this IEnumerator routine, float delay = 0f)
     {
-        Core.StartCoroutine(routine);
+        if (delay > 0f)
+            Core.StartCoroutine(Delay(routine, delay));
+        else
+            Core.StartCoroutine(routine);
+    }
+    public static IEnumerator Delay(IEnumerator routine, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        routine.Run();
     }
     public static Coroutine Start(this IEnumerator routine)
     {

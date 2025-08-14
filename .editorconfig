@@ -371,3 +371,6 @@ dotnet_diagnostic.RCS1003.severity = none
 
 # RCS1001: Add braces (when expression spans over multiple lines)
 dotnet_diagnostic.RCS1001.severity = none
+
+# RCS1246: Use element access
+dotnet_diagnostic.RCS1246.severity = none
