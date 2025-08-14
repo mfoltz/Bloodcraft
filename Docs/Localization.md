@@ -108,3 +108,22 @@ python Tools/scan_english.py --whitelist-dir Bloodcraft.Tests --whitelist-patter
 
 Use this to quickly locate messages that still need localization.
 
+## Troubleshooting & Notes
+
+- **Argos model installation**: Some environments lack the `install` subcommand. Combine split archives and install using the Python API:
+  ```bash
+  cd Resources/Localization/Models/EN_ES
+  cat translate-*.z[0-9][0-9] translate-*.zip > model.zip
+  unzip -o model.zip
+  python - <<'PY'
+  import argostranslate.package
+  argostranslate.package.install_from_path('translate-en_es-1_0.argosmodel')
+  PY
+  ```
+- **Slow translations**: The `--verbose` option can produce huge output and slow processing. Consider omitting it or lowering `--batch-size`.
+- **Missing SDKs**: `dotnet` may be absent on minimal systems; ensure the .NET SDK is installed before running checks.
+- **Token mismatches**: Entries listed in `skipped.csv` often need manual review and translation.
+
+### Follow-up
+- Improve token handling in `translate_argos.py` to reduce `skipped.csv` entries.
+- Provide progress indicators or non-verbose defaults for lengthy translation runs.
