@@ -1,3 +1,6 @@
+`1.12.16`
+- minor hotfix to restore emote actions, forgot to remove some debug stuff; sorry about that!
+
 `1.12.15`
 - primal rifts are slightly more deadly (and fun!) but dreadhorns are no longer quite as instant of a death either so it might balance out
 - added config option for  of primal rift events per day

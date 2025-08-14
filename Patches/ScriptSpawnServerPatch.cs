@@ -313,7 +313,7 @@ internal static class ScriptSpawnServerPatch
 
         using NativeAccessor<Entity> entities = _query.ToEntityArrayAccessor();
         using NativeAccessor<Buff> buffs = _query.ToComponentDataArrayAccessor<Buff>();
-
+        
         try
         {
             for (int i = 0; i < entities.Length; i++)
