@@ -120,7 +120,7 @@ def main() -> None:
             "skipped.csv",
             "--overwrite",
         ])
-        run([sys.executable, "Tools/fix_tokens.py"])
+        run([sys.executable, "Tools/fix_tokens.py", str(path.relative_to(ROOT))])
 
     # Step 5: verify translations
     run(["dotnet", "run", "--project", "Bloodcraft.csproj", "-p:RunGenerateREADME=false", "--", "check-translations"])
