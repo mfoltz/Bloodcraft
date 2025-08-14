@@ -109,9 +109,9 @@ def translate_batch(
     """
     results: List[str] = []
     timed_out: List[int] = []
-    for idx, line in enumerate(lines):
-        for attempt in range(1, max_retries + 1):
-            with ThreadPoolExecutor(max_workers=1) as executor:
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        for idx, line in enumerate(lines):
+            for attempt in range(1, max_retries + 1):
                 future = executor.submit(translator.translate, line)
                 try:
                     results.append(future.result(timeout=timeout))
