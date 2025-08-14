@@ -15,6 +15,8 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Dict
+import csv
+from collections import Counter
 
 ROOT = Path(__file__).resolve().parents[1]
 MESSAGES_DIR = ROOT / "Resources" / "Localization" / "Messages"
@@ -42,10 +44,10 @@ LANGUAGE_CODES: Dict[str, str] = {
 }
 
 
-def run(cmd: list[str]) -> None:
-    """Run a subprocess, raising on failure."""
+def run(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess:
+    """Run a subprocess, returning the completed process."""
     print("+", " ".join(str(c) for c in cmd))
-    subprocess.run(cmd, check=True, cwd=ROOT)
+    return subprocess.run(cmd, check=check, cwd=ROOT)
 
 
 def propagate_hashes(target: Path) -> None:
@@ -98,29 +100,50 @@ def main() -> None:
         propagate_hashes(path)
 
     # Step 3-4: translate and fix tokens per language
+    failure_counts: Counter[str] = Counter()
+    overall_ok = True
     for name, path in targets.items():
         code = LANGUAGE_CODES.get(name)
         if not code:
             print(f"Skipping {name}: no translation code configured")
             continue
-        run([
-            sys.executable,
-            "Tools/translate_argos.py",
-            str(path.relative_to(ROOT)),
-            "--to",
-            code,
-            "--batch-size",
-            "100",
-            "--max-retries",
-            "3",
-            "--verbose",
-            "--log-file",
-            "translate.log",
-            "--report-file",
-            "skipped.csv",
-            "--overwrite",
-        ])
+        result = run(
+            [
+                sys.executable,
+                "Tools/translate_argos.py",
+                str(path.relative_to(ROOT)),
+                "--to",
+                code,
+                "--batch-size",
+                "100",
+                "--max-retries",
+                "3",
+                "--verbose",
+                "--log-file",
+                "translate.log",
+                "--report-file",
+                "skipped.csv",
+                "--overwrite",
+            ],
+            check=False,
+        )
+        report = ROOT / "skipped.csv"
+        if report.is_file():
+            with report.open("r", encoding="utf-8") as fp:
+                reader = csv.DictReader(fp)
+                for row in reader:
+                    failure_counts[row.get("reason", "")] += 1
+            report.unlink()
+        overall_ok &= result.returncode == 0
         run([sys.executable, "Tools/fix_tokens.py", str(path.relative_to(ROOT))])
+
+    if failure_counts:
+        print("Skipped translation summary:")
+        for reason, count in failure_counts.most_common():
+            print(f"  {reason}: {count}")
+        raise SystemExit(1)
+    if not overall_ok:
+        raise SystemExit(1)
 
     # Step 5: verify translations
     run(["dotnet", "run", "--project", "Bloodcraft.csproj", "-p:RunGenerateREADME=false", "--", "check-translations"])

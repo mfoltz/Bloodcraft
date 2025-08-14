@@ -21,6 +21,7 @@ RICHTEXT = re.compile(r'<[^>]+>')
 PLACEHOLDER = re.compile(r'\{[^{}]+\}')
 CSINTERP = re.compile(r'\$\{[^{}]+\}')
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
+STRICT_TOKEN_RE = re.compile(r'__T(\d+)__')
 TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
 # Matches stray TOKEN_n occurrences regardless of surrounding context
 # Matches cases like ``TOKEN_1`` and ``TOKEN _ 1``
@@ -39,6 +40,18 @@ def protect(text: str):
 def _store(tokens: List[str], value: str) -> str:
     tokens.append(value)
     return f"[[TOKEN_{len(tokens)-1}]]"
+
+
+def protect_strict(text: str) -> tuple[str, List[str]]:
+    """Protect tokens using ``__Tn__`` markers for stricter isolation."""
+    text = text.replace("\\u003C", "<").replace("\\u003E", ">")
+    tokens: List[str] = []
+    for regex in (RICHTEXT, PLACEHOLDER, CSINTERP):
+        def store(m: re.Match) -> str:
+            tokens.append(m.group(0))
+            return f"__T{len(tokens)-1}__"
+        text = regex.sub(store, text)
+    return text, tokens
 
 
 def unprotect(text: str, tokens: List[str]) -> str:
@@ -259,15 +272,23 @@ def main():
         keys.append(key)
 
     translated: dict[str, str] = {}
-    skipped: List[str] = []
+    failures: dict[str, str] = {}
     report: list[dict[str, str]] = []
 
-    def log_entry(key: str, original: str, result: str, reason: str | None = None) -> None:
+    def log_entry(
+        key: str,
+        original: str,
+        result: str,
+        reason: str | None = None,
+        *,
+        record: bool = True,
+    ) -> None:
         status = "SKIPPED" if reason else "TRANSLATED"
         msg = f"{key}: {status}"
         if reason:
             msg += f" ({reason})"
-            report.append({"hash": key, "english": original, "reason": reason})
+            if record:
+                report.append({"hash": key, "english": original, "reason": reason})
         msg += f"\n  Original: {original}\n  Result: {result}"
         log_verbose(msg)
 
@@ -285,21 +306,21 @@ def main():
         except Exception as e:
             log_verbose(f"Translation error: {e}")
             for k in batch_keys:
-                log_entry(k, english[k], "", f"batch error: {e}")
-            skipped.extend(batch_keys)
+                log_entry(k, english[k], "", f"batch error: {e}", record=False)
+                failures[k] = f"batch error: {e}"
             continue
 
         for idx, (key, result, (tokens, token_only)) in enumerate(
             zip(batch_keys, batch_results, batch_tokens)
         ):
             if idx in timeouts:
-                log_entry(key, english[key], "", "timeout")
-                skipped.append(key)
+                log_entry(key, english[key], "", "timeout", record=False)
+                failures[key] = "timeout"
                 continue
             if token_only:
                 if TOKEN_SENTINEL not in result:
-                    log_entry(key, english[key], result, "sentinel missing")
-                    skipped.append(key)
+                    log_entry(key, english[key], result, "sentinel missing", record=False)
+                    failures[key] = "sentinel missing"
                     continue
                 result = result.replace(f" {TOKEN_SENTINEL}", "").replace(TOKEN_SENTINEL, "")
             result = normalize_tokens(result)
@@ -307,27 +328,73 @@ def main():
 
             stripped = TOKEN_RE.sub("", result)
             if "[" in stripped or "]" in stripped:
-                log_entry(key, english[key], result, "stray brackets")
-                skipped.append(key)
+                log_entry(key, english[key], result, "stray brackets", record=False)
+                failures[key] = "stray brackets"
                 continue
 
             found_tokens = TOKEN_RE.findall(result)
             expected = [str(i) for i in range(len(tokens))]
             if set(found_tokens) != set(expected):
                 reason = f"token mismatch (expected {expected}, got {found_tokens})"
-                log_entry(key, english[key], result, reason)
-                skipped.append(key)
+                log_entry(key, english[key], result, reason, record=False)
+                failures[key] = reason
                 continue
             if reordered:
                 log_verbose(f"Normalized token order for {key}: {found_tokens} -> {expected}")
             un = unprotect(result, tokens)
             un = un.replace("\\u003C", "<").replace("\\u003E", ">")
             if un == english[key] or contains_english(un):
-                log_entry(key, english[key], un, "looks untranslated")
-                skipped.append(key)
+                log_entry(key, english[key], un, "looks untranslated", record=False)
+                failures[key] = "looks untranslated"
                 continue
             translated[key] = un
             log_entry(key, english[key], un)
+
+    def strict_retry(key: str) -> tuple[bool, str]:
+        safe, tokens = protect_strict(english[key])
+        token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
+        if token_only:
+            safe += f" {TOKEN_SENTINEL}"
+        try:
+            results, timeouts = translate_batch(
+                translator,
+                [safe],
+                max_retries=args.max_retries,
+                timeout=args.timeout,
+            )
+        except Exception as e:
+            return False, f"batch error on strict retry: {e}"
+        if timeouts:
+            return False, "timeout on strict retry"
+        result = results[0]
+        if token_only:
+            if TOKEN_SENTINEL not in result:
+                return False, "sentinel missing on strict retry"
+            result = result.replace(f" {TOKEN_SENTINEL}", "").replace(TOKEN_SENTINEL, "")
+        result = re.sub(r"__T(\d+)__", r"[[TOKEN_\1]]", result)
+        result = normalize_tokens(result)
+        result, _ = reorder_tokens(result, len(tokens))
+        stripped = TOKEN_RE.sub("", result)
+        if "[" in stripped or "]" in stripped:
+            return False, "stray brackets on strict retry"
+        found_tokens = TOKEN_RE.findall(result)
+        expected = [str(i) for i in range(len(tokens))]
+        if set(found_tokens) != set(expected):
+            return False, f"token mismatch on strict retry (expected {expected}, got {found_tokens})"
+        un = unprotect(result, tokens)
+        un = un.replace("\\u003C", "<").replace("\\u003E", ">")
+        if un == english[key] or contains_english(un):
+            return False, "looks untranslated on strict retry"
+        return True, un
+
+    for key, _initial_reason in failures.items():
+        ok, out = strict_retry(key)
+        if ok:
+            translated[key] = out
+            log_entry(key, english[key], out)
+        else:
+            translated[key] = english[key]
+            log_entry(key, english[key], english[key], f"fallback: {out}")
 
     messages.update(translated)
     target["Messages"] = messages
@@ -365,18 +432,6 @@ def main():
             else:
                 raise RuntimeError("Report file must end with .json or .csv")
         print(f"Wrote skip report to {args.report_file}")
-
-    if skipped:
-        if args.report_file and os.path.exists(args.report_file):
-            print("Untranslated message hashes detected:")
-            with open(args.report_file, "r", encoding="utf-8") as fp:
-                print(fp.read())
-        else:
-            print("Skipped the following message hashes due to repeated errors:")
-            for k in skipped:
-                print(f" - {k}")
-        raise SystemExit(1)
-
 
 if __name__ == "__main__":
     main()
