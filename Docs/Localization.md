@@ -50,6 +50,16 @@ Only the JSON files in `Resources/Localization/Messages` contain user-facing mes
 
    Any hashes listed in `skipped.csv` must be translated manually. Re-run the translator until the file is empty.
 
+   ### Interpolation blocks
+
+   Entries containing C# interpolation expressions like `{(condition ? "A" : "B")}` are skipped
+   automatically and appear in `skipped.csv` with the `interpolation` category. To translate them:
+
+   1. Locate the hash in the target language JSON file.
+   2. Translate only the surrounding text, leaving the `{(...)}` block untouched.
+   3. Run `python Tools/fix_tokens.py` for that JSON file.
+   4. Re-run the translator to verify the hash no longer appears in `skipped.csv`.
+
 4. **Fix tokens**
 
    ```bash
