@@ -60,6 +60,10 @@ Only the JSON files in `Resources/Localization/Messages` contain user-facing mes
    3. Run `python Tools/fix_tokens.py` for that JSON file.
    4. Re-run the translator to verify the hash no longer appears in `skipped.csv`.
 
+   ### Placeholder-only results
+
+   Sometimes the translator may output only `[[TOKEN_n]]` placeholders without any surrounding text. These messages are left in their original English form and appear in `skipped.csv` with the `placeholder` category so they can be reviewed manually.
+
 4. **Fix tokens**
 
    ```bash
