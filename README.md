@@ -461,7 +461,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 </details>
 
 <details>
-<summary><strong>Config</strong></summary>
+<summary><strong>Configuration</strong></summary>
 
 ## Configuration
 
