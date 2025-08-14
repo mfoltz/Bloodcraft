@@ -272,8 +272,17 @@ def main():
         keys.append(key)
 
     translated: dict[str, str] = {}
-    failures: dict[str, str] = {}
+    failures: dict[str, tuple[str, str]] = {}
     report: list[dict[str, str]] = []
+
+    def categorize(reason: str | None) -> str:
+        if not reason:
+            return ""
+        if "sentinel" in reason:
+            return "sentinel"
+        if "untranslated" in reason:
+            return "untranslated"
+        return "other"
 
     def log_entry(
         key: str,
@@ -281,6 +290,7 @@ def main():
         result: str,
         reason: str | None = None,
         *,
+        category: str | None = None,
         record: bool = True,
     ) -> None:
         status = "SKIPPED" if reason else "TRANSLATED"
@@ -288,7 +298,14 @@ def main():
         if reason:
             msg += f" ({reason})"
             if record:
-                report.append({"hash": key, "english": original, "reason": reason})
+                report.append(
+                    {
+                        "hash": key,
+                        "english": original,
+                        "reason": reason,
+                        "category": category or categorize(reason),
+                    }
+                )
         msg += f"\n  Original: {original}\n  Result: {result}"
         log_verbose(msg)
 
@@ -306,21 +323,34 @@ def main():
         except Exception as e:
             log_verbose(f"Translation error: {e}")
             for k in batch_keys:
-                log_entry(k, english[k], "", f"batch error: {e}", record=False)
-                failures[k] = f"batch error: {e}"
+                reason = f"batch error: {e}"
+                category = categorize(reason)
+                log_entry(k, english[k], "", reason, category=category, record=False)
+                failures[k] = (reason, category)
             continue
 
         for idx, (key, result, (tokens, token_only)) in enumerate(
             zip(batch_keys, batch_results, batch_tokens)
         ):
             if idx in timeouts:
-                log_entry(key, english[key], "", "timeout", record=False)
-                failures[key] = "timeout"
+                reason = "timeout"
+                category = categorize(reason)
+                log_entry(key, english[key], "", reason, category=category, record=False)
+                failures[key] = (reason, category)
                 continue
             if token_only:
                 if TOKEN_SENTINEL not in result:
-                    log_entry(key, english[key], result, "sentinel missing", record=False)
-                    failures[key] = "sentinel missing"
+                    reason = "sentinel missing"
+                    category = "sentinel"
+                    log_entry(
+                        key,
+                        english[key],
+                        result,
+                        reason,
+                        category=category,
+                        record=False,
+                    )
+                    failures[key] = (reason, category)
                     continue
                 result = result.replace(f" {TOKEN_SENTINEL}", "").replace(TOKEN_SENTINEL, "")
             result = normalize_tokens(result)
@@ -328,24 +358,50 @@ def main():
 
             stripped = TOKEN_RE.sub("", result)
             if "[" in stripped or "]" in stripped:
-                log_entry(key, english[key], result, "stray brackets", record=False)
-                failures[key] = "stray brackets"
+                reason = "stray brackets"
+                category = categorize(reason)
+                log_entry(
+                    key,
+                    english[key],
+                    result,
+                    reason,
+                    category=category,
+                    record=False,
+                )
+                failures[key] = (reason, category)
                 continue
 
             found_tokens = TOKEN_RE.findall(result)
             expected = [str(i) for i in range(len(tokens))]
             if set(found_tokens) != set(expected):
                 reason = f"token mismatch (expected {expected}, got {found_tokens})"
-                log_entry(key, english[key], result, reason, record=False)
-                failures[key] = reason
+                category = categorize(reason)
+                log_entry(
+                    key,
+                    english[key],
+                    result,
+                    reason,
+                    category=category,
+                    record=False,
+                )
+                failures[key] = (reason, category)
                 continue
             if reordered:
                 log_verbose(f"Normalized token order for {key}: {found_tokens} -> {expected}")
             un = unprotect(result, tokens)
             un = un.replace("\\u003C", "<").replace("\\u003E", ">")
             if un == english[key] or contains_english(un):
-                log_entry(key, english[key], un, "looks untranslated", record=False)
-                failures[key] = "looks untranslated"
+                reason = "looks untranslated"
+                category = "untranslated"
+                log_entry(
+                    key,
+                    english[key],
+                    un,
+                    reason,
+                    category=category,
+                    record=False,
+                )
+                failures[key] = (reason, category)
                 continue
             translated[key] = un
             log_entry(key, english[key], un)
@@ -387,14 +443,21 @@ def main():
             return False, "looks untranslated on strict retry"
         return True, un
 
-    for key, _initial_reason in failures.items():
+    for key, (_initial_reason, _category) in failures.items():
         ok, out = strict_retry(key)
         if ok:
             translated[key] = out
             log_entry(key, english[key], out)
         else:
+            category = categorize(out)
             translated[key] = english[key]
-            log_entry(key, english[key], english[key], f"fallback: {out}")
+            log_entry(
+                key,
+                english[key],
+                english[key],
+                out,
+                category=category,
+            )
 
     messages.update(translated)
     target["Messages"] = messages
@@ -426,7 +489,7 @@ def main():
             if ext == ".json":
                 json.dump(report, fp, indent=2, ensure_ascii=False)
             elif ext == ".csv":
-                writer = csv.DictWriter(fp, fieldnames=["hash", "english", "reason"])
+                writer = csv.DictWriter(fp, fieldnames=["hash", "english", "reason", "category"])
                 writer.writeheader()
                 writer.writerows(report)
             else:
