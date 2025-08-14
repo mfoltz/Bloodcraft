@@ -1,3 +1,4 @@
+import csv
 import json
 import os
 import subprocess
@@ -169,8 +170,61 @@ def test_fallback_to_english_and_reports(tmp_path, monkeypatch):
 
     translate_argos.main()
     assert report_path.is_file()
-    contents = report_path.read_text()
-    assert "fallback" in contents
+    import csv
+    rows = list(csv.DictReader(report_path.open()))
+    assert rows[0]["category"] == "untranslated"
+    assert "untranslated" in rows[0]["reason"]
+
+
+def test_sentinel_missing_report(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "{name}"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    report_path = root / "skipped.csv"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "[[TOKEN_0]]"  # missing sentinel
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--report-file",
+            str(report_path),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+    rows = list(csv.DictReader(report_path.open()))
+    assert rows[0]["category"] == "sentinel"
+    assert "sentinel" in rows[0]["reason"]
 
 
 def test_strict_retry_succeeds(tmp_path, monkeypatch):
@@ -223,7 +277,9 @@ def test_strict_retry_succeeds(tmp_path, monkeypatch):
     translate_argos.main()
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["hash"] == "<b>Bonjour</b>"
-    assert report_path.read_text().strip().splitlines() == ["hash,english,reason"]
+    assert report_path.read_text().strip().splitlines() == [
+        "hash,english,reason,category"
+    ]
 
 
 def test_reorder_tokens_swapped():
