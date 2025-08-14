@@ -11,6 +11,8 @@ import os
 import re
 import subprocess
 import sys
+import time
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from typing import List
 
@@ -334,10 +336,18 @@ def main():
         translated[key] = english[key]
         failures[key] = (reason, category)
 
-    for i in range(0, len(safe_lines), args.batch_size):
+    num_batches = (len(safe_lines) + args.batch_size - 1) // args.batch_size
+    start = time.perf_counter()
+
+    for batch_idx in range(num_batches):
+        i = batch_idx * args.batch_size
         batch_lines = safe_lines[i : i + args.batch_size]
         batch_keys = keys[i : i + args.batch_size]
         batch_tokens = tokens_list[i : i + args.batch_size]
+        batch_start = time.perf_counter()
+        log_verbose(
+            f"Batch {batch_idx + 1}/{num_batches} start @ {batch_start - start:.2f}s"
+        )
         try:
             batch_results, timeouts = translate_batch(
                 translator,
@@ -352,6 +362,11 @@ def main():
                 category = categorize(reason)
                 log_entry(k, english[k], "", reason, category=category, record=False)
                 failures[k] = (reason, category)
+            batch_end = time.perf_counter()
+            log_verbose(
+                f"Batch {batch_idx + 1}/{num_batches} end @ {batch_end - start:.2f}s "
+                f"({batch_end - batch_start:.2f}s)"
+            )
             continue
 
         for idx, (key, result, (tokens, token_only)) in enumerate(
@@ -456,6 +471,12 @@ def main():
             translated[key] = un
             log_entry(key, english[key], un)
 
+        batch_end = time.perf_counter()
+        log_verbose(
+            f"Batch {batch_idx + 1}/{num_batches} end @ {batch_end - start:.2f}s "
+            f"({batch_end - batch_start:.2f}s)"
+        )
+
     def strict_retry(key: str) -> tuple[bool, str]:
         safe, tokens = protect_strict(english[key])
         token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
@@ -511,6 +532,24 @@ def main():
                 out,
                 category=category,
             )
+
+    total_elapsed = time.perf_counter() - start
+    summary_msg = (
+        f"Processed {num_batches} batches in {total_elapsed:.2f} seconds"
+    )
+    log_verbose(summary_msg)
+    if not args.verbose:
+        print(summary_msg)
+    if report:
+        counts = Counter(entry["category"] for entry in report)
+        breakdown_msg = "Report breakdown: " + ", ".join(
+            f"{k}: {v}" for k, v in sorted(counts.items())
+        )
+    else:
+        breakdown_msg = "Report breakdown: none"
+    log_verbose(breakdown_msg)
+    if not args.verbose:
+        print(breakdown_msg)
 
     messages.update(translated)
     target["Messages"] = messages
