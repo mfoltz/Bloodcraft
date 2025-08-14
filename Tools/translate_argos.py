@@ -473,16 +473,18 @@ def _run_translation(args, root: str, log_fp) -> None:
             return False, "contains English on strict retry"
         return True, un
 
-    for key, (_initial_reason, category) in failures.items():
+    for key, (_initial_reason, category) in list(failures.items()):
         if category in ("interpolation", "placeholder"):
             continue
         ok, out = strict_retry(key)
         if ok:
             translated[key] = out
             log_entry(key, english[key], out)
+            failures.pop(key, None)
         else:
             category = categorize(out)
             translated[key] = english[key]
+            failures[key] = (out, category)
             log_entry(
                 key,
                 english[key],
@@ -490,8 +492,8 @@ def _run_translation(args, root: str, log_fp) -> None:
                 out,
                 category=category,
             )
-
-    total_elapsed = time.perf_counter() - start
+    end = time.perf_counter()
+    total_elapsed = end - start
     summary_msg = (
         f"Processed {num_batches} batches in {total_elapsed:.2f} seconds"
     )
@@ -508,6 +510,15 @@ def _run_translation(args, root: str, log_fp) -> None:
     log_verbose(breakdown_msg)
     if not args.verbose:
         print(breakdown_msg)
+
+    translated_count = len(translated) - len(failures)
+    skipped_count = len(failures)
+    counts_msg = (
+        f"Translation results: {translated_count} translated, {skipped_count} skipped"
+    )
+    log_verbose(counts_msg)
+    if not args.verbose:
+        print(counts_msg)
 
     messages.update(translated)
     target["Messages"] = messages
