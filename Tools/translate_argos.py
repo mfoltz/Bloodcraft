@@ -265,6 +265,10 @@ def _run_translation(args, root: str, log_fp) -> None:
     failures: dict[str, tuple[str, str]] = {}
     report: list[dict[str, str]] = []
     category_counts: Counter[str] = Counter()
+    processed = len(safe_lines)
+    timeouts_count = 0
+    token_reorders = 0
+    timed_out_hashes: set[str] = set()
 
     def categorize(reason: str | None) -> str:
         if not reason:
@@ -364,6 +368,8 @@ def _run_translation(args, root: str, log_fp) -> None:
                 category = categorize(reason)
                 log_entry(key, english[key], "", reason, category=category, record=False)
                 failures[key] = (reason, category)
+                timeouts_count += 1
+                timed_out_hashes.add(key)
                 continue
             if token_only:
                 if TOKEN_SENTINEL not in result:
@@ -383,6 +389,8 @@ def _run_translation(args, root: str, log_fp) -> None:
                 )
             result = normalize_tokens(result)
             result, changed = reorder_tokens(result, len(tokens))
+            if changed:
+                token_reorders += 1
             stripped = TOKEN_RE.sub("", result)
             if stripped.strip() == "":
                 reason = "placeholders only"
@@ -518,6 +526,8 @@ def _run_translation(args, root: str, log_fp) -> None:
                 out,
                 category=category,
             )
+            if "timeout" in out and key not in timed_out_hashes:
+                timeouts_count += 1
     end = time.perf_counter()
     total_elapsed = end - start
     summary_msg = (
@@ -536,14 +546,7 @@ def _run_translation(args, root: str, log_fp) -> None:
     if not args.verbose:
         print(breakdown_msg)
 
-    translated_count = len(translated) - len(failures)
-    skipped_count = len(failures)
-    counts_msg = (
-        f"Translation results: {translated_count} translated, {skipped_count} skipped"
-    )
-    log_verbose(counts_msg)
-    if not args.verbose:
-        print(counts_msg)
+    successes = processed - len(failures)
 
     messages.update(translated)
     target["Messages"] = messages
@@ -580,6 +583,37 @@ def _run_translation(args, root: str, log_fp) -> None:
             else:
                 raise RuntimeError("Report file must end with .json or .csv")
         print(f"Wrote skip report to {args.report_file}")
+
+    metrics_dir = os.path.dirname(args.metrics_file)
+    if metrics_dir:
+        os.makedirs(metrics_dir, exist_ok=True)
+    metrics_entry = {
+        "file": args.target_file,
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "processed": processed,
+        "success": successes,
+        "timeouts": timeouts_count,
+        "token_reorders": token_reorders,
+        "failures": {k: v[0] for k, v in failures.items()},
+    }
+    try:
+        with open(args.metrics_file, "r", encoding="utf-8") as fp:
+            metrics_log = json.load(fp)
+    except FileNotFoundError:
+        metrics_log = []
+    except json.JSONDecodeError:
+        metrics_log = []
+    metrics_log.append(metrics_entry)
+    with open(args.metrics_file, "w", encoding="utf-8") as fp:
+        json.dump(metrics_log, fp, indent=2, ensure_ascii=False)
+
+    summary_line = (
+        f"Summary: {successes}/{processed} translated, {timeouts_count} timeouts, "
+        f"{token_reorders} token reorders. Metrics written to {args.metrics_file}"
+    )
+    print(summary_line)
+    if log_fp:
+        log_fp.write(summary_line + "\n")
 
 def main():
     ap = argparse.ArgumentParser(
@@ -628,6 +662,13 @@ def main():
             "missing directories are created"
         ),
     )
+    ap.add_argument(
+        "--metrics-file",
+        help=(
+            "Append translation metrics to this JSON file; "
+            "defaults to translate_metrics.json under --root"
+        ),
+    )
     args = ap.parse_args()
 
     log_fp = None
@@ -638,6 +679,16 @@ def main():
         log_fp = open(args.log_file, "w", encoding="utf-8")
 
     root = os.path.abspath(args.root)
+
+    if args.metrics_file:
+        metrics_path = (
+            args.metrics_file
+            if os.path.isabs(args.metrics_file)
+            else os.path.join(root, args.metrics_file)
+        )
+    else:
+        metrics_path = os.path.join(root, "translate_metrics.json")
+    args.metrics_file = metrics_path
 
     try:
         _run_translation(args, root, log_fp)
