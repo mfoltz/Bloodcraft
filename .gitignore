@@ -309,3 +309,8 @@ Debugging.cs
 Notepad.cs
 VSystem.cs
 Bridges.cs
+
+# Translation artifacts
+translate.log
+skipped.csv
+TranslationLogs/

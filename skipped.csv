@@ -1,2 +1,0 @@
-hash,english,reason,category
-3334433396,Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.,"token mismatch on strict retry (expected ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], got ['2'])",other
