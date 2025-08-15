@@ -468,7 +468,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Eclipse will be active if any features that sync with the client are enabled. Instead, this now controls the frequency; true for faster (0.1s), false for slower (2.5s).
 - **Elite Primal Rifts**: `ElitePrimalRifts` (bool, default: False)
   Enable or disable elite primal rifts.
-- **Rift Frequency**: `RiftFrequency` (int, default: 0)
+- **Rift Frequency**: `RiftFrequency` (int, default: 6)
   Number of primal rifts to start per day when they are enabled (24 max).
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
   Enable or disable elite shard bearers.
