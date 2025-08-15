@@ -715,3 +715,172 @@ def test_interpolation_block_skipped(tmp_path, monkeypatch):
 
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["h"] == "before {(skip)} after"
+
+
+def test_metrics_file_records_failure_reason(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "Hello"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    metrics_path = root / "translate_metrics.json"
+    data = json.loads(metrics_path.read_text())
+    entry = data[-1]
+    assert entry["processed"] == 1
+    assert entry["success"] == 0
+    assert entry["timeouts"] == 0
+    assert entry["token_reorders"] == 0
+    assert "identical" in entry["failures"]["hash"].lower()
+
+
+def test_metrics_file_records_timeout(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    metrics_path = root / "metrics.json"
+
+    class DummyTranslator:
+        pass
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    def fake_translate_batch(translator, lines, *, max_retries, timeout):
+        return ["" for _ in lines], list(range(len(lines)))
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(translate_argos, "translate_batch", fake_translate_batch)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--metrics-file",
+            str(metrics_path),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    data = json.loads(metrics_path.read_text())
+    entry = data[-1]
+    assert entry["processed"] == 1
+    assert entry["success"] == 0
+    assert entry["timeouts"] == 1
+    assert entry["token_reorders"] == 0
+    reason = next(iter(entry["failures"].values()))
+    assert "timeout" in reason
+
+
+def test_metrics_file_counts_token_reorders(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"hash": "Hello {0} {1}"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    metrics_path = root / "metrics.json"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "Hola [[TOKEN_1]], [[TOKEN_0]]"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--metrics-file",
+            str(metrics_path),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    data = json.loads(metrics_path.read_text())
+    entry = data[-1]
+    assert entry["processed"] == 1
+    assert entry["success"] == 1
+    assert entry["timeouts"] == 0
+    assert entry["token_reorders"] == 1
+    assert entry["failures"] == {}
