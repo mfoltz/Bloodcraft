@@ -570,3 +570,148 @@ def test_fatal_error_aborts(tmp_path, monkeypatch):
         translate_argos.main()
     assert "Unsupported model binary version" in str(exc.value)
     assert translator.calls == 1
+
+
+def test_roundtrip_with_reordered_tokens(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"h": "Hello <b>{x}</b> world"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class ReversingTranslator:
+        def translate(self, text):
+            import re
+            tokens = re.findall("__T\\d+__", text)
+            tokens.reverse()
+            it = iter(tokens)
+            return re.sub("__T\\d+__", lambda _m: next(it), text)
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: ReversingTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    data = json.loads((root / target_rel).read_text())
+    assert data["Messages"]["h"] == "Hello <b>{x}</b> world"
+
+
+def test_token_only_line_sentinel_roundtrip(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"h": "<b>{x}</b>"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class EchoTranslator:
+        def translate(self, text):
+            return text
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: EchoTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    data = json.loads((root / target_rel).read_text())
+    assert data["Messages"]["h"] == "<b>{x}</b>"
+
+
+def test_interpolation_block_skipped(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"h": "before {(skip)} after"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class RaisingTranslator:
+        def translate(self, _text):
+            raise AssertionError("translator should not be called")
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: RaisingTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    data = json.loads((root / target_rel).read_text())
+    assert data["Messages"]["h"] == "before {(skip)} after"

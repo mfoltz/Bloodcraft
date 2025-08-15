@@ -29,9 +29,7 @@ FATAL_ARGOS_ERRORS = [
 class FatalTranslationError(Exception):
     """Raised when Argos Translate encounters an unrecoverable error."""
 
-RICHTEXT = re.compile(r'<[^>]+>')
-PLACEHOLDER = re.compile(r'\{[^{}]+\}')
-CSINTERP = re.compile(r'\$\{[^{}]+\}')
+TOKEN_PATTERN = re.compile(r'<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}')
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
 STRICT_TOKEN_RE = re.compile(r'__T(\d+)__')
 STRICT_TOKEN_CLEAN = re.compile(r'__\s*T\s*(\d+)\s*__', re.I)
@@ -47,11 +45,12 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
     """Protect tokens using ``__Tn__`` markers for stricter isolation."""
     text = text.replace("\\u003C", "<").replace("\\u003E", ">")
     tokens: List[str] = []
-    for regex in (RICHTEXT, PLACEHOLDER, CSINTERP):
-        def store(m: re.Match) -> str:
-            tokens.append(m.group(0))
-            return f"__T{len(tokens)-1}__"
-        text = regex.sub(store, text)
+
+    def store(m: re.Match) -> str:
+        tokens.append(m.group(0))
+        return f"__T{len(tokens)-1}__"
+
+    text = TOKEN_PATTERN.sub(store, text)
     return text, tokens
 
 
