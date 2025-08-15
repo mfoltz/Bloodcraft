@@ -42,3 +42,11 @@ def test_normalize_tokens_merge_with_space():
 def test_normalize_tokens_merge_adjacent():
     raw = "[[TOKEN_1]][[TOKEN_0]]"
     assert translate_argos.normalize_tokens(raw) == "[[TOKEN_10]]"
+
+
+def test_replace_placeholders_token_only_line():
+    tokens = ["<b>", "{x}", "</b>"]
+    value = "[[TOKEN_0]][[TOKEN_1]][[TOKEN_2]]"
+    new_value, replaced, mismatch = fix_tokens.replace_placeholders(value, tokens)
+    assert new_value == "<b>{x}</b>"
+    assert replaced and not mismatch
