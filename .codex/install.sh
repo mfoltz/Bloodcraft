@@ -14,10 +14,16 @@ if ! command -v dotnet >/dev/null; then
     bash "$SCRIPT_DIR/dotnet-install.sh" --channel "$DOTNET_VERSION" --install-dir "$HOME/.dotnet"
 fi
 
-# Install .NET 6 targeting pack if not already present
+# Install .NET 6 SDK if not already present
 if ! dotnet --list-sdks 2>/dev/null | grep -q '^6\.'; then
-    echo "Installing .NET 6 targeting pack..."
+    echo "Installing .NET 6 SDK..."
     bash "$SCRIPT_DIR/dotnet-install.sh" --channel "6.0" --install-dir "$HOME/.dotnet" --no-path
+fi
+
+# Install .NET 6 runtime if missing
+if ! dotnet --list-runtimes 2>/dev/null | grep -q '^Microsoft.NETCore.App 6\.'; then
+    echo "Installing .NET 6 runtime..."
+    bash "$SCRIPT_DIR/dotnet-install.sh" --channel "6.0" --runtime "dotnet" --install-dir "$HOME/.dotnet" --no-path
 fi
 
 export DOTNET_ROOT="$HOME/.dotnet"
@@ -29,8 +35,8 @@ if ! grep -q "DOTNET_ROOT" "$HOME/.bashrc"; then
     echo "export PATH=\$DOTNET_ROOT:\$PATH:\$HOME/.local/bin" >> "$HOME/.bashrc"
 fi
 
-# Install Argos Translate and expose CLI
-python3 -m pip install --user --no-cache-dir argostranslate==1.8.0
+# Install Argos Translate (CTranslate2 v6 support) and expose CLI
+python3 -m pip install --user --no-cache-dir argostranslate==1.9.6
 mkdir -p "$HOME/.local/bin"
 cat >"$HOME/.local/bin/argos-translate" <<'EOF'
 #!/usr/bin/env bash

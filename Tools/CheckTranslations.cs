@@ -20,6 +20,7 @@ internal static class CheckTranslations
         var englishFile = JsonSerializer.Deserialize<MessageFile>(File.ReadAllText(engPath), options) ?? new MessageFile();
         englishFile.Messages ??= new Dictionary<string, string>();
 
+        bool hasIssues = false;
         foreach (string path in Directory.GetFiles(messagesDir, "*.json"))
         {
             if (Path.GetFileName(path).Equals("English.json", StringComparison.OrdinalIgnoreCase))
@@ -40,6 +41,7 @@ internal static class CheckTranslations
 
             if (missing.Count > 0)
             {
+                hasIssues = true;
                 Console.WriteLine($"Missing hashes in {Path.GetFileName(path)}:");
                 foreach (string h in missing)
                 {
@@ -57,6 +59,7 @@ internal static class CheckTranslations
 
             if (englishLike.Count > 0)
             {
+                hasIssues = true;
                 Console.WriteLine($"Potential untranslated strings in {Path.GetFileName(path)}:");
                 foreach (string h in englishLike)
                 {
@@ -73,6 +76,9 @@ internal static class CheckTranslations
                 }
             }
         }
+
+        if (hasIssues)
+            Environment.Exit(1);
     }
 
     class MessageFile

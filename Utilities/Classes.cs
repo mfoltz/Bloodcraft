@@ -1,6 +1,7 @@
 ﻿using Bloodcraft.Interfaces;
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
+using Bloodcraft.Resources.Localization;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -345,13 +346,13 @@ internal static class Classes
         if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.User.LocalCharacter._Entity, out var inventoryEntity) ||
             ServerGameManager.GetInventoryItemCount(inventoryEntity, item) < quantity)
         {
-            LocalizationService.Reply(ctx, $"You do not have enough of the required item to change classes (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)");
+            LocalizationService.Reply(ctx, MessageKeys.CLASS_CHANGE_MISSING_ITEM, item.GetLocalizedName(), quantity);
             return false;
         }
 
         if (!ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
         {
-            LocalizationService.Reply(ctx, $"Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)");
+            LocalizationService.Reply(ctx, MessageKeys.CLASS_CHANGE_REMOVE_FAILED, item.GetLocalizedName(), quantity);
             return false;
         }
 
@@ -397,7 +398,7 @@ internal static class Classes
 
         if (passiveBuffs.Count == 0)
         {
-            LocalizationService.Reply(ctx, $"{FormatClassName(playerClass)} passives not found!");
+            LocalizationService.Reply(ctx, MessageKeys.CLASS_PASSIVES_NOT_FOUND, FormatClassName(playerClass));
             return;
         }
 
@@ -416,16 +417,16 @@ internal static class Classes
                 prefabName = prefabName[..prefabIndex].TrimEnd();
             }
 
-            return $"<color=yellow>{index + 1}</color>| {(prefabEntity.Has<ModifyUnitStatBuff_DOTS>() ? FormatModifyUnitStatBuffer(prefabEntity) : prefabName)} at level <color=green>{level}</color>";
+            return string.Format(MessageKeys.CLASS_PASSIVE_ENTRY, index + 1, prefabEntity.Has<ModifyUnitStatBuff_DOTS>() ? FormatModifyUnitStatBuffer(prefabEntity) : prefabName, level);
         }).ToList();
 
-        LocalizationService.Reply(ctx, $"{FormatClassName(playerClass)} passives:");
+        LocalizationService.Reply(ctx, MessageKeys.CLASS_PASSIVES_HEADER, FormatClassName(playerClass));
 
         for (int i = 0; i < classBuffs.Count; i += 3) // Using batches of 4 for better readability
         {
             var batch = classBuffs.Skip(i).Take(3);
             string replyMessage = string.Join(", ", batch);
-            LocalizationService.Reply(ctx, $"{replyMessage}");
+            LocalizationService.Reply(ctx, replyMessage);
         }
     }
 
@@ -436,7 +437,7 @@ internal static class Classes
 
         if (!hasWeaponStats && !hasBloodStats)
         {
-            LocalizationService.Reply(ctx, $"Couldn't find stat synergies for {FormatClassName(playerClass)}...");
+            LocalizationService.Reply(ctx, MessageKeys.CLASS_SYNERGIES_NOT_FOUND, FormatClassName(playerClass));
             return;
         }
 
@@ -444,70 +445,37 @@ internal static class Classes
 
         if (hasWeaponStats && weaponStats is { Count: > 0 })
         {
-            allStats.AddRange(weaponStats.Select(stat => $"<color=white>{stat}</color> (<color=#00FFFF>Weapon</color>)"));
+            allStats.AddRange(weaponStats.Select(stat => string.Format(MessageKeys.CLASS_SYNERGY_WEAPON_ENTRY, stat)));
         }
 
         if (hasBloodStats && bloodStats is { Count: > 0 })
         {
-            allStats.AddRange(bloodStats.Select(stat => $"<color=white>{stat}</color> (<color=red>Blood</color>)"));
+            allStats.AddRange(bloodStats.Select(stat => string.Format(MessageKeys.CLASS_SYNERGY_BLOOD_ENTRY, stat)));
         }
 
         if (allStats.Count == 0)
         {
-            LocalizationService.Reply(ctx, $"No stat synergies found for {FormatClassName(playerClass)}.");
+            LocalizationService.Reply(ctx, MessageKeys.CLASS_SYNERGIES_NONE, FormatClassName(playerClass));
             return;
         }
 
-        LocalizationService.Reply(ctx, $"{FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:");
+        LocalizationService.Reply(ctx, MessageKeys.CLASS_SYNERGIES_HEADER, FormatClassName(playerClass), ConfigService.SynergyMultiplier);
 
         for (int i = 0; i < allStats.Count; i += 6)
         {
             var batch = allStats.Skip(i).Take(6);
             string replyMessage = string.Join(", ", batch);
-            LocalizationService.Reply(ctx, $"{replyMessage}");
+            LocalizationService.Reply(ctx, replyMessage);
         }
     }
 
-    /*
-    public static void ReplyClassSynergies(ChatCommandContext ctx, PlayerClass playerClass)
-    {
-        if (ClassWeaponBloodMap.TryGetValue(playerClass, out var weaponBloodStats))
-        {
-            var weaponStats = weaponBloodStats.Item1.Split(',').Select(v => ((WeaponStatType)int.Parse(v)).ToString()).ToList();
-            var bloodStats = weaponBloodStats.Item2.Split(',').Select(v => ((BloodStatType)int.Parse(v)).ToString()).ToList();
-
-            if (weaponStats.Count == 0 && bloodStats.Count == 0)
-            {
-                LocalizationService.Reply(ctx, $"No stat synergies found for {FormatClassName(playerClass)}.");
-                return;
-            }
-
-            var allStats = new List<string>();
-            allStats.AddRange(weaponStats.Select(stat => $"<color=white>{stat}</color> (<color=#00FFFF>Weapon</color>)"));
-            allStats.AddRange(bloodStats.Select(stat => $"<color=white>{stat}</color> (<color=red>Blood</color>)"));
-
-            LocalizationService.Reply(ctx, $"{FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:");
-
-            for (int i = 0; i < allStats.Count; i += 6)
-            {
-                var batch = allStats.Skip(i).Take(6);
-                string replyMessage = string.Join(", ", batch);
-                LocalizationService.Reply(ctx, $"{replyMessage}");
-            }
-        }
-        else
-        {
-            LocalizationService.Reply(ctx, $"Couldn't find stat synergies for {FormatClassName(playerClass)}...");
-        }
-    }
-    */
     public static void ReplyClassSpells(ChatCommandContext ctx, PlayerClass playerClass)
     {
         List<int> spells = Configuration.ParseIntegersFromString(ClassSpellsMap[playerClass]);
 
         if (spells.Count == 0)
         {
-            LocalizationService.Reply(ctx, $"{FormatClassName(playerClass)} has no spells configured...");
+            LocalizationService.Reply(ctx, MessageKeys.CLASS_SPELLS_NONE, FormatClassName(playerClass));
             return;
         }
 
@@ -516,7 +484,7 @@ internal static class Classes
             PrefabGUID spellPrefabGuid = new(spell);
             string spellName = GetClassSpellName(spellPrefabGuid);
 
-            return $"<color=yellow>{index + 1}</color>| <color=white>{spellName}</color>";
+            return string.Format("<color=yellow>{0}</color>| <color=white>{1}</color>", index + 1, spellName);
         }).ToList();
 
         if (!ConfigService.DefaultClassSpell.Equals(0))
@@ -524,16 +492,16 @@ internal static class Classes
             PrefabGUID spellPrefabGuid = new(ConfigService.DefaultClassSpell);
             string spellName = GetClassSpellName(spellPrefabGuid);
 
-            classSpells.Insert(0, $"<color=yellow>{0}</color>| <color=white>{spellName}</color>");
+            classSpells.Insert(0, string.Format("<color=yellow>0</color>| <color=white>{0}</color>", spellName));
         }
 
-        LocalizationService.Reply(ctx, $"{FormatClassName(playerClass)} spells:");
+        LocalizationService.Reply(ctx, MessageKeys.CLASS_SPELLS_HEADER, FormatClassName(playerClass));
 
         for (int i = 0; i < classSpells.Count; i += 4)
         {
             var batch = classSpells.Skip(i).Take(4);
             string replyMessage = string.Join(", ", batch);
-            LocalizationService.Reply(ctx, $"{replyMessage}");
+            LocalizationService.Reply(ctx, replyMessage);
         }
     }
     public static bool TryParseClass(string classType, out PlayerClass parsedClassType)
@@ -652,7 +620,7 @@ internal static class Classes
 
                 if (spellPrefabGUID.Equals(oldAbility))
                 {
-                    LocalizationService.Reply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
+                    LocalizationService.Reply(ctx, MessageKeys.CLASS_SHIFT_SPELL, spellName);
                     return;
                 }
                 for (int i = 0; i < firstBuffer.Length; i++)
@@ -717,7 +685,7 @@ internal static class Classes
                 JewelEquipUtilitiesServer.TryEquipJewel(ref _entityManagerRef, ref _prefabLookupMap, character, slot);
             }
 
-            LocalizationService.Reply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
+            LocalizationService.Reply(ctx, MessageKeys.CLASS_SHIFT_SPELL, spellName);
         }
         else if (spellPrefabGUID.HasValue())
         {
@@ -736,7 +704,7 @@ internal static class Classes
 
                 if (spellPrefabGUID.Equals(oldAbility))
                 {
-                    LocalizationService.Reply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
+                    LocalizationService.Reply(ctx, MessageKeys.CLASS_SHIFT_SPELL, spellName);
                     return;
                 }
                 for (int i = 0; i < firstBuffer.Length; i++)
@@ -781,12 +749,12 @@ internal static class Classes
                     JewelEquipUtilitiesServer.TryEquipJewel(ref _entityManagerRef, ref _prefabLookupMap, character, slot);
                 }
 
-                LocalizationService.Reply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
+                LocalizationService.Reply(ctx, MessageKeys.CLASS_SHIFT_SPELL, spellName);
             }
             else
             {
                 HandleNPCSpell(character, spellPrefabGUID);
-                LocalizationService.Reply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
+                LocalizationService.Reply(ctx, MessageKeys.CLASS_SHIFT_SPELL, spellName);
             }
         }
     }
@@ -869,7 +837,7 @@ internal static class Classes
 
         if (_classColorMap.TryGetValue(classType, out string classColor))
         {
-            return $"<color={classColor}>{className}</color>";
+            return string.Format("<color={0}>{1}</color>", classColor, className);
         }
         else
         {
@@ -885,14 +853,14 @@ internal static class Classes
             if (!Enum.IsDefined(typeof(PlayerClass), value))
             {
                 LocalizationService.Reply(ctx,
-                    "Invalid class, use '<color=white>.class l</color>' to see options.");
+                    MessageKeys.CLASS_INVALID);
                 return null;
             }
 
             /*
             if (value < 1 || value > 6)
             {
-                LocalizationService.Reply(ctx, "Invalid class, use <color=white>'.class l'</color> to see options.");
+                LocalizationService.Reply(ctx, MessageKeys.CLASS_INVALID);
                 return null;
             }
             */
@@ -904,7 +872,7 @@ internal static class Classes
         {
             if (!TryParseClassName(input, out PlayerClass playerClass))
             {
-                LocalizationService.Reply(ctx, "Invalid class, use <color=white>'.class l'</color> to see options.");
+                LocalizationService.Reply(ctx, MessageKeys.CLASS_INVALID);
                 return null;
             }
 
@@ -1064,7 +1032,7 @@ internal static class Classes
             ApplyClassBuffs(playerInfo.CharEntity, steamId);
         }
 
-        LocalizationService.Reply(ctx, "Removed all class buffs then applied current class buffs for all players.");
+        LocalizationService.Reply(ctx, MessageKeys.CLASS_BUFFS_REFRESHED);
     }
     public static void GlobalPurgeClassBuffs(ChatCommandContext ctx)
     {
@@ -1078,7 +1046,7 @@ internal static class Classes
             RemoveAllClassBuffs(playerInfo.CharEntity);
         }
 
-        LocalizationService.Reply(ctx, "Removed all class buffs for all players.");
+        LocalizationService.Reply(ctx, MessageKeys.CLASS_BUFFS_REMOVED);
     }
     public static string FormatModifyUnitStatBuffer(Entity buffEntity)
     {
@@ -1101,7 +1069,7 @@ internal static class Classes
                     formattedValue = FormatPercentStatValue(value);
                 }
 
-                string colorizedStat = $"<color=#00FFFF>{statName}</color>: <color=white>{formattedValue}</color>";
+                string colorizedStat = string.Format("<color=#00FFFF>{0}</color>: <color=white>{1}</color>", statName, formattedValue);
                 formattedStats.Add(colorizedStat);
             }
 

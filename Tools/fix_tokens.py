@@ -25,6 +25,18 @@ def replace_placeholders(value: str, tokens: List[str]) -> Tuple[str, bool, bool
     return value, True, mismatch
 
 
+def reorder_tokens_in_text(value: str, tokens: List[str]) -> Tuple[str, bool]:
+    found = TOKEN_PATTERN.findall(value or "")
+    if len(found) != len(tokens):
+        return value, False
+    if found == tokens:
+        return value, False
+    token_iter = iter(tokens)
+    def repl(_m: re.Match) -> str:
+        return next(token_iter)
+    return TOKEN_PATTERN.sub(repl, value, count=len(tokens)), True
+
+
 def load_english_messages(root: Path) -> Dict[str, List[str]]:
     path = root / "Resources" / "Localization" / "Messages" / "English.json"
     with open(path, "r", encoding="utf-8") as f:
@@ -46,7 +58,9 @@ def load_english_nodes(root: Path) -> Dict[str, List[str]]:
     return mapping
 
 
-def process_messages_file(path: Path, baseline: Dict[str, List[str]], check_only: bool) -> bool:
+def process_messages_file(
+    path: Path, baseline: Dict[str, List[str]], check_only: bool, reorder: bool
+) -> bool:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     messages = data.get("Messages", {})
@@ -54,11 +68,18 @@ def process_messages_file(path: Path, baseline: Dict[str, List[str]], check_only
     mismatch = False
     for key, text in list(messages.items()):
         new_text, replaced, bad = replace_placeholders(text, baseline.get(key, []))
-        if replaced:
+        reordered = False
+        if reorder and not bad:
+            new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(key, []))
+        if replaced or reordered:
             if bad:
                 print(f"{path}: {key} token count mismatch")
-            else:
+            elif replaced and reordered:
+                print(f"{path}: {key} tokens restored and reordered")
+            elif replaced:
                 print(f"{path}: {key} tokens restored")
+            else:
+                print(f"{path}: {key} tokens reordered")
             if not check_only:
                 messages[key] = new_text
             changed = True
@@ -69,7 +90,9 @@ def process_messages_file(path: Path, baseline: Dict[str, List[str]], check_only
     return changed or mismatch
 
 
-def process_root_file(path: Path, baseline: Dict[str, List[str]], check_only: bool) -> bool:
+def process_root_file(
+    path: Path, baseline: Dict[str, List[str]], check_only: bool, reorder: bool
+) -> bool:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     nodes = data.get("nodes") or data.get("Nodes") or []
@@ -84,11 +107,18 @@ def process_root_file(path: Path, baseline: Dict[str, List[str]], check_only: bo
         if not isinstance(text, str):
             continue
         new_text, replaced, bad = replace_placeholders(text, baseline.get(guid, []))
-        if replaced:
+        reordered = False
+        if reorder and not bad:
+            new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(guid, []))
+        if replaced or reordered:
             if bad:
                 print(f"{path}: {guid} token count mismatch")
-            else:
+            elif replaced and reordered:
+                print(f"{path}: {guid} tokens restored and reordered")
+            elif replaced:
                 print(f"{path}: {guid} tokens restored")
+            else:
+                print(f"{path}: {guid} tokens reordered")
             if not check_only:
                 node[text_key] = new_text
             changed = True
@@ -103,22 +133,32 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Fix token placeholders in localization JSON files")
     ap.add_argument("--root", default=Path(__file__).resolve().parents[1], help="Repo root")
     ap.add_argument("--check-only", action="store_true", help="Report issues without modifying files")
+    ap.add_argument("--reorder", action="store_true", help="Reorder tokens when counts match")
+    ap.add_argument("paths", nargs="*", help="Specific localization JSON files to process")
     args = ap.parse_args()
 
     root = Path(args.root).resolve()
     messages_tokens = load_english_messages(root)
     node_tokens = load_english_nodes(root)
 
-    files = list((root / "Resources" / "Localization" / "Messages").glob("*.json"))
-    files = [p for p in files if p.name != "English.json"]
-    files += [p for p in (root / "Resources" / "Localization").glob("*.json") if p.name != "English.json"]
+    if args.paths:
+        files = []
+        for p in args.paths:
+            path = Path(p)
+            if not path.is_absolute():
+                path = (root / path).resolve()
+            files.append(path)
+    else:
+        files = list((root / "Resources" / "Localization" / "Messages").glob("*.json"))
+        files = [p for p in files if p.name != "English.json"]
+        files += [p for p in (root / "Resources" / "Localization").glob("*.json") if p.name != "English.json"]
 
     issues = False
     for path in files:
         if path.parent.name == "Messages":
-            issues |= process_messages_file(path, messages_tokens, args.check_only)
+            issues |= process_messages_file(path, messages_tokens, args.check_only, args.reorder)
         else:
-            issues |= process_root_file(path, node_tokens, args.check_only)
+            issues |= process_root_file(path, node_tokens, args.check_only, args.reorder)
 
     if args.check_only and issues:
         raise SystemExit(1)

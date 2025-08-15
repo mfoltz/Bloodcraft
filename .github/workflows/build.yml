@@ -77,6 +77,12 @@ jobs:
       - name: Build (Release)
         run: dotnet build . --configuration Release -p:Version=${{ env.version }} -p:RunGenerateREADME=false
 
+      - name: Check tokens and translations
+        run: |
+          set -e
+          python Tools/fix_tokens.py --check-only Resources/Localization/Messages/*.json
+          dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations
+
       - name: GH Release
         uses: softprops/action-gh-release@v1
         if: github.event_name == 'workflow_dispatch'

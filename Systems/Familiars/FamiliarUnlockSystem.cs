@@ -25,6 +25,9 @@ internal static class FamiliarUnlockSystem
     static readonly bool _shareUnlocks = ConfigService.ShareUnlocks;
     static readonly bool _allowVBloods = ConfigService.AllowVBloods;
 
+    public const string NEW_UNIT_UNLOCKED_MESSAGE = "New unit unlocked: <color=green>{0}</color>";
+    public const string NEW_SHINY_UNIT_UNLOCKED_MESSAGE = "New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{0}</color>";
+
     static readonly PrefabGUID _familiarUnlockBuff = PrefabGUIDs.AB_HighLordSword_SelfStun_DeadBuff;
 
     public static readonly HashSet<PrefabGUID> ConfiguredPrefabGuidBans = [];
@@ -169,11 +172,11 @@ internal static class FamiliarUnlockSystem
 
             if (!isShiny)
             {
-                LocalizationService.Reply(EntityManager, user, "New unit unlocked: <color=green>{0}</color>", targetPrefabGuid.GetLocalizedName());
+                LocalizationService.Reply(EntityManager, user, NEW_UNIT_UNLOCKED_MESSAGE, targetPrefabGuid.GetLocalizedName());
             }
             else if (isShiny)
             {
-                LocalizationService.Reply(EntityManager, user, "New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{0}</color>", targetPrefabGuid.GetLocalizedName());
+                LocalizationService.Reply(EntityManager, user, NEW_SHINY_UNIT_UNLOCKED_MESSAGE, targetPrefabGuid.GetLocalizedName());
             }
         }
         else if (isShiny)

@@ -64,6 +64,8 @@ internal static class FamiliarBindingSystem
 
     const string SHINY_DEFAULT = "<color=#FF69B4>";
 
+    const string BINDING_FAILED_MESSAGE = "Binding failed...";
+
     static readonly int _maxFamiliarLevel = ConfigService.MaxFamiliarLevel;
     static readonly float _familiarPrestigeStatMultiplier = ConfigService.FamiliarPrestigeStatMultiplier;
 
@@ -239,7 +241,7 @@ internal static class FamiliarBindingSystem
                 else
                 {
                     familiar.Destroy();
-                    LocalizationService.Reply(EntityManager, user, "Binding failed...");
+                    LocalizationService.Reply(EntityManager, user, BINDING_FAILED_MESSAGE);
 
                     return false;
                 }

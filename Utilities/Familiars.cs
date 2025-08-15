@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Resources;
+using Bloodcraft.Resources.Localization;
 using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Behaviours;
@@ -60,6 +61,28 @@ internal static class Familiars
     static readonly float3 _southFloat3 = new(0f, 0f, -1f);
 
     const float BLOOD_QUALITY_IGNORE = 90f;
+
+    const string SHINY_FAMILIARS_ENABLED_MESSAGE = "Shiny familiars <color=green>enabled</color>.";
+    const string SHINY_FAMILIARS_DISABLED_MESSAGE = "Shiny familiars <color=red>disabled</color>.";
+    const string VBLOOD_EMOTES_ENABLED_MESSAGE = "VBlood emotes <color=green>enabled</color>.";
+    const string VBLOOD_EMOTES_DISABLED_MESSAGE = "VBlood emotes <color=red>disabled</color>.";
+    const string FAMILIAR_ENABLED_MESSAGE = "<color=yellow>Familiar</color> <color=green>enabled</color>!";
+    const string DISMISS_WHILE_BINDING_MESSAGE = "Can't dismiss familiar when binding/unbinding!";
+    const string FAMILIAR_DISABLED_MESSAGE = "<color=yellow>Familiar</color> <color=red>disabled</color>!";
+    const string ACTIVE_FAMILIAR_EXISTS_MESSAGE = "You already have an active familiar! Unbind that one first.";
+    const string BIND_IN_COMBAT_MESSAGE = "You can't bind in combat or when using certain forms! (dominating presence, bat)";
+    const string ACTIVE_BOX_NOT_FOUND_MESSAGE = "Couldn't find active box! Use '<color=white>.fam listboxes</color>' and select one with '<color=white>.fam cb [BoxName]</color>'";
+    const string ACTIVE_BOX_INDEX_INVALID_MESSAGE = "Invalid index for active box, try binding or smartbind via command.";
+    const string BINDING_PRESET_NOT_FOUND_MESSAGE = "Couldn't find binding preset, try binding or smartbind via command.";
+    const string INDEX_OUT_OF_RANGE_MESSAGE = "Invalid index, use <color=white>1</color>-<color=white>{0}</color>! (Active Box - <color=yellow>{1}</color>)";
+    const string ACTIVES_NOT_FOUND_MESSAGE = "Couldn't find familiar actives or familiar already active! If this doesn't seem right try using '<color=white>.fam reset</color>'.";
+    const string UNBIND_WHILE_INTERACTING_MESSAGE = "Can't unbind familiar right now! (interacting)";
+    const string UNBIND_WHILE_DISMISSED_MESSAGE = "Can't unbind familiar right now! (dismissed)";
+    const string FAMILIAR_NOT_FOUND_UNBIND_MESSAGE = "Couldn't find familiar to unbind! If this doesn't seem right try using '<color=white>.fam reset</color>'.";
+    const string FAMILIAR_UNBOUND_SHINY_MESSAGE = "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!";
+    const string FAMILIAR_UNBOUND_MESSAGE = "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!";
+    const string SHINY_INFO_MESSAGE = "{0}[<color=white>{1}</color>]";
+
     public enum FamiliarEquipmentType
     {
         Chest,
@@ -352,14 +375,14 @@ internal static class Familiars
             // Add to set if valid
             if (!prefabEntity.Read<PrefabGUID>().GetPrefabName().StartsWith("CHAR"))
             {
-                LocalizationService.Reply(ctx, "Invalid unit prefab (match found but does not start with CHAR/char).");
+                LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_INVALID_PREFAB);
                 return;
             }
 
             data.FamiliarUnlocks[activeBox].Add(prefabHash);
             SaveFamiliarUnlocksData(steamId, data);
 
-            LocalizationService.Reply(ctx, $"<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.");
+            LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_ADD_SUCCESS, new PrefabGUID(prefabHash).GetLocalizedName(), activeBox);
         }
         else if (unit.ToLower().StartsWith("char")) // search for full and/or partial name match
         {
@@ -383,23 +406,23 @@ internal static class Familiars
             {
                 if (!prefabEntity.Read<PrefabGUID>().GetPrefabName().StartsWith("CHAR"))
                 {
-                    LocalizationService.Reply(ctx, "Invalid unit name (match found but does not start with CHAR/char).");
+                    LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_INVALID_NAME);
                     return;
                 }
 
                 data.FamiliarUnlocks[activeBox].Add(match.GuidHash);
                 SaveFamiliarUnlocksData(steamId, data);
 
-                LocalizationService.Reply(ctx, $"<color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.");
+                LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_ADD_SUCCESS_WITH_HASH, match.GetLocalizedName(), match.GuidHash, activeBox);
             }
             else
             {
-                LocalizationService.Reply(ctx, "Invalid unit name (no full or partial matches).");
+                LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_INVALID_NAME_NO_MATCH);
             }
         }
         else
         {
-            LocalizationService.Reply(ctx, "Invalid prefab (not an integer) or name (does not start with CHAR/char).");
+            LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_INVALID_PREFAB_OR_NAME);
         }
     }
     public static void TryReturnFamiliar(Entity playerCharacter, Entity familiar)
@@ -475,12 +498,12 @@ internal static class Familiars
     public static void ToggleShinies(ChatCommandContext ctx, ulong steamId)
     {
         TogglePlayerBool(steamId, SHINY_FAMILIARS_KEY);
-        LocalizationService.Reply(ctx, GetPlayerBool(steamId, SHINY_FAMILIARS_KEY) ? "Shiny familiars <color=green>enabled</color>." : "Shiny familiars <color=red>disabled</color>.");
+        LocalizationService.Reply(ctx, GetPlayerBool(steamId, SHINY_FAMILIARS_KEY) ? SHINY_FAMILIARS_ENABLED_MESSAGE : SHINY_FAMILIARS_DISABLED_MESSAGE);
     }
     public static void ToggleVBloodEmotes(ChatCommandContext ctx, ulong steamId)
     {
         TogglePlayerBool(steamId, VBLOOD_EMOTES_KEY);
-        LocalizationService.Reply(ctx, GetPlayerBool(steamId, VBLOOD_EMOTES_KEY) ? "VBlood emotes <color=green>enabled</color>." : "VBlood emotes <color=red>disabled</color>.");
+        LocalizationService.Reply(ctx, GetPlayerBool(steamId, VBLOOD_EMOTES_KEY) ? VBLOOD_EMOTES_ENABLED_MESSAGE : VBLOOD_EMOTES_DISABLED_MESSAGE);
     }
     public static void CallFamiliar(Entity playerCharacter, Entity familiar, User user, ulong steamId)
     {
@@ -503,13 +526,13 @@ internal static class Familiars
 
         UpdateActiveFamiliarDismissed(steamId, false);
 
-        LocalizationService.Reply(EntityManager, user, "<color=yellow>Familiar</color> <color=green>enabled</color>!");
+        LocalizationService.Reply(EntityManager, user, FAMILIAR_ENABLED_MESSAGE);
     }
     public static void DismissFamiliar(Entity playerCharacter, Entity familiar, User user, ulong steamId)
     {
         if (familiar.HasBuff(_vanishBuff))
         {
-            LocalizationService.Reply(EntityManager, user, "Can't dismiss familiar when binding/unbinding!");
+            LocalizationService.Reply(EntityManager, user, DISMISS_WHILE_BINDING_MESSAGE);
             return;
         }
 
@@ -535,7 +558,7 @@ internal static class Familiars
 
         UpdateActiveFamiliarDismissed(steamId, true);
 
-        LocalizationService.Reply(EntityManager, user, "<color=yellow>Familiar</color> <color=red>disabled</color>!");
+        LocalizationService.Reply(EntityManager, user, FAMILIAR_DISABLED_MESSAGE);
     }
     public static string GetShinyInfo(FamiliarBuffsData buffsData, Entity familiar, int familiarId)
     {
@@ -545,7 +568,7 @@ internal static class Familiars
 
             if (ShinyBuffSpellSchools.TryGetValue(shinyBuff, out string spellSchool) && familiar.TryGetBuffStacks(shinyBuff, out Entity _, out int stacks))
             {
-                return $"{spellSchool}[<color=white>{stacks}</color>]";
+                return string.Format(SHINY_INFO_MESSAGE, spellSchool, stacks);
             }
         }
 
@@ -622,12 +645,12 @@ internal static class Familiars
 
         if (hasActive)
         {
-            LocalizationService.Reply(EntityManager, user, "You already have an active familiar! Unbind that one first.");
+            LocalizationService.Reply(EntityManager, user, ACTIVE_FAMILIAR_EXISTS_MESSAGE);
             return;
         }
         else if (playerCharacter.HasBuff(_pveCombatBuff) || playerCharacter.HasBuff(_dominateBuff) || playerCharacter.HasBuff(_takeFlightBuff) || playerCharacter.HasBuff(_pvpCombatBuff))
         {
-            LocalizationService.Reply(EntityManager, user, "You can't bind in combat or when using certain forms! (dominating presence, bat)");
+            LocalizationService.Reply(EntityManager, user, BIND_IN_COMBAT_MESSAGE);
             return;
         }
 
@@ -635,7 +658,7 @@ internal static class Familiars
 
         if (string.IsNullOrEmpty(box))
         {
-            LocalizationService.Reply(EntityManager, user, "Couldn't find active box! Use '<color=white>.fam listboxes</color>' and select one with '<color=white>.fam cb [BoxName]</color>");
+            LocalizationService.Reply(EntityManager, user, ACTIVE_BOX_NOT_FOUND_MESSAGE);
             return;
         }
         else if (!hasActive && LoadFamiliarUnlocksData(steamId).FamiliarUnlocks.TryGetValue(box, out var famKeys))
@@ -644,7 +667,7 @@ internal static class Familiars
             {
                 if (boxIndex < 1 || boxIndex > famKeys.Count)
                 {
-                    LocalizationService.Reply(EntityManager, user, "Invalid index for active box, try binding or smartbind via command.");
+                    LocalizationService.Reply(EntityManager, user, ACTIVE_BOX_INDEX_INVALID_MESSAGE);
                     return;
                 }
 
@@ -652,11 +675,11 @@ internal static class Familiars
             }
             else if (boxIndex == -1)
             {
-                LocalizationService.Reply(EntityManager, user, "Couldn't find binding preset, try binding or smartbind via command.");
+                LocalizationService.Reply(EntityManager, user, BINDING_PRESET_NOT_FOUND_MESSAGE);
             }
             else if (boxIndex < 1 || boxIndex > famKeys.Count)
             {
-                LocalizationService.Reply(EntityManager, user, "Invalid index, use <color=white>1</color>-<color=white>{0}</color>! (Active Box - <color=yellow>{1}</color>)", famKeys.Count, box);
+                LocalizationService.Reply(EntityManager, user, INDEX_OUT_OF_RANGE_MESSAGE, famKeys.Count, box);
             }
             else
             {
@@ -666,7 +689,7 @@ internal static class Familiars
         }
         else
         {
-            LocalizationService.Reply(EntityManager, user, "Couldn't find familiar actives or familiar already active! If this doesn't seem right try using '<color=white>.fam reset</color>'.");
+            LocalizationService.Reply(EntityManager, user, ACTIVES_NOT_FOUND_MESSAGE);
         }
     }
     public static void UnbindFamiliar(User user, Entity playerCharacter, bool smartBind = false, int index = -1)
@@ -682,7 +705,7 @@ internal static class Familiars
 
             if (familiar.HasBuff(_interactModeBuff))
             {
-                LocalizationService.Reply(EntityManager, user, "Can't unbind familiar right now! (interacting)");
+                LocalizationService.Reply(EntityManager, user, UNBIND_WHILE_INTERACTING_MESSAGE);
                 return;
             }
 
@@ -694,11 +717,11 @@ internal static class Familiars
         }
         else if (isDismissed)
         {
-            LocalizationService.Reply(EntityManager, user, "Can't unbind familiar right now! (dismissed)");
+            LocalizationService.Reply(EntityManager, user, UNBIND_WHILE_DISMISSED_MESSAGE);
         }
         else
         {
-            LocalizationService.Reply(EntityManager, user, "Couldn't find familiar to unbind! If this doesn't seem right try using '<color=white>.fam reset</color>'.");
+            LocalizationService.Reply(EntityManager, user, FAMILIAR_NOT_FOUND_UNBIND_MESSAGE);
         }
     }
     static IEnumerator UnbindFamiliarDelayRoutine(User user, Entity playerCharacter, Entity familiar,
@@ -737,11 +760,11 @@ internal static class Familiars
 
         if (!string.IsNullOrEmpty(shinyHexColor))
         {
-            LocalizationService.Reply(EntityManager, user, "<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!", prefabGuid.GetLocalizedName(), shinyHexColor);
+            LocalizationService.Reply(EntityManager, user, FAMILIAR_UNBOUND_SHINY_MESSAGE, prefabGuid.GetLocalizedName(), shinyHexColor);
         }
         else
         {
-            LocalizationService.Reply(EntityManager, user, "<color=green>{0}</color> <color=#FFC0CB>unbound</color>!", prefabGuid.GetLocalizedName());
+            LocalizationService.Reply(EntityManager, user, FAMILIAR_UNBOUND_MESSAGE, prefabGuid.GetLocalizedName());
         }
 
         if (smartBind)
@@ -889,7 +912,7 @@ internal static class Familiars
 
         if (!steamId.HasActiveFamiliar())
         {
-            LocalizationService.Reply(ctx, "Couldn't find active familiar!");
+            LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_NOT_FOUND);
             return;
         }
 
@@ -909,7 +932,7 @@ internal static class Familiars
 
         if (prestigeData.FamiliarPrestige[familiarId] >= ConfigService.MaxFamiliarPrestiges)
         {
-            LocalizationService.Reply(ctx, $"Your familiar has already prestiged the maximum number of times! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)");
+            LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_PRESTIGE_MAX, ConfigService.MaxFamiliarPrestiges);
             return;
         }
 
@@ -936,13 +959,13 @@ internal static class Familiars
                 }
                 else
                 {
-                    LocalizationService.Reply(ctx, $"Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.");
+                    LocalizationService.Reply(ctx, "Familiar already has <color=#00FFFF>{0}</color> (<color=yellow>{1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.", FamiliarPrestigeStats[value], value + 1);
                     return;
                 }
             }
             else
             {
-                LocalizationService.Reply(ctx, $"Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.");
+                LocalizationService.Reply(ctx, "Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.");
                 return;
             }
         }
@@ -962,7 +985,7 @@ internal static class Familiars
             Entity familiar = GetActiveFamiliar(playerCharacter);
             ModifyUnitStats(familiar, xpData.FamiliarExperience[familiarId].Key, steamId, familiarId);
 
-            LocalizationService.Reply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!");
+            LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_PRESTIGE_RETAIN_LEVEL, prestigeLevel);
 
             /*
             if (value == -1)
@@ -977,7 +1000,7 @@ internal static class Familiars
         }
         else
         {
-            LocalizationService.Reply(ctx, "Failed to remove schematics from your inventory!");
+            LocalizationService.Reply(ctx, MessageKeys.FAMILIAR_SCHEMATICS_REMOVE_FAILED);
         }
     }
     public static IEnumerator HandleFamiliarShapeshiftRoutine(User user, Entity playerCharacter, Entity familiar)

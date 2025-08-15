@@ -24,7 +24,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 ## Development setup
 
-Run `.codex/install.sh` once to install the .NET SDK and Argos Translate dependencies. See
+Run `.codex/install.sh` once to install the .NET SDK, the .NET 6 runtime, and Argos Translate dependencies. The script installs Argos Translate 1.9.6 or later to support CTranslate2 model binary v6. After running the script, verify the runtime with `dotnet --list-runtimes` and ensure `Microsoft.NETCore.App 6.0.x` is listed. See
 [AGENTS.md](AGENTS.md) for the full workflow. For instructions on customizing
 `FROM_LANG` and `TO_LANG`, jump to the [Localization](#localization-wip) section.
 
@@ -780,11 +780,16 @@ Run `.codex/install.sh` once to install the .NET SDK and Argos Translate depende
   Create custom portals and waygates for your server! Pairs great with KindredSchematics for making new areas.
 - [XPRising](https://thunderstore.io/c/v-rising/p/XPRising/XPRising/)
   If you like the idea of a mod with RPG features but Bloodcraft doesn't float your boat maybe this will!
-
+- [VRoles Testing Info Template Thing](https://thunderstore.io/c/v-rising/p/odjit/VRoles/) <br/>
+  <img src="https://gcdn.thunderstore.io/live/repository/icons/odjit-VRoles-1.0.0.png.128x128_q95.png" alt="VRoles icon" width="48" height="48" style="border-radius:8px; vertical-align:middle; margin-right:6px;"/>
+  <strong>Feature-rich, role-based command system</strong> with a clean, modern UI. Perfect for managing permissions and powers without the clutter. Pairs wonderfully with <a href="https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/">VCF</a>.<br/>
+  <img alt="tag" src="https://img.shields.io/badge/Commands-1f6feb" />
+  <img alt="tag" src="https://img.shields.io/badge/UX-polished-ff69b4" />
+  
 ## Development Setup
 
-Run `.codex/install.sh` once to install the .NET SDK and Argos Translate. The script adds
-`~/.local/bin` to your `PATH` so the `argos-translate` CLI is available in future sessions.
+Run `.codex/install.sh` once to install the .NET SDK, the .NET 6 runtime, and Argos Translate. The script installs Argos Translate 1.9.6 or later for CTranslate2 v6 model support and adds
+`~/.local/bin` to your `PATH` so the `argos-translate` CLI is available in future sessions. Confirm the runtime with `dotnet --list-runtimes` and look for `Microsoft.NETCore.App 6.0.x`.
 
 ## Localization (WIP)
 
@@ -799,6 +804,8 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 
 ### Translation Workflow
 
+This process applies only to files under `Resources/Localization/Messages`.
+
 1. **Refresh the English source.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
 2. **Propagate new hashes.** Copy the refreshed `English.json` entries into each `Resources/Localization/Messages/<Language>.json` while keeping numeric hashes intact.
@@ -806,9 +813,22 @@ dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-me
 3. **Translate missing entries.**
    `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --verbose --log-file translate.log --report-file skipped.csv --overwrite`
    Verify the Argos model is installed before running translations: `argos-translate --from en --to tr - < /dev/null` (replace `tr` with the target code). Any hashes listed in `skipped.csv` must be manually translated and the script re-run to confirm they are handled.
-4. **Verify translations.**
+4. **Check and fix tokens.**
+   ```bash
+   python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
+   python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json
+   ```
+   Running with `--check-only` fails fast if tokens were altered.
+5. **Verify translations.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text`
    This command confirms every hash exists and no English text remains.
+
+   The CI pipeline also enforces this by running:
+
+   ```bash
+   python Tools/fix_tokens.py --check-only Resources/Localization/Messages/*.json
+   dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations
+   ```
 
 ### English detection allowlist
 

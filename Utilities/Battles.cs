@@ -18,6 +18,9 @@ internal static class Battles
     const string SANGUIS_CONFIG_CLASS = "Sanguis.Plugin";
     const string SANGUIS_CONFIG_PROPERTY = "TokensPerMinute";
     const string SANGUIS_SAVE_METHOD = "SavePlayerTokens";
+    const string BATTLE_GROUP_FAMILIAR_ADDED_MESSAGE = "<color=green>{0}</color>{1} [<color=white>{2}</color>][<color=#90EE90>{3}</color>] added to <color=white>{4}</color>! (<color=yellow>{5}</color>)";
+    const string BATTLE_GROUP_DETAILS_MESSAGE = "Battle Group - {0}";
+    const string BATTLE_GROUP_EMPTY_MESSAGE = "No familiars in battle group!";
     public static bool TryGetMatch(this HashSet<(ulong, ulong)> hashSet, ulong value, out (ulong, ulong) matchingPair)
     {
         matchingPair = default;
@@ -180,7 +183,14 @@ internal static class Battles
             prestiges = prestigeData.FamiliarPrestige[familiarId].Key;
         }
 
-        LocalizationService.Reply(ctx, $"<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to <color=white>{groupName}</color>! (<color=yellow>{slotIndex}</color>)");
+        LocalizationService.Reply(ctx,
+            BATTLE_GROUP_FAMILIAR_ADDED_MESSAGE,
+            famName,
+            buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $"{colorCode}*</color>" : string.Empty,
+            level,
+            prestiges,
+            groupName,
+            slotIndex);
     }
     */
     public static void HandleBattleGroupDetailsReply(ChatCommandContext ctx, ulong steamId, FamiliarBattleGroupsManager.FamiliarBattleGroup battleGroup)
@@ -194,12 +204,12 @@ internal static class Battles
             BuildBattleGroupDetailsReply(steamId, buffsData, prestigeData, battleGroup.Familiars, ref familiars);
 
             string familiarReply = string.Join(", ", familiars);
-            LocalizationService.Reply(ctx, $"Battle Group - {familiarReply}");
+            LocalizationService.Reply(ctx, BATTLE_GROUP_DETAILS_MESSAGE, familiarReply);
             return;
         }
         else
         {
-            LocalizationService.Reply(ctx, "No familiars in battle group!");
+            LocalizationService.Reply(ctx, BATTLE_GROUP_EMPTY_MESSAGE);
             return;
         }
     }

@@ -30,7 +30,7 @@ internal static class QuestCommands
         var steamId = ctx.Event.User.PlatformId;
 
         TogglePlayerBool(steamId, QUEST_LOG_KEY);
-        LocalizationService.Reply(ctx, $"Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.Reply(ctx, "Quest logging is now {0}.", GetPlayerBool(steamId, QUEST_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>");
     }
 
     [Command(name: "progress", shortHand: "p", adminOnly: false, usage: ".quest p [QuestType]", description: "Display your current quest progress.")]
@@ -137,7 +137,7 @@ internal static class QuestCommands
         int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : Progression.GetSimulatedLevel(playerInfo.UserEntity);
         ForceRefresh(steamId, level);
 
-        LocalizationService.Reply(ctx, $"Quests for <color=green>{playerInfo.User.CharacterName.Value}</color> have been refreshed.");
+        LocalizationService.Reply(ctx, "Quests for <color=green>{0}</color> have been refreshed.", playerInfo.User.CharacterName.Value);
     }
 
     [Command(name: "reroll", shortHand: "r", adminOnly: false, usage: ".quest r [QuestType]", description: "Reroll quest for cost (daily only currently).")]
@@ -186,13 +186,13 @@ internal static class QuestCommands
                         int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : Progression.GetSimulatedLevel(ctx.Event.SenderUserEntity);
                         ForceDaily(ctx.Event.User.PlatformId, level);
 
-                        LocalizationService.Reply(ctx, $"Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!");
+                        LocalizationService.Reply(ctx, "Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{0}</color> x<color=white>{1}</color>!", item.GetLocalizedName(), quantity);
                         Quests.QuestObjectiveReply(ctx, questData, type);
                     }
                 }
                 else
                 {
-                    LocalizationService.Reply(ctx, $"You couldn't afford to reroll your daily... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)");
+                    LocalizationService.Reply(ctx, "You couldn't afford to reroll your daily... (<color=#C0C0C0>{0}</color> x<color=white>{1}</color>)", item.GetLocalizedName(), quantity);
                 }
             }
             else
@@ -219,13 +219,13 @@ internal static class QuestCommands
                         int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.Read<Equipment>().GetFullLevel();
                         ForceWeekly(ctx.Event.User.PlatformId, level);
 
-                        LocalizationService.Reply(ctx, $"Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!");
+                        LocalizationService.Reply(ctx, "Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{0}</color> x<color=white>{1}</color>!", item.GetLocalizedName(), quantity);
                         Quests.QuestObjectiveReply(ctx, questData, type);
                     }
                 }
                 else
                 {
-                    LocalizationService.Reply(ctx, $"You couldn't afford to reroll your wekly... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)");
+                    LocalizationService.Reply(ctx, "You couldn't afford to reroll your wekly... (<color=#C0C0C0>{0}</color> x<color=white>{1}</color>)", item.GetLocalizedName(), quantity);
                 }
             }
             else
@@ -272,20 +272,20 @@ internal static class QuestCommands
 
         if (!Enum.TryParse<QuestType>(questTypeName, true, out var questType))
         {
-            LocalizationService.Reply(ctx, $"Invalid quest type '{questTypeName}'. Valid values are: {string.Join(", ", Enum.GetNames(typeof(QuestType)))}");
+            LocalizationService.Reply(ctx, "Invalid quest type '{0}'. Valid values are: {1}", questTypeName, string.Join(", ", Enum.GetNames(typeof(QuestType))));
             return;
         }
 
         if (!questData.ContainsKey(questType))
         {
-            LocalizationService.Reply(ctx, $"Player does not have an active {questType} quest to complete.");
+            LocalizationService.Reply(ctx, "Player does not have an active {0} quest to complete.", questType);
             return;
         }
 
         var quest = questData[questType];
         if (quest.Objective.Complete)
         {
-            LocalizationService.Reply(ctx, $"The {questType} quest is already complete for {playerInfo.User.CharacterName.Value}.");
+            LocalizationService.Reply(ctx, "The {0} quest is already complete for {1}.", questType, playerInfo.User.CharacterName.Value);
             return;
         }
 
@@ -299,6 +299,6 @@ internal static class QuestCommands
 
         ProcessQuestProgress(questData, target, toAdd, user);
 
-        LocalizationService.Reply(ctx, $"Completed {Quests.QuestTypeColor[questType]} for <color=green>{playerInfo.User.CharacterName.Value}</color>!");
+        LocalizationService.Reply(ctx, "Completed {0} for <color=green>{1}</color>!", Quests.QuestTypeColor[questType], playerInfo.User.CharacterName.Value);
     }
 }
