@@ -516,3 +516,57 @@ def test_interpolation_block_skipped(tmp_path, monkeypatch):
     assert data["Messages"]["hash"] == msg
     rows = list(csv.DictReader(report_path.open()))
     assert rows[0]["category"] == "interpolation"
+
+
+def test_fatal_error_aborts(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class DummyTranslator:
+        def __init__(self):
+            self.calls = 0
+
+        def translate(self, text):
+            self.calls += 1
+            raise Exception("Unsupported model binary version 3")
+
+    translator = DummyTranslator()
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: translator,
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert "Unsupported model binary version" in str(exc.value)
+    assert translator.calls == 1

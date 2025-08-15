@@ -21,6 +21,14 @@ from typing import List
 from argostranslate import translate as argos_translate
 from language_utils import contains_english
 
+FATAL_ARGOS_ERRORS = [
+    "Unsupported model binary version",
+]
+
+
+class FatalTranslationError(Exception):
+    """Raised when Argos Translate encounters an unrecoverable error."""
+
 RICHTEXT = re.compile(r'<[^>]+>')
 PLACEHOLDER = re.compile(r'\{[^{}]+\}')
 CSINTERP = re.compile(r'\$\{[^{}]+\}')
@@ -177,10 +185,13 @@ def translate_batch(
                         )
                 except Exception as e:
                     future.cancel()
+                    msg = str(e)
+                    if any(err in msg for err in FATAL_ARGOS_ERRORS):
+                        raise FatalTranslationError(msg)
                     if attempt == max_retries:
-                        raise RuntimeError(f"Translation failed: {e}")
+                        raise RuntimeError(f"Translation failed: {msg}")
                     print(
-                        f"Argos failed on attempt {attempt}/{max_retries}: {e}"
+                        f"Argos failed on attempt {attempt}/{max_retries}: {msg}"
                     )
     return results, timed_out
 
@@ -325,6 +336,13 @@ def _run_translation(args, root: str, log_fp) -> None:
                 max_retries=args.max_retries,
                 timeout=args.timeout,
             )
+        except FatalTranslationError as e:
+            msg = f"Fatal Argos error: {e}"
+            guidance = "Upgrade Argos Translate to support model version"
+            log_verbose(msg)
+            log_verbose(guidance)
+            print(guidance)
+            raise SystemExit(msg)
         except Exception as e:
             log_verbose(f"Translation error: {e}")
             for k in batch_keys:
@@ -452,6 +470,8 @@ def _run_translation(args, root: str, log_fp) -> None:
                 max_retries=args.max_retries,
                 timeout=args.timeout,
             )
+        except FatalTranslationError:
+            raise
         except Exception as e:
             return False, f"batch error on strict retry: {e}"
         if timeouts:
