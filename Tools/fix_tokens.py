@@ -4,6 +4,7 @@
 import argparse
 import json
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -58,46 +59,61 @@ def load_english_nodes(root: Path) -> Dict[str, List[str]]:
     return mapping
 
 
+@dataclass
+class Counters:
+    tokens_restored: int = 0
+    tokens_reordered: int = 0
+    token_mismatches: int = 0
+
+
 def process_messages_file(
     path: Path, baseline: Dict[str, List[str]], check_only: bool, reorder: bool
-) -> bool:
+) -> Counters:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     messages = data.get("Messages", {})
     changed = False
-    mismatch = False
+    counters = Counters()
     for key, text in list(messages.items()):
         new_text, replaced, bad = replace_placeholders(text, baseline.get(key, []))
         reordered = False
         if reorder and not bad:
             new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(key, []))
+        if bad:
+            print(f"{path}: {key} token count mismatch")
+            counters.token_mismatches += 1
+            if replaced and not check_only:
+                messages[key] = new_text
+                changed = True
+            continue
         if replaced or reordered:
-            if bad:
-                print(f"{path}: {key} token count mismatch")
-            elif replaced and reordered:
+            if replaced and reordered:
                 print(f"{path}: {key} tokens restored and reordered")
+                counters.tokens_restored += 1
+                counters.tokens_reordered += 1
             elif replaced:
                 print(f"{path}: {key} tokens restored")
+                counters.tokens_restored += 1
             else:
                 print(f"{path}: {key} tokens reordered")
+                counters.tokens_reordered += 1
             if not check_only:
                 messages[key] = new_text
             changed = True
-            mismatch = mismatch or bad
     if changed and not check_only:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-    return changed or mismatch
+    return counters
 
 
 def process_root_file(
     path: Path, baseline: Dict[str, List[str]], check_only: bool, reorder: bool
-) -> bool:
+) -> Counters:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     nodes = data.get("nodes") or data.get("Nodes") or []
     changed = False
-    mismatch = False
+    counters = Counters()
     for node in nodes:
         guid = node.get("guid") or node.get("Guid")
         text_key = "text" if "text" in node else "Text" if "Text" in node else None
@@ -110,23 +126,31 @@ def process_root_file(
         reordered = False
         if reorder and not bad:
             new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(guid, []))
+        if bad:
+            print(f"{path}: {guid} token count mismatch")
+            counters.token_mismatches += 1
+            if replaced and not check_only:
+                node[text_key] = new_text
+                changed = True
+            continue
         if replaced or reordered:
-            if bad:
-                print(f"{path}: {guid} token count mismatch")
-            elif replaced and reordered:
+            if replaced and reordered:
                 print(f"{path}: {guid} tokens restored and reordered")
+                counters.tokens_restored += 1
+                counters.tokens_reordered += 1
             elif replaced:
                 print(f"{path}: {guid} tokens restored")
+                counters.tokens_restored += 1
             else:
                 print(f"{path}: {guid} tokens reordered")
+                counters.tokens_reordered += 1
             if not check_only:
                 node[text_key] = new_text
             changed = True
-            mismatch = mismatch or bad
     if changed and not check_only:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-    return changed or mismatch
+    return counters
 
 
 def main() -> None:
@@ -134,6 +158,7 @@ def main() -> None:
     ap.add_argument("--root", default=Path(__file__).resolve().parents[1], help="Repo root")
     ap.add_argument("--check-only", action="store_true", help="Report issues without modifying files")
     ap.add_argument("--reorder", action="store_true", help="Reorder tokens when counts match")
+    ap.add_argument("--metrics-file", help="Write JSON metrics to this path")
     ap.add_argument("paths", nargs="*", help="Specific localization JSON files to process")
     args = ap.parse_args()
 
@@ -153,15 +178,41 @@ def main() -> None:
         files = [p for p in files if p.name != "English.json"]
         files += [p for p in (root / "Resources" / "Localization").glob("*.json") if p.name != "English.json"]
 
-    issues = False
+    totals = Counters()
     for path in files:
         if path.parent.name == "Messages":
-            issues |= process_messages_file(path, messages_tokens, args.check_only, args.reorder)
+            result = process_messages_file(path, messages_tokens, args.check_only, args.reorder)
         else:
-            issues |= process_root_file(path, node_tokens, args.check_only, args.reorder)
+            result = process_root_file(path, node_tokens, args.check_only, args.reorder)
+        totals.tokens_restored += result.tokens_restored
+        totals.tokens_reordered += result.tokens_reordered
+        totals.token_mismatches += result.token_mismatches
 
-    if args.check_only and issues:
-        raise SystemExit(1)
+    metrics_path = None
+    if args.metrics_file:
+        metrics_path = Path(args.metrics_file)
+        with open(metrics_path, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "tokens_restored": totals.tokens_restored,
+                    "tokens_reordered": totals.tokens_reordered,
+                    "token_mismatches": totals.token_mismatches,
+                },
+                f,
+                indent=2,
+            )
+
+    if totals.token_mismatches:
+        msg = f"{totals.token_mismatches} token mismatches detected"
+        if metrics_path:
+            msg += f"; metrics written to {metrics_path}"
+        raise SystemExit(msg)
+
+    if args.check_only and (totals.tokens_restored or totals.tokens_reordered):
+        msg = "token issues detected"
+        if metrics_path:
+            msg += f"; metrics written to {metrics_path}"
+        raise SystemExit(msg)
 
 
 if __name__ == "__main__":
