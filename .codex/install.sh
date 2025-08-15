@@ -35,8 +35,8 @@ if ! grep -q "DOTNET_ROOT" "$HOME/.bashrc"; then
     echo "export PATH=\$DOTNET_ROOT:\$PATH:\$HOME/.local/bin" >> "$HOME/.bashrc"
 fi
 
-# Install Argos Translate and expose CLI
-python3 -m pip install --user --no-cache-dir argostranslate==1.8.0
+# Install Argos Translate (CTranslate2 v6 support) and expose CLI
+python3 -m pip install --user --no-cache-dir argostranslate==1.9.6
 mkdir -p "$HOME/.local/bin"
 cat >"$HOME/.local/bin/argos-translate" <<'EOF'
 #!/usr/bin/env bash
