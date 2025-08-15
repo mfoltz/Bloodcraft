@@ -1,6 +1,8 @@
 import json
 import sys
 
+import pytest
+
 import fix_tokens
 import translate_argos
 
@@ -16,6 +18,7 @@ def test_reorder_option(tmp_path, monkeypatch):
     (root / "Resources" / "Localization" / "English.json").write_text(json.dumps({}))
     target = messages_dir / "Test.json"
     target.write_text(json.dumps({"Messages": {"hash": "{b} {a}"}}))
+    metrics_path = root / "metrics.json"
 
     monkeypatch.setattr(
         sys,
@@ -25,6 +28,8 @@ def test_reorder_option(tmp_path, monkeypatch):
             "--root",
             str(root),
             "--reorder",
+            "--metrics-file",
+            str(metrics_path),
             str(target),
         ],
     )
@@ -32,6 +37,10 @@ def test_reorder_option(tmp_path, monkeypatch):
     fix_tokens.main()
     data = json.loads(target.read_text())
     assert data["Messages"]["hash"] == "{a} {b}"
+    metrics = json.loads(metrics_path.read_text())
+    assert metrics["tokens_restored"] == 0
+    assert metrics["tokens_reordered"] == 1
+    assert metrics["token_mismatches"] == 0
 
 
 def test_normalize_tokens_merge_with_space():
@@ -50,3 +59,37 @@ def test_replace_placeholders_token_only_line():
     new_value, replaced, mismatch = fix_tokens.replace_placeholders(value, tokens)
     assert new_value == "<b>{x}</b>"
     assert replaced and not mismatch
+
+
+def test_exit_on_mismatch(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "{a}"}})
+    )
+    (root / "Resources" / "Localization" / "English.json").write_text(json.dumps({}))
+    target = messages_dir / "Test.json"
+    target.write_text(json.dumps({"Messages": {"hash": "[[TOKEN_0]][[TOKEN_1]]"}}))
+    metrics_path = root / "metrics.json"
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "fix_tokens.py",
+            "--root",
+            str(root),
+            "--metrics-file",
+            str(metrics_path),
+            str(target),
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc:
+        fix_tokens.main()
+    assert str(metrics_path) in str(exc.value)
+    metrics = json.loads(metrics_path.read_text())
+    assert metrics["token_mismatches"] == 1
+    assert metrics["tokens_restored"] == 0
+    assert metrics["tokens_reordered"] == 0
