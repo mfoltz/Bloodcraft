@@ -129,6 +129,87 @@ python Tools/scan_english.py --whitelist-dir Bloodcraft.Tests --whitelist-patter
 
 Use this to quickly locate messages that still need localization.
 
+## Debugging & Metrics
+
+### Localization pipeline
+
+Enable verbose logging and capture end-to-end metrics when running the
+full pipeline:
+
+```bash
+python Tools/localization_pipeline.py --debug
+```
+
+This writes `localization_metrics.json` in the repository root. Each step
+records start/end timestamps and per-language results. A successful run
+looks like:
+
+```json
+{
+  "steps": {
+    "generation": {"start": "2024-02-20T12:00:00Z", "end": "2024-02-20T12:00:01Z"},
+    "propagation": {"start": "…", "end": "…"},
+    "translation": {"start": "…", "end": "…"},
+    "token_fix": {"start": "…", "end": "…"},
+    "verification": {"start": "…", "end": "…", "returncode": 0}
+  },
+  "languages": {
+    "Turkish": {
+      "translation": {"returncode": 0, "duration": 1.2},
+      "token_fix": {"returncode": 0, "duration": 0.3},
+      "skipped_hash_count": 0,
+      "success": true
+    }
+  }
+}
+```
+
+Non‑zero `returncode` values or `success: false` indicate a failed step.
+
+### Automatic translation
+
+`translate_argos.py` appends metrics for each run when `--metrics-file`
+is specified (default `translate_metrics.json` under `--root`):
+
+```bash
+python Tools/translate_argos.py Resources/Localization/Messages/Turkish.json --to tr --metrics-file translate_metrics.json
+```
+
+An entry summarises successes, timeouts and token reorders:
+
+```json
+[
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "timestamp": "2024-02-20T12:00:02Z",
+    "processed": 500,
+    "successes": 498,
+    "timeouts": 2,
+    "token_reorders": 1,
+    "failures": {}
+  }
+]
+```
+
+### Token fixer
+
+Record how many placeholders were restored or reordered by supplying
+`--metrics-file` to `fix_tokens.py`:
+
+```bash
+python Tools/fix_tokens.py Resources/Localization/Messages/Turkish.json --metrics-file fix_tokens_metrics.json
+```
+
+The metrics file reports token changes and mismatches:
+
+```json
+{
+  "tokens_restored": 4,
+  "tokens_reordered": 1,
+  "token_mismatches": 0
+}
+```
+
 ## Troubleshooting & Notes
 
 - **Argos model installation**: Some environments lack the `install` subcommand. Combine split archives and install using the Python API:

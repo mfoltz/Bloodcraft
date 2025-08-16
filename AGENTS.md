@@ -56,6 +56,9 @@ Current PRDs and task lists are stored in `.project-management/current-prd/`, wh
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text`
    This ensures every hash is present and no English text remains.
 
+For debug flags and metrics file examples, see
+[Docs/Localization.md#debugging--metrics](Docs/Localization.md#debugging--metrics).
+
 Before translating, reassemble and install the Argos model for each language under `Resources/Localization/Models`:
 ```bash
 cd Resources/Localization/Models/<LANG>
