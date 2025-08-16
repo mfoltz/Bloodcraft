@@ -22,6 +22,8 @@ internal static class PrestigeCommands
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     const int EXO_PRESTIGES = 100;
+    const int PRESTIGE_BATCH = 6;
+    const int LEADERBOARD_BATCH = 4;
 
     static readonly PrefabGUID _shroudBuff = new(1504279833);
     static readonly PrefabGUID _shroudCloak = new(1063517722);
@@ -403,14 +405,11 @@ internal static class PrestigeCommands
 
         List<string> prestigeTypes = [..Enum.GetNames(typeof(PrestigeType)).Select(prestigeType => $"<color=#90EE90>{prestigeType}</color>")];
 
-        const int maxPerMessage = 6;
-
         LocalizationService.HandleReply(ctx, $"Prestiges:");
-        for (int i = 0; i < prestigeTypes.Count; i += maxPerMessage)
+        foreach (var batch in prestigeTypes.Batch(PRESTIGE_BATCH))
         {
-            var batch = prestigeTypes.Skip(i).Take(maxPerMessage);
             string prestiges = string.Join(", ", batch);
-            LocalizationService.HandleReply(ctx, $"{prestiges}");
+            LocalizationService.HandleReply(ctx, prestiges);
         }
     }
 
@@ -467,9 +466,8 @@ internal static class PrestigeCommands
         }
         else
         {
-            for (int i = 0; i < leaderboard.Count; i += 4)
+            foreach (var batch in leaderboard.Batch(LEADERBOARD_BATCH))
             {
-                var batch = leaderboard.Skip(i).Take(4);
                 string replyMessage = string.Join(", ", batch);
 
                 LocalizationService.HandleReply(ctx, replyMessage);
