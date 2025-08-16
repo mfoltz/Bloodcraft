@@ -263,8 +263,7 @@ def _run_translation(args, root: str, log_fp) -> None:
 
     translated: dict[str, str] = {}
     failures: dict[str, tuple[str, str]] = {}
-    report: list[dict[str, str]] = []
-    category_counts: Counter[str] = Counter()
+    report: dict[str, dict[str, str]] = {}
     processed_lines = len(safe_lines)
     timeouts_count = 0
     token_reorders = 0
@@ -302,15 +301,14 @@ def _run_translation(args, root: str, log_fp) -> None:
             msg += f" ({reason})"
             if record:
                 cat = category or categorize(reason)
-                report.append(
-                    {
-                        "hash": key,
-                        "english": original,
-                        "reason": reason,
-                        "category": cat,
-                    }
-                )
-                category_counts[cat] += 1
+                report[key] = {
+                    "hash": key,
+                    "english": original,
+                    "reason": reason,
+                    "category": cat,
+                }
+        else:
+            report.pop(key, None)
         msg += f"\n  Original: {original}\n  Result: {result}"
         log_verbose(msg)
 
@@ -431,7 +429,6 @@ def _run_translation(args, root: str, log_fp) -> None:
                     result,
                     reason,
                     category=category,
-                    record=False,
                 )
                 failures[key] = (reason, category)
                 continue
@@ -445,7 +442,6 @@ def _run_translation(args, root: str, log_fp) -> None:
                     result,
                     reason,
                     category=category,
-                    record=False,
                 )
                 failures[key] = (reason, category)
                 continue
@@ -558,6 +554,7 @@ def _run_translation(args, root: str, log_fp) -> None:
     log_verbose(summary_msg)
     if not args.verbose:
         print(summary_msg)
+    category_counts = Counter(entry["category"] for entry in report.values())
     if category_counts:
         breakdown_msg = "Report breakdown: " + ", ".join(
             f"{k}: {v}" for k, v in sorted(category_counts.items())
@@ -593,15 +590,16 @@ def _run_translation(args, root: str, log_fp) -> None:
         if report_dir:
             os.makedirs(report_dir, exist_ok=True)
         ext = os.path.splitext(args.report_file)[1].lower()
+        data = list(report.values())
         with open(args.report_file, "w", encoding="utf-8", newline="") as fp:
             if ext == ".json":
-                json.dump(report, fp, indent=2, ensure_ascii=False)
+                json.dump(data, fp, indent=2, ensure_ascii=False)
             elif ext == ".csv":
                 writer = csv.DictWriter(
                     fp, fieldnames=["hash", "english", "reason", "category"]
                 )
                 writer.writeheader()
-                writer.writerows(report)
+                writer.writerows(data)
             else:
                 raise RuntimeError("Report file must end with .json or .csv")
         print(f"Wrote skip report to {args.report_file}")
