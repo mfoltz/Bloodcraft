@@ -29,6 +29,9 @@ internal static class WeaponCommands
 
     static readonly PrefabGUID _exoFormBuff = new(-31099041);
 
+    private const int WEAPON_STAT_BATCH = 6;
+    private const int STAT_LIST_BATCH = 4;
+
     [Command(name: "get", adminOnly: false, usage: ".wep get", description: "Displays current weapon expertise details.")]
     public static void GetExpertiseCommand(ChatCommandContext ctx)
     {
@@ -69,10 +72,8 @@ internal static class WeaponCommands
                     string weaponStatString = Misc.FormatWeaponStatValue(weaponStatType, statValue);
                     weaponExpertiseStats.Add(new KeyValuePair<WeaponStatType, string>(weaponStatType, weaponStatString));
                 }
-
-                for (int i = 0; i < weaponExpertiseStats.Count; i += 6)
+                foreach (var batch in weaponExpertiseStats.Batch(WEAPON_STAT_BATCH))
                 {
-                    var batch = weaponExpertiseStats.Skip(i).Take(6);
                     string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
                     LocalizationService.HandleReply(ctx, $"<color=#c0c0c0>{weaponType}</color> Stats: {bonuses}");
                 }
@@ -292,11 +293,9 @@ internal static class WeaponCommands
         }
         else
         {
-            for (int i = 0; i < weaponStatsWithCaps.Count; i += 4)
+            foreach (var batch in weaponStatsWithCaps.Batch(STAT_LIST_BATCH))
             {
-                var batch = weaponStatsWithCaps.Skip(i).Take(4);
                 string replyMessage = string.Join(", ", batch);
-
                 LocalizationService.HandleReply(ctx, replyMessage);
             }
         }
