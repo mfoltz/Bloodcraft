@@ -26,6 +26,8 @@ internal static class MiscCommands
 
     public static readonly Dictionary<PrefabGUID, int> StarterKitItemPrefabGUIDs = [];
 
+    private const int MAX_PER_MESSAGE = 6;
+
     [Command(name: "reminders", shortHand: "remindme", adminOnly: false, usage: ".misc remindme", description: "Toggles general reminders for various mod features.")]
     public static void LogExperienceCommand(ChatCommandContext ctx)
     {
@@ -149,14 +151,10 @@ internal static class MiscCommands
             List<string> kitItems = [..StarterKitItemPrefabGUIDs.Select(x => $"<color=#ffd9eb>{x.Key.GetLocalizedName()}</color>x<color=white>{x.Value}</color>")];
 
             LocalizationService.HandleReply(ctx, "You've received a <color=yellow>starter kit</color>:");
-
-            const int maxPerMessage = 6;
-            for (int i = 0; i < kitItems.Count; i += maxPerMessage)
+            foreach (var batch in kitItems.Batch(MAX_PER_MESSAGE))
             {
-                var batch = kitItems.Skip(i).Take(maxPerMessage);
                 string items = string.Join(", ", batch);
-
-                LocalizationService.HandleReply(ctx, $"{items}");
+                LocalizationService.HandleReply(ctx, items);
             }
 
             if (!string.IsNullOrEmpty(kitFamiliarName))
