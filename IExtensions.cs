@@ -69,18 +69,20 @@ internal static class IExtensions
 
         return list.IsIndexWithinRange(index) ? list[index] : default;
     }
-
-    /*
-    public static T DrawRandom<T>(this IList<T> list)
+    public static IEnumerable<IReadOnlyList<T>> Batch<T>(this IReadOnlyList<T> source, int size)
     {
-        int index = _random.Next(list.Count);
+        if (size <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(size));
+        }
 
-        if (list.IsIndexWithinRange(index))
-            return list[index];
+        var list = source as List<T> ?? throw new ArgumentException("Source must be a List<T>.", nameof(source));
 
-        return default;
+        for (var i = 0; i < list.Count; i += size)
+        {
+            yield return list.GetRange(i, Math.Min(size, list.Count - i));
+        }
     }
-    */
     public static bool ContainsAny(this string stringChars, List<string> strings, StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
     {
         foreach (string str in strings)
