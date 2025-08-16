@@ -85,10 +85,10 @@ Only the JSON files in `Resources/Localization/Messages` contain user-facing mes
 After updating the files, run:
 
 ```bash
-dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations
+dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --summary-json summary.json
 ```
 
-The command should report no hash changes, confirming placeholders are aligned across languages.
+The command should report no hash changes, confirming placeholders are aligned across languages. Use `--summary-json <path>` to capture aggregate counts per language.
 
 ## Automated validation
 
