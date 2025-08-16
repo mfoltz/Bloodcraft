@@ -23,7 +23,6 @@ ROOT = Path(__file__).resolve().parents[1]
 MESSAGES_DIR = ROOT / "Resources" / "Localization" / "Messages"
 ENGLISH_PATH = MESSAGES_DIR / "English.json"
 
-# Mapping of message file names to Argos Translate codes
 LANGUAGE_CODES: Dict[str, str] = {
     "Brazilian": "pb",
     "French": "fr",
@@ -44,26 +43,20 @@ LANGUAGE_CODES: Dict[str, str] = {
     "Vietnamese": "vi",
 }
 
-
-logger = logging.getLogger("localization_pipeline")
-
-
-def setup_logging(debug: bool) -> None:
-    """Configure root logging for the script."""
+def setup_logging(debug: bool) -> logging.Logger:
+    """Configure and return a logger for the script."""
     level = logging.DEBUG if debug else logging.INFO
     logging.basicConfig(level=level, format="%(asctime)s [%(levelname)s] %(message)s")
-
+    return logging.getLogger("localization_pipeline")
 
 def timestamp() -> str:
     """Return the current UTC time in ISO format."""
     return datetime.now(timezone.utc).isoformat()
 
-
-def run(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess:
+def run(cmd: list[str], *, check: bool = True, logger: logging.Logger) -> subprocess.CompletedProcess:
     """Run a subprocess, returning the completed process."""
     logger.debug("+ %s", " ".join(str(c) for c in cmd))
     return subprocess.run(cmd, check=check, cwd=ROOT)
-
 
 def propagate_hashes(target: Path) -> None:
     """Copy new hashes from English into ``target`` while preserving translations."""
@@ -84,7 +77,6 @@ def propagate_hashes(target: Path) -> None:
         with target.open("w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
-
 def main() -> None:
     ap = argparse.ArgumentParser(
         description="Run the full localization pipeline",
@@ -98,7 +90,7 @@ def main() -> None:
     )
     args = ap.parse_args()
 
-    setup_logging(args.debug)
+    logger = setup_logging(args.debug)
 
     metrics: Dict[str, Dict] = {"steps": {}, "languages": {}}
 
@@ -112,26 +104,29 @@ def main() -> None:
     else:
         targets = available
 
-    # Step 1: regenerate English messages
+    logger.info("Generating English messages")
     metrics["steps"]["generation"] = {"start": timestamp()}
-    run([
-        "dotnet",
-        "run",
-        "--project",
-        "Bloodcraft.csproj",
-        "-p:RunGenerateREADME=false",
-        "--",
-        "generate-messages",
-    ])
+    run(
+        [
+            "dotnet",
+            "run",
+            "--project",
+            "Bloodcraft.csproj",
+            "-p:RunGenerateREADME=false",
+            "--",
+            "generate-messages",
+        ],
+        logger=logger,
+    )
     metrics["steps"]["generation"]["end"] = timestamp()
 
-    # Step 2: propagate new hashes
+    logger.info("Propagating hashes")
     metrics["steps"]["propagation"] = {"start": timestamp()}
     for path in targets.values():
         propagate_hashes(path)
     metrics["steps"]["propagation"]["end"] = timestamp()
 
-    # Step 3: translate per language
+    logger.info("Translating messages")
     metrics["steps"]["translation"] = {"start": timestamp()}
     for name, path in targets.items():
         lang_metrics = metrics["languages"].setdefault(name, {"skipped_hashes": {}})
@@ -161,6 +156,7 @@ def main() -> None:
                 "--overwrite",
             ],
             check=False,
+            logger=logger,
         )
         t_end = timestamp()
         lang_metrics["translation"] = {
@@ -180,7 +176,7 @@ def main() -> None:
         lang_metrics["skipped_hashes"] = skipped_counts
     metrics["steps"]["translation"]["end"] = timestamp()
 
-    # Step 4: fix tokens per language
+    logger.info("Fixing tokens")
     metrics["steps"]["token_fix"] = {"start": timestamp()}
     for name, path in targets.items():
         lang_metrics = metrics["languages"].get(name)
@@ -190,6 +186,7 @@ def main() -> None:
         result = run(
             [sys.executable, "Tools/fix_tokens.py", str(path.relative_to(ROOT))],
             check=False,
+            logger=logger,
         )
         t_end = timestamp()
         lang_metrics["token_fix"] = {
@@ -211,7 +208,7 @@ def main() -> None:
         lang_metrics["success"] = success
         overall_ok &= success
 
-    # Step 5: verify translations
+    logger.info("Verifying translations")
     metrics["steps"]["verification"] = {"start": timestamp()}
     verify_proc = run(
         [
@@ -224,6 +221,7 @@ def main() -> None:
             "check-translations",
         ],
         check=False,
+        logger=logger,
     )
     metrics["steps"]["verification"].update(
         {"end": timestamp(), "returncode": verify_proc.returncode}
@@ -233,11 +231,11 @@ def main() -> None:
     metrics_path = ROOT / "localization_metrics.json"
     with metrics_path.open("w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2, ensure_ascii=False)
+    logger.info("Wrote metrics to %s", metrics_path)
     print(metrics_path)
 
     if not overall_ok:
         raise SystemExit(1)
-
 
 if __name__ == "__main__":
     main()
