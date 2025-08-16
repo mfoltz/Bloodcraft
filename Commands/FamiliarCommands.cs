@@ -40,6 +40,9 @@ internal static class FamiliarCommands
 
     const int BOX_SIZE = 10;
     const int BOX_CAP = 50;
+    const int BOX_BATCH = 6;
+    const int STAT_BATCH = 4;
+    const int GROUP_BATCH = 5;
 
     const float SHINY_CHANGE_COST = 0.25f;
     const int SCHEMATICS_MIN = 500;
@@ -164,22 +167,16 @@ internal static class FamiliarCommands
 
         if (data.FamiliarUnlocks.Keys.Count > 0)
         {
-            List<string> sets = [];
-            foreach (var key in data.FamiliarUnlocks.Keys)
-            {
-                sets.Add(key);
-            }
+            List<string> sets = [..data.FamiliarUnlocks.Keys];
 
             LocalizationService.HandleReply(ctx, $"Familiar Boxes:");
 
             List<string> colorizedBoxes = [..sets.Select(set => $"<color=white>{set}</color>")];
-            const int maxPerMessage = 6;
-            for (int i = 0; i < colorizedBoxes.Count; i += maxPerMessage)
-            {
-                var batch = colorizedBoxes.Skip(i).Take(maxPerMessage);
-                string fams = string.Join(", ", batch);
 
-                LocalizationService.HandleReply(ctx, $"{fams}");
+            foreach (var batch in colorizedBoxes.Batch(BOX_BATCH))
+            {
+                string fams = string.Join(", ", batch);
+                LocalizationService.HandleReply(ctx, fams);
             }
         }
         else
@@ -775,15 +772,14 @@ internal static class FamiliarCommands
                 string infoHeader = string.IsNullOrEmpty(shinyInfo) ? $"{familiarName}:" : $"{familiarName} - {shinyInfo}";
                 LocalizationService.HandleReply(ctx, infoHeader);
 
-                for (int i = 0; i < statPairs.Count; i += 4)
+                foreach (var batch in statPairs.Batch(STAT_BATCH))
                 {
-                    var batch = statPairs.Skip(i).Take(4);
                     string line = string.Join(
                         ", ",
                         batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>")
                     );
 
-                    LocalizationService.HandleReply(ctx, $"{line}");
+                    LocalizationService.HandleReply(ctx, line);
                 }
             }
         }
@@ -1302,11 +1298,10 @@ internal static class FamiliarCommands
             LocalizationService.HandleReply(ctx, "Familiar Battle Groups:");
 
             List<string> formattedGroups = [..battleGroupNames.Select(bg => $"<color=white>{bg}</color>")];
-            const int maxPerMessage = 5;
 
-            for (int i = 0; i < formattedGroups.Count; i += maxPerMessage)
+            foreach (var batch in formattedGroups.Batch(GROUP_BATCH))
             {
-                string groups = string.Join(", ", formattedGroups.Skip(i).Take(maxPerMessage));
+                string groups = string.Join(", ", batch);
                 LocalizationService.HandleReply(ctx, groups);
             }
         }
