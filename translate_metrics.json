@@ -8,6 +8,18 @@
     "token_reorders": 0,
     "failures": {
       "2844729307": "token mismatch on strict retry (expected ['0', '1', '2'], got [])"
+    },
+    "hash_stats": {
+      "2844729307": {
+        "original_tokens": 3,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3981447812": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      }
     }
   },
   {
@@ -17,6 +29,13 @@
     "successes": 1,
     "timeouts": 0,
     "token_reorders": 0,
-    "failures": {}
+    "failures": {},
+    "hash_stats": {
+      "3981447812": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      }
+    }
   }
 ]
