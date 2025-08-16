@@ -269,6 +269,7 @@ def _run_translation(args, root: str, log_fp) -> None:
     timeouts_count = 0
     token_reorders = 0
     timed_out_hashes: set[str] = set()
+    token_stats: dict[str, dict[str, int | bool]] = {}
 
     def categorize(reason: str | None) -> str:
         if not reason:
@@ -370,6 +371,11 @@ def _run_translation(args, root: str, log_fp) -> None:
                 failures[key] = (reason, category)
                 timeouts_count += 1
                 timed_out_hashes.add(key)
+                token_stats[key] = {
+                    "original_tokens": len(tokens),
+                    "translated_tokens": 0,
+                    "reordered": False,
+                }
                 continue
             if token_only:
                 if TOKEN_SENTINEL not in result:
@@ -383,12 +389,23 @@ def _run_translation(args, root: str, log_fp) -> None:
                         category=category,
                     )
                     failures[key] = (reason, category)
+                    token_stats[key] = {
+                        "original_tokens": len(tokens),
+                        "translated_tokens": len(TOKEN_RE.findall(result)),
+                        "reordered": False,
+                    }
                     continue
                 result = result.replace(f" {TOKEN_SENTINEL}", "").replace(
                     TOKEN_SENTINEL, ""
                 )
             result = normalize_tokens(result)
             result, changed = reorder_tokens(result, len(tokens))
+            found_tokens = TOKEN_RE.findall(result)
+            token_stats[key] = {
+                "original_tokens": len(tokens),
+                "translated_tokens": len(found_tokens),
+                "reordered": changed,
+            }
             if changed:
                 token_reorders += 1
             stripped = TOKEN_RE.sub("", result)
@@ -418,7 +435,6 @@ def _run_translation(args, root: str, log_fp) -> None:
                 )
                 failures[key] = (reason, category)
                 continue
-            found_tokens = TOKEN_RE.findall(result)
             expected = [str(i) for i in range(len(tokens))]
             if set(found_tokens) != set(expected):
                 reason = f"token mismatch (expected {expected}, got {found_tokens})"
@@ -465,7 +481,8 @@ def _run_translation(args, root: str, log_fp) -> None:
             f"({batch_end - batch_start:.2f}s)"
         )
 
-    def strict_retry(key: str) -> tuple[bool, str]:
+    def strict_retry(key: str) -> tuple[bool, str, int, bool]:
+        nonlocal token_reorders
         safe, tokens = protect_strict(english[key])
         token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
         if token_only:
@@ -480,37 +497,42 @@ def _run_translation(args, root: str, log_fp) -> None:
         except FatalTranslationError:
             raise
         except Exception as e:
-            return False, f"batch error on strict retry: {e}"
+            return False, f"batch error on strict retry: {e}", 0, False
         if timeouts:
-            return False, "timeout on strict retry"
+            return False, "timeout on strict retry", 0, False
         result = results[0]
         if token_only:
             if TOKEN_SENTINEL not in result:
-                return False, "sentinel missing on strict retry"
+                return False, "sentinel missing on strict retry", len(TOKEN_RE.findall(result)), False
             result = result.replace(f" {TOKEN_SENTINEL}", "").replace(
-                TOKEN_SENTINEL, ""
+                TOKEN_SENTINEL, "",
             )
         result = normalize_tokens(result)
-        result, _ = reorder_tokens(result, len(tokens))
+        result, changed = reorder_tokens(result, len(tokens))
+        found_tokens = TOKEN_RE.findall(result)
+        if changed and not token_stats.get(key, {}).get("reordered"):
+            token_reorders += 1
         stripped = TOKEN_RE.sub("", result)
         if "[" in stripped or "]" in stripped:
-            return False, "stray brackets on strict retry"
-        found_tokens = TOKEN_RE.findall(result)
+            return False, "stray brackets on strict retry", len(found_tokens), changed
         expected = [str(i) for i in range(len(tokens))]
         if set(found_tokens) != set(expected):
-            return False, f"token mismatch on strict retry (expected {expected}, got {found_tokens})"
+            return False, f"token mismatch on strict retry (expected {expected}, got {found_tokens})", len(found_tokens), changed
         un = unprotect(result, tokens)
-        un = un.replace("\\u003C", "<").replace("\\u003E", ">")
+        un = un.replace("\u003C", "<").replace("\u003E", ">")
         if un == english[key]:
-            return False, "identical to source on strict retry"
+            return False, "identical to source on strict retry", len(found_tokens), changed
         if contains_english(un):
-            return False, "contains English on strict retry"
-        return True, un
+            return False, "contains English on strict retry", len(found_tokens), changed
+        return True, un, len(found_tokens), changed
 
     for key, (_initial_reason, category) in list(failures.items()):
         if category in ("interpolation", "placeholder"):
             continue
-        ok, out = strict_retry(key)
+        ok, out, tcount, changed = strict_retry(key)
+        token_stats.setdefault(key, {"original_tokens": len(protect_strict(english[key])[1])})
+        token_stats[key]["translated_tokens"] = tcount
+        token_stats[key]["reordered"] = token_stats[key].get("reordered", False) or changed
         if ok:
             translated[key] = out
             log_entry(key, english[key], out)
@@ -595,6 +617,7 @@ def _run_translation(args, root: str, log_fp) -> None:
         "timeouts": timeouts_count,
         "token_reorders": token_reorders,
         "failures": {k: v[0] for k, v in failures.items()},
+        "hash_stats": token_stats,
     }
     try:
         with open(args.metrics_file, "r", encoding="utf-8") as fp:

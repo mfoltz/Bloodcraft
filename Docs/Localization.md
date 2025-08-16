@@ -175,7 +175,7 @@ is specified (default `translate_metrics.json` under `--root`):
 python Tools/translate_argos.py Resources/Localization/Messages/Turkish.json --to tr --metrics-file translate_metrics.json
 ```
 
-An entry summarises successes, timeouts and token reorders:
+An entry summarises successes, timeouts, token reorders and per‑hash token statistics:
 
 ```json
 [
@@ -186,7 +186,14 @@ An entry summarises successes, timeouts and token reorders:
     "successes": 498,
     "timeouts": 2,
     "token_reorders": 1,
-    "failures": {}
+    "failures": {},
+    "hash_stats": {
+      "1234567890": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      }
+    }
   }
 ]
 ```

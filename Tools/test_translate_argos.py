@@ -769,6 +769,10 @@ def test_metrics_file_records_failure_reason(tmp_path, monkeypatch):
     assert entry["timeouts"] == 0
     assert entry["token_reorders"] == 0
     assert "identical" in entry["failures"]["hash"].lower()
+    stats = entry["hash_stats"]["hash"]
+    assert stats["original_tokens"] == 0
+    assert stats["translated_tokens"] == 0
+    assert not stats["reordered"]
 
 
 def test_metrics_file_records_timeout(tmp_path, monkeypatch):
@@ -829,6 +833,10 @@ def test_metrics_file_records_timeout(tmp_path, monkeypatch):
     assert entry["token_reorders"] == 0
     reason = next(iter(entry["failures"].values()))
     assert "timeout" in reason
+    stats = entry["hash_stats"]["hash"]
+    assert stats["original_tokens"] == 0
+    assert stats["translated_tokens"] == 0
+    assert not stats["reordered"]
 
 
 def test_metrics_file_counts_token_reorders(tmp_path, monkeypatch):
@@ -884,3 +892,7 @@ def test_metrics_file_counts_token_reorders(tmp_path, monkeypatch):
     assert entry["timeouts"] == 0
     assert entry["token_reorders"] == 1
     assert entry["failures"] == {}
+    stats = entry["hash_stats"]["hash"]
+    assert stats["original_tokens"] == 2
+    assert stats["translated_tokens"] == 2
+    assert stats["reordered"]
