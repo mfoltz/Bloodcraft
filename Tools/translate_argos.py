@@ -265,7 +265,7 @@ def _run_translation(args, root: str, log_fp) -> None:
     failures: dict[str, tuple[str, str]] = {}
     report: list[dict[str, str]] = []
     category_counts: Counter[str] = Counter()
-    processed = len(safe_lines)
+    processed_lines = len(safe_lines)
     timeouts_count = 0
     token_reorders = 0
     timed_out_hashes: set[str] = set()
@@ -546,7 +546,7 @@ def _run_translation(args, root: str, log_fp) -> None:
     if not args.verbose:
         print(breakdown_msg)
 
-    successes = processed - len(failures)
+    successes = processed_lines - len(failures)
 
     messages.update(translated)
     target["Messages"] = messages
@@ -590,8 +590,8 @@ def _run_translation(args, root: str, log_fp) -> None:
     metrics_entry = {
         "file": args.target_file,
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "processed": processed,
-        "success": successes,
+        "processed": processed_lines,
+        "successes": successes,
         "timeouts": timeouts_count,
         "token_reorders": token_reorders,
         "failures": {k: v[0] for k, v in failures.items()},
@@ -608,7 +608,7 @@ def _run_translation(args, root: str, log_fp) -> None:
         json.dump(metrics_log, fp, indent=2, ensure_ascii=False)
 
     summary_line = (
-        f"Summary: {successes}/{processed} translated, {timeouts_count} timeouts, "
+        f"Summary: {successes}/{processed_lines} translated, {timeouts_count} timeouts, "
         f"{token_reorders} token reorders. Metrics written to {args.metrics_file}"
     )
     print(summary_line)

@@ -765,7 +765,7 @@ def test_metrics_file_records_failure_reason(tmp_path, monkeypatch):
     data = json.loads(metrics_path.read_text())
     entry = data[-1]
     assert entry["processed"] == 1
-    assert entry["success"] == 0
+    assert entry["successes"] == 0
     assert entry["timeouts"] == 0
     assert entry["token_reorders"] == 0
     assert "identical" in entry["failures"]["hash"].lower()
@@ -824,7 +824,7 @@ def test_metrics_file_records_timeout(tmp_path, monkeypatch):
     data = json.loads(metrics_path.read_text())
     entry = data[-1]
     assert entry["processed"] == 1
-    assert entry["success"] == 0
+    assert entry["successes"] == 0
     assert entry["timeouts"] == 1
     assert entry["token_reorders"] == 0
     reason = next(iter(entry["failures"].values()))
@@ -880,7 +880,7 @@ def test_metrics_file_counts_token_reorders(tmp_path, monkeypatch):
     data = json.loads(metrics_path.read_text())
     entry = data[-1]
     assert entry["processed"] == 1
-    assert entry["success"] == 1
+    assert entry["successes"] == 1
     assert entry["timeouts"] == 0
     assert entry["token_reorders"] == 1
     assert entry["failures"] == {}
