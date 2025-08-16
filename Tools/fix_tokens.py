@@ -190,7 +190,8 @@ def main() -> None:
 
     metrics_path = None
     if args.metrics_file:
-        metrics_path = Path(args.metrics_file)
+        metrics_path = Path(args.metrics_file).resolve()
+        metrics_path.parent.mkdir(parents=True, exist_ok=True)
         with open(metrics_path, "w", encoding="utf-8") as f:
             json.dump(
                 {
