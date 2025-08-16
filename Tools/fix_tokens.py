@@ -38,15 +38,15 @@ def reorder_tokens_in_text(value: str, tokens: List[str]) -> Tuple[str, bool]:
     return TOKEN_PATTERN.sub(repl, value, count=len(tokens)), True
 
 
-def load_english_messages(root: Path) -> Dict[str, List[str]]:
-    path = root / "Resources" / "Localization" / "Messages" / "English.json"
+def load_english_messages(path: Path) -> Dict[str, List[str]]:
     with open(path, "r", encoding="utf-8") as f:
         english = json.load(f)["Messages"]
     return {k: extract_tokens(v) for k, v in english.items()}
 
 
-def load_english_nodes(root: Path) -> Dict[str, List[str]]:
-    path = root / "Resources" / "Localization" / "English.json"
+def load_english_nodes(path: Path) -> Dict[str, List[str]]:
+    if not path.exists():
+        return {}
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     nodes = data.get("nodes") or data.get("Nodes") or []
@@ -159,12 +159,16 @@ def main() -> None:
     ap.add_argument("--check-only", action="store_true", help="Report issues without modifying files")
     ap.add_argument("--reorder", action="store_true", help="Reorder tokens when counts match")
     ap.add_argument("--metrics-file", help="Write JSON metrics to this path")
+    ap.add_argument("--baseline-file", default="Resources/Localization/Messages/English.json", help="Baseline English messages file")
     ap.add_argument("paths", nargs="*", help="Specific localization JSON files to process")
     args = ap.parse_args()
 
     root = Path(args.root).resolve()
-    messages_tokens = load_english_messages(root)
-    node_tokens = load_english_nodes(root)
+    baseline_path = Path(args.baseline_file)
+    if not baseline_path.is_absolute():
+        baseline_path = (root / baseline_path).resolve()
+    messages_tokens = load_english_messages(baseline_path)
+    node_tokens = load_english_nodes(root / "Resources" / "Localization" / "English.json")
 
     if args.paths:
         files = []
