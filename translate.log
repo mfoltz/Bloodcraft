@@ -1,0 +1,8 @@
+Batch 1/1 start @ 0.00s
+3102592194: TRANSLATED
+  Original: Couldn't find active familiar!
+  Result: ¡No pude encontrar un familiar activo!
+Batch 1/1 end @ 1.64s (1.64s)
+Processed 1 batches in 1.64 seconds
+Report breakdown: none
+Summary: 1/1 translated, 0 timeouts, 0 token reorders. Metrics written to /workspace/Bloodcraft/translate_metrics.json
