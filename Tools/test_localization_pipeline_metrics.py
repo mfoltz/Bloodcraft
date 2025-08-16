@@ -47,8 +47,16 @@ def test_metrics_written(tmp_path, monkeypatch):
     lang = metrics["languages"]["French"]
     assert lang["translation"]["returncode"] == 0
     assert lang["token_fix"]["returncode"] == 0
+    assert lang["token_fix"]["tokens_restored"] == 0
+    assert lang["token_fix"]["tokens_reordered"] == 0
+    assert lang["token_fix"]["token_mismatches"] == 0
     assert lang["skipped_hash_count"] == 0
     assert lang["success"] is True
+    assert metrics["steps"]["token_fix"]["totals"] == {
+        "tokens_restored": 0,
+        "tokens_reordered": 0,
+        "token_mismatches": 0,
+    }
 
 
 def test_exit_code_on_skipped(tmp_path, monkeypatch):
@@ -77,4 +85,6 @@ def test_exit_code_on_skipped(tmp_path, monkeypatch):
     metrics = json.loads((root / "localization_metrics.json").read_text())
     lang = metrics["languages"]["French"]
     assert lang["skipped_hashes"] == {"timeout": 1}
+    assert lang["token_fix"]["tokens_restored"] == 0
+    assert lang["token_fix"]["token_mismatches"] == 0
     assert lang["success"] is False

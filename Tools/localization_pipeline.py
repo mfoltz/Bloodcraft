@@ -177,23 +177,48 @@ def main() -> None:
     metrics["steps"]["translation"]["end"] = timestamp()
 
     logger.info("Fixing tokens")
-    metrics["steps"]["token_fix"] = {"start": timestamp()}
+    metrics["steps"]["token_fix"] = {"start": timestamp(), "totals": {
+        "tokens_restored": 0,
+        "tokens_reordered": 0,
+        "token_mismatches": 0,
+    }}
     for name, path in targets.items():
         lang_metrics = metrics["languages"].get(name)
         if not lang_metrics or lang_metrics.get("skipped"):
             continue
         t_start = timestamp()
+        metrics_file = ROOT / f"fix_tokens_{name}.json"
         result = run(
-            [sys.executable, "Tools/fix_tokens.py", str(path.relative_to(ROOT))],
+            [
+                sys.executable,
+                "Tools/fix_tokens.py",
+                str(path.relative_to(ROOT)),
+                "--metrics-file",
+                str(metrics_file),
+            ],
             check=False,
             logger=logger,
         )
         t_end = timestamp()
+        token_data = {
+            "tokens_restored": 0,
+            "tokens_reordered": 0,
+            "token_mismatches": 0,
+        }
+        if metrics_file.is_file():
+            with metrics_file.open("r", encoding="utf-8") as fp:
+                token_data.update(json.load(fp))
+            metrics_file.unlink()
         lang_metrics["token_fix"] = {
             "start": t_start,
             "end": t_end,
             "returncode": result.returncode,
+            **token_data,
         }
+        totals = metrics["steps"]["token_fix"]["totals"]
+        totals["tokens_restored"] += token_data["tokens_restored"]
+        totals["tokens_reordered"] += token_data["tokens_reordered"]
+        totals["token_mismatches"] += token_data["token_mismatches"]
     metrics["steps"]["token_fix"]["end"] = timestamp()
 
     overall_ok = True
