@@ -1,3 +1,12 @@
 # Words that should not trigger English detection.
 # Add one term per line.
 Bloodcraft
+DLC
+Discord
+GitHub
+HP
+NPC
+PvP
+Steam
+Unity
+XP
