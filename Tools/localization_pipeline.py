@@ -84,6 +84,11 @@ def main() -> None:
     )
     ap.add_argument("--debug", action="store_true", help="Enable debug logging")
     ap.add_argument(
+        "--archive-logs",
+        action="store_true",
+        help="Archive translation logs after the run",
+    )
+    ap.add_argument(
         "languages",
         nargs="*",
         help="Languages to process (e.g. French German). Default: all",
@@ -137,6 +142,8 @@ def main() -> None:
             continue
         lang_metrics["skipped"] = False
         t_start = timestamp()
+        log_name = f"translate_{name}.log"
+        report_name = f"skipped_{name}.csv"
         result = run(
             [
                 sys.executable,
@@ -150,9 +157,9 @@ def main() -> None:
                 "3",
                 "--verbose",
                 "--log-file",
-                "translate.log",
+                log_name,
                 "--report-file",
-                "skipped.csv",
+                report_name,
                 "--overwrite",
             ],
             check=False,
@@ -164,7 +171,7 @@ def main() -> None:
             "end": t_end,
             "returncode": result.returncode,
         }
-        report = ROOT / "skipped.csv"
+        report = ROOT / report_name
         skipped_counts: Dict[str, int] = {}
         if report.is_file():
             with report.open("r", encoding="utf-8") as fp:
@@ -172,7 +179,6 @@ def main() -> None:
                 for row in reader:
                     reason = row.get("reason", "")
                     skipped_counts[reason] = skipped_counts.get(reason, 0) + 1
-            report.unlink()
         lang_metrics["skipped_hashes"] = skipped_counts
     metrics["steps"]["translation"]["end"] = timestamp()
 
@@ -258,6 +264,11 @@ def main() -> None:
         json.dump(metrics, f, indent=2, ensure_ascii=False)
     logger.info("Wrote metrics to %s", metrics_path)
     print(metrics_path)
+
+    if args.archive_logs:
+        import archive_translation_logs
+
+        archive_translation_logs.archive_logs()
 
     if not overall_ok:
         raise SystemExit(1)
