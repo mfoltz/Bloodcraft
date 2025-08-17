@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Archive translation log files with timestamped directories.
 
-This script moves ``translate.log`` and ``skipped.csv`` into a directory
-named ``TranslationLogs/<timestamp>`` relative to the repository root. For
-each archived file an accompanying ``.info`` file is written containing the
-timestamp of the run, providing a clear indicator of when the log was
-generated.
+This script moves translation artifacts matching ``translate_*.log`` and
+``skipped_*.csv`` into a directory named ``TranslationLogs/<timestamp>``
+relative to the repository root. For each archived file an accompanying
+``.info`` file is written containing the timestamp of the run, providing a
+clear indicator of when the log was generated.
 """
 
 from __future__ import annotations
@@ -28,12 +28,11 @@ def archive_logs() -> Path:
     destination = root / "TranslationLogs" / timestamp
     destination.mkdir(parents=True, exist_ok=True)
 
-    for name in ("translate.log", "skipped.csv"):
-        source = root / name
-        if source.exists():
-            target = destination / name
+    for pattern in ("translate_*.log", "skipped_*.csv"):
+        for source in root.glob(pattern):
+            target = destination / source.name
             shutil.move(str(source), target)
-            info = destination / f"{name}.info"
+            info = destination / f"{source.name}.info"
             info.write_text(f"Archived: {timestamp}\n")
 
     return destination

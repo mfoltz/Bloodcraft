@@ -69,7 +69,8 @@ def test_exit_code_on_skipped(tmp_path, monkeypatch):
 
     def fake_run(cmd, *, check=True, logger):
         if any("translate_argos.py" in c for c in cmd):
-            report = root / "skipped.csv"
+            report_name = cmd[cmd.index("--report-file") + 1]
+            report = root / report_name
             with report.open("w", newline="", encoding="utf-8") as fp:
                 writer = csv.DictWriter(fp, fieldnames=["hash", "english", "reason"])
                 writer.writeheader()
