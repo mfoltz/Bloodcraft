@@ -57,6 +57,15 @@ Only the JSON files in `Resources/Localization/Messages` contain user-facing mes
 
    Any hashes listed in `skipped.csv` must be translated manually. Re-run the translator until the file is empty.
 
+   To extract hashes that were skipped due to token mismatches, scan the
+   translation log:
+
+   ```bash
+   python Tools/collect_skipped_hashes.py --log-file translate.log --csv mismatches.csv
+   ```
+
+   Omit `--csv` to print the unique hashes to stdout.
+
    ### Interpolation blocks
 
    Entries containing C# interpolation expressions like `{(condition ? "A" : "B")}` are skipped
