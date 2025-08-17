@@ -133,6 +133,7 @@ def main() -> None:
 
     logger.info("Translating messages")
     metrics["steps"]["translation"] = {"start": timestamp()}
+    report_paths = []
     for name, path in targets.items():
         lang_metrics = metrics["languages"].setdefault(name, {"skipped_hashes": {}})
         code = LANGUAGE_CODES.get(name)
@@ -165,6 +166,7 @@ def main() -> None:
             check=False,
             logger=logger,
         )
+        report_paths.append(ROOT / report_name)
         t_end = timestamp()
         lang_metrics["translation"] = {
             "start": t_start,
@@ -181,6 +183,19 @@ def main() -> None:
                     skipped_counts[reason] = skipped_counts.get(reason, 0) + 1
         lang_metrics["skipped_hashes"] = skipped_counts
     metrics["steps"]["translation"]["end"] = timestamp()
+
+    combined_report = ROOT / "skipped.csv"
+    with combined_report.open("w", newline="", encoding="utf-8") as out_fp:
+        writer = csv.writer(out_fp)
+        writer.writerow(["hash", "english", "reason", "category"])
+        for report in report_paths:
+            if not report.is_file():
+                continue
+            with report.open("r", encoding="utf-8") as in_fp:
+                reader = csv.reader(in_fp)
+                next(reader, None)
+                for row in reader:
+                    writer.writerow(row)
 
     logger.info("Fixing tokens")
     metrics["steps"]["token_fix"] = {"start": timestamp(), "totals": {
@@ -238,6 +253,18 @@ def main() -> None:
         success = translation_ok and token_ok and skipped_total == 0
         lang_metrics["success"] = success
         overall_ok &= success
+
+    logger.info("Analyzing translation logs")
+    analysis_proc = run(
+        [sys.executable, "Tools/analyze_translation_logs.py"],
+        check=False,
+        logger=logger,
+    )
+    if analysis_proc.returncode != 0:
+        logger.error(
+            "Translation log analysis found unresolved mismatches or placeholder-only rows"
+        )
+        overall_ok = False
 
     logger.info("Verifying translations")
     metrics["steps"]["verification"] = {"start": timestamp()}
