@@ -149,6 +149,10 @@ full pipeline:
 python Tools/localization_pipeline.py --debug
 ```
 
+Add `--archive-logs` to preserve per-language `translate_<Language>.log`
+and `skipped_<Language>.csv` files under `TranslationLogs/<timestamp>`
+for later investigation.
+
 This writes `localization_metrics.json` in the repository root. Each step
 records start/end timestamps and per-language results. A successful run
 looks like:
@@ -225,6 +229,19 @@ The metrics file reports token changes and mismatches:
   "token_mismatches": 0
 }
 ```
+
+### Log analysis
+
+Use `analyze_translation_logs.py` to summarise unresolved issues across
+translations:
+
+```bash
+python Tools/analyze_translation_logs.py
+```
+
+The script reads `translate_metrics.json` along with any `skipped_*.csv`
+reports and lists token mismatches or placeholder-only entries. It exits
+non-zero when problems remain so CI and contributors can investigate.
 
 ## Troubleshooting & Notes
 
