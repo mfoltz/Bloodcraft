@@ -14,12 +14,16 @@ import subprocess
 import sys
 import time
 import traceback
+import logging
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from typing import List
 
 from argostranslate import translate as argos_translate
 from language_utils import contains_english
+
+
+logger = logging.getLogger("translate_argos")
 
 FATAL_ARGOS_ERRORS = [
     "Unsupported model binary version",
@@ -179,7 +183,7 @@ def translate_batch(
                         results.append("")
                         timed_out.append(idx)
                     else:
-                        print(
+                        logger.warning(
                             f"Argos timed out on attempt {attempt}/{max_retries}"
                         )
                 except Exception as e:
@@ -189,13 +193,13 @@ def translate_batch(
                         raise FatalTranslationError(msg)
                     if attempt == max_retries:
                         raise RuntimeError(f"Translation failed: {msg}")
-                    print(
+                    logger.warning(
                         f"Argos failed on attempt {attempt}/{max_retries}: {msg}"
                     )
     return results, timed_out
 
 
-def _run_translation(args, root: str, log_fp) -> None:
+def _run_translation(args, root: str) -> None:
     translator = argos_translate.get_translation_from_codes(args.src, args.dst)
     if translator is None:
         ensure_model_installed(root, args.dst)
@@ -207,13 +211,7 @@ def _run_translation(args, root: str, log_fp) -> None:
             "Assemble or install the model, or run `.codex/install.sh`."
         )
 
-    def log_verbose(msg: str) -> None:
-        if args.verbose:
-            print(msg)
-        if log_fp:
-            log_fp.write(msg + "\n")
-
-    print(
+    logger.warning(
         "NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables."
     )
     english_path = os.path.join(
@@ -241,7 +239,7 @@ def _run_translation(args, root: str, log_fp) -> None:
         to_translate = [(k, v) for k, v in english.items() if k not in messages]
 
     if not to_translate:
-        print("No messages need translation.")
+        logger.warning("No messages need translation.")
         return
 
     safe_lines: List[str] = []
@@ -307,10 +305,12 @@ def _run_translation(args, root: str, log_fp) -> None:
                     "reason": reason,
                     "category": cat,
                 }
+            logger.warning(
+                f"{msg}\n  Original: {original}\n  Result: {result}"
+            )
         else:
             report.pop(key, None)
-        msg += f"\n  Original: {original}\n  Result: {result}"
-        log_verbose(msg)
+            logger.info(f"{msg}\n  Original: {original}\n  Result: {result}")
 
     for key, text in skipped_interp:
         reason = "interpolation block"
@@ -328,7 +328,7 @@ def _run_translation(args, root: str, log_fp) -> None:
         batch_keys = keys[i : i + args.batch_size]
         batch_tokens = tokens_list[i : i + args.batch_size]
         batch_start = time.perf_counter()
-        log_verbose(
+        logger.info(
             f"Batch {batch_idx + 1}/{num_batches} start @ {batch_start - start:.2f}s"
         )
         try:
@@ -341,19 +341,18 @@ def _run_translation(args, root: str, log_fp) -> None:
         except FatalTranslationError as e:
             msg = f"Fatal Argos error: {e}"
             guidance = "Upgrade Argos Translate to support model version"
-            log_verbose(msg)
-            log_verbose(guidance)
-            print(guidance)
+            logger.error(msg)
+            logger.error(guidance)
             raise SystemExit(msg)
         except Exception as e:
-            log_verbose(f"Translation error: {e}")
+            logger.warning(f"Translation error: {e}")
             for k in batch_keys:
                 reason = f"batch error: {e}"
                 category = categorize(reason)
                 log_entry(k, english[k], "", reason, category=category, record=False)
                 failures[k] = (reason, category)
             batch_end = time.perf_counter()
-            log_verbose(
+            logger.info(
                 f"Batch {batch_idx + 1}/{num_batches} end @ {batch_end - start:.2f}s "
                 f"({batch_end - batch_start:.2f}s)"
             )
@@ -472,7 +471,7 @@ def _run_translation(args, root: str, log_fp) -> None:
             log_entry(key, english[key], un)
 
         batch_end = time.perf_counter()
-        log_verbose(
+        logger.info(
             f"Batch {batch_idx + 1}/{num_batches} end @ {batch_end - start:.2f}s "
             f"({batch_end - batch_start:.2f}s)"
         )
@@ -551,9 +550,7 @@ def _run_translation(args, root: str, log_fp) -> None:
     summary_msg = (
         f"Processed {num_batches} batches in {total_elapsed:.2f} seconds"
     )
-    log_verbose(summary_msg)
-    if not args.verbose:
-        print(summary_msg)
+    logger.warning(summary_msg)
     category_counts = Counter(entry["category"] for entry in report.values())
     if category_counts:
         breakdown_msg = "Report breakdown: " + ", ".join(
@@ -561,9 +558,7 @@ def _run_translation(args, root: str, log_fp) -> None:
         )
     else:
         breakdown_msg = "Report breakdown: none"
-    log_verbose(breakdown_msg)
-    if not args.verbose:
-        print(breakdown_msg)
+    logger.warning(breakdown_msg)
 
     successes = processed_lines - len(failures)
 
@@ -583,7 +578,7 @@ def _run_translation(args, root: str, log_fp) -> None:
     if result.returncode != 0:
         raise SystemExit(result.returncode)
 
-    print(f"Wrote translations to {target_path}")
+    logger.warning(f"Wrote translations to {target_path}")
 
     if args.report_file:
         report_dir = os.path.dirname(args.report_file)
@@ -602,7 +597,7 @@ def _run_translation(args, root: str, log_fp) -> None:
                 writer.writerows(data)
             else:
                 raise RuntimeError("Report file must end with .json or .csv")
-        print(f"Wrote skip report to {args.report_file}")
+        logger.warning(f"Wrote skip report to {args.report_file}")
 
     metrics_dir = os.path.dirname(args.metrics_file)
     if metrics_dir:
@@ -632,9 +627,7 @@ def _run_translation(args, root: str, log_fp) -> None:
         f"Summary: {successes}/{processed_lines} translated, {timeouts_count} timeouts, "
         f"{token_reorders} token reorders. Metrics written to {args.metrics_file}"
     )
-    print(summary_line)
-    if log_fp:
-        log_fp.write(summary_line + "\n")
+    logger.warning(summary_line)
 
 def main():
     ap = argparse.ArgumentParser(
@@ -671,10 +664,14 @@ def main():
         metavar="HASH",
         help="Only translate entries matching this hash; can be repeated for targeted updates",
     )
-    ap.add_argument("--verbose", action="store_true", help="Print per-message translation details")
+    ap.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Log per-message translation details",
+    )
     ap.add_argument(
         "--log-file",
-        help="Write verbose output to this file; missing directories are created",
+        help="Write log output to this file; missing directories are created",
     )
     ap.add_argument(
         "--report-file",
@@ -692,14 +689,20 @@ def main():
     )
     args = ap.parse_args()
 
-    log_fp = None
+    root = os.path.abspath(args.root)
+
+    logger.setLevel(logging.INFO if args.verbose else logging.WARNING)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
     if args.log_file:
         log_dir = os.path.dirname(args.log_file)
         if log_dir:
             os.makedirs(log_dir, exist_ok=True)
-        log_fp = open(args.log_file, "w", encoding="utf-8")
-
-    root = os.path.abspath(args.root)
+        file_handler = logging.FileHandler(args.log_file, encoding="utf-8")
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
 
     if args.metrics_file:
         metrics_path = (
@@ -712,26 +715,23 @@ def main():
     args.metrics_file = metrics_path
 
     try:
-        _run_translation(args, root, log_fp)
+        _run_translation(args, root)
     except SystemExit as e:
         if e.code not in (0, None):
             msg = str(e)
             if not msg or msg == str(e.code):
                 msg = f"Exited with code {e.code}"
-            print(msg, file=sys.stderr)
-            if log_fp:
-                log_fp.write(msg + "\n")
+            logger.error(msg)
         raise
     except Exception as e:
         msg = f"Unhandled exception: {e}"
-        print(msg, file=sys.stderr)
-        if log_fp:
-            log_fp.write(msg + "\n")
-            log_fp.write(traceback.format_exc() + "\n")
+        logger.exception(msg)
         raise SystemExit(1)
     finally:
-        if log_fp:
-            log_fp.close()
+        for handler in logger.handlers:
+            handler.flush()
+            handler.close()
+        logger.handlers.clear()
 
 
 if __name__ == "__main__":
