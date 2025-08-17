@@ -157,7 +157,19 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Fix token placeholders in localization JSON files")
     ap.add_argument("--root", default=Path(__file__).resolve().parents[1], help="Repo root")
     ap.add_argument("--check-only", action="store_true", help="Report issues without modifying files")
-    ap.add_argument("--reorder", action="store_true", help="Reorder tokens when counts match")
+    ap.add_argument(
+        "--reorder",
+        dest="reorder",
+        action="store_true",
+        help="Reorder tokens when counts match (default)",
+    )
+    ap.add_argument(
+        "--no-reorder",
+        dest="reorder",
+        action="store_false",
+        help="Disable token reordering",
+    )
+    ap.set_defaults(reorder=True)
     ap.add_argument("--metrics-file", help="Write JSON metrics to this path")
     ap.add_argument("--baseline-file", default="Resources/Localization/Messages/English.json", help="Baseline English messages file")
     ap.add_argument("paths", nargs="*", help="Specific localization JSON files to process")

@@ -896,3 +896,64 @@ def test_metrics_file_counts_token_reorders(tmp_path, monkeypatch):
     assert stats["original_tokens"] == 2
     assert stats["translated_tokens"] == 2
     assert stats["reordered"]
+
+
+def test_token_only_lines_restored_without_skip(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"h1": "{0}"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    (root / target_rel).write_text(json.dumps({"Messages": {}}))
+    report_path = root / "report.json"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return text
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+
+    called = {}
+
+    def fake_run(args, *a, **k):
+        called["args"] = args
+        return DummyCompleted()
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--report-file",
+            str(report_path),
+        ],
+    )
+
+    translate_argos.main()
+
+    data = json.loads((root / target_rel).read_text())
+    assert data["Messages"]["h1"] == "{0}"
+
+    report = json.loads(report_path.read_text())
+    assert report == []
+    assert "--reorder" in called.get("args", [])
