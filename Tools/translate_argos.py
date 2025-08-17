@@ -406,31 +406,32 @@ def _run_translation(args, root: str) -> None:
             if changed:
                 token_reorders += 1
             stripped = TOKEN_RE.sub("", result)
-            if stripped.strip() == "":
-                reason = "placeholders only"
-                category = categorize(reason)
-                log_entry(
-                    key,
-                    english[key],
-                    result,
-                    reason,
-                    category=category,
-                )
-                translated[key] = english[key]
-                failures[key] = (reason, category)
-                continue
-            if "[" in stripped or "]" in stripped:
-                reason = "stray brackets"
-                category = categorize(reason)
-                log_entry(
-                    key,
-                    english[key],
-                    result,
-                    reason,
-                    category=category,
-                )
-                failures[key] = (reason, category)
-                continue
+            if not token_only:
+                if stripped.strip() == "":
+                    reason = "placeholders only"
+                    category = categorize(reason)
+                    log_entry(
+                        key,
+                        english[key],
+                        result,
+                        reason,
+                        category=category,
+                    )
+                    translated[key] = english[key]
+                    failures[key] = (reason, category)
+                    continue
+                if "[" in stripped or "]" in stripped:
+                    reason = "stray brackets"
+                    category = categorize(reason)
+                    log_entry(
+                        key,
+                        english[key],
+                        result,
+                        reason,
+                        category=category,
+                    )
+                    failures[key] = (reason, category)
+                    continue
             expected = [str(i) for i in range(len(tokens))]
             if set(found_tokens) != set(expected):
                 reason = f"token mismatch (expected {expected}, got {found_tokens})"
@@ -446,6 +447,10 @@ def _run_translation(args, root: str) -> None:
                 continue
             un = unprotect(result, tokens)
             un = un.replace("\\u003C", "<").replace("\\u003E", ">")
+            if token_only:
+                translated[key] = un
+                log_entry(key, english[key], un)
+                continue
             if un == english[key]:
                 reason = "identical to source"
                 category = categorize(reason)
@@ -571,7 +576,9 @@ def _run_translation(args, root: str) -> None:
         [
             sys.executable,
             os.path.join(os.path.dirname(__file__), "fix_tokens.py"),
-            "--check-only",
+            "--root",
+            root,
+            "--reorder",
             target_path,
         ]
     )
