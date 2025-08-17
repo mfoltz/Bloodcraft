@@ -636,6 +636,24 @@ def _run_translation(args, root: str) -> None:
     )
     logger.warning(summary_line)
 
+
+def _load_report(path: str) -> list[dict[str, str]]:
+    """Return rows from a JSON or CSV skip report."""
+    if not path or not os.path.exists(path):
+        return []
+    ext = os.path.splitext(path)[1].lower()
+    try:
+        with open(path, "r", encoding="utf-8", newline="") as fp:
+            if ext == ".json":
+                data = json.load(fp)
+            elif ext == ".csv":
+                data = list(csv.DictReader(fp))
+            else:
+                return []
+    except Exception:
+        return []
+    return [row for row in data if row.get("hash")]
+
 def main():
     ap = argparse.ArgumentParser(
         description="Translate message JSON files with Argos Translate",
@@ -721,8 +739,26 @@ def main():
         metrics_path = os.path.join(root, "translate_metrics.json")
     args.metrics_file = metrics_path
 
+    remaining: list[dict[str, str]] = []
     try:
-        _run_translation(args, root)
+        prev_hashes: set[str] | None = None
+        while True:
+            _run_translation(args, root)
+            if not args.report_file:
+                break
+            remaining = _load_report(args.report_file)
+            hashes = [row["hash"] for row in remaining]
+            if not hashes or set(hashes) == prev_hashes:
+                break
+            prev_hashes = set(hashes)
+            logger.warning(
+                f"Retrying {len(hashes)} hash(es) from {args.report_file}"
+            )
+            args.hashes = hashes
+        if remaining:
+            logger.warning("Unresolved hashes after retries:")
+            for row in remaining:
+                logger.warning(f"{row['hash']}: {row.get('reason', '')}")
     except SystemExit as e:
         if e.code not in (0, None):
             msg = str(e)
