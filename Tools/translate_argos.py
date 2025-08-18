@@ -44,6 +44,9 @@ TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
 # Matches cases like ``TOKEN_1`` and ``TOKEN _ 1``
 TOKEN_WORD = re.compile(r'TOKEN\s*_\s*(\d+)', re.I)
 TOKEN_SENTINEL = "[[TOKEN_SENTINEL]]"
+SENTINEL_ONLY_RE = re.compile(
+    rf"^(?:\s*{re.escape(TOKEN_SENTINEL)})+\s*$"
+)
 
 
 ARGOS_WRAP_RE = re.compile(r"__T(\d+)__")
@@ -511,7 +514,10 @@ def _run_translation(args, root: str) -> None:
                         continue
                     if token_only:
                         if TOKEN_SENTINEL not in result:
-                            reason = "sentinel missing"
+                            logger.debug(f"{key}: sentinel missing, reinserting")
+                            result = f"{result} {TOKEN_SENTINEL}".strip()
+                        if SENTINEL_ONLY_RE.fullmatch(result.strip()):
+                            reason = "sentinel only"
                             category = categorize(reason)
                             log_entry(
                                 key,
@@ -523,9 +529,7 @@ def _run_translation(args, root: str) -> None:
                             failures[key] = (reason, category)
                             token_stats[key] = {
                                 "original_tokens": len(tokens),
-                                "translated_tokens": len(
-                                    TOKEN_RE.findall(result)
-                                ),
+                                "translated_tokens": 0,
                                 "reordered": False,
                             }
                             continue
@@ -704,7 +708,10 @@ def _run_translation(args, root: str) -> None:
             result = results[0]
             if token_only:
                 if TOKEN_SENTINEL not in result:
-                    return False, "sentinel missing on strict retry", len(TOKEN_RE.findall(result)), False, None
+                    logger.debug(f"{key}: sentinel missing on strict retry, reinserting")
+                    result = f"{result} {TOKEN_SENTINEL}".strip()
+                if SENTINEL_ONLY_RE.fullmatch(result.strip()):
+                    return False, "sentinel only on strict retry", 0, False, None
                 result = result.replace(f" {TOKEN_SENTINEL}", "").replace(
                     TOKEN_SENTINEL, "",
                 )

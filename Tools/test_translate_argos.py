@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 import os
 import subprocess
 import sys
@@ -229,7 +230,7 @@ def test_fallback_to_english_and_reports(tmp_path, monkeypatch):
     assert "identical" in rows[0]["reason"]
 
 
-def test_sentinel_missing_report(tmp_path, monkeypatch):
+def test_sentinel_missing_repaired(tmp_path, monkeypatch, caplog):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
     messages_dir.mkdir(parents=True)
@@ -243,6 +244,65 @@ def test_sentinel_missing_report(tmp_path, monkeypatch):
     class DummyTranslator:
         def translate(self, text):
             return "[[TOKEN_0]]"  # missing sentinel
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        translate_argos.logger,
+        "setLevel",
+        lambda level: logging.Logger.setLevel(translate_argos.logger, logging.DEBUG),
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--report-file",
+            str(report_path),
+            "--overwrite",
+        ],
+    )
+
+    with caplog.at_level(logging.DEBUG, logger="translate_argos"):
+        translate_argos.main()
+    rows = list(csv.DictReader(report_path.open()))
+    assert rows == []
+    data = json.loads((root / target_rel).read_text())
+    assert data["Messages"]["hash"] == "{name}"
+    assert "hash: sentinel missing, reinserting" in caplog.text
+
+
+def test_sentinel_only_report(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "{name}"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    report_path = root / "skipped.csv"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "[[TOKEN_SENTINEL]]"  # sentinel only
 
     class DummyCompleted:
         def __init__(self, code=0):
@@ -277,7 +337,7 @@ def test_sentinel_missing_report(tmp_path, monkeypatch):
     translate_argos.main()
     rows = list(csv.DictReader(report_path.open()))
     assert rows[0]["category"] == "sentinel"
-    assert "sentinel" in rows[0]["reason"]
+    assert "sentinel only" in rows[0]["reason"]
 
 
 def test_placeholder_only_report(tmp_path, monkeypatch):
