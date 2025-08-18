@@ -375,10 +375,12 @@ def _run_translation(args, root: str) -> None:
             return "sentinel"
         if "identical" in r:
             return "identical"
-        if "untranslated" in r or "english" in r:
-            return "untranslated"
+        if "token mismatch" in r:
+            return "token_mismatch"
         if "placeholder" in r or "tokens only" in r or "token only" in r:
             return "placeholder"
+        if "untranslated" in r or "english" in r:
+            return "english"
         return "other"
 
     def log_entry(
