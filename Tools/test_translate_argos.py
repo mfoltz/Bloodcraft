@@ -552,7 +552,7 @@ def test_reorder_tokens_from_one_based():
 def test_normalize_and_reorder_many_tokens():
     raw = " ".join(f"__T{i}__" for i in range(12))
     normalized = translate_argos.normalize_tokens(raw)
-    assert normalized == "".join(f"[[TOKEN_{i}]]" for i in range(12))
+    assert normalized == " ".join(f"[[TOKEN_{i}]]" for i in range(12))
     text, changed = translate_argos.reorder_tokens(
         " ".join(f"[[TOKEN_{i}]]" for i in range(11, -1, -1)), 12
     )
@@ -635,7 +635,7 @@ def test_interpolation_block_translated(tmp_path, monkeypatch):
     translate_argos.main()
 
     assert translator.called
-    assert translator.seen == "before __T0__ after"
+    assert translator.seen == "before <t0> after"
 
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["hash"] == "translated {(cond ? \"yes\" : \"no\")} after"
@@ -695,7 +695,7 @@ def test_multiple_interpolation_blocks_translated(tmp_path, monkeypatch):
     translate_argos.main()
 
     assert translator.called
-    assert translator.seen == "before __T0__ middle __T1__ after"
+    assert translator.seen == "before <t0> middle <t1> after"
 
     data = json.loads((root / target_rel).read_text())
     assert (
@@ -1273,3 +1273,111 @@ def test_translate_preserves_special_tokens(tmp_path, monkeypatch):
 
     log = log_path.read_text().lower()
     assert "token mismatch" not in log
+    data = json.loads((root / target_rel).read_text())
+    assert (
+        data["Messages"]["h1"]
+        == "Bonjour {0} ${var} [[TOKEN_0]] {(a (b))}"
+    )
+
+
+def test_handles_bracket_tokens(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english_text = "[color=red]"
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"h1": english_text}})
+    )
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return text
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    data = json.loads((root / target_rel).read_text())
+    assert data["Messages"]["h1"] == english_text
+
+
+def test_wraps_and_unwraps_placeholders(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english_text = "Hi {0}"
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"h1": english_text}})
+    )
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class RecordingTranslator:
+        def __init__(self):
+            self.seen: list[str] = []
+
+        def translate(self, text):
+            self.seen.append(text)
+            return text.replace("Hi", "Bonjour")
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    translator = RecordingTranslator()
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: translator,
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    assert translator.seen and "<t0>" in translator.seen[0]
+    data = json.loads((root / target_rel).read_text())
+    assert data["Messages"]["h1"] == "Bonjour {0}"
