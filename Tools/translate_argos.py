@@ -285,6 +285,14 @@ def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3
     report_dir = os.path.dirname(path)
     if report_dir:
         os.makedirs(report_dir, exist_ok=True)
+    # Deduplicate by hash so reruns don't accumulate stale entries
+    if rows:
+        deduped: dict[str, dict[str, str]] = {}
+        for row in rows:
+            key = row.get("hash")
+            if key:
+                deduped[key] = row
+        rows = list(deduped.values())
     ext = os.path.splitext(path)[1].lower()
     for attempt in range(1, max_retries + 1):
         try:
@@ -842,7 +850,12 @@ def _load_report(path: str) -> list[dict[str, str]]:
                 return []
     except Exception:
         return []
-    return [row for row in data if row.get("hash")]
+    deduped: dict[str, dict[str, str]] = {}
+    for row in data:
+        key = row.get("hash")
+        if key:
+            deduped[key] = row
+    return list(deduped.values())
 
 def main():
     ap = argparse.ArgumentParser(
@@ -928,6 +941,12 @@ def main():
     else:
         metrics_path = os.path.join(root, "translate_metrics.json")
     args.metrics_file = metrics_path
+
+    if args.report_file:
+        try:
+            _write_report(args.report_file, [])
+        except Exception as e:
+            logger.warning(f"Failed to initialize report file: {e}")
 
     remaining: list[dict[str, str]] = []
     try:
