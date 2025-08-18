@@ -54,28 +54,35 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
         return f"__T{len(tokens)-1}__"
 
     # Handle interpolation blocks `{(...)}'` which may contain nested
-    # parentheses and other brace-delimited tokens. We scan manually so any
-    # embedded braces do not terminate the match prematurely.
+    # parentheses and optional whitespace. We scan manually so any embedded
+    # braces or spaces do not terminate the match prematurely.
     res: List[str] = []
     i = 0
     while i < len(text):
-        if text.startswith("{(", i):
-            start = i
-            i += 2
-            depth = 1
-            while i < len(text) and depth:
-                ch = text[i]
-                if ch == "(":
-                    depth += 1
-                elif ch == ")":
-                    depth -= 1
-                i += 1
-            if depth == 0 and i < len(text) and text[i] == "}":
-                i += 1
-                tokens.append(text[start:i])
-                res.append(f"__T{len(tokens)-1}__")
-                continue
-            i = start
+        if text[i] == "{":
+            j = i + 1
+            while j < len(text) and text[j].isspace():
+                j += 1
+            if j < len(text) and text[j] == "(":
+                start = i
+                i = j + 1
+                depth = 1
+                while i < len(text) and depth:
+                    ch = text[i]
+                    if ch == "(":
+                        depth += 1
+                    elif ch == ")":
+                        depth -= 1
+                    i += 1
+                if depth == 0:
+                    while i < len(text) and text[i].isspace():
+                        i += 1
+                    if i < len(text) and text[i] == "}":
+                        i += 1
+                        tokens.append(text[start:i])
+                        res.append(f"__T{len(tokens)-1}__")
+                        continue
+                i = start
         res.append(text[i])
         i += 1
     text = "".join(res)
