@@ -660,6 +660,11 @@ def _run_translation(args, root: str) -> None:
                 f"Batch {batch_idx + 1}/{num_batches} end @ {batch_end - start:.2f}s "
                 f"({batch_end - batch_start:.2f}s)"
             )
+            if args.report_file:
+                try:
+                    _write_report(args.report_file, list(report.values()))
+                except Exception as e:
+                    logger.warning(f"Failed to flush skip report: {e}")
 
         def strict_retry(key: str) -> tuple[bool, str, int, bool, str | None]:
             nonlocal token_reorders

@@ -2,6 +2,8 @@ import csv
 import json
 import subprocess
 import sys
+import textwrap
+from pathlib import Path
 
 import pytest
 import translate_argos
@@ -137,3 +139,72 @@ def test_report_written_on_exception(tmp_path, monkeypatch):
 
     rows = list(csv.DictReader(report_path.open()))
     assert [row["hash"] for row in rows] == ["h0"]
+
+
+def test_report_persisted_when_process_killed(tmp_path):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {f"h{i}": f"Line {i}" for i in range(3)}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    report_path = root / "skipped.csv"
+    tools_dir = Path(__file__).resolve().parent
+
+    script = textwrap.dedent(
+        f"""
+import os, sys
+sys.path.insert(0, {str(tools_dir)!r})
+import translate_argos
+
+class DummyTranslator:
+    def translate(self, text):
+        return text
+
+class DummyCompleted:
+    def __init__(self, code=0):
+        self.returncode = code
+
+translate_argos.argos_translate.get_translation_from_codes = lambda s, d: DummyTranslator()
+translate_argos.argos_translate.load_installed_languages = lambda: None
+translate_argos.subprocess.run = lambda *a, **k: DummyCompleted()
+translate_argos.contains_english = lambda s: False
+
+original_unprotect = translate_argos.unprotect
+call_count = 0
+
+def killer(text, tokens):
+    global call_count
+    call_count += 1
+    if call_count == 3:
+        os._exit(1)
+    return original_unprotect(text, tokens)
+
+translate_argos.unprotect = killer
+
+sys.argv = [
+    "translate_argos.py",
+    {target_rel!r},
+    "--to",
+    "xx",
+    "--root",
+    {str(root)!r},
+    "--batch-size",
+    "2",
+    "--report-file",
+    {str(report_path)!r},
+    "--overwrite",
+]
+
+translate_argos.main()
+"""
+    )
+
+    runner = root / "runner.py"
+    runner.write_text(script)
+    completed = subprocess.run([sys.executable, str(runner)], cwd=root)
+    assert completed.returncode != 0
+
+    rows = list(csv.DictReader(report_path.open()))
+    assert [row["hash"] for row in rows] == ["h0", "h1"]
