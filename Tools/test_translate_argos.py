@@ -1023,3 +1023,68 @@ def test_retry_loop_resolves_skipped_translation(tmp_path, monkeypatch):
     rows = list(csv.DictReader(report_path.open()))
     assert rows == []
     assert translator.calls == 2
+
+
+def test_report_written_on_exception(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"h1": "Hello", "h2": "World"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    report_path = root / "skipped.csv"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return text
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+
+    original_unprotect = translate_argos.unprotect
+    call_count = {"n": 0}
+
+    def flaky_unprotect(text, tokens):
+        call_count["n"] += 1
+        if call_count["n"] == 2:
+            raise RuntimeError("boom")
+        return original_unprotect(text, tokens)
+
+    monkeypatch.setattr(translate_argos, "unprotect", flaky_unprotect)
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--report-file",
+            str(report_path),
+            "--overwrite",
+        ],
+    )
+
+    with pytest.raises(SystemExit):
+        translate_argos.main()
+
+    assert report_path.is_file()
+    rows = list(csv.DictReader(report_path.open()))
+    assert len(rows) == 1
+    assert rows[0]["hash"] == "h1"
