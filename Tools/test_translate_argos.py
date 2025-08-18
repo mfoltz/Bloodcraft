@@ -383,6 +383,50 @@ def test_contains_english_report(tmp_path, monkeypatch):
     assert "English" in rows[0]["reason"]
 
 
+def test_missing_tokens_reinjected(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello <b>world</b> {name}"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "Bonjour"
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    data = json.loads((root / target_rel).read_text())
+    value = data["Messages"]["hash"]
+    assert "<b>" in value and "</b>" in value and "{name}" in value
+
+
 def test_strict_retry_succeeds(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
