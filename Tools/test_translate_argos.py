@@ -509,6 +509,27 @@ def test_normalize_and_reorder_many_tokens():
     assert changed
 
 
+def test_protect_round_trip_with_placeholders():
+    text = "Start {0} ${var} [[TOKEN_0]] {(a (b))} End"
+    safe, tokens = translate_argos.protect_strict(text)
+    normalized = translate_argos.normalize_tokens(safe)
+    reordered, changed = translate_argos.reorder_tokens(normalized, len(tokens))
+    assert not changed
+    restored = translate_argos.unprotect(reordered, tokens)
+    assert restored.replace(" ", "") == text.replace(" ", "")
+
+
+def test_round_trip_with_reordered_tokens():
+    text = "{0} ${var} [[TOKEN_0]] {(x (y))}"
+    _, tokens = translate_argos.protect_strict(text)
+    swapped = "__T2__ __T0__ __T1__ __T3__"
+    normalized = translate_argos.normalize_tokens(swapped)
+    reordered, changed = translate_argos.reorder_tokens(normalized, len(tokens))
+    assert changed
+    restored = translate_argos.unprotect(reordered, tokens)
+    assert restored.replace(" ", "") == text.replace(" ", "")
+
+
 def test_interpolation_block_translated(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
@@ -1150,3 +1171,54 @@ def test_report_written_on_exception(tmp_path, monkeypatch):
     rows = list(csv.DictReader(report_path.open()))
     hashes = {row["hash"] for row in rows}
     assert "h2" in hashes
+
+
+def test_translate_preserves_special_tokens(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english_text = "Hello {0} ${var} [[TOKEN_0]] {(a (b))}"
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"h1": english_text}})
+    )
+    target_rel = "Resources/Localization/Messages/Test.json"
+    log_path = root / "out.log"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return text.replace("Hello", "Bonjour")
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--log-file",
+            str(log_path),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    log = log_path.read_text().lower()
+    assert "token mismatch" not in log

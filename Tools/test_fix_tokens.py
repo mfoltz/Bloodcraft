@@ -61,6 +61,14 @@ def test_replace_placeholders_token_only_line():
     assert replaced and not mismatch
 
 
+def test_replace_placeholders_with_various_tokens():
+    tokens = ["{0}", "${var}", "[[TOKEN_0]]", "{(a (b))}"]
+    value = "".join(f"[[TOKEN_{i}]]" for i in range(len(tokens)))
+    new_value, replaced, mismatch = fix_tokens.replace_placeholders(value, tokens)
+    assert new_value == "".join(tokens)
+    assert replaced and not mismatch
+
+
 def test_exit_on_mismatch(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
