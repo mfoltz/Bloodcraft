@@ -89,6 +89,40 @@ Only the JSON files in `Resources/Localization/Messages` contain user-facing mes
 
    Run the check-only mode first to fail fast if tokens were altered, then apply the fixes.
 
+### Token warnings
+
+Argos may reorder or drop placeholder tokens during translation. The translation log highlights these issues:
+
+```
+3981447812: tokens reordered
+  Original: "<color=yellow>{0}</color> has {1} apples"
+  Result:   "<color=yellow>{1}</color> tiene {0} manzanas"
+```
+
+A token count mismatch appears when placeholders are dropped entirely:
+
+```
+2844729307: token mismatch on strict retry (expected ['0', '1'], got [])
+```
+
+Use `fix_tokens.py` to detect and repair token problems:
+
+```
+python Tools/fix_tokens.py --check-only Resources/Localization/Messages/Spanish.json
+Resources/Localization/Messages/Spanish.json: 3981447812 tokens reordered
+
+python Tools/fix_tokens.py Resources/Localization/Messages/Spanish.json
+Resources/Localization/Messages/Spanish.json: 3981447812 tokens restored and reordered
+```
+
+After fixing tokens, rerun the translator if any hashes were skipped and verify the final files:
+
+```
+dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text
+```
+
+The check should report no token mismatches or leftover English text.
+
 ## Verify translation hashes
 
 After updating the files, run:
