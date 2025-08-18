@@ -225,6 +225,35 @@ def translate_batch(
     return results, timed_out
 
 
+def _read_json(path: str, *, default=None, max_retries: int = 3):
+    """Read JSON from ``path`` with retry logic."""
+    for attempt in range(1, max_retries + 1):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except FileNotFoundError:
+            if default is not None:
+                return default
+            raise
+        except Exception:
+            if attempt == max_retries:
+                raise
+            time.sleep(0.1)
+
+
+def _write_json(path: str, data, *, max_retries: int = 3) -> None:
+    """Write JSON ``data`` to ``path`` with retry logic."""
+    for attempt in range(1, max_retries + 1):
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            return
+        except Exception:
+            if attempt == max_retries:
+                raise
+            time.sleep(0.1)
+
+
 def _run_translation(args, root: str) -> None:
     translator = argos_translate.get_translation_from_codes(args.src, args.dst)
     if translator is None:
@@ -245,14 +274,9 @@ def _run_translation(args, root: str) -> None:
     )
     target_path = os.path.join(root, args.target_file)
 
-    with open(english_path, "r", encoding="utf-8") as f:
-        english = json.load(f)["Messages"]
+    english = _read_json(english_path)["Messages"]
 
-    if os.path.exists(target_path):
-        with open(target_path, "r", encoding="utf-8") as f:
-            target = json.load(f)
-    else:
-        target = {"Messages": {}}
+    target = _read_json(target_path, default={"Messages": {}})
 
     messages = target.get("Messages", {})
     if args.hashes:
@@ -345,165 +369,244 @@ def _run_translation(args, root: str) -> None:
             logger.info(
                 f"Batch {batch_idx + 1}/{num_batches} start @ {batch_start - start:.2f}s"
             )
-            try:
-                batch_results, timeouts = translate_batch(
-                    translator,
-                    batch_lines,
-                    max_retries=args.max_retries,
-                    timeout=args.timeout,
-                )
-            except FatalTranslationError as e:
-                msg = f"Fatal Argos error: {e}"
-                guidance = "Upgrade Argos Translate to support model version"
-                logger.error(msg)
-                logger.error(guidance)
-                raise SystemExit(msg)
-            except Exception as e:
-                logger.warning(f"Translation error: {e}")
-                for k in batch_keys:
-                    reason = f"batch error: {e}"
-                    category = categorize(reason)
-                    log_entry(k, english[k], "", reason, category=category, record=False)
-                    failures[k] = (reason, category)
-                batch_end = time.perf_counter()
-                logger.info(
-                    f"Batch {batch_idx + 1}/{num_batches} end @ {batch_end - start:.2f}s "
-                    f"({batch_end - batch_start:.2f}s)"
-                )
+            batch_results: List[str] = []
+            timeouts: List[int] = []
+            success = False
+            for attempt in range(1, args.max_retries + 1):
+                try:
+                    batch_results, timeouts = translate_batch(
+                        translator,
+                        batch_lines,
+                        max_retries=args.max_retries,
+                        timeout=args.timeout,
+                    )
+                    success = True
+                    break
+                except FatalTranslationError as e:
+                    msg = f"Fatal Argos error: {e}"
+                    guidance = "Upgrade Argos Translate to support model version"
+                    logger.error(msg)
+                    logger.error(guidance)
+                    raise SystemExit(msg)
+                except Exception as e:
+                    if attempt == args.max_retries:
+                        logger.warning(f"Translation error: {e}")
+                        for k in batch_keys:
+                            reason = f"batch error: {e}"
+                            category = categorize(reason)
+                            log_entry(
+                                k,
+                                english[k],
+                                "",
+                                reason,
+                                category=category,
+                                record=False,
+                            )
+                            failures[k] = (reason, category)
+                        batch_end = time.perf_counter()
+                        logger.info(
+                            f"Batch {batch_idx + 1}/{num_batches} end @ {batch_end - start:.2f}s "
+                            f"({batch_end - batch_start:.2f}s)"
+                        )
+                        break
+                    logger.warning(
+                        f"Batch {batch_idx + 1} failed attempt {attempt}/{args.max_retries}: {e}"
+                    )
+                    time.sleep(0.1)
+            if not success:
                 continue
 
-        for idx, (key, result, (tokens, token_only)) in enumerate(
-            zip(batch_keys, batch_results, batch_tokens)
-        ):
-            if idx in timeouts:
-                reason = "timeout"
-                category = categorize(reason)
-                log_entry(key, english[key], "", reason, category=category, record=False)
-                failures[key] = (reason, category)
-                timeouts_count += 1
-                timed_out_hashes.add(key)
-                token_stats[key] = {
-                    "original_tokens": len(tokens),
-                    "translated_tokens": 0,
-                    "reordered": False,
-                }
-                continue
-            if token_only:
-                if TOKEN_SENTINEL not in result:
-                    reason = "sentinel missing"
+            for idx, (key, result, (tokens, token_only)) in enumerate(
+                zip(batch_keys, batch_results, batch_tokens)
+            ):
+                try:
+                    if idx in timeouts:
+                        reason = "timeout"
+                        category = categorize(reason)
+                        log_entry(
+                            key,
+                            english[key],
+                            "",
+                            reason,
+                            category=category,
+                            record=False,
+                        )
+                        failures[key] = (reason, category)
+                        timeouts_count += 1
+                        timed_out_hashes.add(key)
+                        token_stats[key] = {
+                            "original_tokens": len(tokens),
+                            "translated_tokens": 0,
+                            "reordered": False,
+                        }
+                        continue
+                    if token_only:
+                        if TOKEN_SENTINEL not in result:
+                            reason = "sentinel missing"
+                            category = categorize(reason)
+                            log_entry(
+                                key,
+                                english[key],
+                                english[key],
+                                reason,
+                                category=category,
+                            )
+                            failures[key] = (reason, category)
+                            token_stats[key] = {
+                                "original_tokens": len(tokens),
+                                "translated_tokens": len(
+                                    TOKEN_RE.findall(result)
+                                ),
+                                "reordered": False,
+                            }
+                            continue
+                        result = result.replace(f" {TOKEN_SENTINEL}", "").replace(
+                            TOKEN_SENTINEL, ""
+                        )
+                    result = normalize_tokens(result)
+                    result, changed = reorder_tokens(result, len(tokens))
+                    found_tokens = TOKEN_RE.findall(result)
+                    token_stats[key] = {
+                        "original_tokens": len(tokens),
+                        "translated_tokens": len(found_tokens),
+                        "reordered": changed,
+                    }
+                    if changed:
+                        token_reorders += 1
+                    stripped = TOKEN_RE.sub("", result)
+                    if not token_only:
+                        if stripped.strip() == "":
+                            reason = "placeholders only"
+                            category = categorize(reason)
+                            log_entry(
+                                key,
+                                english[key],
+                                result,
+                                reason,
+                                category=category,
+                            )
+                            translated[key] = english[key]
+                            failures[key] = (reason, category)
+                            continue
+                        if "[" in stripped or "]" in stripped:
+                            reason = "stray brackets"
+                            category = categorize(reason)
+                            log_entry(
+                                key,
+                                english[key],
+                                result,
+                                reason,
+                                category=category,
+                            )
+                            failures[key] = (reason, category)
+                            continue
+                    expected = [str(i) for i in range(len(tokens))]
+                    reason: str | None = None
+                    category: str | None = None
+                    if set(found_tokens) != set(expected):
+                        missing = [t for t in expected if t not in found_tokens]
+                        extra = [t for t in found_tokens if t not in expected]
+                        if missing:
+                            result += "".join(
+                                f" [[TOKEN_{m}]]" for m in missing
+                            )
+                            found_tokens.extend(missing)
+                        token_stats[key]["translated_tokens"] = len(
+                            found_tokens
+                        )
+                        parts = []
+                        if missing:
+                            parts.append(f"missing {missing}")
+                        if extra:
+                            parts.append(f"unexpected {extra}")
+                        reason = "token mismatch (" + ", ".join(parts) + ")"
+                        category = categorize(reason)
+                    un = unprotect(result, tokens)
+                    un = un.replace("\\u003C", "<").replace("\\u003E", ">")
+                    if token_only:
+                        translated[key] = un
+                        log_entry(
+                            key,
+                            english[key],
+                            un,
+                            reason,
+                            category=category,
+                        )
+                        if reason:
+                            failures[key] = (reason, category)
+                        continue
+                    if un == english[key]:
+                        reason = "identical to source"
+                        category = categorize(reason)
+                        log_entry(
+                            key,
+                            english[key],
+                            un,
+                            reason,
+                            category=category,
+                        )
+                        translated[key] = un
+                        failures[key] = (reason, category)
+                        continue
+                    if contains_english(un):
+                        reason = "contains English"
+                        category = categorize(reason)
+                        log_entry(
+                            key,
+                            english[key],
+                            un,
+                            reason,
+                            category=category,
+                        )
+                        translated[key] = english[key]
+                        failures[key] = (reason, category)
+                        continue
+                    if changed:
+                        reason = "tokens reordered"
+                        category = categorize(reason)
+                        log_entry(
+                            key,
+                            english[key],
+                            un,
+                            reason,
+                            category=category,
+                        )
+                        translated[key] = un
+                        failures[key] = (reason, category)
+                        continue
+                    translated[key] = un
+                    if reason:
+                        log_entry(
+                            key,
+                            english[key],
+                            un,
+                            reason,
+                            category=category,
+                        )
+                        failures[key] = (reason, category)
+                    else:
+                        log_entry(key, english[key], un)
+                except Exception as e:
+                    reason = f"processing error: {e}"
                     category = categorize(reason)
                     log_entry(
                         key,
                         english[key],
-                        english[key],
+                        "",
                         reason,
                         category=category,
                     )
                     failures[key] = (reason, category)
                     token_stats[key] = {
                         "original_tokens": len(tokens),
-                        "translated_tokens": len(TOKEN_RE.findall(result)),
+                        "translated_tokens": 0,
                         "reordered": False,
                     }
-                    continue
-                result = result.replace(f" {TOKEN_SENTINEL}", "").replace(
-                    TOKEN_SENTINEL, ""
-                )
-            result = normalize_tokens(result)
-            result, changed = reorder_tokens(result, len(tokens))
-            found_tokens = TOKEN_RE.findall(result)
-            token_stats[key] = {
-                "original_tokens": len(tokens),
-                "translated_tokens": len(found_tokens),
-                "reordered": changed,
-            }
-            if changed:
-                token_reorders += 1
-            stripped = TOKEN_RE.sub("", result)
-            if not token_only:
-                if stripped.strip() == "":
-                    reason = "placeholders only"
-                    category = categorize(reason)
-                    log_entry(
-                        key,
-                        english[key],
-                        result,
-                        reason,
-                        category=category,
-                    )
-                    translated[key] = english[key]
-                    failures[key] = (reason, category)
-                    continue
-                if "[" in stripped or "]" in stripped:
-                    reason = "stray brackets"
-                    category = categorize(reason)
-                    log_entry(
-                        key,
-                        english[key],
-                        result,
-                        reason,
-                        category=category,
-                    )
-                    failures[key] = (reason, category)
-                    continue
-            expected = [str(i) for i in range(len(tokens))]
-            reason: str | None = None
-            category: str | None = None
-            if set(found_tokens) != set(expected):
-                missing = [t for t in expected if t not in found_tokens]
-                extra = [t for t in found_tokens if t not in expected]
-                if missing:
-                    result += "".join(f" [[TOKEN_{m}]]" for m in missing)
-                    found_tokens.extend(missing)
-                token_stats[key]["translated_tokens"] = len(found_tokens)
-                parts = []
-                if missing:
-                    parts.append(f"missing {missing}")
-                if extra:
-                    parts.append(f"unexpected {extra}")
-                reason = "token mismatch (" + ", ".join(parts) + ")"
-                category = categorize(reason)
-            un = unprotect(result, tokens)
-            un = un.replace("\\u003C", "<").replace("\\u003E", ">")
-            if token_only:
-                translated[key] = un
-                log_entry(key, english[key], un, reason, category=category)
-                if reason:
-                    failures[key] = (reason, category)
-                continue
-            if un == english[key]:
-                reason = "identical to source"
-                category = categorize(reason)
-                log_entry(key, english[key], un, reason, category=category)
-                translated[key] = un
-                failures[key] = (reason, category)
-                continue
-            if contains_english(un):
-                reason = "contains English"
-                category = categorize(reason)
-                log_entry(key, english[key], un, reason, category=category)
-                translated[key] = english[key]
-                failures[key] = (reason, category)
-                continue
-            if changed:
-                reason = "tokens reordered"
-                category = categorize(reason)
-                log_entry(key, english[key], un, reason, category=category)
-                translated[key] = un
-                failures[key] = (reason, category)
-                continue
-            translated[key] = un
-            if reason:
-                log_entry(key, english[key], un, reason, category=category)
-                failures[key] = (reason, category)
-            else:
-                log_entry(key, english[key], un)
-
-        batch_end = time.perf_counter()
-        logger.info(
-            f"Batch {batch_idx + 1}/{num_batches} end @ {batch_end - start:.2f}s "
-            f"({batch_end - batch_start:.2f}s)"
-        )
+            batch_end = time.perf_counter()
+            logger.info(
+                f"Batch {batch_idx + 1}/{num_batches} end @ {batch_end - start:.2f}s "
+                f"({batch_end - batch_start:.2f}s)"
+            )
 
         def strict_retry(key: str) -> tuple[bool, str, int, bool, str | None]:
             nonlocal token_reorders
@@ -610,8 +713,7 @@ def _run_translation(args, root: str) -> None:
 
         messages.update(translated)
         target["Messages"] = messages
-        with open(target_path, "w", encoding="utf-8") as f:
-            json.dump(target, f, indent=2, ensure_ascii=False)
+        _write_json(target_path, target)
 
         result = subprocess.run(
             [
@@ -641,16 +743,11 @@ def _run_translation(args, root: str) -> None:
             "failures": {k: v[0] for k, v in failures.items()},
             "hash_stats": token_stats,
         }
-        try:
-            with open(args.metrics_file, "r", encoding="utf-8") as fp:
-                metrics_log = json.load(fp)
-        except FileNotFoundError:
-            metrics_log = []
-        except json.JSONDecodeError:
+        metrics_log = _read_json(args.metrics_file, default=[])
+        if not isinstance(metrics_log, list):
             metrics_log = []
         metrics_log.append(metrics_entry)
-        with open(args.metrics_file, "w", encoding="utf-8") as fp:
-            json.dump(metrics_log, fp, indent=2, ensure_ascii=False)
+        _write_json(args.metrics_file, metrics_log)
 
         summary_line = (
             f"Summary: {successes}/{processed_lines} translated, {timeouts_count} timeouts, "
@@ -660,28 +757,35 @@ def _run_translation(args, root: str) -> None:
     finally:
         exc_type = sys.exc_info()[0]
         if args.report_file:
-            try:
-                report_dir = os.path.dirname(args.report_file)
-                if report_dir:
-                    os.makedirs(report_dir, exist_ok=True)
-                ext = os.path.splitext(args.report_file)[1].lower()
-                data = list(report.values())
-                with open(args.report_file, "w", encoding="utf-8", newline="") as fp:
-                    if ext == ".json":
-                        json.dump(data, fp, indent=2, ensure_ascii=False)
-                    elif ext == ".csv":
-                        writer = csv.DictWriter(
-                            fp, fieldnames=["hash", "english", "reason", "category"]
-                        )
-                        writer.writeheader()
-                        writer.writerows(data)
+            report_dir = os.path.dirname(args.report_file)
+            if report_dir:
+                os.makedirs(report_dir, exist_ok=True)
+            ext = os.path.splitext(args.report_file)[1].lower()
+            data = list(report.values())
+            for attempt in range(1, args.max_retries + 1):
+                try:
+                    with open(args.report_file, "w", encoding="utf-8", newline="") as fp:
+                        if ext == ".json":
+                            json.dump(data, fp, indent=2, ensure_ascii=False)
+                        elif ext == ".csv":
+                            writer = csv.DictWriter(
+                                fp, fieldnames=["hash", "english", "reason", "category"]
+                            )
+                            writer.writeheader()
+                            writer.writerows(data)
+                        else:
+                            raise RuntimeError(
+                                "Report file must end with .json or .csv"
+                            )
+                    logger.warning(f"Wrote skip report to {args.report_file}")
+                    break
+                except Exception as e:
+                    if attempt == args.max_retries:
+                        logger.warning(f"Failed to write skip report: {e}")
+                        if exc_type is None:
+                            raise
                     else:
-                        raise RuntimeError("Report file must end with .json or .csv")
-                logger.warning(f"Wrote skip report to {args.report_file}")
-            except Exception as e:
-                logger.warning(f"Failed to write skip report: {e}")
-                if exc_type is None:
-                    raise
+                        time.sleep(0.1)
 
 
 def _load_report(path: str) -> list[dict[str, str]]:

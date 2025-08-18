@@ -1,0 +1,76 @@
+import csv
+import json
+import subprocess
+import sys
+
+import translate_argos
+
+
+def test_multibatch_continues_after_line_error(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {f"h{i}": f"Line {i}" for i in range(5)}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    report_path = root / "skipped.csv"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return text + "_t"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+
+    original_unprotect = translate_argos.unprotect
+    call_count = {"n": 0}
+
+    def flaky_unprotect(text, tokens):
+        call_count["n"] += 1
+        if call_count["n"] == 2:
+            raise RuntimeError("boom")
+        return original_unprotect(text, tokens)
+
+    monkeypatch.setattr(translate_argos, "unprotect", flaky_unprotect)
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--batch-size",
+            "2",
+            "--report-file",
+            str(report_path),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    assert call_count["n"] >= 2
+
+    data = json.loads((root / target_rel).read_text())
+    assert data["Messages"]["h0"] == "Line 0_t"
+    assert data["Messages"]["h2"] == "Line 2_t"
+    assert data["Messages"]["h4"] == "Line 4_t"
+    rows = list(csv.DictReader(report_path.open()))
+    assert rows == []

@@ -1081,10 +1081,9 @@ def test_report_written_on_exception(tmp_path, monkeypatch):
         ],
     )
 
-    with pytest.raises(SystemExit):
-        translate_argos.main()
+    translate_argos.main()
 
     assert report_path.is_file()
     rows = list(csv.DictReader(report_path.open()))
-    assert len(rows) == 1
-    assert rows[0]["hash"] == "h1"
+    hashes = {row["hash"] for row in rows}
+    assert "h2" in hashes
