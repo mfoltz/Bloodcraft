@@ -509,30 +509,37 @@ def test_normalize_and_reorder_many_tokens():
     assert changed
 
 
-def test_interpolation_block_skipped(tmp_path, monkeypatch):
+def test_interpolation_block_translated(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
     messages_dir.mkdir(parents=True)
-    msg = "Value {(cond ? \"yes\" : \"no\")}" 
+    msg = "before {(cond ? \"yes\" : \"no\")} after"
     (messages_dir / "English.json").write_text(
         json.dumps({"Messages": {"hash": msg}})
     )
 
     target_rel = "Resources/Localization/Messages/Test.json"
-    report_path = root / "skipped.csv"
 
-    class DummyTranslator:
+    class RecordingTranslator:
+        def __init__(self):
+            self.called = False
+            self.seen = ""
+
         def translate(self, text):
-            return "ignored"
+            self.called = True
+            self.seen = text
+            return text.replace("before", "translated")
 
     class DummyCompleted:
         def __init__(self, code=0):
             self.returncode = code
 
+    translator = RecordingTranslator()
+
     monkeypatch.setattr(
         translate_argos.argos_translate,
         "get_translation_from_codes",
-        lambda src, dst: DummyTranslator(),
+        lambda src, dst: translator,
     )
     monkeypatch.setattr(
         translate_argos.argos_translate, "load_installed_languages", lambda: None
@@ -549,17 +556,18 @@ def test_interpolation_block_skipped(tmp_path, monkeypatch):
             "xx",
             "--root",
             str(root),
-            "--report-file",
-            str(report_path),
             "--overwrite",
         ],
     )
 
     translate_argos.main()
+
+    assert translator.called
+    assert translator.seen == "before __T0__ after"
+
     data = json.loads((root / target_rel).read_text())
-    assert data["Messages"]["hash"] == msg
-    rows = list(csv.DictReader(report_path.open()))
-    assert rows[0]["category"] == "interpolation"
+    assert data["Messages"]["hash"] == "translated {(cond ? \"yes\" : \"no\")} after"
+
 
 
 def test_fatal_error_aborts(tmp_path, monkeypatch):
@@ -713,52 +721,6 @@ def test_token_only_line_sentinel_roundtrip(tmp_path, monkeypatch):
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["h"] == "<b>{x}</b>"
 
-
-def test_interpolation_block_skipped(tmp_path, monkeypatch):
-    root = tmp_path
-    messages_dir = root / "Resources" / "Localization" / "Messages"
-    messages_dir.mkdir(parents=True)
-    english = {"Messages": {"h": "before {(skip)} after"}}
-    (messages_dir / "English.json").write_text(json.dumps(english))
-
-    target_rel = "Resources/Localization/Messages/Test.json"
-
-    class RaisingTranslator:
-        def translate(self, _text):
-            raise AssertionError("translator should not be called")
-
-    class DummyCompleted:
-        def __init__(self, code=0):
-            self.returncode = code
-
-    monkeypatch.setattr(
-        translate_argos.argos_translate,
-        "get_translation_from_codes",
-        lambda src, dst: RaisingTranslator(),
-    )
-    monkeypatch.setattr(
-        translate_argos.argos_translate, "load_installed_languages", lambda: None
-    )
-    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
-    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
-    monkeypatch.setattr(
-        sys,
-        "argv",
-        [
-            "translate_argos.py",
-            target_rel,
-            "--to",
-            "xx",
-            "--root",
-            str(root),
-            "--overwrite",
-        ],
-    )
-
-    translate_argos.main()
-
-    data = json.loads((root / target_rel).read_text())
-    assert data["Messages"]["h"] == "before {(skip)} after"
 
 
 def test_metrics_file_records_failure_reason(tmp_path, monkeypatch):
