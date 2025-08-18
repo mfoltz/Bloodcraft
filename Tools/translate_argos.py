@@ -33,7 +33,9 @@ FATAL_ARGOS_ERRORS = [
 class FatalTranslationError(Exception):
     """Raised when Argos Translate encounters an unrecoverable error."""
 
-TOKEN_PATTERN = re.compile(r'<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}')
+TOKEN_PATTERN = re.compile(
+    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[\[TOKEN_\d+\]\]"
+)
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
 STRICT_TOKEN_RE = re.compile(r'__T(\d+)__')
 STRICT_TOKEN_CLEAN = re.compile(r'__\s*T\s*(\d+)\s*__', re.I)
@@ -53,9 +55,10 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
         tokens.append(m.group(0))
         return f"__T{len(tokens)-1}__"
 
-    # Handle interpolation blocks `{(...)}'` which may contain nested
-    # parentheses and optional whitespace. We scan manually so any embedded
-    # braces or spaces do not terminate the match prematurely.
+    # First replace nested interpolation blocks `{(...)}'` with temporary
+    # markers so we can process remaining tokens via regex. The blocks may
+    # contain arbitrary nested parentheses.
+    nested: List[str] = []
     res: List[str] = []
     i = 0
     while i < len(text):
@@ -79,15 +82,25 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
                         i += 1
                     if i < len(text) and text[i] == "}":
                         i += 1
-                        tokens.append(text[start:i])
-                        res.append(f"__T{len(tokens)-1}__")
+                        marker = f"@@NB{len(nested)}@@"
+                        nested.append(text[start:i])
+                        res.append(marker)
                         continue
                 i = start
         res.append(text[i])
         i += 1
     text = "".join(res)
 
+    # Handle standard tokens including `<...>`, `{...}`, `${...}`, and
+    # `[[TOKEN_n]]` markers.
     text = TOKEN_PATTERN.sub(store, text)
+
+    # Restore nested blocks with proper ordering.
+    for idx, block in enumerate(nested):
+        placeholder = f"__T{len(tokens)}__"
+        text = text.replace(f"@@NB{idx}@@", placeholder, 1)
+        tokens.append(block)
+
     return text, tokens
 
 
@@ -99,7 +112,12 @@ def unprotect(text: str, tokens: List[str]) -> str:
 
 
 def normalize_tokens(text: str) -> str:
-    """Normalize token formatting in Argos output."""
+    """Normalize token formatting in Argos output.
+
+    Converts ``__Tn__`` placeholders back to ``[[TOKEN_n]]`` and cleans up
+    spacing so existing tokens like ``{0}`` or ``${var}`` remain intact after
+    translation.
+    """
     text = re.sub(r"\]\s+\[\[", "][[", text)
 
     # Merge cases where Argos splits multi-digit token numbers.
@@ -137,14 +155,15 @@ def normalize_tokens(text: str) -> str:
 
 
 def reorder_tokens(text: str, token_count: int) -> tuple[str, bool]:
-    """Renumber TOKEN_n markers to match the English source order.
+    """Renumber ``[[TOKEN_n]]`` markers to match English token order.
 
-    Argos may emit tokens with non-sequential or permuted indices. This
-    function rewrites them so ``[[TOKEN_0]]`` through
-    ``[[TOKEN_{token_count-1}]]`` appear in their expected order. The token
-    positions in the string are preserved; only the numeric identifiers are
-    remapped.
+    The translator may permute or use one-based numbering for placeholders.
+    This helper reindexes them sequentially starting from ``0`` so they can be
+    mapped back to the original tokens. ``token_count`` is the number of tokens
+    extracted from the English source.
     """
+    if token_count <= 1:
+        return text, False
     found = TOKEN_RE.findall(text)
     if len(found) != token_count:
         return text, False
