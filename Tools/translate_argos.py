@@ -34,7 +34,7 @@ class FatalTranslationError(Exception):
     """Raised when Argos Translate encounters an unrecoverable error."""
 
 TOKEN_PATTERN = re.compile(
-    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[\[TOKEN_\d+\]\]"
+    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_\d+\]\]"
 )
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
 STRICT_TOKEN_RE = re.compile(r'__T(\d+)__')
@@ -44,6 +44,20 @@ TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
 # Matches cases like ``TOKEN_1`` and ``TOKEN _ 1``
 TOKEN_WORD = re.compile(r'TOKEN\s*_\s*(\d+)', re.I)
 TOKEN_SENTINEL = "[[TOKEN_SENTINEL]]"
+
+
+ARGOS_WRAP_RE = re.compile(r"__T(\d+)__")
+ARGOS_UNWRAP_RE = re.compile(r"<t(\d+)>")
+
+
+def wrap_placeholders(text: str) -> str:
+    """Convert ``__Tn__`` markers to ``<tN>`` for Argos."""
+    return ARGOS_WRAP_RE.sub(lambda m: f"<t{m.group(1)}>", text)
+
+
+def unwrap_placeholders(text: str) -> str:
+    """Restore ``<tN>`` markers back to ``__Tn__`` after translation."""
+    return ARGOS_UNWRAP_RE.sub(lambda m: f"__T{m.group(1)}__", text)
 
 
 def protect_strict(text: str) -> tuple[str, List[str]]:
@@ -118,7 +132,6 @@ def normalize_tokens(text: str) -> str:
     spacing so existing tokens like ``{0}`` or ``${var}`` remain intact after
     translation.
     """
-    text = re.sub(r"\]\s+\[\[", "][[", text)
 
     # Merge cases where Argos splits multi-digit token numbers.
     # ``[[TOKEN_1 0]]`` -> ``[[TOKEN_10]]``
@@ -138,7 +151,6 @@ def normalize_tokens(text: str) -> str:
     text = STRICT_TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
     text = TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
     text = TOKEN_WORD.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
-    text = re.sub(r"\]\s+\[\[", "][[", text)
 
     placeholders: List[str] = []
 
@@ -224,10 +236,12 @@ def translate_batch(
     timed_out: List[int] = []
     with ThreadPoolExecutor(max_workers=1) as executor:
         for idx, line in enumerate(lines):
+            wrapped = wrap_placeholders(line)
             for attempt in range(1, max_retries + 1):
-                future = executor.submit(translator.translate, line)
+                future = executor.submit(translator.translate, wrapped)
                 try:
-                    results.append(future.result(timeout=timeout))
+                    translated = future.result(timeout=timeout)
+                    results.append(unwrap_placeholders(translated))
                     break
                 except FuturesTimeout:
                     future.cancel()
