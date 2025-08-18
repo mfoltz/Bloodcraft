@@ -93,10 +93,15 @@ Only the JSON files in `Resources/Localization/Messages` contain user-facing mes
 
 Argos may reorder or drop placeholder tokens during translation. The translation log highlights these issues:
 
+```text
+2024-02-24T12:00:00Z WARNING 3981447812 tokens reordered (expected ['0', '1'], got ['1', '0'])
 ```
-3981447812: tokens reordered
-  Original: "<color=yellow>{0}</color> has {1} apples"
-  Result:   "<color=yellow>{1}</color> tiene {0} manzanas"
+
+When placeholders move, the log shows the original and translated strings for the affected hash:
+
+```
+Original: "<color=yellow>{0}</color> has {1} apples"
+Result:   "<color=yellow>{1}</color> tiene {0} manzanas"
 ```
 
 A token count mismatch appears when placeholders are dropped entirely:
@@ -105,17 +110,23 @@ A token count mismatch appears when placeholders are dropped entirely:
 2844729307: token mismatch on strict retry (expected ['0', '1'], got [])
 ```
 
-Use `fix_tokens.py` to detect and repair token problems:
+#### Validation steps
+
+Use `fix_tokens.py` to detect and repair token problems. Start with a dry run to surface warnings without modifying files:
 
 ```
 python Tools/fix_tokens.py --check-only Resources/Localization/Messages/Spanish.json
 Resources/Localization/Messages/Spanish.json: 3981447812 tokens reordered
-
-python Tools/fix_tokens.py Resources/Localization/Messages/Spanish.json
-Resources/Localization/Messages/Spanish.json: 3981447812 tokens restored and reordered
 ```
 
-After fixing tokens, rerun the translator if any hashes were skipped and verify the final files:
+Apply the fixes and re‑run in check-only mode to confirm a clean result:
+
+```
+python Tools/fix_tokens.py Resources/Localization/Messages/Spanish.json
+python Tools/fix_tokens.py --check-only Resources/Localization/Messages/Spanish.json
+```
+
+Finally, verify the language files contain no token mismatches or leftover English text:
 
 ```
 dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text
