@@ -1284,6 +1284,74 @@ def test_report_written_on_exception(tmp_path, monkeypatch):
     assert "h2" in hashes
 
 
+def test_report_cleared_between_runs(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"h1": "Hello"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    (root / target_rel).write_text(json.dumps({"Messages": {}}))
+    report_path = root / "skipped.csv"
+
+    # Pre-populate with stale data to ensure it is cleared
+    report_path.write_text(
+        "hash,english,reason,category\nold,Old,old reason,oldcat\n"
+    )
+
+    class DummyTranslator:
+        def translate(self, text):
+            return text + "!"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: True)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--report-file",
+            str(report_path),
+        ],
+    )
+
+    translate_argos.main()
+
+    rows = list(csv.DictReader(report_path.open()))
+    assert len(rows) == 1
+    assert rows[0]["hash"] == "h1"
+
+
+def test_write_report_deduplicates_rows(tmp_path):
+    path = tmp_path / "out.csv"
+    rows = [
+        {"hash": "a", "english": "Hello", "reason": "r1", "category": "c"},
+        {"hash": "a", "english": "Hola", "reason": "r2", "category": "c"},
+    ]
+    translate_argos._write_report(str(path), rows)
+    out_rows = list(csv.DictReader(path.open()))
+    assert len(out_rows) == 1
+    assert out_rows[0]["reason"] == "r2"
+
+
 def test_translate_preserves_special_tokens(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
