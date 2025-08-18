@@ -42,7 +42,6 @@ TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
 # Matches cases like ``TOKEN_1`` and ``TOKEN _ 1``
 TOKEN_WORD = re.compile(r'TOKEN\s*_\s*(\d+)', re.I)
 TOKEN_SENTINEL = "[[TOKEN_SENTINEL]]"
-INTERP_BLOCK = re.compile(r'\{\(')
 
 
 def protect_strict(text: str) -> tuple[str, List[str]]:
@@ -53,6 +52,33 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
     def store(m: re.Match) -> str:
         tokens.append(m.group(0))
         return f"__T{len(tokens)-1}__"
+
+    # Handle interpolation blocks `{(...)}'` which may contain nested
+    # parentheses and other brace-delimited tokens. We scan manually so any
+    # embedded braces do not terminate the match prematurely.
+    res: List[str] = []
+    i = 0
+    while i < len(text):
+        if text.startswith("{(", i):
+            start = i
+            i += 2
+            depth = 1
+            while i < len(text) and depth:
+                ch = text[i]
+                if ch == "(":
+                    depth += 1
+                elif ch == ")":
+                    depth -= 1
+                i += 1
+            if depth == 0 and i < len(text) and text[i] == "}":
+                i += 1
+                tokens.append(text[start:i])
+                res.append(f"__T{len(tokens)-1}__")
+                continue
+            i = start
+        res.append(text[i])
+        i += 1
+    text = "".join(res)
 
     text = TOKEN_PATTERN.sub(store, text)
     return text, tokens
@@ -245,12 +271,8 @@ def _run_translation(args, root: str) -> None:
     safe_lines: List[str] = []
     tokens_list: List[tuple[List[str], bool]] = []
     keys: List[str] = []
-    skipped_interp: List[tuple[str, str]] = []
 
     for key, text in to_translate:
-        if INTERP_BLOCK.search(text):
-            skipped_interp.append((key, text))
-            continue
         safe, tokens = protect_strict(text)
         token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
         if token_only:
@@ -278,8 +300,6 @@ def _run_translation(args, root: str) -> None:
             return "identical"
         if "untranslated" in r or "english" in r:
             return "untranslated"
-        if "interpolation" in r:
-            return "interpolation"
         if "placeholder" in r or "tokens only" in r or "token only" in r:
             return "placeholder"
         return "other"
@@ -312,12 +332,6 @@ def _run_translation(args, root: str) -> None:
             report.pop(key, None)
             logger.info(f"{msg}\n  Original: {original}\n  Result: {result}")
 
-    for key, text in skipped_interp:
-        reason = "interpolation block"
-        category = "interpolation"
-        log_entry(key, english[key], english[key], reason, category=category)
-        translated[key] = english[key]
-        failures[key] = (reason, category)
 
     num_batches = (len(safe_lines) + args.batch_size - 1) // args.batch_size
     start = time.perf_counter()
@@ -548,7 +562,7 @@ def _run_translation(args, root: str) -> None:
         return True, un, len(found_tokens), changed, reason
 
     for key, (_initial_reason, category) in list(failures.items()):
-        if category in ("interpolation", "placeholder"):
+        if category == "placeholder":
             continue
         ok, out, tcount, changed, reason = strict_retry(key)
         token_stats.setdefault(key, {"original_tokens": len(protect_strict(english[key])[1])})
