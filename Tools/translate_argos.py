@@ -254,6 +254,33 @@ def _write_json(path: str, data, *, max_retries: int = 3) -> None:
             time.sleep(0.1)
 
 
+def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3) -> None:
+    """Write translation ``rows`` to ``path`` as JSON or CSV."""
+    report_dir = os.path.dirname(path)
+    if report_dir:
+        os.makedirs(report_dir, exist_ok=True)
+    ext = os.path.splitext(path)[1].lower()
+    for attempt in range(1, max_retries + 1):
+        try:
+            with open(path, "w", encoding="utf-8", newline="") as fp:
+                if ext == ".json":
+                    json.dump(rows, fp, indent=2, ensure_ascii=False)
+                elif ext == ".csv":
+                    writer = csv.DictWriter(
+                        fp, fieldnames=["hash", "english", "reason", "category"]
+                    )
+                    writer.writeheader()
+                    writer.writerows(rows)
+                else:
+                    raise RuntimeError("Report file must end with .json or .csv")
+            logger.warning(f"Wrote skip report to {path}")
+            break
+        except Exception:
+            if attempt == max_retries:
+                raise
+            time.sleep(0.1)
+
+
 def _run_translation(args, root: str) -> None:
     translator = argos_translate.get_translation_from_codes(args.src, args.dst)
     if translator is None:
@@ -757,35 +784,14 @@ def _run_translation(args, root: str) -> None:
     finally:
         exc_type = sys.exc_info()[0]
         if args.report_file:
-            report_dir = os.path.dirname(args.report_file)
-            if report_dir:
-                os.makedirs(report_dir, exist_ok=True)
-            ext = os.path.splitext(args.report_file)[1].lower()
-            data = list(report.values())
-            for attempt in range(1, args.max_retries + 1):
-                try:
-                    with open(args.report_file, "w", encoding="utf-8", newline="") as fp:
-                        if ext == ".json":
-                            json.dump(data, fp, indent=2, ensure_ascii=False)
-                        elif ext == ".csv":
-                            writer = csv.DictWriter(
-                                fp, fieldnames=["hash", "english", "reason", "category"]
-                            )
-                            writer.writeheader()
-                            writer.writerows(data)
-                        else:
-                            raise RuntimeError(
-                                "Report file must end with .json or .csv"
-                            )
-                    logger.warning(f"Wrote skip report to {args.report_file}")
-                    break
-                except Exception as e:
-                    if attempt == args.max_retries:
-                        logger.warning(f"Failed to write skip report: {e}")
-                        if exc_type is None:
-                            raise
-                    else:
-                        time.sleep(0.1)
+            try:
+                _write_report(
+                    args.report_file, list(report.values()), max_retries=args.max_retries
+                )
+            except Exception as e:
+                logger.warning(f"Failed to write skip report: {e}")
+                if exc_type is None:
+                    raise
 
 
 def _load_report(path: str) -> list[dict[str, str]]:
