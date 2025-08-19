@@ -39,6 +39,7 @@ TOKEN_PATTERN = re.compile(
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
 STRICT_TOKEN_RE = re.compile(r'⟦T(\d+)⟧')
 STRICT_TOKEN_CLEAN = re.compile(r'⟦\s*T\s*(\d+)\s*⟧', re.I)
+LOOSE_STRICT_TOKEN_RE = re.compile(r'⟦([^⟧]+)⟧')
 TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
 # Matches stray TOKEN_n occurrences regardless of surrounding context
 # Matches cases like ``TOKEN_1`` and ``TOKEN _ 1``
@@ -131,6 +132,17 @@ def normalize_tokens(text: str) -> str:
     spacing so existing tokens like ``{0}`` or ``${var}`` remain intact after
     translation.
     """
+
+    # Pre-validate sloppy ``⟦Tn⟧`` markers. Allow whitespace or punctuation
+    # inside the delimiters and rewrite them to canonical form.
+    def clean_strict(m: re.Match) -> str:
+        inner = re.sub(r"[^0-9Tt]", "", m.group(1))
+        inner = inner.upper()
+        if inner.startswith("T") and inner[1:].isdigit():
+            return f"⟦T{inner[1:]}⟧"
+        return m.group(0)
+
+    text = LOOSE_STRICT_TOKEN_RE.sub(clean_strict, text)
 
     # Merge cases where Argos splits multi-digit token numbers.
     # ``[[TOKEN_1 0]]`` -> ``[[TOKEN_10]]``

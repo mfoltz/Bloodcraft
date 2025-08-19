@@ -597,6 +597,60 @@ def test_strict_retry_succeeds(tmp_path, monkeypatch):
     ]
 
 
+def test_sloppy_sentinels_cleaned(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "<b>Hello</b>"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    report_path = root / "skipped.csv"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "⟦ T0 , ⟧Bonjour⟦ T1 ⟧"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--report-file",
+            str(report_path),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    data = json.loads((root / target_rel).read_text())
+    assert data["Messages"]["hash"] == "<b>Bonjour</b>"
+    assert report_path.read_text().strip().splitlines() == [
+        "hash,english,reason,category"
+    ]
+
+
 def test_reorder_tokens_swapped():
     text, changed = translate_argos.reorder_tokens("[[TOKEN_1]] then [[TOKEN_0]]", 2)
     assert text == "[[TOKEN_0]] then [[TOKEN_1]]"
