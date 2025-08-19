@@ -695,6 +695,24 @@ def test_round_trip_with_reordered_tokens():
     assert restored.replace(" ", "") == text.replace(" ", "")
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "<tag>",
+        "{0}",
+        "${value}",
+        "[[TOKEN_0]]",
+        "mix <b>{0}${val}[[TOKEN_0]]",
+    ],
+)
+def test_tokens_round_trip_without_mismatch(text):
+    safe, tokens = translate_argos.protect_strict(text)
+    normalized = translate_argos.normalize_tokens(safe)
+    reordered, _ = translate_argos.reorder_tokens(normalized, len(tokens))
+    restored = translate_argos.unprotect(reordered, tokens)
+    assert restored == text
+
+
 def test_interpolation_block_translated(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
