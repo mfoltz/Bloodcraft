@@ -45,7 +45,7 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
 2. **Run the translator**
 
    ```bash
-   python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --verbose --log-file translate.log --report-file skipped.csv --overwrite
+   python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --log-level INFO --log-file translate.log --report-file skipped.csv --overwrite
    ```
 
    Omitting `--overwrite` translates only missing entries and keeps existing
@@ -317,12 +317,12 @@ non-zero when problems remain so CI and contributors can investigate.
   argostranslate.package.install_from_path('translate-en_es-1_0.argosmodel')
   PY
   ```
-- **Slow translations**: The `--verbose` option can produce huge output and slow processing. Consider omitting it or lowering `--batch-size`.
+- **Slow translations**: High `--log-level` values like `INFO` or `DEBUG` can produce huge output and slow processing. Consider using `WARNING` or lowering `--batch-size`.
 - **Missing SDKs**: `dotnet` may be absent on minimal systems; ensure the .NET SDK is installed before running checks.
 - **.NET 6 runtime**: The project targets .NET 6; install `dotnet-runtime-6.0` from Microsoft's package feed even if newer SDKs are present.
-- **Translator stalls**: After reporting skipped rows the translator may appear idle; lower `--batch-size` or drop `--verbose` to speed it up.
+- **Translator stalls**: After reporting skipped rows the translator may appear idle; lower `--batch-size` or reduce `--log-level` to speed it up.
 - **Token mismatches**: Entries listed in `skipped.csv` often need manual review and translation.
 
 ### Follow-up
 - Improve token handling in `translate_argos.py` to reduce `skipped.csv` entries.
-- Provide progress indicators or non-verbose defaults for lengthy translation runs.
+- Provide progress indicators or low-noise defaults for lengthy translation runs.

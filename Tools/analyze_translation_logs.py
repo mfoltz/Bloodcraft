@@ -10,8 +10,10 @@ remain so CI systems can fail fast. Categories include ``english``,
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
+import logging
 import sys
 from collections import Counter
 from pathlib import Path
@@ -19,6 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 METRICS_PATH = ROOT / "translate_metrics.json"
 SKIPPED_PATH = ROOT / "skipped.csv"
+logger = logging.getLogger(__name__)
 
 
 def _categorize(reason: str | None) -> str:
@@ -65,17 +68,31 @@ def _summarize_skipped(path: Path) -> Counter:
     return counts
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Summarize translation log failures")
+    ap.add_argument(
+        "--log-level",
+        default="INFO",
+        help="Logging level (default: INFO)",
+    )
+    args = ap.parse_args()
+
+    logging.basicConfig(
+        level=getattr(logging, args.log_level.upper(), logging.INFO),
+        format="%(asctime)s %(levelname)s %(message)s",
+        stream=sys.stdout,
+    )
+
     metric_counts = _summarize_metrics(METRICS_PATH)
     skipped_counts = _summarize_skipped(SKIPPED_PATH)
 
     if metric_counts:
-        print("Metric failures:")
+        logger.info("Metric failures:")
         for category, count in metric_counts.items():
-            print(f"  {category}: {count}")
+            logger.info("  %s: %s", category, count)
     if skipped_counts:
-        print("Skipped translations:")
+        logger.info("Skipped translations:")
         for category, count in skipped_counts.items():
-            print(f"  {category}: {count}")
+            logger.info("  %s: %s", category, count)
 
     exit_code = 0
     if metric_counts.get("token_mismatch") or skipped_counts.get("token_mismatch"):

@@ -956,9 +956,15 @@ def main():
         help="Only translate entries matching this hash; can be repeated for targeted updates",
     )
     ap.add_argument(
+        "--log-level",
+        default="WARNING",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        help="Set logging level",
+    )
+    ap.add_argument(
         "--verbose",
         action="store_true",
-        help="Log per-message translation details",
+        help=argparse.SUPPRESS,
     )
     ap.add_argument(
         "--log-file",
@@ -982,7 +988,11 @@ def main():
 
     root = os.path.abspath(args.root)
 
-    logger.setLevel(logging.INFO if args.verbose else logging.WARNING)
+    level_name = args.log_level
+    if getattr(args, "verbose", False):
+        level_name = "INFO"
+
+    logger.setLevel(getattr(logging, level_name.upper()))
     formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
@@ -994,6 +1004,9 @@ def main():
         file_handler = logging.FileHandler(args.log_file, encoding="utf-8")
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
+
+    if getattr(args, "verbose", False):
+        logger.warning("--verbose is deprecated; use --log-level INFO")
 
     if args.metrics_file:
         metrics_path = (
