@@ -811,8 +811,8 @@ This process applies only to files under `Resources/Localization/Messages`.
 2. **Propagate new hashes.** Copy the refreshed `English.json` entries into each `Resources/Localization/Messages/<Language>.json` while keeping numeric hashes intact.
    Use `--overwrite` when translating after propagating hashes so English text is replaced by its translation.
 3. **Translate missing entries.**
-   `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --log-level INFO --log-file translate.log --report-file skipped.csv --overwrite`
-   Verify the Argos model is installed before running translations: `argos-translate --from en --to tr - < /dev/null` (replace `tr` with the target code). Any hashes listed in `skipped.csv` must be manually translated and the script re-run to confirm they are handled.
+   `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --verbose --log-file translate.log --report-file skipped.csv --overwrite`
+   Verify the Argos model is installed before running translations: `argos-translate --from en --to tr - < /dev/null` (replace `tr` with the target code). Reassemble models from the module zip parts at the start of each session. Any hashes listed in `skipped.csv` must be manually translated and the script re-run to confirm they are handled.
 4. **Check and fix tokens.**
    ```bash
    python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
@@ -834,7 +834,7 @@ This process applies only to files under `Resources/Localization/Messages`.
 
 `Tools/language_utils.py` flags untranslated strings by searching for common English stop words.
 To ignore project-specific terms like "Bloodcraft", add them to `Tools/english_allowlist.txt`, one per line.
-Each language model resides under `Resources/Localization/Models/<DIR>`. Combine the split archives, inspect `metadata.json` to confirm the language pair, and then install:
+Each language model resides under `Resources/Localization/Models/<DIR>`. Reassemble the split archives from module zip parts each session, inspect `metadata.json` to confirm the language pair, and then install:
 
 ```bash
 cd Resources/Localization/Models/<DIR>
@@ -844,7 +844,7 @@ unzip -p translate-*.argosmodel */metadata.json | jq '.from_code, .to_code'
 argos-translate install translate-*.argosmodel
 ```
 
-`metadata.json` must report `from_code` = `en` and the expected `to_code`. Re-run this verification whenever models are added or updated so scripts reference the correct language pair.
+Rebuild and install models at the start of every session; they are not persisted. `metadata.json` must report `from_code` = `en` and the expected `to_code`. Re-run this verification whenever models are added or updated so scripts reference the correct language pair.
 
 #### Model directories
 
