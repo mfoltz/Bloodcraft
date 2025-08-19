@@ -345,16 +345,24 @@ def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3
 
 
 def _run_translation(args, root: str) -> None:
-    translator = argos_translate.get_translation_from_codes(args.src, args.dst)
-    if translator is None:
-        ensure_model_installed(root, args.dst)
-        argos_translate.load_installed_languages()
+    try:
         translator = argos_translate.get_translation_from_codes(args.src, args.dst)
+        if translator is None:
+            ensure_model_installed(root, args.dst)
+            argos_translate.load_installed_languages()
+            translator = argos_translate.get_translation_from_codes(
+                args.src, args.dst
+            )
+    except Exception as e:
+        raise SystemExit(f"Failed to initialize Argos translation engine: {e}")
+
     if translator is None:
-        raise SystemExit(
+        msg = (
             f"No Argos translation model for {args.src}->{args.dst}. "
             "Assemble or install the model, or run `.codex/install.sh`."
         )
+        logger.error(msg)
+        raise SystemExit(msg)
 
     logger.warning(
         "NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables."
