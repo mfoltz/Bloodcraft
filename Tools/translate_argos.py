@@ -33,6 +33,13 @@ FATAL_ARGOS_ERRORS = [
 class FatalTranslationError(Exception):
     """Raised when Argos Translate encounters an unrecoverable error."""
 
+# Match standard placeholder patterns:
+#   * XML-like tags:        ``<tag>``
+#   * Format items:         ``{0}``
+#   * String interpolation: ``${var}``
+#   * Bracket tags:         ``[tag]`` or ``[tag=value]``
+#   * Existing tokens:      ``[[TOKEN_n]]``
+#   * Strict markers:       ``⟦Tn⟧``
 TOKEN_PATTERN = re.compile(
     r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_\d+\]\]|⟦T\d+⟧"
 )
@@ -61,108 +68,103 @@ def unwrap_placeholders(text: str) -> str:
 
 
 def protect_strict(text: str) -> tuple[str, List[str]]:
-    """Protect tokens using ``⟦Tn⟧`` markers for stricter isolation."""
+    """Replace tokens with durable ``⟦Tn⟧`` placeholders."""
+
     text = text.replace("\\u003C", "<").replace("\\u003E", ">")
     tokens: List[str] = []
-
-    def store(m: re.Match) -> str:
-        tokens.append(m.group(0))
-        return f"⟦T{len(tokens)-1}⟧"
-
-    # First replace nested interpolation blocks `{(...)}'` with temporary
-    # markers so we can process remaining tokens via regex. The blocks may
-    # contain arbitrary nested parentheses.
-    nested: List[str] = []
-    res: List[str] = []
+    result: List[str] = []
     i = 0
+
     while i < len(text):
-        if text[i] == "{":
+        # Handle interpolation blocks like ``{(a(b))}`` which may contain
+        # nested parentheses. These should be treated atomically so the
+        # translator never touches the contents.
+        if text.startswith("{", i):
             j = i + 1
             while j < len(text) and text[j].isspace():
                 j += 1
             if j < len(text) and text[j] == "(":
                 start = i
-                i = j + 1
+                j += 1
                 depth = 1
-                while i < len(text) and depth:
-                    ch = text[i]
+                while j < len(text) and depth:
+                    ch = text[j]
                     if ch == "(":
                         depth += 1
                     elif ch == ")":
                         depth -= 1
-                    i += 1
-                if depth == 0:
-                    while i < len(text) and text[i].isspace():
-                        i += 1
-                    if i < len(text) and text[i] == "}":
-                        i += 1
-                        marker = f"@@NB{len(nested)}@@"
-                        nested.append(text[start:i])
-                        res.append(marker)
-                        continue
-                i = start
-        res.append(text[i])
+                    j += 1
+                while j < len(text) and text[j].isspace():
+                    j += 1
+                if depth == 0 and j < len(text) and text[j] == "}":
+                    block = text[start : j + 1]
+                    tokens.append(block)
+                    result.append(f"⟦T{len(tokens)-1}⟧")
+                    i = j + 1
+                    continue
+
+        m = TOKEN_PATTERN.match(text, i)
+        if m:
+            tokens.append(m.group(0))
+            result.append(f"⟦T{len(tokens)-1}⟧")
+            i = m.end()
+            continue
+
+        result.append(text[i])
         i += 1
-    text = "".join(res)
 
-    # Handle standard tokens including `<...>`, `{...}`, `${...}`,
-    # `[[TOKEN_n]]` markers, and existing ``⟦Tn⟧`` sentinels.
-    text = TOKEN_PATTERN.sub(store, text)
-
-    # Restore nested blocks with proper ordering.
-    for idx, block in enumerate(nested):
-        placeholder = f"⟦T{len(tokens)}⟧"
-        text = text.replace(f"@@NB{idx}@@", placeholder, 1)
-        tokens.append(block)
-
-    return text, tokens
+    return "".join(result), tokens
 
 
 def unprotect(text: str, tokens: List[str]) -> str:
-    def repl(m):
-        idx = int(m.group(1))
-        return tokens[idx] if 0 <= idx < len(tokens) else m.group(0)
-    return TOKEN_RE.sub(repl, text)
+    """Restore original tokens from placeholder markers."""
+
+    pattern = re.compile(r"⟦T(\d+)⟧|\[\[TOKEN_(\d+)\]\]")
+
+    def repl(m: re.Match) -> str:
+        idx = m.group(1) or m.group(2)
+        assert idx is not None
+        num = int(idx)
+        return tokens[num] if 0 <= num < len(tokens) else m.group(0)
+
+    return pattern.sub(repl, text)
 
 
 def normalize_tokens(text: str) -> str:
-    """Normalize token formatting in Argos output.
+    """Normalize token formatting in Argos output."""
 
-    Converts ``⟦Tn⟧`` placeholders back to ``[[TOKEN_n]]`` and cleans up
-    spacing so existing tokens like ``{0}`` or ``${var}`` remain intact after
-    translation.
-    """
+    def to_token(num: str) -> str:
+        return f"[[TOKEN_{num}]]"
 
-    # Pre-validate sloppy ``⟦Tn⟧`` markers. Allow whitespace or punctuation
-    # inside the delimiters and rewrite them to canonical form.
-    def clean_strict(m: re.Match) -> str:
-        inner = re.sub(r"[^0-9Tt]", "", m.group(1))
-        inner = inner.upper()
-        if inner.startswith("T") and inner[1:].isdigit():
-            return f"⟦T{inner[1:]}⟧"
+    # Canonicalise any ``⟦Tn⟧`` placeholder, permitting stray characters.
+    text = re.sub(
+        r"⟦\s*T([^⟧]+)⟧",
+        lambda m: to_token(re.sub(r"\D", "", m.group(1))),
+        text,
+    )
+
+    # Merge cases where Argos inserts spaces within token digits.
+    text = re.sub(
+        r"\[\[\s*TOKEN\s*_\s*((?:\d\s*)+)\]\]",
+        lambda m: to_token(re.sub(r"\s+", "", m.group(1))),
+        text,
+        flags=re.I,
+    )
+
+    # Merge adjacent placeholder fragments created from split digits but avoid
+    # collapsing legitimately sequential tokens (e.g., ``[[TOKEN_0]][[TOKEN_1]]``).
+    def merge_adjacent(m: re.Match) -> str:
+        nums = [int(n) for n in re.findall(r"TOKEN_(\d+)", m.group(0))]
+        if len(nums) == 2 and nums[1] == 0:
+            return to_token(f"{nums[0]}{nums[1]}")
         return m.group(0)
 
-    text = LOOSE_STRICT_TOKEN_RE.sub(clean_strict, text)
+    text = re.sub(r"(?:\[\[TOKEN_\d+\]\]){2,}", merge_adjacent, text)
 
-    # Merge cases where Argos splits multi-digit token numbers.
-    # ``[[TOKEN_1 0]]`` -> ``[[TOKEN_10]]``
-    def merge_inner(m: re.Match) -> str:
-        digits = re.sub(r"\s+", "", m.group(1))
-        return f"[[TOKEN_{digits}]]"
+    # Catch bare ``TOKEN_n`` words and rewrite them to placeholder form.
+    text = re.sub(r"TOKEN\s*_?\s*(\d+)", lambda m: to_token(m.group(1)), text, flags=re.I)
 
-    text = re.sub(r"\[\[TOKEN_((?:\d\s*)+\d)\]\]", merge_inner, text)
-
-    # ``[[TOKEN_1]][[TOKEN_0]]`` -> ``[[TOKEN_10]]``
-    def merge_adjacent(m: re.Match) -> str:
-        digits = re.findall(r"TOKEN_(\d)", m.group(0))
-        return f"[[TOKEN_{''.join(digits)}]]"
-
-    text = re.sub(r"(?:\[\[TOKEN_\d\]\]){2,}", merge_adjacent, text)
-
-    text = STRICT_TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
-    text = TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
-    text = TOKEN_WORD.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
-
+    # After tokens are normalized, strip any stray brackets Argos may emit.
     placeholders: List[str] = []
 
     def store(m: re.Match) -> str:
