@@ -338,7 +338,7 @@ def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3
                     writer.writerows(rows)
                 else:
                     raise RuntimeError("Report file must end with .json or .csv")
-            logger.warning(f"Wrote skip report to {path}")
+            logger.info(f"Wrote skip report to {path}")
             break
         except Exception:
             if attempt == max_retries:
@@ -367,7 +367,7 @@ def _run_translation(args, root: str) -> None:
         logger.error(msg)
         raise SystemExit(msg)
 
-    logger.warning(
+    logger.info(
         "NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables."
     )
     english_path = os.path.join(
@@ -390,7 +390,7 @@ def _run_translation(args, root: str) -> None:
         to_translate = [(k, v) for k, v in english.items() if k not in messages]
 
     if not to_translate:
-        logger.warning("No messages need translation.")
+        logger.info("No messages need translation.")
         return
 
     safe_lines: List[str] = []
@@ -830,7 +830,7 @@ def _run_translation(args, root: str) -> None:
         summary_msg = (
             f"Processed {num_batches} batches in {total_elapsed:.2f} seconds"
         )
-        logger.warning(summary_msg)
+        logger.info(summary_msg)
         category_counts = Counter(entry["category"] for entry in report.values())
         if category_counts:
             breakdown_msg = "Report breakdown: " + ", ".join(
@@ -838,7 +838,7 @@ def _run_translation(args, root: str) -> None:
             )
         else:
             breakdown_msg = "Report breakdown: none"
-        logger.warning(breakdown_msg)
+        logger.info(breakdown_msg)
 
         successes = processed_lines - len(failures)
 
@@ -859,7 +859,7 @@ def _run_translation(args, root: str) -> None:
         if result.returncode != 0:
             raise SystemExit(result.returncode)
 
-        logger.warning(f"Wrote translations to {target_path}")
+        logger.info(f"Wrote translations to {target_path}")
 
         metrics_dir = os.path.dirname(args.metrics_file)
         if metrics_dir:
@@ -884,7 +884,7 @@ def _run_translation(args, root: str) -> None:
             f"Summary: {successes}/{processed_lines} translated, {timeouts_count} timeouts, "
             f"{token_reorders} token reorders. Metrics written to {args.metrics_file}"
         )
-        logger.warning(summary_line)
+        logger.info(summary_line)
     finally:
         exc_type = sys.exc_info()[0]
         if args.report_file:
@@ -1036,7 +1036,7 @@ def main():
             if not hashes or set(hashes) == prev_hashes:
                 break
             prev_hashes = set(hashes)
-            logger.warning(
+            logger.info(
                 f"Retrying {len(hashes)} hash(es) from {args.report_file}"
             )
             args.hashes = hashes
