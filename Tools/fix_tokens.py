@@ -4,9 +4,12 @@
 import argparse
 import json
 import re
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
+
+from translate_argos import normalize_tokens
 
 TOKEN_PLACEHOLDER = re.compile(r"\[\[[^\]]+\]\]")
 # Match HTML tags, .NET style numeric or named tokens (e.g. {PlayerName}) and
@@ -22,13 +25,21 @@ def extract_tokens(text: str) -> List[str]:
 
 
 def replace_placeholders(value: str, tokens: List[str]) -> Tuple[str, bool, bool]:
+    value = normalize_tokens(value)
     placeholders = TOKEN_PLACEHOLDER.findall(value)
-    if not placeholders:
-        return value, False, False
-    mismatch = len(placeholders) != len(tokens)
-    for ph, token in zip(placeholders, tokens):
-        value = value.replace(ph, token, 1)
-    return value, True, mismatch
+    replaced = False
+    mismatch = False
+    if placeholders:
+        mismatch = len(placeholders) != len(tokens)
+        for ph, token in zip(placeholders, tokens):
+            value = value.replace(ph, token, 1)
+        replaced = True
+    tokenized = extract_tokens(value)
+    remaining = TOKEN_PLACEHOLDER.findall(value)
+    tokenized.extend(ph for ph in remaining if ph in tokens)
+    if Counter(tokenized) != Counter(tokens):
+        mismatch = True
+    return value, replaced, mismatch
 
 
 def reorder_tokens_in_text(value: str, tokens: List[str]) -> Tuple[str, bool]:
