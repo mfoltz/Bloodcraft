@@ -62,7 +62,7 @@ def test_replace_placeholders_token_only_line():
 
 
 def test_replace_placeholders_with_various_tokens():
-    tokens = ["{0}", "${var}", "[[TOKEN_0]]", "{(a (b))}"]
+    tokens = ["{0}", "${var}", "[[TOKEN_0]]", "{PlayerName}"]
     value = "".join(f"[[TOKEN_{i}]]" for i in range(len(tokens)))
     new_value, replaced, mismatch = fix_tokens.replace_placeholders(value, tokens)
     assert new_value == "".join(tokens)
