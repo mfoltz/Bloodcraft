@@ -1,0 +1,24 @@
+{
+  "Messages": {
+    "profession-improved": "{0} improved to [<color=white>{1}</color>]",
+    "profession-proficiency-gain": "+<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>)",
+    "profession-bonus-received": "<color=green>{0}</color>x<color=white>{1}</color> received from {2}",
+    "profession-gold-ore-received": "<color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}",
+    "profession-gold-ore-dropped": "<color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.",
+    "profession-radiant-fiber-received": "<color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}",
+    "profession-radiant-fiber-dropped": "<color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.",
+    "profession-bonus-seeds-received": "<color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}!",
+    "profession-bonus-seeds-dropped": "<color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.",
+    "profession-bonus-saplings-received": "<color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}!",
+    "profession-bonus-saplings-dropped": "<color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.",
+    "quest-new-daily": "New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>]",
+    "quest-reward-received": "You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}!",
+    "quest-reward-dropped": "You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}! It dropped on the ground because your inventory was full.",
+    "3637474013": "<color=green>{0}</color>{1} [<color=white>{2}</color>][<color=#90EE90>{3}</color>] added to <color=white>{4}</color>! (<color=yellow>{5}</color>)",
+    "2712718738": "Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)",
+    "3466860311": "Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)",
+    "2147420594": "{FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:",
+    "625301684": "Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!",
+    "2129553669": "You're not currently queued for battle! Use '<color=white>.fam challenge [PlayerName]</color>' to challenge another player."
+  }
+}
