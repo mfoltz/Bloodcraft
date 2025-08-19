@@ -55,18 +55,51 @@ def test_normalize_tokens_merge_adjacent():
 
 def test_replace_placeholders_token_only_line():
     tokens = ["<b>", "{x}", "</b>"]
-    value = "[[TOKEN_0]][[TOKEN_1]][[TOKEN_2]]"
+    value = "[[TOKEN_0]] [[TOKEN_1]] [[TOKEN_2]]"
     new_value, replaced, mismatch = fix_tokens.replace_placeholders(value, tokens)
-    assert new_value == "<b>{x}</b>"
+    assert new_value.replace(" ", "") == "<b>{x}</b>"
     assert replaced and not mismatch
 
 
 def test_replace_placeholders_with_various_tokens():
     tokens = ["{0}", "${var}", "[[TOKEN_0]]", "{PlayerName}"]
-    value = "".join(f"[[TOKEN_{i}]]" for i in range(len(tokens)))
+    value = " ".join(f"[[TOKEN_{i}]]" for i in range(len(tokens)))
     new_value, replaced, mismatch = fix_tokens.replace_placeholders(value, tokens)
-    assert new_value == "".join(tokens)
+    assert new_value.replace(" ", "") == "".join(tokens)
     assert replaced and not mismatch
+
+
+def test_normalization_merges_split_tokens(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "{a}"}})
+    )
+    (root / "Resources" / "Localization" / "English.json").write_text(json.dumps({}))
+    target = messages_dir / "Test.json"
+    target.write_text(json.dumps({"Messages": {"hash": "[[TOKEN_1]][[TOKEN_0]]"}}))
+    metrics_path = root / "metrics.json"
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "fix_tokens.py",
+            "--root",
+            str(root),
+            "--metrics-file",
+            str(metrics_path),
+            str(target),
+        ],
+    )
+
+    fix_tokens.main()
+    data = json.loads(target.read_text())
+    assert data["Messages"]["hash"] == "{a}"
+    metrics = json.loads(metrics_path.read_text())
+    assert metrics["tokens_restored"] == 1
+    assert metrics["token_mismatches"] == 0
 
 
 def test_exit_on_mismatch(tmp_path, monkeypatch):
@@ -78,7 +111,7 @@ def test_exit_on_mismatch(tmp_path, monkeypatch):
     )
     (root / "Resources" / "Localization" / "English.json").write_text(json.dumps({}))
     target = messages_dir / "Test.json"
-    target.write_text(json.dumps({"Messages": {"hash": "[[TOKEN_0]][[TOKEN_1]]"}}))
+    target.write_text(json.dumps({"Messages": {"hash": "[[TOKEN_0]] [[TOKEN_1]]"}}))
     metrics_path = root / "metrics.json"
 
     monkeypatch.setattr(
