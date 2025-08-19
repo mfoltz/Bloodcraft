@@ -449,14 +449,33 @@ def _run_translation(args, root: str) -> None:
             logger.info(f"{msg}\n  Original: {original}\n  Result: {result}")
 
 
-    num_batches = (len(safe_lines) + args.batch_size - 1) // args.batch_size
+    batches: list[list[int]] = []
+    i = 0
+    while i < len(safe_lines):
+        tokens, _ = tokens_list[i]
+        if tokens:
+            batches.append([i])
+            i += 1
+            continue
+        chunk: list[int] = []
+        j = i
+        while (
+            j < len(safe_lines)
+            and len(chunk) < args.batch_size
+            and not tokens_list[j][0]
+        ):
+            chunk.append(j)
+            j += 1
+        batches.append(chunk)
+        i = j
+
+    num_batches = len(batches)
     start = time.perf_counter()
     try:
-        for batch_idx in range(num_batches):
-            i = batch_idx * args.batch_size
-            batch_lines = safe_lines[i : i + args.batch_size]
-            batch_keys = keys[i : i + args.batch_size]
-            batch_tokens = tokens_list[i : i + args.batch_size]
+        for batch_idx, batch in enumerate(batches):
+            batch_lines = [safe_lines[idx] for idx in batch]
+            batch_keys = [keys[idx] for idx in batch]
+            batch_tokens = [tokens_list[idx] for idx in batch]
             batch_start = time.perf_counter()
             logger.info(
                 f"Batch {batch_idx + 1}/{num_batches} start @ {batch_start - start:.2f}s"
