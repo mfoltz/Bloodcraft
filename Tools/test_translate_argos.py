@@ -77,7 +77,7 @@ def test_creates_directories_for_logs_and_reports(tmp_path, monkeypatch):
     assert report_path.is_file()
 
 
-def test_exit_when_translation_engine_missing(tmp_path, monkeypatch):
+def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
     messages_dir.mkdir(parents=True)
@@ -115,9 +115,12 @@ def test_exit_when_translation_engine_missing(tmp_path, monkeypatch):
         ],
     )
 
-    with pytest.raises(SystemExit) as exc:
-        translate_argos.main()
-    assert "No Argos translation model" in str(exc.value)
+    with caplog.at_level("ERROR"):
+        with pytest.raises(SystemExit) as exc:
+            translate_argos.main()
+    msg = "No Argos translation model for en->xx"
+    assert msg in str(exc.value)
+    assert msg in caplog.text
 
 
 def test_translates_only_specified_hashes(tmp_path, monkeypatch):

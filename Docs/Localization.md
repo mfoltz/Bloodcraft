@@ -30,7 +30,9 @@ The script preserves existing translations, adds any new English hashes, and rem
 
 ## Automated Translation for Messages
 
-Only the JSON files in `Resources/Localization/Messages` contain user-facing messages. Use Argos Translate to automate translating these files:
+Only the JSON files in `Resources/Localization/Messages` contain user-facing messages. Use Argos Translate to automate translating these files.
+
+Argos models are stored under `Resources/Localization/Models/<LANG>` as split archives and must be reconstructed and installed at the start of each session:
 
 1. **Verify model installation**
 
@@ -305,7 +307,7 @@ non-zero when problems remain so CI and contributors can investigate.
 
 ## Troubleshooting & Notes
 
-- **Argos model installation**: Some environments lack the `install` subcommand. Combine split archives and install using the Python API:
+- **Argos model installation**: Some environments lack the `install` subcommand. Combine split archives and install using the Python API each session:
   ```bash
   cd Resources/Localization/Models/EN_ES
   cat translate-*.z[0-9][0-9] translate-*.zip > model.zip

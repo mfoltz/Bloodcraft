@@ -361,7 +361,8 @@ def _run_translation(args, root: str) -> None:
     if translator is None:
         msg = (
             f"No Argos translation model for {args.src}->{args.dst}. "
-            "Assemble or install the model, or run `.codex/install.sh`."
+            "Assemble the model from module zip parts and install it for this session, "
+            "or run `.codex/install.sh`."
         )
         logger.error(msg)
         raise SystemExit(msg)
