@@ -9,7 +9,12 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 TOKEN_PLACEHOLDER = re.compile(r"\[\[[^\]]+\]\]")
-TOKEN_PATTERN = re.compile(r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}")
+# Match HTML tags, .NET style numeric or named tokens (e.g. {PlayerName}) and
+# ${var} style variables. Named tokens may optionally include a format segment
+# such as {Value:0.00}.
+TOKEN_PATTERN = re.compile(
+    r"<[^>]+>|\{[A-Za-z0-9_.-]+(?:[:][^{}]+)?\}|\$\{[A-Za-z0-9_.-]+\}"
+)
 
 
 def extract_tokens(text: str) -> List[str]:
