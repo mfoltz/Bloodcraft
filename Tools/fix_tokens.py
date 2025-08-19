@@ -3,13 +3,17 @@
 
 import argparse
 import json
+import logging
 import re
+import sys
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 from translate_argos import normalize_tokens
+
+logger = logging.getLogger(__name__)
 
 TOKEN_PLACEHOLDER = re.compile(r"\[\[[^\]]+\]\]")
 # Match HTML tags, .NET style numeric or named tokens (e.g. {PlayerName}) and
@@ -96,7 +100,7 @@ def process_messages_file(
         if reorder and not bad:
             new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(key, []))
         if bad:
-            print(f"{path}: {key} token count mismatch")
+            logger.error("%s: %s token count mismatch", path, key)
             counters.token_mismatches += 1
             if replaced and not check_only:
                 messages[key] = new_text
@@ -104,14 +108,14 @@ def process_messages_file(
             continue
         if replaced or reordered:
             if replaced and reordered:
-                print(f"{path}: {key} tokens restored and reordered")
+                logger.info("%s: %s tokens restored and reordered", path, key)
                 counters.tokens_restored += 1
                 counters.tokens_reordered += 1
             elif replaced:
-                print(f"{path}: {key} tokens restored")
+                logger.info("%s: %s tokens restored", path, key)
                 counters.tokens_restored += 1
             else:
-                print(f"{path}: {key} tokens reordered")
+                logger.info("%s: %s tokens reordered", path, key)
                 counters.tokens_reordered += 1
             if not check_only:
                 messages[key] = new_text
@@ -143,7 +147,7 @@ def process_root_file(
         if reorder and not bad:
             new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(guid, []))
         if bad:
-            print(f"{path}: {guid} token count mismatch")
+            logger.error("%s: %s token count mismatch", path, guid)
             counters.token_mismatches += 1
             if replaced and not check_only:
                 node[text_key] = new_text
@@ -151,14 +155,14 @@ def process_root_file(
             continue
         if replaced or reordered:
             if replaced and reordered:
-                print(f"{path}: {guid} tokens restored and reordered")
+                logger.info("%s: %s tokens restored and reordered", path, guid)
                 counters.tokens_restored += 1
                 counters.tokens_reordered += 1
             elif replaced:
-                print(f"{path}: {guid} tokens restored")
+                logger.info("%s: %s tokens restored", path, guid)
                 counters.tokens_restored += 1
             else:
-                print(f"{path}: {guid} tokens reordered")
+                logger.info("%s: %s tokens reordered", path, guid)
                 counters.tokens_reordered += 1
             if not check_only:
                 node[text_key] = new_text
@@ -188,8 +192,15 @@ def main() -> None:
     ap.set_defaults(reorder=True)
     ap.add_argument("--metrics-file", help="Write JSON metrics to this path")
     ap.add_argument("--baseline-file", default="Resources/Localization/Messages/English.json", help="Baseline English messages file")
+    ap.add_argument("--log-level", default="INFO", help="Logging level (default: INFO)")
     ap.add_argument("paths", nargs="*", help="Specific localization JSON files to process")
     args = ap.parse_args()
+
+    logging.basicConfig(
+        level=getattr(logging, args.log_level.upper(), logging.INFO),
+        format="%(asctime)s %(levelname)s %(message)s",
+        stream=sys.stdout,
+    )
 
     root = Path(args.root).resolve()
     baseline_path = Path(args.baseline_file)
