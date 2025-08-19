@@ -78,7 +78,22 @@ Only the JSON files in `Resources/Localization/Messages` contain user-facing mes
 
    ### Placeholder-only results
 
-   Sometimes the translator may output only `[[TOKEN_n]]` placeholders without any surrounding text. These messages are left in their original English form and appear in `skipped.csv` with the `placeholder` category so they can be reviewed manually.
+    Sometimes the translator may output only `[[TOKEN_n]]` placeholders without any surrounding text. These messages are left in their original English form and appear in `skipped.csv` with the `placeholder` category so they can be reviewed manually.
+
+    ### Manual review script
+
+    Use `Tools/review_skipped.py skipped_Spanish.csv` to list each skipped hash with its current Spanish text. Replace the English strings in `Resources/Localization/Messages/Spanish.json` with manual translations, then run:
+
+    ```bash
+    python Tools/fix_tokens.py Resources/Localization/Messages/Spanish.json
+    python Tools/translate_argos.py Resources/Localization/Messages/Spanish.json --to es --overwrite
+    ```
+
+    Re-run the translator until `skipped_Spanish.csv` is empty and verify the catalog:
+
+    ```bash
+    dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations
+    ```
 
 4. **Fix tokens**
 
