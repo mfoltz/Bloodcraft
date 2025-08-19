@@ -557,7 +557,7 @@ def test_strict_retry_succeeds(tmp_path, monkeypatch):
             self.calls += 1
             if self.calls == 1:
                 return "[[TOKEN_1]]Bonjour"
-            return "__T0__Bonjour__T1__"
+            return "⟦T0⟧Bonjour⟦T1⟧"
 
     class DummyCompleted:
         def __init__(self, code=0):
@@ -610,7 +610,7 @@ def test_reorder_tokens_from_one_based():
 
 
 def test_normalize_and_reorder_many_tokens():
-    raw = " ".join(f"__T{i}__" for i in range(12))
+    raw = " ".join(f"⟦T{i}⟧" for i in range(12))
     normalized = translate_argos.normalize_tokens(raw)
     assert normalized == " ".join(f"[[TOKEN_{i}]]" for i in range(12))
     text, changed = translate_argos.reorder_tokens(
@@ -633,7 +633,7 @@ def test_protect_round_trip_with_placeholders():
 def test_round_trip_with_reordered_tokens():
     text = "{0} ${var} [[TOKEN_0]] {(x (y))}"
     _, tokens = translate_argos.protect_strict(text)
-    swapped = "__T2__ __T0__ __T1__ __T3__"
+    swapped = "⟦T2⟧ ⟦T0⟧ ⟦T1⟧ ⟦T3⟧"
     normalized = translate_argos.normalize_tokens(swapped)
     reordered, changed = translate_argos.reorder_tokens(normalized, len(tokens))
     assert changed
@@ -695,7 +695,7 @@ def test_interpolation_block_translated(tmp_path, monkeypatch):
     translate_argos.main()
 
     assert translator.called
-    assert translator.seen == "before <t0> after"
+    assert translator.seen == "before ⟦T0⟧ after"
 
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["hash"] == "translated {(cond ? \"yes\" : \"no\")} after"
@@ -755,7 +755,7 @@ def test_multiple_interpolation_blocks_translated(tmp_path, monkeypatch):
     translate_argos.main()
 
     assert translator.called
-    assert translator.seen == "before <t0> middle <t1> after"
+    assert translator.seen == "before ⟦T0⟧ middle ⟦T1⟧ after"
 
     data = json.loads((root / target_rel).read_text())
     assert (
@@ -831,10 +831,10 @@ def test_roundtrip_with_reordered_tokens(tmp_path, monkeypatch):
     class ReversingTranslator:
         def translate(self, text):
             import re
-            tokens = re.findall("__T\\d+__", text)
+            tokens = re.findall(r"⟦T\d+⟧", text)
             tokens.reverse()
             it = iter(tokens)
-            return re.sub("__T\\d+__", lambda _m: next(it), text)
+            return re.sub(r"⟦T\d+⟧", lambda _m: next(it), text)
 
     class DummyCompleted:
         def __init__(self, code=0):
@@ -1506,6 +1506,6 @@ def test_wraps_and_unwraps_placeholders(tmp_path, monkeypatch):
 
     translate_argos.main()
 
-    assert translator.seen and "<t0>" in translator.seen[0]
+    assert translator.seen and "⟦T0⟧" in translator.seen[0]
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["h1"] == "Bonjour {0}"

@@ -34,11 +34,11 @@ class FatalTranslationError(Exception):
     """Raised when Argos Translate encounters an unrecoverable error."""
 
 TOKEN_PATTERN = re.compile(
-    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_\d+\]\]"
+    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_\d+\]\]|⟦T\d+⟧"
 )
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
-STRICT_TOKEN_RE = re.compile(r'__T(\d+)__')
-STRICT_TOKEN_CLEAN = re.compile(r'__\s*T\s*(\d+)\s*__', re.I)
+STRICT_TOKEN_RE = re.compile(r'⟦T(\d+)⟧')
+STRICT_TOKEN_CLEAN = re.compile(r'⟦\s*T\s*(\d+)\s*⟧', re.I)
 TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
 # Matches stray TOKEN_n occurrences regardless of surrounding context
 # Matches cases like ``TOKEN_1`` and ``TOKEN _ 1``
@@ -49,28 +49,24 @@ SENTINEL_ONLY_RE = re.compile(
 )
 
 
-ARGOS_WRAP_RE = re.compile(r"__T(\d+)__")
-ARGOS_UNWRAP_RE = re.compile(r"<t(\d+)>")
-
-
 def wrap_placeholders(text: str) -> str:
-    """Convert ``__Tn__`` markers to ``<tN>`` for Argos."""
-    return ARGOS_WRAP_RE.sub(lambda m: f"<t{m.group(1)}>", text)
+    """No-op placeholder wrapper using ``⟦Tn⟧`` markers."""
+    return text
 
 
 def unwrap_placeholders(text: str) -> str:
-    """Restore ``<tN>`` markers back to ``__Tn__`` after translation."""
-    return ARGOS_UNWRAP_RE.sub(lambda m: f"__T{m.group(1)}__", text)
+    """No-op placeholder unwrapper for ``⟦Tn⟧`` markers."""
+    return text
 
 
 def protect_strict(text: str) -> tuple[str, List[str]]:
-    """Protect tokens using ``__Tn__`` markers for stricter isolation."""
+    """Protect tokens using ``⟦Tn⟧`` markers for stricter isolation."""
     text = text.replace("\\u003C", "<").replace("\\u003E", ">")
     tokens: List[str] = []
 
     def store(m: re.Match) -> str:
         tokens.append(m.group(0))
-        return f"__T{len(tokens)-1}__"
+        return f"⟦T{len(tokens)-1}⟧"
 
     # First replace nested interpolation blocks `{(...)}'` with temporary
     # markers so we can process remaining tokens via regex. The blocks may
@@ -108,13 +104,13 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
         i += 1
     text = "".join(res)
 
-    # Handle standard tokens including `<...>`, `{...}`, `${...}`, and
-    # `[[TOKEN_n]]` markers.
+    # Handle standard tokens including `<...>`, `{...}`, `${...}`,
+    # `[[TOKEN_n]]` markers, and existing ``⟦Tn⟧`` sentinels.
     text = TOKEN_PATTERN.sub(store, text)
 
     # Restore nested blocks with proper ordering.
     for idx, block in enumerate(nested):
-        placeholder = f"__T{len(tokens)}__"
+        placeholder = f"⟦T{len(tokens)}⟧"
         text = text.replace(f"@@NB{idx}@@", placeholder, 1)
         tokens.append(block)
 
@@ -131,7 +127,7 @@ def unprotect(text: str, tokens: List[str]) -> str:
 def normalize_tokens(text: str) -> str:
     """Normalize token formatting in Argos output.
 
-    Converts ``__Tn__`` placeholders back to ``[[TOKEN_n]]`` and cleans up
+    Converts ``⟦Tn⟧`` placeholders back to ``[[TOKEN_n]]`` and cleans up
     spacing so existing tokens like ``{0}`` or ``${var}`` remain intact after
     translation.
     """
@@ -179,6 +175,10 @@ def reorder_tokens(text: str, token_count: int) -> tuple[str, bool]:
     """
     if token_count <= 1:
         return text, False
+
+    # Normalize any ``⟦Tn⟧`` markers before processing.
+    text = STRICT_TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
+
     found = TOKEN_RE.findall(text)
     if len(found) != token_count:
         return text, False
