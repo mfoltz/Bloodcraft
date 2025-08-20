@@ -1042,7 +1042,8 @@ def main():
     root = os.path.abspath(args.root)
 
     timestamp = time.strftime("%Y%m%d-%H%M%S")
-    if args.run_dir:
+    provided_run_dir = bool(args.run_dir)
+    if provided_run_dir:
         run_dir = (
             args.run_dir
             if os.path.isabs(args.run_dir)
@@ -1053,35 +1054,17 @@ def main():
     os.makedirs(run_dir, exist_ok=True)
     args.run_dir = run_dir
 
-    if args.log_file:
-        log_path = (
-            args.log_file
-            if os.path.isabs(args.log_file)
-            else os.path.join(run_dir, args.log_file)
-        )
-    else:
-        log_path = os.path.join(run_dir, "translate.log")
-    args.log_file = log_path
+    def resolve_path(path: str | None, default_name: str) -> str:
+        if provided_run_dir:
+            name = os.path.basename(path) if path else default_name
+            return os.path.join(run_dir, name)
+        if path:
+            return path if os.path.isabs(path) else os.path.join(root, path)
+        return os.path.join(run_dir, default_name)
 
-    if args.report_file:
-        report_path = (
-            args.report_file
-            if os.path.isabs(args.report_file)
-            else os.path.join(run_dir, args.report_file)
-        )
-    else:
-        report_path = os.path.join(run_dir, "skipped.csv")
-    args.report_file = report_path
-
-    if args.metrics_file:
-        metrics_path = (
-            args.metrics_file
-            if os.path.isabs(args.metrics_file)
-            else os.path.join(run_dir, args.metrics_file)
-        )
-    else:
-        metrics_path = os.path.join(run_dir, "translate_metrics.json")
-    args.metrics_file = metrics_path
+    args.log_file = resolve_path(args.log_file, "translate.log")
+    args.report_file = resolve_path(args.report_file, "skipped.csv")
+    args.metrics_file = resolve_path(args.metrics_file, "translate_metrics.json")
 
     args.run_id = str(uuid.uuid4())
     try:

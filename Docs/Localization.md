@@ -50,9 +50,11 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
 
    Omitting `--overwrite` translates only missing entries and keeps existing
    translations intact. Use `--overwrite` sparingly, as it retranslates every
-   line and can reprocess thousands of entries unnecessarily. Outputs are saved
-   under `translations/<iso-code>/<timestamp>/` by default; override with
-   `--run-dir` if a custom location is desired.
+  line and can reprocess thousands of entries unnecessarily. Outputs are saved
+  under `translations/<iso-code>/<timestamp>/` by default; override with
+  `--run-dir` if a custom location is desired. The translator writes
+  `translate.log`, `skipped.csv`, and `translate_metrics.json` to this run
+  directory.
 
    To refresh specific messages without touching the rest, pass one or more
    `--hash <hash>` options to translate only those hashes.
