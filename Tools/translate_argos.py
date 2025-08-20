@@ -40,8 +40,9 @@ class FatalTranslationError(Exception):
 #   * Bracket tags:         ``[tag]`` or ``[tag=value]``
 #   * Existing tokens:      ``[[TOKEN_n]]``
 #   * Strict markers:       ``⟦Tn⟧``
+#   * Percent sign:         ``%``
 TOKEN_PATTERN = re.compile(
-    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_\d+\]\]|⟦T\d+⟧"
+    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_\d+\]\]|⟦T\d+⟧|%"
 )
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
 TOKEN_OR_SENTINEL_RE = re.compile(r'\[\[TOKEN_(?:\d+|SENTINEL)\]\]', re.I)
@@ -69,7 +70,7 @@ def unwrap_placeholders(text: str) -> str:
 
 
 def protect_strict(text: str) -> tuple[str, List[str]]:
-    """Replace tokens with durable ``⟦Tn⟧`` placeholders."""
+    """Replace tokens with deterministic ``[[TOKEN_n]]`` sentinels."""
 
     text = text.replace("\\u003C", "<").replace("\\u003E", ">")
     tokens: List[str] = []
@@ -100,14 +101,14 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
                 if depth == 0 and j < len(text) and text[j] == "}":
                     block = text[start : j + 1]
                     tokens.append(block)
-                    result.append(f"⟦T{len(tokens)-1}⟧")
+                    result.append(f"[[TOKEN_{len(tokens)-1}]]")
                     i = j + 1
                     continue
 
         m = TOKEN_PATTERN.match(text, i)
         if m:
             tokens.append(m.group(0))
-            result.append(f"⟦T{len(tokens)-1}⟧")
+            result.append(f"[[TOKEN_{len(tokens)-1}]]")
             i = m.end()
             continue
 
@@ -118,21 +119,24 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
 
 
 def unprotect(text: str, tokens: List[str]) -> str:
-    """Restore original tokens from placeholder markers."""
+    """Restore original tokens from ``[[TOKEN_n]]`` markers.
 
-    pattern = re.compile(
-        r"⟦T(\d+)⟧|\[\[TOKEN_(\d+)\]\]|\[\[TOKEN_SENTINEL\]\]",
-        re.I,
-    )
+    Validates that the placeholders appear in the expected order and count
+    before performing the substitution.
+    """
+
+    found = TOKEN_RE.findall(text)
+    expected = [str(i) for i in range(len(tokens))]
+    if found != expected:
+        raise ValueError(
+            f"Token sequence mismatch: expected {expected}, got {found}"
+        )
 
     def repl(m: re.Match) -> str:
-        idx = m.group(1) or m.group(2)
-        if idx is None:
-            return ""
-        num = int(idx)
-        return tokens[num] if 0 <= num < len(tokens) else m.group(0)
+        idx = int(m.group(1))
+        return tokens[idx] if 0 <= idx < len(tokens) else m.group(0)
 
-    return pattern.sub(repl, text)
+    return TOKEN_RE.sub(repl, text)
 
 
 def normalize_tokens(text: str) -> str:
@@ -427,7 +431,7 @@ def _run_translation(args, root: str) -> None:
 
     for key, text in to_translate:
         safe, tokens = protect_strict(text)
-        token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
+        token_only = TOKEN_RE.sub("", safe).strip() == ""
         if token_only:
             safe += f" {TOKEN_SENTINEL}"
         safe_lines.append(safe)
@@ -767,7 +771,7 @@ def _run_translation(args, root: str) -> None:
         def strict_retry(key: str) -> tuple[bool, str, int, bool, str | None]:
             nonlocal token_reorders
             safe, tokens = protect_strict(english[key])
-            token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
+            token_only = TOKEN_RE.sub("", safe).strip() == ""
             if token_only:
                 safe += f" {TOKEN_SENTINEL}"
             try:
