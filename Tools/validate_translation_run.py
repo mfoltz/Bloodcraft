@@ -2,9 +2,11 @@
 """Validate a translation run directory.
 
 Counts `TRANSLATED`/`SKIPPED` entries in `translate.log` and
-summarises categories from `skipped.csv`. Exits with a non-zero status
-if any `token_mismatch` or `sentinel` issues remain so CI can fail
-fast.
+summarises categories from `skipped.csv`. The script is used by the
+`Spanish_sample.json` dataset via ``make sample-translate`` to verify
+that translation tooling handles placeholders and color tags. Exits
+with a non-zero status if any `token_mismatch` or `sentinel` issues
+remain so CI can fail fast.
 """
 
 from __future__ import annotations
