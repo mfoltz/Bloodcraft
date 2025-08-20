@@ -1,7 +1,7 @@
 {
   "Messages": {
-    "welcome": "Welcome to Bloodcraft",
-    "binding-failed": "Binding failed...",
+    "welcome": "Bienvenido a Bloodcraft",
+    "binding-failed": "La unión falló...",
     "profession-improved": "{0} improved to [<color=white>{1}</color>]",
     "profession-proficiency-gain": "+<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>)",
     "profession-bonus-received": "<color=green>{0}</color>x<color=white>{1}</color> received from {2}",
