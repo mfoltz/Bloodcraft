@@ -61,6 +61,15 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
 
    Any hashes listed in `skipped.csv` within the run directory must be
    translated manually. Re-run the translator until the file is empty.
+   Summarise each run and fail fast on unresolved issues:
+
+   ```bash
+   python Tools/validate_translation_run.py --run-dir translations/<iso-code>/<timestamp>
+   ```
+
+   The script reports how many entries were translated or skipped and
+   exits non-zero when any `token_mismatch` or `sentinel` problems remain.
+
 
    To extract hashes that were skipped due to token mismatches, scan the
    translation log:
