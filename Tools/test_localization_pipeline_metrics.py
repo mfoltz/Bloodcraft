@@ -94,3 +94,36 @@ def test_exit_code_on_skipped(tmp_path, monkeypatch):
     assert lang["token_fix"]["tokens_restored"] == 0
     assert lang["token_fix"]["token_mismatches"] == 0
     assert lang["success"] is False
+
+
+def test_custom_output_paths(tmp_path, monkeypatch):
+    root, messages_dir, english_path = _setup_repo(tmp_path)
+    monkeypatch.setattr(localization_pipeline, "ROOT", root)
+    monkeypatch.setattr(localization_pipeline, "MESSAGES_DIR", messages_dir)
+    monkeypatch.setattr(localization_pipeline, "ENGLISH_PATH", english_path)
+    monkeypatch.setattr(localization_pipeline, "LANGUAGE_CODES", {"French": "fr"})
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "localization_pipeline.py",
+            "--metrics-file",
+            "metrics.json",
+            "--skipped-file",
+            "skipped_all.csv",
+        ],
+    )
+
+    def fake_run(cmd, *, check=True, logger):
+        if any("translate_argos.py" in c for c in cmd):
+            run_dir = Path(cmd[cmd.index("--run-dir") + 1])
+            run_dir.mkdir(parents=True, exist_ok=True)
+            (run_dir / "skipped.csv").write_text("hash,english,reason,category\n")
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(localization_pipeline, "run", fake_run)
+
+    localization_pipeline.main()
+
+    assert (root / "metrics.json").is_file()
+    assert (root / "skipped_all.csv").is_file()

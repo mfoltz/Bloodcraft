@@ -234,13 +234,21 @@ full pipeline:
 python Tools/localization_pipeline.py --debug
 ```
 
+Override the output paths for aggregate metrics and skipped hashes with
+`--metrics-file` and `--skipped-file` (defaults are `localization_metrics.json`
+and `skipped.csv` in the repository root):
+
+```bash
+python Tools/localization_pipeline.py --debug --metrics-file metrics.json --skipped-file skipped.csv
+```
+
 Add `--archive-logs` to preserve per-language `translate_<Language>.log`
 and `skipped_<Language>.csv` files under `TranslationLogs/<timestamp>`
 for later investigation.
 
-This writes `localization_metrics.json` in the repository root. Each step
-records start/end timestamps and per-language results. A successful run
-looks like:
+This writes `localization_metrics.json` (or the path provided via
+`--metrics-file`). Each step records start/end timestamps and per-language
+results. A successful run looks like:
 
 ```json
 {
