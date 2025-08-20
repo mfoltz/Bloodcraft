@@ -11,7 +11,7 @@ def test_protect_unprotect_simple_tokens():
     text = "Attack {0}!"
     safe, tokens = translate_argos.protect_strict(text)
     assert tokens == ["{0}"]
-    assert "⟦T0⟧" in safe
+    assert "[[TOKEN_0]]" in safe
     assert translate_argos.unprotect(safe, tokens) == text
 
 
