@@ -283,7 +283,7 @@ is specified (default `translate_metrics.json` under `--root`):
 python Tools/translate_argos.py Resources/Localization/Messages/Turkish.json --to tr --metrics-file translate_metrics.json
 ```
 
-An entry records the run ID, source commit, Argos Translate version, model version, and summarises successes, timeouts, token reorders and per‑hash token statistics:
+An entry records the run ID, source commit, Argos Translate version, model version, CLI arguments, and summarises successes, timeouts, token reorders and per‑hash token statistics:
 
 ```json
 [
@@ -292,6 +292,15 @@ An entry records the run ID, source commit, Argos Translate version, model versi
     "commit": "abcdef1",
     "argos_version": "1.8.0",
     "model_version": "1",
+    "cli_args": {
+      "target_file": "Resources/Localization/Messages/Turkish.json",
+      "src": "en",
+      "dst": "tr",
+      "batch_size": 100,
+      "max_retries": 3,
+      "timeout": 60,
+      "overwrite": false
+    },
     "file": "Resources/Localization/Messages/Turkish.json",
     "timestamp": "2024-02-20T12:00:02Z",
     "processed": 500,

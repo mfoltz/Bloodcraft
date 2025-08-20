@@ -4,7 +4,7 @@
 This script reads ``translate_metrics.json`` files under ``translations`` and
 ``skipped.csv`` from the repository root and prints counts of failures grouped
 by category. Metrics entries now include additional metadata such as
-``run_id``, ``commit``, and ``model_version`` which are emitted at debug level.
+``run_id``, ``commit``, ``model_version``, and ``cli_args`` which are emitted at debug level.
 The script exits with a non-zero status if any token mismatches or
 placeholder-only failures remain so CI systems can fail fast. Categories
 include ``english``, ``identical``, ``sentinel``, ``token_mismatch``, and
@@ -54,10 +54,11 @@ def _summarize_metrics(path: Path) -> Counter:
         failures = entry.get("failures", {})
         if failures:
             logger.debug(
-                "Run %s commit %s model %s had %d failures",
+                "Run %s commit %s model %s args %s had %d failures",
                 entry.get("run_id"),
                 entry.get("commit"),
                 entry.get("model_version", entry.get("argos_version")),
+                entry.get("cli_args"),
                 len(failures),
             )
         for reason in failures.values():
