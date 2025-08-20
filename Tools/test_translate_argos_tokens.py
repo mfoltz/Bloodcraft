@@ -77,3 +77,11 @@ def test_token_only_line_uses_sentinel(tmp_path, monkeypatch):
     assert translator.last.endswith(" " + translate_argos.TOKEN_SENTINEL)
     data = json.loads(target_path.read_text())
     assert data["Messages"]["hash"] == "<b>{0}</b>"
+
+
+def test_sentinel_round_trip():
+    tokens = ["<b>", "{0}", "</b>"]
+    result = "[[TOKEN_0]][[TOKEN_1]][[TOKEN_2]] [[ TOKEN_SENTINEL ]]"
+    normalized = translate_argos.normalize_tokens(result)
+    restored = translate_argos.unprotect(normalized, tokens)
+    assert restored == "<b>{0}</b>"

@@ -45,6 +45,7 @@ TOKEN_PATTERN = re.compile(
     r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_\d+\]\]|⟦T\d+⟧|%"
 )
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
+TOKEN_OR_SENTINEL_RE = re.compile(r'\[\[TOKEN_(?:\d+|SENTINEL)\]\]', re.I)
 STRICT_TOKEN_RE = re.compile(r'⟦T(\d+)⟧')
 STRICT_TOKEN_CLEAN = re.compile(r'⟦\s*T\s*(\d+)\s*⟧', re.I)
 LOOSE_STRICT_TOKEN_RE = re.compile(r'⟦([^⟧]+)⟧')
@@ -151,6 +152,15 @@ def normalize_tokens(text: str) -> str:
         text,
     )
 
+    # Normalise potential variations of the sentinel token.
+    text = re.sub(
+        r"\[\[\s*TOKEN\s*_?\s*SENTINEL\s*\]\]|TOKEN\s*_?\s*SENTINEL",
+        TOKEN_SENTINEL,
+        text,
+        flags=re.I,
+    )
+    text = text.replace(f" {TOKEN_SENTINEL}", "").replace(TOKEN_SENTINEL, "")
+
     # Merge cases where Argos inserts spaces within token digits.
     text = re.sub(
         r"\[\[\s*TOKEN\s*_\s*((?:\d\s*)+)\]\]",
@@ -182,7 +192,7 @@ def normalize_tokens(text: str) -> str:
     def restore(m: re.Match) -> str:
         return placeholders[int(m.group(1))]
 
-    tmp = TOKEN_RE.sub(store, text)
+    tmp = TOKEN_OR_SENTINEL_RE.sub(store, text)
     tmp = tmp.replace("[", "").replace("]", "")
     return re.sub(r"@@(\d+)@@", restore, tmp)
 
