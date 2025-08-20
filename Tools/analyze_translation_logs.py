@@ -2,10 +2,13 @@
 """Summarize translation log failures.
 
 This script reads ``translate_metrics.json`` files under ``translations`` and
-``skipped.csv`` from the repository root and prints counts of failures grouped by category. It exits
-with a non-zero status if any token mismatches or placeholder-only failures
-remain so CI systems can fail fast. Categories include ``english``,
-``identical``, ``sentinel``, ``token_mismatch``, and ``placeholder``.
+``skipped.csv`` from the repository root and prints counts of failures grouped
+by category. Metrics entries now include additional metadata such as
+``run_id``, ``commit``, and ``model_version`` which are emitted at debug level.
+The script exits with a non-zero status if any token mismatches or
+placeholder-only failures remain so CI systems can fail fast. Categories
+include ``english``, ``identical``, ``sentinel``, ``token_mismatch``, and
+``placeholder``.
 """
 
 from __future__ import annotations
@@ -48,7 +51,16 @@ def _summarize_metrics(path: Path) -> Counter:
     except json.JSONDecodeError:
         return counts
     for entry in entries:
-        for reason in entry.get("failures", {}).values():
+        failures = entry.get("failures", {})
+        if failures:
+            logger.debug(
+                "Run %s commit %s model %s had %d failures",
+                entry.get("run_id"),
+                entry.get("commit"),
+                entry.get("model_version", entry.get("argos_version")),
+                len(failures),
+            )
+        for reason in failures.values():
             counts[_categorize(reason)] += 1
     return counts
 
