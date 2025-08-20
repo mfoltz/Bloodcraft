@@ -11,7 +11,7 @@ from typing import Iterable, Set
 
 ROOT = Path(__file__).resolve().parent.parent
 
-PATTERN = re.compile(r"^(\d+): SKIPPED \(token mismatch")
+PATTERN = re.compile(r"^([^:]+): SKIPPED \(token mismatch")
 
 
 def parse_hashes(path: Path) -> Set[str]:
@@ -22,7 +22,10 @@ def parse_hashes(path: Path) -> Set[str]:
         for line in fp:
             match = PATTERN.search(line)
             if match:
-                hashes.add(match.group(1))
+                hash_id = match.group(1).strip()
+                if hash_id.isdigit():
+                    hash_id = str(int(hash_id))
+                hashes.add(hash_id)
     return hashes
 
 
