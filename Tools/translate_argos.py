@@ -13,7 +13,6 @@ import re
 import subprocess
 import sys
 import time
-import traceback
 import logging
 import uuid
 import importlib.metadata
@@ -1133,6 +1132,16 @@ def main():
 
     if getattr(args, "verbose", False):
         logger.info("--verbose is deprecated; use --log-level INFO")
+
+    summary = {
+        "input_file": args.target_file,
+        "target_language": args.dst,
+        "batch_size": args.batch_size,
+        "max_retries": args.max_retries,
+        "timeout": args.timeout,
+        "run_dir": args.run_dir,
+    }
+    logger.info("Run configuration: %s", summary)
 
     if args.report_file:
         try:
