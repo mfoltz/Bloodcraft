@@ -340,6 +340,16 @@ The script reads `translate_metrics.json` along with any `skipped_*.csv`
 reports and lists token mismatches or placeholder-only entries. It exits
 non-zero when problems remain so CI and contributors can investigate.
 
+For a focused view of hashes with mismatched or reordered tokens recorded in
+`translate_metrics.json`, run:
+
+```bash
+python Tools/summarize_token_stats.py --top 20
+```
+
+This prints a table of problematic hashes; add `--csv output.csv` to write the
+results to disk.
+
 ## Troubleshooting & Notes
 
 - **Argos model installation**: Some environments lack the `install` subcommand. Combine split archives and install using the Python API each session:
