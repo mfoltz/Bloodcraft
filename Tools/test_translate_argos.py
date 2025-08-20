@@ -73,6 +73,71 @@ def test_run_dir_creates_outputs(tmp_path, monkeypatch):
 
     assert (run_dir / "translate.log").is_file()
     assert (run_dir / "skipped.csv").is_file()
+    assert (run_dir / "translate_metrics.json").is_file()
+
+
+def test_run_dir_redirects_paths(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    run_dir = root / "logs"
+    external = root / "external"
+    external.mkdir()
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "Bonjour"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--run-dir",
+            str(run_dir),
+            "--log-file",
+            str(external / "custom.log"),
+            "--report-file",
+            str(external / "custom.csv"),
+            "--metrics-file",
+            str(external / "custom_metrics.json"),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    # All outputs should reside in run_dir regardless of the explicit paths
+    assert (run_dir / "custom.log").is_file()
+    assert not (external / "custom.log").exists()
+    assert (run_dir / "custom.csv").is_file()
+    assert not (external / "custom.csv").exists()
+    assert (run_dir / "custom_metrics.json").is_file()
+    assert not (external / "custom_metrics.json").exists()
 
 
 def test_summary_and_success_logged_at_info(tmp_path, monkeypatch, caplog):
