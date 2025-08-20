@@ -44,6 +44,7 @@ TOKEN_PATTERN = re.compile(
     r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_\d+\]\]|⟦T\d+⟧"
 )
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
+TOKEN_OR_SENTINEL_RE = re.compile(r'\[\[TOKEN_(?:\d+|SENTINEL)\]\]', re.I)
 STRICT_TOKEN_RE = re.compile(r'⟦T(\d+)⟧')
 STRICT_TOKEN_CLEAN = re.compile(r'⟦\s*T\s*(\d+)\s*⟧', re.I)
 LOOSE_STRICT_TOKEN_RE = re.compile(r'⟦([^⟧]+)⟧')
@@ -119,11 +120,15 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
 def unprotect(text: str, tokens: List[str]) -> str:
     """Restore original tokens from placeholder markers."""
 
-    pattern = re.compile(r"⟦T(\d+)⟧|\[\[TOKEN_(\d+)\]\]")
+    pattern = re.compile(
+        r"⟦T(\d+)⟧|\[\[TOKEN_(\d+)\]\]|\[\[TOKEN_SENTINEL\]\]",
+        re.I,
+    )
 
     def repl(m: re.Match) -> str:
         idx = m.group(1) or m.group(2)
-        assert idx is not None
+        if idx is None:
+            return ""
         num = int(idx)
         return tokens[num] if 0 <= num < len(tokens) else m.group(0)
 
@@ -142,6 +147,15 @@ def normalize_tokens(text: str) -> str:
         lambda m: to_token(re.sub(r"\D", "", m.group(1))),
         text,
     )
+
+    # Normalise potential variations of the sentinel token.
+    text = re.sub(
+        r"\[\[\s*TOKEN\s*_?\s*SENTINEL\s*\]\]|TOKEN\s*_?\s*SENTINEL",
+        TOKEN_SENTINEL,
+        text,
+        flags=re.I,
+    )
+    text = text.replace(f" {TOKEN_SENTINEL}", "").replace(TOKEN_SENTINEL, "")
 
     # Merge cases where Argos inserts spaces within token digits.
     text = re.sub(
@@ -174,7 +188,7 @@ def normalize_tokens(text: str) -> str:
     def restore(m: re.Match) -> str:
         return placeholders[int(m.group(1))]
 
-    tmp = TOKEN_RE.sub(store, text)
+    tmp = TOKEN_OR_SENTINEL_RE.sub(store, text)
     tmp = tmp.replace("[", "").replace("]", "")
     return re.sub(r"@@(\d+)@@", restore, tmp)
 
