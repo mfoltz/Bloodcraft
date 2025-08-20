@@ -911,6 +911,7 @@ def _run_translation(args, root: str) -> None:
             "commit": args.git_commit,
             "argos_version": args.argos_version,
             "model_version": args.model_version,
+            "cli_args": args.cli_args,
             "file": args.target_file,
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "processed": processed_lines,
@@ -1065,6 +1066,7 @@ def main():
     args.log_file = resolve_path(args.log_file, "translate.log")
     args.report_file = resolve_path(args.report_file, "skipped.csv")
     args.metrics_file = resolve_path(args.metrics_file, "translate_metrics.json")
+    cli_args = dict(vars(args))
 
     args.run_id = str(uuid.uuid4())
     try:
@@ -1098,6 +1100,19 @@ def main():
                 break
     except Exception:
         args.model_version = "unknown"
+
+    if args.model_version == "unknown":
+        try:
+            output = subprocess.check_output(["argospm", "list"], stderr=subprocess.DEVNULL)
+            for line in output.decode().splitlines():
+                parts = line.split()
+                if len(parts) >= 4 and parts[1] == args.src and parts[2] == args.dst:
+                    args.model_version = parts[-1]
+                    break
+        except Exception:
+            pass
+
+    args.cli_args = cli_args
 
     level_name = args.log_level
     if getattr(args, "verbose", False):
@@ -1142,6 +1157,7 @@ def main():
                         "commit": args.git_commit,
                         "argos_version": args.argos_version,
                         "model_version": args.model_version,
+                        "cli_args": args.cli_args,
                         "file": args.target_file,
                         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                         "processed": 0,
