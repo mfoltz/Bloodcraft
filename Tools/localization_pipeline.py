@@ -89,6 +89,16 @@ def main() -> None:
         help="Archive translation logs after the run",
     )
     ap.add_argument(
+        "--metrics-file",
+        default="localization_metrics.json",
+        help="Write JSON metrics to this path",
+    )
+    ap.add_argument(
+        "--skipped-file",
+        default="skipped.csv",
+        help="Write combined skipped hashes to this CSV file",
+    )
+    ap.add_argument(
         "languages",
         nargs="*",
         help="Languages to process (e.g. French German). Default: all",
@@ -98,6 +108,15 @@ def main() -> None:
     logger = setup_logging(args.debug)
 
     metrics: Dict[str, Dict] = {"steps": {}, "languages": {}}
+
+    metrics_path = Path(args.metrics_file)
+    if not metrics_path.is_absolute():
+        metrics_path = ROOT / metrics_path
+    metrics_path.parent.mkdir(parents=True, exist_ok=True)
+    combined_report = Path(args.skipped_file)
+    if not combined_report.is_absolute():
+        combined_report = ROOT / combined_report
+    combined_report.parent.mkdir(parents=True, exist_ok=True)
 
     available = {p.stem: p for p in MESSAGES_DIR.glob("*.json") if p.name != "English.json"}
     if args.languages:
@@ -189,7 +208,6 @@ def main() -> None:
         lang_metrics["validation"] = {"returncode": validate_proc.returncode}
     metrics["steps"]["translation"]["end"] = timestamp()
 
-    combined_report = ROOT / "skipped.csv"
     with combined_report.open("w", newline="", encoding="utf-8") as out_fp:
         writer = csv.writer(out_fp)
         writer.writerow(["hash", "english", "reason", "category"])
@@ -292,7 +310,6 @@ def main() -> None:
     )
     overall_ok &= verify_proc.returncode == 0
 
-    metrics_path = ROOT / "localization_metrics.json"
     with metrics_path.open("w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2, ensure_ascii=False)
     logger.info("Wrote metrics to %s", metrics_path)
