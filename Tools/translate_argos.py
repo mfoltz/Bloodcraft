@@ -346,9 +346,7 @@ def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3
                 deduped[key] = row
         rows = list(deduped.values())
     after_count = len(rows)
-    logger.info(
-        "Report rows before deduplication: %d, after: %d", before_count, after_count
-    )
+    logger.info("Received %d rows; deduplicated to %d rows", before_count, after_count)
 
     ext = os.path.splitext(path)[1].lower()
     for attempt in range(1, max_retries + 1):
@@ -364,7 +362,7 @@ def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3
                     writer.writerows(rows)
                 else:
                     raise RuntimeError("Report file must end with .json or .csv")
-            logger.info("Wrote report to %s", path)
+            logger.info("Successfully wrote %d rows to %s", after_count, path)
             break
         except Exception as exc:
             logger.warning(

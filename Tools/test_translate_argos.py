@@ -1659,10 +1659,12 @@ def test_write_report_logs_counts_and_success(tmp_path, caplog):
     out_rows = list(csv.DictReader(path.open()))
     assert len(out_rows) == 2
     assert (
-        f"Report rows before deduplication: {len(rows)}, after: {len(out_rows)}"
+        f"Received {len(rows)} rows; deduplicated to {len(out_rows)} rows"
         in caplog.text
     )
-    assert f"Wrote report to {path}" in caplog.text
+    assert (
+        f"Successfully wrote {len(out_rows)} rows to {path}" in caplog.text
+    )
 
 
 def test_write_report_warns_on_failure(tmp_path, monkeypatch, caplog):
