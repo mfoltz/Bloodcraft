@@ -316,6 +316,8 @@ def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3
     report_dir = os.path.dirname(path)
     if report_dir:
         os.makedirs(report_dir, exist_ok=True)
+
+    before_count = len(rows)
     # Deduplicate by hash so reruns don't accumulate stale entries
     if rows:
         deduped: dict[str, dict[str, str]] = {}
@@ -324,6 +326,11 @@ def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3
             if key:
                 deduped[key] = row
         rows = list(deduped.values())
+    after_count = len(rows)
+    logger.info(
+        "Report rows before deduplication: %d, after: %d", before_count, after_count
+    )
+
     ext = os.path.splitext(path)[1].lower()
     for attempt in range(1, max_retries + 1):
         try:
@@ -338,9 +345,16 @@ def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3
                     writer.writerows(rows)
                 else:
                     raise RuntimeError("Report file must end with .json or .csv")
-            logger.info(f"Wrote skip report to {path}")
+            logger.info("Wrote report to %s", path)
             break
-        except Exception:
+        except Exception as exc:
+            logger.warning(
+                "Failed to write report to %s (attempt %d/%d): %s",
+                path,
+                attempt,
+                max_retries,
+                exc,
+            )
             if attempt == max_retries:
                 raise
             time.sleep(0.1)

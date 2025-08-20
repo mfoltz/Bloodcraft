@@ -1470,6 +1470,43 @@ def test_write_report_deduplicates_rows(tmp_path):
     assert out_rows[0]["reason"] == "r2"
 
 
+def test_write_report_logs_counts_and_success(tmp_path, caplog):
+    path = tmp_path / "out.csv"
+    rows = [
+        {"hash": "a", "english": "Hello", "reason": "r1", "category": "c"},
+        {"hash": "a", "english": "Hola", "reason": "r2", "category": "c"},
+        {"hash": "b", "english": "Hi", "reason": "r3", "category": "c"},
+    ]
+    with caplog.at_level("INFO", logger="translate_argos"):
+        translate_argos._write_report(str(path), rows)
+    out_rows = list(csv.DictReader(path.open()))
+    assert len(out_rows) == 2
+    assert (
+        f"Report rows before deduplication: {len(rows)}, after: {len(out_rows)}"
+        in caplog.text
+    )
+    assert f"Wrote report to {path}" in caplog.text
+
+
+def test_write_report_warns_on_failure(tmp_path, monkeypatch, caplog):
+    path = tmp_path / "out.csv"
+    rows: list[dict[str, str]] = []
+    real_open = open
+    calls = {"count": 0}
+
+    def flaky_open(*args, **kwargs):
+        if args[0] == str(path) and calls["count"] == 0:
+            calls["count"] += 1
+            raise OSError("fail")
+        return real_open(*args, **kwargs)
+
+    monkeypatch.setattr("builtins.open", flaky_open)
+    with caplog.at_level("WARNING", logger="translate_argos"):
+        translate_argos._write_report(str(path), rows, max_retries=2)
+    assert f"Failed to write report to {path} (attempt 1/2)" in caplog.text
+    assert path.is_file()
+
+
 def test_translate_preserves_special_tokens(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
