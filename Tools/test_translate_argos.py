@@ -121,6 +121,55 @@ def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
     assert msg in caplog.text
 
 
+def test_exit_when_translation_engine_attribute_error(tmp_path, monkeypatch, caplog):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    def raiser(src, dst):
+        raise AttributeError("engine missing")
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        raiser,
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    with caplog.at_level("ERROR"):
+        with pytest.raises(SystemExit) as exc:
+            translate_argos.main()
+    msg = "No Argos translation model for en->xx"
+    assert msg in str(exc.value)
+    assert msg in caplog.text
+
+
 def test_translates_only_specified_hashes(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"

@@ -63,12 +63,23 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
    translated manually. Re-run the translator until the file is empty.
    Summarise each run and fail fast on unresolved issues:
 
-   ```bash
-   python Tools/validate_translation_run.py --run-dir translations/<iso-code>/<timestamp>
-   ```
+    ```bash
+    python Tools/validate_translation_run.py --run-dir translations/<iso-code>/<timestamp>
+    ```
 
-   The script reports how many entries were translated or skipped and
-   exits non-zero when any `token_mismatch` or `sentinel` problems remain.
+    The script reports how many entries were translated or skipped and
+    exits non-zero when any `token_mismatch` or `sentinel` problems remain.
+
+### Sample translation dataset
+
+`Resources/Localization/Messages/Spanish_sample.json` provides roughly twenty English messages with numbered placeholders and `<color>` tags. It is intended for experimenting with the translation tooling.
+
+Translate and validate this dataset automatically with:
+
+```bash
+make sample-translate
+```
+
 
 
    To extract hashes that were skipped due to token mismatches, scan the
