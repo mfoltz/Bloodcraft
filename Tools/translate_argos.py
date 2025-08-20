@@ -15,6 +15,8 @@ import sys
 import time
 import traceback
 import logging
+import uuid
+import importlib.metadata
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from typing import List
@@ -897,6 +899,9 @@ def _run_translation(args, root: str) -> None:
         if metrics_dir:
             os.makedirs(metrics_dir, exist_ok=True)
         metrics_entry = {
+            "run_id": args.run_id,
+            "commit": args.git_commit,
+            "argos_version": args.argos_version,
             "file": args.target_file,
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "processed": processed_lines,
@@ -1019,6 +1024,22 @@ def main():
     args = ap.parse_args()
 
     root = os.path.abspath(args.root)
+
+    args.run_id = str(uuid.uuid4())
+    try:
+        args.git_commit = (
+            subprocess.check_output(
+                ["git", "rev-parse", "--short", "HEAD"], cwd=root
+            )
+            .decode()
+            .strip()
+        )
+    except Exception:
+        args.git_commit = "unknown"
+    try:
+        args.argos_version = importlib.metadata.version("argostranslate")
+    except Exception:
+        args.argos_version = "unknown"
 
     level_name = args.log_level
     if getattr(args, "verbose", False):
