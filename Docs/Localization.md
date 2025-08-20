@@ -45,25 +45,28 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
 2. **Run the translator**
 
    ```bash
-   python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --log-level INFO --log-file translate.log --report-file skipped.csv --overwrite
+   python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --log-level INFO --overwrite
    ```
 
    Omitting `--overwrite` translates only missing entries and keeps existing
    translations intact. Use `--overwrite` sparingly, as it retranslates every
-   line and can reprocess thousands of entries unnecessarily.
+   line and can reprocess thousands of entries unnecessarily. Outputs are saved
+   under `translations/<iso-code>/<timestamp>/` by default; override with
+   `--run-dir` if a custom location is desired.
 
    To refresh specific messages without touching the rest, pass one or more
    `--hash <hash>` options to translate only those hashes.
 
 3. **Handle skipped rows**
 
-   Any hashes listed in `skipped.csv` must be translated manually. Re-run the translator until the file is empty.
+   Any hashes listed in `skipped.csv` within the run directory must be
+   translated manually. Re-run the translator until the file is empty.
 
    To extract hashes that were skipped due to token mismatches, scan the
    translation log:
 
    ```bash
-   python Tools/collect_skipped_hashes.py --log-file translate.log --csv mismatches.csv
+   python Tools/collect_skipped_hashes.py --log-file translations/<iso-code>/<timestamp>/translate.log --csv mismatches.csv
    ```
 
    Omit `--csv` to print the unique hashes to stdout.

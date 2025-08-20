@@ -24,7 +24,7 @@ def test_raises_when_segments_present_without_model():
         assert "cd Resources/Localization/Models/xx" in str(err.value)
 
 
-def test_creates_directories_for_logs_and_reports(tmp_path, monkeypatch):
+def test_run_dir_creates_outputs(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
     messages_dir.mkdir(parents=True)
@@ -33,12 +33,12 @@ def test_creates_directories_for_logs_and_reports(tmp_path, monkeypatch):
     )
 
     target_rel = "Resources/Localization/Messages/Test.json"
-    log_path = root / "logs" / "nested" / "out.log"
-    report_path = root / "reports" / "nested" / "report.json"
+    run_dir = root / "logs" / "nested" / "run"
 
     class DummyTranslator:
         def translate(self, text):
             return "Bonjour"
+
     class DummyCompleted:
         def __init__(self, code=0):
             self.returncode = code
@@ -63,18 +63,16 @@ def test_creates_directories_for_logs_and_reports(tmp_path, monkeypatch):
             "xx",
             "--root",
             str(root),
-            "--log-file",
-            str(log_path),
-            "--report-file",
-            str(report_path),
+            "--run-dir",
+            str(run_dir),
             "--overwrite",
         ],
     )
 
     translate_argos.main()
 
-    assert log_path.is_file()
-    assert report_path.is_file()
+    assert (run_dir / "translate.log").is_file()
+    assert (run_dir / "skipped.csv").is_file()
 
 
 def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
@@ -1080,8 +1078,9 @@ def test_metrics_file_records_failure_reason(tmp_path, monkeypatch):
 
     translate_argos.main()
 
-    metrics_path = root / "translate_metrics.json"
-    data = json.loads(metrics_path.read_text())
+    metrics_files = list((root / "translations" / "xx").glob("*/translate_metrics.json"))
+    assert len(metrics_files) == 1
+    data = json.loads(metrics_files[0].read_text())
     entry = data[-1]
     assert entry["processed"] == 1
     assert entry["successes"] == 0

@@ -1,6 +1,7 @@
 import csv
 import json
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -29,6 +30,10 @@ def test_metrics_written(tmp_path, monkeypatch):
     monkeypatch.setattr(sys, "argv", ["localization_pipeline.py"])
 
     def fake_run(cmd, *, check=True, logger):
+        if any("translate_argos.py" in c for c in cmd):
+            run_dir = Path(cmd[cmd.index("--run-dir") + 1])
+            run_dir.mkdir(parents=True, exist_ok=True)
+            (run_dir / "skipped.csv").write_text("hash,english,reason,category\n")
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr(localization_pipeline, "run", fake_run)
@@ -69,9 +74,9 @@ def test_exit_code_on_skipped(tmp_path, monkeypatch):
 
     def fake_run(cmd, *, check=True, logger):
         if any("translate_argos.py" in c for c in cmd):
-            report_name = cmd[cmd.index("--report-file") + 1]
-            report = root / report_name
-            with report.open("w", newline="", encoding="utf-8") as fp:
+            run_dir = Path(cmd[cmd.index("--run-dir") + 1])
+            run_dir.mkdir(parents=True, exist_ok=True)
+            with (run_dir / "skipped.csv").open("w", newline="", encoding="utf-8") as fp:
                 writer = csv.DictWriter(fp, fieldnames=["hash", "english", "reason"])
                 writer.writeheader()
                 writer.writerow({"hash": "h", "english": "Hello", "reason": "timeout"})

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Summarize translation log failures.
 
-This script reads ``translate_metrics.json`` and ``skipped.csv`` from the
-repository root and prints counts of failures grouped by category. It exits
+This script reads ``translate_metrics.json`` files under ``translations`` and
+``skipped.csv`` from the repository root and prints counts of failures grouped by category. It exits
 with a non-zero status if any token mismatches or placeholder-only failures
 remain so CI systems can fail fast. Categories include ``english``,
 ``identical``, ``sentinel``, ``token_mismatch``, and ``placeholder``.
@@ -19,7 +19,6 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-METRICS_PATH = ROOT / "translate_metrics.json"
 SKIPPED_PATH = ROOT / "skipped.csv"
 logger = logging.getLogger(__name__)
 
@@ -82,7 +81,9 @@ def main() -> None:
         stream=sys.stdout,
     )
 
-    metric_counts = _summarize_metrics(METRICS_PATH)
+    metric_counts: Counter[str] = Counter()
+    for path in (ROOT / "translations").glob("*/*/translate_metrics.json"):
+        metric_counts.update(_summarize_metrics(path))
     skipped_counts = _summarize_skipped(SKIPPED_PATH)
 
     if metric_counts:

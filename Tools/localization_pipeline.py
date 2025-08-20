@@ -143,8 +143,7 @@ def main() -> None:
             continue
         lang_metrics["skipped"] = False
         t_start = timestamp()
-        log_name = f"translate_{name}.log"
-        report_name = f"skipped_{name}.csv"
+        run_dir = ROOT / "translations" / code / datetime.now().strftime("%Y%m%d-%H%M%S")
         result = run(
             [
                 sys.executable,
@@ -152,29 +151,28 @@ def main() -> None:
                 str(path.relative_to(ROOT)),
                 "--to",
                 code,
+                "--run-dir",
+                str(run_dir),
                 "--batch-size",
                 "100",
                 "--max-retries",
                 "3",
                 "--log-level",
                 "INFO",
-                "--log-file",
-                log_name,
-                "--report-file",
-                report_name,
                 "--overwrite",
             ],
             check=False,
             logger=logger,
         )
-        report_paths.append(ROOT / report_name)
+        report = run_dir / "skipped.csv"
+        report_paths.append(report)
         t_end = timestamp()
         lang_metrics["translation"] = {
             "start": t_start,
             "end": t_end,
             "returncode": result.returncode,
         }
-        report = ROOT / report_name
+        report = run_dir / "skipped.csv"
         skipped_counts: Dict[str, int] = {}
         if report.is_file():
             with report.open("r", encoding="utf-8") as fp:
