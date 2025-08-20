@@ -1131,6 +1131,7 @@ def test_metrics_file_records_failure_reason(tmp_path, monkeypatch):
     assert len(metrics_files) == 1
     data = json.loads(metrics_files[0].read_text())
     entry = data[-1]
+    assert "model_version" in entry
     assert entry["processed"] == 1
     assert entry["successes"] == 0
     assert entry["timeouts"] == 0

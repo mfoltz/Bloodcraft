@@ -910,6 +910,7 @@ def _run_translation(args, root: str) -> None:
             "run_id": args.run_id,
             "commit": args.git_commit,
             "argos_version": args.argos_version,
+            "model_version": args.model_version,
             "file": args.target_file,
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "processed": processed_lines,
@@ -1097,6 +1098,23 @@ def main():
         args.argos_version = importlib.metadata.version("argostranslate")
     except Exception:
         args.argos_version = "unknown"
+    try:
+        from argostranslate import package as argos_package
+
+        packages = argos_package.get_installed_packages()
+        args.model_version = "unknown"
+        for pkg in packages:
+            meta = getattr(pkg, "metadata", {})
+            if (
+                meta.get("from_code") == args.src
+                and meta.get("to_code") == args.dst
+            ):
+                args.model_version = str(
+                    meta.get("package_version") or meta.get("version") or "unknown"
+                )
+                break
+    except Exception:
+        args.model_version = "unknown"
 
     level_name = args.log_level
     if getattr(args, "verbose", False):
@@ -1140,6 +1158,7 @@ def main():
                         "run_id": args.run_id,
                         "commit": args.git_commit,
                         "argos_version": args.argos_version,
+                        "model_version": args.model_version,
                         "file": args.target_file,
                         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                         "processed": 0,
