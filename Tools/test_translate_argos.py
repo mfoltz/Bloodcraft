@@ -75,6 +75,69 @@ def test_run_dir_creates_outputs(tmp_path, monkeypatch):
     assert (run_dir / "skipped.csv").is_file()
 
 
+def test_summary_and_success_logged_at_info(tmp_path, monkeypatch, caplog):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "Bonjour"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+            "--log-level",
+            "INFO",
+        ],
+    )
+
+    with caplog.at_level(logging.INFO, logger="translate_argos"):
+        translate_argos.main()
+
+    info_msgs = [rec.message for rec in caplog.records if rec.levelname == "INFO"]
+    assert any("Processed" in m for m in info_msgs)
+    assert any("Report breakdown" in m for m in info_msgs)
+    assert any("Summary:" in m for m in info_msgs)
+    assert any("Wrote translations to" in m for m in info_msgs)
+
+    warn_msgs = [rec.message for rec in caplog.records if rec.levelname == "WARNING"]
+    assert not any(
+        "Processed" in m
+        or "Report breakdown" in m
+        or "Summary:" in m
+        or "Wrote translations to" in m
+        for m in warn_msgs
+    )
+
+
 def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"

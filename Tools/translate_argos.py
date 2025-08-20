@@ -1134,7 +1134,7 @@ def main():
         logger.addHandler(file_handler)
 
     if getattr(args, "verbose", False):
-        logger.warning("--verbose is deprecated; use --log-level INFO")
+        logger.info("--verbose is deprecated; use --log-level INFO")
 
     if args.report_file:
         try:
