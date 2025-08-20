@@ -41,8 +41,12 @@ def main() -> None:
     parser.add_argument(
         "--log-file",
         type=Path,
-        default=ROOT / "translate.log",
         help="Path to translate.log",
+    )
+    parser.add_argument(
+        "--run-dir",
+        type=Path,
+        help="Directory containing translate.log (defaults to current run dir)",
     )
     parser.add_argument(
         "--csv",
@@ -50,6 +54,11 @@ def main() -> None:
         help="Optional CSV output file; hashes are printed to stdout when omitted",
     )
     args = parser.parse_args()
+
+    if not args.log_file:
+        if not args.run_dir:
+            parser.error("--log-file or --run-dir is required")
+        args.log_file = args.run_dir / "translate.log"
 
     hashes = parse_hashes(args.log_file)
     if args.csv:

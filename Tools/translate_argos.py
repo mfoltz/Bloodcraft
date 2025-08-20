@@ -966,6 +966,13 @@ def main():
     ap.add_argument("--from", dest="src", default="en", help="Source language code (default: en)")
     ap.add_argument("--to", dest="dst", required=True, help="Target language code")
     ap.add_argument("--root", default=os.path.dirname(os.path.dirname(__file__)), help="Repo root")
+    ap.add_argument(
+        "--run-dir",
+        help=(
+            "Directory to store logs, reports, and metrics. "
+            "Defaults to translations/<lang>/<timestamp>/ under --root"
+        ),
+    )
     ap.add_argument("--batch-size", type=int, default=100, help="Number of lines to translate per request")
     ap.add_argument(
         "--max-retries", type=int, default=3, help="Retry failed translations up to this many times",
@@ -1025,6 +1032,48 @@ def main():
 
     root = os.path.abspath(args.root)
 
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    if args.run_dir:
+        run_dir = (
+            args.run_dir
+            if os.path.isabs(args.run_dir)
+            else os.path.join(root, args.run_dir)
+        )
+    else:
+        run_dir = os.path.join(root, "translations", args.dst, timestamp)
+    os.makedirs(run_dir, exist_ok=True)
+    args.run_dir = run_dir
+
+    if args.log_file:
+        log_path = (
+            args.log_file
+            if os.path.isabs(args.log_file)
+            else os.path.join(run_dir, args.log_file)
+        )
+    else:
+        log_path = os.path.join(run_dir, "translate.log")
+    args.log_file = log_path
+
+    if args.report_file:
+        report_path = (
+            args.report_file
+            if os.path.isabs(args.report_file)
+            else os.path.join(run_dir, args.report_file)
+        )
+    else:
+        report_path = os.path.join(run_dir, "skipped.csv")
+    args.report_file = report_path
+
+    if args.metrics_file:
+        metrics_path = (
+            args.metrics_file
+            if os.path.isabs(args.metrics_file)
+            else os.path.join(run_dir, args.metrics_file)
+        )
+    else:
+        metrics_path = os.path.join(run_dir, "translate_metrics.json")
+    args.metrics_file = metrics_path
+
     args.run_id = str(uuid.uuid4())
     try:
         args.git_commit = (
@@ -1060,16 +1109,6 @@ def main():
 
     if getattr(args, "verbose", False):
         logger.warning("--verbose is deprecated; use --log-level INFO")
-
-    if args.metrics_file:
-        metrics_path = (
-            args.metrics_file
-            if os.path.isabs(args.metrics_file)
-            else os.path.join(root, args.metrics_file)
-        )
-    else:
-        metrics_path = os.path.join(root, "translate_metrics.json")
-    args.metrics_file = metrics_path
 
     if args.report_file:
         try:
