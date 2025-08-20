@@ -1120,7 +1120,37 @@ def main():
     try:
         prev_hashes: set[str] | None = None
         while True:
-            _run_translation(args, root)
+            try:
+                _run_translation(args, root)
+            finally:
+                exc_type, exc, _ = sys.exc_info()
+                if exc_type is not None:
+                    metrics_dir = os.path.dirname(args.metrics_file)
+                    if metrics_dir:
+                        os.makedirs(metrics_dir, exist_ok=True)
+                    metrics_entry = {
+                        "run_id": args.run_id,
+                        "commit": args.git_commit,
+                        "argos_version": args.argos_version,
+                        "file": args.target_file,
+                        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                        "processed": 0,
+                        "successes": 0,
+                        "timeouts": 0,
+                        "token_reorders": 0,
+                        "failures": {},
+                        "hash_stats": {},
+                        "error": str(exc) or exc_type.__name__,
+                    }
+                    metrics_log = _read_json(args.metrics_file, default=[])
+                    if not isinstance(metrics_log, list):
+                        metrics_log = []
+                    metrics_log.append(metrics_entry)
+                    _write_json(args.metrics_file, metrics_log)
+                    summary_line = (
+                        f"Summary: 0/0 translated, 0 timeouts, 0 token reorders. Metrics written to {args.metrics_file}"
+                    )
+                    logger.info(summary_line)
             if not args.report_file:
                 break
             remaining = _load_report(args.report_file)
