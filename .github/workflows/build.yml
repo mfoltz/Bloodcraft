@@ -89,6 +89,9 @@ jobs:
           python Tools/fix_tokens.py --check-only Resources/Localization/Messages/*.json
           dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations
 
+      - name: Validate translation run
+        run: python Tools/validate_translation_run.py --run-dir .
+
       - name: GH Release
         uses: softprops/action-gh-release@v1
         if: github.event_name == 'workflow_dispatch'

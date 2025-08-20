@@ -181,6 +181,12 @@ def main() -> None:
                     reason = row.get("reason", "")
                     skipped_counts[reason] = skipped_counts.get(reason, 0) + 1
         lang_metrics["skipped_hashes"] = skipped_counts
+        validate_proc = run(
+            [sys.executable, "Tools/validate_translation_run.py", "--run-dir", str(run_dir)],
+            check=False,
+            logger=logger,
+        )
+        lang_metrics["validation"] = {"returncode": validate_proc.returncode}
     metrics["steps"]["translation"]["end"] = timestamp()
 
     combined_report = ROOT / "skipped.csv"
@@ -247,9 +253,10 @@ def main() -> None:
             continue
         translation_ok = lang_metrics["translation"]["returncode"] == 0
         token_ok = lang_metrics["token_fix"]["returncode"] == 0
+        validation_ok = lang_metrics.get("validation", {}).get("returncode", 0) == 0
         skipped_total = sum(lang_metrics["skipped_hashes"].values())
         lang_metrics["skipped_hash_count"] = skipped_total
-        success = translation_ok and token_ok and skipped_total == 0
+        success = translation_ok and token_ok and skipped_total == 0 and validation_ok
         lang_metrics["success"] = success
         overall_ok &= success
 
