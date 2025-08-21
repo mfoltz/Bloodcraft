@@ -4,8 +4,8 @@
 This script reads ``translate_metrics.json`` and ``skipped.csv`` from the
 repository root and prints counts of failures grouped by category. Paths may be
 overridden via ``--metrics-file`` and ``--skipped-file`` to inspect a specific
-run directory. Metrics entries include metadata such as ``run_id``, ``commit``,
-``model_version``, and ``cli_args`` which are emitted at debug level. The script
+run directory. Metrics entries include metadata such as ``run_id``, ``git_commit``,
+``model_version``, ``run_dir``, and ``cli_args`` which are emitted at debug level. The script
 exits with a non-zero status if any token mismatches or placeholder-only
 failures remain so CI systems can fail fast. Categories include ``english``,
 ``identical``, ``sentinel``, ``token_mismatch``, and ``placeholder``.
@@ -51,13 +51,15 @@ def _summarize_metrics(path: Path) -> Counter:
         return counts
     for entry in entries:
         failures = entry.get("failures", {})
-        if failures:
+        if failures or entry.get("error"):
             logger.debug(
-                "Run %s commit %s model %s args %s had %d failures",
+                "Run %s commit %s model %s dir %s args %s error %s had %d failures",
                 entry.get("run_id"),
-                entry.get("commit"),
+                entry.get("git_commit"),
                 entry.get("model_version", entry.get("argos_version")),
+                entry.get("run_dir"),
                 entry.get("cli_args"),
+                entry.get("error"),
                 len(failures),
             )
         for reason in failures.values():
