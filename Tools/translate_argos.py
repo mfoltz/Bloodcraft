@@ -976,6 +976,159 @@ def _run_translation(args, root: str) -> None:
                     raise
 
 
+def _run_dry_run(args, root: str) -> None:
+    """Check existing translations without invoking Argos."""
+
+    english_path = os.path.join(
+        root, "Resources", "Localization", "Messages", "English.json"
+    )
+    target_path = os.path.join(root, args.target_file)
+
+    english = _read_json(english_path)["Messages"]
+    target = _read_json(target_path, default={"Messages": {}})
+    messages = target.get("Messages", {})
+
+    processed_lines = len(english)
+    failures: dict[str, tuple[str, str]] = {}
+    report: dict[str, dict[str, str]] = {}
+    token_reorders = 0
+    token_stats: dict[str, dict[str, int | bool]] = {}
+
+    def categorize(reason: str | None) -> str:
+        if not reason:
+            return ""
+        r = reason.lower()
+        if "sentinel" in r:
+            return "sentinel"
+        if "identical" in r:
+            return "identical"
+        if "token mismatch" in r:
+            return "token_mismatch"
+        if "placeholder" in r or "tokens only" in r or "token only" in r:
+            return "placeholder"
+        if "untranslated" in r or "english" in r:
+            return "english"
+        return "other"
+
+    def log_entry(
+        key: str,
+        original: str,
+        result: str,
+        reason: str | None = None,
+        *,
+        category: str | None = None,
+    ) -> None:
+        status = "SKIPPED" if reason else "CHECKED"
+        msg = f"{key}: {status}"
+        if reason:
+            msg += f" ({reason})"
+            cat = category or categorize(reason)
+            report[key] = {
+                "hash": key,
+                "english": original,
+                "reason": reason,
+                "category": cat,
+            }
+            logger.warning(
+                f"{msg}\n  Original: {original}\n  Result: {result}"
+            )
+        else:
+            logger.info(f"{msg}\n  Original: {original}\n  Result: {result}")
+
+    for key, original in english.items():
+        safe, tokens = protect_strict(original)
+        token_only = TOKEN_RE.sub("", safe).strip() == ""
+        translated = messages.get(key)
+        if translated is None:
+            reason = "untranslated"
+            category = categorize(reason)
+            log_entry(key, original, "", reason, category=category)
+            failures[key] = (reason, category)
+            token_stats[key] = {
+                "original_tokens": len(tokens),
+                "translated_tokens": 0,
+                "reordered": False,
+            }
+            continue
+
+        protected, found_tokens_list = protect_strict(translated)
+        protected = normalize_tokens(protected)
+        reorder_tokens(protected, len(tokens))
+
+        token_stats[key] = {
+            "original_tokens": len(tokens),
+            "translated_tokens": len(found_tokens_list),
+            "reordered": False,
+        }
+
+        reason: str | None = None
+        category: str | None = None
+
+        if Counter(found_tokens_list) != Counter(tokens):
+            missing = [t for t in tokens if t not in found_tokens_list]
+            extra = [t for t in found_tokens_list if t not in tokens]
+            parts: list[str] = []
+            if missing:
+                parts.append(f"missing {missing}")
+            if extra:
+                parts.append(f"unexpected {extra}")
+            reason = "token mismatch (" + ", ".join(parts) + ")"
+            category = categorize(reason)
+        elif found_tokens_list != tokens:
+            reason = "tokens reordered"
+            category = categorize(reason)
+            token_stats[key]["reordered"] = True
+            token_reorders += 1
+
+        stripped = TOKEN_PATTERN.sub("", translated)
+        if reason is None:
+            if token_only:
+                if stripped.strip():
+                    reason = "contains English"
+            else:
+                if stripped.strip() == "":
+                    reason = "placeholders only"
+                elif "[" in stripped or "]" in stripped:
+                    reason = "stray brackets"
+                elif translated == original:
+                    reason = "identical to source"
+                elif contains_english(translated):
+                    reason = "contains English"
+            if reason:
+                category = categorize(reason)
+
+        if reason:
+            failures[key] = (reason, category)
+            log_entry(key, original, translated, reason, category=category)
+        else:
+            log_entry(key, original, translated)
+
+    if args.report_file:
+        try:
+            _write_report(args.report_file, list(report.values()))
+        except Exception as e:
+            logger.warning(f"Failed to write skip report: {e}")
+
+    successes = processed_lines - len(failures)
+
+    _append_metrics_entry(
+        args,
+        processed=processed_lines,
+        successes=successes,
+        timeouts=0,
+        token_reorders=token_reorders,
+        failures={k: v[0] for k, v in failures.items()},
+        hash_stats=token_stats,
+        dry_run=True,
+    )
+
+    summary_line = (
+        f"Summary: {successes}/{processed_lines} checked, 0 timeouts, {token_reorders} token reorders. "
+        f"Metrics written to {args.metrics_file}"
+    )
+    logger.info(summary_line)
+
+
 def _load_report(path: str) -> list[dict[str, str]]:
     """Return rows from a JSON or CSV skip report."""
     if not path or not os.path.exists(path):
@@ -1071,6 +1224,11 @@ def main():
             "Append translation metrics to this JSON file "
             "(default: translate_metrics.json in run directory)"
         ),
+    )
+    ap.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Run token checks without calling Argos; no translations are written",
     )
     args = ap.parse_args()
 
@@ -1191,34 +1349,37 @@ def main():
 
     remaining: list[dict[str, str]] = []
     try:
-        prev_hashes: set[str] | None = None
-        while True:
-            try:
-                _run_translation(args, root)
-            except BaseException as exc:
-                write_failure_metrics(args, exc)
-                error_msg = str(exc) or exc.__class__.__name__
-                summary_line = (
-                    "Summary: 0/0 translated, 0 timeouts, 0 token reorders. "
-                    f"Failed: {error_msg}. Metrics written to {args.metrics_file}"
+        if args.dry_run:
+            _run_dry_run(args, root)
+        else:
+            prev_hashes: set[str] | None = None
+            while True:
+                try:
+                    _run_translation(args, root)
+                except BaseException as exc:
+                    write_failure_metrics(args, exc)
+                    error_msg = str(exc) or exc.__class__.__name__
+                    summary_line = (
+                        "Summary: 0/0 translated, 0 timeouts, 0 token reorders. "
+                        f"Failed: {error_msg}. Metrics written to {args.metrics_file}"
+                    )
+                    logger.error(summary_line)
+                    raise
+                if not args.report_file:
+                    break
+                remaining = _load_report(args.report_file)
+                hashes = [row["hash"] for row in remaining]
+                if not hashes or set(hashes) == prev_hashes:
+                    break
+                prev_hashes = set(hashes)
+                logger.info(
+                    f"Retrying {len(hashes)} hash(es) from {args.report_file}"
                 )
-                logger.error(summary_line)
-                raise
-            if not args.report_file:
-                break
-            remaining = _load_report(args.report_file)
-            hashes = [row["hash"] for row in remaining]
-            if not hashes or set(hashes) == prev_hashes:
-                break
-            prev_hashes = set(hashes)
-            logger.info(
-                f"Retrying {len(hashes)} hash(es) from {args.report_file}"
-            )
-            args.hashes = hashes
-        if remaining:
-            logger.warning("Unresolved hashes after retries:")
-            for row in remaining:
-                logger.warning(f"{row['hash']}: {row.get('reason', '')}")
+                args.hashes = hashes
+            if remaining:
+                logger.warning("Unresolved hashes after retries:")
+                for row in remaining:
+                    logger.warning(f"{row['hash']}: {row.get('reason', '')}")
     except SystemExit as e:
         if e.code not in (0, None):
             msg = str(e)
