@@ -377,6 +377,32 @@ def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3
             time.sleep(0.1)
 
 
+def _append_metrics_entry(args, **extra) -> dict:
+    """Append a metrics entry to ``args.metrics_file``."""
+
+    metrics_dir = os.path.dirname(args.metrics_file)
+    if metrics_dir:
+        os.makedirs(metrics_dir, exist_ok=True)
+    entry = {
+        "run_id": args.run_id,
+        "git_commit": args.git_commit,
+        "argos_version": args.argos_version,
+        "model_version": args.model_version,
+        "cli_args": args.cli_args,
+        "run_dir": args.run_dir,
+        "file": args.target_file,
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        **extra,
+    }
+    log = _read_json(args.metrics_file, default=[])
+    if not isinstance(log, list):
+        log = []
+    log.append(entry)
+    _write_json(args.metrics_file, log)
+    args.metrics_recorded = True
+    return entry
+
+
 def _run_translation(args, root: str) -> None:
     try:
         translator = argos_translate.get_translation_from_codes(args.src, args.dst)
@@ -900,29 +926,15 @@ def _run_translation(args, root: str) -> None:
 
         logger.info(f"Wrote translations to {target_path}")
 
-        metrics_dir = os.path.dirname(args.metrics_file)
-        if metrics_dir:
-            os.makedirs(metrics_dir, exist_ok=True)
-        metrics_entry = {
-            "run_id": args.run_id,
-            "commit": args.git_commit,
-            "argos_version": args.argos_version,
-            "model_version": args.model_version,
-            "cli_args": args.cli_args,
-            "file": args.target_file,
-            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            "processed": processed_lines,
-            "successes": successes,
-            "timeouts": timeouts_count,
-            "token_reorders": token_reorders,
-            "failures": {k: v[0] for k, v in failures.items()},
-            "hash_stats": token_stats,
-        }
-        metrics_log = _read_json(args.metrics_file, default=[])
-        if not isinstance(metrics_log, list):
-            metrics_log = []
-        metrics_log.append(metrics_entry)
-        _write_json(args.metrics_file, metrics_log)
+        _append_metrics_entry(
+            args,
+            processed=processed_lines,
+            successes=successes,
+            timeouts=timeouts_count,
+            token_reorders=token_reorders,
+            failures={k: v[0] for k, v in failures.items()},
+            hash_stats=token_stats,
+        )
 
         summary_line = (
             f"Summary: {successes}/{processed_lines} translated, {timeouts_count} timeouts, "
@@ -1110,6 +1122,7 @@ def main():
             pass
 
     args.cli_args = cli_args
+    args.metrics_recorded = False
 
     level_name = args.log_level
     if getattr(args, "verbose", False):
@@ -1156,30 +1169,16 @@ def main():
             finally:
                 exc_type, exc, _ = sys.exc_info()
                 if exc_type is not None:
-                    metrics_dir = os.path.dirname(args.metrics_file)
-                    if metrics_dir:
-                        os.makedirs(metrics_dir, exist_ok=True)
-                    metrics_entry = {
-                        "run_id": args.run_id,
-                        "commit": args.git_commit,
-                        "argos_version": args.argos_version,
-                        "model_version": args.model_version,
-                        "cli_args": args.cli_args,
-                        "file": args.target_file,
-                        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                        "processed": 0,
-                        "successes": 0,
-                        "timeouts": 0,
-                        "token_reorders": 0,
-                        "failures": {},
-                        "hash_stats": {},
-                        "error": str(exc) or exc_type.__name__,
-                    }
-                    metrics_log = _read_json(args.metrics_file, default=[])
-                    if not isinstance(metrics_log, list):
-                        metrics_log = []
-                    metrics_log.append(metrics_entry)
-                    _write_json(args.metrics_file, metrics_log)
+                    _append_metrics_entry(
+                        args,
+                        processed=0,
+                        successes=0,
+                        timeouts=0,
+                        token_reorders=0,
+                        failures={},
+                        hash_stats={},
+                        error=str(exc) or exc_type.__name__,
+                    )
                     summary_line = (
                         f"Summary: 0/0 translated, 0 timeouts, 0 token reorders. Metrics written to {args.metrics_file}"
                     )
@@ -1205,10 +1204,32 @@ def main():
             if not msg or msg == str(e.code):
                 msg = f"Exited with code {e.code}"
             logger.error(msg)
+            if not getattr(args, "metrics_recorded", False):
+                _append_metrics_entry(
+                    args,
+                    processed=0,
+                    successes=0,
+                    timeouts=0,
+                    token_reorders=0,
+                    failures={},
+                    hash_stats={},
+                    error=msg,
+                )
         raise
     except Exception as e:
         msg = f"Unhandled exception: {e}"
         logger.exception(msg)
+        if not getattr(args, "metrics_recorded", False):
+            _append_metrics_entry(
+                args,
+                processed=0,
+                successes=0,
+                timeouts=0,
+                token_reorders=0,
+                failures={},
+                hash_stats={},
+                error=msg,
+            )
         raise SystemExit(1)
     finally:
         for handler in logger.handlers:

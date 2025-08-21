@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 
 import pytest
 
@@ -1260,6 +1261,9 @@ def test_metrics_file_records_failure_reason(tmp_path, monkeypatch):
     data = json.loads(metrics_files[0].read_text())
     entry = data[-1]
     assert "model_version" in entry
+    assert entry["run_id"]
+    assert entry["git_commit"] == "unknown"
+    assert Path(entry["run_dir"]).is_dir()
     assert entry["processed"] == 1
     assert entry["successes"] == 0
     assert entry["timeouts"] == 0
