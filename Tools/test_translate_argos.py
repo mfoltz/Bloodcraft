@@ -241,7 +241,9 @@ def test_dry_run_reports_mismatches(tmp_path, monkeypatch):
         ],
     )
 
-    translate_argos.main()
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert int(exc.value.code) == 1
 
     report_rows = list(csv.DictReader((run_dir / "skipped.csv").open()))
     assert any(row["hash"] == "h1" and "tokens reordered" in row["reason"] for row in report_rows)
@@ -494,7 +496,7 @@ def test_exit_on_fix_tokens_failure(tmp_path, monkeypatch):
 
     with pytest.raises(SystemExit) as exc:
         translate_argos.main()
-    assert exc.value.code == 1
+    assert int(exc.value.code) == 1
 
 
 def test_fallback_to_english_and_reports(tmp_path, monkeypatch):
@@ -542,7 +544,9 @@ def test_fallback_to_english_and_reports(tmp_path, monkeypatch):
         ],
     )
 
-    translate_argos.main()
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert exc.value.code == 1
     assert report_path.is_file()
     import csv
     rows = list(csv.DictReader(report_path.open()))
@@ -654,7 +658,9 @@ def test_sentinel_only_report(tmp_path, monkeypatch):
         ],
     )
 
-    translate_argos.main()
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert exc.value.code == 1
     rows = list(csv.DictReader(report_path.open()))
     assert rows[0]["category"] == "sentinel"
     assert "sentinel only" in rows[0]["reason"]
@@ -705,7 +711,9 @@ def test_placeholder_only_report(tmp_path, monkeypatch):
         ],
     )
 
-    translate_argos.main()
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert exc.value.code == 1
     rows = list(csv.DictReader(report_path.open()))
     assert rows[0]["category"] == "placeholder"
     data = json.loads((root / target_rel).read_text())
@@ -757,7 +765,9 @@ def test_token_mismatch_report(tmp_path, monkeypatch):
         ],
     )
 
-    translate_argos.main()
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert exc.value.code == 1
     rows = list(csv.DictReader(report_path.open()))
     assert rows[0]["category"] == "token_mismatch"
     assert "token mismatch" in rows[0]["reason"]
@@ -808,7 +818,9 @@ def test_contains_english_report(tmp_path, monkeypatch):
         ],
     )
 
-    translate_argos.main()
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert exc.value.code == 1
     rows = list(csv.DictReader(report_path.open()))
     assert rows[0]["category"] == "english"
     assert "English" in rows[0]["reason"]
@@ -851,7 +863,9 @@ def test_missing_tokens_reinjected(tmp_path, monkeypatch):
         ],
     )
 
-    translate_argos.main()
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert exc.value.code == 1
 
     data = json.loads((root / target_rel).read_text())
     value = data["Messages"]["hash"]
@@ -1256,7 +1270,9 @@ def test_roundtrip_with_reordered_tokens(tmp_path, monkeypatch):
         ],
     )
 
-    translate_argos.main()
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert exc.value.code == 1
 
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["h"] == "Hello <b>{x}</b> world"
@@ -1352,7 +1368,9 @@ def test_metrics_file_records_failure_reason(tmp_path, monkeypatch):
         ],
     )
 
-    translate_argos.main()
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert exc.value.code == 1
 
     metrics_files = list((root / "translations" / "xx").glob("*/translate_metrics.json"))
     assert len(metrics_files) == 1
@@ -1427,7 +1445,9 @@ def test_metrics_file_records_timeout(tmp_path, monkeypatch):
         ],
     )
 
-    translate_argos.main()
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert exc.value.code == 1
 
     data = json.loads(metrics_path.read_text())
     entry = data[-1]
@@ -1686,7 +1706,9 @@ def test_report_written_on_exception(tmp_path, monkeypatch):
         ],
     )
 
-    translate_argos.main()
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert exc.value.code == 1
 
     assert report_path.is_file()
     rows = list(csv.DictReader(report_path.open()))
@@ -1745,7 +1767,9 @@ def test_report_cleared_between_runs(tmp_path, monkeypatch):
         ],
     )
 
-    translate_argos.main()
+    with pytest.raises(SystemExit) as exc:
+        translate_argos.main()
+    assert exc.value.code == 1
 
     rows = list(csv.DictReader(report_path.open()))
     assert len(rows) == 2
@@ -1836,8 +1860,10 @@ def test_report_written_once_and_deduplicated(tmp_path, monkeypatch, caplog):
     real_run_translation = translate_argos._run_translation
 
     def dup_run_translation(args, root):
-        rows = real_run_translation(args, root)
-        return rows + rows
+        rows, processed, successes, skipped, failures = real_run_translation(
+            args, root
+        )
+        return rows + rows, processed, successes, skipped, failures
 
     monkeypatch.setattr(translate_argos, "_run_translation", dup_run_translation)
 
@@ -1867,7 +1893,9 @@ def test_report_written_once_and_deduplicated(tmp_path, monkeypatch, caplog):
     )
 
     with caplog.at_level("INFO", logger="translate_argos"):
-        translate_argos.main()
+        with pytest.raises(SystemExit) as exc:
+            translate_argos.main()
+    assert exc.value.code == 1
 
     assert len(calls) == 1
     out_rows = list(csv.DictReader(report_path.open()))

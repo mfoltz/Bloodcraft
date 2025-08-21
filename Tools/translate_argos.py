@@ -1011,10 +1011,12 @@ def _run_translation(args, root: str) -> None:
     finally:
         pass
 
-    return list(report.values())
+    skipped = len(report)
+    failures_count = len(failures)
+    return list(report.values()), processed_lines, successes, skipped, failures_count
 
 
-def _run_dry_run(args, root: str) -> None:
+def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, int]:
     """Check existing translations without invoking Argos."""
 
     english_path = os.path.join(
@@ -1160,7 +1162,9 @@ def _run_dry_run(args, root: str) -> None:
     )
     logger.info(summary_line)
 
-    return list(report.values())
+    skipped = len(report)
+    failures_count = len(failures)
+    return list(report.values()), processed_lines, successes, skipped, failures_count
 
 
 def _load_report(path: str) -> list[dict[str, str]]:
@@ -1378,14 +1382,31 @@ def main():
     )
 
     remaining: list[dict[str, str]] = []
+    processed_total = translated_total = skipped_total = failures_total = 0
+    exit_code = 0
+    exit_msg: str | None = None
     try:
         if args.dry_run:
-            remaining = _run_dry_run(args, root)
+            (
+                remaining,
+                processed_total,
+                translated_total,
+                skipped_total,
+                failures_total,
+            ) = _run_dry_run(args, root)
         else:
             prev_hashes: set[str] | None = None
             while True:
                 try:
-                    remaining = _run_translation(args, root)
+                    (
+                        remaining,
+                        processed,
+                        translated,
+                        skipped_total,
+                        failures_total,
+                    ) = _run_translation(args, root)
+                    processed_total += processed
+                    translated_total += translated
                 except BaseException as exc:
                     write_failure_metrics(args, exc)
                     error_msg = str(exc) or exc.__class__.__name__
@@ -1394,7 +1415,11 @@ def main():
                         f"Failed: {error_msg}. Metrics written to {args.metrics_file}"
                     )
                     logger.error(summary_line)
-                    raise
+                    exit_code = 1
+                    exit_msg = error_msg
+                    break
+                if exit_code:
+                    break
                 if not args.report_file:
                     break
                 hashes = [row["hash"] for row in remaining]
@@ -1405,16 +1430,18 @@ def main():
                     f"Retrying {len(hashes)} hash(es) from {args.report_file}"
                 )
                 args.hashes = hashes
-            if remaining:
+            if not exit_code and remaining:
                 logger.warning("Unresolved hashes after retries:")
                 for row in remaining:
                     logger.warning(f"{row['hash']}: {row.get('reason', '')}")
     except SystemExit as e:
+        exit_code = e.code if isinstance(e.code, int) else 1
         if e.code not in (0, None):
             msg = str(e)
             if not msg or msg == str(e.code):
                 msg = f"Exited with code {e.code}"
             logger.error(msg)
+            exit_msg = msg
             if not getattr(args, "metrics_recorded", False):
                 _append_metrics_entry(
                     args,
@@ -1426,7 +1453,6 @@ def main():
                     hash_stats={},
                     error=msg,
                 )
-        raise
     except Exception as e:
         msg = f"Unhandled exception: {e}"
         logger.exception(msg)
@@ -1441,7 +1467,7 @@ def main():
                 hash_stats={},
                 error=msg,
             )
-        raise SystemExit(1)
+        exit_code = 1
     finally:
         if args.report_file:
             try:
@@ -1455,10 +1481,24 @@ def main():
                     logger.info("Category counts: %s", dict(counts))
             except Exception as e:
                 logger.warning(f"Failed to write skip report: {e}")
+
+        logger.info(
+            "Totals: processed=%d translated=%d skipped=%d failures=%d",
+            processed_total,
+            translated_total,
+            skipped_total,
+            failures_total,
+        )
+        if skipped_total or failures_total:
+            exit_code = exit_code or 1
+
         for handler in logger.handlers:
             handler.flush()
             handler.close()
         logger.handlers.clear()
+
+    if exit_code:
+        raise SystemExit(exit_msg or exit_code)
 
 
 if __name__ == "__main__":

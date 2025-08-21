@@ -71,6 +71,14 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
    To refresh specific messages without touching the rest, pass one or more
    `--hash <hash>` options to translate only those hashes.
 
+   Each run ends with a summary line similar to:
+
+   ```
+   Totals: processed=500 translated=498 skipped=2 failures=1
+   ```
+
+   The script exits with a non-zero status when any skips or failures remain so CI can detect issues.
+
 4. **Handle skipped rows**
 
    Any hashes listed in `skipped.csv` within the run directory must be
