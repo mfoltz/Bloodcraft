@@ -418,6 +418,32 @@ def _append_metrics_entry(args, **extra) -> dict:
     log.append(entry)
     _write_json(args.metrics_file, log)
     args.metrics_recorded = True
+
+    try:
+        run_index_file = getattr(args, "run_index_file", None)
+        if run_index_file and not getattr(args, "run_index_recorded", False):
+            index_dir = os.path.dirname(run_index_file)
+            if index_dir:
+                os.makedirs(index_dir, exist_ok=True)
+            processed = extra.get("processed", 0)
+            successes = extra.get("successes", 0)
+            success_rate = successes / processed if processed else 0
+            index_entry = {
+                "run_id": args.run_id,
+                "timestamp": entry["timestamp"],
+                "language": args.dst,
+                "run_dir": args.run_dir,
+                "success_rate": success_rate,
+            }
+            index_log = _read_json(run_index_file, default=[])
+            if not isinstance(index_log, list):
+                index_log = []
+            index_log.append(index_entry)
+            _write_json(run_index_file, index_log)
+            args.run_index_recorded = True
+    except Exception as e:
+        logger.warning(f"Failed to update run index: {e}")
+
     return entry
 
 
@@ -1277,6 +1303,7 @@ def main():
     args.log_file = resolve_path(args.log_file, "translate.log")
     args.report_file = resolve_path(args.report_file, "skipped.csv")
     args.metrics_file = resolve_path(args.metrics_file, "translate_metrics.json")
+    args.run_index_file = os.path.join(root, "translations", "run_index.json")
     cli_args = dict(vars(args))
 
     args.run_id = str(uuid.uuid4())
@@ -1326,6 +1353,7 @@ def main():
 
     args.cli_args = cli_args
     args.metrics_recorded = False
+    args.run_index_recorded = False
 
     level_name = args.log_level
     if getattr(args, "verbose", False):
