@@ -811,8 +811,9 @@ This process applies only to files under `Resources/Localization/Messages`.
 2. **Propagate new hashes.** Copy the refreshed `English.json` entries into each `Resources/Localization/Messages/<Language>.json` while keeping numeric hashes intact.
    Use `--overwrite` when translating after propagating hashes so English text is replaced by its translation.
 3. **Translate missing entries.**
+   Reassemble the split Argos model and install it before running the translator (see [Docs/Localization.md](Docs/Localization.md#automated-translation-for-messages) or [model directories](#model-directories)).
    `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --log-level INFO --overwrite`
-   Outputs are saved under `translations/<iso-code>/<timestamp>/` (override with `--run-dir`). Verify the Argos model is installed before running translations: `argos-translate --from en --to tr - < /dev/null` (replace `tr` with the target code). Any hashes listed in `skipped.csv` within the run directory must be manually translated and the script re-run to confirm they are handled.
+   Outputs are saved under `translations/<iso-code>/<timestamp>/` (override with `--run-dir`). Verify the model is installed: `argos-translate --from en --to tr - < /dev/null` (replace `tr` with the target code). Any hashes listed in `skipped.csv` within the run directory must be manually translated and the script re-run to confirm they are handled.
 4. **Check and fix tokens.**
    ```bash
    python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
