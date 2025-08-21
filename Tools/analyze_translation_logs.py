@@ -6,11 +6,12 @@ of failures grouped by category. By default the files are looked up under the
 repository root, but ``--run-dir`` can point to a translation run directory.
 Paths may also be overridden individually via ``--metrics-file`` and
 ``--skipped-file``. Metrics entries include metadata such as ``run_id``,
-``git_commit``, ``model_version``, ``run_dir``, and ``cli_args`` which are emitted at
-debug level. The script exits with a non-zero status if any token mismatches or
-placeholder-only
-failures remain so CI systems can fail fast. Categories include ``english``,
-``identical``, ``sentinel``, ``token_mismatch``, and ``placeholder``.
+``git_commit``, ``python_version``, ``argos_version``, ``model_version``, ``run_dir``,
+``log_file``, ``report_file``, ``metrics_file``, and ``cli_args`` which are emitted
+at debug level. The script exits with a non-zero status if any token mismatches
+or placeholder-only failures remain so CI systems can fail fast. Categories
+include ``english``, ``identical``, ``sentinel``, ``token_mismatch``, and
+``placeholder``.
 """
 
 from __future__ import annotations
@@ -55,11 +56,19 @@ def _summarize_metrics(path: Path) -> Counter:
         failures = entry.get("failures", {})
         if failures or entry.get("error"):
             logger.debug(
-                "Run %s commit %s model %s dir %s args %s error %s had %d failures",
+                (
+                    "Run %s commit %s py %s argos %s model %s dir %s log %s "
+                    "report %s metrics %s args %s error %s had %d failures"
+                ),
                 entry.get("run_id"),
                 entry.get("git_commit"),
-                entry.get("model_version", entry.get("argos_version")),
+                entry.get("python_version"),
+                entry.get("argos_version"),
+                entry.get("model_version"),
                 entry.get("run_dir"),
+                entry.get("log_file"),
+                entry.get("report_file"),
+                entry.get("metrics_file"),
                 entry.get("cli_args"),
                 entry.get("error"),
                 len(failures),

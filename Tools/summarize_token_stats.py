@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Summarize per-hash token mismatches and reorders."""
+"""Summarize per-hash token mismatches and reorders.
+
+The metrics file may include run metadata (e.g., ``run_id``, ``git_commit``,
+``python_version``) and paths to log, report, and metrics files. These fields are
+ignored; only ``file``, ``failures``, and ``hash_stats`` are used."""
 
 from __future__ import annotations
 
