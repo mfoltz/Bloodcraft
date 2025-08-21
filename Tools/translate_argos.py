@@ -403,6 +403,23 @@ def _append_metrics_entry(args, **extra) -> dict:
     return entry
 
 
+def write_failure_metrics(args, error) -> None:
+    """Record metrics for a failed run if none were written."""
+
+    if getattr(args, "metrics_recorded", False):
+        return
+    _append_metrics_entry(
+        args,
+        processed=0,
+        successes=0,
+        timeouts=0,
+        token_reorders=0,
+        failures={},
+        hash_stats={},
+        error=str(error) or error.__class__.__name__,
+    )
+
+
 def _run_translation(args, root: str) -> None:
     try:
         translator = argos_translate.get_translation_from_codes(args.src, args.dst)
@@ -1166,23 +1183,15 @@ def main():
         while True:
             try:
                 _run_translation(args, root)
-            finally:
-                exc_type, exc, _ = sys.exc_info()
-                if exc_type is not None:
-                    _append_metrics_entry(
-                        args,
-                        processed=0,
-                        successes=0,
-                        timeouts=0,
-                        token_reorders=0,
-                        failures={},
-                        hash_stats={},
-                        error=str(exc) or exc_type.__name__,
-                    )
-                    summary_line = (
-                        f"Summary: 0/0 translated, 0 timeouts, 0 token reorders. Metrics written to {args.metrics_file}"
-                    )
-                    logger.info(summary_line)
+            except BaseException as exc:
+                write_failure_metrics(args, exc)
+                error_msg = str(exc) or exc.__class__.__name__
+                summary_line = (
+                    "Summary: 0/0 translated, 0 timeouts, 0 token reorders. "
+                    f"Failed: {error_msg}. Metrics written to {args.metrics_file}"
+                )
+                logger.error(summary_line)
+                raise
             if not args.report_file:
                 break
             remaining = _load_report(args.report_file)
@@ -1232,6 +1241,12 @@ def main():
             )
         raise SystemExit(1)
     finally:
+        if args.report_file:
+            try:
+                rows = _load_report(args.report_file)
+                _write_report(args.report_file, rows)
+            except Exception as e:
+                logger.warning(f"Failed to flush skip report: {e}")
         for handler in logger.handlers:
             handler.flush()
             handler.close()
