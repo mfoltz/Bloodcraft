@@ -347,8 +347,14 @@ translations:
 python Tools/analyze_translation_logs.py
 ```
 
-The script reads `translate_metrics.json` along with any `skipped_*.csv`
-reports and lists token mismatches or placeholder-only entries. It exits
+By default, the script reads `translate_metrics.json` and `skipped.csv` from
+the repository root. Override these paths to analyse a specific run directory:
+
+```bash
+python Tools/analyze_translation_logs.py --metrics-file translations/French/2025-05-16/translate_metrics.json --skipped-file translations/French/2025-05-16/skipped.csv
+```
+
+The script lists token mismatches or placeholder-only entries and exits
 non-zero when problems remain so CI and contributors can investigate.
 
 For a focused view of hashes with mismatched or reordered tokens recorded in
