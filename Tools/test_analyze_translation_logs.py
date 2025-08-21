@@ -1,5 +1,10 @@
 import csv
+import csv
+import json
+import sys
 from collections import Counter
+
+import pytest
 
 import analyze_translation_logs as atl
 
@@ -32,3 +37,26 @@ def test_summarize_skipped(tmp_path):
             "token_mismatch": 1,
         }
     )
+
+
+def test_cli_overrides_paths(tmp_path, monkeypatch):
+    metrics = tmp_path / "translate_metrics.json"
+    metrics.write_text(json.dumps([{"failures": {}}]))
+    skipped = tmp_path / "skipped.csv"
+    with skipped.open("w", newline="", encoding="utf-8") as fp:
+        writer = csv.DictWriter(fp, fieldnames=["hash", "english", "reason", "category"])
+        writer.writeheader()
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "analyze_translation_logs.py",
+            "--metrics-file",
+            str(metrics),
+            "--skipped-file",
+            str(skipped),
+        ],
+    )
+    with pytest.raises(SystemExit) as exc:
+        atl.main()
+    assert exc.value.code == 0
