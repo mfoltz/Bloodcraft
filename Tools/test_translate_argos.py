@@ -1960,3 +1960,54 @@ def test_wraps_and_unwraps_placeholders(tmp_path, monkeypatch):
     assert translator.seen and "[[TOKEN_0]]" in translator.seen[0]
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["h1"] == "Bonjour {0}"
+
+
+def test_run_index_appended(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "Bonjour"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    index_path = root / "translations" / "run_index.json"
+    assert index_path.is_file()
+    data = json.loads(index_path.read_text())
+    assert data and data[-1]["language"] == "xx"
+    assert data[-1]["success_rate"] == 1.0
