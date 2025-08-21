@@ -248,6 +248,9 @@ def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
     msg = "No Argos translation model for en->xx"
     assert msg in str(exc.value)
     assert msg in caplog.text
+    install_hint = "argospm install translate-en_xx"
+    assert install_hint in str(exc.value)
+    assert install_hint in caplog.text
 
 
 def test_exit_when_translation_engine_attribute_error(tmp_path, monkeypatch, caplog):
@@ -297,6 +300,42 @@ def test_exit_when_translation_engine_attribute_error(tmp_path, monkeypatch, cap
     msg = "No Argos translation model for en->xx"
     assert msg in str(exc.value)
     assert msg in caplog.text
+    install_hint = "argospm install translate-en_xx"
+    assert install_hint in str(exc.value)
+    assert install_hint in caplog.text
+
+
+def test_missing_model_logs_install_hint(tmp_path, monkeypatch, caplog):
+    root = tmp_path
+    target_rel = "Resources/Localization/Messages/Spanish.json"
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: None,
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "es",
+            "--root",
+            str(root),
+        ],
+    )
+
+    with caplog.at_level("ERROR"):
+        with pytest.raises(SystemExit) as exc:
+            translate_argos.main()
+    hint = "argospm install translate-en_es"
+    assert hint in str(exc.value)
+    assert hint in caplog.text
 
 
 def test_translates_only_specified_hashes(tmp_path, monkeypatch):
