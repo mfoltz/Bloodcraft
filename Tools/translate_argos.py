@@ -1161,15 +1161,18 @@ def main():
     if getattr(args, "verbose", False):
         logger.info("--verbose is deprecated; use --log-level INFO")
 
-    summary = {
-        "input_file": args.target_file,
-        "target_language": args.dst,
-        "batch_size": args.batch_size,
-        "max_retries": args.max_retries,
-        "timeout": args.timeout,
-        "run_dir": args.run_dir,
-    }
-    logger.info("Run configuration: %s", summary)
+    logger.info(
+        "target_file=%s src=%s dst=%s batch_size=%d timeout=%d max_retries=%d run_dir=%s git_commit=%s model_version=%s",
+        args.target_file,
+        args.src,
+        args.dst,
+        args.batch_size,
+        args.timeout,
+        args.max_retries,
+        args.run_dir,
+        args.git_commit,
+        args.model_version,
+    )
 
     if args.report_file:
         try:
