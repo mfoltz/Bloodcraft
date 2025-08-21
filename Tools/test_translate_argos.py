@@ -251,6 +251,9 @@ def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
     install_hint = "argospm install translate-en_xx"
     assert install_hint in str(exc.value)
     assert install_hint in caplog.text
+    rebuild_hint = "cd Resources/Localization/Models/xx"
+    assert rebuild_hint in str(exc.value)
+    assert rebuild_hint in caplog.text
 
 
 def test_exit_when_translation_engine_attribute_error(tmp_path, monkeypatch, caplog):
@@ -303,6 +306,9 @@ def test_exit_when_translation_engine_attribute_error(tmp_path, monkeypatch, cap
     install_hint = "argospm install translate-en_xx"
     assert install_hint in str(exc.value)
     assert install_hint in caplog.text
+    rebuild_hint = "cd Resources/Localization/Models/xx"
+    assert rebuild_hint in str(exc.value)
+    assert rebuild_hint in caplog.text
 
 
 def test_missing_model_logs_install_hint(tmp_path, monkeypatch, caplog):
@@ -336,6 +342,9 @@ def test_missing_model_logs_install_hint(tmp_path, monkeypatch, caplog):
     hint = "argospm install translate-en_es"
     assert hint in str(exc.value)
     assert hint in caplog.text
+    rebuild_hint = "cd Resources/Localization/Models/es"
+    assert rebuild_hint in str(exc.value)
+    assert rebuild_hint in caplog.text
 
 
 def test_translates_only_specified_hashes(tmp_path, monkeypatch):
