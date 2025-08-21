@@ -438,7 +438,13 @@ def _run_translation(args, root: str) -> None:
         package = f"translate-{args.src}_{args.dst}"
         msg = (
             f"No Argos translation model for {args.src}->{args.dst}. "
-            f"Install it with `argospm install {package}`."
+            f"Install it with `argospm install {package}`. If split segments are\n"
+            f"present, rebuild and install from `Resources/Localization/Models/{args.dst}`:\n"
+            f"cd Resources/Localization/Models/{args.dst}\n"
+            "cat translate-*.z[0-9][0-9] translate-*.zip > model.zip\n"
+            "unzip -o model.zip\n"
+            "unzip -p translate-*.argosmodel */metadata.json | jq '.from_code, .to_code'\n"
+            "argos-translate install translate-*.argosmodel"
         )
         logger.error(msg)
         raise SystemExit(msg)
