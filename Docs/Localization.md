@@ -34,7 +34,19 @@ Only the JSON files in `Resources/Localization/Messages` contain user-facing mes
 
 Argos models are stored under `Resources/Localization/Models/<LANG>` as split archives and must be reconstructed and installed at the start of each session:
 
-1. **Verify model installation**
+1. **Reassemble and install the model**
+
+   ```bash
+   cd Resources/Localization/Models/<LANG>
+   cat translate-*.z[0-9][0-9] translate-*.zip > model.zip
+   unzip -o model.zip
+   unzip -p translate-*.argosmodel */metadata.json | jq '.from_code, .to_code'
+   argos-translate install translate-*.argosmodel
+   ```
+
+   Run these commands every session to rebuild the model archive and confirm the `from_code`/`to_code` pair.
+
+2. **Verify model installation**
 
    Ensure the Argos model for your target language is installed:
 
@@ -42,7 +54,7 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
    argos-translate --from en --to <iso-code> - < /dev/null
    ```
 
-2. **Run the translator**
+3. **Run the translator**
 
    ```bash
    python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --log-level INFO --overwrite
@@ -59,7 +71,7 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
    To refresh specific messages without touching the rest, pass one or more
    `--hash <hash>` options to translate only those hashes.
 
-3. **Handle skipped rows**
+4. **Handle skipped rows**
 
    Any hashes listed in `skipped.csv` within the run directory must be
    translated manually. Re-run the translator until the file is empty.
@@ -371,7 +383,7 @@ results to disk.
 
 ## Troubleshooting & Notes
 
-- **Argos model installation**: Some environments lack the `install` subcommand. Combine split archives and install using the Python API each session:
+- **Argos model installation**: If the `argos-translate install` subcommand is unavailable, reassemble the split archives as shown above and install using the Python API each session:
   ```bash
   cd Resources/Localization/Models/EN_ES
   cat translate-*.z[0-9][0-9] translate-*.zip > model.zip
