@@ -1744,8 +1744,9 @@ def test_report_cleared_between_runs(tmp_path, monkeypatch):
     translate_argos.main()
 
     rows = list(csv.DictReader(report_path.open()))
-    assert len(rows) == 1
+    assert len(rows) == 2
     assert rows[0]["hash"] == "h1"
+    assert rows[1]["category"] == "summary"
 
 
 def test_write_report_deduplicates_rows(tmp_path):
@@ -1756,8 +1757,9 @@ def test_write_report_deduplicates_rows(tmp_path):
     ]
     translate_argos._write_report(str(path), rows)
     out_rows = list(csv.DictReader(path.open()))
-    assert len(out_rows) == 1
+    assert len(out_rows) == 2
     assert out_rows[0]["reason"] == "r2"
+    assert out_rows[1]["category"] == "summary"
 
 
 def test_write_report_logs_counts_and_success(tmp_path, caplog):
@@ -1770,14 +1772,16 @@ def test_write_report_logs_counts_and_success(tmp_path, caplog):
     with caplog.at_level("INFO", logger="translate_argos"):
         translate_argos._write_report(str(path), rows)
     out_rows = list(csv.DictReader(path.open()))
-    assert len(out_rows) == 2
+    assert len(out_rows) == 3
+    assert out_rows[-1]["category"] == "summary"
     assert (
-        f"Received {len(rows)} rows; deduplicated to {len(out_rows)} rows"
+        f"Received {len(rows)} rows; deduplicated to {len(out_rows) - 1} rows"
         in caplog.text
     )
     assert (
-        f"Successfully wrote {len(out_rows)} rows to {path}" in caplog.text
+        f"Successfully wrote {len(out_rows) - 1} rows to {path}" in caplog.text
     )
+    assert "Category counts" in caplog.text
 
 
 def test_write_report_warns_on_failure(tmp_path, monkeypatch, caplog):

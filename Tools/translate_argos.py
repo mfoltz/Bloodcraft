@@ -343,21 +343,40 @@ def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3
     after_count = len(rows)
     logger.info("Received %d rows; deduplicated to %d rows", before_count, after_count)
 
+    counts: Counter[str] = Counter()
+    if rows:
+        for row in rows:
+            counts[row.get("category") or "unknown"] += 1
+
     ext = os.path.splitext(path)[1].lower()
     for attempt in range(1, max_retries + 1):
         try:
             with open(path, "w", encoding="utf-8", newline="") as fp:
                 if ext == ".json":
-                    json.dump(rows, fp, indent=2, ensure_ascii=False)
+                    out_rows = list(rows)
+                    if counts:
+                        out_rows.append({"summary": dict(counts)})
+                    json.dump(out_rows, fp, indent=2, ensure_ascii=False)
                 elif ext == ".csv":
                     writer = csv.DictWriter(
                         fp, fieldnames=["hash", "english", "reason", "category"]
                     )
                     writer.writeheader()
                     writer.writerows(rows)
+                    if counts:
+                        writer.writerow(
+                            {
+                                "hash": "",
+                                "english": "",
+                                "reason": json.dumps(dict(counts), ensure_ascii=False),
+                                "category": "summary",
+                            }
+                        )
                 else:
                     raise RuntimeError("Report file must end with .json or .csv")
             logger.info("Successfully wrote %d rows to %s", after_count, path)
+            if counts:
+                logger.info("Category counts: %s", dict(counts))
             break
         except Exception as exc:
             logger.warning(

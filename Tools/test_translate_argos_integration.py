@@ -138,7 +138,8 @@ def test_report_written_on_exception(tmp_path, monkeypatch):
         translate_argos.main()
 
     rows = list(csv.DictReader(report_path.open()))
-    assert [row["hash"] for row in rows] == ["h0"]
+    assert [row["hash"] for row in rows[:-1]] == ["h0"]
+    assert rows[-1]["category"] == "summary"
 
 
 def test_report_persisted_when_process_killed(tmp_path):
@@ -207,4 +208,5 @@ translate_argos.main()
     assert completed.returncode != 0
 
     rows = list(csv.DictReader(report_path.open()))
-    assert [row["hash"] for row in rows] == ["h0", "h1"]
+    assert [row["hash"] for row in rows[:-1]] == ["h0", "h1"]
+    assert rows[-1]["category"] == "summary"
