@@ -1555,6 +1555,8 @@ def test_token_only_lines_restored_without_skip(tmp_path, monkeypatch):
             str(root),
             "--report-file",
             str(report_path),
+            "--log-level",
+            "INFO",
         ],
     )
 
@@ -1738,6 +1740,8 @@ def test_report_cleared_between_runs(tmp_path, monkeypatch):
             str(root),
             "--report-file",
             str(report_path),
+            "--log-level",
+            "INFO",
         ],
     )
 
@@ -1762,7 +1766,7 @@ def test_write_report_deduplicates_rows(tmp_path):
     assert out_rows[1]["category"] == "summary"
 
 
-def test_write_report_logs_counts_and_success(tmp_path, caplog):
+def test_write_report_logs_counts(tmp_path, caplog):
     path = tmp_path / "out.csv"
     rows = [
         {"hash": "a", "english": "Hello", "reason": "r1", "category": "c"},
@@ -1778,10 +1782,6 @@ def test_write_report_logs_counts_and_success(tmp_path, caplog):
         f"Received {len(rows)} rows; deduplicated to {len(out_rows) - 1} rows"
         in caplog.text
     )
-    assert (
-        f"Successfully wrote {len(out_rows) - 1} rows to {path}" in caplog.text
-    )
-    assert "Category counts" in caplog.text
 
 
 def test_write_report_warns_on_failure(tmp_path, monkeypatch, caplog):
@@ -1801,6 +1801,81 @@ def test_write_report_warns_on_failure(tmp_path, monkeypatch, caplog):
         translate_argos._write_report(str(path), rows, max_retries=2)
     assert f"Failed to write report to {path} (attempt 1/2)" in caplog.text
     assert path.is_file()
+
+
+def test_report_written_once_and_deduplicated(tmp_path, monkeypatch, caplog):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"h1": "Hello", "h2": "Hi"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    report_path = root / "out.csv"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return text
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: True)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+
+    real_run_translation = translate_argos._run_translation
+
+    def dup_run_translation(args, root):
+        rows = real_run_translation(args, root)
+        return rows + rows
+
+    monkeypatch.setattr(translate_argos, "_run_translation", dup_run_translation)
+
+    calls: list[list[dict[str, str]]] = []
+    real_write_report = translate_argos._write_report
+
+    def counting_write_report(path, rows, **kwargs):
+        calls.append(list(rows))
+        return real_write_report(path, rows, **kwargs)
+
+    monkeypatch.setattr(translate_argos, "_write_report", counting_write_report)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--report-file",
+            str(report_path),
+            "--log-level",
+            "INFO",
+        ],
+    )
+
+    with caplog.at_level("INFO", logger="translate_argos"):
+        translate_argos.main()
+
+    assert len(calls) == 1
+    out_rows = list(csv.DictReader(report_path.open()))
+    hashes = [row["hash"] for row in out_rows[:-1]]
+    assert len(hashes) == len(set(hashes))
+    assert (
+        f"Wrote skip report to {report_path} with {len(out_rows) - 1} row(s)" in caplog.text
+    )
 
 
 def test_translate_preserves_special_tokens(tmp_path, monkeypatch):

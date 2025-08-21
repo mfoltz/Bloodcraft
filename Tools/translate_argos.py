@@ -325,8 +325,15 @@ def _write_json(path: str, data, *, max_retries: int = 3) -> None:
             time.sleep(0.1)
 
 
-def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3) -> None:
-    """Write translation ``rows`` to ``path`` as JSON or CSV."""
+def _write_report(
+    path: str, rows: list[dict[str, str]], *, max_retries: int = 3
+) -> tuple[int, Counter[str]]:
+    """Write translation ``rows`` to ``path`` as JSON or CSV.
+
+    Returns a tuple of ``(row_count, category_counts)`` where ``row_count`` is the
+    number of deduplicated rows written and ``category_counts`` is a ``Counter``
+    mapping categories to their respective counts.
+    """
     report_dir = os.path.dirname(path)
     if report_dir:
         os.makedirs(report_dir, exist_ok=True)
@@ -374,9 +381,6 @@ def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3
                         )
                 else:
                     raise RuntimeError("Report file must end with .json or .csv")
-            logger.info("Successfully wrote %d rows to %s", after_count, path)
-            if counts:
-                logger.info("Category counts: %s", dict(counts))
             break
         except Exception as exc:
             logger.warning(
@@ -389,6 +393,7 @@ def _write_report(path: str, rows: list[dict[str, str]], *, max_retries: int = 3
             if attempt == max_retries:
                 raise
             time.sleep(0.1)
+    return after_count, counts
 
 
 def _append_metrics_entry(args, **extra) -> dict:
@@ -862,11 +867,6 @@ def _run_translation(args, root: str) -> None:
                 f"Batch {batch_idx + 1}/{num_batches} end @ {batch_end - start:.2f}s "
                 f"({batch_end - batch_start:.2f}s)"
             )
-            if args.report_file:
-                try:
-                    _write_report(args.report_file, list(report.values()))
-                except Exception as e:
-                    logger.warning(f"Failed to flush skip report: {e}")
 
         def strict_retry(key: str) -> tuple[bool, str, int, bool, str | None]:
             nonlocal token_reorders
@@ -1009,16 +1009,9 @@ def _run_translation(args, root: str) -> None:
         )
         logger.info(summary_line)
     finally:
-        exc_type = sys.exc_info()[0]
-        if args.report_file:
-            try:
-                _write_report(
-                    args.report_file, list(report.values()), max_retries=args.max_retries
-                )
-            except Exception as e:
-                logger.warning(f"Failed to write skip report: {e}")
-                if exc_type is None:
-                    raise
+        pass
+
+    return list(report.values())
 
 
 def _run_dry_run(args, root: str) -> None:
@@ -1148,12 +1141,6 @@ def _run_dry_run(args, root: str) -> None:
         else:
             log_entry(key, original, translated)
 
-    if args.report_file:
-        try:
-            _write_report(args.report_file, list(report.values()))
-        except Exception as e:
-            logger.warning(f"Failed to write skip report: {e}")
-
     successes = processed_lines - len(failures)
 
     _append_metrics_entry(
@@ -1172,6 +1159,8 @@ def _run_dry_run(args, root: str) -> None:
         f"Metrics written to {args.metrics_file}"
     )
     logger.info(summary_line)
+
+    return list(report.values())
 
 
 def _load_report(path: str) -> list[dict[str, str]]:
@@ -1388,21 +1377,15 @@ def main():
         args.model_version,
     )
 
-    if args.report_file:
-        try:
-            _write_report(args.report_file, [])
-        except Exception as e:
-            logger.warning(f"Failed to initialize report file: {e}")
-
     remaining: list[dict[str, str]] = []
     try:
         if args.dry_run:
-            _run_dry_run(args, root)
+            remaining = _run_dry_run(args, root)
         else:
             prev_hashes: set[str] | None = None
             while True:
                 try:
-                    _run_translation(args, root)
+                    remaining = _run_translation(args, root)
                 except BaseException as exc:
                     write_failure_metrics(args, exc)
                     error_msg = str(exc) or exc.__class__.__name__
@@ -1414,7 +1397,6 @@ def main():
                     raise
                 if not args.report_file:
                     break
-                remaining = _load_report(args.report_file)
                 hashes = [row["hash"] for row in remaining]
                 if not hashes or set(hashes) == prev_hashes:
                     break
@@ -1463,10 +1445,16 @@ def main():
     finally:
         if args.report_file:
             try:
-                rows = _load_report(args.report_file)
-                _write_report(args.report_file, rows)
+                written, counts = _write_report(args.report_file, remaining)
+                logger.info(
+                    "Wrote skip report to %s with %d row(s)",
+                    args.report_file,
+                    written,
+                )
+                if counts:
+                    logger.info("Category counts: %s", dict(counts))
             except Exception as e:
-                logger.warning(f"Failed to flush skip report: {e}")
+                logger.warning(f"Failed to write skip report: {e}")
         for handler in logger.handlers:
             handler.flush()
             handler.close()
