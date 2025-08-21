@@ -432,10 +432,10 @@ def _run_translation(args, root: str) -> None:
             raise SystemExit(f"Failed to initialize Argos translation engine: {e}")
 
     if translator is None:
+        package = f"translate-{args.src}_{args.dst}"
         msg = (
             f"No Argos translation model for {args.src}->{args.dst}. "
-            "Assemble the model from module zip parts and install it for this session, "
-            "or run `.codex/install.sh`."
+            f"Install it with `argospm install {package}`."
         )
         logger.error(msg)
         raise SystemExit(msg)
