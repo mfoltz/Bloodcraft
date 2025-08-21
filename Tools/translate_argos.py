@@ -120,22 +120,13 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
 
 
 def unprotect(text: str, tokens: List[str]) -> str:
-    """Restore original tokens from ``[[TOKEN_n]]`` markers.
-
-    Validates that the placeholders appear in the expected order and count
-    before performing the substitution.
-    """
-
-    found = TOKEN_RE.findall(text)
-    expected = [str(i) for i in range(len(tokens))]
-    if found != expected:
-        raise ValueError(
-            f"Token sequence mismatch: expected {expected}, got {found}"
-        )
+    """Restore original tokens from ``[[TOKEN_n]]`` markers."""
 
     def repl(m: re.Match) -> str:
         idx = int(m.group(1))
-        return tokens[idx] if 0 <= idx < len(tokens) else m.group(0)
+        if idx >= len(tokens):
+            raise ValueError(f"Unknown token index: {idx}")
+        return tokens[idx]
 
     return TOKEN_RE.sub(repl, text)
 
