@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+import platform
 
 import pytest
 
@@ -1311,6 +1312,11 @@ def test_metrics_file_records_failure_reason(tmp_path, monkeypatch):
     assert "model_version" in entry
     assert entry["run_id"]
     assert entry["git_commit"] == "unknown"
+    assert entry["python_version"] == platform.python_version()
+    assert entry["argos_version"]
+    assert entry["metrics_file"] == str(metrics_files[0])
+    assert Path(entry["log_file"]).is_file()
+    assert Path(entry["report_file"]).is_file()
     assert Path(entry["run_dir"]).is_dir()
     assert entry["cli_args"]["dst"] == "xx"
     assert entry["processed"] == 1
@@ -1376,6 +1382,11 @@ def test_metrics_file_records_timeout(tmp_path, monkeypatch):
 
     data = json.loads(metrics_path.read_text())
     entry = data[-1]
+    assert entry["python_version"] == platform.python_version()
+    assert entry["argos_version"]
+    assert entry["metrics_file"] == str(metrics_path)
+    assert Path(entry["log_file"]).is_file()
+    assert Path(entry["report_file"]).is_file()
     assert entry["processed"] == 1
     assert entry["successes"] == 0
     assert entry["timeouts"] == 1

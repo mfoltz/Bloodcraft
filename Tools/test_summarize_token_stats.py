@@ -13,6 +13,12 @@ def test_aggregate():
                 "1": {"original_tokens": 1, "translated_tokens": 0, "reordered": False},
                 "2": {"original_tokens": 1, "translated_tokens": 1, "reordered": True},
             },
+            "run_id": "1",
+            "log_file": "log",
+            "report_file": "report",
+            "metrics_file": "metrics",
+            "python_version": "3",
+            "argos_version": "1",
         },
         {
             "file": "b.json",
@@ -20,6 +26,8 @@ def test_aggregate():
             "hash_stats": {
                 "2": {"original_tokens": 1, "translated_tokens": 1, "reordered": False}
             },
+            "run_id": "2",
+            "python_version": "3",
         },
     ]
     stats = sts._aggregate(entries)

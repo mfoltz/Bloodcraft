@@ -19,6 +19,7 @@ import time
 import logging
 import uuid
 import importlib.metadata
+import platform
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from typing import List
@@ -379,7 +380,11 @@ def _append_metrics_entry(args, **extra) -> dict:
         os.makedirs(metrics_dir, exist_ok=True)
     entry = {
         "run_id": args.run_id,
+        "log_file": args.log_file,
+        "report_file": args.report_file,
+        "metrics_file": args.metrics_file,
         "git_commit": args.git_commit,
+        "python_version": args.python_version,
         "argos_version": args.argos_version,
         "model_version": args.model_version,
         "cli_args": args.cli_args,
@@ -1112,6 +1117,7 @@ def main():
         args.argos_version = importlib.metadata.version("argostranslate")
     except Exception:
         args.argos_version = "unknown"
+    args.python_version = platform.python_version()
     try:
         from argostranslate import package as argos_package
 
