@@ -244,9 +244,10 @@ and `skipped.csv` in the repository root):
 python Tools/localization_pipeline.py --debug --metrics-file metrics.json --skipped-file skipped.csv
 ```
 
-Add `--archive-logs` to preserve per-language `translate_<Language>.log`
-and `skipped_<Language>.csv` files under `TranslationLogs/<timestamp>`
-for later investigation.
+Pass `--archive-logs` to archive each run directory under
+`TranslationLogs/<commit>/<timestamp>` for later investigation. Commit these
+directories to the repository so post-mortem reviews can trace issues back to
+the exact code version.
 
 This writes `localization_metrics.json` (or the path provided via
 `--metrics-file`). Each step records start/end timestamps and per-language
