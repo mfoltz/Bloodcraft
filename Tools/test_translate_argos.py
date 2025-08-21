@@ -205,6 +205,55 @@ def test_summary_and_success_logged_at_info(tmp_path, monkeypatch, caplog):
     )
 
 
+def test_dry_run_reports_mismatches(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"h1": "Hello {0} {1}", "h2": "Hi"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    target = {"Messages": {"h1": "Bonjour {1} {0}", "h2": "Salut"}}
+    (root / target_rel).write_text(json.dumps(target))
+
+    run_dir = root / "run"
+
+    def fail_get_translation(*_a, **_k):  # pragma: no cover - ensure not called
+        raise AssertionError("Argos should not be called in dry run")
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "get_translation_from_codes", fail_get_translation
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--run-dir",
+            str(run_dir),
+            "--dry-run",
+        ],
+    )
+
+    translate_argos.main()
+
+    report_rows = list(csv.DictReader((run_dir / "skipped.csv").open()))
+    assert any(row["hash"] == "h1" and "tokens reordered" in row["reason"] for row in report_rows)
+
+    metrics = json.loads((run_dir / "translate_metrics.json").read_text())
+    entry = metrics[-1]
+    assert entry["dry_run"] is True
+    assert entry["processed"] == 2
+    assert entry["token_reorders"] == 1
+    assert entry["successes"] == 1
+
+
 def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
