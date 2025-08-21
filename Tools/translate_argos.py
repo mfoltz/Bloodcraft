@@ -3,6 +3,9 @@
 
 Lines exceeding the timeout are skipped and listed in the report.
 Use ``--hash`` to restrict translation to specific hashes for targeted updates.
+
+After each run, summarise results and fail fast on remaining issues with
+``python Tools/validate_translation_run.py --run-dir <directory>``.
 """
 
 import argparse
