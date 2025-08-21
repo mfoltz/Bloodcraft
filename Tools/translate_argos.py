@@ -997,7 +997,7 @@ def main():
         "--run-dir",
         help=(
             "Directory to store logs, reports, and metrics. "
-            "Defaults to TranslationRuns/<lang>/<timestamp>/ under --root"
+            "Defaults to translations/<lang>/<timestamp>/ under --root"
         ),
     )
     ap.add_argument("--batch-size", type=int, default=100, help="Number of lines to translate per request")
@@ -1039,20 +1039,23 @@ def main():
     )
     ap.add_argument(
         "--log-file",
-        help="Write log output to this file; missing directories are created",
+        help=(
+            "Write log output to this file (default: translate.log in run directory); "
+            "missing directories are created"
+        ),
     )
     ap.add_argument(
         "--report-file",
         help=(
-            "Write skipped hashes and reasons to this JSON or CSV file; "
-            "missing directories are created"
+            "Write skipped hashes and reasons to this JSON or CSV file "
+            "(default: skipped.csv in run directory); missing directories are created"
         ),
     )
     ap.add_argument(
         "--metrics-file",
         help=(
-            "Append translation metrics to this JSON file; "
-            "defaults to translate_metrics.json under --root"
+            "Append translation metrics to this JSON file "
+            "(default: translate_metrics.json in run directory)"
         ),
     )
     args = ap.parse_args()
@@ -1068,7 +1071,7 @@ def main():
             else os.path.join(root, args.run_dir)
         )
     else:
-        run_dir = os.path.join(root, "TranslationRuns", args.dst, timestamp)
+        run_dir = os.path.join(root, "translations", args.dst, timestamp)
     os.makedirs(run_dir, exist_ok=True)
     args.run_dir = run_dir
 

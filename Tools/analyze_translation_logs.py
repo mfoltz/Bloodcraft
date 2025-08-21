@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Summarize translation log failures.
 
-This script reads ``translate_metrics.json`` and ``skipped.csv`` from the
-repository root and prints counts of failures grouped by category. Paths may be
-overridden via ``--metrics-file`` and ``--skipped-file`` to inspect a specific
-run directory. Metrics entries include metadata such as ``run_id``, ``git_commit``,
-``model_version``, ``run_dir``, and ``cli_args`` which are emitted at debug level. The script
-exits with a non-zero status if any token mismatches or placeholder-only
+This script reads ``translate_metrics.json`` and ``skipped.csv`` and prints counts
+of failures grouped by category. By default the files are looked up under the
+repository root, but ``--run-dir`` can point to a translation run directory.
+Paths may also be overridden individually via ``--metrics-file`` and
+``--skipped-file``. Metrics entries include metadata such as ``run_id``,
+``git_commit``, ``model_version``, ``run_dir``, and ``cli_args`` which are emitted at
+debug level. The script exits with a non-zero status if any token mismatches or
+placeholder-only
 failures remain so CI systems can fail fast. Categories include ``english``,
 ``identical``, ``sentinel``, ``token_mismatch``, and ``placeholder``.
 """
@@ -88,14 +90,16 @@ def main() -> None:
         help="Logging level (default: INFO)",
     )
     ap.add_argument(
+        "--run-dir",
+        help="Translation run directory containing translate_metrics.json and skipped.csv",
+    )
+    ap.add_argument(
         "--metrics-file",
-        default=str(ROOT / "translate_metrics.json"),
-        help="Path to translate_metrics.json (default: translate_metrics.json under the repository root)",
+        help="Path to translate_metrics.json (overrides --run-dir)",
     )
     ap.add_argument(
         "--skipped-file",
-        default=str(ROOT / "skipped.csv"),
-        help="Path to skipped.csv (default: skipped.csv under the repository root)",
+        help="Path to skipped.csv (overrides --run-dir)",
     )
     args = ap.parse_args()
 
@@ -105,13 +109,25 @@ def main() -> None:
         stream=sys.stdout,
     )
 
-    metrics_path = Path(args.metrics_file)
-    if not metrics_path.is_absolute():
+    run_dir = Path(args.run_dir) if args.run_dir else None
+    metrics_path = Path(args.metrics_file) if args.metrics_file else None
+    skipped_path = Path(args.skipped_file) if args.skipped_file else None
+
+    if run_dir:
+        if metrics_path is None:
+            metrics_path = run_dir / "translate_metrics.json"
+        if skipped_path is None:
+            skipped_path = run_dir / "skipped.csv"
+
+    if metrics_path is None:
+        metrics_path = ROOT / "translate_metrics.json"
+    elif not metrics_path.is_absolute():
         metrics_path = ROOT / metrics_path
     metric_counts: Counter[str] = _summarize_metrics(metrics_path)
 
-    skipped_path = Path(args.skipped_file)
-    if not skipped_path.is_absolute():
+    if skipped_path is None:
+        skipped_path = ROOT / "skipped.csv"
+    elif not skipped_path.is_absolute():
         skipped_path = ROOT / skipped_path
     skipped_counts = _summarize_skipped(skipped_path)
 

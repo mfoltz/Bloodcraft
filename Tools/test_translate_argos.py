@@ -1256,7 +1256,7 @@ def test_metrics_file_records_failure_reason(tmp_path, monkeypatch):
 
     translate_argos.main()
 
-    metrics_files = list((root / "TranslationRuns" / "xx").glob("*/translate_metrics.json"))
+    metrics_files = list((root / "translations" / "xx").glob("*/translate_metrics.json"))
     assert len(metrics_files) == 1
     data = json.loads(metrics_files[0].read_text())
     entry = data[-1]
@@ -1264,6 +1264,7 @@ def test_metrics_file_records_failure_reason(tmp_path, monkeypatch):
     assert entry["run_id"]
     assert entry["git_commit"] == "unknown"
     assert Path(entry["run_dir"]).is_dir()
+    assert entry["cli_args"]["dst"] == "xx"
     assert entry["processed"] == 1
     assert entry["successes"] == 0
     assert entry["timeouts"] == 0
