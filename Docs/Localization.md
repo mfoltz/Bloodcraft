@@ -51,7 +51,7 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
    Omitting `--overwrite` translates only missing entries and keeps existing
    translations intact. Use `--overwrite` sparingly, as it retranslates every
   line and can reprocess thousands of entries unnecessarily. Outputs are saved
-  under `translations/<iso-code>/<timestamp>/` by default; override with
+  under `TranslationRuns/<iso-code>/<timestamp>/` by default; override with
   `--run-dir` if a custom location is desired. The translator writes
   `translate.log`, `skipped.csv`, and `translate_metrics.json` to this run
   directory.
@@ -66,7 +66,7 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
    Summarise each run and fail fast on unresolved issues:
 
     ```bash
-    python Tools/validate_translation_run.py --run-dir translations/<iso-code>/<timestamp>
+    python Tools/validate_translation_run.py --run-dir TranslationRuns/<iso-code>/<timestamp>
     ```
 
     The script reports how many entries were translated or skipped and
@@ -88,7 +88,7 @@ make sample-translate
    translation log:
 
    ```bash
-   python Tools/collect_skipped_hashes.py --log-file translations/<iso-code>/<timestamp>/translate.log --csv mismatches.csv
+   python Tools/collect_skipped_hashes.py --log-file TranslationRuns/<iso-code>/<timestamp>/translate.log --csv mismatches.csv
    ```
 
    Omit `--csv` to print the unique hashes to stdout.
@@ -351,7 +351,7 @@ By default, the script reads `translate_metrics.json` and `skipped.csv` from
 the repository root. Override these paths to analyse a specific run directory:
 
 ```bash
-python Tools/analyze_translation_logs.py --metrics-file translations/French/2025-05-16/translate_metrics.json --skipped-file translations/French/2025-05-16/skipped.csv
+python Tools/analyze_translation_logs.py --metrics-file TranslationRuns/French/2025-05-16/translate_metrics.json --skipped-file TranslationRuns/French/2025-05-16/skipped.csv
 ```
 
 The script lists token mismatches or placeholder-only entries and exits

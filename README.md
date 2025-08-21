@@ -812,7 +812,7 @@ This process applies only to files under `Resources/Localization/Messages`.
    Use `--overwrite` when translating after propagating hashes so English text is replaced by its translation.
 3. **Translate missing entries.**
    `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --log-level INFO --overwrite`
-   Outputs are saved under `translations/<iso-code>/<timestamp>/` (override with `--run-dir`). Verify the Argos model is installed before running translations: `argos-translate --from en --to tr - < /dev/null` (replace `tr` with the target code). Any hashes listed in `skipped.csv` within the run directory must be manually translated and the script re-run to confirm they are handled.
+   Outputs are saved under `TranslationRuns/<iso-code>/<timestamp>/` (override with `--run-dir`). Verify the Argos model is installed before running translations: `argos-translate --from en --to tr - < /dev/null` (replace `tr` with the target code). Any hashes listed in `skipped.csv` within the run directory must be manually translated and the script re-run to confirm they are handled.
 4. **Check and fix tokens.**
    ```bash
    python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
@@ -866,7 +866,7 @@ Rebuild and install models at the start of every session; they are not persisted
 | EN_ZH | Simplified Chinese (`zh`) |
 | EN_ZT | Traditional Chinese — non‑ISO `zt` |
 
-`Tools/translate_argos.py` uses the `argostranslate` Python API and protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Tokens must be preserved, but they may be reordered when grammar requires; the script logs a warning if their order changes. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. Set `--log-level INFO` to display each entry as it is processed or `DEBUG` for more detail. Translation logs (`translate.log`), skip reports (`skipped.csv`), and metrics (`translate_metrics.json`) are written to the run directory (`translations/<lang>/<timestamp>` by default). `translate_argos.py` accepts `--batch-size`, `--max-retries`, `--timeout`, and `--run-dir` options. Re-run it on a clean copy of `Spanish.json` to restart translations from scratch. `Tools/translate.py` remains for backward compatibility but prints a deprecation warning.
+`Tools/translate_argos.py` uses the `argostranslate` Python API and protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Tokens must be preserved, but they may be reordered when grammar requires; the script logs a warning if their order changes. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. Set `--log-level INFO` to display each entry as it is processed or `DEBUG` for more detail. Translation logs (`translate.log`), skip reports (`skipped.csv`), and metrics (`translate_metrics.json`) are written to the run directory (`TranslationRuns/<lang>/<timestamp>` by default). `translate_argos.py` accepts `--batch-size`, `--max-retries`, `--timeout`, and `--run-dir` options. Re-run it on a clean copy of `Spanish.json` to restart translations from scratch. `Tools/translate.py` remains for backward compatibility but prints a deprecation warning.
 
 Run `Tools/fix_tokens.py` after translating to restore `<...>` tags and `{...}` placeholders if any `[[TOKEN_n]]` markers remain. Use `--check-only` to report discrepancies without modifying files.
 

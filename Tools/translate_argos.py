@@ -977,7 +977,7 @@ def main():
         "--run-dir",
         help=(
             "Directory to store logs, reports, and metrics. "
-            "Defaults to translations/<lang>/<timestamp>/ under --root"
+            "Defaults to TranslationRuns/<lang>/<timestamp>/ under --root"
         ),
     )
     ap.add_argument("--batch-size", type=int, default=100, help="Number of lines to translate per request")
@@ -1048,7 +1048,7 @@ def main():
             else os.path.join(root, args.run_dir)
         )
     else:
-        run_dir = os.path.join(root, "translations", args.dst, timestamp)
+        run_dir = os.path.join(root, "TranslationRuns", args.dst, timestamp)
     os.makedirs(run_dir, exist_ok=True)
     args.run_dir = run_dir
 

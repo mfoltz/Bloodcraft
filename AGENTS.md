@@ -47,7 +47,7 @@ Current PRDs and task lists are stored in `.project-management/current-prd/`, wh
    Use `--overwrite` when translating after propagating hashes so English text is replaced by its translation.
 3. **Translate missing entries.**
    `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --log-level INFO --overwrite`
-   Outputs are written to `translations/<iso-code>/<timestamp>/` (override with `--run-dir`). Verify the Argos model is installed before running translations: `argos-translate --from en --to tr - < /dev/null` (substitute the target code for `tr`).
+   Outputs are written to `TranslationRuns/<iso-code>/<timestamp>/` (override with `--run-dir`). Verify the Argos model is installed before running translations: `argos-translate --from en --to tr - < /dev/null` (substitute the target code for `tr`).
    `--log-level` helps pinpoint skipped or untranslated strings. Any hashes listed in `skipped.csv` within the run directory must be manually translated and the script re‑run to confirm they are handled.
 4. **Fix tokens after manual translation.**
    `python Tools/fix_tokens.py Resources/Localization/Messages/Turkish.json`
