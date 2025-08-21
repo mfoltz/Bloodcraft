@@ -1255,7 +1255,7 @@ def test_metrics_file_records_failure_reason(tmp_path, monkeypatch):
 
     translate_argos.main()
 
-    metrics_files = list((root / "translations" / "xx").glob("*/translate_metrics.json"))
+    metrics_files = list((root / "TranslationRuns" / "xx").glob("*/translate_metrics.json"))
     assert len(metrics_files) == 1
     data = json.loads(metrics_files[0].read_text())
     entry = data[-1]
