@@ -26,7 +26,7 @@ Propagate hash keys from the English source into each language file by running:
 python Tools/propagate_hashes.py Resources/Localization/Messages/<Language>.json
 ```
 
-The script preserves existing translations, adds any new English hashes, and removes obsolete ones. See [`Tools/propagate_hashes.py`](../Tools/propagate_hashes.py) for details.
+The script preserves existing translations, adds any new English hashes, and removes obsolete ones. Run it before any translation work so each language file stays in sync with English. See [`Tools/propagate_hashes.py`](../Tools/propagate_hashes.py) for details.
 
 ## Automated Translation for Messages
 
@@ -82,6 +82,14 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
 
    The script exits with a non-zero status when any skips or failures remain so CI can detect issues.
 
+   After the translator finishes, verify that placeholder tokens remain intact and counts match the English source:
+
+   ```bash
+   python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
+   ```
+
+   Run this check after every translation pass. If mismatches are reported, run `fix_tokens.py` without `--check-only` to repair the file and re-run the translator.
+
 4. **Handle skipped rows**
 
    Any hashes listed in `skipped.csv` within the run directory must be
@@ -102,6 +110,8 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
    ```
 
    This prints the number of rows per category so manual fixes can be prioritised.
+
+   Do not commit translations until `skipped.csv` is empty and `python Tools/fix_tokens.py --check-only` reports no token mismatches, confirming placeholder counts match the English file.
 
 ### Sample translation dataset
 
@@ -155,12 +165,12 @@ make sample-translate
 
 4. **Fix tokens**
 
-   ```bash
-   python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
-   python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json
-   ```
+```bash
+python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
+python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json
+```
 
-   Run the check-only mode first to fail fast if tokens were altered, then apply the fixes.
+Run the check-only mode first to fail fast if tokens were altered, then apply the fixes. Perform this validation after every translation pass and before committing changes.
 
 ### Token warnings
 
