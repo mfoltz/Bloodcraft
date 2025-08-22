@@ -415,7 +415,7 @@
     "2997561401": "<color=#00FFFF>{0}</color> has been chosen for <color=#c0c0c0>{1}</color>!",
     "2687655344": "Your weapon stats have been reset for <color=#c0c0c0>{0}</color>!",
     "1454481026": "You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{0}</color>x<color=white>{1}</color>)",
-    "2508084566": "Level must be between 0 and {MaxLevel}.",
+    "2508084566": "El nivel debe estar entre 0 y {0}.",
     "3227554981": "<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>",
     "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
     "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
