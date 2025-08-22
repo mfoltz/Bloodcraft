@@ -7,12 +7,22 @@ import pytest
 import translate_argos
 
 
+@pytest.fixture(autouse=True)
+def _stub_check_output(monkeypatch):
+    def fake_check_output(cmd, *a, **k):
+        if cmd and cmd[0] == "git":
+            raise subprocess.CalledProcessError(1, cmd)
+        return b""
+
+    monkeypatch.setattr(subprocess, "check_output", fake_check_output)
+
+
 def test_protect_unprotect_simple_tokens():
     text = "Attack {0}!"
     safe, tokens = translate_argos.protect_strict(text)
     assert list(tokens.values()) == ["{0}"]
     token_id = next(iter(tokens))
-    assert f"⟦T{token_id}⟧" in safe
+    assert f"[[TOKEN_{token_id}]]" in safe
     assert translate_argos.unprotect(safe, tokens) == text
 
 
@@ -84,7 +94,7 @@ def test_sentinel_round_trip():
     text = "<b>{0}</b>"
     safe, tokens = translate_argos.protect_strict(text)
     ids = list(tokens.keys())
-    result = "".join(f"⟦T{tid}⟧" for tid in ids) + " [[ TOKEN_SENTINEL ]]"
+    result = "".join(f"[[TOKEN_{tid}]]" for tid in ids) + " [[ TOKEN_SENTINEL ]]"
     normalized = translate_argos.normalize_tokens(result)
     restored = translate_argos.unprotect(normalized, tokens)
     assert restored == text
@@ -95,8 +105,8 @@ def test_mixed_placeholders_round_trip_with_reorder():
     safe, tokens = translate_argos.protect_strict(text)
     ids = list(tokens.keys())
     translation = (
-        f"⟦T{ids[1]}⟧⟦T{ids[2]}⟧⟦T{ids[0]}⟧ "
-        f"⟦T{ids[4]}⟧⟦T{ids[3]}⟧⟦T{ids[5]}⟧"
+        f"[[TOKEN_{ids[1]}]][[TOKEN_{ids[2]}]][[TOKEN_{ids[0]}]] "
+        f"[[TOKEN_{ids[4]}]][[TOKEN_{ids[3]}]][[TOKEN_{ids[5]}]]"
     )
     normalized = translate_argos.normalize_tokens(translation)
     reordered, changed = translate_argos.reorder_tokens(normalized, ids)

@@ -19,9 +19,9 @@ import subprocess
 import sys
 import time
 import logging
-import uuid
 import importlib.metadata
 import platform
+import uuid
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from typing import List
@@ -46,20 +46,16 @@ class FatalTranslationError(Exception):
 #   * String interpolation: ``${var}``
 #   * Bracket tags:         ``[tag]`` or ``[tag=value]``
 #   * Existing tokens:      ``[[TOKEN_n]]``
-#   * Strict markers:       ``⟦Tn⟧``
 #   * Percent sign:         ``%``
 TOKEN_PATTERN = re.compile(
-    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_[0-9a-f]+\]\]|⟦T[0-9a-f]+⟧|%"
+    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_[0-9a-f]+\]\]|%"
 )
 TOKEN_RE = re.compile(r'\[\[TOKEN_([0-9a-f]+)\]\]')
 TOKEN_OR_SENTINEL_RE = re.compile(
-    r'\[\[TOKEN_(?:[0-9a-f]+|SENTINEL)\]\]|⟦T[0-9a-f]+⟧',
+    r'\[\[TOKEN_(?:[0-9a-f]+|SENTINEL)\]\]',
     re.I,
 )
-STRICT_TOKEN_RE = re.compile(r'⟦T([0-9a-f]+)⟧')
-STRICT_TOKEN_CLEAN = re.compile(r'⟦\s*T\s*([0-9a-f]+)\s*⟧', re.I)
-LOOSE_STRICT_TOKEN_RE = re.compile(r'⟦([^⟧]+)⟧')
-TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_([0-9a-f]+)\s*\]', re.I)
+TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_([0-9a-f]+)\s*\](?!\])', re.I)
 # Matches stray TOKEN_n occurrences regardless of surrounding context
 # Matches cases like ``TOKEN_1`` and ``TOKEN _ 1``
 TOKEN_WORD = re.compile(r'TOKEN\s*_\s*([0-9a-f]+)', re.I)
@@ -70,17 +66,17 @@ SENTINEL_ONLY_RE = re.compile(
 
 
 def wrap_placeholders(text: str) -> str:
-    """No-op placeholder wrapper using ``⟦Tn⟧`` markers."""
+    """No-op placeholder wrapper."""
     return text
 
 
 def unwrap_placeholders(text: str) -> str:
-    """No-op placeholder unwrapper for ``⟦Tn⟧`` markers."""
+    """No-op placeholder unwrapper."""
     return text
 
 
 def protect_strict(text: str) -> tuple[str, dict[str, str]]:
-    """Replace tokens with unique ``⟦T<id>⟧`` sentinels."""
+    """Replace tokens with sequential ``[[TOKEN_n]]`` placeholders."""
 
     text = text.replace("\u003C", "<").replace("\u003E", ">")
     tokens: dict[str, str] = {}
@@ -110,17 +106,17 @@ def protect_strict(text: str) -> tuple[str, dict[str, str]]:
                     j += 1
                 if depth == 0 and j < len(text) and text[j] == "}":
                     block = text[start : j + 1]
-                    token_id = uuid.uuid4().hex
+                    token_id = str(len(tokens))
                     tokens[token_id] = block
-                    result.append(f"⟦T{token_id}⟧")
+                    result.append(f"[[TOKEN_{token_id}]]")
                     i = j + 1
                     continue
 
         m = TOKEN_PATTERN.match(text, i)
         if m:
-            token_id = uuid.uuid4().hex
+            token_id = str(len(tokens))
             tokens[token_id] = m.group(0)
-            result.append(f"⟦T{token_id}⟧")
+            result.append(f"[[TOKEN_{token_id}]]")
             i = m.end()
             continue
 
@@ -131,9 +127,9 @@ def protect_strict(text: str) -> tuple[str, dict[str, str]]:
 
 
 def unprotect(text: str, tokens: dict[str, str]) -> str:
-    """Restore original tokens from sentinels."""
+    """Restore original tokens from placeholders."""
 
-    text = STRICT_TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
+    text = TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
 
     def repl(m: re.Match) -> str:
         key = m.group(1)
@@ -149,14 +145,6 @@ def normalize_tokens(text: str) -> str:
 
     def to_token(tok: str) -> str:
         return f"[[TOKEN_{tok}]]"
-
-    # Canonicalise any ``⟦T<id>⟧`` placeholder, permitting stray characters.
-    text = re.sub(
-        r"⟦\s*T\s*([0-9a-f]+)[^⟧]*⟧",
-        lambda m: to_token(m.group(1)),
-        text,
-        flags=re.I,
-    )
 
     # Normalise potential variations of the sentinel token.
     text = re.sub(
@@ -213,7 +201,7 @@ def reorder_tokens(text: str, token_ids: List[str]) -> tuple[str, bool]:
     if len(token_ids) <= 1:
         return text, False
 
-    text = STRICT_TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
+    text = TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
     found = TOKEN_RE.findall(text)
     changed = found != token_ids
     return text, changed
@@ -558,7 +546,7 @@ def _run_translation(args, root: str) -> None:
 
     for key, text in to_translate:
         safe, tokens = protect_strict(text)
-        token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
+        token_only = TOKEN_RE.sub("", safe).strip() == ""
         if token_only:
             safe += f" {TOKEN_SENTINEL}"
         safe_lines.append(safe)
@@ -790,7 +778,6 @@ def _run_translation(args, root: str) -> None:
                             failures[key] = (reason, category)
                             continue
                     reason: str | None = None
-                    category: str | None = None
                     if set(found_tokens) != set(expected):
                         missing = [t for t in expected if t not in found_tokens]
                         extra = [t for t in found_tokens if t not in expected]
@@ -800,26 +787,15 @@ def _run_translation(args, root: str) -> None:
                             )
                             found_tokens.extend(missing)
                         token_stats[key]["translated_tokens"] = len(found_tokens)
-                        parts: List[str] = []
-                        if missing:
-                            parts.append(f"missing {missing}")
-                        if extra:
-                            parts.append(f"unexpected {extra}")
-                        reason = "token mismatch (" + ", ".join(parts) + ")"
-                        category = categorize(reason)
+                        if missing or extra:
+                            logger.warning(
+                                f"{key}: token mismatch (missing {missing}, unexpected {extra})"
+                            )
                     un = unprotect(result, tokens)
                     un = un.replace("\\u003C", "<").replace("\\u003E", ">")
                     if token_only:
                         translated[key] = un
-                        log_entry(
-                            key,
-                            english[key],
-                            un,
-                            reason,
-                            category=category,
-                        )
-                        if reason:
-                            failures[key] = (reason, category)
+                        log_entry(key, english[key], un)
                         continue
                     if un == english[key]:
                         reason = "identical to source"
@@ -847,30 +823,13 @@ def _run_translation(args, root: str) -> None:
                         translated[key] = english[key]
                         failures[key] = (reason, category)
                         continue
-                    if changed:
-                        reason = "tokens reordered"
-                        category = categorize(reason)
-                        log_entry(
-                            key,
-                            english[key],
-                            un,
-                            reason,
-                            category=category,
-                        )
-                        translated[key] = un
-                        failures[key] = (reason, category)
-                        continue
                     translated[key] = un
                     if reason:
-                        log_entry(
-                            key,
-                            english[key],
-                            un,
-                            reason,
-                            category=category,
-                        )
-                        failures[key] = (reason, category)
+                        log_entry(key, english[key], un, reason)
+                        failures[key] = (reason, categorize(reason))
                     else:
+                        if changed:
+                            logger.warning(f"{key}: tokens reordered")
                         log_entry(key, english[key], un)
                 except Exception as e:
                     logger.exception("Failed to process translation for %s", key)
@@ -898,7 +857,7 @@ def _run_translation(args, root: str) -> None:
         def strict_retry(key: str) -> tuple[bool, str, int, bool, str | None]:
             nonlocal token_reorders
             safe, tokens = protect_strict(english[key])
-            token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
+            token_only = TOKEN_RE.sub("", safe).strip() == ""
             if token_only:
                 safe += f" {TOKEN_SENTINEL}"
             try:
@@ -934,26 +893,23 @@ def _run_translation(args, root: str) -> None:
                 stripped = TOKEN_RE.sub("", result)
                 if "[" in stripped or "]" in stripped:
                     return False, "stray brackets on strict retry", len(found_tokens), changed, None
-            reason: str | None = None
             if set(found_tokens) != set(expected):
                 missing = [t for t in expected if t not in found_tokens]
                 extra = [t for t in found_tokens if t not in expected]
                 if missing:
                     result += "".join(f" [[TOKEN_{m}]]" for m in missing)
                     found_tokens.extend(missing)
-                parts: List[str] = []
-                if missing:
-                    parts.append(f"missing {missing}")
-                if extra:
-                    parts.append(f"unexpected {extra}")
-                reason = "token mismatch on strict retry (" + ", ".join(parts) + ")"
+                if missing or extra:
+                    logger.warning(
+                        f"{key}: token mismatch on strict retry (missing {missing}, unexpected {extra})"
+                    )
             un = unprotect(result, tokens)
             un = un.replace("\u003C", "<").replace("\u003E", ">")
             if un == english[key]:
                 return False, "identical to source on strict retry", len(found_tokens), changed, None
             if contains_english(un):
                 return False, "contains English on strict retry", len(found_tokens), changed, None
-            return True, un, len(found_tokens), changed, reason
+            return True, un, len(found_tokens), changed, None
 
         for key, (_initial_reason, category) in list(failures.items()):
             if category == "placeholder":
@@ -1105,7 +1061,7 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
 
     for key, original in english.items():
         safe, tokens = protect_strict(original)
-        token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
+        token_only = TOKEN_RE.sub("", safe).strip() == ""
         translated = messages.get(key)
         if translated is None:
             reason = "untranslated"

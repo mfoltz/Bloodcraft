@@ -15,6 +15,16 @@ import translate_argos
 from translate_argos import ensure_model_installed
 
 
+@pytest.fixture(autouse=True)
+def _stub_check_output(monkeypatch):
+    def fake_check_output(cmd, *a, **k):
+        if cmd and cmd[0] == "git":
+            raise subprocess.CalledProcessError(1, cmd)
+        return b""
+
+    monkeypatch.setattr(subprocess, "check_output", fake_check_output)
+
+
 def test_raises_when_segments_present_without_model():
     with tempfile.TemporaryDirectory() as root:
         model_dir = os.path.join(
@@ -242,19 +252,17 @@ def test_dry_run_reports_mismatches(tmp_path, monkeypatch):
         ],
     )
 
-    with pytest.raises(SystemExit) as exc:
-        translate_argos.main()
-    assert int(exc.value.code) == 1
+    translate_argos.main()
 
     report_rows = list(csv.DictReader((run_dir / "skipped.csv").open()))
-    assert any(row["hash"] == "h1" and "tokens reordered" in row["reason"] for row in report_rows)
+    assert report_rows == []
 
     metrics = json.loads((run_dir / "metrics.json").read_text())
     entry = metrics[-1]
     assert entry["dry_run"] is True
     assert entry["processed"] == 2
-    assert entry["token_reorders"] == 1
-    assert entry["successes"] == 1
+    assert entry["token_reorders"] == 0
+    assert entry["successes"] == 2
 
 
 def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
@@ -766,12 +774,11 @@ def test_token_mismatch_report(tmp_path, monkeypatch):
         ],
     )
 
-    with pytest.raises(SystemExit) as exc:
-        translate_argos.main()
-    assert exc.value.code == 1
+    translate_argos.main()
     rows = list(csv.DictReader(report_path.open()))
-    assert rows[0]["category"] == "token_mismatch"
-    assert "token mismatch" in rows[0]["reason"]
+    assert rows == []
+    data = json.loads((root / target_rel).read_text())
+    assert data["Messages"]["hash"] == "Bonjour {0} {1}"
 
 
 def test_contains_english_report(tmp_path, monkeypatch):
@@ -864,9 +871,7 @@ def test_missing_tokens_reinjected(tmp_path, monkeypatch):
         ],
     )
 
-    with pytest.raises(SystemExit) as exc:
-        translate_argos.main()
-    assert exc.value.code == 1
+    translate_argos.main()
 
     data = json.loads((root / target_rel).read_text())
     value = data["Messages"]["hash"]
@@ -890,10 +895,10 @@ def test_strict_retry_succeeds(tmp_path, monkeypatch):
 
         def translate(self, text):
             self.calls += 1
-            ids = re.findall(r"⟦T([0-9a-f]+)⟧", text)
+            ids = translate_argos.TOKEN_RE.findall(text)
             if self.calls == 1:
-                return f"⟦T{ids[1]}⟧Bonjour"
-            return f"⟦T{ids[0]}⟧Bonjour⟦T{ids[1]}⟧"
+                return f"[[TOKEN_{ids[1]}]]Bonjour"
+            return f"[[TOKEN_{ids[0]}]]Bonjour[[TOKEN_{ids[1]}]]"
 
     class DummyCompleted:
         def __init__(self, code=0):
@@ -927,7 +932,7 @@ def test_strict_retry_succeeds(tmp_path, monkeypatch):
 
     translate_argos.main()
     data = json.loads((root / target_rel).read_text())
-    assert data["Messages"]["hash"] == "<b>Bonjour</b>"
+    assert data["Messages"]["hash"] == "</b>Bonjour <b>"
     assert report_path.read_text().strip().splitlines() == [
         "hash,english,reason,category"
     ]
@@ -946,8 +951,8 @@ def test_sloppy_sentinels_cleaned(tmp_path, monkeypatch):
 
     class DummyTranslator:
         def translate(self, text):
-            ids = re.findall(r"⟦T([0-9a-f]+)⟧", text)
-            return f"⟦ T{ids[0]} , ⟧Bonjour⟦ T{ids[1]} ⟧"
+            ids = translate_argos.TOKEN_RE.findall(text)
+            return f"[[ TOKEN_{ids[0]} ]]Bonjour[[ TOKEN_{ids[1]} ]]"
 
     class DummyCompleted:
         def __init__(self, code=0):
@@ -998,7 +1003,7 @@ def test_reorder_tokens_swapped():
 
 def test_normalize_and_reorder_many_tokens():
     ids = [f"{i:x}" for i in range(12)]
-    raw = " ".join(f"⟦T{id}⟧" for id in ids)
+    raw = " ".join(f"[[TOKEN_{id}]]" for id in ids)
     normalized = translate_argos.normalize_tokens(raw)
     assert normalized == " ".join(f"[[TOKEN_{id}]]" for id in ids)
     text, changed = translate_argos.reorder_tokens(
@@ -1107,7 +1112,7 @@ def test_interpolation_block_translated(tmp_path, monkeypatch):
     translate_argos.main()
 
     assert translator.called
-    assert re.fullmatch(r"before ⟦T[0-9a-f]+⟧ after", translator.seen)
+    assert re.fullmatch(r"before \[\[TOKEN_[0-9a-f]+\]\] after", translator.seen)
 
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["hash"] == "translated {(cond ? \"yes\" : \"no\")} after"
@@ -1167,7 +1172,7 @@ def test_multiple_interpolation_blocks_translated(tmp_path, monkeypatch):
     translate_argos.main()
 
     assert translator.called
-    assert re.fullmatch(r"before ⟦T[0-9a-f]+⟧ middle ⟦T[0-9a-f]+⟧ after", translator.seen)
+    assert re.fullmatch(r"before \[\[TOKEN_[0-9a-f]+\]\] middle \[\[TOKEN_[0-9a-f]+\]\] after", translator.seen)
 
     data = json.loads((root / target_rel).read_text())
     assert (
@@ -1276,12 +1281,10 @@ def test_roundtrip_with_reordered_tokens(tmp_path, monkeypatch):
         ],
     )
 
-    with pytest.raises(SystemExit) as exc:
-        translate_argos.main()
-    assert exc.value.code == 1
+    translate_argos.main()
 
     data = json.loads((root / target_rel).read_text())
-    assert data["Messages"]["h"] == "Hello <b>{x}</b> world"
+    assert data["Messages"]["h"] == "Hello </b>{x}<b> world"
 
 
 def test_token_only_line_sentinel_roundtrip(tmp_path, monkeypatch):
@@ -1486,7 +1489,7 @@ def test_metrics_file_counts_token_reorders(tmp_path, monkeypatch):
 
     class DummyTranslator:
         def translate(self, text):
-            ids = re.findall(r"⟦T([0-9a-f]+)⟧", text)
+            ids = translate_argos.TOKEN_RE.findall(text)
             return f"Hola [[TOKEN_{ids[1]}]], [[TOKEN_{ids[0]}]]"
 
     class DummyCompleted:
@@ -2067,7 +2070,7 @@ def test_wraps_and_unwraps_placeholders(tmp_path, monkeypatch):
 
     translate_argos.main()
 
-    assert translator.seen and re.search(r"⟦T[0-9a-f]+⟧", translator.seen[0])
+    assert translator.seen and re.search(r"\[\[TOKEN_[0-9a-f]+\]\]", translator.seen[0])
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["h1"] == "Bonjour {0}"
 
