@@ -11,7 +11,7 @@ def test_protect_unprotect_simple_tokens():
     text = "Attack {0}!"
     safe, tokens = translate_argos.protect_strict(text)
     assert tokens == ["{0}"]
-    assert "[[TOKEN_0]]" in safe
+    assert "⟦T0⟧" in safe
     assert translate_argos.unprotect(safe, tokens) == text
 
 
@@ -81,7 +81,18 @@ def test_token_only_line_uses_sentinel(tmp_path, monkeypatch):
 
 def test_sentinel_round_trip():
     tokens = ["<b>", "{0}", "</b>"]
-    result = "[[TOKEN_0]][[TOKEN_1]][[TOKEN_2]] [[ TOKEN_SENTINEL ]]"
+    result = "⟦T0⟧⟦T1⟧⟦T2⟧ [[ TOKEN_SENTINEL ]]"
     normalized = translate_argos.normalize_tokens(result)
     restored = translate_argos.unprotect(normalized, tokens)
     assert restored == "<b>{0}</b>"
+
+
+def test_mixed_placeholders_round_trip_with_reorder():
+    text = "[b]<color=red>${var} {0}</color>[/b]"
+    safe, tokens = translate_argos.protect_strict(text)
+    translation = "⟦T1⟧⟦T2⟧⟦T0⟧ ⟦T4⟧⟦T3⟧⟦T5⟧"
+    normalized = translate_argos.normalize_tokens(translation)
+    reordered, changed = translate_argos.reorder_tokens(normalized, len(tokens))
+    assert changed
+    restored = translate_argos.unprotect(reordered, tokens)
+    assert restored == text
