@@ -1522,6 +1522,7 @@ def main():
         if args.report_file:
             try:
                 written, counts = _write_report(args.report_file, remaining)
+                skipped_total = written
                 logger.info(
                     "Wrote skip report to %s with %d row(s)",
                     args.report_file,
@@ -1533,13 +1534,14 @@ def main():
                 logger.exception("Failed to write skip report")
 
         logger.info(
-            "Totals: processed=%d translated=%d skipped=%d failures=%d",
+            "Totals: processed=%d translated=%d skipped=%d",
             processed_total,
             translated_total,
             skipped_total,
-            failures_total,
         )
-        if skipped_total or failures_total:
+        if skipped_total:
+            exit_code = exit_code or 1
+        if failures_total:
             exit_code = exit_code or 1
 
         for handler in logger.handlers:
