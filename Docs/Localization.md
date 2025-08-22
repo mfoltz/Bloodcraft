@@ -88,12 +88,20 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
    translated manually. Re-run the translator until the file is empty.
    Summarise each run and fail fast on unresolved issues:
 
-    ```bash
-    python Tools/validate_translation_run.py --run-dir translations/<iso-code>/<timestamp>
-    ```
+   ```bash
+   python Tools/validate_translation_run.py --run-dir translations/<iso-code>/<timestamp>
+   ```
 
-    The script reports how many entries were translated or skipped and
-    exits non-zero when any `token_mismatch` or `sentinel` problems remain.
+   The script reports how many entries were translated or skipped and
+   exits non-zero when any `token_mismatch` or `sentinel` problems remain.
+
+   To review skip categories at a glance, run:
+
+   ```bash
+   python Tools/analyze_skip_report.py translations/<iso-code>/<timestamp>/skipped.csv
+   ```
+
+   This prints the number of rows per category so manual fixes can be prioritised.
 
 ### Sample translation dataset
 

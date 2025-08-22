@@ -6,6 +6,8 @@ Use ``--hash`` to restrict translation to specific hashes for targeted updates.
 
 After each run, summarise results and fail fast on remaining issues with
 ``python Tools/validate_translation_run.py --run-dir <directory>``.
+Review skip categories with
+``python Tools/analyze_skip_report.py <directory>/skipped.csv``.
 """
 
 import argparse

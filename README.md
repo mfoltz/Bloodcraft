@@ -814,6 +814,11 @@ This process applies only to files under `Resources/Localization/Messages`.
    Reassemble the split Argos model and install it before running the translator (see [Docs/Localization.md](Docs/Localization.md#automated-translation-for-messages) or [model directories](#model-directories)).
    `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --log-level INFO --overwrite`
    Outputs are saved under `translations/<iso-code>/<timestamp>/` (override with `--run-dir`). Verify the model is installed: `argos-translate --from en --to tr - < /dev/null` (replace `tr` with the target code). Any hashes listed in `skipped.csv` within the run directory must be manually translated and the script re-run to confirm they are handled.
+   Summarise skip categories to prioritise fixes:
+
+   ```bash
+   python Tools/analyze_skip_report.py translations/<iso-code>/<timestamp>/skipped.csv
+   ```
 4. **Check and fix tokens.**
    ```bash
    python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
