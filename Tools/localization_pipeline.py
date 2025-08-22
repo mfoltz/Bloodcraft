@@ -224,6 +224,17 @@ def main() -> None:
                     for row in reader:
                         writer.writerow(row)
 
+        logger.info("Analyzing skipped translations")
+        run(
+            [
+                sys.executable,
+                "Tools/analyze_skip_report.py",
+                str(combined_report.relative_to(ROOT)),
+            ],
+            check=False,
+            logger=logger,
+        )
+
         logger.info("Fixing tokens")
         metrics["steps"]["token_fix"] = {"start": timestamp(), "totals": {
             "tokens_restored": 0,
