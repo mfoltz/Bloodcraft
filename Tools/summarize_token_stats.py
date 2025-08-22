@@ -75,16 +75,16 @@ def _write_csv(rows: List[Tuple[str, int, int, str]], path: Path) -> None:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Summarize token stats from translate_metrics.json")
+    ap = argparse.ArgumentParser(description="Summarize token stats from metrics.json")
     ap.add_argument(
         "--run-dir",
         type=Path,
-        help="Translation run directory containing translate_metrics.json",
+        help="Translation run directory containing metrics.json",
     )
     ap.add_argument(
         "--metrics-file",
         type=Path,
-        help="Path to translate_metrics.json (overrides --run-dir)",
+        help="Path to metrics.json (overrides --run-dir)",
     )
     ap.add_argument(
         "--csv",
@@ -101,9 +101,9 @@ def main() -> None:
 
     metrics_path = args.metrics_file
     if args.run_dir and metrics_path is None:
-        metrics_path = args.run_dir / "translate_metrics.json"
+        metrics_path = args.run_dir / "metrics.json"
     if metrics_path is None:
-        metrics_path = ROOT / "translate_metrics.json"
+        metrics_path = ROOT / "metrics.json"
     entries = _load_metrics(metrics_path)
     stats = _aggregate(entries)
     rows = _sort_rows(stats)

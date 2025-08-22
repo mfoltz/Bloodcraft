@@ -30,15 +30,23 @@ def main() -> None:
         print("No translation runs recorded.")
         return
 
-    header = "Run ID                               Timestamp               Lang  Success%  Run Directory"
+    header = (
+        "Run ID                               Timestamp               Lang  Success%  "
+        "Log File                        Report File                     Metrics File"
+    )
     print(header)
     for entry in entries:
         run_id = entry.get("run_id", "")
         ts = entry.get("timestamp", "")
         lang = entry.get("language", "")
         rate = entry.get("success_rate", 0)
-        run_dir = entry.get("run_dir", "")
-        print(f"{run_id:36} {ts:20} {lang:>4}  {rate*100:7.2f}%  {run_dir}")
+        log_file = entry.get("log_file", "")
+        report_file = entry.get("report_file", "")
+        metrics_file = entry.get("metrics_file", "")
+        print(
+            f"{run_id:36} {ts:20} {lang:>4}  {rate*100:7.2f}%  "
+            f"{log_file}  {report_file}  {metrics_file}"
+        )
 
 
 if __name__ == "__main__":

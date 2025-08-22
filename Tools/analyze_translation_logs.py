@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Summarize translation log failures.
 
-This script reads ``translate_metrics.json`` and ``skipped.csv`` and prints counts
-of failures grouped by category. By default the files are looked up under the
+This script reads ``metrics.json`` and ``skipped.csv`` and prints counts of
+failures grouped by category. By default the files are looked up under the
 repository root, but ``--run-dir`` can point to a translation run directory.
 Paths may also be overridden individually via ``--metrics-file`` and
 ``--skipped-file``. Metrics entries include metadata such as ``run_id``,
@@ -100,11 +100,11 @@ def main() -> None:
     )
     ap.add_argument(
         "--run-dir",
-        help="Translation run directory containing translate_metrics.json and skipped.csv",
+        help="Translation run directory containing metrics.json and skipped.csv",
     )
     ap.add_argument(
         "--metrics-file",
-        help="Path to translate_metrics.json (overrides --run-dir)",
+        help="Path to metrics.json (overrides --run-dir)",
     )
     ap.add_argument(
         "--skipped-file",
@@ -124,12 +124,12 @@ def main() -> None:
 
     if run_dir:
         if metrics_path is None:
-            metrics_path = run_dir / "translate_metrics.json"
+            metrics_path = run_dir / "metrics.json"
         if skipped_path is None:
             skipped_path = run_dir / "skipped.csv"
 
     if metrics_path is None:
-        metrics_path = ROOT / "translate_metrics.json"
+        metrics_path = ROOT / "metrics.json"
     elif not metrics_path.is_absolute():
         metrics_path = ROOT / metrics_path
     metric_counts: Counter[str] = _summarize_metrics(metrics_path)

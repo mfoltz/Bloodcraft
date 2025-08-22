@@ -40,7 +40,7 @@ def test_summarize_skipped(tmp_path):
 
 
 def test_cli_overrides_paths(tmp_path, monkeypatch):
-    metrics = tmp_path / "translate_metrics.json"
+    metrics = tmp_path / "metrics.json"
     metrics.write_text(json.dumps([{"failures": {}}]))
     skipped = tmp_path / "skipped.csv"
     with skipped.open("w", newline="", encoding="utf-8") as fp:
@@ -63,7 +63,7 @@ def test_cli_overrides_paths(tmp_path, monkeypatch):
 
 
 def test_run_dir_argument(tmp_path, monkeypatch):
-    metrics = tmp_path / "translate_metrics.json"
+    metrics = tmp_path / "metrics.json"
     metrics.write_text(json.dumps([{"failures": {}}]))
     skipped = tmp_path / "skipped.csv"
     with skipped.open("w", newline="", encoding="utf-8") as fp:
