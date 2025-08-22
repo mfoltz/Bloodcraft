@@ -6,8 +6,8 @@ def test_round_trip_mixed_placeholders_and_nested_tags():
     safe, tokens = translate_argos.protect_strict(text)
     ids = list(tokens.keys())
     translation = (
-        f"⟦T{ids[1]}⟧⟦T{ids[2]}⟧⟦T{ids[0]}⟧ "
-        f"⟦T{ids[4]}⟧⟦T{ids[3]}⟧⟦T{ids[5]}⟧"
+        f"[[TOKEN_{ids[1]}]][[TOKEN_{ids[2]}]][[TOKEN_{ids[0]}]] "
+        f"[[TOKEN_{ids[4]}]][[TOKEN_{ids[3]}]][[TOKEN_{ids[5]}]]"
     )
     normalized = translate_argos.normalize_tokens(translation)
     reordered, changed = translate_argos.reorder_tokens(normalized, ids)
