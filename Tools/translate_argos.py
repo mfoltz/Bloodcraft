@@ -287,11 +287,18 @@ def translate_batch(
                     future.cancel()
                     msg = str(e)
                     if any(err in msg for err in FATAL_ARGOS_ERRORS):
-                        raise FatalTranslationError(msg)
+                        logger.exception("Fatal Argos error")
+                        raise FatalTranslationError(msg) from e
                     if attempt == max_retries:
-                        raise RuntimeError(f"Translation failed: {msg}")
-                    logger.warning(
-                        f"Argos failed on attempt {attempt}/{max_retries}: {msg}"
+                        logger.exception(
+                            "Translation failed after %d attempt(s)", attempt
+                        )
+                        raise RuntimeError(f"Translation failed: {msg}") from e
+                    logger.exception(
+                        "Argos failed on attempt %d/%d: %s",
+                        attempt,
+                        max_retries,
+                        msg,
                     )
     return results, timed_out
 
@@ -307,6 +314,12 @@ def _read_json(path: str, *, default=None, max_retries: int = 3):
                 return default
             raise
         except Exception:
+            logger.exception(
+                "Failed to read JSON from %s (attempt %d/%d)",
+                path,
+                attempt,
+                max_retries,
+            )
             if attempt == max_retries:
                 raise
             time.sleep(0.1)
@@ -320,6 +333,12 @@ def _write_json(path: str, data, *, max_retries: int = 3) -> None:
                 json.dump(data, f, indent=2, ensure_ascii=False)
             return
         except Exception:
+            logger.exception(
+                "Failed to write JSON to %s (attempt %d/%d)",
+                path,
+                attempt,
+                max_retries,
+            )
             if attempt == max_retries:
                 raise
             time.sleep(0.1)
@@ -382,13 +401,12 @@ def _write_report(
                 else:
                     raise RuntimeError("Report file must end with .json or .csv")
             break
-        except Exception as exc:
-            logger.warning(
-                "Failed to write report to %s (attempt %d/%d): %s",
+        except Exception:
+            logger.exception(
+                "Failed to write report to %s (attempt %d/%d)",
                 path,
                 attempt,
                 max_retries,
-                exc,
             )
             if attempt == max_retries:
                 raise
@@ -446,8 +464,8 @@ def _append_metrics_entry(args, **extra) -> dict:
             index_log.append(index_entry)
             _write_json(run_index_file, index_log)
             args.run_index_recorded = True
-    except Exception as e:
-        logger.warning(f"Failed to update run index: {e}")
+    except Exception:
+        logger.exception("Failed to update run index")
 
     return entry
 
@@ -475,7 +493,10 @@ def _run_translation(args, root: str) -> None:
     except AttributeError:
         translator = None
     except Exception as e:
-        raise SystemExit(f"Failed to initialize Argos translation engine: {e}")
+        logger.exception("Failed to initialize Argos translation engine")
+        raise SystemExit(
+            f"Failed to initialize Argos translation engine: {e}"
+        ) from e
 
     if translator is None:
         try:
@@ -487,7 +508,10 @@ def _run_translation(args, root: str) -> None:
         except AttributeError:
             translator = None
         except Exception as e:
-            raise SystemExit(f"Failed to initialize Argos translation engine: {e}")
+            logger.exception("Failed to initialize Argos translation engine")
+            raise SystemExit(
+                f"Failed to initialize Argos translation engine: {e}"
+            ) from e
 
     if translator is None:
         package = f"translate-{args.src}_{args.dst}"
@@ -644,12 +668,15 @@ def _run_translation(args, root: str) -> None:
                 except FatalTranslationError as e:
                     msg = f"Fatal Argos error: {e}"
                     guidance = "Upgrade Argos Translate to support model version"
-                    logger.error(msg)
+                    logger.exception(msg)
                     logger.error(guidance)
-                    raise SystemExit(msg)
+                    raise SystemExit(msg) from e
                 except Exception as e:
                     if attempt == args.max_retries:
-                        logger.warning(f"Translation error: {e}")
+                        logger.exception(
+                            "Translation error during batch %d",
+                            batch_idx + 1,
+                        )
                         for k in batch_keys:
                             reason = f"batch error: {e}"
                             category = categorize(reason)
@@ -668,8 +695,11 @@ def _run_translation(args, root: str) -> None:
                             f"({batch_end - batch_start:.2f}s)"
                         )
                         break
-                    logger.warning(
-                        f"Batch {batch_idx + 1} failed attempt {attempt}/{args.max_retries}: {e}"
+                    logger.exception(
+                        "Batch %d failed attempt %d/%d",
+                        batch_idx + 1,
+                        attempt,
+                        args.max_retries,
                     )
                     time.sleep(0.1)
             if not success:
@@ -847,6 +877,7 @@ def _run_translation(args, root: str) -> None:
                     else:
                         log_entry(key, english[key], un)
                 except Exception as e:
+                    logger.exception("Failed to process translation for %s", key)
                     reason = f"processing error: {e}"
                     category = categorize(reason)
                     log_entry(
@@ -884,6 +915,7 @@ def _run_translation(args, root: str) -> None:
             except FatalTranslationError:
                 raise
             except Exception as e:
+                logger.exception("Strict retry failed for %s", key)
                 return False, f"batch error on strict retry: {e}", 0, False, None
             if timeouts:
                 return False, "timeout on strict retry", 0, False, None
@@ -1181,6 +1213,7 @@ def _load_report(path: str) -> list[dict[str, str]]:
             else:
                 return []
     except Exception:
+        logger.exception("Failed to load report from %s", path)
         return []
     deduped: dict[str, dict[str, str]] = {}
     for row in data:
@@ -1309,10 +1342,12 @@ def main():
             .strip()
         )
     except Exception:
+        logger.exception("Failed to determine git commit")
         args.git_commit = "unknown"
     try:
         args.argos_version = importlib.metadata.version("argostranslate")
     except Exception:
+        logger.exception("Failed to determine Argos version")
         args.argos_version = "unknown"
     args.python_version = platform.python_version()
     try:
@@ -1331,6 +1366,7 @@ def main():
                 )
                 break
     except Exception:
+        logger.exception("Failed to determine model version")
         args.model_version = "unknown"
 
     if args.model_version == "unknown":
@@ -1342,7 +1378,7 @@ def main():
                     args.model_version = parts[-1]
                     break
         except Exception:
-            pass
+            logger.exception("Failed to query argospm for model version")
 
     args.cli_args = cli_args
     args.metrics_recorded = False
@@ -1479,8 +1515,8 @@ def main():
                 )
                 if counts:
                     logger.info("Category counts: %s", dict(counts))
-            except Exception as e:
-                logger.warning(f"Failed to write skip report: {e}")
+            except Exception:
+                logger.exception("Failed to write skip report")
 
         logger.info(
             "Totals: processed=%d translated=%d skipped=%d failures=%d",

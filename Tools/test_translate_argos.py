@@ -2114,3 +2114,55 @@ def test_run_index_appended(tmp_path, monkeypatch):
     data = json.loads(index_path.read_text())
     assert data and data[-1]["language"] == "xx"
     assert data[-1]["success_rate"] == 1.0
+
+
+def test_stack_trace_logged_on_exception(tmp_path, monkeypatch, caplog):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class FailingTranslator:
+        def translate(self, text):
+            raise ValueError("boom")
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: FailingTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+            "--max-retries",
+            "1",
+        ],
+    )
+
+    with caplog.at_level(logging.ERROR, logger="translate_argos"):
+        with pytest.raises(SystemExit):
+            translate_argos.main()
+
+    assert "ValueError: boom" in caplog.text
+    assert "Traceback" in caplog.text
