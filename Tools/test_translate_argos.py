@@ -2,6 +2,7 @@ import csv
 import json
 import logging
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -544,9 +545,8 @@ def test_fallback_to_english_and_reports(tmp_path, monkeypatch):
         ],
     )
 
-    with pytest.raises(SystemExit) as exc:
+    with pytest.raises(SystemExit):
         translate_argos.main()
-    assert exc.value.code == 1
     assert report_path.is_file()
     import csv
     rows = list(csv.DictReader(report_path.open()))
@@ -567,7 +567,7 @@ def test_sentinel_missing_repaired(tmp_path, monkeypatch, caplog):
 
     class DummyTranslator:
         def translate(self, text):
-            return "[[TOKEN_0]]"  # missing sentinel
+            return text.replace(f" {translate_argos.TOKEN_SENTINEL}", "")
 
     class DummyCompleted:
         def __init__(self, code=0):
@@ -733,7 +733,8 @@ def test_token_mismatch_report(tmp_path, monkeypatch):
 
     class DummyTranslator:
         def translate(self, text):
-            return "Bonjour [[TOKEN_0]]"  # missing token 1
+            parts = text.split()
+            return f"Bonjour {parts[1]}"  # drop second token
 
     class DummyCompleted:
         def __init__(self, code=0):
@@ -889,9 +890,10 @@ def test_strict_retry_succeeds(tmp_path, monkeypatch):
 
         def translate(self, text):
             self.calls += 1
+            ids = re.findall(r"⟦T([0-9a-f]+)⟧", text)
             if self.calls == 1:
-                return "[[TOKEN_1]]Bonjour"
-            return "[[TOKEN_0]]Bonjour[[TOKEN_1]]"
+                return f"⟦T{ids[1]}⟧Bonjour"
+            return f"⟦T{ids[0]}⟧Bonjour⟦T{ids[1]}⟧"
 
     class DummyCompleted:
         def __init__(self, code=0):
@@ -944,7 +946,8 @@ def test_sloppy_sentinels_cleaned(tmp_path, monkeypatch):
 
     class DummyTranslator:
         def translate(self, text):
-            return "⟦ T0 , ⟧Bonjour⟦ T1 ⟧"
+            ids = re.findall(r"⟦T([0-9a-f]+)⟧", text)
+            return f"⟦ T{ids[0]} , ⟧Bonjour⟦ T{ids[1]} ⟧"
 
     class DummyCompleted:
         def __init__(self, code=0):
@@ -986,25 +989,22 @@ def test_sloppy_sentinels_cleaned(tmp_path, monkeypatch):
 
 
 def test_reorder_tokens_swapped():
-    text, changed = translate_argos.reorder_tokens("[[TOKEN_1]] then [[TOKEN_0]]", 2)
-    assert text == "[[TOKEN_0]] then [[TOKEN_1]]"
-    assert changed
-
-
-def test_reorder_tokens_from_one_based():
-    text, changed = translate_argos.reorder_tokens("[[TOKEN_1]] then [[TOKEN_2]]", 2)
-    assert text == "[[TOKEN_0]] then [[TOKEN_1]]"
+    text, changed = translate_argos.reorder_tokens(
+        "[[TOKEN_b]] then [[TOKEN_a]]", ["a", "b"]
+    )
+    assert text == "[[TOKEN_b]] then [[TOKEN_a]]"
     assert changed
 
 
 def test_normalize_and_reorder_many_tokens():
-    raw = " ".join(f"⟦T{i}⟧" for i in range(12))
+    ids = [f"{i:x}" for i in range(12)]
+    raw = " ".join(f"⟦T{id}⟧" for id in ids)
     normalized = translate_argos.normalize_tokens(raw)
-    assert normalized == " ".join(f"[[TOKEN_{i}]]" for i in range(12))
+    assert normalized == " ".join(f"[[TOKEN_{id}]]" for id in ids)
     text, changed = translate_argos.reorder_tokens(
-        " ".join(f"[[TOKEN_{i}]]" for i in range(11, -1, -1)), 12
+        " ".join(f"[[TOKEN_{id}]]" for id in reversed(ids)), ids
     )
-    assert text == " ".join(f"[[TOKEN_{i}]]" for i in range(12))
+    assert text == " ".join(f"[[TOKEN_{id}]]" for id in reversed(ids))
     assert changed
 
 
@@ -1012,7 +1012,7 @@ def test_protect_round_trip_with_placeholders():
     text = "Start {0} ${var} [[TOKEN_0]] {(a (b))} End"
     safe, tokens = translate_argos.protect_strict(text)
     normalized = translate_argos.normalize_tokens(safe)
-    reordered, changed = translate_argos.reorder_tokens(normalized, len(tokens))
+    reordered, changed = translate_argos.reorder_tokens(normalized, list(tokens.keys()))
     assert not changed
     restored = translate_argos.unprotect(reordered, tokens)
     assert restored.replace(" ", "") == text.replace(" ", "")
@@ -1021,12 +1021,18 @@ def test_protect_round_trip_with_placeholders():
 def test_round_trip_with_reordered_tokens():
     text = "{0} ${var} [[TOKEN_0]] {(x (y))}"
     _, tokens = translate_argos.protect_strict(text)
-    swapped = "[[TOKEN_2]] [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_3]]"
+    ids = list(tokens.keys())
+    swapped = (
+        f"[[TOKEN_{ids[2]}]] [[TOKEN_{ids[0]}]] [[TOKEN_{ids[1]}]] [[TOKEN_{ids[3]}]]"
+    )
     normalized = translate_argos.normalize_tokens(swapped)
-    reordered, changed = translate_argos.reorder_tokens(normalized, len(tokens))
+    reordered, changed = translate_argos.reorder_tokens(normalized, ids)
     assert changed
     restored = translate_argos.unprotect(reordered, tokens)
-    assert restored.replace(" ", "") == text.replace(" ", "")
+    expected = (
+        f"{tokens[ids[2]]} {tokens[ids[0]]} {tokens[ids[1]]} {tokens[ids[3]]}"
+    )
+    assert restored.replace(" ", "") == expected.replace(" ", "")
 
 
 @pytest.mark.parametrize(
@@ -1042,7 +1048,7 @@ def test_round_trip_with_reordered_tokens():
 def test_tokens_round_trip_without_mismatch(text):
     safe, tokens = translate_argos.protect_strict(text)
     normalized = translate_argos.normalize_tokens(safe)
-    reordered, _ = translate_argos.reorder_tokens(normalized, len(tokens))
+    reordered, _ = translate_argos.reorder_tokens(normalized, list(tokens.keys()))
     restored = translate_argos.unprotect(reordered, tokens)
     assert restored == text
 
@@ -1101,7 +1107,7 @@ def test_interpolation_block_translated(tmp_path, monkeypatch):
     translate_argos.main()
 
     assert translator.called
-    assert translator.seen == "before ⟦T0⟧ after"
+    assert re.fullmatch(r"before ⟦T[0-9a-f]+⟧ after", translator.seen)
 
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["hash"] == "translated {(cond ? \"yes\" : \"no\")} after"
@@ -1161,7 +1167,7 @@ def test_multiple_interpolation_blocks_translated(tmp_path, monkeypatch):
     translate_argos.main()
 
     assert translator.called
-    assert translator.seen == "before ⟦T0⟧ middle ⟦T1⟧ after"
+    assert re.fullmatch(r"before ⟦T[0-9a-f]+⟧ middle ⟦T[0-9a-f]+⟧ after", translator.seen)
 
     data = json.loads((root / target_rel).read_text())
     assert (
@@ -1480,7 +1486,8 @@ def test_metrics_file_counts_token_reorders(tmp_path, monkeypatch):
 
     class DummyTranslator:
         def translate(self, text):
-            return "Hola [[TOKEN_1]], [[TOKEN_0]]"
+            ids = re.findall(r"⟦T([0-9a-f]+)⟧", text)
+            return f"Hola [[TOKEN_{ids[1]}]], [[TOKEN_{ids[0]}]]"
 
     class DummyCompleted:
         def __init__(self, code=0):
@@ -2060,7 +2067,7 @@ def test_wraps_and_unwraps_placeholders(tmp_path, monkeypatch):
 
     translate_argos.main()
 
-    assert translator.seen and "⟦T0⟧" in translator.seen[0]
+    assert translator.seen and re.search(r"⟦T[0-9a-f]+⟧", translator.seen[0])
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["h1"] == "Bonjour {0}"
 

@@ -49,20 +49,20 @@ class FatalTranslationError(Exception):
 #   * Strict markers:       ``⟦Tn⟧``
 #   * Percent sign:         ``%``
 TOKEN_PATTERN = re.compile(
-    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_\d+\]\]|⟦T\d+⟧|%"
+    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_[0-9a-f]+\]\]|⟦T[0-9a-f]+⟧|%"
 )
-TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
+TOKEN_RE = re.compile(r'\[\[TOKEN_([0-9a-f]+)\]\]')
 TOKEN_OR_SENTINEL_RE = re.compile(
-    r'\[\[TOKEN_(?:\d+|SENTINEL)\]\]|⟦T\d+⟧',
+    r'\[\[TOKEN_(?:[0-9a-f]+|SENTINEL)\]\]|⟦T[0-9a-f]+⟧',
     re.I,
 )
-STRICT_TOKEN_RE = re.compile(r'⟦T(\d+)⟧')
-STRICT_TOKEN_CLEAN = re.compile(r'⟦\s*T\s*(\d+)\s*⟧', re.I)
+STRICT_TOKEN_RE = re.compile(r'⟦T([0-9a-f]+)⟧')
+STRICT_TOKEN_CLEAN = re.compile(r'⟦\s*T\s*([0-9a-f]+)\s*⟧', re.I)
 LOOSE_STRICT_TOKEN_RE = re.compile(r'⟦([^⟧]+)⟧')
-TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_(\d+)\s*\]', re.I)
+TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_([0-9a-f]+)\s*\]', re.I)
 # Matches stray TOKEN_n occurrences regardless of surrounding context
 # Matches cases like ``TOKEN_1`` and ``TOKEN _ 1``
-TOKEN_WORD = re.compile(r'TOKEN\s*_\s*(\d+)', re.I)
+TOKEN_WORD = re.compile(r'TOKEN\s*_\s*([0-9a-f]+)', re.I)
 TOKEN_SENTINEL = "[[TOKEN_SENTINEL]]"
 SENTINEL_ONLY_RE = re.compile(
     rf"^(?:\s*{re.escape(TOKEN_SENTINEL)})+\s*$"
@@ -79,11 +79,11 @@ def unwrap_placeholders(text: str) -> str:
     return text
 
 
-def protect_strict(text: str) -> tuple[str, List[str]]:
-    """Replace tokens with deterministic ``⟦Tn⟧`` sentinels."""
+def protect_strict(text: str) -> tuple[str, dict[str, str]]:
+    """Replace tokens with unique ``⟦T<id>⟧`` sentinels."""
 
-    text = text.replace("\\u003C", "<").replace("\\u003E", ">")
-    tokens: List[str] = []
+    text = text.replace("\u003C", "<").replace("\u003E", ">")
+    tokens: dict[str, str] = {}
     result: List[str] = []
     i = 0
 
@@ -110,15 +110,17 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
                     j += 1
                 if depth == 0 and j < len(text) and text[j] == "}":
                     block = text[start : j + 1]
-                    tokens.append(block)
-                    result.append(f"⟦T{len(tokens)-1}⟧")
+                    token_id = uuid.uuid4().hex
+                    tokens[token_id] = block
+                    result.append(f"⟦T{token_id}⟧")
                     i = j + 1
                     continue
 
         m = TOKEN_PATTERN.match(text, i)
         if m:
-            tokens.append(m.group(0))
-            result.append(f"⟦T{len(tokens)-1}⟧")
+            token_id = uuid.uuid4().hex
+            tokens[token_id] = m.group(0)
+            result.append(f"⟦T{token_id}⟧")
             i = m.end()
             continue
 
@@ -128,16 +130,16 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
     return "".join(result), tokens
 
 
-def unprotect(text: str, tokens: List[str]) -> str:
+def unprotect(text: str, tokens: dict[str, str]) -> str:
     """Restore original tokens from sentinels."""
 
     text = STRICT_TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
 
     def repl(m: re.Match) -> str:
-        idx = int(m.group(1))
-        if idx >= len(tokens):
-            raise ValueError(f"Unknown token index: {idx}")
-        return tokens[idx]
+        key = m.group(1)
+        if key not in tokens:
+            raise ValueError(f"Unknown token index: {key}")
+        return tokens[key]
 
     return TOKEN_RE.sub(repl, text)
 
@@ -145,14 +147,15 @@ def unprotect(text: str, tokens: List[str]) -> str:
 def normalize_tokens(text: str) -> str:
     """Normalize token formatting in Argos output."""
 
-    def to_token(num: str) -> str:
-        return f"[[TOKEN_{num}]]"
+    def to_token(tok: str) -> str:
+        return f"[[TOKEN_{tok}]]"
 
-    # Canonicalise any ``⟦Tn⟧`` placeholder, permitting stray characters.
+    # Canonicalise any ``⟦T<id>⟧`` placeholder, permitting stray characters.
     text = re.sub(
-        r"⟦\s*T([^⟧]+)⟧",
-        lambda m: to_token(re.sub(r"\D", "", m.group(1))),
+        r"⟦\s*T\s*([0-9a-f]+)[^⟧]*⟧",
+        lambda m: to_token(m.group(1)),
         text,
+        flags=re.I,
     )
 
     # Normalise potential variations of the sentinel token.
@@ -164,26 +167,22 @@ def normalize_tokens(text: str) -> str:
     )
     text = text.replace(f" {TOKEN_SENTINEL}", "").replace(TOKEN_SENTINEL, "")
 
-    # Merge cases where Argos inserts spaces within token digits.
+    # Canonicalise any ``[[TOKEN_<id>]]`` with stray spacing or split digits.
     text = re.sub(
-        r"\[\[\s*TOKEN\s*_\s*((?:\d\s*)+)\]\]",
+        r"\[\[\s*TOKEN\s*_?\s*((?:[0-9a-f]\s*)+)\s*\]\]",
         lambda m: to_token(re.sub(r"\s+", "", m.group(1))),
         text,
         flags=re.I,
     )
+    text = re.sub(
+        r"\[\[\s*TOKEN\s*_?\s*([^\]\s]+)\s*\]\]",
+        lambda m: to_token(m.group(1).strip()),
+        text,
+        flags=re.I,
+    )
 
-    # Merge adjacent placeholder fragments created from split digits but avoid
-    # collapsing legitimately sequential tokens (e.g., ``[[TOKEN_0]][[TOKEN_1]]``).
-    def merge_adjacent(m: re.Match) -> str:
-        nums = [int(n) for n in re.findall(r"TOKEN_(\d+)", m.group(0))]
-        if len(nums) == 2 and nums[1] == 0:
-            return to_token(f"{nums[0]}{nums[1]}")
-        return m.group(0)
-
-    text = re.sub(r"(?:\[\[TOKEN_\d+\]\]){2,}", merge_adjacent, text)
-
-    # Catch bare ``TOKEN_n`` words and rewrite them to placeholder form.
-    text = re.sub(r"TOKEN\s*_?\s*(\d+)", lambda m: to_token(m.group(1)), text, flags=re.I)
+    # Catch bare ``TOKEN_x`` words and rewrite them to placeholder form.
+    text = TOKEN_WORD.sub(lambda m: to_token(m.group(1)), text)
 
     # After tokens are normalized, strip any stray brackets Argos may emit.
     placeholders: List[str] = []
@@ -200,35 +199,24 @@ def normalize_tokens(text: str) -> str:
     return re.sub(r"@@(\d+)@@", restore, tmp)
 
 
-def reorder_tokens(text: str, token_count: int) -> tuple[str, bool]:
-    """Renumber ``[[TOKEN_n]]`` markers to match English token order.
+def reorder_tokens(text: str, token_ids: List[str]) -> tuple[str, bool]:
+    """Detect if token order differs from the English source.
 
-    The translator may permute or use one-based numbering for placeholders.
-    This helper reindexes them sequentially starting from ``0`` so they can be
-    mapped back to the original tokens. ``token_count`` is the number of tokens
-    extracted from the English source.
+    ``token_ids`` is the list of token identifiers extracted from the English
+    source in their original order. ``text`` is expected to contain the same
+    token identifiers regardless of order. The function returns a tuple of the
+    possibly normalised text and a boolean indicating whether the order differs
+    from ``token_ids``. No reordering is performed; the translator's ordering is
+    preserved.
     """
-    if token_count <= 1:
+
+    if len(token_ids) <= 1:
         return text, False
 
-    # Normalize any ``⟦Tn⟧`` markers before processing.
     text = STRICT_TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
-
     found = TOKEN_RE.findall(text)
-    if len(found) != token_count:
-        return text, False
-    expected = [str(i) for i in range(token_count)]
-    if found == expected:
-        return text, False
-
-    mapping: dict[str, str] = {}
-    for old, new in zip(found, expected):
-        mapping.setdefault(old, new)
-
-    remapped = TOKEN_RE.sub(
-        lambda m: f"[[TOKEN_{mapping.get(m.group(1), m.group(1))}]]", text
-    )
-    return remapped, True
+    changed = found != token_ids
+    return text, changed
 
 
 def ensure_model_installed(root: str, dst: str) -> None:
@@ -565,7 +553,7 @@ def _run_translation(args, root: str) -> None:
         return
 
     safe_lines: List[str] = []
-    tokens_list: List[tuple[List[str], bool]] = []
+    tokens_list: List[tuple[dict[str, str], bool]] = []
     keys: List[str] = []
 
     for key, text in to_translate:
@@ -764,8 +752,9 @@ def _run_translation(args, root: str) -> None:
                             TOKEN_SENTINEL, ""
                         )
                     result = normalize_tokens(result)
-                    result, changed = reorder_tokens(result, len(tokens))
+                    expected = list(tokens.keys())
                     found_tokens = TOKEN_RE.findall(result)
+                    changed = found_tokens != expected
                     token_stats[key] = {
                         "original_tokens": len(tokens),
                         "translated_tokens": len(found_tokens),
@@ -800,7 +789,6 @@ def _run_translation(args, root: str) -> None:
                             )
                             failures[key] = (reason, category)
                             continue
-                    expected = [str(i) for i in range(len(tokens))]
                     reason: str | None = None
                     category: str | None = None
                     if set(found_tokens) != set(expected):
@@ -811,10 +799,8 @@ def _run_translation(args, root: str) -> None:
                                 f" [[TOKEN_{m}]]" for m in missing
                             )
                             found_tokens.extend(missing)
-                        token_stats[key]["translated_tokens"] = len(
-                            found_tokens
-                        )
-                        parts = []
+                        token_stats[key]["translated_tokens"] = len(found_tokens)
+                        parts: List[str] = []
                         if missing:
                             parts.append(f"missing {missing}")
                         if extra:
@@ -940,14 +926,14 @@ def _run_translation(args, root: str) -> None:
                     TOKEN_SENTINEL, "",
                 )
             result = normalize_tokens(result)
-            result, changed = reorder_tokens(result, len(tokens))
+            expected = list(tokens.keys())
             found_tokens = TOKEN_RE.findall(result)
+            changed = found_tokens != expected
             if changed and not token_stats.get(key, {}).get("reordered"):
                 token_reorders += 1
                 stripped = TOKEN_RE.sub("", result)
                 if "[" in stripped or "]" in stripped:
                     return False, "stray brackets on strict retry", len(found_tokens), changed, None
-            expected = [str(i) for i in range(len(tokens))]
             reason: str | None = None
             if set(found_tokens) != set(expected):
                 missing = [t for t in expected if t not in found_tokens]
@@ -955,7 +941,7 @@ def _run_translation(args, root: str) -> None:
                 if missing:
                     result += "".join(f" [[TOKEN_{m}]]" for m in missing)
                     found_tokens.extend(missing)
-                parts = []
+                parts: List[str] = []
                 if missing:
                     parts.append(f"missing {missing}")
                 if extra:
@@ -1133,22 +1119,22 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
             }
             continue
 
-        protected, found_tokens_list = protect_strict(translated)
+        protected, found_tokens_map = protect_strict(translated)
         protected = normalize_tokens(protected)
-        reorder_tokens(protected, len(tokens))
+        found_tokens_list = list(found_tokens_map.values())
 
         token_stats[key] = {
             "original_tokens": len(tokens),
-            "translated_tokens": len(found_tokens_list),
-            "reordered": False,
+            "translated_tokens": len(found_tokens_map),
+            "reordered": list(found_tokens_map.keys()) != list(tokens.keys()),
         }
 
         reason: str | None = None
         category: str | None = None
 
-        if Counter(found_tokens_list) != Counter(tokens):
-            missing = [t for t in tokens if t not in found_tokens_list]
-            extra = [t for t in found_tokens_list if t not in tokens]
+        if Counter(found_tokens_list) != Counter(list(tokens.values())):
+            missing = [t for t in tokens.values() if t not in found_tokens_list]
+            extra = [t for t in found_tokens_list if t not in tokens.values()]
             parts: list[str] = []
             if missing:
                 parts.append(f"missing {missing}")
@@ -1156,7 +1142,7 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
                 parts.append(f"unexpected {extra}")
             reason = "token mismatch (" + ", ".join(parts) + ")"
             category = categorize(reason)
-        elif found_tokens_list != tokens:
+        elif list(found_tokens_map.keys()) != list(tokens.keys()):
             reason = "tokens reordered"
             category = categorize(reason)
             token_stats[key]["reordered"] = True
