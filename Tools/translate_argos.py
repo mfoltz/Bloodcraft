@@ -50,7 +50,10 @@ TOKEN_PATTERN = re.compile(
     r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_\d+\]\]|⟦T\d+⟧|%"
 )
 TOKEN_RE = re.compile(r'\[\[TOKEN_(\d+)\]\]')
-TOKEN_OR_SENTINEL_RE = re.compile(r'\[\[TOKEN_(?:\d+|SENTINEL)\]\]', re.I)
+TOKEN_OR_SENTINEL_RE = re.compile(
+    r'\[\[TOKEN_(?:\d+|SENTINEL)\]\]|⟦T\d+⟧',
+    re.I,
+)
 STRICT_TOKEN_RE = re.compile(r'⟦T(\d+)⟧')
 STRICT_TOKEN_CLEAN = re.compile(r'⟦\s*T\s*(\d+)\s*⟧', re.I)
 LOOSE_STRICT_TOKEN_RE = re.compile(r'⟦([^⟧]+)⟧')
@@ -75,7 +78,7 @@ def unwrap_placeholders(text: str) -> str:
 
 
 def protect_strict(text: str) -> tuple[str, List[str]]:
-    """Replace tokens with deterministic ``[[TOKEN_n]]`` sentinels."""
+    """Replace tokens with deterministic ``⟦Tn⟧`` sentinels."""
 
     text = text.replace("\\u003C", "<").replace("\\u003E", ">")
     tokens: List[str] = []
@@ -106,14 +109,14 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
                 if depth == 0 and j < len(text) and text[j] == "}":
                     block = text[start : j + 1]
                     tokens.append(block)
-                    result.append(f"[[TOKEN_{len(tokens)-1}]]")
+                    result.append(f"⟦T{len(tokens)-1}⟧")
                     i = j + 1
                     continue
 
         m = TOKEN_PATTERN.match(text, i)
         if m:
             tokens.append(m.group(0))
-            result.append(f"[[TOKEN_{len(tokens)-1}]]")
+            result.append(f"⟦T{len(tokens)-1}⟧")
             i = m.end()
             continue
 
@@ -124,7 +127,9 @@ def protect_strict(text: str) -> tuple[str, List[str]]:
 
 
 def unprotect(text: str, tokens: List[str]) -> str:
-    """Restore original tokens from ``[[TOKEN_n]]`` markers."""
+    """Restore original tokens from sentinels."""
+
+    text = STRICT_TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
 
     def repl(m: re.Match) -> str:
         idx = int(m.group(1))
@@ -563,7 +568,7 @@ def _run_translation(args, root: str) -> None:
 
     for key, text in to_translate:
         safe, tokens = protect_strict(text)
-        token_only = TOKEN_RE.sub("", safe).strip() == ""
+        token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
         if token_only:
             safe += f" {TOKEN_SENTINEL}"
         safe_lines.append(safe)
@@ -905,7 +910,7 @@ def _run_translation(args, root: str) -> None:
         def strict_retry(key: str) -> tuple[bool, str, int, bool, str | None]:
             nonlocal token_reorders
             safe, tokens = protect_strict(english[key])
-            token_only = TOKEN_RE.sub("", safe).strip() == ""
+            token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
             if token_only:
                 safe += f" {TOKEN_SENTINEL}"
             try:
@@ -1112,7 +1117,7 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
 
     for key, original in english.items():
         safe, tokens = protect_strict(original)
-        token_only = TOKEN_RE.sub("", safe).strip() == ""
+        token_only = STRICT_TOKEN_RE.sub("", safe).strip() == ""
         translated = messages.get(key)
         if translated is None:
             reason = "untranslated"

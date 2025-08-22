@@ -1101,7 +1101,7 @@ def test_interpolation_block_translated(tmp_path, monkeypatch):
     translate_argos.main()
 
     assert translator.called
-    assert translator.seen == "before [[TOKEN_0]] after"
+    assert translator.seen == "before ⟦T0⟧ after"
 
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["hash"] == "translated {(cond ? \"yes\" : \"no\")} after"
@@ -1161,7 +1161,7 @@ def test_multiple_interpolation_blocks_translated(tmp_path, monkeypatch):
     translate_argos.main()
 
     assert translator.called
-    assert translator.seen == "before [[TOKEN_0]] middle [[TOKEN_1]] after"
+    assert translator.seen == "before ⟦T0⟧ middle ⟦T1⟧ after"
 
     data = json.loads((root / target_rel).read_text())
     assert (
@@ -2060,7 +2060,7 @@ def test_wraps_and_unwraps_placeholders(tmp_path, monkeypatch):
 
     translate_argos.main()
 
-    assert translator.seen and "[[TOKEN_0]]" in translator.seen[0]
+    assert translator.seen and "⟦T0⟧" in translator.seen[0]
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["h1"] == "Bonjour {0}"
 
