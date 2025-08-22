@@ -421,9 +421,8 @@
     "1369871380": "Available Weapon Expertises: <color=#c0c0c0>{0}</color>",
     "1601487032": "First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
     "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
-    "3097011724": "Invalid class, use '<color=white>.class l</color>' to see options."
-  },
-  "_meta": {
-    "1716911803": "Intentionally identical to English; dynamic placeholder"
+    "3097011724": "Invalid class, use '<color=white>.class l</color>' to see options.",
+    "3102592194": "Couldn't find active familiar!",
+    "2844729307": "Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!"
   }
 }
