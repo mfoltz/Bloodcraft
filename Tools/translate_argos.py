@@ -1330,6 +1330,12 @@ def main():
     args.report_file = resolve_path(args.report_file, "skipped.csv")
     args.metrics_file = resolve_path(args.metrics_file, "translate_metrics.json")
     args.run_index_file = os.path.join(root, "translations", "run_index.json")
+
+    # Surface key locations for easier discovery when not explicitly set.
+    print(f"Run directory: {args.run_dir}")
+    print(f"Log file: {args.log_file}")
+    print(f"Report file: {args.report_file}")
+    print(f"Metrics file: {args.metrics_file}")
     cli_args = dict(vars(args))
 
     args.run_id = str(uuid.uuid4())
