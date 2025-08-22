@@ -347,7 +347,7 @@
     "2174214346": "Completed {0} for <color=green>{1}</color>!",
     "1218917876": "¡Todos los blancos han sido asesinados, darles la oportunidad de reaparecer! Si esto no parece correcto considerar rerollar su {0}.",
     "1105957988": "El <color=white>{0}</color> más cercano estaba a <color=#00FFFF>{1}</color>f del {2}!",
-    "800655279": "{0}: <color=green> {1} </color> <color=white> {2} </color>x <color=#FFC0CB> 12 {3} TOKEN__ 12  12  </color> <color=white> {4} </color> <color=yellow> {3} </color>",
+    "800655279": "{0}: <color=green>{1}</color> <color=white>{2}</color>x<color=#FFC0CB>{3}</color> [<color=white>{4}</color>/<color=yellow>{3}</color>]",
     "3499636759": "Tiempo hasta {0} restablecer - <color=yellow> {1} </color> {2} Prefab: <color=white> {3}</color>",
     "2615857787": "¡Ya has completado tu {0}! Tiempo hasta {1} restablecer - <color=yellow> {2} </color>",
     "743202161": "No tienes un {0}.",
