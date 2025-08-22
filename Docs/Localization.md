@@ -172,6 +172,21 @@ python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json
 
 Run the check-only mode first to fail fast if tokens were altered, then apply the fixes. Perform this validation after every translation pass and before committing changes.
 
+### Placeholder rules
+
+When translating, the `[[TOKEN_n]]` placeholders must follow these rules:
+
+- **Do not translate tokens.** Copy them exactly as they appear in English.
+- **Keep token counts equal to English.** Every `[[TOKEN_n]]` in English must appear in the translation.
+- **Reorder only if grammar demands it.** Change the order only when required for correct grammar.
+
+**Example**
+
+```
+Before: "[[TOKEN_0]] has [[TOKEN_1]] apples"
+After:  "[[TOKEN_0]] tiene [[TOKEN_1]] manzanas"
+```
+
 ### Token warnings
 
 Argos may reorder or drop placeholder tokens during translation. The translation log highlights these issues:

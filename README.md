@@ -825,6 +825,7 @@ This process applies only to files under `Resources/Localization/Messages`.
    python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json
    ```
    Running with `--check-only` fails fast if tokens were altered.
+   See the [placeholder rules](Docs/Localization.md#placeholder-rules) for guidance on handling `[[TOKEN_n]]` tokens.
 5. **Verify translations.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text --summary-json summary.json`
    This command confirms every hash exists and no English text remains. Use `--summary-json <path>` to write aggregate counts for each language.
