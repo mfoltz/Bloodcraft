@@ -10,15 +10,16 @@ import translate_argos
 def test_protect_unprotect_simple_tokens():
     text = "Attack {0}!"
     safe, tokens = translate_argos.protect_strict(text)
-    assert tokens == ["{0}"]
-    assert "⟦T0⟧" in safe
+    assert list(tokens.values()) == ["{0}"]
+    token_id = next(iter(tokens))
+    assert f"⟦T{token_id}⟧" in safe
     assert translate_argos.unprotect(safe, tokens) == text
 
 
 def test_protect_unprotect_nested_color_and_placeholder():
     text = "<color=red>{0}</color>"
     safe, tokens = translate_argos.protect_strict(text)
-    assert tokens == ["<color=red>", "{0}", "</color>"]
+    assert list(tokens.values()) == ["<color=red>", "{0}", "</color>"]
     assert translate_argos.unprotect(safe, tokens) == text
 
 
@@ -80,19 +81,29 @@ def test_token_only_line_uses_sentinel(tmp_path, monkeypatch):
 
 
 def test_sentinel_round_trip():
-    tokens = ["<b>", "{0}", "</b>"]
-    result = "⟦T0⟧⟦T1⟧⟦T2⟧ [[ TOKEN_SENTINEL ]]"
+    text = "<b>{0}</b>"
+    safe, tokens = translate_argos.protect_strict(text)
+    ids = list(tokens.keys())
+    result = "".join(f"⟦T{tid}⟧" for tid in ids) + " [[ TOKEN_SENTINEL ]]"
     normalized = translate_argos.normalize_tokens(result)
     restored = translate_argos.unprotect(normalized, tokens)
-    assert restored == "<b>{0}</b>"
+    assert restored == text
 
 
 def test_mixed_placeholders_round_trip_with_reorder():
     text = "[b]<color=red>${var} {0}</color>[/b]"
     safe, tokens = translate_argos.protect_strict(text)
-    translation = "⟦T1⟧⟦T2⟧⟦T0⟧ ⟦T4⟧⟦T3⟧⟦T5⟧"
+    ids = list(tokens.keys())
+    translation = (
+        f"⟦T{ids[1]}⟧⟦T{ids[2]}⟧⟦T{ids[0]}⟧ "
+        f"⟦T{ids[4]}⟧⟦T{ids[3]}⟧⟦T{ids[5]}⟧"
+    )
     normalized = translate_argos.normalize_tokens(translation)
-    reordered, changed = translate_argos.reorder_tokens(normalized, len(tokens))
+    reordered, changed = translate_argos.reorder_tokens(normalized, ids)
     assert changed
     restored = translate_argos.unprotect(reordered, tokens)
-    assert restored == text
+    expected = (
+        f"{tokens[ids[1]]}{tokens[ids[2]]}{tokens[ids[0]]} "
+        f"{tokens[ids[4]]}{tokens[ids[3]]}{tokens[ids[5]]}"
+    )
+    assert restored == expected

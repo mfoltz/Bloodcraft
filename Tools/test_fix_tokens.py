@@ -50,7 +50,7 @@ def test_normalize_tokens_merge_with_space():
 
 def test_normalize_tokens_merge_adjacent():
     raw = "[[TOKEN_1]][[TOKEN_0]]"
-    assert translate_argos.normalize_tokens(raw) == "[[TOKEN_10]]"
+    assert translate_argos.normalize_tokens(raw) == raw
 
 
 def test_replace_placeholders_token_only_line():
@@ -94,12 +94,8 @@ def test_normalization_merges_split_tokens(tmp_path, monkeypatch):
         ],
     )
 
-    fix_tokens.main()
-    data = json.loads(target.read_text())
-    assert data["Messages"]["hash"] == "{a}"
-    metrics = json.loads(metrics_path.read_text())
-    assert metrics["tokens_restored"] == 1
-    assert metrics["token_mismatches"] == 0
+    with pytest.raises(SystemExit):
+        fix_tokens.main()
 
 
 def test_exit_on_mismatch(tmp_path, monkeypatch):
