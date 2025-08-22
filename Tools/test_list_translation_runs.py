@@ -12,7 +12,9 @@ def test_lists_runs(tmp_path, capsys, monkeypatch):
             "run_id": "1",
             "timestamp": "2024-01-01T00:00:00Z",
             "language": "xx",
-            "run_dir": "dir1",
+            "log_file": "dir1/translate.log",
+            "report_file": "dir1/skipped.csv",
+            "metrics_file": "dir1/metrics.json",
             "success_rate": 1.0,
         }
     ]
@@ -25,4 +27,4 @@ def test_lists_runs(tmp_path, capsys, monkeypatch):
     )
     list_translation_runs.main()
     out = capsys.readouterr().out
-    assert "xx" in out and "dir1" in out
+    assert "xx" in out and "metrics.json" in out

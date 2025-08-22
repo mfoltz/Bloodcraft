@@ -38,7 +38,7 @@ def test_aggregate():
 
 
 def test_run_dir_cli(tmp_path, monkeypatch, capsys):
-    metrics = tmp_path / "translate_metrics.json"
+    metrics = tmp_path / "metrics.json"
     metrics.write_text(
         json.dumps([
             {

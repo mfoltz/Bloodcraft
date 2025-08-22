@@ -65,9 +65,10 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
   line and can reprocess thousands of entries unnecessarily. Outputs are saved
   under `translations/<iso-code>/<timestamp>/` by default; override with
   `--run-dir` if a custom location is desired. The translator writes
-  `translate.log`, `skipped.csv`, and `translate_metrics.json` to this run
-  directory. Omitting `--log-file` or `--report-file` constructs these defaults
-  within the run directory, and the script prints the resolved locations at
+  `translate.log`, `skipped.csv`, and `metrics.json` to this run
+  directory and appends a summary to `translations/run_index.json`.
+  Omitting `--log-file` or `--report-file` constructs these defaults within
+  the run directory, and the script prints the resolved locations at
   startup for easy discovery.
 
    To refresh specific messages without touching the rest, pass one or more
@@ -300,10 +301,11 @@ Non‑zero `returncode` values or `success: false` indicate a failed step.
 ### Automatic translation
 
 `translate_argos.py` appends metrics for each run when `--metrics-file`
-is specified (default `translate_metrics.json` under `--root`):
+is specified (default `metrics.json` under `--root`). Each run also updates
+`translations/run_index.json`:
 
 ```bash
-python Tools/translate_argos.py Resources/Localization/Messages/Turkish.json --to tr --metrics-file translate_metrics.json
+python Tools/translate_argos.py Resources/Localization/Messages/Turkish.json --to tr --metrics-file metrics.json
 ```
 
 An entry records the run ID, git commit, Python and Argos Translate versions,
@@ -330,7 +332,7 @@ statistics. If the run terminates early, ``error`` notes the reason:
     },
     "log_file": "translations/tr/2024-02-20/translate.log",
     "report_file": "translations/tr/2024-02-20/skipped.csv",
-    "metrics_file": "translations/tr/2024-02-20/translate_metrics.json",
+    "metrics_file": "translations/tr/2024-02-20/metrics.json",
     "run_dir": "translations/tr/2024-02-20",
     "file": "Resources/Localization/Messages/Turkish.json",
     "timestamp": "2024-02-20T12:00:02Z",
@@ -378,7 +380,7 @@ translations:
 python Tools/analyze_translation_logs.py
 ```
 
-By default, the script reads `translate_metrics.json` and `skipped.csv` from
+By default, the script reads `metrics.json` and `skipped.csv` from
 the repository root. Override these paths to analyse a specific run directory:
 
 ```bash
@@ -389,7 +391,7 @@ The script lists token mismatches or placeholder-only entries and exits
 non-zero when problems remain so CI and contributors can investigate.
 
 For a focused view of hashes with mismatched or reordered tokens recorded in
-`translate_metrics.json`, run:
+`metrics.json`, run:
 
 ```bash
 python Tools/summarize_token_stats.py --run-dir translations/fr/2025-05-16 --top 20

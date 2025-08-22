@@ -75,7 +75,7 @@ def test_run_dir_creates_outputs(tmp_path, monkeypatch):
 
     assert (run_dir / "translate.log").is_file()
     assert (run_dir / "skipped.csv").is_file()
-    assert (run_dir / "translate_metrics.json").is_file()
+    assert (run_dir / "metrics.json").is_file()
 
 
 def test_run_dir_redirects_paths(tmp_path, monkeypatch):
@@ -248,7 +248,7 @@ def test_dry_run_reports_mismatches(tmp_path, monkeypatch):
     report_rows = list(csv.DictReader((run_dir / "skipped.csv").open()))
     assert any(row["hash"] == "h1" and "tokens reordered" in row["reason"] for row in report_rows)
 
-    metrics = json.loads((run_dir / "translate_metrics.json").read_text())
+    metrics = json.loads((run_dir / "metrics.json").read_text())
     entry = metrics[-1]
     assert entry["dry_run"] is True
     assert entry["processed"] == 2
@@ -1372,7 +1372,7 @@ def test_metrics_file_records_failure_reason(tmp_path, monkeypatch):
         translate_argos.main()
     assert exc.value.code == 1
 
-    metrics_files = list((root / "translations" / "xx").glob("*/translate_metrics.json"))
+    metrics_files = list((root / "translations" / "xx").glob("*/metrics.json"))
     assert len(metrics_files) == 1
     data = json.loads(metrics_files[0].read_text())
     entry = data[-1]
@@ -2112,8 +2112,13 @@ def test_run_index_appended(tmp_path, monkeypatch):
     index_path = root / "translations" / "run_index.json"
     assert index_path.is_file()
     data = json.loads(index_path.read_text())
-    assert data and data[-1]["language"] == "xx"
-    assert data[-1]["success_rate"] == 1.0
+    assert data
+    entry = data[-1]
+    assert entry["language"] == "xx"
+    assert entry["success_rate"] == 1.0
+    assert entry["log_file"]
+    assert entry["report_file"]
+    assert entry["metrics_file"]
 
 
 def test_stack_trace_logged_on_exception(tmp_path, monkeypatch, caplog):

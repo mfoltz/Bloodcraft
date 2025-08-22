@@ -456,6 +456,9 @@ def _append_metrics_entry(args, **extra) -> dict:
                 "timestamp": entry["timestamp"],
                 "language": args.dst,
                 "run_dir": args.run_dir,
+                "log_file": args.log_file,
+                "report_file": args.report_file,
+                "metrics_file": args.metrics_file,
                 "success_rate": success_rate,
             }
             index_log = _read_json(run_index_file, default=[])
@@ -1293,7 +1296,7 @@ def main():
         "--metrics-file",
         help=(
             "Append translation metrics to this JSON file "
-            "(default: translate_metrics.json in run directory)"
+            "(default: metrics.json in run directory)"
         ),
     )
     ap.add_argument(
@@ -1328,7 +1331,7 @@ def main():
 
     args.log_file = resolve_path(args.log_file, "translate.log")
     args.report_file = resolve_path(args.report_file, "skipped.csv")
-    args.metrics_file = resolve_path(args.metrics_file, "translate_metrics.json")
+    args.metrics_file = resolve_path(args.metrics_file, "metrics.json")
     args.run_index_file = os.path.join(root, "translations", "run_index.json")
 
     # Surface key locations for easier discovery when not explicitly set.
