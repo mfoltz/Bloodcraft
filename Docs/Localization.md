@@ -66,7 +66,9 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
   under `translations/<iso-code>/<timestamp>/` by default; override with
   `--run-dir` if a custom location is desired. The translator writes
   `translate.log`, `skipped.csv`, and `translate_metrics.json` to this run
-  directory.
+  directory. Omitting `--log-file` or `--report-file` constructs these defaults
+  within the run directory, and the script prints the resolved locations at
+  startup for easy discovery.
 
    To refresh specific messages without touching the rest, pass one or more
    `--hash <hash>` options to translate only those hashes.
