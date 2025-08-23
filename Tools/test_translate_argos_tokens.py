@@ -196,6 +196,11 @@ def test_extra_placeholders_trimmed(tmp_path, monkeypatch, caplog):
             "token mismatch (missing ['1'])",
         ),
         (
+            "Translated [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_999]]",
+            "Translated {0} {1}",
+            "token mismatch (dropped ['999'])",
+        ),
+        (
             "Translated [[TOKEN_1]] [[TOKEN_0]]",
             "Translated {1} {0}",
             "tokens reordered",
@@ -215,7 +220,11 @@ def test_lenient_token_mismatches(tmp_path, monkeypatch, caplog, translation, ex
     target_path.write_text(json.dumps({"Messages": {"hash": ""}}))
 
     class DummyTranslator:
+        def __init__(self):
+            self.calls = 0
+
         def translate(self, text: str) -> str:
+            self.calls += 1
             return translation
 
     class DummyCompleted:
@@ -245,24 +254,22 @@ def test_lenient_token_mismatches(tmp_path, monkeypatch, caplog, translation, ex
             "--root",
             str(root),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 
     with caplog.at_level(logging.WARNING):
         translate_argos.main()
 
-    if warning:
-        assert warning in caplog.text
-    else:
-        assert "token mismatch" not in caplog.text
-        assert "tokens reordered" not in caplog.text
+    assert warning in caplog.text
+    assert translator.calls == 1
     data = json.loads(target_path.read_text())
     assert data["Messages"]["hash"] == expected
 
     run_dir = next((root / "translations" / "xx").glob("*"))
     metrics = json.loads((run_dir / "metrics.json").read_text())
     entry = metrics[-1]
-    if warning and "token mismatch" in warning:
+    if "token mismatch" in warning:
         assert entry["token_mismatches"] == 1
     else:
         assert entry["token_mismatches"] == 0
