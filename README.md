@@ -825,6 +825,7 @@ This process applies only to files under `Resources/Localization/Messages`.
    python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json
    ```
    Running with `--check-only` fails fast if tokens were altered.
+   After manually editing any `Resources/Localization/Messages/*.json` file, run `make fix-tokens` to reorder placeholder tokens across all languages.
    See the [placeholder rules](Docs/Localization.md#placeholder-rules) for guidance on handling `[[TOKEN_n]]` tokens.
 5. **Verify translations.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text --summary-json summary.json`
