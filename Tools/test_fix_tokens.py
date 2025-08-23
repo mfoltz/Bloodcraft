@@ -144,9 +144,9 @@ def test_exit_on_mismatch(tmp_path, monkeypatch):
     assert metrics["tokens_reordered"] == 0
 
 
-def test_extract_tokens_bracket_and_percent():
-    text = "[b]100%[/b] [color=]"
-    assert fix_tokens.extract_tokens(text) == ["[b]", "%", "[/b]", "[color=]"]
+def test_extract_tokens_bracket_tags_and_percent():
+    text = "[b]100%[/b] [color=red]"
+    assert fix_tokens.extract_tokens(text) == ["[b]", "%", "[/b]", "[color=red]"]
 
 
 def test_replace_placeholders_with_bracket_tags_and_percent():

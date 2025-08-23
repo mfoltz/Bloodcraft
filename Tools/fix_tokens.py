@@ -23,7 +23,7 @@ TOKEN_PLACEHOLDER = re.compile(r"\[\[[^\]]+\]\]")
 #   * Bracket tags:         ``[tag]`` or ``[tag=value]``
 #   * Percent sign:         ``%``
 TOKEN_PATTERN = re.compile(
-    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]*)?)\]|%"
+    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|%"
 )
 
 
