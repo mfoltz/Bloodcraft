@@ -5,6 +5,7 @@ import sys
 import pytest
 
 import translate_argos
+import fix_tokens
 
 
 @pytest.fixture(autouse=True)
@@ -117,3 +118,60 @@ def test_mixed_placeholders_round_trip_with_reorder():
         f"{tokens[ids[4]]}{tokens[ids[3]]}{tokens[ids[5]]}"
     )
     assert restored == expected
+
+
+def test_extra_placeholders_trimmed(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"hash": "Attack {0}!"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    target_path = root / target_rel
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(json.dumps({"Messages": {"hash": ""}}))
+
+    class ExtraTokenTranslator:
+        def translate(self, text: str) -> str:
+            return "Translated [[TOKEN_0]]! [[TOKEN_999]]"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    translator = ExtraTokenTranslator()
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: translator,
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    data = json.loads(target_path.read_text())
+    assert data["Messages"]["hash"] == "Translated {0}!"
+
+    monkeypatch.setattr(
+        sys, "argv", ["fix_tokens.py", "--root", str(root), "--check-only", target_rel]
+    )
+    fix_tokens.main()
