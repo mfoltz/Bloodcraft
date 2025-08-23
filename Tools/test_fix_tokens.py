@@ -250,6 +250,9 @@ def test_fix_tokens_after_lenient_translation(tmp_path, monkeypatch, caplog, tra
         translate_argos.main()
 
     assert warning in caplog.text
+    intermediate = json.loads(target_path.read_text())
+    assert "{0}" in intermediate["Messages"]["hash"]
+    assert "{1}" in intermediate["Messages"]["hash"]
 
     monkeypatch.setattr(sys, "argv", ["fix_tokens.py", "--root", str(root), target_rel])
     fix_tokens.main()
