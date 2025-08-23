@@ -174,14 +174,14 @@ Run the check-only mode first to fail fast if tokens were altered, then apply th
 
 #### Lenient token checks
 
-Placeholder tokens are automatically restored during this step. To log discrepancies without failing the run, enable lenient mode or permit mismatches:
+`fix_tokens.py` automatically restores placeholder tokens after each translation pass. To continue when Argos drops or reorders tokens, run:
 
 ```bash
-python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json --lenient-tokens
+python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --lenient-tokens
 python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json --allow-mismatch
 ```
 
-`--lenient-tokens` records reordered or missing tokens for later review, while `--allow-mismatch` keeps processing even when counts differ.
+`--lenient-tokens` lets the translator drop unexpected placeholders and proceed, while `--allow-mismatch` logs count differences without exiting. Token order warnings are advisory unless strict placeholder mode is required.
 
 ### Placeholder rules
 
