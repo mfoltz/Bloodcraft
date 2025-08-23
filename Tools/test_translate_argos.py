@@ -300,6 +300,7 @@ def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
             "--root",
             str(root),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 
@@ -355,6 +356,7 @@ def test_exit_when_translation_engine_attribute_error(tmp_path, monkeypatch, cap
             "--root",
             str(root),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 
@@ -500,6 +502,7 @@ def test_exit_on_fix_tokens_failure(tmp_path, monkeypatch):
             "--root",
             str(root),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 
@@ -550,6 +553,8 @@ def test_fallback_to_english_and_reports(tmp_path, monkeypatch):
             "--report-file",
             str(report_path),
             "--overwrite",
+            "--lenient-tokens",
+            "--lenient-tokens",
         ],
     )
 
@@ -609,6 +614,7 @@ def test_sentinel_missing_repaired(tmp_path, monkeypatch, caplog):
             "--report-file",
             str(report_path),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 
@@ -663,6 +669,7 @@ def test_sentinel_only_report(tmp_path, monkeypatch):
             "--report-file",
             str(report_path),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 
@@ -716,6 +723,7 @@ def test_placeholder_only_report(tmp_path, monkeypatch):
             "--report-file",
             str(report_path),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 
@@ -771,6 +779,7 @@ def test_token_mismatch_report(tmp_path, monkeypatch):
             "--report-file",
             str(report_path),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 
@@ -868,6 +877,7 @@ def test_missing_tokens_reinjected(tmp_path, monkeypatch):
             "--root",
             str(root),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 
@@ -926,6 +936,7 @@ def test_strict_retry_succeeds(tmp_path, monkeypatch):
             str(root),
             "--report-file",
             str(report_path),
+            "--lenient-tokens",
             "--overwrite",
         ],
     )

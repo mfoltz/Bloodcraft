@@ -81,6 +81,7 @@ def test_token_only_line_uses_sentinel(tmp_path, monkeypatch):
             "--root",
             str(root),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 
@@ -163,6 +164,7 @@ def test_extra_placeholders_trimmed(tmp_path, monkeypatch):
             "--root",
             str(root),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 
