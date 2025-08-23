@@ -16,11 +16,14 @@ from translate_argos import normalize_tokens
 logger = logging.getLogger(__name__)
 
 TOKEN_PLACEHOLDER = re.compile(r"\[\[[^\]]+\]\]")
-# Match HTML tags, .NET style numeric or named tokens (e.g. {PlayerName}) and
-# ${var} style variables. Named tokens may optionally include a format segment
-# such as {Value:0.00}.
+# Match standard placeholder patterns:
+#   * XML-like tags:        ``<tag>``
+#   * Format items:         ``{0}`` or ``{PlayerName}``
+#   * String interpolation: ``${var}``
+#   * Bracket tags:         ``[tag]`` or ``[tag=value]``
+#   * Percent sign:         ``%``
 TOKEN_PATTERN = re.compile(
-    r"<[^>]+>|\{[A-Za-z0-9_.-]+(?:[:][^{}]+)?\}|\$\{[A-Za-z0-9_.-]+\}"
+    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]*)?)\]|%"
 )
 
 
