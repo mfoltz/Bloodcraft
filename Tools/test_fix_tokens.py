@@ -1,10 +1,22 @@
 import json
 import sys
 
+import logging
+import subprocess
 import pytest
 
 import fix_tokens
 import translate_argos
+
+
+@pytest.fixture(autouse=True)
+def _stub_check_output(monkeypatch):
+    def fake_check_output(cmd, *a, **k):
+        if cmd and cmd[0] == "git":
+            raise subprocess.CalledProcessError(1, cmd)
+        return b""
+
+    monkeypatch.setattr(subprocess, "check_output", fake_check_output)
 
 
 def test_reorder_option(tmp_path, monkeypatch):
@@ -143,3 +155,72 @@ def test_replace_placeholders_with_bracket_tags_and_percent():
     new_value, replaced, mismatch = fix_tokens.replace_placeholders(value, tokens)
     assert new_value == "[b]100%[/b]"
     assert replaced and not mismatch
+
+
+@pytest.mark.parametrize(
+    "translation,warning",
+    [
+        ("Translated [[TOKEN_0]]", "token mismatch (missing ['1'])"),
+        (
+            "Translated [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_999]]",
+            "token mismatch (dropped ['999'])",
+        ),
+        ("Translated [[TOKEN_1]] [[TOKEN_0]]", "tokens reordered"),
+    ],
+)
+def test_fix_tokens_after_lenient_translation(tmp_path, monkeypatch, caplog, translation, warning):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"hash": "Attack {0} {1}"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    target_path = root / target_rel
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(json.dumps({"Messages": {"hash": ""}}))
+
+    class DummyTranslator:
+        def translate(self, text: str) -> str:
+            return translation
+
+    class DummyCompleted:
+        def __init__(self, code: int = 0):
+            self.returncode = code
+
+    translator = DummyTranslator()
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: translator,
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    with caplog.at_level(logging.WARNING):
+        translate_argos.main()
+
+    assert warning in caplog.text
+
+    monkeypatch.setattr(sys, "argv", ["fix_tokens.py", "--root", str(root), target_rel])
+    fix_tokens.main()
+
+    data = json.loads(target_path.read_text())
+    assert data["Messages"]["hash"] == "Translated {0} {1}"
