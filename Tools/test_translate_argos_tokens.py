@@ -121,7 +121,7 @@ def test_mixed_placeholders_round_trip_with_reorder():
     assert restored == expected
 
 
-def test_extra_placeholders_trimmed(tmp_path, monkeypatch):
+def test_extra_placeholders_trimmed(tmp_path, monkeypatch, caplog):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
     messages_dir.mkdir(parents=True)
@@ -167,10 +167,18 @@ def test_extra_placeholders_trimmed(tmp_path, monkeypatch):
         ],
     )
 
-    translate_argos.main()
+    with caplog.at_level(logging.WARNING):
+        translate_argos.main()
+
+    assert "token mismatch" not in caplog.text
+    assert "tokens reordered" not in caplog.text
 
     data = json.loads(target_path.read_text())
     assert data["Messages"]["hash"] == "Translated {0}!"
+
+    run_dir = next((root / "translations" / "xx").iterdir())
+    metrics = json.loads((run_dir / "metrics.json").read_text())
+    assert metrics[0]["hash_stats"]["hash"]["removed_tokens"] == 1
 
     monkeypatch.setattr(
         sys, "argv", ["fix_tokens.py", "--root", str(root), "--check-only", target_rel]
@@ -189,7 +197,7 @@ def test_extra_placeholders_trimmed(tmp_path, monkeypatch):
         (
             "Translated [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_999]]",
             "Translated {0} {1}",
-            "token mismatch (dropped ['999'])",
+            None,
         ),
         (
             "Translated [[TOKEN_1]] [[TOKEN_0]]",
@@ -247,6 +255,10 @@ def test_lenient_token_mismatches(tmp_path, monkeypatch, caplog, translation, ex
     with caplog.at_level(logging.WARNING):
         translate_argos.main()
 
-    assert warning in caplog.text
+    if warning:
+        assert warning in caplog.text
+    else:
+        assert "token mismatch" not in caplog.text
+        assert "tokens reordered" not in caplog.text
     data = json.loads(target_path.read_text())
     assert data["Messages"]["hash"] == expected
