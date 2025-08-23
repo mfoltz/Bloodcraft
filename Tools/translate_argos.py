@@ -781,6 +781,14 @@ def _run_translation(args, root: str) -> None:
                     if set(found_tokens) != set(expected):
                         missing = [t for t in expected if t not in found_tokens]
                         extra = [t for t in found_tokens if t not in expected]
+                        if extra:
+                            result = TOKEN_RE.sub(
+                                lambda m: "" if m.group(1) in extra else m.group(0),
+                                result,
+                            )
+                            result = re.sub(r"\s{2,}", " ", result).strip()
+                            token_stats[key]["removed_tokens"] = len(extra)
+                            found_tokens = [t for t in found_tokens if t not in extra]
                         if missing:
                             result += "".join(
                                 f" [[TOKEN_{m}]]" for m in missing
@@ -788,8 +796,13 @@ def _run_translation(args, root: str) -> None:
                             found_tokens.extend(missing)
                         token_stats[key]["translated_tokens"] = len(found_tokens)
                         if missing or extra:
+                            parts: list[str] = []
+                            if missing:
+                                parts.append(f"missing {missing}")
+                            if extra:
+                                parts.append(f"dropped {extra}")
                             logger.warning(
-                                f"{key}: token mismatch (missing {missing}, unexpected {extra})"
+                                f"{key}: token mismatch (" + ", ".join(parts) + ")"
                             )
                     un = unprotect(result, tokens)
                     un = un.replace("\\u003C", "<").replace("\\u003E", ">")
