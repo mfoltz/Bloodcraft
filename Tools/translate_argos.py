@@ -741,13 +741,22 @@ def _run_translation(args, root: str) -> None:
                         )
                     result = normalize_tokens(result)
                     expected = list(tokens.keys())
+                    token_stats[key] = {"original_tokens": len(tokens)}
                     found_tokens = TOKEN_RE.findall(result)
+                    extra = [t for t in found_tokens if t not in expected]
+                    if extra:
+                        result = TOKEN_RE.sub(
+                            lambda m: "" if m.group(1) in extra else m.group(0),
+                            result,
+                        )
+                        result = re.sub(r"\s{2,}", " ", result).strip()
+                        token_stats[key]["removed_tokens"] = len(extra)
+                        for t in extra:
+                            logger.info(f"{key}: dropping extra token [[TOKEN_{t}]]")
+                        found_tokens = [t for t in found_tokens if t not in extra]
                     changed = found_tokens != expected
-                    token_stats[key] = {
-                        "original_tokens": len(tokens),
-                        "translated_tokens": len(found_tokens),
-                        "reordered": changed,
-                    }
+                    token_stats[key]["translated_tokens"] = len(found_tokens)
+                    token_stats[key]["reordered"] = changed
                     if changed:
                         token_reorders += 1
                     stripped = TOKEN_RE.sub("", result)
@@ -778,32 +787,14 @@ def _run_translation(args, root: str) -> None:
                             failures[key] = (reason, category)
                             continue
                     reason: str | None = None
-                    if set(found_tokens) != set(expected):
-                        missing = [t for t in expected if t not in found_tokens]
-                        extra = [t for t in found_tokens if t not in expected]
-                        if extra:
-                            result = TOKEN_RE.sub(
-                                lambda m: "" if m.group(1) in extra else m.group(0),
-                                result,
-                            )
-                            result = re.sub(r"\s{2,}", " ", result).strip()
-                            token_stats[key]["removed_tokens"] = len(extra)
-                            found_tokens = [t for t in found_tokens if t not in extra]
-                        if missing:
-                            result += "".join(
-                                f" [[TOKEN_{m}]]" for m in missing
-                            )
-                            found_tokens.extend(missing)
+                    missing = [t for t in expected if t not in found_tokens]
+                    if missing:
+                        result += "".join(f" [[TOKEN_{m}]]" for m in missing)
+                        found_tokens.extend(missing)
                         token_stats[key]["translated_tokens"] = len(found_tokens)
-                        if missing or extra:
-                            parts: list[str] = []
-                            if missing:
-                                parts.append(f"missing {missing}")
-                            if extra:
-                                parts.append(f"dropped {extra}")
-                            logger.warning(
-                                f"{key}: token mismatch (" + ", ".join(parts) + ")"
-                            )
+                        logger.warning(
+                            f"{key}: token mismatch (missing {missing})"
+                        )
                     un = unprotect(result, tokens)
                     un = un.replace("\\u003C", "<").replace("\\u003E", ">")
                     if token_only:
