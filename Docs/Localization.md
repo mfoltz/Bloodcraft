@@ -172,13 +172,24 @@ python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json
 
 Run the check-only mode first to fail fast if tokens were altered, then apply the fixes. Perform this validation after every translation pass and before committing changes.
 
+#### Lenient token checks
+
+Placeholder tokens are automatically restored during this step. To log discrepancies without failing the run, enable lenient mode or permit mismatches:
+
+```bash
+python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json --lenient-tokens
+python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json --allow-mismatch
+```
+
+`--lenient-tokens` records reordered or missing tokens for later review, while `--allow-mismatch` keeps processing even when counts differ.
+
 ### Placeholder rules
 
 When translating, the `[[TOKEN_n]]` placeholders must follow these rules:
 
 - **Do not translate tokens.** Copy them exactly as they appear in English.
 - **Keep token counts equal to English.** Every `[[TOKEN_n]]` in English must appear in the translation.
-- **Reorder only if grammar demands it.** Change the order only when required for correct grammar.
+- **Reorder only if grammar demands it.** Token order warnings are advisory unless strict placeholder mode is required.
 
 **Example**
 
