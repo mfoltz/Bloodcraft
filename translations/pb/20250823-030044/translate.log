@@ -1,0 +1,14 @@
+2025-08-23 03:00:47,275 INFO target_file=Resources/Localization/Messages/Brazilian.json src=en dst=pb batch_size=100 timeout=60 max_retries=3 run_dir=/workspace/Bloodcraft/translations/pb/20250823-030044 git_commit=ed48c19 model_version=unknown
+2025-08-23 03:00:47,276 INFO NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.
+2025-08-23 03:00:47,277 INFO Batch 1/1 start @ 0.00s
+2025-08-23 03:00:48,915 INFO 3439613370: TRANSLATED
+  Original: Welcome to Bloodcraft
+  Result: Bem-vindo ao Bloodcraft.
+2025-08-23 03:00:48,915 INFO Batch 1/1 end @ 1.64s (1.64s)
+2025-08-23 03:00:48,915 INFO Processed 1 batches in 1.64 seconds
+2025-08-23 03:00:48,915 INFO Report breakdown: none
+2025-08-23 03:00:52,040 INFO Wrote translations to /workspace/Bloodcraft/Resources/Localization/Messages/Brazilian.json
+2025-08-23 03:00:52,041 INFO Summary: 1/1 translated, 0 timeouts, 0 token reorders. Metrics written to /workspace/Bloodcraft/translations/pb/20250823-030044/metrics.json
+2025-08-23 03:00:52,041 INFO Received 0 rows; deduplicated to 0 rows
+2025-08-23 03:00:52,042 INFO Wrote skip report to /workspace/Bloodcraft/translations/pb/20250823-030044/skipped.csv with 0 row(s)
+2025-08-23 03:00:52,042 INFO Totals: processed=1 translated=1 skipped=0
