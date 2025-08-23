@@ -23,7 +23,7 @@ TOKEN_PLACEHOLDER = re.compile(r"\[\[[^\]]+\]\]")
 #   * Bracket tags:         ``[tag]`` or ``[tag=value]``
 #   * Percent sign:         ``%``
 TOKEN_PATTERN = re.compile(
-    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]*)?)\]|%"
+    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|%"
 )
 
 
@@ -90,7 +90,11 @@ class Counters:
 
 
 def process_messages_file(
-    path: Path, baseline: Dict[str, List[str]], check_only: bool, reorder: bool
+    path: Path,
+    baseline: Dict[str, List[str]],
+    check_only: bool,
+    reorder: bool,
+    allow_mismatch: bool,
 ) -> Counters:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -103,7 +107,8 @@ def process_messages_file(
         if reorder and not bad:
             new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(key, []))
         if bad:
-            logger.error("%s: %s token count mismatch", path, key)
+            log = logger.warning if allow_mismatch else logger.error
+            log("%s: %s token count mismatch", path, key)
             counters.token_mismatches += 1
             if replaced and not check_only:
                 messages[key] = new_text
@@ -130,7 +135,11 @@ def process_messages_file(
 
 
 def process_root_file(
-    path: Path, baseline: Dict[str, List[str]], check_only: bool, reorder: bool
+    path: Path,
+    baseline: Dict[str, List[str]],
+    check_only: bool,
+    reorder: bool,
+    allow_mismatch: bool,
 ) -> Counters:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -150,7 +159,8 @@ def process_root_file(
         if reorder and not bad:
             new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(guid, []))
         if bad:
-            logger.error("%s: %s token count mismatch", path, guid)
+            log = logger.warning if allow_mismatch else logger.error
+            log("%s: %s token count mismatch", path, guid)
             counters.token_mismatches += 1
             if replaced and not check_only:
                 node[text_key] = new_text
@@ -198,6 +208,11 @@ def main() -> None:
         help="Disable token reordering",
     )
     ap.set_defaults(reorder=True)
+    ap.add_argument(
+        "--allow-mismatch",
+        action="store_true",
+        help="Warn on token mismatches instead of exiting",
+    )
     ap.add_argument("--metrics-file", help="Write JSON metrics to this path")
     ap.add_argument("--baseline-file", default="Resources/Localization/Messages/English.json", help="Baseline English messages file")
     ap.add_argument("--log-level", default="INFO", help="Logging level (default: INFO)")
@@ -232,9 +247,13 @@ def main() -> None:
     totals = Counters()
     for path in files:
         if path.parent.name == "Messages":
-            result = process_messages_file(path, messages_tokens, args.check_only, args.reorder)
+            result = process_messages_file(
+                path, messages_tokens, args.check_only, args.reorder, args.allow_mismatch
+            )
         else:
-            result = process_root_file(path, node_tokens, args.check_only, args.reorder)
+            result = process_root_file(
+                path, node_tokens, args.check_only, args.reorder, args.allow_mismatch
+            )
         totals.tokens_restored += result.tokens_restored
         totals.tokens_reordered += result.tokens_reordered
         totals.token_mismatches += result.token_mismatches

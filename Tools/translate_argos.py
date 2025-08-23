@@ -560,6 +560,7 @@ def _run_translation(args, root: str) -> None:
     processed_lines = len(safe_lines)
     timeouts_count = 0
     token_reorders = 0
+    token_mismatches = 0
     timed_out_hashes: set[str] = set()
     token_stats: dict[str, dict[str, int | bool]] = {}
 
@@ -742,13 +743,47 @@ def _run_translation(args, root: str) -> None:
                         )
                     result = normalize_tokens(result)
                     expected = list(tokens.keys())
+                    token_stats[key] = {"original_tokens": len(tokens)}
                     found_tokens = TOKEN_RE.findall(result)
+                    extra = [t for t in found_tokens if t not in expected]
+                    missing = [t for t in expected if t not in found_tokens]
+                    if extra or missing:
+                        token_mismatches += 1
+                        parts: list[str] = []
+                        if missing:
+                            parts.append(f"missing {missing}")
+                        if extra:
+                            parts.append(
+                                f"dropped {extra}" if args.lenient_tokens else f"unexpected {extra}"
+                            )
+                        if not args.lenient_tokens:
+                            reason = "token mismatch (" + ", ".join(parts) + ")"
+                            category = categorize(reason)
+                            log_entry(
+                                key,
+                                english[key],
+                                result,
+                                reason,
+                                category=category,
+                            )
+                            failures[key] = (reason, category)
+                            token_stats[key]["translated_tokens"] = len(found_tokens)
+                            continue
+                        if extra:
+                            result = TOKEN_RE.sub(
+                                lambda m: "" if m.group(1) in extra else m.group(0),
+                                result,
+                            )
+                            result = re.sub(r"\s{2,}", " ", result).strip()
+                            token_stats[key]["removed_tokens"] = len(extra)
+                            found_tokens = [t for t in found_tokens if t not in extra]
+                        if missing:
+                            result += "".join(f" [[TOKEN_{m}]]" for m in missing)
+                            found_tokens.extend(missing)
+                        logger.warning(f"{key}: token mismatch (" + ", ".join(parts) + ")")
                     changed = found_tokens != expected
-                    token_stats[key] = {
-                        "original_tokens": len(tokens),
-                        "translated_tokens": len(found_tokens),
-                        "reordered": changed,
-                    }
+                    token_stats[key]["translated_tokens"] = len(found_tokens)
+                    token_stats[key]["reordered"] = changed
                     if changed:
                         token_reorders += 1
                     stripped = TOKEN_RE.sub("", result)
@@ -1013,16 +1048,17 @@ def _run_translation(args, root: str) -> None:
         target["Messages"] = messages
         _write_json(target_path, target)
 
-        result = subprocess.run(
-            [
-                sys.executable,
-                os.path.join(os.path.dirname(__file__), "fix_tokens.py"),
-                "--root",
-                root,
-                "--reorder",
-                target_path,
-            ]
-        )
+        cmd = [
+            sys.executable,
+            os.path.join(os.path.dirname(__file__), "fix_tokens.py"),
+            "--root",
+            root,
+            "--reorder",
+        ]
+        if args.lenient_tokens:
+            cmd.append("--allow-mismatch")
+        cmd.append(target_path)
+        result = subprocess.run(cmd)
         if result.returncode != 0:
             raise SystemExit(result.returncode)
 
@@ -1073,6 +1109,7 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
     failures: dict[str, tuple[str, str]] = {}
     report: dict[str, dict[str, str]] = {}
     token_reorders = 0
+    token_mismatches = 0
     token_stats: dict[str, dict[str, int | bool]] = {}
 
     def categorize(reason: str | None) -> str:
@@ -1328,6 +1365,11 @@ def main():
         "--dry-run",
         action="store_true",
         help="Run token checks without calling Argos; no translations are written",
+    )
+    ap.add_argument(
+        "--lenient-tokens",
+        action="store_true",
+        help="Attempt to fix token mismatches and warn instead of failing",
     )
     args = ap.parse_args()
 

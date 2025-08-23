@@ -943,7 +943,7 @@ def test_strict_retry_succeeds(tmp_path, monkeypatch):
 
     translate_argos.main()
     data = json.loads((root / target_rel).read_text())
-    assert data["Messages"]["hash"] == "</b>Bonjour <b>"
+    assert data["Messages"]["hash"] == "<b>Bonjour</b>"
     assert report_path.read_text().strip().splitlines() == [
         "hash,english,reason,category"
     ]
