@@ -191,6 +191,11 @@ def main() -> None:
     ap.add_argument("--root", default=Path(__file__).resolve().parents[1], help="Repo root")
     ap.add_argument("--check-only", action="store_true", help="Report issues without modifying files")
     ap.add_argument(
+        "--allow-mismatch",
+        action="store_true",
+        help="Only warn when token counts differ",
+    )
+    ap.add_argument(
         "--reorder",
         dest="reorder",
         action="store_true",

@@ -814,6 +814,37 @@ def _run_translation(args, root: str) -> None:
                             failures[key] = (reason, category)
                             continue
                     reason: str | None = None
+                    category: str | None = None
+                    if set(found_tokens) != set(expected):
+                        missing = [t for t in expected if t not in found_tokens]
+                        extra = [t for t in found_tokens if t not in expected]
+                        if extra:
+                            result = TOKEN_RE.sub(
+                                lambda m: "" if m.group(1) in extra else m.group(0),
+                                result,
+                            )
+                            result = re.sub(r"\s{2,}", " ", result).strip()
+                            token_stats[key]["removed_tokens"] = len(extra)
+                            found_tokens = [t for t in found_tokens if t not in extra]
+                        if missing:
+                            result += "".join(
+                                f" [[TOKEN_{m}]]" for m in missing
+                            )
+                            found_tokens.extend(missing)
+                            token_stats[key]["missing_tokens"] = len(missing)
+                        token_stats[key]["translated_tokens"] = len(found_tokens)
+                        if missing or extra:
+                            parts: list[str] = []
+                            if missing:
+                                parts.append(f"missing {missing}")
+                            if extra:
+                                parts.append(f"dropped {extra}")
+                            logger.warning(
+                                f"{key}: token mismatch (" + ", ".join(parts) + ")"
+                            )
+                            if not args.lenient_tokens:
+                                reason = "token mismatch (" + ", ".join(parts) + ")"
+                                category = categorize(reason)
                     un = unprotect(result, tokens)
                     un = un.replace("\\u003C", "<").replace("\\u003E", ">")
                     if token_only:
@@ -848,8 +879,8 @@ def _run_translation(args, root: str) -> None:
                         continue
                     translated[key] = un
                     if reason:
-                        log_entry(key, english[key], un, reason)
-                        failures[key] = (reason, categorize(reason))
+                        log_entry(key, english[key], un, reason, category=category)
+                        failures[key] = (reason, category or categorize(reason))
                     else:
                         if changed:
                             logger.warning(f"{key}: tokens reordered")
@@ -877,9 +908,11 @@ def _run_translation(args, root: str) -> None:
                 f"({batch_end - batch_start:.2f}s)"
             )
 
-        def strict_retry(key: str) -> tuple[bool, str, int, bool, str | None]:
+        def strict_retry(key: str) -> tuple[bool, str, int, bool, str | None, int, int]:
             nonlocal token_reorders
             safe, tokens = protect_strict(english[key])
+            missing_count = 0
+            removed_count = 0
             token_only = TOKEN_RE.sub("", safe).strip() == ""
             if token_only:
                 safe += f" {TOKEN_SENTINEL}"
@@ -894,16 +927,16 @@ def _run_translation(args, root: str) -> None:
                 raise
             except Exception as e:
                 logger.exception("Strict retry failed for %s", key)
-                return False, f"batch error on strict retry: {e}", 0, False, None
+                return False, f"batch error on strict retry: {e}", 0, False, None, 0, 0
             if timeouts:
-                return False, "timeout on strict retry", 0, False, None
+                return False, "timeout on strict retry", 0, False, None, 0, 0
             result = results[0]
             if token_only:
                 if TOKEN_SENTINEL not in result:
                     logger.debug(f"{key}: sentinel missing on strict retry, reinserting")
                     result = f"{result} {TOKEN_SENTINEL}".strip()
                 if SENTINEL_ONLY_RE.fullmatch(result.strip()):
-                    return False, "sentinel only on strict retry", 0, False, None
+                    return False, "sentinel only on strict retry", 0, False, None, 0, 0
                 result = result.replace(f" {TOKEN_SENTINEL}", "").replace(
                     TOKEN_SENTINEL, "",
                 )
@@ -915,34 +948,64 @@ def _run_translation(args, root: str) -> None:
                 token_reorders += 1
                 stripped = TOKEN_RE.sub("", result)
                 if "[" in stripped or "]" in stripped:
-                    return False, "stray brackets on strict retry", len(found_tokens), changed, None
+                    return False, "stray brackets on strict retry", len(found_tokens), changed, None, 0, 0
             if set(found_tokens) != set(expected):
                 missing = [t for t in expected if t not in found_tokens]
                 extra = [t for t in found_tokens if t not in expected]
+                if extra:
+                    removed_count = len(extra)
+                    result = TOKEN_RE.sub(
+                        lambda m: "" if m.group(1) in extra else m.group(0), result
+                    )
+                    result = re.sub(r"\s{2,}", " ", result).strip()
+                    found_tokens = [t for t in found_tokens if t not in extra]
                 if missing:
+                    missing_count = len(missing)
                     result += "".join(f" [[TOKEN_{m}]]" for m in missing)
                     found_tokens.extend(missing)
                 if missing or extra:
                     logger.warning(
                         f"{key}: token mismatch on strict retry (missing {missing}, unexpected {extra})"
                     )
+                    if not args.lenient_tokens:
+                        return (
+                            False,
+                            f"token mismatch on strict retry (missing {missing}, unexpected {extra})",
+                            len(found_tokens),
+                            changed,
+                            None,
+                            missing_count,
+                            removed_count,
+                        )
             un = unprotect(result, tokens)
             un = un.replace("\u003C", "<").replace("\u003E", ">")
             if un == english[key]:
-                return False, "identical to source on strict retry", len(found_tokens), changed, None
+                return False, "identical to source on strict retry", len(found_tokens), changed, None, missing_count, removed_count
             if contains_english(un):
-                return False, "contains English on strict retry", len(found_tokens), changed, None
-            return True, un, len(found_tokens), changed, None
+                return False, "contains English on strict retry", len(found_tokens), changed, None, missing_count, removed_count
+            return True, un, len(found_tokens), changed, None, missing_count, removed_count
 
         for key, (_initial_reason, category) in list(failures.items()):
             if category == "placeholder":
                 continue
-            ok, out, tcount, changed, reason = strict_retry(key)
+            (
+                ok,
+                out,
+                tcount,
+                changed,
+                reason,
+                missing_cnt,
+                removed_cnt,
+            ) = strict_retry(key)
             token_stats.setdefault(
                 key, {"original_tokens": len(protect_strict(english[key])[1])}
             )
             token_stats[key]["translated_tokens"] = tcount
             token_stats[key]["reordered"] = token_stats[key].get("reordered", False) or changed
+            if missing_cnt:
+                token_stats[key]["missing_tokens"] = missing_cnt
+            if removed_cnt:
+                token_stats[key]["removed_tokens"] = removed_cnt
             if ok:
                 translated[key] = out
                 if reason:
@@ -1000,7 +1063,11 @@ def _run_translation(args, root: str) -> None:
             raise SystemExit(result.returncode)
 
         logger.info(f"Wrote translations to {target_path}")
-
+        token_mismatches = sum(
+            1
+            for stats in token_stats.values()
+            if stats.get("missing_tokens") or stats.get("removed_tokens")
+        )
         _append_metrics_entry(
             args,
             processed=processed_lines,
@@ -1014,7 +1081,8 @@ def _run_translation(args, root: str) -> None:
 
         summary_line = (
             f"Summary: {successes}/{processed_lines} translated, {timeouts_count} timeouts, "
-            f"{token_reorders} token reorders. Metrics written to {args.metrics_file}"
+            f"{token_reorders} token reorders, {token_mismatches} token mismatches. "
+            f"Metrics written to {args.metrics_file}"
         )
         logger.info(summary_line)
     finally:
@@ -1117,16 +1185,20 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
         if Counter(found_tokens_list) != Counter(list(tokens.values())):
             missing = [t for t in tokens.values() if t not in found_tokens_list]
             extra = [t for t in found_tokens_list if t not in tokens.values()]
+            if missing:
+                token_stats[key]["missing_tokens"] = len(missing)
+            if extra:
+                token_stats[key]["removed_tokens"] = len(extra)
             parts: list[str] = []
             if missing:
                 parts.append(f"missing {missing}")
             if extra:
                 parts.append(f"unexpected {extra}")
-            token_mismatches += 1
+            msg = "token mismatch (" + ", ".join(parts) + ")"
             if args.lenient_tokens:
-                logger.warning(f"{key}: token mismatch (" + ", ".join(parts) + ")")
+                logger.warning(f"{key}: {msg}")
             else:
-                reason = "token mismatch (" + ", ".join(parts) + ")"
+                reason = msg
                 category = categorize(reason)
         elif list(found_tokens_map.keys()) != list(tokens.keys()):
             reason = "tokens reordered"
@@ -1158,6 +1230,11 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
             log_entry(key, original, translated)
 
     successes = processed_lines - len(failures)
+    token_mismatches = sum(
+        1
+        for stats in token_stats.values()
+        if stats.get("missing_tokens") or stats.get("removed_tokens")
+    )
 
     _append_metrics_entry(
         args,
@@ -1172,8 +1249,8 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
     )
 
     summary_line = (
-        f"Summary: {successes}/{processed_lines} checked, 0 timeouts, {token_reorders} token reorders. "
-        f"Metrics written to {args.metrics_file}"
+        f"Summary: {successes}/{processed_lines} checked, 0 timeouts, {token_reorders} token reorders, "
+        f"{token_mismatches} token mismatches. Metrics written to {args.metrics_file}"
     )
     logger.info(summary_line)
 
@@ -1239,6 +1316,11 @@ def main():
             "without this flag only missing entries are processed. "
             "Use sparingly to avoid reprocessing thousands of lines."
         ),
+    )
+    ap.add_argument(
+        "--lenient-tokens",
+        action="store_true",
+        help="Treat token count mismatches as warnings after attempting to fix them",
     )
     ap.add_argument(
         "--hash",
