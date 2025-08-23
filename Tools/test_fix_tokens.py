@@ -144,6 +144,37 @@ def test_exit_on_mismatch(tmp_path, monkeypatch):
     assert metrics["tokens_reordered"] == 0
 
 
+def test_allow_mismatch(tmp_path, monkeypatch, caplog):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(json.dumps({"Messages": {"hash": "{a}"}}))
+    (root / "Resources" / "Localization" / "English.json").write_text(json.dumps({}))
+    target = messages_dir / "Test.json"
+    target.write_text(json.dumps({"Messages": {"hash": "[[TOKEN_0]] [[TOKEN_1]]"}}))
+    metrics_path = root / "metrics.json"
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "fix_tokens.py",
+            "--root",
+            str(root),
+            "--metrics-file",
+            str(metrics_path),
+            "--allow-mismatch",
+            str(target),
+        ],
+    )
+
+    with caplog.at_level(logging.WARNING):
+        fix_tokens.main()
+    assert "token count mismatch" in caplog.text
+    metrics = json.loads(metrics_path.read_text())
+    assert metrics["token_mismatches"] == 1
+
+
 def test_extract_tokens_bracket_tags_and_percent():
     text = "[b]100%[/b] [color=red]"
     assert fix_tokens.extract_tokens(text) == ["[b]", "%", "[/b]", "[color=red]"]
@@ -211,6 +242,7 @@ def test_fix_tokens_after_lenient_translation(tmp_path, monkeypatch, caplog, tra
             "--root",
             str(root),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 

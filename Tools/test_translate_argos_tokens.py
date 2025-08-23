@@ -82,6 +82,7 @@ def test_token_only_line_uses_sentinel(tmp_path, monkeypatch):
             "--root",
             str(root),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 
@@ -164,14 +165,14 @@ def test_extra_placeholders_trimmed(tmp_path, monkeypatch, caplog):
             "--root",
             str(root),
             "--overwrite",
+            "--lenient-tokens",
         ],
     )
 
     with caplog.at_level(logging.WARNING):
         translate_argos.main()
 
-    assert "token mismatch" not in caplog.text
-    assert "tokens reordered" not in caplog.text
+    assert "token mismatch (dropped ['999'])" in caplog.text
 
     data = json.loads(target_path.read_text())
     assert data["Messages"]["hash"] == "Translated {0}!"
@@ -193,11 +194,6 @@ def test_extra_placeholders_trimmed(tmp_path, monkeypatch, caplog):
             "Translated [[TOKEN_0]]",
             "Translated {0} {1}",
             "token mismatch (missing ['1'])",
-        ),
-        (
-            "Translated [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_999]]",
-            "Translated {0} {1}",
-            None,
         ),
         (
             "Translated [[TOKEN_1]] [[TOKEN_0]]",
@@ -262,3 +258,11 @@ def test_lenient_token_mismatches(tmp_path, monkeypatch, caplog, translation, ex
         assert "tokens reordered" not in caplog.text
     data = json.loads(target_path.read_text())
     assert data["Messages"]["hash"] == expected
+
+    run_dir = next((root / "translations" / "xx").glob("*"))
+    metrics = json.loads((run_dir / "metrics.json").read_text())
+    entry = metrics[-1]
+    if warning and "token mismatch" in warning:
+        assert entry["token_mismatches"] == 1
+    else:
+        assert entry["token_mismatches"] == 0
