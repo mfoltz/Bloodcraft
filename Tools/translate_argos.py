@@ -1524,8 +1524,8 @@ def main():
             ) = _run_dry_run(args, root)
         else:
             prev_hashes: set[str] | None = None
-            while True:
-                try:
+            try:
+                while True:
                     (
                         remaining,
                         processed,
@@ -1535,35 +1535,31 @@ def main():
                     ) = _run_translation(args, root)
                     processed_total += processed
                     translated_total += translated
-                except KeyboardInterrupt:
-                    write_failure_metrics(args, "interrupted")
-                    logger.warning("Translation aborted by user")
-                    exit_code = 1
-                    exit_msg = "Interrupted"
-                    break
-                except BaseException as exc:
-                    write_failure_metrics(args, exc)
-                    error_msg = str(exc) or exc.__class__.__name__
-                    summary_line = (
-                        "Summary: 0/0 translated, 0 timeouts, 0 token reorders. "
-                        f"Failed: {error_msg}. Metrics written to {args.metrics_file}"
+                    if not args.report_file:
+                        break
+                    hashes = [row["hash"] for row in remaining]
+                    if not hashes or set(hashes) == prev_hashes:
+                        break
+                    prev_hashes = set(hashes)
+                    logger.info(
+                        f"Retrying {len(hashes)} hash(es) from {args.report_file}"
                     )
-                    logger.error(summary_line)
-                    exit_code = 1
-                    exit_msg = error_msg
-                    break
-                if exit_code:
-                    break
-                if not args.report_file:
-                    break
-                hashes = [row["hash"] for row in remaining]
-                if not hashes or set(hashes) == prev_hashes:
-                    break
-                prev_hashes = set(hashes)
-                logger.info(
-                    f"Retrying {len(hashes)} hash(es) from {args.report_file}"
+                    args.hashes = hashes
+            except KeyboardInterrupt:
+                write_failure_metrics(args, "interrupted")
+                logger.warning("Translation aborted by user")
+                exit_code = 1
+                exit_msg = "Interrupted"
+            except BaseException as exc:
+                write_failure_metrics(args, exc)
+                error_msg = str(exc) or exc.__class__.__name__
+                summary_line = (
+                    "Summary: 0/0 translated, 0 timeouts, 0 token reorders. "
+                    f"Failed: {error_msg}. Metrics written to {args.metrics_file}"
                 )
-                args.hashes = hashes
+                logger.error(summary_line)
+                exit_code = 1
+                exit_msg = error_msg
             if not exit_code and remaining:
                 logger.warning("Unresolved hashes after retries:")
                 for row in remaining:
