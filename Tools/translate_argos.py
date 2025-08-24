@@ -631,6 +631,7 @@ def _run_translation(args, root: str) -> None:
 
     num_batches = len(batches)
     start = time.perf_counter()
+    processed_so_far = 0
     try:
         for batch_idx, batch in enumerate(batches):
             batch_lines = [safe_lines[idx] for idx in batch]
@@ -691,6 +692,7 @@ def _run_translation(args, root: str) -> None:
                     )
                     time.sleep(0.1)
             if not success:
+                processed_so_far += len(batch)
                 continue
 
             for idx, (key, result, (tokens, token_only)) in enumerate(
@@ -907,6 +909,7 @@ def _run_translation(args, root: str) -> None:
                 f"Batch {batch_idx + 1}/{num_batches} end @ {batch_end - start:.2f}s "
                 f"({batch_end - batch_start:.2f}s)"
             )
+            processed_so_far += len(batch)
 
         def strict_retry(key: str) -> tuple[bool, str, int, bool, str | None, int, int]:
             nonlocal token_reorders
@@ -1085,6 +1088,24 @@ def _run_translation(args, root: str) -> None:
             f"Metrics written to {args.metrics_file}"
         )
         logger.info(summary_line)
+    except KeyboardInterrupt:
+        messages.update(translated)
+        target["Messages"] = messages
+        _write_json(target_path, target)
+        successes = processed_so_far - len(failures)
+        _append_metrics_entry(
+            args,
+            processed=processed_so_far,
+            successes=successes,
+            timeouts=timeouts_count,
+            token_reorders=token_reorders,
+            token_mismatches=token_mismatches,
+            failures={k: v[0] for k, v in failures.items()},
+            hash_stats=token_stats,
+            error="interrupted",
+        )
+        logger.warning("Translation interrupted; partial results written to %s", target_path)
+        raise
     finally:
         pass
 
@@ -1318,11 +1339,6 @@ def main():
         ),
     )
     ap.add_argument(
-        "--lenient-tokens",
-        action="store_true",
-        help="Treat token count mismatches as warnings after attempting to fix them",
-    )
-    ap.add_argument(
         "--hash",
         dest="hashes",
         action="append",
@@ -1519,6 +1535,12 @@ def main():
                     ) = _run_translation(args, root)
                     processed_total += processed
                     translated_total += translated
+                except KeyboardInterrupt:
+                    write_failure_metrics(args, "interrupted")
+                    logger.warning("Translation aborted by user")
+                    exit_code = 1
+                    exit_msg = "Interrupted"
+                    break
                 except BaseException as exc:
                     write_failure_metrics(args, exc)
                     error_msg = str(exc) or exc.__class__.__name__
