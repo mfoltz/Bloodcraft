@@ -12,23 +12,9 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 from translate_argos import normalize_tokens
+from token_patterns import TOKEN_PATTERN, TOKEN_PLACEHOLDER, extract_tokens
 
 logger = logging.getLogger(__name__)
-
-TOKEN_PLACEHOLDER = re.compile(r"\[\[[^\]]+\]\]")
-# Match standard placeholder patterns:
-#   * XML-like tags:        ``<tag>``
-#   * Format items:         ``{0}`` or ``{PlayerName}``
-#   * String interpolation: ``${var}``
-#   * Bracket tags:         ``[tag]`` or ``[tag=value]``
-#   * Percent sign:         ``%``
-TOKEN_PATTERN = re.compile(
-    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|%"
-)
-
-
-def extract_tokens(text: str) -> List[str]:
-    return TOKEN_PATTERN.findall(text or "")
 
 
 def replace_placeholders(value: str, tokens: List[str]) -> Tuple[str, bool, bool]:
@@ -42,8 +28,6 @@ def replace_placeholders(value: str, tokens: List[str]) -> Tuple[str, bool, bool
             value = value.replace(ph, token, 1)
         replaced = True
     tokenized = extract_tokens(value)
-    remaining = TOKEN_PLACEHOLDER.findall(value)
-    tokenized.extend(ph for ph in remaining if ph in tokens)
     if Counter(tokenized) != Counter(tokens):
         mismatch = True
     return value, replaced, mismatch

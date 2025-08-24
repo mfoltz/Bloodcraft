@@ -28,6 +28,15 @@ from typing import List
 
 from argostranslate import translate as argos_translate
 from language_utils import contains_english
+from token_patterns import (
+    TOKEN_PATTERN,
+    TOKEN_RE,
+    TOKEN_OR_SENTINEL_RE,
+    TOKEN_CLEAN,
+    TOKEN_WORD,
+    TOKEN_SENTINEL,
+    SENTINEL_ONLY_RE,
+)
 
 
 logger = logging.getLogger("translate_argos")
@@ -39,31 +48,6 @@ FATAL_ARGOS_ERRORS = [
 
 class FatalTranslationError(Exception):
     """Raised when Argos Translate encounters an unrecoverable error."""
-
-# Match standard placeholder patterns:
-#   * XML-like tags:        ``<tag>``
-#   * Format items:         ``{0}``
-#   * String interpolation: ``${var}``
-#   * Bracket tags:         ``[tag]`` or ``[tag=value]``
-#   * Existing tokens:      ``[[TOKEN_n]]``
-#   * Percent sign:         ``%``
-TOKEN_PATTERN = re.compile(
-    r"<[^>]+>|\{[^{}]+\}|\$\{[^{}]+\}|\[(?:/?[a-zA-Z]+(?:=[^\]]+)?)\]|\[\[TOKEN_[0-9a-f]+\]\]|%"
-)
-TOKEN_RE = re.compile(r'\[\[TOKEN_([0-9a-f]+)\]\]')
-TOKEN_OR_SENTINEL_RE = re.compile(
-    r'\[\[TOKEN_(?:[0-9a-f]+|SENTINEL)\]\]',
-    re.I,
-)
-TOKEN_CLEAN = re.compile(r'\[\s*TOKEN_([0-9a-f]+)\s*\](?!\])', re.I)
-# Matches stray TOKEN_n occurrences regardless of surrounding context
-# Matches cases like ``TOKEN_1`` and ``TOKEN _ 1``
-TOKEN_WORD = re.compile(r'TOKEN\s*_\s*([0-9a-f]+)', re.I)
-TOKEN_SENTINEL = "[[TOKEN_SENTINEL]]"
-SENTINEL_ONLY_RE = re.compile(
-    rf"^(?:\s*{re.escape(TOKEN_SENTINEL)})+\s*$"
-)
-
 
 def wrap_placeholders(text: str) -> str:
     """No-op placeholder wrapper."""
@@ -782,12 +766,15 @@ def _run_translation(args, root: str) -> None:
                         if missing:
                             result += "".join(f" [[TOKEN_{m}]]" for m in missing)
                             found_tokens.extend(missing)
+                            token_stats[key]["missing_tokens"] = len(missing)
                         logger.warning(f"{key}: token mismatch (" + ", ".join(parts) + ")")
                     changed = found_tokens != expected
-                    token_stats[key]["translated_tokens"] = len(found_tokens)
-                    token_stats[key]["reordered"] = changed
                     if changed:
                         token_reorders += 1
+                        if args.report_file:
+                            failures[key] = ("tokens reordered", "token")
+                    token_stats[key]["translated_tokens"] = len(found_tokens)
+                    token_stats[key]["reordered"] = changed
                     stripped = TOKEN_RE.sub("", result)
                     if not token_only:
                         if stripped.strip() == "":

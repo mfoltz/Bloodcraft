@@ -11,7 +11,7 @@ from typing import List
 from argostranslate import translate as argos_translate
 from language_utils import contains_english
 from translate_argos import normalize_tokens
-from fix_tokens import extract_tokens
+from token_patterns import extract_tokens
 
 print(
     "WARNING: Tools/translate.py is deprecated. Use Tools/translate_argos.py instead.",

@@ -7,6 +7,7 @@ import pytest
 
 import fix_tokens
 import translate_argos
+import token_patterns
 
 
 @pytest.fixture(autouse=True)
@@ -177,7 +178,7 @@ def test_allow_mismatch(tmp_path, monkeypatch, caplog):
 
 def test_extract_tokens_bracket_tags_and_percent():
     text = "[b]100%[/b] [color=red]"
-    assert fix_tokens.extract_tokens(text) == ["[b]", "%", "[/b]", "[color=red]"]
+    assert token_patterns.extract_tokens(text) == ["[b]", "%", "[/b]", "[color=red]"]
 
 
 def test_replace_placeholders_with_bracket_tags_and_percent():
