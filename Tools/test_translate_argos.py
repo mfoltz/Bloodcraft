@@ -13,6 +13,7 @@ import pytest
 
 import translate_argos
 from translate_argos import ensure_model_installed
+import token_patterns
 
 
 @pytest.fixture(autouse=True)
@@ -580,7 +581,7 @@ def test_sentinel_missing_repaired(tmp_path, monkeypatch, caplog):
 
     class DummyTranslator:
         def translate(self, text):
-            return text.replace(f" {translate_argos.TOKEN_SENTINEL}", "")
+            return text.replace(f" {token_patterns.TOKEN_SENTINEL}", "")
 
     class DummyCompleted:
         def __init__(self, code=0):
@@ -905,7 +906,7 @@ def test_strict_retry_succeeds(tmp_path, monkeypatch):
 
         def translate(self, text):
             self.calls += 1
-            ids = translate_argos.TOKEN_RE.findall(text)
+            ids = token_patterns.TOKEN_RE.findall(text)
             if self.calls == 1:
                 return f"[[TOKEN_{ids[1]}]]Bonjour"
             return f"[[TOKEN_{ids[0]}]]Bonjour[[TOKEN_{ids[1]}]]"
@@ -962,7 +963,7 @@ def test_sloppy_sentinels_cleaned(tmp_path, monkeypatch):
 
     class DummyTranslator:
         def translate(self, text):
-            ids = translate_argos.TOKEN_RE.findall(text)
+            ids = token_patterns.TOKEN_RE.findall(text)
             return f"[[ TOKEN_{ids[0]} ]]Bonjour[[ TOKEN_{ids[1]} ]]"
 
     class DummyCompleted:
@@ -1500,7 +1501,7 @@ def test_metrics_file_counts_token_reorders(tmp_path, monkeypatch):
 
     class DummyTranslator:
         def translate(self, text):
-            ids = translate_argos.TOKEN_RE.findall(text)
+            ids = token_patterns.TOKEN_RE.findall(text)
             return f"Hola [[TOKEN_{ids[1]}]], [[TOKEN_{ids[0]}]]"
 
     class DummyCompleted:
