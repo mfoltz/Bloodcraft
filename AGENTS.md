@@ -1,5 +1,7 @@
 # Codex Workflow Contract
 
+> For any localization work, follow the Translation Workflow section below.
+
 ## 1. Glossary — Command Index
 
 | Keyword                                   | Purpose                                                    |
