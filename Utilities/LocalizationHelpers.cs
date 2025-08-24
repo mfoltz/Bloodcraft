@@ -8,6 +8,10 @@ namespace Bloodcraft.Utilities;
 /// </summary>
 internal static class LocalizationHelpers
 {
+    static readonly Regex BracketPlaceholder = new(
+        @"\[.*?\]",
+        RegexOptions.Compiled);
+
     static readonly Regex RichTextTag = new(
         @"</?\w+[^>]*>",
         RegexOptions.Compiled);
@@ -20,6 +24,10 @@ internal static class LocalizationHelpers
         @"\$\{[^}]+\}",
         RegexOptions.Compiled);
 
+    static readonly Regex PercentSymbol = new(
+        @"%",
+        RegexOptions.Compiled);
+
     /// <summary>
     /// Replaces tags and placeholders with indexed markers so translation services do not alter them.
     /// </summary>
@@ -28,7 +36,7 @@ internal static class LocalizationHelpers
         List<string> tokens = [];
         string result = message;
 
-        foreach (Regex regex in new[] { RichTextTag, Placeholder, CsInterp })
+        foreach (Regex regex in new[] { BracketPlaceholder, RichTextTag, Placeholder, CsInterp, PercentSymbol })
         {
             result = regex.Replace(result, m =>
             {
