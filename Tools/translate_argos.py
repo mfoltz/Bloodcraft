@@ -182,7 +182,7 @@ def normalize_tokens(text: str) -> str:
     def restore(m: re.Match) -> str:
         return placeholders[int(m.group(1))]
 
-    tmp = TOKEN_OR_SENTINEL_RE.sub(store, text)
+    tmp = TOKEN_PATTERN.sub(store, text)
     tmp = tmp.replace("[", "").replace("]", "")
     return re.sub(r"@@(\d+)@@", restore, tmp)
 

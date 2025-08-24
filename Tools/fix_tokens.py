@@ -208,11 +208,6 @@ def main() -> None:
         help="Disable token reordering",
     )
     ap.set_defaults(reorder=True)
-    ap.add_argument(
-        "--allow-mismatch",
-        action="store_true",
-        help="Warn on token mismatches instead of exiting",
-    )
     ap.add_argument("--metrics-file", help="Write JSON metrics to this path")
     ap.add_argument("--baseline-file", default="Resources/Localization/Messages/English.json", help="Baseline English messages file")
     ap.add_argument("--log-level", default="INFO", help="Logging level (default: INFO)")
