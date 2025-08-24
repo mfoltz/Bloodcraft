@@ -458,7 +458,8 @@ def write_failure_metrics(args, error) -> None:
     )
 
 
-def _run_translation(args, root: str) -> None:
+def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, int, int, int]:
+    fix_tokens_code = 0
     try:
         translator = argos_translate.get_translation_from_codes(args.src, args.dst)
     except AttributeError:
@@ -1049,8 +1050,7 @@ def _run_translation(args, root: str) -> None:
             cmd.append("--allow-mismatch")
         cmd.append(target_path)
         result = subprocess.run(cmd)
-        if result.returncode != 0:
-            raise SystemExit(result.returncode)
+        fix_tokens_code = result.returncode
 
         logger.info(f"Wrote translations to {target_path}")
         token_mismatches = sum(
@@ -1098,10 +1098,17 @@ def _run_translation(args, root: str) -> None:
 
     skipped = len(report)
     failures_count = len(failures)
-    return list(report.values()), processed_lines, successes, skipped, failures_count
+    return (
+        list(report.values()),
+        processed_lines,
+        successes,
+        skipped,
+        failures_count,
+        fix_tokens_code,
+    )
 
 
-def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, int]:
+def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, int, int]:
     """Check existing translations without invoking Argos."""
 
     english_path = os.path.join(
@@ -1264,7 +1271,14 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
 
     skipped = len(report)
     failures_count = len(failures)
-    return list(report.values()), processed_lines, successes, skipped, failures_count
+    return (
+        list(report.values()),
+        processed_lines,
+        successes,
+        skipped,
+        failures_count,
+        0,
+    )
 
 
 def _load_report(path: str) -> list[dict[str, str]]:
@@ -1508,7 +1522,9 @@ def main():
                 translated_total,
                 skipped_total,
                 failures_total,
+                run_exit_code,
             ) = _run_dry_run(args, root)
+            exit_code = exit_code or run_exit_code
         else:
             prev_hashes: set[str] | None = None
             try:
@@ -1519,9 +1535,11 @@ def main():
                         translated,
                         skipped_total,
                         failures_total,
+                        run_exit_code,
                     ) = _run_translation(args, root)
                     processed_total += processed
                     translated_total += translated
+                    exit_code = exit_code or run_exit_code
                     if not args.report_file:
                         break
                     hashes = [row["hash"] for row in remaining]
