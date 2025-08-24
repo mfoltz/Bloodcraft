@@ -24,7 +24,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 ## Development setup
 
-Run `.codex/install.sh` once to install the .NET SDK, the .NET 6 runtime, and Argos Translate dependencies. The script installs Argos Translate 1.9.6 or later to support CTranslate2 model binary v6. After running the script, verify the runtime with `dotnet --list-runtimes` and ensure `Microsoft.NETCore.App 6.0.x` is listed. See
+Run `.codex/install.sh` once to install the .NET SDK (8.0+) with preview features enabled, the .NET 6 runtime, and Argos Translate dependencies. The script installs Argos Translate 1.9.6 or later to support CTranslate2 model binary v6. After running the script, verify the runtime with `dotnet --list-runtimes` and ensure `Microsoft.NETCore.App 6.0.x` is listed. See
 [AGENTS.md](AGENTS.md) for the full workflow. For instructions on customizing
 `FROM_LANG` and `TO_LANG`, jump to the [Localization](#localization-wip) section.
 
