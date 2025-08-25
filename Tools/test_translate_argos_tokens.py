@@ -104,6 +104,12 @@ def test_sentinel_round_trip():
     assert restored == text
 
 
+def test_trim_whitespace_inside_color_tags():
+    text = "<color=red> {0} </color>"
+    normalized = translate_argos.normalize_tokens(text)
+    assert normalized == "<color=red>{0}</color>"
+
+
 def test_mixed_placeholders_round_trip_with_reorder():
     text = "[b]<color=red>${var} {0}</color>[/b]"
     safe, tokens = translate_argos.protect_strict(text)
