@@ -1,6 +1,7 @@
 import json
 import subprocess
 import sys
+import re
 
 import logging
 import pytest
@@ -179,7 +180,8 @@ def test_extra_placeholders_trimmed(tmp_path, monkeypatch, caplog):
     with caplog.at_level(logging.WARNING):
         translate_argos.main()
 
-    assert "token mismatch (dropped ['999'])" in caplog.text
+    assert re.search(r"token mismatch \[[0-9a-f]{8}\] \(dropped \['999'\]\)", caplog.text)
+    assert "Suggested fix: remove ['999']" in caplog.text
 
     data = json.loads(target_path.read_text())
     assert data["Messages"]["hash"] == "Translated {0}!"
@@ -195,26 +197,26 @@ def test_extra_placeholders_trimmed(tmp_path, monkeypatch, caplog):
 
 
 @pytest.mark.parametrize(
-    "translation,expected,warning",
+    "translation,expected,pattern",
     [
         (
             "Translated [[TOKEN_0]]",
             "Translated {0} {1}",
-            "token mismatch (missing ['1'])",
+            r"token mismatch \[[0-9a-f]{8}\] \(missing \['1'\]\)",
         ),
         (
             "Translated [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_999]]",
             "Translated {0} {1}",
-            "token mismatch (dropped ['999'])",
+            r"token mismatch \[[0-9a-f]{8}\] \(dropped \['999'\]\)",
         ),
         (
             "Translated [[TOKEN_1]] [[TOKEN_0]]",
             "Translated {1} {0}",
-            "tokens reordered",
+            r"tokens reordered",
         ),
     ],
 )
-def test_lenient_token_mismatches(tmp_path, monkeypatch, caplog, translation, expected, warning):
+def test_lenient_token_mismatches(tmp_path, monkeypatch, caplog, translation, expected, pattern):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
     messages_dir.mkdir(parents=True)
@@ -268,8 +270,8 @@ def test_lenient_token_mismatches(tmp_path, monkeypatch, caplog, translation, ex
     with caplog.at_level(logging.WARNING):
         translate_argos.main()
 
-    assert warning in caplog.text
-    if warning == "tokens reordered":
+    assert re.search(pattern, caplog.text)
+    if pattern == r"tokens reordered":
         assert translator.calls >= 1
     else:
         assert translator.calls == 1
@@ -279,7 +281,61 @@ def test_lenient_token_mismatches(tmp_path, monkeypatch, caplog, translation, ex
     run_dir = next((root / "translations" / "xx").glob("*"))
     metrics = json.loads((run_dir / "metrics.json").read_text())
     entry = metrics[-1]
-    if "token mismatch" in warning:
+    if "token mismatch" in pattern:
         assert entry["token_mismatches"] == 1
     else:
         assert entry["token_mismatches"] == 0
+
+
+def test_mismatch_logs_id_and_suggestion(tmp_path, monkeypatch, caplog):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"hash": "Attack {0}!"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    target_path = root / target_rel
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(json.dumps({"Messages": {"hash": ""}}))
+
+    class BadTranslator:
+        def translate(self, text: str) -> str:
+            return "Translated [[TOKEN_1]] [[TOKEN_999]]"
+
+    class DummyCompleted:
+        def __init__(self, code: int = 0):
+            self.returncode = code
+
+    translator = BadTranslator()
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: translator,
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+            "--lenient-tokens",
+        ],
+    )
+
+    with caplog.at_level(logging.WARNING):
+        translate_argos.main()
+
+    pattern = re.compile(r"hash: token mismatch \[[0-9a-f]{8}\].*Suggested fix: add \['0'\]; remove \['1', '999'\]")
+    assert pattern.search(caplog.text)
