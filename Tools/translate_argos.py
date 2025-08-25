@@ -168,7 +168,16 @@ def normalize_tokens(text: str) -> str:
 
     tmp = TOKEN_PATTERN.sub(store, text)
     tmp = tmp.replace("[", "").replace("]", "")
-    return re.sub(r"@@(\d+)@@", restore, tmp)
+    restored = re.sub(r"@@(\d+)@@", restore, tmp)
+
+    # Trim whitespace around format tokens within colour tags.
+    restored = re.sub(
+        r"(<color[^>]*>)\s*(\{[^{}]+\})\s*(</color>)",
+        lambda m: f"{m.group(1)}{m.group(2)}{m.group(3)}",
+        restored,
+        flags=re.I,
+    )
+    return restored
 
 
 def reorder_tokens(text: str, token_ids: List[str]) -> tuple[str, bool]:
