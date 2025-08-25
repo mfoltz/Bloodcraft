@@ -113,18 +113,6 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
 
    Do not commit translations until `skipped.csv` is empty and `python Tools/fix_tokens.py --check-only` reports no token mismatches, confirming placeholder counts match the English file.
 
-### Sample translation dataset
-
-`Resources/Localization/Messages/Spanish_sample.json` provides roughly twenty English messages with numbered placeholders and `<color>` tags. It is intended for experimenting with the translation tooling.
-
-Translate and validate this dataset automatically with:
-
-```bash
-make sample-translate
-```
-
-
-
    To extract hashes that were skipped due to token mismatches, scan the
    translation log:
 
