@@ -430,7 +430,13 @@ python Tools/summarize_token_stats.py --run-dir translations/fr/2025-05-16 --top
 ```
 
 This prints a table of problematic hashes; add `--csv output.csv` to write the
-results to disk.
+results to disk. Translation logs now record token mismatches with short hash
+IDs and suggested fixes. To aggregate recurring issues directly from a log
+file, provide the log path instead of `--run-dir`:
+
+```bash
+python Tools/summarize_token_stats.py translations/de/<timestamp>/translate.log
+```
 
 ## Troubleshooting & Notes
 

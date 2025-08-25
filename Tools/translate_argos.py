@@ -22,6 +22,7 @@ import logging
 import importlib.metadata
 import platform
 import uuid
+import hashlib
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from typing import List
@@ -752,8 +753,22 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
                             parts.append(
                                 f"dropped {extra}" if args.lenient_tokens else f"unexpected {extra}"
                             )
+                        issue_id = hashlib.sha1(
+                            ("|".join(sorted(missing)) + "|" + "|".join(sorted(extra))).encode(
+                                "utf-8"
+                            )
+                        ).hexdigest()[:8]
+                        suggestion_bits: list[str] = []
+                        if missing:
+                            suggestion_bits.append(f"add {missing}")
+                        if extra:
+                            suggestion_bits.append(f"remove {extra}")
+                        logger.warning(
+                            f"{key}: token mismatch [{issue_id}] (" + ", ".join(parts) + ")" +
+                            (f" — Suggested fix: {'; '.join(suggestion_bits)}" if suggestion_bits else "")
+                        )
                         if not args.lenient_tokens:
-                            reason = "token mismatch (" + ", ".join(parts) + ")"
+                            reason = "token mismatch (" + ", ".join(parts) + f") [{issue_id}]"
                             category = categorize(reason)
                             log_entry(
                                 key,
@@ -777,7 +792,6 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
                             result += "".join(f" [[TOKEN_{m}]]" for m in missing)
                             found_tokens.extend(missing)
                             token_stats[key]["missing_tokens"] = len(missing)
-                        logger.warning(f"{key}: token mismatch (" + ", ".join(parts) + ")")
                     changed = found_tokens != expected
                     if changed:
                         token_reorders += 1
@@ -838,11 +852,22 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
                                 parts.append(f"missing {missing}")
                             if extra:
                                 parts.append(f"dropped {extra}")
+                            issue_id = hashlib.sha1(
+                                ("|".join(sorted(missing)) + "|" + "|".join(sorted(extra))).encode(
+                                    "utf-8"
+                                )
+                            ).hexdigest()[:8]
+                            suggestion_bits: list[str] = []
+                            if missing:
+                                suggestion_bits.append(f"add {missing}")
+                            if extra:
+                                suggestion_bits.append(f"remove {extra}")
                             logger.warning(
-                                f"{key}: token mismatch (" + ", ".join(parts) + ")"
+                                f"{key}: token mismatch [{issue_id}] (" + ", ".join(parts) + ")" +
+                                (f" — Suggested fix: {'; '.join(suggestion_bits)}" if suggestion_bits else "")
                             )
                             if not args.lenient_tokens:
-                                reason = "token mismatch (" + ", ".join(parts) + ")"
+                                reason = "token mismatch (" + ", ".join(parts) + f") [{issue_id}]"
                                 category = categorize(reason)
                     un = unprotect(result, tokens)
                     un = un.replace("\\u003C", "<").replace("\\u003E", ">")
@@ -964,13 +989,22 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
                     result += "".join(f" [[TOKEN_{m}]]" for m in missing)
                     found_tokens.extend(missing)
                 if missing or extra:
+                    issue_id = hashlib.sha1(
+                        ("|".join(sorted(missing)) + "|" + "|".join(sorted(extra))).encode("utf-8")
+                    ).hexdigest()[:8]
+                    suggestion_bits: list[str] = []
+                    if missing:
+                        suggestion_bits.append(f"add {missing}")
+                    if extra:
+                        suggestion_bits.append(f"remove {extra}")
                     logger.warning(
-                        f"{key}: token mismatch on strict retry (missing {missing}, unexpected {extra})"
+                        f"{key}: token mismatch [{issue_id}] on strict retry (missing {missing}, unexpected {extra})" +
+                        (f" — Suggested fix: {'; '.join(suggestion_bits)}" if suggestion_bits else "")
                     )
                     if not args.lenient_tokens:
                         return (
                             False,
-                            f"token mismatch on strict retry (missing {missing}, unexpected {extra})",
+                            f"token mismatch on strict retry (missing {missing}, unexpected {extra}) [{issue_id}]",
                             len(found_tokens),
                             changed,
                             None,
@@ -1218,10 +1252,25 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
                 parts.append(f"missing {missing}")
             if extra:
                 parts.append(f"unexpected {extra}")
-            msg = "token mismatch (" + ", ".join(parts) + ")"
+            issue_id = hashlib.sha1(
+                ("|".join(sorted(missing)) + "|" + "|".join(sorted(extra))).encode("utf-8")
+            ).hexdigest()[:8]
+            suggestion_bits: list[str] = []
+            if missing:
+                suggestion_bits.append(f"add {missing}")
+            if extra:
+                suggestion_bits.append(f"remove {extra}")
+            msg = "token mismatch (" + ", ".join(parts) + f") [{issue_id}]"
             if args.lenient_tokens:
-                logger.warning(f"{key}: {msg}")
+                logger.warning(
+                    f"{key}: {msg}" +
+                    (f" — Suggested fix: {'; '.join(suggestion_bits)}" if suggestion_bits else "")
+                )
             else:
+                logger.warning(
+                    f"{key}: {msg}" +
+                    (f" — Suggested fix: {'; '.join(suggestion_bits)}" if suggestion_bits else "")
+                )
                 reason = msg
                 category = categorize(reason)
         elif list(found_tokens_map.keys()) != list(tokens.keys()):
