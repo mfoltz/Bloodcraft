@@ -1509,34 +1509,38 @@ def main():
         args.git_commit,
         args.model_version,
     )
-
+    skipped_entries: list[dict[str, str]] = _load_report(args.report_file)
     remaining: list[dict[str, str]] = []
-    processed_total = translated_total = skipped_total = failures_total = 0
+    processed_total = translated_total = failures_total = 0
     exit_code = 0
     exit_msg: str | None = None
     try:
         if args.dry_run:
             (
-                remaining,
+                run_remaining,
                 processed_total,
                 translated_total,
-                skipped_total,
+                _skipped,
                 failures_total,
                 run_exit_code,
             ) = _run_dry_run(args, root)
+            skipped_entries.extend(run_remaining)
+            remaining = run_remaining
             exit_code = exit_code or run_exit_code
         else:
             prev_hashes: set[str] | None = None
             try:
                 while True:
                     (
-                        remaining,
+                        run_remaining,
                         processed,
                         translated,
-                        skipped_total,
+                        _skipped,
                         failures_total,
                         run_exit_code,
                     ) = _run_translation(args, root)
+                    skipped_entries.extend(run_remaining)
+                    remaining = run_remaining
                     processed_total += processed
                     translated_total += translated
                     exit_code = exit_code or run_exit_code
@@ -1606,10 +1610,10 @@ def main():
             )
         exit_code = 1
     finally:
+        unresolved_total = len(remaining)
         if args.report_file:
             try:
-                written, counts = _write_report(args.report_file, remaining)
-                skipped_total = written
+                written, counts = _write_report(args.report_file, skipped_entries)
                 logger.info(
                     "Wrote skip report to %s with %d row(s)",
                     args.report_file,
@@ -1624,9 +1628,9 @@ def main():
             "Totals: processed=%d translated=%d skipped=%d",
             processed_total,
             translated_total,
-            skipped_total,
+            unresolved_total,
         )
-        if skipped_total:
+        if unresolved_total:
             exit_code = exit_code or 1
         if failures_total:
             exit_code = exit_code or 1
