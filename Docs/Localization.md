@@ -67,12 +67,10 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
   `--run-dir` if a custom location is desired. The translator writes
   `translate.log`, `skipped.csv`, and `metrics.json` to this run
   directory and appends a summary to `translations/run_index.json`.
-  These run directories are ignored by git to keep commits concise; to
-  retain logs for QA, remove the ignore rule or add an exception such as
-  `!translations/de/**` to `.gitignore` before committing. Omitting
-  `--log-file` or `--report-file` constructs these defaults within the run
-  directory, and the script prints the resolved locations at startup for
-  easy discovery.
+  Commit every run directory to version control so logs remain available
+  for QA. Omitting `--log-file` or `--report-file` constructs these
+  defaults within the run directory, and the script prints the resolved
+  locations at startup for easy discovery.
 
    To refresh specific messages without touching the rest, pass one or more
    `--hash <hash>` options to translate only those hashes.
