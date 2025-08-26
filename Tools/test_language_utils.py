@@ -3,7 +3,7 @@ import language_utils
 
 def test_allowlisted_word_is_ignored(monkeypatch):
     monkeypatch.setattr(language_utils, "STOP_WORDS", {"english": {"bloodcraft"}})
-    monkeypatch.setattr(language_utils, "ALLOWLIST", {"english": set()})
+    monkeypatch.setattr(language_utils, "ALLOWLIST", {"english": {"bloodcraft"}})
     assert not language_utils.contains_english("Bloodcraft")
 
 

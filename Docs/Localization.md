@@ -326,6 +326,12 @@ full pipeline:
 python Tools/localization_pipeline.py --debug
 ```
 
+Language names correspond to the message file stems (``German.json`` → ``German``).
+The pipeline maps each name to its ISO code (for example, German → ``de``) and
+now verifies that translated strings contain words from that language. A run
+will fail if messages are produced in another language (e.g. Spanish text in
+German files).
+
 Override the output paths for aggregate metrics and skipped hashes with
 `--metrics-file` and `--skipped-file` (defaults are `localization_metrics.json`
 and `skipped.csv` in the repository root):

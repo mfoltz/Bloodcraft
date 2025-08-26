@@ -34,6 +34,8 @@ def test_metrics_written(tmp_path, monkeypatch):
             run_dir = Path(cmd[cmd.index("--run-dir") + 1])
             run_dir.mkdir(parents=True, exist_ok=True)
             (run_dir / "skipped.csv").write_text("hash,english,reason,category\n")
+            target = cmd[cmd.index("Tools/translate_argos.py") + 1]
+            (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr(localization_pipeline, "run", fake_run)
@@ -80,6 +82,8 @@ def test_exit_code_on_skipped(tmp_path, monkeypatch):
                 writer = csv.DictWriter(fp, fieldnames=["hash", "english", "reason"])
                 writer.writeheader()
                 writer.writerow({"hash": "h", "english": "Hello", "reason": "timeout"})
+            target = cmd[cmd.index("Tools/translate_argos.py") + 1]
+            (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr(localization_pipeline, "run", fake_run)
@@ -119,6 +123,8 @@ def test_custom_output_paths(tmp_path, monkeypatch):
             run_dir = Path(cmd[cmd.index("--run-dir") + 1])
             run_dir.mkdir(parents=True, exist_ok=True)
             (run_dir / "skipped.csv").write_text("hash,english,reason,category\n")
+            target = cmd[cmd.index("Tools/translate_argos.py") + 1]
+            (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr(localization_pipeline, "run", fake_run)
@@ -145,6 +151,8 @@ def test_language_mismatch_detection(tmp_path, monkeypatch):
             run_dir = Path(cmd[cmd.index("--run-dir") + 1])
             run_dir.mkdir(parents=True, exist_ok=True)
             (run_dir / "skipped.csv").write_text("hash,english,reason,category\n")
+            target = cmd[cmd.index("Tools/translate_argos.py") + 1]
+            (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr(localization_pipeline, "run", fake_run)
@@ -155,5 +163,37 @@ def test_language_mismatch_detection(tmp_path, monkeypatch):
 
     metrics = json.loads((root / "localization_metrics.json").read_text())
     lang = metrics["languages"]["Spanish"]
+    assert lang["language_mismatches"] == 1
+    assert lang["success"] is False
+
+
+def test_wrong_language_detected(tmp_path, monkeypatch):
+    root, messages_dir, english_path = _setup_repo(tmp_path)
+    (messages_dir / "German.json").write_text(
+        json.dumps({"Messages": {"hash": "Hola amigo"}})
+    )
+    monkeypatch.setattr(localization_pipeline, "ROOT", root)
+    monkeypatch.setattr(localization_pipeline, "MESSAGES_DIR", messages_dir)
+    monkeypatch.setattr(localization_pipeline, "ENGLISH_PATH", english_path)
+    monkeypatch.setattr(localization_pipeline, "LANGUAGE_CODES", {"German": "de"})
+    monkeypatch.setattr(sys, "argv", ["localization_pipeline.py"])
+
+    def fake_run(cmd, *, check=True, logger):
+        if any("translate_argos.py" in c for c in cmd):
+            run_dir = Path(cmd[cmd.index("--run-dir") + 1])
+            run_dir.mkdir(parents=True, exist_ok=True)
+            (run_dir / "skipped.csv").write_text("hash,english,reason,category\n")
+            target = cmd[cmd.index("Tools/translate_argos.py") + 1]
+            (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(localization_pipeline, "run", fake_run)
+
+    with pytest.raises(SystemExit) as exc:
+        localization_pipeline.main()
+    assert exc.value.code == 1
+
+    metrics = json.loads((root / "localization_metrics.json").read_text())
+    lang = metrics["languages"]["German"]
     assert lang["language_mismatches"] == 1
     assert lang["success"] is False
