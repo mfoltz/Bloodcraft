@@ -15,6 +15,7 @@ import json
 import logging
 import subprocess
 import sys
+import signal
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict
@@ -117,6 +118,8 @@ def main() -> None:
     if not combined_report.is_absolute():
         combined_report = ROOT / combined_report
     combined_report.parent.mkdir(parents=True, exist_ok=True)
+
+    signal.signal(signal.SIGTERM, signal.default_int_handler)
 
     available = {p.stem: p for p in MESSAGES_DIR.glob("*.json") if p.name != "English.json"}
     if args.languages:
@@ -329,7 +332,13 @@ def main() -> None:
             json.dump(metrics, f, indent=2, ensure_ascii=False)
         logger.info("Wrote metrics to %s", metrics_path)
         print(metrics_path)
-
+    except KeyboardInterrupt:
+        logger.warning("Pipeline interrupted")
+        metrics["status"] = "interrupted"
+        with metrics_path.open("w", encoding="utf-8") as f:
+            json.dump(metrics, f, indent=2, ensure_ascii=False)
+        overall_ok = False
+        raise SystemExit(1)
     finally:
         if args.archive_logs:
             import archive_translation_logs
