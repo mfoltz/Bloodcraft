@@ -23,6 +23,7 @@ import importlib.metadata
 import platform
 import uuid
 import hashlib
+import signal
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from typing import List
@@ -41,6 +42,51 @@ from token_patterns import (
 
 
 logger = logging.getLogger("translate_argos")
+
+_INTERRUPT_ARGS = None
+
+
+def handle_interrupt(signum, frame):
+    """Handle SIGINT/SIGTERM by writing interrupted metrics and exiting."""
+    if _INTERRUPT_ARGS is not None:
+        try:
+            write_failure_metrics(
+                _INTERRUPT_ARGS, "interrupted", status="interrupted"
+            )
+            run_index_file = getattr(_INTERRUPT_ARGS, "run_index_file", None)
+            if run_index_file:
+                index_log = _read_json(run_index_file, default=[])
+                if not isinstance(index_log, list):
+                    index_log = []
+                updated = False
+                for entry in index_log:
+                    if entry.get("run_id") == _INTERRUPT_ARGS.run_id:
+                        entry["status"] = "interrupted"
+                        updated = True
+                        break
+                if not updated:
+                    index_log.append(
+                        {
+                            "run_id": _INTERRUPT_ARGS.run_id,
+                            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                            "language": _INTERRUPT_ARGS.dst,
+                            "run_dir": _INTERRUPT_ARGS.run_dir,
+                            "log_file": _INTERRUPT_ARGS.log_file,
+                            "report_file": _INTERRUPT_ARGS.report_file,
+                            "metrics_file": _INTERRUPT_ARGS.metrics_file,
+                            "success_rate": 0,
+                            "status": "interrupted",
+                        }
+                    )
+                _write_json(run_index_file, index_log)
+        except Exception:
+            logger.exception("Failed to record interrupted metrics")
+        for handler in logger.handlers:
+            try:
+                handler.flush()
+            except Exception:
+                pass
+    raise SystemExit("Interrupted")
 
 FATAL_ARGOS_ERRORS = [
     "Unsupported model binary version",
@@ -391,7 +437,7 @@ def _write_report(
     return after_count, counts
 
 
-def _append_metrics_entry(args, **extra) -> dict:
+def _append_metrics_entry(args, *, status: str, **extra) -> dict:
     """Append a metrics entry to ``args.metrics_file``."""
 
     metrics_dir = os.path.dirname(args.metrics_file)
@@ -410,6 +456,7 @@ def _append_metrics_entry(args, **extra) -> dict:
         "run_dir": args.run_dir,
         "file": args.target_file,
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "status": status,
         **extra,
     }
     log = _read_json(args.metrics_file, default=[])
@@ -437,6 +484,7 @@ def _append_metrics_entry(args, **extra) -> dict:
                 "report_file": args.report_file,
                 "metrics_file": args.metrics_file,
                 "success_rate": success_rate,
+                "status": status,
             }
             index_log = _read_json(run_index_file, default=[])
             if not isinstance(index_log, list):
@@ -450,13 +498,14 @@ def _append_metrics_entry(args, **extra) -> dict:
     return entry
 
 
-def write_failure_metrics(args, error) -> None:
+def write_failure_metrics(args, error, *, status: str = "failed") -> None:
     """Record metrics for a failed run if none were written."""
 
     if getattr(args, "metrics_recorded", False):
         return
     _append_metrics_entry(
         args,
+        status=status,
         processed=0,
         successes=0,
         timeouts=0,
@@ -1103,6 +1152,7 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
         )
         _append_metrics_entry(
             args,
+            status="success",
             processed=processed_lines,
             successes=successes,
             timeouts=timeouts_count,
@@ -1125,6 +1175,7 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
         successes = processed_so_far - len(failures)
         _append_metrics_entry(
             args,
+            status="interrupted",
             processed=processed_so_far,
             successes=successes,
             timeouts=timeouts_count,
@@ -1311,6 +1362,7 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
 
     _append_metrics_entry(
         args,
+        status="success",
         processed=processed_lines,
         successes=successes,
         timeouts=0,
@@ -1552,6 +1604,11 @@ def main():
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
+    global _INTERRUPT_ARGS
+    _INTERRUPT_ARGS = args
+    signal.signal(signal.SIGINT, handle_interrupt)
+    signal.signal(signal.SIGTERM, handle_interrupt)
+
     if getattr(args, "verbose", False):
         logger.info("--verbose is deprecated; use --log-level INFO")
 
@@ -1613,12 +1670,12 @@ def main():
                     )
                     args.hashes = hashes
             except KeyboardInterrupt:
-                write_failure_metrics(args, "interrupted")
+                write_failure_metrics(args, "interrupted", status="interrupted")
                 logger.warning("Translation aborted by user")
                 exit_code = 1
                 exit_msg = "Interrupted"
             except BaseException as exc:
-                write_failure_metrics(args, exc)
+                write_failure_metrics(args, exc, status="failed")
                 error_msg = str(exc) or exc.__class__.__name__
                 summary_line = (
                     "Summary: 0/0 translated, 0 timeouts, 0 token reorders. "
@@ -1642,6 +1699,7 @@ def main():
             if not getattr(args, "metrics_recorded", False):
                 _append_metrics_entry(
                     args,
+                    status="failed",
                     processed=0,
                     successes=0,
                     timeouts=0,
@@ -1657,6 +1715,7 @@ def main():
         if not getattr(args, "metrics_recorded", False):
             _append_metrics_entry(
                 args,
+                status="failed",
                 processed=0,
                 successes=0,
                 timeouts=0,
