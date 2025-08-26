@@ -5,13 +5,13 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-DOTNET_VERSION="8.0"
+DOTNET_VERSION="8.0.413"
 
 
-if ! command -v dotnet >/dev/null; then
-    echo "Installing .NET $DOTNET_VERSION SDK..."
+if ! command -v dotnet >/dev/null || ! dotnet --list-sdks 2>/dev/null | grep -q "^${DOTNET_VERSION}"; then
+    echo "Installing .NET SDK $DOTNET_VERSION..."
     curl -sSL https://dot.net/v1/dotnet-install.sh -o "$SCRIPT_DIR/dotnet-install.sh"
-    bash "$SCRIPT_DIR/dotnet-install.sh" --channel "$DOTNET_VERSION" --install-dir "$HOME/.dotnet"
+    bash "$SCRIPT_DIR/dotnet-install.sh" --version "$DOTNET_VERSION" --install-dir "$HOME/.dotnet"
 fi
 
 # Install .NET 6 SDK if not already present

@@ -50,7 +50,10 @@ public class LocalizationHelpersIntegrationTests
         if (process.ExitCode != 0)
             throw new InvalidOperationException($"Python failed: {error}");
 
-        return JsonSerializer.Deserialize<PyResult>(output)!;
+        return JsonSerializer.Deserialize<PyResult>(
+            output,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+        )!;
     }
 
     record PyResult(string Safe, string[] Tokens, string Restored);

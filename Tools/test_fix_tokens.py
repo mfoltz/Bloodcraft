@@ -50,7 +50,7 @@ def test_reorder_option(tmp_path, monkeypatch):
     fix_tokens.main()
     data = json.loads(target.read_text())
     assert data["Messages"]["hash"] == "{a} {b}"
-    metrics = json.loads(metrics_path.read_text())
+    metrics = json.loads(metrics_path.read_text())[-1]
     assert metrics["tokens_restored"] == 0
     assert metrics["tokens_reordered"] == 1
     assert metrics["token_mismatches"] == 0
@@ -69,17 +69,17 @@ def test_normalize_tokens_merge_adjacent():
 def test_replace_placeholders_token_only_line():
     tokens = ["<b>", "{x}", "</b>"]
     value = "[[TOKEN_0]] [[TOKEN_1]] [[TOKEN_2]]"
-    new_value, replaced, mismatch = fix_tokens.replace_placeholders(value, tokens)
+    new_value, replaced, mismatch, missing, extra = fix_tokens.replace_placeholders(value, tokens)
     assert new_value.replace(" ", "") == "<b>{x}</b>"
-    assert replaced and not mismatch
+    assert replaced and not mismatch and not missing and not extra
 
 
 def test_replace_placeholders_with_various_tokens():
     tokens = ["{0}", "${var}", "[[TOKEN_0]]", "{PlayerName}"]
     value = " ".join(f"[[TOKEN_{i}]]" for i in range(len(tokens)))
-    new_value, replaced, mismatch = fix_tokens.replace_placeholders(value, tokens)
+    new_value, replaced, mismatch, missing, extra = fix_tokens.replace_placeholders(value, tokens)
     assert new_value.replace(" ", "") == "".join(tokens)
-    assert replaced and not mismatch
+    assert replaced and not mismatch and not missing and not extra
 
 
 def test_normalization_merges_split_tokens(tmp_path, monkeypatch):
@@ -139,10 +139,11 @@ def test_exit_on_mismatch(tmp_path, monkeypatch):
     with pytest.raises(SystemExit) as exc:
         fix_tokens.main()
     assert str(metrics_path) in str(exc.value)
-    metrics = json.loads(metrics_path.read_text())
+    metrics = json.loads(metrics_path.read_text())[-1]
     assert metrics["token_mismatches"] == 1
     assert metrics["tokens_restored"] == 0
     assert metrics["tokens_reordered"] == 0
+    assert metrics["mismatches"][0]["key"] == "hash"
 
 
 def test_allow_mismatch(tmp_path, monkeypatch, caplog):
@@ -172,7 +173,7 @@ def test_allow_mismatch(tmp_path, monkeypatch, caplog):
     with caplog.at_level(logging.WARNING):
         fix_tokens.main()
     assert "token count mismatch" in caplog.text
-    metrics = json.loads(metrics_path.read_text())
+    metrics = json.loads(metrics_path.read_text())[-1]
     assert metrics["token_mismatches"] == 1
 
 
@@ -184,9 +185,9 @@ def test_extract_tokens_bracket_tags_and_percent():
 def test_replace_placeholders_with_bracket_tags_and_percent():
     tokens = ["[b]", "%", "[/b]"]
     value = "[[TOKEN_0]]100[[TOKEN_1]][[TOKEN_2]]"
-    new_value, replaced, mismatch = fix_tokens.replace_placeholders(value, tokens)
+    new_value, replaced, mismatch, missing, extra = fix_tokens.replace_placeholders(value, tokens)
     assert new_value == "[b]100%[/b]"
-    assert replaced and not mismatch
+    assert replaced and not mismatch and not missing and not extra
 
 
 @pytest.mark.skip(reason="log format varies with argostranslate version")
