@@ -1,4 +1,5 @@
 using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
@@ -23,7 +24,7 @@ sealed class CombatStanceHandler : IBuffSpawnHandler
         {
             ctx.BuffEntity.Remove<SetOwnerRotateTowardsMouse>();
         }
-        else if (ctx.Familiars && ctx.SteamId.HasActiveFamiliar())
+        else if (ConfigService.FamiliarSystem && ctx.SteamId.HasActiveFamiliar())
         {
             Entity familiar = Familiars.GetActiveFamiliar(ctx.Target);
             Familiars.SyncAggro(ctx.Target, familiar);

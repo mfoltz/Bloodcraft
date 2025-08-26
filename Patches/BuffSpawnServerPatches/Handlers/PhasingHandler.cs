@@ -1,4 +1,5 @@
 using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
@@ -19,12 +20,12 @@ sealed class PhasingHandler : IBuffSpawnHandler
         if (!ctx.IsPlayer)
             return;
 
-        if (ctx.Familiars && ctx.SteamId.HasDismissedFamiliar() && Familiars.AutoCallMap.TryRemove(ctx.Target, out Entity familiar))
+        if (ConfigService.FamiliarSystem && ctx.SteamId.HasDismissedFamiliar() && Familiars.AutoCallMap.TryRemove(ctx.Target, out Entity familiar))
         {
             Familiars.CallFamiliar(ctx.Target, familiar, ctx.Target.GetUser(), ctx.SteamId);
         }
 
-        if (ctx.Legacies || ctx.Expertise)
+        if (ConfigService.LegacySystem || ConfigService.ExpertiseSystem)
         {
             Buffs.RefreshStats(ctx.Target);
         }

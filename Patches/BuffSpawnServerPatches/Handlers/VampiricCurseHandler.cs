@@ -1,4 +1,5 @@
 using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
@@ -13,7 +14,7 @@ sealed class VampiricCurseHandler : IBuffSpawnHandler
     const float TravelDuration = 7.5f;
 
     public bool CanHandle(BuffSpawnContext ctx)
-        => ctx.Familiars && ctx.IsPlayer && ctx.PrefabGuid.Equals(VampiricCurseBuff);
+        => ConfigService.FamiliarSystem && ctx.IsPlayer && ctx.PrefabGuid.Equals(VampiricCurseBuff);
 
     public void Handle(BuffSpawnContext ctx)
     {

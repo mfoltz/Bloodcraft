@@ -1,3 +1,4 @@
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using System;
@@ -12,7 +13,7 @@ sealed class UseRelicHandler : IBuffSpawnHandler
 
     public void Handle(BuffSpawnContext ctx)
     {
-        if (!ctx.Familiars || !ctx.IsPlayer)
+        if (!ConfigService.FamiliarSystem || !ctx.IsPlayer)
             return;
 
         Entity familiar = Familiars.GetActiveFamiliar(ctx.Target);

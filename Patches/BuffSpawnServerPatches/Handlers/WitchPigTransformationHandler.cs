@@ -1,4 +1,5 @@
 using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
@@ -11,7 +12,7 @@ sealed class WitchPigTransformationHandler : IBuffSpawnHandler
     static readonly PrefabGUID WitchPigTransformationBuff = Buffs.WitchPigTransformationBuff;
 
     public bool CanHandle(BuffSpawnContext ctx)
-        => ctx.Familiars && ctx.PrefabGuid.Equals(WitchPigTransformationBuff);
+        => ConfigService.FamiliarSystem && ctx.PrefabGuid.Equals(WitchPigTransformationBuff);
 
     public void Handle(BuffSpawnContext ctx)
     {

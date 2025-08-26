@@ -1,4 +1,5 @@
 using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
@@ -12,7 +13,7 @@ sealed class PvpCombatHandler : IBuffSpawnHandler
     static readonly PrefabGUID PvpCombatBuff = Buffs.PvPCombatBuff;
 
     public bool CanHandle(BuffSpawnContext ctx)
-        => ctx.Familiars && ctx.IsPlayer && ctx.PrefabGuid.Equals(PvpCombatBuff);
+        => ConfigService.FamiliarSystem && ctx.IsPlayer && ctx.PrefabGuid.Equals(PvpCombatBuff);
 
     public void Handle(BuffSpawnContext ctx)
     {
@@ -21,7 +22,7 @@ sealed class PvpCombatHandler : IBuffSpawnHandler
 
         Entity familiar = Familiars.GetActiveFamiliar(ctx.Target);
 
-        if (!ctx.FamiliarPvP)
+        if (!ConfigService.FamiliarPvP)
         {
             User user = ctx.Target.GetUser();
             Familiars.DismissFamiliar(ctx.Target, familiar, user, ctx.SteamId);

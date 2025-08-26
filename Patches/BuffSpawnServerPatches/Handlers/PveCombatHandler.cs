@@ -1,4 +1,5 @@
 using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
@@ -24,7 +25,7 @@ sealed class PveCombatHandler : IBuffSpawnHandler
             ctx.BuffEntity.Remove<SetOwnerRotateTowardsMouse>();
         }
 
-        if (ctx.Familiars && ctx.SteamId.HasActiveFamiliar())
+        if (ConfigService.FamiliarSystem && ctx.SteamId.HasActiveFamiliar())
         {
             Entity familiar = Familiars.GetActiveFamiliar(ctx.Target);
             Familiars.HandleFamiliarEnteringCombat(ctx.Target, familiar);

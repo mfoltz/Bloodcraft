@@ -1,6 +1,7 @@
 using System;
 using Bloodcraft.Interfaces;
 using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Utilities;
 using ProjectM;
@@ -33,13 +34,13 @@ sealed class ConsumableHandler : IBuffSpawnHandler
 
     void ApplyConsumableToPlayer(BuffSpawnContext ctx)
     {
-        if (ctx.PotionStacking && !ctx.PrefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase))
+        if (ConfigService.PotionStacking && !ctx.PrefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase))
         {
             ctx.BuffEntity.Remove<RemoveBuffOnGameplayEvent>();
             ctx.BuffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
         }
 
-        if (ctx.Professions)
+        if (ConfigService.ProfessionSystem)
         {
             IProfession handler = ProfessionFactory.GetProfession(ctx.PrefabGuid);
             int level = handler.GetProfessionLevel(ctx.SteamId);
@@ -72,7 +73,7 @@ sealed class ConsumableHandler : IBuffSpawnHandler
             }
         }
 
-        if (ctx.Familiars && !ctx.PrefabGuid.Equals(WranglerPotionBuff))
+        if (ConfigService.FamiliarSystem && !ctx.PrefabGuid.Equals(WranglerPotionBuff))
         {
             Entity familiar = Familiars.GetActiveFamiliar(ctx.Target);
             if (familiar.Exists())
@@ -86,13 +87,13 @@ sealed class ConsumableHandler : IBuffSpawnHandler
 
     void ApplyConsumableToFollower(BuffSpawnContext ctx, Entity playerChar)
     {
-        if (ctx.PotionStacking && !ctx.PrefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase))
+        if (ConfigService.PotionStacking && !ctx.PrefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase))
         {
             ctx.BuffEntity.Remove<RemoveBuffOnGameplayEvent>();
             ctx.BuffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
         }
 
-        if (ctx.Familiars && !ctx.PrefabGuid.Equals(WranglerPotionBuff))
+        if (ConfigService.FamiliarSystem && !ctx.PrefabGuid.Equals(WranglerPotionBuff))
         {
             Entity familiar = Familiars.GetActiveFamiliar(playerChar);
             if (familiar.Exists())

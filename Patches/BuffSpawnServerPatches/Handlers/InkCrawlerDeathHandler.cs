@@ -1,4 +1,5 @@
 using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
@@ -12,7 +13,7 @@ sealed class InkCrawlerDeathHandler : IBuffSpawnHandler
     const float MinionLifetime = 30f;
 
     public bool CanHandle(BuffSpawnContext ctx)
-        => ctx.Familiars && ctx.PrefabGuid.Equals(InkCrawlerDeathBuff);
+        => ConfigService.FamiliarSystem && ctx.PrefabGuid.Equals(InkCrawlerDeathBuff);
 
     public void Handle(BuffSpawnContext ctx)
     {

@@ -1,4 +1,5 @@
 using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
@@ -13,7 +14,7 @@ sealed class EliteSolarusHandler : IBuffSpawnHandler
     static readonly PrefabGUID Solarus = PrefabGUIDs.CHAR_ChurchOfLight_Paladin_VBlood;
 
     public bool CanHandle(BuffSpawnContext ctx)
-        => ctx.EliteShardBearers && ctx.PrefabGuid.Equals(GateBossFeedCompleteBuff);
+        => ConfigService.EliteShardBearers && ctx.PrefabGuid.Equals(GateBossFeedCompleteBuff);
 
     public void Handle(BuffSpawnContext ctx)
     {

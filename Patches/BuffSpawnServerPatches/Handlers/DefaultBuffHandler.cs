@@ -1,4 +1,6 @@
+using Bloodcraft;
 using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
@@ -22,16 +24,18 @@ sealed class DefaultBuffHandler : IBuffSpawnHandler
 
         bool prevent = false;
 
-        if (ctx.GameMode == GameModeType.PvE)
+        GameModeType gameMode = Core.SystemService.ServerGameSettingsSystem._Settings.GameModeType;
+
+        if (gameMode == GameModeType.PvE)
         {
             prevent = ownerPlayer && !owner.Equals(ctx.Target);
         }
-        else if (ctx.GameMode == GameModeType.PvP && ctx.Target.HasBuff(PvPProtectedBuff))
+        else if (gameMode == GameModeType.PvP && ctx.Target.HasBuff(PvPProtectedBuff))
         {
             prevent = ownerPlayer && !owner.Equals(ctx.Target);
         }
 
-        if (!prevent && ctx.Familiars)
+        if (!prevent && ConfigService.FamiliarSystem)
         {
             if (owner.IsFollowingPlayer() || owner.GetOwner().IsFollowingPlayer())
             {

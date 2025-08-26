@@ -1,4 +1,5 @@
 using System;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using Unity.Entities;
@@ -13,7 +14,7 @@ sealed class AggroEmoteHandler : IBuffSpawnHandler
 
     public void Handle(BuffSpawnContext ctx)
     {
-        if (ctx.Familiars && ctx.Target.TryGetFollowedPlayer(out Entity player) && !GetPlayerBool(player.GetSteamId(), VBLOOD_EMOTES_KEY))
+        if (ConfigService.FamiliarSystem && ctx.Target.TryGetFollowedPlayer(out Entity player) && !GetPlayerBool(player.GetSteamId(), VBLOOD_EMOTES_KEY))
         {
             ctx.BuffEntity.Destroy();
         }

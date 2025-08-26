@@ -1,6 +1,5 @@
 using System;
 using Bloodcraft.Patches.BuffSpawnServerPatches;
-using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using HarmonyLib;
@@ -20,18 +19,6 @@ internal static class BuffSystemSpawnPatches
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static ModificationsRegistry ModificationsRegistry => SystemService.ModificationSystem.Registry;
 
-    static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
-
-    static readonly bool _eliteShardBearers = ConfigService.EliteShardBearers;
-    static readonly bool _legacies = ConfigService.LegacySystem;
-    static readonly bool _expertise = ConfigService.ExpertiseSystem;
-    static readonly bool _trueImmortal = ConfigService.TrueImmortal;
-    static readonly bool _familiars = ConfigService.FamiliarSystem;
-    static readonly bool _familiarPvP = ConfigService.FamiliarPvP;
-    static readonly bool _potionStacking = ConfigService.PotionStacking;
-    static readonly bool _professions = ConfigService.ProfessionSystem;
-
-    static readonly EntityQuery _query = QueryService.BuffSpawnServerQuery;
 
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
@@ -39,9 +26,11 @@ internal static class BuffSystemSpawnPatches
     {
         if (!Core._initialized) return;
 
-        using NativeAccessor<Entity> entities = _query.ToEntityArrayAccessor();
-        using NativeAccessor<PrefabGUID> prefabGuids = _query.ToComponentDataArrayAccessor<PrefabGUID>();
-        using NativeAccessor<Buff> buffs = _query.ToComponentDataArrayAccessor<Buff>();
+        EntityQuery query = QueryService.BuffSpawnServerQuery;
+
+        using NativeAccessor<Entity> entities = query.ToEntityArrayAccessor();
+        using NativeAccessor<PrefabGUID> prefabGuids = query.ToComponentDataArrayAccessor<PrefabGUID>();
+        using NativeAccessor<Buff> buffs = query.ToComponentDataArrayAccessor<Buff>();
 
         ComponentLookup<PlayerCharacter> playerCharacterLookup = __instance.GetComponentLookup<PlayerCharacter>(true);
         ComponentLookup<BlockFeedBuff> blockFeedBuffLookup = __instance.GetComponentLookup<BlockFeedBuff>(true);
@@ -69,15 +58,6 @@ internal static class BuffSystemSpawnPatches
                     PrefabName = prefabName,
                     IsPlayer = isPlayerTarget,
                     SteamId = steamId,
-                    GameMode = _gameMode,
-                    EliteShardBearers = _eliteShardBearers,
-                    Legacies = _legacies,
-                    Expertise = _expertise,
-                    TrueImmortal = _trueImmortal,
-                    Familiars = _familiars,
-                    FamiliarPvP = _familiarPvP,
-                    PotionStacking = _potionStacking,
-                    Professions = _professions,
                     BlockFeedLookup = blockFeedBuffLookup
                 };
 

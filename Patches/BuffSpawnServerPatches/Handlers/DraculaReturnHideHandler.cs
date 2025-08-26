@@ -1,4 +1,5 @@
 using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
@@ -11,7 +12,7 @@ sealed class DraculaReturnHideHandler : IBuffSpawnHandler
     static readonly PrefabGUID DraculaReturnHideBuff = Buffs.DraculaReturnHideBuff;
 
     public bool CanHandle(BuffSpawnContext ctx)
-        => ctx.Familiars && ctx.PrefabGuid.Equals(DraculaReturnHideBuff);
+        => ConfigService.FamiliarSystem && ctx.PrefabGuid.Equals(DraculaReturnHideBuff);
 
     public void Handle(BuffSpawnContext ctx)
     {

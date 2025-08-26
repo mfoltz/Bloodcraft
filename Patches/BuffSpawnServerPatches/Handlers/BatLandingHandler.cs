@@ -1,3 +1,4 @@
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
@@ -11,7 +12,7 @@ sealed class BatLandingHandler : IBuffSpawnHandler
     static readonly PrefabGUID BatLandingTravel = new(-371745443);
 
     public bool CanHandle(BuffSpawnContext ctx)
-        => ctx.Familiars && ctx.IsPlayer && ctx.PrefabGuid.Equals(BatLandingTravel);
+        => ConfigService.FamiliarSystem && ctx.IsPlayer && ctx.PrefabGuid.Equals(BatLandingTravel);
 
     public void Handle(BuffSpawnContext ctx)
     {

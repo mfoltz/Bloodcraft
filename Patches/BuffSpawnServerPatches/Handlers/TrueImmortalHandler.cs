@@ -1,4 +1,5 @@
 using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
@@ -12,7 +13,7 @@ sealed class TrueImmortalHandler : IBuffSpawnHandler
     static readonly PrefabGUID BloodCurseBuff = Buffs.DraculaBloodCurseBuff;
 
     public bool CanHandle(BuffSpawnContext ctx)
-        => ctx.TrueImmortal && ctx.IsPlayer && ctx.PrefabGuid.Equals(BloodCurseBuff);
+        => ConfigService.TrueImmortal && ctx.IsPlayer && ctx.PrefabGuid.Equals(BloodCurseBuff);
 
     public void Handle(BuffSpawnContext ctx)
     {
