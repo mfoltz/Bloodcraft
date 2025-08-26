@@ -68,8 +68,9 @@ artifacts/
 *.tmp
 *.tmp_proj
 *.log
-# Translation run outputs
-translate_es.log
+# Keep translation logs under version control
+!translate.log
+!translations/**/translate.log
 *.vspscc
 *.vssscc
 .builds
@@ -310,9 +311,3 @@ Notepad.cs
 VSystem.cs
 Bridges.cs
 
-# Translation artifacts
-translate.log
-skipped.csv
-TranslationLogs/
-translations/*
-!translations/run_index.json
