@@ -122,6 +122,36 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
 
    Omit `--csv` to print the unique hashes to stdout.
 
+### Handling Interruptions & Hard Blockers
+
+Translation runs or the full localization pipeline may terminate early. Both
+`translate_argos.py` and `localization_pipeline.py` record a `status` field in
+their metrics so interruptions are visible after the fact. Each translation run
+writes `metrics.json` alongside `translate.log` in its run directory, and
+`translations/run_index.json` aggregates the `status` for every run.
+
+```bash
+# Inspect run index for unfinished or failed runs
+jq '.[] | select(.status != "completed") | {run_dir, status}' translations/run_index.json
+
+# Check metrics for the same run directory
+jq '.[] | select(.status != "completed") | {file, status}' translations/<iso-code>/<timestamp>/metrics.json
+```
+
+Open a follow‑up task for each `interrupted` or `failed` entry so the missing
+messages are tracked. Before re‑running a translation or pipeline step, ingest
+the existing artifacts—`skipped.csv`, `translate.log`, `metrics.json`, and any
+other logs—into your tracking system to preserve context.
+
+```bash
+# Locate logs and summarise outstanding blockers
+ls translations/<iso-code>/<timestamp>
+python Tools/analyze_translation_logs.py --run-dir translations/<iso-code>/<timestamp>
+```
+
+The summary output highlights unresolved token issues or skipped hashes so they
+can be investigated before triggering another run.
+
    ### Interpolation blocks
 
    Entries containing C# interpolation expressions like `{(condition ? "A" : "B")}` are skipped
