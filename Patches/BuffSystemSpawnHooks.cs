@@ -11,7 +11,7 @@ using Unity.Entities;
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal static class BuffSystemSpawnPatches
+internal static class BuffSystemSpawnHooks
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;

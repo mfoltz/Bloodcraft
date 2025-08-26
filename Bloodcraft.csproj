@@ -22,6 +22,11 @@
 
     <ItemGroup>
         <Compile Remove="Bloodcraft.Tests/**/*" />
+        <Compile Remove="Patches/ScriptSpawnServerPatch/**/*" />
+        <Compile Remove="Patches/ScriptSpawnServerHooks.cs" />
+        <Compile Remove="Patches/BuffSpawnServerPatches/**/*" />
+        <Compile Remove="Patches/BuffSystemSpawnHooks.cs" />
+        <Compile Remove="Patches/UpdateBuffsBufferDestroyPatch/**/*" />
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
             <_Parameter1>Bloodcraft.Tests</_Parameter1>
         </AssemblyAttribute>
@@ -37,7 +42,6 @@
                 <EmbeddedResource Include="Resources\Localization\Messages\German.json" />
                 <EmbeddedResource Include="Resources\Localization\Messages\French.json" />
                 <EmbeddedResource Include="Resources\Localization\Messages\Italian.json" />
-                <EmbeddedResource Include="Resources\secrets.json" />
         </ItemGroup>
 
 	<ItemGroup>
