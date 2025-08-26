@@ -283,16 +283,36 @@ def main() -> None:
             totals["token_mismatches"] += token_data["token_mismatches"]
         metrics["steps"]["token_fix"]["end"] = timestamp()
 
+        logger.info("Summarizing token statistics")
+        for run_dir in run_dirs:
+            run(
+                [
+                    sys.executable,
+                    "Tools/summarize_token_stats.py",
+                    "--run-dir",
+                    str(run_dir),
+                ],
+                check=False,
+                logger=logger,
+            )
+
         overall_ok = True
         for lang_metrics in metrics["languages"].values():
             if lang_metrics.get("skipped"):
                 continue
             translation_ok = lang_metrics["translation"]["returncode"] == 0
             token_ok = lang_metrics["token_fix"]["returncode"] == 0
+            mismatch_ok = lang_metrics["token_fix"]["token_mismatches"] == 0
             validation_ok = lang_metrics.get("validation", {}).get("returncode", 0) == 0
             skipped_total = sum(lang_metrics["skipped_hashes"].values())
             lang_metrics["skipped_hash_count"] = skipped_total
-            success = translation_ok and token_ok and skipped_total == 0 and validation_ok
+            success = (
+                translation_ok
+                and token_ok
+                and mismatch_ok
+                and skipped_total == 0
+                and validation_ok
+            )
             lang_metrics["success"] = success
             overall_ok &= success
 

@@ -452,6 +452,11 @@ When mismatches occur the `mismatches` array contains objects with `file`,
 `key`, `missing`, and `extra` fields so problematic entries can be traced
 quickly.
 
+The localization pipeline runs `summarize_token_stats.py` after tokens are
+fixed to highlight hashes with mismatched or reordered tokens. If any language
+reports a non-zero `token_mismatches` count in the metrics emitted by
+`fix_tokens.py`, the pipeline terminates with a failure status.
+
 ### Log analysis
 
 Use `analyze_translation_logs.py` to summarise unresolved issues across
