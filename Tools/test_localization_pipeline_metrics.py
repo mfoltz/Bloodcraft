@@ -127,3 +127,33 @@ def test_custom_output_paths(tmp_path, monkeypatch):
 
     assert (root / "metrics.json").is_file()
     assert (root / "skipped_all.csv").is_file()
+
+
+def test_language_mismatch_detection(tmp_path, monkeypatch):
+    root, messages_dir, english_path = _setup_repo(tmp_path)
+    (messages_dir / "Spanish.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello"}})
+    )
+    monkeypatch.setattr(localization_pipeline, "ROOT", root)
+    monkeypatch.setattr(localization_pipeline, "MESSAGES_DIR", messages_dir)
+    monkeypatch.setattr(localization_pipeline, "ENGLISH_PATH", english_path)
+    monkeypatch.setattr(localization_pipeline, "LANGUAGE_CODES", {"Spanish": "es"})
+    monkeypatch.setattr(sys, "argv", ["localization_pipeline.py"])
+
+    def fake_run(cmd, *, check=True, logger):
+        if any("translate_argos.py" in c for c in cmd):
+            run_dir = Path(cmd[cmd.index("--run-dir") + 1])
+            run_dir.mkdir(parents=True, exist_ok=True)
+            (run_dir / "skipped.csv").write_text("hash,english,reason,category\n")
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(localization_pipeline, "run", fake_run)
+
+    with pytest.raises(SystemExit) as exc:
+        localization_pipeline.main()
+    assert exc.value.code == 1
+
+    metrics = json.loads((root / "localization_metrics.json").read_text())
+    lang = metrics["languages"]["Spanish"]
+    assert lang["language_mismatches"] == 1
+    assert lang["success"] is False
