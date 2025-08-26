@@ -2,6 +2,10 @@
 
 Bloodcraft uses hash-based localization. Follow these steps when adding or editing messages.
 
+## Prerequisites
+
+Install the .NET 8 SDK and the .NET 6 runtime. Verify with `dotnet --list-runtimes` that `Microsoft.NETCore.App 6.0.x` is installed before running any `dotnet run` commands.
+
 Before introducing a new message, check the catalog in
 `Docs/MessageKeys.md` to avoid creating duplicate entries. Run
 `python Tools/generate_message_catalog.py` if you change
