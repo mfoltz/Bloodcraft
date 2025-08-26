@@ -511,6 +511,7 @@ def write_failure_metrics(args, error, *, status: str = "failed") -> None:
         timeouts=0,
         token_reorders=0,
         token_mismatches=0,
+        token_mismatch_details={},
         failures={},
         hash_stats={},
         error=str(error) or error.__class__.__name__,
@@ -607,6 +608,7 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
     token_mismatches = 0
     timed_out_hashes: set[str] = set()
     token_stats: dict[str, dict[str, int | bool]] = {}
+    token_mismatch_details: dict[str, dict[str, list[str]]] = {}
 
     def categorize(reason: str | None) -> str:
         if not reason:
@@ -795,6 +797,10 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
                     missing = [t for t in expected if t not in found_tokens]
                     if extra or missing:
                         token_mismatches += 1
+                        token_mismatch_details[key] = {
+                            "missing": missing,
+                            "extra": extra,
+                        }
                         parts: list[str] = []
                         if missing:
                             parts.append(f"missing {missing}")
@@ -880,6 +886,10 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
                     if set(found_tokens) != set(expected):
                         missing = [t for t in expected if t not in found_tokens]
                         extra = [t for t in found_tokens if t not in expected]
+                        token_mismatch_details[key] = {
+                            "missing": missing,
+                            "extra": extra,
+                        }
                         if extra:
                             result = TOKEN_RE.sub(
                                 lambda m: "" if m.group(1) in extra else m.group(0),
@@ -1026,6 +1036,10 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
             if set(found_tokens) != set(expected):
                 missing = [t for t in expected if t not in found_tokens]
                 extra = [t for t in found_tokens if t not in expected]
+                token_mismatch_details[key] = {
+                    "missing": missing,
+                    "extra": extra,
+                }
                 if extra:
                     removed_count = len(extra)
                     result = TOKEN_RE.sub(
@@ -1137,6 +1151,8 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
             "--root",
             root,
             "--reorder",
+            "--metrics-file",
+            os.path.join(root, "fix_tokens_metrics.json"),
         ]
         if args.lenient_tokens:
             cmd.append("--allow-mismatch")
@@ -1158,6 +1174,7 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
             timeouts=timeouts_count,
             token_reorders=token_reorders,
             token_mismatches=token_mismatches,
+            token_mismatch_details=token_mismatch_details,
             failures={k: v[0] for k, v in failures.items()},
             hash_stats=token_stats,
         )
@@ -1181,6 +1198,7 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
             timeouts=timeouts_count,
             token_reorders=token_reorders,
             token_mismatches=token_mismatches,
+            token_mismatch_details=token_mismatch_details,
             failures={k: v[0] for k, v in failures.items()},
             hash_stats=token_stats,
             error="interrupted",
@@ -1220,6 +1238,7 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
     token_reorders = 0
     token_mismatches = 0
     token_stats: dict[str, dict[str, int | bool]] = {}
+    token_mismatch_details: dict[str, dict[str, list[str]]] = {}
 
     def categorize(reason: str | None) -> str:
         if not reason:
@@ -1294,6 +1313,8 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
         if Counter(found_tokens_list) != Counter(list(tokens.values())):
             missing = [t for t in tokens.values() if t not in found_tokens_list]
             extra = [t for t in found_tokens_list if t not in tokens.values()]
+            if missing or extra:
+                token_mismatch_details[key] = {"missing": missing, "extra": extra}
             if missing:
                 token_stats[key]["missing_tokens"] = len(missing)
             if extra:
@@ -1368,6 +1389,7 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
         timeouts=0,
         token_reorders=token_reorders,
         token_mismatches=token_mismatches,
+        token_mismatch_details=token_mismatch_details,
         failures={k: v[0] for k, v in failures.items()},
         hash_stats=token_stats,
         dry_run=True,
@@ -1705,6 +1727,7 @@ def main():
                     timeouts=0,
                     token_reorders=0,
                     token_mismatches=0,
+                    token_mismatch_details={},
                     failures={},
                     hash_stats={},
                     error=msg,
@@ -1721,6 +1744,7 @@ def main():
                 timeouts=0,
                 token_reorders=0,
                 token_mismatches=0,
+                token_mismatch_details={},
                 failures={},
                 hash_stats={},
                 error=msg,

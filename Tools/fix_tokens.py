@@ -7,6 +7,7 @@ import logging
 import re
 import sys
 from collections import Counter
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -17,13 +18,13 @@ from token_patterns import TOKEN_PATTERN, TOKEN_PLACEHOLDER, extract_tokens
 logger = logging.getLogger(__name__)
 
 
-def replace_placeholders(value: str, tokens: List[str]) -> Tuple[str, bool, bool]:
+def replace_placeholders(
+    value: str, tokens: List[str]
+) -> Tuple[str, bool, bool, List[str], List[str]]:
     value = normalize_tokens(value)
     matches = list(TOKEN_PLACEHOLDER.finditer(value))
     replaced = False
-    mismatch = False
     if matches:
-        mismatch = len(matches) != len(tokens)
         parts: List[str] = []
         last = 0
         for m, token in zip(matches, tokens):
@@ -35,9 +36,12 @@ def replace_placeholders(value: str, tokens: List[str]) -> Tuple[str, bool, bool
         replaced = True
     value = value.replace('\\"', '"').replace("\\'", "'")
     tokenized = extract_tokens(value)
-    if Counter(tokenized) != Counter(tokens):
-        mismatch = True
-    return value, replaced, mismatch
+    expected = Counter(tokens)
+    found = Counter(tokenized)
+    missing = list((expected - found).elements())
+    extra = list((found - expected).elements())
+    mismatch = bool(missing or extra)
+    return value, replaced, mismatch, missing, extra
 
 
 def reorder_tokens_in_text(value: str, tokens: List[str]) -> Tuple[str, bool]:
@@ -86,14 +90,18 @@ def process_messages_file(
     check_only: bool,
     reorder: bool,
     allow_mismatch: bool,
-) -> Counters:
+    root: Path,
+) -> Tuple[Counters, List[Dict[str, List[str]]]]:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     messages = data.get("Messages", {})
     changed = False
     counters = Counters()
+    mismatches: List[Dict[str, List[str]]] = []
     for key, text in list(messages.items()):
-        new_text, replaced, bad = replace_placeholders(text, baseline.get(key, []))
+        new_text, replaced, bad, missing, extra = replace_placeholders(
+            text, baseline.get(key, [])
+        )
         reordered = False
         if reorder and not bad:
             new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(key, []))
@@ -101,6 +109,17 @@ def process_messages_file(
             log = logger.warning if allow_mismatch else logger.error
             log("%s: %s token count mismatch", path, key)
             counters.token_mismatches += 1
+            rel = str(path)
+            try:
+                rel = str(path.relative_to(root))
+            except ValueError:
+                pass
+            mismatches.append({
+                "file": rel,
+                "key": key,
+                "missing": missing,
+                "extra": extra,
+            })
             if replaced and not check_only:
                 messages[key] = new_text
                 changed = True
@@ -122,7 +141,7 @@ def process_messages_file(
     if changed and not check_only:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-    return counters
+    return counters, mismatches
 
 
 def process_root_file(
@@ -131,12 +150,14 @@ def process_root_file(
     check_only: bool,
     reorder: bool,
     allow_mismatch: bool,
-) -> Counters:
+    root: Path,
+) -> Tuple[Counters, List[Dict[str, List[str]]]]:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     nodes = data.get("nodes") or data.get("Nodes") or []
     changed = False
     counters = Counters()
+    mismatches: List[Dict[str, List[str]]] = []
     for node in nodes:
         guid = node.get("guid") or node.get("Guid")
         text_key = "text" if "text" in node else "Text" if "Text" in node else None
@@ -145,7 +166,9 @@ def process_root_file(
         text = node[text_key]
         if not isinstance(text, str):
             continue
-        new_text, replaced, bad = replace_placeholders(text, baseline.get(guid, []))
+        new_text, replaced, bad, missing, extra = replace_placeholders(
+            text, baseline.get(guid, [])
+        )
         reordered = False
         if reorder and not bad:
             new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(guid, []))
@@ -153,6 +176,17 @@ def process_root_file(
             log = logger.warning if allow_mismatch else logger.error
             log("%s: %s token count mismatch", path, guid)
             counters.token_mismatches += 1
+            rel = str(path)
+            try:
+                rel = str(path.relative_to(root))
+            except ValueError:
+                pass
+            mismatches.append({
+                "file": rel,
+                "key": guid,
+                "missing": missing,
+                "extra": extra,
+            })
             if replaced and not check_only:
                 node[text_key] = new_text
                 changed = True
@@ -174,7 +208,7 @@ def process_root_file(
     if changed and not check_only:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-    return counters
+    return counters, mismatches
 
 
 def main() -> None:
@@ -231,33 +265,53 @@ def main() -> None:
         files += [p for p in (root / "Resources" / "Localization").glob("*.json") if p.name != "English.json"]
 
     totals = Counters()
+    all_mismatches: List[Dict[str, List[str]]] = []
     for path in files:
         if path.parent.name == "Messages":
-            result = process_messages_file(
-                path, messages_tokens, args.check_only, args.reorder, args.allow_mismatch
+            result, mismatches = process_messages_file(
+                path,
+                messages_tokens,
+                args.check_only,
+                args.reorder,
+                args.allow_mismatch,
+                root,
             )
         else:
-            result = process_root_file(
-                path, node_tokens, args.check_only, args.reorder, args.allow_mismatch
+            result, mismatches = process_root_file(
+                path,
+                node_tokens,
+                args.check_only,
+                args.reorder,
+                args.allow_mismatch,
+                root,
             )
         totals.tokens_restored += result.tokens_restored
         totals.tokens_reordered += result.tokens_reordered
         totals.token_mismatches += result.token_mismatches
+        all_mismatches.extend(mismatches)
 
     metrics_path = None
     if args.metrics_file:
         metrics_path = Path(args.metrics_file).resolve()
         metrics_path.parent.mkdir(parents=True, exist_ok=True)
+        entry = {
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "tokens_restored": totals.tokens_restored,
+            "tokens_reordered": totals.tokens_reordered,
+            "token_mismatches": totals.token_mismatches,
+            "mismatches": all_mismatches,
+        }
+        existing: List[dict] = []
+        if metrics_path.exists():
+            try:
+                existing = json.loads(metrics_path.read_text(encoding="utf-8"))
+                if not isinstance(existing, list):
+                    existing = [existing]
+            except Exception:
+                existing = []
+        existing.append(entry)
         with open(metrics_path, "w", encoding="utf-8") as f:
-            json.dump(
-                {
-                    "tokens_restored": totals.tokens_restored,
-                    "tokens_reordered": totals.tokens_reordered,
-                    "token_mismatches": totals.token_mismatches,
-                },
-                f,
-                indent=2,
-            )
+            json.dump(existing, f, indent=2)
 
     if totals.token_mismatches:
         msg = f"{totals.token_mismatches} token mismatches detected"

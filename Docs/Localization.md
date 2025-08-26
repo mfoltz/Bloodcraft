@@ -374,7 +374,9 @@ python Tools/translate_argos.py Resources/Localization/Messages/Turkish.json --t
 An entry records the run ID, git commit, Python and Argos Translate versions,
 model version, paths to the log, report and metrics files, run directory, CLI
 arguments, and summarises successes, timeouts, token reorders and per‑hash token
-statistics. If the run terminates early, ``error`` notes the reason:
+statistics. Token mismatches are listed under `token_mismatch_details` with the
+exact tokens that were missing or added. If the run terminates early, ``error``
+notes the reason:
 
 ```json
 [
@@ -403,6 +405,9 @@ statistics. If the run terminates early, ``error`` notes the reason:
     "successes": 498,
     "timeouts": 2,
     "token_reorders": 1,
+    "token_mismatch_details": {
+      "1234567890": {"missing": ["1"], "extra": []}
+    },
     "failures": {},
     "hash_stats": {
       "1234567890": {
@@ -417,22 +422,31 @@ statistics. If the run terminates early, ``error`` notes the reason:
 
 ### Token fixer
 
-Record how many placeholders were restored or reordered by supplying
-`--metrics-file` to `fix_tokens.py`:
+Record how many placeholders were restored or reordered and capture token
+mismatch details by supplying `--metrics-file` to `fix_tokens.py`:
 
 ```bash
 python Tools/fix_tokens.py Resources/Localization/Messages/Turkish.json --metrics-file fix_tokens_metrics.json
 ```
 
-The metrics file reports token changes and mismatches:
+Each run appends an entry to `fix_tokens_metrics.json` in the repository root
+summarising counts and listing mismatched tokens:
 
 ```json
-{
-  "tokens_restored": 4,
-  "tokens_reordered": 1,
-  "token_mismatches": 0
-}
+[
+  {
+    "timestamp": "2024-02-20T12:00:03Z",
+    "tokens_restored": 4,
+    "tokens_reordered": 1,
+    "token_mismatches": 0,
+    "mismatches": []
+  }
+]
 ```
+
+When mismatches occur the `mismatches` array contains objects with `file`,
+`key`, `missing`, and `extra` fields so problematic entries can be traced
+quickly.
 
 ### Log analysis
 
