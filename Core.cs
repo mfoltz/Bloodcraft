@@ -198,7 +198,7 @@ internal static class Core
         DelayedRoutine(delay, method, args).Run();
     }
 
-    private static IEnumerator DelayedRoutine(float delay, Delegate method, object[] args)
+    static IEnumerator DelayedRoutine(float delay, Delegate method, object[] args)
     {
         if (delay > 0f)
             yield return new WaitForSeconds(delay);
