@@ -310,9 +310,12 @@ Notepad.cs
 VSystem.cs
 Bridges.cs
 
-# Translation artifacts
-translate.log
-skipped.csv
+# Translation artifacts (ignored by default)
+# To preserve a run's logs for QA, unignore its directory below.
+/translate.log
+/skipped.csv
 TranslationLogs/
 translations/*
 !translations/run_index.json
+!translations/de/
+!translations/de/**
