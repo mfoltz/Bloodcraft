@@ -16,6 +16,7 @@ import logging
 import subprocess
 import sys
 import signal
+import language_utils
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict
@@ -207,6 +208,16 @@ def main() -> None:
                         reason = row.get("reason", "")
                         skipped_counts[reason] = skipped_counts.get(reason, 0) + 1
             lang_metrics["skipped_hashes"] = skipped_counts
+
+            mismatches = 0
+            with path.open("r", encoding="utf-8") as fp:
+                messages = json.load(fp).get("Messages", {})
+            for txt in messages.values():
+                if language_utils.contains_english(txt) and not language_utils.contains_language_code(txt, code):
+                    mismatches += 1
+            lang_metrics["language_mismatches"] = mismatches
+            if mismatches:
+                logger.error("%s: detected %d possible English strings", name, mismatches)
             validate_proc = run(
                 [sys.executable, "Tools/validate_translation_run.py", "--run-dir", str(run_dir)],
                 check=False,
@@ -304,12 +315,14 @@ def main() -> None:
             token_ok = lang_metrics["token_fix"]["returncode"] == 0
             mismatch_ok = lang_metrics["token_fix"]["token_mismatches"] == 0
             validation_ok = lang_metrics.get("validation", {}).get("returncode", 0) == 0
+            language_ok = lang_metrics.get("language_mismatches", 0) == 0
             skipped_total = sum(lang_metrics["skipped_hashes"].values())
             lang_metrics["skipped_hash_count"] = skipped_total
             success = (
                 translation_ok
                 and token_ok
                 and mismatch_ok
+                and language_ok
                 and skipped_total == 0
                 and validation_ok
             )
