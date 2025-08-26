@@ -145,9 +145,14 @@ def protect_strict(text: str) -> tuple[str, dict[str, str]]:
 
         m = TOKEN_PATTERN.match(text, i)
         if m:
+            tok = m.group(0)
             token_id = str(len(tokens))
-            tokens[token_id] = m.group(0)
-            result.append(f"[[TOKEN_{token_id}]]")
+            if tok.startswith("$") and tok[1:2] == "{":
+                tokens[token_id] = tok[1:]
+                result.append(f"$[[TOKEN_{token_id}]]")
+            else:
+                tokens[token_id] = tok
+                result.append(f"[[TOKEN_{token_id}]]")
             i = m.end()
             continue
 
