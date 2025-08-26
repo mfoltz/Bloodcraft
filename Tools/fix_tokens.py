@@ -19,14 +19,21 @@ logger = logging.getLogger(__name__)
 
 def replace_placeholders(value: str, tokens: List[str]) -> Tuple[str, bool, bool]:
     value = normalize_tokens(value)
-    placeholders = TOKEN_PLACEHOLDER.findall(value)
+    matches = list(TOKEN_PLACEHOLDER.finditer(value))
     replaced = False
     mismatch = False
-    if placeholders:
-        mismatch = len(placeholders) != len(tokens)
-        for ph, token in zip(placeholders, tokens):
-            value = value.replace(ph, token, 1)
+    if matches:
+        mismatch = len(matches) != len(tokens)
+        parts: List[str] = []
+        last = 0
+        for m, token in zip(matches, tokens):
+            parts.append(value[last : m.start()])
+            parts.append(token)
+            last = m.end()
+        parts.append(value[last:])
+        value = "".join(parts)
         replaced = True
+    value = value.replace('\\"', '"').replace("\\'", "'")
     tokenized = extract_tokens(value)
     if Counter(tokenized) != Counter(tokens):
         mismatch = True
