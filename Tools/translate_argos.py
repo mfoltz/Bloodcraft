@@ -527,6 +527,11 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
     fix_tokens_code = 0
     try:
         translator = argos_translate.get_translation_from_codes(args.src, args.dst)
+        if translator and translator.to_lang.code != args.dst:
+            raise SystemExit(
+                f"Argos model destination mismatch: expected {args.dst}, "
+                f"got {translator.to_lang.code}"
+            )
     except AttributeError:
         translator = None
     except Exception as e:
@@ -542,6 +547,11 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
             translator = argos_translate.get_translation_from_codes(
                 args.src, args.dst
             )
+            if translator and translator.to_lang.code != args.dst:
+                raise SystemExit(
+                    f"Argos model destination mismatch: expected {args.dst}, "
+                    f"got {translator.to_lang.code}"
+                )
         except AttributeError:
             translator = None
         except Exception as e:

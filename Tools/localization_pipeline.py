@@ -191,6 +191,22 @@ def main() -> None:
                 check=False,
                 logger=logger,
             )
+            metrics_file_path = run_dir / "metrics.json"
+            expected_file = str(path.relative_to(ROOT))
+            if not metrics_file_path.is_file():
+                raise SystemExit(f"Missing metrics file in {run_dir}")
+            with metrics_file_path.open("r", encoding="utf-8") as mf:
+                metrics_data = json.load(mf)
+            if isinstance(metrics_data, list):
+                metrics_entry = metrics_data[-1] if metrics_data else {}
+            else:
+                metrics_entry = metrics_data
+            actual_file = metrics_entry.get("file")
+            if actual_file != expected_file:
+                raise SystemExit(
+                    f"Run directory {run_dir} metrics mismatch: {actual_file} != {expected_file}"
+                )
+
             report = run_dir / "skipped.csv"
             report_paths.append(report)
             t_end = timestamp()
@@ -199,7 +215,6 @@ def main() -> None:
                 "end": t_end,
                 "returncode": result.returncode,
             }
-            report = run_dir / "skipped.csv"
             skipped_counts: Dict[str, int] = {}
             if report.is_file():
                 with report.open("r", encoding="utf-8") as fp:
