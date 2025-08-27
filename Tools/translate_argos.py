@@ -205,6 +205,9 @@ def normalize_tokens(text: str) -> str:
         flags=re.I,
     )
 
+    # Normalise single-bracket forms like ``[TOKEN_4]``.
+    text = TOKEN_CLEAN.sub(lambda m: to_token(m.group(1)), text)
+
     # Catch bare ``TOKEN_x`` words and rewrite them to placeholder form.
     text = TOKEN_WORD.sub(lambda m: to_token(m.group(1)), text)
 
