@@ -415,3 +415,75 @@ def test_token_mismatch_retry(tmp_path, monkeypatch):
     run_dir = next((root / "translations" / "xx").glob("*"))
     skipped = (run_dir / "skipped.csv").read_text()
     assert "token_mismatch" not in skipped
+
+
+def test_missing_tokens_fails(tmp_path, monkeypatch, caplog):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"hash": "Attack {0} {1} {2} {3} {4} {5}!"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    target_path = root / target_rel
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(json.dumps({"Messages": {"hash": ""}}))
+
+    class MissingTokenTranslator:
+        def __init__(self):
+            self.calls = 0
+
+        def translate(self, text: str) -> str:
+            self.calls += 1
+            return "Translated [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_2]] [[TOKEN_3]]!"
+
+    class DummyCompleted:
+        def __init__(self, code: int = 0):
+            self.returncode = code
+
+    translator = MissingTokenTranslator()
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: translator,
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+            "--retry-mismatches",
+        ],
+    )
+
+    with caplog.at_level(logging.WARNING):
+        translate_argos.main()
+
+    assert translator.calls > 1
+    assert re.search(
+        r"token mismatch \[[0-9a-f]{8}\] on strict retry \(missing \['4', '5'\]",
+        caplog.text,
+    )
+
+    run_dir = next((root / "translations" / "xx").iterdir())
+    metrics = json.loads((run_dir / "metrics.json").read_text())
+    entry = metrics[-1]
+    details = entry["token_mismatch_details"]["hash"]
+    assert details["missing"] == ["4", "5"]
+    assert details["extra"] == []
+    stats = entry["hash_stats"]["hash"]
+    assert stats["retry_attempted"]
+    assert not stats["retry_succeeded"]
+    assert stats["retry_missing_tokens"] == 2
