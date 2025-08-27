@@ -606,12 +606,17 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
     safe_lines: List[str] = []
     tokens_list: List[tuple[dict[str, str], bool]] = []
     keys: List[str] = []
+    pretranslated: List[tuple[str, str, dict[str, str]]] = []
 
     for key, text in to_translate:
         safe, tokens = protect_strict(text)
         token_only = TOKEN_RE.sub("", safe).strip() == ""
         if token_only:
             safe += f" {TOKEN_SENTINEL}"
+        token_free = TOKEN_RE.sub("", safe).strip()
+        if SENTINEL_ONLY_RE.fullmatch(token_free):
+            pretranslated.append((key, text, tokens))
+            continue
         safe_lines.append(safe)
         tokens_list.append((tokens, token_only))
         keys.append(key)
@@ -619,7 +624,7 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
     translated: dict[str, str] = {}
     failures: dict[str, tuple[str, str]] = {}
     report: dict[str, dict[str, str]] = {}
-    processed_lines = len(safe_lines)
+    processed_lines = len(safe_lines) + len(pretranslated)
     timeouts_count = 0
     token_reorders = 0
     token_mismatches = 0
@@ -672,6 +677,15 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
             logger.info(f"{msg}\n  Original: {original}\n  Result: {result}")
 
 
+    for key, original, tokens in pretranslated:
+        translated[key] = original
+        log_entry(key, original, original)
+        token_stats[key] = {
+            "original_tokens": len(tokens),
+            "translated_tokens": len(tokens),
+            "reordered": False,
+        }
+
     batches: list[list[int]] = []
     i = 0
     while i < len(safe_lines):
@@ -694,7 +708,7 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
 
     num_batches = len(batches)
     start = time.perf_counter()
-    processed_so_far = 0
+    processed_so_far = len(pretranslated)
     try:
         for batch_idx, batch in enumerate(batches):
             batch_lines = [safe_lines[idx] for idx in batch]
