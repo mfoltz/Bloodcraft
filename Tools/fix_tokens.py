@@ -32,6 +32,8 @@ def replace_placeholders(
             parts.append(token)
             last = m.end()
         parts.append(value[last:])
+        if len(tokens) > len(matches):
+            parts.extend(tokens[len(matches):])
         value = "".join(parts)
         replaced = True
     value = value.replace('\\"', '"').replace("\\'", "'")

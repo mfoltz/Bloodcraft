@@ -82,6 +82,31 @@ def test_replace_placeholders_with_various_tokens():
     assert replaced and not mismatch and not missing and not extra
 
 
+def test_replace_placeholders_restores_missing_token4_and_token5():
+    tokens = ["<a>", "</a>", "<b>", "</b>", "<c>", "</c>"]
+    value = " ".join(f"[[TOKEN_{i}]]" for i in range(4))
+    new_value, replaced, mismatch, missing, extra = fix_tokens.replace_placeholders(
+        value, tokens
+    )
+    assert new_value.replace(" ", "") == "<a></a><b></b><c></c>"
+    assert replaced and not mismatch and not missing and not extra
+
+
+def test_replace_placeholders_restores_missing_token4():
+    tokens = ["<a>", "</a>", "<b>", "</b>", "<c>", "</c>"]
+    value = " ".join(["[[TOKEN_0]]", "[[TOKEN_1]]", "[[TOKEN_2]]", "[[TOKEN_3]]", "[[TOKEN_5]]"])
+    new_value, replaced, mismatch, missing, extra = fix_tokens.replace_placeholders(
+        value, tokens
+    )
+    assert new_value.replace(" ", "") == "<a></a><b></b><c></c>"
+    assert replaced and not mismatch and not missing and not extra
+
+
+def test_normalize_tokens_single_bracket_forms():
+    assert translate_argos.normalize_tokens("[TOKEN_4]") == "[[TOKEN_4]]"
+    assert translate_argos.normalize_tokens("[token_5]") == "[[TOKEN_5]]"
+
+
 def test_normalization_merges_split_tokens(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
