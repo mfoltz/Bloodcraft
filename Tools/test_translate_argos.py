@@ -204,7 +204,8 @@ def test_summary_and_success_logged_at_info(tmp_path, monkeypatch, caplog):
     info_msgs = [rec.message for rec in caplog.records if rec.levelname == "INFO"]
     assert any("Processed" in m for m in info_msgs)
     assert any("Report breakdown" in m for m in info_msgs)
-    assert any("Summary:" in m for m in info_msgs)
+    summary_msgs = [m for m in info_msgs if m.startswith("Summary:")]
+    assert summary_msgs == ["Summary: 1/1 translated, 0 skipped"]
     assert any("Wrote translations to" in m for m in info_msgs)
 
     warn_msgs = [rec.message for rec in caplog.records if rec.levelname == "WARNING"]
