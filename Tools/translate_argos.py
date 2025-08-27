@@ -613,10 +613,6 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
         token_only = TOKEN_RE.sub("", safe).strip() == ""
         if token_only:
             safe += f" {TOKEN_SENTINEL}"
-        token_free = TOKEN_RE.sub("", safe).strip()
-        if SENTINEL_ONLY_RE.fullmatch(token_free):
-            pretranslated.append((key, text, tokens))
-            continue
         safe_lines.append(safe)
         tokens_list.append((tokens, token_only))
         keys.append(key)
@@ -1211,13 +1207,6 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
             failures={k: v[0] for k, v in failures.items()},
             hash_stats=token_stats,
         )
-
-        summary_line = (
-            f"Summary: {successes}/{processed_lines} translated, {timeouts_count} timeouts, "
-            f"{token_reorders} token reorders, {token_mismatches} token mismatches. "
-            f"Metrics written to {args.metrics_file}"
-        )
-        logger.info(summary_line)
     except KeyboardInterrupt:
         messages.update(translated)
         target["Messages"] = messages
@@ -1427,12 +1416,6 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
         hash_stats=token_stats,
         dry_run=True,
     )
-
-    summary_line = (
-        f"Summary: {successes}/{processed_lines} checked, 0 timeouts, {token_reorders} token reorders, "
-        f"{token_mismatches} token mismatches. Metrics written to {args.metrics_file}"
-    )
-    logger.info(summary_line)
 
     skipped = len(report)
     failures_count = len(failures)
@@ -1689,6 +1672,7 @@ def main():
         ]
     remaining: list[dict[str, str]] = []
     processed_total = translated_total = failures_total = 0
+    processed_recorded = False
     exit_code = 0
     exit_msg: str | None = None
     try:
@@ -1713,7 +1697,7 @@ def main():
                         processed,
                         translated,
                         _skipped,
-                        failures_total,
+                        failures_run,
                         run_exit_code,
                     ) = _run_translation(args, root)
                     skipped_entries.extend(run_remaining)
@@ -1723,8 +1707,11 @@ def main():
                         if row.get("category") == "token_mismatch"
                     )
                     remaining = run_remaining
-                    processed_total += processed
+                    if not processed_recorded:
+                        processed_total = processed
+                        processed_recorded = True
                     translated_total += translated
+                    failures_total = failures_run
                     exit_code = exit_code or run_exit_code
                     if not args.report_file:
                         break
@@ -1751,11 +1738,9 @@ def main():
             except BaseException as exc:
                 write_failure_metrics(args, exc, status="failed")
                 error_msg = str(exc) or exc.__class__.__name__
-                summary_line = (
-                    "Summary: 0/0 translated, 0 timeouts, 0 token reorders. "
+                logger.error(
                     f"Failed: {error_msg}. Metrics written to {args.metrics_file}"
                 )
-                logger.error(summary_line)
                 exit_code = 1
                 exit_msg = error_msg
             remaining = [
@@ -1774,7 +1759,6 @@ def main():
                 original_lenient = args.lenient_tokens
                 args.hashes = token_mismatch_hashes
                 args.lenient_tokens = True
-                failures_total = 0
                 (
                     run_remaining,
                     processed,
@@ -1785,9 +1769,11 @@ def main():
                 ) = _run_translation(args, root)
                 skipped_entries.extend(run_remaining)
                 remaining.extend(run_remaining)
-                processed_total += processed
+                if not processed_recorded:
+                    processed_total = processed
+                    processed_recorded = True
                 translated_total += translated
-                failures_total += failures_retry
+                failures_total = failures_retry
                 exit_code = run_exit_code
                 args.hashes = original_hashes
                 args.lenient_tokens = original_lenient
@@ -1850,12 +1836,14 @@ def main():
             except Exception:
                 logger.exception("Failed to write skip report")
 
-        logger.info(
-            "Totals: processed=%d translated=%d skipped=%d",
-            processed_total,
-            translated_total,
-            unresolved_total,
+        summary_line = (
+            f"Summary: {translated_total}/{processed_total} translated, {unresolved_total} skipped"
         )
+        if exit_msg:
+            summary_line += f". Failed: {exit_msg}"
+            logger.error(summary_line)
+        else:
+            logger.info(summary_line)
         if unresolved_total:
             exit_code = exit_code or 1
         if failures_total:
