@@ -159,6 +159,14 @@ def main() -> None:
 
         logger.info("Translating messages")
         metrics["steps"]["translation"] = {"start": timestamp()}
+        metrics["steps"]["token_fix"] = {
+            "start": timestamp(),
+            "totals": {
+                "tokens_restored": 0,
+                "tokens_reordered": 0,
+                "token_mismatches": 0,
+            },
+        }
         report_paths = []
         for name, path in targets.items():
             lang_metrics = metrics["languages"].setdefault(name, {"skipped_hashes": {}})
@@ -244,7 +252,44 @@ def main() -> None:
                 logger=logger,
             )
             lang_metrics["validation"] = {"returncode": validate_proc.returncode}
+
+            logger.info("Fixing tokens for %s", name)
+            t_fix_start = timestamp()
+            metrics_file = ROOT / f"fix_tokens_{name}.json"
+            fix_proc = run(
+                [
+                    sys.executable,
+                    "Tools/fix_tokens.py",
+                    str(path.relative_to(ROOT)),
+                    "--metrics-file",
+                    str(metrics_file),
+                    "--reorder",
+                ],
+                check=False,
+                logger=logger,
+            )
+            t_fix_end = timestamp()
+            token_data = {
+                "tokens_restored": 0,
+                "tokens_reordered": 0,
+                "token_mismatches": 0,
+            }
+            if metrics_file.is_file():
+                with metrics_file.open("r", encoding="utf-8") as fp:
+                    token_data.update(json.load(fp))
+                metrics_file.unlink()
+            lang_metrics["token_fix"] = {
+                "start": t_fix_start,
+                "end": t_fix_end,
+                "returncode": fix_proc.returncode,
+                **token_data,
+            }
+            totals = metrics["steps"]["token_fix"]["totals"]
+            totals["tokens_restored"] += token_data["tokens_restored"]
+            totals["tokens_reordered"] += token_data["tokens_reordered"]
+            totals["token_mismatches"] += token_data["token_mismatches"]
         metrics["steps"]["translation"]["end"] = timestamp()
+        metrics["steps"]["token_fix"]["end"] = timestamp()
 
         with combined_report.open("w", newline="", encoding="utf-8") as out_fp:
             writer = csv.writer(out_fp)
@@ -268,51 +313,6 @@ def main() -> None:
             check=False,
             logger=logger,
         )
-
-        logger.info("Fixing tokens")
-        metrics["steps"]["token_fix"] = {"start": timestamp(), "totals": {
-            "tokens_restored": 0,
-            "tokens_reordered": 0,
-            "token_mismatches": 0,
-        }}
-        for name, path in targets.items():
-            lang_metrics = metrics["languages"].get(name)
-            if not lang_metrics or lang_metrics.get("skipped"):
-                continue
-            t_start = timestamp()
-            metrics_file = ROOT / f"fix_tokens_{name}.json"
-            result = run(
-                [
-                    sys.executable,
-                    "Tools/fix_tokens.py",
-                    str(path.relative_to(ROOT)),
-                    "--metrics-file",
-                    str(metrics_file),
-                ],
-                check=False,
-                logger=logger,
-            )
-            t_end = timestamp()
-            token_data = {
-                "tokens_restored": 0,
-                "tokens_reordered": 0,
-                "token_mismatches": 0,
-            }
-            if metrics_file.is_file():
-                with metrics_file.open("r", encoding="utf-8") as fp:
-                    token_data.update(json.load(fp))
-                metrics_file.unlink()
-            lang_metrics["token_fix"] = {
-                "start": t_start,
-                "end": t_end,
-                "returncode": result.returncode,
-                **token_data,
-            }
-            totals = metrics["steps"]["token_fix"]["totals"]
-            totals["tokens_restored"] += token_data["tokens_restored"]
-            totals["tokens_reordered"] += token_data["tokens_reordered"]
-            totals["token_mismatches"] += token_data["token_mismatches"]
-        metrics["steps"]["token_fix"]["end"] = timestamp()
 
         logger.info("Summarizing token statistics")
         for run_dir in run_dirs:

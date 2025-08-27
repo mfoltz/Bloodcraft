@@ -196,7 +196,7 @@ python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Languag
 python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json
 ```
 
-Run the check-only mode first to fail fast if tokens were altered, then apply the fixes. Perform this validation after every translation pass and before committing changes.
+Run the check-only mode first to fail fast if tokens were altered, then apply the fixes. Perform this validation after every translation pass and before committing changes. The `localization_pipeline.py` script runs this step automatically with `--reorder` after each translation run.
 
 #### Lenient token checks
 
@@ -333,7 +333,9 @@ Language names correspond to the message file stems (``German.json`` → ``Germa
 The pipeline maps each name to its ISO code (for example, German → ``de``) and
 now verifies that translated strings contain words from that language. A run
 will fail if messages are produced in another language (e.g. Spanish text in
-German files).
+German files). After each translation run, `fix_tokens.py --reorder` executes
+automatically to restore placeholders and align their order with the English
+baseline, recording token restoration and reordering metrics per language.
 
 Override the output paths for aggregate metrics and skipped hashes with
 `--metrics-file` and `--skipped-file` (defaults are `localization_metrics.json`
