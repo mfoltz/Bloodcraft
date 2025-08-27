@@ -234,6 +234,10 @@ def main() -> None:
     )
     ap.set_defaults(reorder=True)
     ap.add_argument("--metrics-file", help="Write JSON metrics to this path")
+    ap.add_argument(
+        "--mismatches-file",
+        help="Write token mismatch details to this JSON path",
+    )
     ap.add_argument("--baseline-file", default="Resources/Localization/Messages/English.json", help="Baseline English messages file")
     ap.add_argument("--log-level", default="INFO", help="Logging level (default: INFO)")
     ap.add_argument("paths", nargs="*", help="Specific localization JSON files to process")
@@ -312,6 +316,12 @@ def main() -> None:
         existing.append(entry)
         with open(metrics_path, "w", encoding="utf-8") as f:
             json.dump(existing, f, indent=2)
+
+    if args.mismatches_file:
+        mismatches_path = Path(args.mismatches_file).resolve()
+        mismatches_path.parent.mkdir(parents=True, exist_ok=True)
+        with mismatches_path.open("w", encoding="utf-8") as fp:
+            json.dump(all_mismatches, fp, indent=2, ensure_ascii=False)
 
     if totals.token_mismatches:
         msg = f"{totals.token_mismatches} token mismatches detected"

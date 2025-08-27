@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import re
 import sys
 from collections import Counter
@@ -67,6 +68,14 @@ def main() -> None:
     run_dir = Path(args.run_dir)
     translated, skipped, log_reasons = summarize_log(run_dir / "translate.log")
     skip_counts = summarize_skipped(run_dir / "skipped.csv")
+    mismatch_path = run_dir / "token_mismatches.json"
+    mismatch_count = 0
+    try:
+        data = json.loads(mismatch_path.read_text(encoding="utf-8"))
+        if isinstance(data, list):
+            mismatch_count = len(data)
+    except FileNotFoundError:
+        pass
 
     print(f"Log results: {translated} TRANSLATED, {skipped} SKIPPED")
     if log_reasons:
@@ -77,11 +86,13 @@ def main() -> None:
         print("Skip report:")
         for category, count in sorted(skip_counts.items()):
             print(f"  {category}: {count}")
+    if mismatch_path.exists():
+        print(f"Token mismatch report: {mismatch_count} entries")
 
     def has_mismatch(counter: Counter[str]) -> bool:
         return any("token_mismatch" in k or "sentinel" in k for k in counter)
 
-    exit_code = 1 if has_mismatch(log_reasons) or has_mismatch(skip_counts) else 0
+    exit_code = 1 if mismatch_count or has_mismatch(log_reasons) or has_mismatch(skip_counts) else 0
 
     sys.exit(exit_code)
 
