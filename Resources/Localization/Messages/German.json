@@ -331,7 +331,7 @@
     "1369871380": "Verfügbare Waffenkompetenzen: <color=#c0c0c0>{0}</color>",
     "3097011724": "Invalide Klasse, verwenden Sie '<color=white>.class l</color>', um Optionen zu sehen.",
     "3102592194": "Ich konnte nicht aktiv vertraut finden!",
-    "2007397999": "+<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>)",
+    "2007397999": "+<color=yellow>{0}</color> <color=#FFC0CB>Fertigkeit</color> in {1} (<color=white>{2}%</color>)",
     "1407688215": "<color=green>{0}</color>x<color=white>{1}</color> received from {2}",
     "2252098529": "<color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}",
     "3115116616": "<color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.",
