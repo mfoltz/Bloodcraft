@@ -615,7 +615,7 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
 
     if not to_translate:
         logger.info("No messages need translation.")
-        return
+        return [], 0, 0, 0, 0, 0
 
     safe_lines: List[str] = []
     tokens_list: List[tuple[dict[str, str], bool]] = []
@@ -1946,6 +1946,13 @@ def main():
                     logger.info("Category counts: %s", dict(counts))
             except Exception:
                 logger.exception("Failed to write skip report")
+
+        if processed_total == 0:
+            msg = "No messages processed; verify input hashes and Argos model."
+            logger.error(msg)
+            exit_code = exit_code or 1
+            if not exit_msg:
+                exit_msg = msg
 
         summary_line = (
             f"Summary: {translated_total}/{processed_total} translated, {unresolved_total} skipped"
