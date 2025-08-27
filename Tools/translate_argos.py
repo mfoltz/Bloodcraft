@@ -1666,6 +1666,13 @@ def main():
         args.model_version,
     )
     skipped_entries: list[dict[str, str]] = _load_report(args.report_file)
+    token_mismatch_hashes = [
+        row["hash"] for row in skipped_entries if row.get("category") == "token_mismatch"
+    ]
+    if token_mismatch_hashes:
+        skipped_entries = [
+            row for row in skipped_entries if row.get("category") != "token_mismatch"
+        ]
     remaining: list[dict[str, str]] = []
     processed_total = translated_total = failures_total = 0
     exit_code = 0
@@ -1696,6 +1703,11 @@ def main():
                         run_exit_code,
                     ) = _run_translation(args, root)
                     skipped_entries.extend(run_remaining)
+                    token_mismatch_hashes.extend(
+                        row["hash"]
+                        for row in run_remaining
+                        if row.get("category") == "token_mismatch"
+                    )
                     remaining = run_remaining
                     processed_total += processed
                     translated_total += translated
@@ -1732,6 +1744,39 @@ def main():
                 logger.error(summary_line)
                 exit_code = 1
                 exit_msg = error_msg
+            remaining = [
+                row for row in remaining if row.get("category") != "token_mismatch"
+            ]
+            skipped_entries = [
+                row for row in skipped_entries if row.get("category") != "token_mismatch"
+            ]
+            token_mismatch_hashes = sorted(set(token_mismatch_hashes))
+            if token_mismatch_hashes:
+                logger.info(
+                    "Retrying %d token mismatch hash(es) with lenient tokens",
+                    len(token_mismatch_hashes),
+                )
+                original_hashes = args.hashes
+                original_lenient = args.lenient_tokens
+                args.hashes = token_mismatch_hashes
+                args.lenient_tokens = True
+                failures_total = 0
+                (
+                    run_remaining,
+                    processed,
+                    translated,
+                    _skipped,
+                    failures_retry,
+                    run_exit_code,
+                ) = _run_translation(args, root)
+                skipped_entries.extend(run_remaining)
+                remaining.extend(run_remaining)
+                processed_total += processed
+                translated_total += translated
+                failures_total += failures_retry
+                exit_code = run_exit_code
+                args.hashes = original_hashes
+                args.lenient_tokens = original_lenient
             if not exit_code and remaining:
                 logger.warning("Unresolved hashes after retries:")
                 for row in remaining:
