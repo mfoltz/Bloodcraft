@@ -38,6 +38,8 @@ def test_exit_code_on_issues(tmp_path: Path) -> None:
     assert "Log results: 1 TRANSLATED, 1 SKIPPED" in proc.stdout
     assert "token_mismatch: 1" in proc.stdout
     assert "Token mismatch report: 1 entries" in proc.stdout
+    summary = json.loads((run_dir / "token_mismatch_summary.json").read_text(encoding="utf-8"))
+    assert summary == {"k": {"missing": ["t"], "extra": []}}
 
 
 def test_success_without_issues(tmp_path: Path) -> None:
@@ -55,3 +57,5 @@ def test_success_without_issues(tmp_path: Path) -> None:
     assert proc.returncode == 0
     assert "Log results: 1 TRANSLATED, 0 SKIPPED" in proc.stdout
     assert "Token mismatch report: 0 entries" in proc.stdout
+    summary = json.loads((run_dir / "token_mismatch_summary.json").read_text(encoding="utf-8"))
+    assert summary == {}
