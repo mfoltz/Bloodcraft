@@ -64,6 +64,9 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
    python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --log-level INFO --overwrite
    ```
 
+   The translator reports each batch as it completes and warns if repeated
+   retries yield the same skipped hashes, preventing silent infinite loops.
+
    Omitting `--overwrite` translates only missing entries and keeps existing
    translations intact. Use `--overwrite` sparingly, as it retranslates every
   line and can reprocess thousands of entries unnecessarily. Outputs are saved
