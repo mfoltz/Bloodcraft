@@ -12,7 +12,7 @@ using Unity.Entities;
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal static class ScriptSpawnServerPatch
+internal static class ScriptSpawnServerHooks
 {
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly EntityQuery _query = QueryService.ScriptSpawnServerQuery;

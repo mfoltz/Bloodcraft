@@ -527,10 +527,11 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
     fix_tokens_code = 0
     try:
         translator = argos_translate.get_translation_from_codes(args.src, args.dst)
-        if translator and translator.to_lang.code != args.dst:
+        to_code = getattr(getattr(translator, "to_lang", None), "code", args.dst)
+        if translator and to_code != args.dst:
             raise SystemExit(
                 f"Argos model destination mismatch: expected {args.dst}, "
-                f"got {translator.to_lang.code}"
+                f"got {to_code}"
             )
     except AttributeError:
         translator = None
@@ -547,10 +548,11 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
             translator = argos_translate.get_translation_from_codes(
                 args.src, args.dst
             )
-            if translator and translator.to_lang.code != args.dst:
+            to_code = getattr(getattr(translator, "to_lang", None), "code", args.dst)
+            if translator and to_code != args.dst:
                 raise SystemExit(
                     f"Argos model destination mismatch: expected {args.dst}, "
-                    f"got {translator.to_lang.code}"
+                    f"got {to_code}"
                 )
         except AttributeError:
             translator = None
@@ -754,6 +756,7 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
                     time.sleep(0.1)
             if not success:
                 processed_so_far += len(batch)
+                logger.info("Processed %d/%d lines", processed_so_far, processed_lines)
                 continue
 
             for idx, (key, result, (tokens, token_only)) in enumerate(
@@ -1006,6 +1009,7 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
                 f"({batch_end - batch_start:.2f}s)"
             )
             processed_so_far += len(batch)
+            logger.info("Processed %d/%d lines", processed_so_far, processed_lines)
 
         def strict_retry(key: str) -> tuple[bool, str, int, bool, str | None, int, int]:
             nonlocal token_reorders
@@ -1699,9 +1703,16 @@ def main():
                     if not args.report_file:
                         break
                     hashes = [row["hash"] for row in remaining]
-                    if not hashes or set(hashes) == prev_hashes:
+                    if not hashes:
                         break
-                    prev_hashes = set(hashes)
+                    new_set = set(hashes)
+                    if new_set == prev_hashes:
+                        logger.warning(
+                            "Translation retries stalled; no progress on %d hash(es)",
+                            len(hashes),
+                        )
+                        break
+                    prev_hashes = new_set
                     logger.info(
                         f"Retrying {len(hashes)} hash(es) from {args.report_file}"
                     )

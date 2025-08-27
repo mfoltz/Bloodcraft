@@ -64,6 +64,9 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
    python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --log-level INFO --overwrite
    ```
 
+   The translator reports each batch as it completes and warns if repeated
+   retries yield the same skipped hashes, preventing silent infinite loops.
+
    Omitting `--overwrite` translates only missing entries and keeps existing
    translations intact. Use `--overwrite` sparingly, as it retranslates every
   line and can reprocess thousands of entries unnecessarily. Outputs are saved
@@ -325,6 +328,12 @@ full pipeline:
 ```bash
 python Tools/localization_pipeline.py --debug
 ```
+
+Language names correspond to the message file stems (``German.json`` → ``German``).
+The pipeline maps each name to its ISO code (for example, German → ``de``) and
+now verifies that translated strings contain words from that language. A run
+will fail if messages are produced in another language (e.g. Spanish text in
+German files).
 
 Override the output paths for aggregate metrics and skipped hashes with
 `--metrics-file` and `--skipped-file` (defaults are `localization_metrics.json`

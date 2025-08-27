@@ -228,11 +228,16 @@ def main() -> None:
             with path.open("r", encoding="utf-8") as fp:
                 messages = json.load(fp).get("Messages", {})
             for txt in messages.values():
-                if language_utils.contains_english(txt) and not language_utils.contains_language_code(txt, code):
+                if language_utils.has_words(txt) and not language_utils.contains_language_code(txt, code):
                     mismatches += 1
             lang_metrics["language_mismatches"] = mismatches
             if mismatches:
-                logger.error("%s: detected %d possible English strings", name, mismatches)
+                logger.error(
+                    "%s: detected %d strings that do not match language code %s",
+                    name,
+                    mismatches,
+                    code,
+                )
             validate_proc = run(
                 [sys.executable, "Tools/validate_translation_run.py", "--run-dir", str(run_dir)],
                 check=False,
