@@ -102,6 +102,13 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
 
    Any hashes listed in `skipped.csv` within the run directory must be
    translated manually. Re-run the translator until the file is empty.
+   After translating, capture placeholder issues alongside the skip
+   report:
+
+   ```bash
+   python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json --mismatches-file translations/<iso-code>/<timestamp>/token_mismatches.json
+   ```
+
    Summarise each run and fail fast on unresolved issues:
 
    ```bash
@@ -111,15 +118,19 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
    The script reports how many entries were translated or skipped and
    exits non-zero when any `token_mismatch` or `sentinel` problems remain.
 
-   To review skip categories at a glance, run:
+   To review skip categories and recurring token mismatch patterns at a glance, run:
 
    ```bash
    python Tools/analyze_skip_report.py translations/<iso-code>/<timestamp>/skipped.csv
    ```
 
-   This prints the number of rows per category so manual fixes can be prioritised.
+   The script prints the number of rows per category and also consumes
+   `token_mismatches.json` (if present) to highlight repeated
+   placeholder mismatch patterns.
 
-   Do not commit translations until `skipped.csv` is empty and `python Tools/fix_tokens.py --check-only` reports no token mismatches, confirming placeholder counts match the English file.
+   Do not commit translations until `skipped.csv` is empty and
+   `python Tools/fix_tokens.py --check-only` reports no token mismatches,
+   confirming placeholder counts match the English file.
 
    To extract hashes that were skipped due to token mismatches, scan the
    translation log:

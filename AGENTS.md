@@ -52,8 +52,8 @@ Current PRDs and task lists are stored in `.project-management/current-prd/`, wh
    Outputs are written to `translations/<iso-code>/<timestamp>/` (override with `--run-dir`). Verify the Argos model is installed before running translations: `argos-translate --from en --to tr - < /dev/null` (substitute the target code for `tr`).
    `--log-level` helps pinpoint skipped or untranslated strings. Any hashes listed in `skipped.csv` within the run directory must be manually translated and the script re‑run to confirm they are handled.
 4. **Fix tokens after manual translation.**
-   `python Tools/fix_tokens.py Resources/Localization/Messages/Turkish.json`
-   Run with `--check-only` (`python Tools/fix_tokens.py --check-only`) to fail fast if tokens were altered. After fixing tokens, re‑run the translator to ensure no hashes remain in `skipped.csv`.
+   `python Tools/fix_tokens.py Resources/Localization/Messages/Turkish.json --mismatches-file translations/tr/<timestamp>/token_mismatches.json`
+   Run with `--check-only` (`python Tools/fix_tokens.py --check-only`) to fail fast if tokens were altered. Review `token_mismatches.json` with `python Tools/analyze_skip_report.py translations/tr/<timestamp>/skipped.csv` before proceeding. After fixing tokens, re‑run the translator to ensure no hashes remain in `skipped.csv`.
 5. **Verify translations.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text`
    This ensures every hash is present and no English text remains.
