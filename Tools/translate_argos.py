@@ -611,6 +611,9 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
     for key, text in to_translate:
         safe, tokens = protect_strict(text)
         token_only = TOKEN_RE.sub("", safe).strip() == ""
+        if token_only and args.lenient_tokens and len(tokens) > 1:
+            pretranslated.append((key, english[key], tokens))
+            continue
         if token_only:
             safe += f" {TOKEN_SENTINEL}"
         safe_lines.append(safe)
@@ -823,6 +826,57 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
                     found_tokens = TOKEN_RE.findall(result)
                     extra = [t for t in found_tokens if t not in expected]
                     missing = [t for t in expected if t not in found_tokens]
+                    if missing and args.retry_mismatches:
+                        token_stats[key]["retry_attempted"] = True
+                        safe = batch_lines[idx]
+                        retry_safe = TOKEN_RE.sub(lambda m: f'"{m.group(0)}"', safe)
+                        if token_only and TOKEN_SENTINEL not in retry_safe:
+                            retry_safe += f" {TOKEN_SENTINEL}"
+                        try:
+                            retry_results, retry_timeouts = translate_batch(
+                                translator,
+                                [retry_safe],
+                                max_retries=args.max_retries,
+                                timeout=args.timeout,
+                            )
+                        except FatalTranslationError:
+                            raise
+                        except Exception as e:
+                            logger.exception("Mismatch retry failed for %s", key)
+                            retry_results, retry_timeouts = [""], [0]
+                        if retry_timeouts:
+                            result_retry = result
+                        else:
+                            result_retry = retry_results[0]
+                            if token_only:
+                                if TOKEN_SENTINEL not in result_retry:
+                                    logger.debug(
+                                        f"{key}: sentinel missing on mismatch retry, reinserting"
+                                    )
+                                    result_retry = f"{result_retry} {TOKEN_SENTINEL}".strip()
+                                if SENTINEL_ONLY_RE.fullmatch(result_retry.strip()):
+                                    result_retry = result_retry.replace(
+                                        f" {TOKEN_SENTINEL}", ""
+                                    ).replace(TOKEN_SENTINEL, "")
+                                    found_tokens = []
+                                    extra = []
+                                    missing = expected
+                            result_retry = result_retry.replace(
+                                f" {TOKEN_SENTINEL}", ""
+                            ).replace(TOKEN_SENTINEL, "")
+                            result_retry = re.sub(
+                                r'"\s*(\[\[TOKEN_[0-9a-f]+\]\])\s*"',
+                                r"\1",
+                                result_retry,
+                            )
+                            result_retry = normalize_tokens(result_retry)
+                            found_tokens = TOKEN_RE.findall(result_retry)
+                            extra = [t for t in found_tokens if t not in expected]
+                            missing = [t for t in expected if t not in found_tokens]
+                            result = result_retry
+                        token_stats[key]["retry_succeeded"] = not (extra or missing)
+                        token_stats[key]["retry_missing_tokens"] = len(missing)
+                        token_stats[key]["retry_extra_tokens"] = len(extra)
                     if extra or missing:
                         token_mismatches += 1
                         token_mismatch_details[key] = {
@@ -1535,6 +1589,11 @@ def main():
         "--lenient-tokens",
         action="store_true",
         help="Attempt to fix token mismatches and warn instead of failing",
+    )
+    ap.add_argument(
+        "--retry-mismatches",
+        action="store_true",
+        help="Retry lines with missing tokens using a secondary placeholder scheme",
     )
     args = ap.parse_args()
 
