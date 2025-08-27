@@ -49,7 +49,7 @@ def test_protect_unprotect_nested_color_and_placeholder():
     assert translate_argos.unprotect(safe, tokens) == text
 
 
-def test_token_only_line_uses_sentinel(tmp_path, monkeypatch):
+def test_placeholder_only_skipped(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
     messages_dir.mkdir(parents=True)
@@ -61,19 +61,19 @@ def test_token_only_line_uses_sentinel(tmp_path, monkeypatch):
     target_path.parent.mkdir(parents=True, exist_ok=True)
     target_path.write_text(json.dumps({"Messages": {"hash": ""}}))
 
-    class EchoTranslator:
+    class DummyTranslator:
         def __init__(self):
-            self.last = ""
+            self.calls = 0
 
         def translate(self, text: str) -> str:
-            self.last = text
+            self.calls += 1
             return text
 
     class DummyCompleted:
         def __init__(self, code=0):
             self.returncode = code
 
-    translator = EchoTranslator()
+    translator = DummyTranslator()
 
     monkeypatch.setattr(
         translate_argos.argos_translate,
@@ -102,9 +102,13 @@ def test_token_only_line_uses_sentinel(tmp_path, monkeypatch):
 
     translate_argos.main()
 
-    assert translator.last.endswith(" " + token_patterns.TOKEN_SENTINEL)
+    assert translator.calls == 0
     data = json.loads(target_path.read_text())
     assert data["Messages"]["hash"] == "<b>{0}</b>"
+    run_dir = next((root / "translations" / "xx").iterdir())
+    report_path = run_dir / "skipped.csv"
+    rows = report_path.read_text().splitlines()
+    assert rows == ["hash,english,reason,category"]
 
 
 def test_sentinel_round_trip():
