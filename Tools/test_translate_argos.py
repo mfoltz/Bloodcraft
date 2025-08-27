@@ -2198,3 +2198,51 @@ def test_stack_trace_logged_on_exception(tmp_path, monkeypatch, caplog):
 
     assert "ValueError: boom" in caplog.text
     assert "Traceback" in caplog.text
+
+
+def test_error_when_no_messages_processed(tmp_path, monkeypatch, caplog):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(json.dumps({"Messages": {}}))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    (root / target_rel).write_text(json.dumps({"Messages": {}}))
+
+    class DummyTranslator:
+        def translate(self, text):  # pragma: no cover - not expected to run
+            return text
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+        ],
+    )
+
+    msg = "No messages processed; verify input hashes and Argos model."
+    with caplog.at_level(logging.ERROR, logger="translate_argos"):
+        with pytest.raises(SystemExit) as exc:
+            translate_argos.main()
+    assert str(exc.value) == msg
+    assert msg in caplog.text
