@@ -88,3 +88,56 @@ def test_retry_missing_tokens(tmp_path, monkeypatch):
     stats = metrics[0]["hash_stats"]["hash"]
     assert stats["retry_attempted"]
     assert stats["retry_succeeded"]
+
+
+def test_fix_order_rewrites_tokens(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"hash": "Attack {0} {1}!"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    target_path = root / target_rel
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(json.dumps({"Messages": {"hash": ""}}))
+
+    class SwapTranslator:
+        def translate(self, text: str) -> str:
+            return "Translated [[TOKEN_1]] [[TOKEN_0]]!"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    translator = SwapTranslator()
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: translator,
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+            "--fix-order",
+        ],
+    )
+
+    translate_argos.main()
+
+    data = json.loads(target_path.read_text())
+    assert data["Messages"]["hash"] == "Translated {0} {1}!"

@@ -235,15 +235,17 @@ def normalize_tokens(text: str) -> str:
     return restored
 
 
-def reorder_tokens(text: str, token_ids: List[str]) -> tuple[str, bool]:
+def reorder_tokens(
+    text: str, token_ids: List[str], *, fix: bool = False
+) -> tuple[str, bool]:
     """Detect if token order differs from the English source.
 
     ``token_ids`` is the list of token identifiers extracted from the English
     source in their original order. ``text`` is expected to contain the same
     token identifiers regardless of order. The function returns a tuple of the
     possibly normalised text and a boolean indicating whether the order differs
-    from ``token_ids``. No reordering is performed; the translator's ordering is
-    preserved.
+    from ``token_ids``. When ``fix`` is True and the order differs, tokens are
+    rewritten to match ``token_ids``.
     """
 
     if len(token_ids) <= 1:
@@ -252,6 +254,11 @@ def reorder_tokens(text: str, token_ids: List[str]) -> tuple[str, bool]:
     text = TOKEN_CLEAN.sub(lambda m: f"[[TOKEN_{m.group(1)}]]", text)
     found = TOKEN_RE.findall(text)
     changed = found != token_ids
+    if changed and fix:
+        ids_iter = iter(token_ids)
+        text = TOKEN_RE.sub(
+            lambda _: f"[[TOKEN_{next(ids_iter)}]]", text
+        )
     return text, changed
 
 
@@ -937,9 +944,12 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
                             found_tokens.extend(missing)
                             token_stats[key]["missing_tokens"] = len(missing)
                     changed = found_tokens != expected
+                    if changed and args.fix_order:
+                        result, _ = reorder_tokens(result, expected, fix=True)
+                        found_tokens = expected
                     if changed:
                         token_reorders += 1
-                        if args.report_file:
+                        if args.report_file and not args.fix_order:
                             failures[key] = ("tokens reordered", "token")
                     token_stats[key]["translated_tokens"] = len(found_tokens)
                     token_stats[key]["reordered"] = changed
@@ -1118,6 +1128,9 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
             expected = list(tokens.keys())
             found_tokens = TOKEN_RE.findall(result)
             changed = found_tokens != expected
+            if changed and args.fix_order:
+                result, _ = reorder_tokens(result, expected, fix=True)
+                found_tokens = expected
             if changed and not token_stats.get(key, {}).get("reordered"):
                 token_reorders += 1
                 stripped = TOKEN_RE.sub("", result)
@@ -1619,6 +1632,11 @@ def main():
         "--retry-mismatches",
         action="store_true",
         help="Retry lines with missing tokens using a secondary placeholder scheme",
+    )
+    ap.add_argument(
+        "--fix-order",
+        action="store_true",
+        help="Rewrite output to match source token order when tokens are reordered",
     )
     args = ap.parse_args()
 
