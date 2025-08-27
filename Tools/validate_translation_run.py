@@ -112,6 +112,23 @@ def main() -> None:
     if mismatch_path.exists():
         print(f"Token mismatch report: {mismatch_count} entries")
 
+    metrics_path = run_dir / "metrics.json"
+    try:
+        metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        metrics = []
+    if metrics:
+        entry = metrics[-1] if isinstance(metrics, list) else metrics
+        token_reorders = entry.get("token_reorders", 0)
+        token_mismatches = entry.get("token_mismatches", 0)
+        retry_attempts = entry.get("retry_attempts", 0)
+        retry_successes = entry.get("retry_successes", 0)
+        print(
+            "Metrics summary: "
+            f"{token_reorders} token reorders, {token_mismatches} token mismatches, "
+            f"{retry_attempts} retry attempts, {retry_successes} retry successes"
+        )
+
     def has_mismatch(counter: Counter[str]) -> bool:
         return any("token_mismatch" in k or "sentinel" in k for k in counter)
 

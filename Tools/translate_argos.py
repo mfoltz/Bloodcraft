@@ -29,7 +29,7 @@ from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeou
 from typing import List
 
 from argostranslate import translate as argos_translate
-from language_utils import contains_english
+from language_utils import contains_english, CODE_TO_LANG
 from token_patterns import (
     TOKEN_PATTERN,
     TOKEN_RE,
@@ -516,6 +516,10 @@ def write_failure_metrics(args, error, *, status: str = "failed") -> None:
         timeouts=0,
         token_reorders=0,
         token_mismatches=0,
+        retry_attempts=0,
+        retry_successes=0,
+        retry_missing_tokens=0,
+        retry_extra_tokens=0,
         token_mismatch_details={},
         failures={},
         hash_stats={},
@@ -1249,6 +1253,10 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
             for stats in token_stats.values()
             if stats.get("missing_tokens") or stats.get("removed_tokens")
         )
+        retry_attempts = sum(1 for stats in token_stats.values() if stats.get("retry_attempted"))
+        retry_successes = sum(1 for stats in token_stats.values() if stats.get("retry_succeeded"))
+        retry_missing_tokens = sum(stats.get("retry_missing_tokens", 0) for stats in token_stats.values())
+        retry_extra_tokens = sum(stats.get("retry_extra_tokens", 0) for stats in token_stats.values())
         _append_metrics_entry(
             args,
             status="success",
@@ -1257,6 +1265,10 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
             timeouts=timeouts_count,
             token_reorders=token_reorders,
             token_mismatches=token_mismatches,
+            retry_attempts=retry_attempts,
+            retry_successes=retry_successes,
+            retry_missing_tokens=retry_missing_tokens,
+            retry_extra_tokens=retry_extra_tokens,
             token_mismatch_details=token_mismatch_details,
             failures={k: v[0] for k, v in failures.items()},
             hash_stats=token_stats,
@@ -1266,6 +1278,10 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
         target["Messages"] = messages
         _write_json(target_path, target)
         successes = processed_so_far - len(failures)
+        retry_attempts = sum(1 for stats in token_stats.values() if stats.get("retry_attempted"))
+        retry_successes = sum(1 for stats in token_stats.values() if stats.get("retry_succeeded"))
+        retry_missing_tokens = sum(stats.get("retry_missing_tokens", 0) for stats in token_stats.values())
+        retry_extra_tokens = sum(stats.get("retry_extra_tokens", 0) for stats in token_stats.values())
         _append_metrics_entry(
             args,
             status="interrupted",
@@ -1274,6 +1290,10 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
             timeouts=timeouts_count,
             token_reorders=token_reorders,
             token_mismatches=token_mismatches,
+            retry_attempts=retry_attempts,
+            retry_successes=retry_successes,
+            retry_missing_tokens=retry_missing_tokens,
+            retry_extra_tokens=retry_extra_tokens,
             token_mismatch_details=token_mismatch_details,
             failures={k: v[0] for k, v in failures.items()},
             hash_stats=token_stats,
@@ -1511,12 +1531,14 @@ def main():
         description="Translate message JSON files with Argos Translate",
         epilog="Reassemble and install the Argos model before running this script.",
     )
-    ap.add_argument("target_file", help="Path to the target language JSON file")
-    ap.add_argument("--from", dest="src", default="en", help="Source language code (default: en)")
-    ap.add_argument("--to", dest="dst", required=True, help="Target language code")
+    ap.add_argument("target_file", nargs="?", help="Path to the target language JSON file")
+    ap.add_argument("--from", "--src", dest="src", default="en", help="Source language code (default: en)")
+    ap.add_argument("--to", "--tgt", dest="dst", required=True, help="Target language code")
     ap.add_argument("--root", default=os.path.dirname(os.path.dirname(__file__)), help="Repo root")
     ap.add_argument(
         "--run-dir",
+        "--out-dir",
+        dest="run_dir",
         help=(
             "Directory to store logs, reports, and metrics. "
             "Defaults to translations/<lang>/<timestamp>/ under --root"
@@ -1596,6 +1618,15 @@ def main():
         help="Retry lines with missing tokens using a secondary placeholder scheme",
     )
     args = ap.parse_args()
+
+    if not args.target_file:
+        overrides = {"pb": "Brazilian", "zh": "SChinese", "zt": "TChinese"}
+        name = overrides.get(args.dst.lower())
+        if not name:
+            name = CODE_TO_LANG.get(args.dst.lower(), args.dst).title()
+        args.target_file = os.path.join(
+            "Resources", "Localization", "Messages", f"{name}.json"
+        )
 
     root = os.path.abspath(args.root)
 
