@@ -1,6 +1,6 @@
 import csv
-import subprocess
 import csv
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -25,6 +25,10 @@ def test_exit_code_on_issues(tmp_path: Path) -> None:
         run_dir / "skipped.csv",
         [{"hash": "h2", "english": "e", "reason": "r", "category": "token_mismatch"}],
     )
+    (run_dir / "token_mismatches.json").write_text(
+        json.dumps([{"file": "f", "key": "k", "missing": ["t"], "extra": []}]),
+        encoding="utf-8",
+    )
     proc = subprocess.run(
         [sys.executable, str(SCRIPT), "--run-dir", str(run_dir)],
         capture_output=True,
@@ -33,6 +37,7 @@ def test_exit_code_on_issues(tmp_path: Path) -> None:
     assert proc.returncode == 1
     assert "Log results: 1 TRANSLATED, 1 SKIPPED" in proc.stdout
     assert "token_mismatch: 1" in proc.stdout
+    assert "Token mismatch report: 1 entries" in proc.stdout
 
 
 def test_success_without_issues(tmp_path: Path) -> None:
@@ -41,6 +46,7 @@ def test_success_without_issues(tmp_path: Path) -> None:
         "hash1: TRANSLATED\n", encoding="utf-8"
     )
     _write_csv(run_dir / "skipped.csv", [])
+    (run_dir / "token_mismatches.json").write_text("[]", encoding="utf-8")
     proc = subprocess.run(
         [sys.executable, str(SCRIPT), "--run-dir", str(run_dir)],
         capture_output=True,
@@ -48,3 +54,4 @@ def test_success_without_issues(tmp_path: Path) -> None:
     )
     assert proc.returncode == 0
     assert "Log results: 1 TRANSLATED, 0 SKIPPED" in proc.stdout
+    assert "Token mismatch report: 0 entries" in proc.stdout
