@@ -57,11 +57,19 @@ def summarize_skipped(path: Path) -> Counter[str]:
     return counts
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Validate translation run output")
+    ap = argparse.ArgumentParser(
+        description=(
+            "Validate translation run output and write a token mismatch summary "
+            "to token_mismatch_summary.json."
+        )
+    )
     ap.add_argument(
         "--run-dir",
         required=True,
-        help="Directory containing translate.log and skipped.csv",
+        help=(
+            "Directory containing translate.log and skipped.csv; "
+            "token_mismatch_summary.json will be written here"
+        ),
     )
     args = ap.parse_args()
 
@@ -69,13 +77,28 @@ def main() -> None:
     translated, skipped, log_reasons = summarize_log(run_dir / "translate.log")
     skip_counts = summarize_skipped(run_dir / "skipped.csv")
     mismatch_path = run_dir / "token_mismatches.json"
+    summary_path = run_dir / "token_mismatch_summary.json"
     mismatch_count = 0
+    summary_data: dict[str, dict[str, list[str]]] = {}
     try:
         data = json.loads(mismatch_path.read_text(encoding="utf-8"))
         if isinstance(data, list):
             mismatch_count = len(data)
+            for entry in data:
+                if not isinstance(entry, dict):
+                    continue
+                key = entry.get("key") or entry.get("hash")
+                if not isinstance(key, str):
+                    continue
+                summary_data[key] = {
+                    "missing": entry.get("missing", []),
+                    "extra": entry.get("extra", []),
+                }
     except FileNotFoundError:
         pass
+
+    with summary_path.open("w", encoding="utf-8") as fp:
+        json.dump(summary_data, fp, indent=2, ensure_ascii=False)
 
     print(f"Log results: {translated} TRANSLATED, {skipped} SKIPPED")
     if log_reasons:
