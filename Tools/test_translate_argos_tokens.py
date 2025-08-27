@@ -2,9 +2,21 @@ import json
 import subprocess
 import sys
 import re
+import json
+import subprocess
+import sys
+import re
+import types
 
 import logging
 import pytest
+
+argos_stub = types.ModuleType("argostranslate")
+argos_stub.translate = types.SimpleNamespace(
+    get_translation_from_codes=lambda *a, **k: None,
+    load_installed_languages=lambda: None,
+)
+sys.modules.setdefault("argostranslate", argos_stub)
 
 import translate_argos
 import fix_tokens
@@ -339,3 +351,63 @@ def test_mismatch_logs_id_and_suggestion(tmp_path, monkeypatch, caplog):
 
     pattern = re.compile(r"hash: token mismatch \[[0-9a-f]{8}\].*Suggested fix: add \['0'\]; remove \['1', '999'\]")
     assert pattern.search(caplog.text)
+
+
+def test_token_mismatch_retry(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english = {"Messages": {"hash": "Attack {0}!"}}
+    (messages_dir / "English.json").write_text(json.dumps(english))
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+    target_path = root / target_rel
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(json.dumps({"Messages": {"hash": ""}}))
+
+    class BadTranslator:
+        def __init__(self):
+            self.calls = 0
+
+        def translate(self, text: str) -> str:
+            self.calls += 1
+            return "Translated [[TOKEN_1]]"
+
+    class DummyCompleted:
+        def __init__(self, code: int = 0):
+            self.returncode = code
+
+    translator = BadTranslator()
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: translator,
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    assert translator.calls >= 2
+    data = json.loads(target_path.read_text())
+    assert data["Messages"]["hash"] == "Translated {0}"
+    run_dir = next((root / "translations" / "xx").glob("*"))
+    skipped = (run_dir / "skipped.csv").read_text()
+    assert "token_mismatch" not in skipped
