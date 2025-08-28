@@ -16,6 +16,7 @@ import logging
 import subprocess
 import sys
 import signal
+import time
 import language_utils
 from datetime import datetime, timezone
 from pathlib import Path
@@ -55,10 +56,16 @@ def timestamp() -> str:
     """Return the current UTC time in ISO format."""
     return datetime.now(timezone.utc).isoformat()
 
-def run(cmd: list[str], *, check: bool = True, logger: logging.Logger) -> subprocess.CompletedProcess:
-    """Run a subprocess, returning the completed process."""
+def run(
+    cmd: list[str], *, check: bool = True, logger: logging.Logger
+) -> tuple[subprocess.CompletedProcess, float]:
+    """Run a subprocess, returning the completed process and duration."""
     logger.debug("+ %s", " ".join(str(c) for c in cmd))
-    return subprocess.run(cmd, check=check, cwd=ROOT)
+    start = time.monotonic()
+    proc = subprocess.run(cmd, check=check, cwd=ROOT)
+    duration = time.monotonic() - start
+    logger.debug("Command finished in %.2f seconds", duration)
+    return proc, duration
 
 def propagate_hashes(target: Path) -> None:
     """Copy new hashes from English into ``target`` while preserving translations."""
@@ -179,7 +186,7 @@ def main() -> None:
             t_start = timestamp()
             run_dir = ROOT / "translations" / code / datetime.now().strftime("%Y%m%d-%H%M%S")
             run_dirs.append(run_dir)
-            result = run(
+            result, duration = run(
                 [
                     sys.executable,
                     "Tools/translate_argos.py",
@@ -221,6 +228,7 @@ def main() -> None:
             lang_metrics["translation"] = {
                 "start": t_start,
                 "end": t_end,
+                "duration": duration,
                 "returncode": result.returncode,
             }
             skipped_counts: Dict[str, int] = {}
@@ -246,7 +254,7 @@ def main() -> None:
                     mismatches,
                     code,
                 )
-            validate_proc = run(
+            validate_proc, _ = run(
                 [sys.executable, "Tools/validate_translation_run.py", "--run-dir", str(run_dir)],
                 check=False,
                 logger=logger,
@@ -256,7 +264,7 @@ def main() -> None:
             logger.info("Fixing tokens for %s", name)
             t_fix_start = timestamp()
             metrics_file = ROOT / f"fix_tokens_{name}.json"
-            fix_proc = run(
+            fix_proc, _ = run(
                 [
                     sys.executable,
                     "Tools/fix_tokens.py",
@@ -350,7 +358,7 @@ def main() -> None:
             overall_ok &= success
 
         logger.info("Analyzing translation logs")
-        analysis_proc = run(
+        analysis_proc, _ = run(
             [sys.executable, "Tools/analyze_translation_logs.py"],
             check=False,
             logger=logger,
@@ -363,7 +371,7 @@ def main() -> None:
 
         logger.info("Verifying translations")
         metrics["steps"]["verification"] = {"start": timestamp()}
-        verify_proc = run(
+        verify_proc, duration = run(
             [
                 "dotnet",
                 "run",
@@ -377,7 +385,7 @@ def main() -> None:
             logger=logger,
         )
         metrics["steps"]["verification"].update(
-            {"end": timestamp(), "returncode": verify_proc.returncode}
+            {"end": timestamp(), "duration": duration, "returncode": verify_proc.returncode}
         )
         overall_ok &= verify_proc.returncode == 0
 
