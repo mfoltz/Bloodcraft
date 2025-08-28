@@ -26,7 +26,7 @@ import hashlib
 import signal
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
-from typing import List
+from typing import List, Callable
 
 from argostranslate import translate as argos_translate
 from language_utils import contains_english, CODE_TO_LANG
@@ -44,12 +44,25 @@ from token_patterns import (
 logger = logging.getLogger("translate_argos")
 
 _INTERRUPT_ARGS = None
+_INTERRUPT_SKIPPED: list[dict[str, str]] | None = None
+_INTERRUPT_FLUSH: Callable[[], None] | None = None
 
 
 def handle_interrupt(signum, frame):
-    """Handle SIGINT/SIGTERM by writing interrupted metrics and exiting."""
+    """Handle SIGINT/SIGTERM by writing interrupted state and exiting."""
     if _INTERRUPT_ARGS is not None:
         try:
+            if _INTERRUPT_FLUSH is not None:
+                try:
+                    _INTERRUPT_FLUSH()
+                except Exception:
+                    logger.exception("Failed to flush translations on interrupt")
+            report_file = getattr(_INTERRUPT_ARGS, "report_file", None)
+            if report_file and _INTERRUPT_SKIPPED is not None:
+                try:
+                    _write_report(report_file, _INTERRUPT_SKIPPED)
+                except Exception:
+                    logger.exception("Failed to write skip report on interrupt")
             write_failure_metrics(
                 _INTERRUPT_ARGS, "interrupted", status="interrupted"
             )
@@ -644,6 +657,14 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
     timed_out_hashes: set[str] = set()
     token_stats: dict[str, dict[str, int | bool]] = {}
     token_mismatch_details: dict[str, dict[str, list[str]]] = {}
+
+    global _INTERRUPT_FLUSH
+
+    def _flush_partial() -> None:
+        target["Messages"] = {**messages, **translated}
+        _write_json(target_path, target)
+
+    _INTERRUPT_FLUSH = _flush_partial
 
     def categorize(reason: str | None) -> str:
         if not reason:
@@ -1318,7 +1339,7 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
         logger.warning("Translation interrupted; partial results written to %s", target_path)
         raise
     finally:
-        pass
+        _INTERRUPT_FLUSH = None
 
     skipped = len(report)
     failures_count = len(failures)
@@ -1774,6 +1795,8 @@ def main():
         args.model_version,
     )
     skipped_entries: list[dict[str, str]] = _load_report(args.report_file)
+    global _INTERRUPT_SKIPPED
+    _INTERRUPT_SKIPPED = skipped_entries
     token_mismatch_hashes = [
         row["hash"] for row in skipped_entries if row.get("category") == "token_mismatch"
     ]
