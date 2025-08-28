@@ -45,7 +45,7 @@ def test_token_metrics_collected(tmp_path, monkeypatch):
                     }
                 )
             )
-        return SimpleNamespace(returncode=0)
+        return SimpleNamespace(returncode=0), 0.0
 
     monkeypatch.setattr(localization_pipeline, "run", fake_run)
 
