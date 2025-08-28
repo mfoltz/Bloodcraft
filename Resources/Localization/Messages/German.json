@@ -402,7 +402,7 @@
     "4273383622": "You couldn't afford to reroll your daily... (<color=#C0C0C0>{0}</color> x<color=white>{1}</color>)",
     "370730849": "Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{0}</color> x<color=white>{1}</color>!",
     "1315865629": "You couldn't afford to reroll your wekly... (<color=#C0C0C0>{0}</color> x<color=white>{1}</color>)",
-    "1105957988": "Nearest <color=white>{0}</color> was <color=#00FFFF>{1}</color>f away to the {2}!",
+    "1105957988": "Der nächste <color=white>{0}</color> war <color=#00FFFF>{1}</color>f entfernt in Richtung {2}!",
     "800655279": "{0}: <color=green>{1}</color> <color=white>{2}</color>x<color=#FFC0CB>{3}</color> [<color=white>{4}</color>/<color=yellow>{3}</color>]",
     "3499636759": "Time until {0} reset - <color=yellow>{1}</color> | {2} Prefab: <color=white>{3}</color>",
     "3914295487": "<color=green>{0}</color> added to <color=white>{1}</color>.",
