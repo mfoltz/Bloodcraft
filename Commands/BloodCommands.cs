@@ -82,7 +82,8 @@ internal static class BloodCommands
                 {
                     var batch = bloodLegacyStats.Skip(i).Take(6);
                     string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
-                    LocalizationService.HandleReply(ctx, $"<color=red>{bloodType}</color> Stats: {bonuses}");
+                    LocalizationService.HandleReply(ctx, $"<color=red>{bloodType}</color> Stats:");
+                    LocalizationService.HandleReply(ctx, bonuses);
                 }
             }
             else

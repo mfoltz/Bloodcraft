@@ -426,7 +426,7 @@ internal static class Familiars
 
         if (distance >= 25f)
         {
-            PreventDisableFamiliar(familiar);
+            PreventDisabled(familiar);
             ReturnFamiliar(playerPosition, familiar);
         }
 
@@ -490,7 +490,7 @@ internal static class Familiars
     public static void CallFamiliar(Entity playerCharacter, Entity familiar, User user, ulong steamId)
     {
         familiar.Remove<Disabled>();
-        PreventDisableFamiliar(familiar);
+        PreventDisabled(familiar);
 
         float3 position = playerCharacter.GetPosition();
         ReturnFamiliar(position, familiar);
@@ -533,7 +533,7 @@ internal static class Familiars
             }
         }
 
-        PreventDisableFamiliar(familiar);
+        PreventDisabled(familiar);
         familiar.Add<Disabled>();
 
         UpdateActiveFamiliarDismissed(steamId, true);

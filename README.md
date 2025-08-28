@@ -492,8 +492,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Item prefabGuids for starting kit.
 - **Kit Quantities**: `KitQuantities` (string, default: "500,1000,1000,250")
   The quantity of each item in the starter kit.
-- **Kit Familiar**: `KitFamiliar` (int, default: 0)
-  Character Prefab GUID for a familiar to grant with the starter kit (0 disables).
+- **Kit Familiar**: `KitFamiliar` (int, default: 1107541186)
+  Character Prefab GUID for a familiar to grant with the starter kit (CHAR_CopperGolem default, 0 for none).
 
 ### Quests
 - **Quest System**: `QuestSystem` (bool, default: False)
@@ -599,7 +599,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Unit Spawner Expertise Factor**: `UnitSpawnerExpertiseFactor` (float, default: 1)
   The multiplier for experience gained from unit spawners (vermin nests, tombs).
 - **Expertise Stat Choices**: `ExpertiseStatChoices` (int, default: 3)
-  The maximum number of stat choices a player can pick for a weapon expertise. Max of 3 will be sent to client UI for display.
+  The maximum number of stat specializations players can pick for expertise. (Clamping to 3 max as of >1.12.15)
 - **Reset Expertise Item**: `ResetExpertiseItem` (int, default: 576389135)
   Item PrefabGUID cost for resetting weapon stats.
 - **Reset Expertise Item Quantity**: `ResetExpertiseItemQuantity` (int, default: 500)
@@ -641,7 +641,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **V Blood Legacy Multiplier**: `VBloodLegacyMultiplier` (float, default: 5)
   The multiplier for lineage gained from VBloods.
 - **Legacy Stat Choices**: `LegacyStatChoices` (int, default: 3)
-  The maximum number of stat choices a player can pick for a blood legacy. Max of 3 will be sent to client UI for display.
+  Number of specializations players can pick for legacies. (Clamping to 3 max as of >1.12.15)
 - **Reset Legacy Item**: `ResetLegacyItem` (int, default: 576389135)
   Item PrefabGUID cost for resetting blood stats.
 - **Reset Legacy Item Quantity**: `ResetLegacyItemQuantity` (int, default: 500)
