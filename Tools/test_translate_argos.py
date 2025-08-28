@@ -38,6 +38,19 @@ def test_raises_when_segments_present_without_model():
         assert "cd Resources/Localization/Models/xx" in str(err.value)
 
 
+def test_raises_when_model_missing(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: None,
+    )
+    with pytest.raises(RuntimeError) as err:
+        ensure_model_installed(str(tmp_path), "xx")
+    msg = str(err.value)
+    assert "Reassemble or install the model" in msg
+    assert "Resources/Localization/Models/xx" in msg
+
+
 def test_run_dir_creates_outputs(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"

@@ -285,23 +285,28 @@ def ensure_model_installed(root: str, dst: str) -> None:
     model_dir = os.path.join(
         root, "Resources", "Localization", "Models", dst
     )
-    if not os.path.isdir(model_dir):
-        return
+    if os.path.isdir(model_dir):
+        entries = os.listdir(model_dir)
+        has_segments = any(name.endswith(".z01") for name in entries)
+        has_model = any(name.endswith(".argosmodel") for name in entries)
+        if has_segments and not has_model:
+            snippet = (
+                f"cd Resources/Localization/Models/{dst}\n"
+                "cat translate-*.z[0-9][0-9] translate-*.zip > model.zip\n"
+                "unzip -o model.zip\n"
+                "unzip -p translate-*.argosmodel */metadata.json | jq '.from_code, .to_code'\n"
+                "argos-translate install translate-*.argosmodel"
+            )
+            raise RuntimeError(
+                "Split Argos model segments detected without an installed model. "
+                "Combine and install the model:\n" + snippet
+            )
 
-    entries = os.listdir(model_dir)
-    has_segments = any(name.endswith(".z01") for name in entries)
-    has_model = any(name.endswith(".argosmodel") for name in entries)
-    if has_segments and not has_model:
-        snippet = (
-            f"cd Resources/Localization/Models/{dst}\n"
-            "cat translate-*.z[0-9][0-9] translate-*.zip > model.zip\n"
-            "unzip -o model.zip\n"
-            "unzip -p translate-*.argosmodel */metadata.json | jq '.from_code, .to_code'\n"
-            "argos-translate install translate-*.argosmodel"
-        )
+    translator = argos_translate.get_translation_from_codes("en", dst)
+    if translator is None:
         raise RuntimeError(
-            "Split Argos model segments detected without an installed model. "
-            "Combine and install the model:\n" + snippet
+            f"No Argos translation model installed for en→{dst}. "
+            f"Reassemble or install the model under Resources/Localization/Models/{dst}."
         )
 def translate_batch(
     translator,
