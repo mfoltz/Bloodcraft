@@ -17,6 +17,7 @@ import subprocess
 import sys
 import signal
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import language_utils
 from datetime import datetime, timezone
 from pathlib import Path
@@ -85,6 +86,132 @@ def propagate_hashes(target: Path) -> None:
         data["Messages"] = merged
         with target.open("w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+def process_language(name: str, path: Path, logger: logging.Logger) -> dict:
+    """Translate, validate and fix tokens for a single language."""
+    lang_metrics: Dict[str, Dict] = {"skipped_hashes": {}}
+    code = LANGUAGE_CODES.get(name)
+    if not code:
+        logger.warning("Skipping %s: no translation code configured", name)
+        lang_metrics["skipped"] = True
+        return {"name": name, "lang_metrics": lang_metrics}
+
+    lang_metrics["skipped"] = False
+    t_start = timestamp()
+    run_dir = ROOT / "translations" / code / datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+    result, duration = run(
+        [
+            sys.executable,
+            "Tools/translate_argos.py",
+            str(path.relative_to(ROOT)),
+            "--to",
+            code,
+            "--run-dir",
+            str(run_dir),
+            "--batch-size",
+            "100",
+            "--max-retries",
+            "3",
+            "--log-level",
+            "INFO",
+            "--overwrite",
+        ],
+        check=False,
+        logger=logger,
+    )
+    metrics_file_path = run_dir / "metrics.json"
+    expected_file = str(path.relative_to(ROOT))
+    if not metrics_file_path.is_file():
+        raise SystemExit(f"Missing metrics file in {run_dir}")
+    with metrics_file_path.open("r", encoding="utf-8") as mf:
+        metrics_data = json.load(mf)
+    if isinstance(metrics_data, list):
+        metrics_entry = metrics_data[-1] if metrics_data else {}
+    else:
+        metrics_entry = metrics_data
+    actual_file = metrics_entry.get("file")
+    if actual_file != expected_file:
+        raise SystemExit(
+            f"Run directory {run_dir} metrics mismatch: {actual_file} != {expected_file}"
+        )
+
+    report = run_dir / "skipped.csv"
+    t_end = timestamp()
+    lang_metrics["translation"] = {
+        "start": t_start,
+        "end": t_end,
+        "duration": duration,
+        "returncode": result.returncode,
+    }
+    skipped_counts: Dict[str, int] = {}
+    if report.is_file():
+        with report.open("r", encoding="utf-8") as fp:
+            reader = csv.DictReader(fp)
+            for row in reader:
+                reason = row.get("reason", "")
+                skipped_counts[reason] = skipped_counts.get(reason, 0) + 1
+    lang_metrics["skipped_hashes"] = skipped_counts
+
+    mismatches = 0
+    with path.open("r", encoding="utf-8") as fp:
+        messages = json.load(fp).get("Messages", {})
+    for txt in messages.values():
+        if language_utils.has_words(txt) and not language_utils.contains_language_code(txt, code):
+            mismatches += 1
+    lang_metrics["language_mismatches"] = mismatches
+    if mismatches:
+        logger.error(
+            "%s: detected %d strings that do not match language code %s",
+            name,
+            mismatches,
+            code,
+        )
+    validate_proc, _ = run(
+        [sys.executable, "Tools/validate_translation_run.py", "--run-dir", str(run_dir)],
+        check=False,
+        logger=logger,
+    )
+    lang_metrics["validation"] = {"returncode": validate_proc.returncode}
+
+    logger.info("Fixing tokens for %s", name)
+    t_fix_start = timestamp()
+    metrics_file = ROOT / f"fix_tokens_{name}.json"
+    fix_proc, _ = run(
+        [
+            sys.executable,
+            "Tools/fix_tokens.py",
+            str(path.relative_to(ROOT)),
+            "--metrics-file",
+            str(metrics_file),
+            "--reorder",
+        ],
+        check=False,
+        logger=logger,
+    )
+    t_fix_end = timestamp()
+    token_data = {
+        "tokens_restored": 0,
+        "tokens_reordered": 0,
+        "token_mismatches": 0,
+    }
+    if metrics_file.is_file():
+        with metrics_file.open("r", encoding="utf-8") as fp:
+            token_data.update(json.load(fp))
+        metrics_file.unlink()
+    lang_metrics["token_fix"] = {
+        "start": t_fix_start,
+        "end": t_fix_end,
+        "returncode": fix_proc.returncode,
+        **token_data,
+    }
+
+    return {
+        "name": name,
+        "lang_metrics": lang_metrics,
+        "report": report,
+        "run_dir": run_dir,
+    }
 
 def main() -> None:
     ap = argparse.ArgumentParser(
@@ -174,128 +301,31 @@ def main() -> None:
                 "token_mismatches": 0,
             },
         }
-        report_paths = []
-        for name, path in targets.items():
-            lang_metrics = metrics["languages"].setdefault(name, {"skipped_hashes": {}})
-            code = LANGUAGE_CODES.get(name)
-            if not code:
-                logger.warning("Skipping %s: no translation code configured", name)
-                lang_metrics["skipped"] = True
-                continue
-            lang_metrics["skipped"] = False
-            t_start = timestamp()
-            run_dir = ROOT / "translations" / code / datetime.now().strftime("%Y%m%d-%H%M%S")
-            run_dirs.append(run_dir)
-            result, duration = run(
-                [
-                    sys.executable,
-                    "Tools/translate_argos.py",
-                    str(path.relative_to(ROOT)),
-                    "--to",
-                    code,
-                    "--run-dir",
-                    str(run_dir),
-                    "--batch-size",
-                    "100",
-                    "--max-retries",
-                    "3",
-                    "--log-level",
-                    "INFO",
-                    "--overwrite",
-                ],
-                check=False,
-                logger=logger,
-            )
-            metrics_file_path = run_dir / "metrics.json"
-            expected_file = str(path.relative_to(ROOT))
-            if not metrics_file_path.is_file():
-                raise SystemExit(f"Missing metrics file in {run_dir}")
-            with metrics_file_path.open("r", encoding="utf-8") as mf:
-                metrics_data = json.load(mf)
-            if isinstance(metrics_data, list):
-                metrics_entry = metrics_data[-1] if metrics_data else {}
-            else:
-                metrics_entry = metrics_data
-            actual_file = metrics_entry.get("file")
-            if actual_file != expected_file:
-                raise SystemExit(
-                    f"Run directory {run_dir} metrics mismatch: {actual_file} != {expected_file}"
-                )
-
-            report = run_dir / "skipped.csv"
-            report_paths.append(report)
-            t_end = timestamp()
-            lang_metrics["translation"] = {
-                "start": t_start,
-                "end": t_end,
-                "duration": duration,
-                "returncode": result.returncode,
+        report_paths: list[Path] = []
+        results = []
+        with ThreadPoolExecutor() as executor:
+            future_map = {
+                executor.submit(process_language, name, path, logger): name
+                for name, path in targets.items()
             }
-            skipped_counts: Dict[str, int] = {}
-            if report.is_file():
-                with report.open("r", encoding="utf-8") as fp:
-                    reader = csv.DictReader(fp)
-                    for row in reader:
-                        reason = row.get("reason", "")
-                        skipped_counts[reason] = skipped_counts.get(reason, 0) + 1
-            lang_metrics["skipped_hashes"] = skipped_counts
+            for future in as_completed(future_map):
+                results.append(future.result())
 
-            mismatches = 0
-            with path.open("r", encoding="utf-8") as fp:
-                messages = json.load(fp).get("Messages", {})
-            for txt in messages.values():
-                if language_utils.has_words(txt) and not language_utils.contains_language_code(txt, code):
-                    mismatches += 1
-            lang_metrics["language_mismatches"] = mismatches
-            if mismatches:
-                logger.error(
-                    "%s: detected %d strings that do not match language code %s",
-                    name,
-                    mismatches,
-                    code,
-                )
-            validate_proc, _ = run(
-                [sys.executable, "Tools/validate_translation_run.py", "--run-dir", str(run_dir)],
-                check=False,
-                logger=logger,
-            )
-            lang_metrics["validation"] = {"returncode": validate_proc.returncode}
-
-            logger.info("Fixing tokens for %s", name)
-            t_fix_start = timestamp()
-            metrics_file = ROOT / f"fix_tokens_{name}.json"
-            fix_proc, _ = run(
-                [
-                    sys.executable,
-                    "Tools/fix_tokens.py",
-                    str(path.relative_to(ROOT)),
-                    "--metrics-file",
-                    str(metrics_file),
-                    "--reorder",
-                ],
-                check=False,
-                logger=logger,
-            )
-            t_fix_end = timestamp()
-            token_data = {
-                "tokens_restored": 0,
-                "tokens_reordered": 0,
-                "token_mismatches": 0,
-            }
-            if metrics_file.is_file():
-                with metrics_file.open("r", encoding="utf-8") as fp:
-                    token_data.update(json.load(fp))
-                metrics_file.unlink()
-            lang_metrics["token_fix"] = {
-                "start": t_fix_start,
-                "end": t_fix_end,
-                "returncode": fix_proc.returncode,
-                **token_data,
-            }
+        for res in results:
+            name = res["name"]
+            lang_metrics = res["lang_metrics"]
+            metrics["languages"][name] = lang_metrics
+            report = res.get("report")
+            if report:
+                report_paths.append(report)
+            run_dir = res.get("run_dir")
+            if run_dir:
+                run_dirs.append(run_dir)
+            token_data = lang_metrics.get("token_fix", {})
             totals = metrics["steps"]["token_fix"]["totals"]
-            totals["tokens_restored"] += token_data["tokens_restored"]
-            totals["tokens_reordered"] += token_data["tokens_reordered"]
-            totals["token_mismatches"] += token_data["token_mismatches"]
+            totals["tokens_restored"] += token_data.get("tokens_restored", 0)
+            totals["tokens_reordered"] += token_data.get("tokens_reordered", 0)
+            totals["token_mismatches"] += token_data.get("token_mismatches", 0)
         metrics["steps"]["translation"]["end"] = timestamp()
         metrics["steps"]["token_fix"]["end"] = timestamp()
 
