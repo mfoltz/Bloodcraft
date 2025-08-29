@@ -1,0 +1,103 @@
+{
+  "3637474013": {
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{3}"
+    ]
+  },
+  "2785130336": {
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>"
+    ]
+  },
+  "2191580006": {
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{vBloodPrefabGuid.GetPrefabName()}",
+      "{vBloodPrefabGuid.GetPrefabName()}",
+      "{vBloodPrefabGuid.GetPrefabName()}",
+      "{vBloodPrefabGuid.GetPrefabName()}"
+    ]
+  },
+  "2709293439": {
+    "missing": [],
+    "extra": [
+      "{progress}"
+    ]
+  },
+  "54858227": {
+    "missing": [],
+    "extra": [
+      "{prestigeLevel}"
+    ]
+  },
+  "860320001": {
+    "missing": [],
+    "extra": [
+      "{quantity}"
+    ]
+  },
+  "4009901629": {
+    "missing": [],
+    "extra": [
+      "{quantity}"
+    ]
+  },
+  "3066749917": {
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{prestiges}"
+    ]
+  },
+  "2978826451": {
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{prestiges}"
+    ]
+  },
+  "3938781329": {
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{2}",
+      "{2}",
+      "{2}",
+      "{2}"
+    ]
+  },
+  "2286869349": {
+    "missing": [],
+    "extra": [
+      "{1}"
+    ]
+  },
+  "370730849": {
+    "missing": [],
+    "extra": [
+      "{1}"
+    ]
+  },
+  "3254231727": {
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{handler.GetBloodType()}"
+    ]
+  },
+  "1286090332": {
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{handler.GetBloodType()}"
+    ]
+  }
+}
