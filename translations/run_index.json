@@ -344,5 +344,38 @@
     "metrics_file": "/workspace/Bloodcraft/translations/zt/20250829-173723/metrics.json",
     "success_rate": 0.9078014184397163,
     "status": "success"
+  },
+  {
+    "run_id": "5177dbeb-8e1d-4d4c-8d92-13bdd50c623b",
+    "timestamp": "2025-08-29T18:02:55Z",
+    "language": "th",
+    "run_dir": "/workspace/Bloodcraft/translations/th/20250829-180223",
+    "log_file": "/workspace/Bloodcraft/translations/th/20250829-180223/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/th/20250829-180223/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/th/20250829-180223/metrics.json",
+    "success_rate": 0,
+    "status": "interrupted"
+  },
+  {
+    "run_id": "bacb4fc8-62e9-479a-9fb0-a4f910f9eb77",
+    "timestamp": "2025-08-29T18:03:19Z",
+    "language": "th",
+    "run_dir": "/workspace/Bloodcraft/translations/th/20250829-180314",
+    "log_file": "/workspace/Bloodcraft/translations/th/20250829-180314/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/th/20250829-180314/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/th/20250829-180314/metrics.json",
+    "success_rate": 1.0,
+    "status": "success"
+  },
+  {
+    "run_id": "b4d52c42-5684-4718-949f-6aac4622990c",
+    "timestamp": "2025-08-29T18:04:31Z",
+    "language": "th",
+    "run_dir": "/workspace/Bloodcraft/translations/th/20250829-180426",
+    "log_file": "/workspace/Bloodcraft/translations/th/20250829-180426/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/th/20250829-180426/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/th/20250829-180426/metrics.json",
+    "success_rate": 1.0,
+    "status": "success"
   }
 ]
