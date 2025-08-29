@@ -422,6 +422,11 @@
     "3060695596": "Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.",
     "3097011724": "Invalid class, use '<color=white>.class l</color>' to see options.",
     "3102592194": "Aktif tanıdık bulamaz!",
-    "2844729307": "Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!"
+    "2844729307": "Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!",
+    "3002809107": "Prefab with GUID {guidHash} not found!",
+    "2597161495": "No hovered entity!",
+    "2660507905": "No Castle Heart!",
+    "182159004": "No Familiar Active!",
+    "2336012040": "Renamed '{oldName}' to '{newName}'!"
   }
 }
