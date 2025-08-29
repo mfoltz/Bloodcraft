@@ -299,3 +299,4 @@ build/
 dist/
 /*.sln
 *.env
+DevCommands.cs
