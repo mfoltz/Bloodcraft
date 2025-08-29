@@ -46,5 +46,157 @@
         ]
       }
     ]
+  },
+  {
+    "timestamp": "2025-08-29T01:12:35Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 1,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "3343555659",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T01:12:57Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 1,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "3343555659",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T01:13:06Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 7,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "3343555659",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "3125006928",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "1763729577",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "</color>",
+          "{(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "3334433396",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "</color>",
+          "</color>",
+          "{clampedCost}",
+          "{clampedCost}",
+          "{clampedCost}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "881612152",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "</color>",
+          "{(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "3055272330",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "</color>",
+          "</color>",
+          "{2}",
+          "{2}",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "935039462",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
   }
 ]
