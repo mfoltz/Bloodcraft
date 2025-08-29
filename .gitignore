@@ -68,8 +68,9 @@ artifacts/
 *.tmp
 *.tmp_proj
 *.log
-# Translation run outputs
-translate_es.log
+# Keep translation logs under version control
+!translate.log
+!translations/**/translate.log
 *.vspscc
 *.vssscc
 .builds
@@ -296,21 +297,5 @@ __pycache__/
 *.lutconfig
 build/
 dist/
-/Bloodcraft.sln
 /*.sln
-/TODO.txt
 *.env
-secrets.json
-TestCommands.cs
-DevCommands.cs
-SystemTesting.cs
-TestPatches.cs
-Debugging.cs
-Notepad.cs
-VSystem.cs
-Bridges.cs
-
-# Translation artifacts
-translate.log
-skipped.csv
-TranslationLogs/

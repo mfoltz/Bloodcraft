@@ -5,10 +5,13 @@ import os
 import re
 import subprocess
 import sys
+from collections import Counter
 from typing import List
 
 from argostranslate import translate as argos_translate
 from language_utils import contains_english
+from translate_argos import normalize_tokens
+from token_patterns import extract_tokens
 
 print(
     "WARNING: Tools/translate.py is deprecated. Use Tools/translate_argos.py instead.",
@@ -179,12 +182,17 @@ def main():
         ):
             if token_only:
                 result = result.replace(" TRANSLATE", "")
-            if len(TOKEN_RE.findall(result)) != len(tokens):
-                log_entry(key, english[key], result, "token mismatch")
+            normalized = normalize_tokens(result)
+            if len(TOKEN_RE.findall(normalized)) != len(tokens):
+                log_entry(key, english[key], normalized, "token mismatch")
                 skipped.append(key)
                 continue
-            un = unprotect(result, tokens)
+            un = unprotect(normalized, tokens)
             un = un.replace("\\u003C", "<").replace("\\u003E", ">")
+            if Counter(extract_tokens(un)) != Counter(tokens):
+                log_entry(key, english[key], un, "token mismatch")
+                skipped.append(key)
+                continue
             if un == english[key] or contains_english(un):
                 log_entry(key, english[key], un, "looks untranslated")
                 skipped.append(key)

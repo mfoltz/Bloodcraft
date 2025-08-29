@@ -45,16 +45,19 @@ internal static class GenerateREADME
         {
             string root = Directory.GetCurrentDirectory();
             bool showText = false;
+            string? summaryJson = null;
             for (int i = 1; i < args.Length; i++)
             {
                 string arg = args[i];
                 if (arg.Equals("--show-text", StringComparison.OrdinalIgnoreCase) || arg.Equals("--verbose", StringComparison.OrdinalIgnoreCase))
                     showText = true;
+                else if (arg.Equals("--summary-json", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                    summaryJson = args[++i];
                 else if (!arg.StartsWith("-"))
                     root = arg;
             }
 
-            Tools.CheckTranslations.Run(root, showText);
+            Tools.CheckTranslations.Run(root, showText, summaryJson);
             return;
         }
 

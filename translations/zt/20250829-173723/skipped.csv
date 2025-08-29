@@ -1,0 +1,10 @@
+hash,english,reason,category
+3489173133,<color=#c0c0c0>{weaponType}</color> Stats: {bonuses},placeholders only,placeholder
+1711931034,<color=red>{bloodType}</color> Stats: {bonuses},placeholders only,placeholder
+1716911803,<color=white>{box}</color>:,identical to source on strict retry,identical
+203356865,Growth rate increase for expertise and legacies: <color=green>{0}</color>,placeholders only,placeholder
+132267140,Growth rate reduction for experience: <color=yellow>{0}</color>,placeholders only,placeholder
+1899346128,Total change in growth rate including leveling prestige bonus: <color=yellow>{0}</color>,placeholders only,placeholder
+2772168133,{0}[<color=white>{1}</color>],placeholders only,placeholder
+4190631897,<color=#c0c0c0>{0}</color> Stats: {1},placeholders only,placeholder
+,,"{""placeholder"": 7, ""identical"": 1}",summary

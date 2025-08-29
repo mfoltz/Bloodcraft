@@ -566,7 +566,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Adds the Salvageable component if missing, then sets its fields.
     /// </summary>
-    private static void EnsureSalvageable(Entity entity, float salvageTimer)
+    static void EnsureSalvageable(Entity entity, float salvageTimer)
     {
         if (!entity.Has<Salvageable>())
         {
@@ -584,7 +584,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Ensures the entity has a RecipeRequirementBuffer, then adds each (guid, amount) pair.
     /// </summary>
-    private static void AddRecipeRequirements(Entity entity, params (PrefabGUID guid, int amount)[] requirements)
+    static void AddRecipeRequirements(Entity entity, params (PrefabGUID guid, int amount)[] requirements)
     {
         if (!entity.Has<RecipeRequirementBuffer>())
         {
@@ -601,7 +601,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Updates a recipe's base data: craft time, unlock state, station visibility, etc.
     /// </summary>
-    private static void UpdateRecipeData(
+    static void UpdateRecipeData(
         Entity recipeEntity,
         float craftDuration,
         bool alwaysUnlocked,
@@ -620,7 +620,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Adds the specified recipes to the station's RefinementstationRecipesBuffer.
     /// </summary>
-    private static void AddRefinementRecipes(Entity stationEntity, params PrefabGUID[] recipeGuids)
+    static void AddRefinementRecipes(Entity stationEntity, params PrefabGUID[] recipeGuids)
     {
         var buffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
         foreach (var guid in recipeGuids)
@@ -637,7 +637,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Removes the specified recipes from the station's RefinementstationRecipesBuffer, if present.
     /// </summary>
-    private static void RemoveRefinementRecipes(Entity stationEntity, params PrefabGUID[] recipeGuids)
+    static void RemoveRefinementRecipes(Entity stationEntity, params PrefabGUID[] recipeGuids)
     {
         var buffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
 
@@ -658,7 +658,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Removes matching entries in RecipeLinkBuffer for the given guids.
     /// </summary>
-    private static void RemoveRecipeLinks(Entity entity, params PrefabGUID[] guids)
+    static void RemoveRecipeLinks(Entity entity, params PrefabGUID[] guids)
     {
         if (!entity.Has<RecipeLinkBuffer>())
             return;
@@ -685,7 +685,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Example: modifies the “EMP Building” item recipe requirements and salvageable data.
     /// </summary>
-    private static void ConfigureEMPBuildingItem()
+    static void ConfigureEMPBuildingItem()
     {
         Entity itemEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_itemBuildingEMP];
 
@@ -709,7 +709,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Updates the Primal Stygian recipe requirements, outputs, and main RecipeData.
     /// </summary>
-    private static void ConfigurePrimalStygianRecipe(Dictionary<PrefabGUID, RecipeData> recipeMap)
+    static void ConfigurePrimalStygianRecipe(Dictionary<PrefabGUID, RecipeData> recipeMap)
     {
         var recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_primalStygianRecipe];
 
@@ -735,7 +735,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Updates the Blood Crystal recipe requirements, outputs, and main RecipeData.
     /// </summary>
-    private static void ConfigureBloodCrystalRecipe(Dictionary<PrefabGUID, RecipeData> recipeMap)
+    static void ConfigureBloodCrystalRecipe(Dictionary<PrefabGUID, RecipeData> recipeMap)
     {
         var recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_bloodCrystalRecipe];
 
@@ -764,7 +764,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// For a given prefab, ensure it is salvageable (with a given timer), then add any new requirements.
     /// </summary>
-    private static void ModifyMiscItem(PrefabGUID itemGuid, float salvageTimer, params (PrefabGUID guid, int amount)[] newRequirements)
+    static void ModifyMiscItem(PrefabGUID itemGuid, float salvageTimer, params (PrefabGUID guid, int amount)[] newRequirements)
     {
         if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(itemGuid, out Entity prefabEntity))
             return;
@@ -779,7 +779,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Removes salvageable and requirement data from the prefab if present.
     /// </summary>
-    private static void RemoveSalvageableAndRequirements(PrefabGUID itemGuid)
+    static void RemoveSalvageableAndRequirements(PrefabGUID itemGuid)
     {
         if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(itemGuid, out var entity))
             return;
@@ -794,7 +794,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// If the Primal Jewel Requirement is valid, update the extract shard recipe with it.
     /// </summary>
-    private static void ConfigureExtractShardRecipeIfJewelValid()
+    static void ConfigureExtractShardRecipeIfJewelValid()
     {
         if (!_primalJewelRequirement.HasValue())
             return;
@@ -825,7 +825,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Increases the inventory slot capacity for each shard container to 14.
     /// </summary>
-    private static void IncreaseShardContainerSlots()
+    static void IncreaseShardContainerSlots()
     {
         foreach (var shardContainer in _shardContainers)
         {
@@ -845,7 +845,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Enables and configures Vampiric Dust on the advanced grinder, removes primal stygian & blood crystal from it.
     /// </summary>
-    private static void ConfigureAdvancedGrinder(Dictionary<PrefabGUID, RecipeData> recipeMap)
+    static void ConfigureAdvancedGrinder(Dictionary<PrefabGUID, RecipeData> recipeMap)
     {
         // 1) Update Vampiric Dust.
         var recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_vampiricDustRecipe];
@@ -871,7 +871,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Adds copper wires and charged battery recipes to the fabricator.
     /// </summary>
-    private static void ConfigureFabricator(Dictionary<PrefabGUID, RecipeData> recipeMap)
+    static void ConfigureFabricator(Dictionary<PrefabGUID, RecipeData> recipeMap)
     {
         var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_fabricator];
 
@@ -899,7 +899,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// If we have a valid “fake flower” recipe, tweak its requirement to use thistle.
     /// </summary>
-    private static void FixFakeFlowerRecipe()
+    static void FixFakeFlowerRecipe()
     {
         if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_fakeFlowerRecipe, out Entity recipePrefab))
             return;
@@ -915,7 +915,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Adds several shard-related recipes to the gem cutting table station.
     /// </summary>
-    private static void ConfigureGemCuttingTable()
+    static void ConfigureGemCuttingTable()
     {
         var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_gemCuttingTable];
         AddRefinementRecipes(
@@ -932,7 +932,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// <summary>
     /// Adds Blood Crystal recipe to the advanced blood press station.
     /// </summary>
-    private static void ConfigureAdvancedBloodPress()
+    static void ConfigureAdvancedBloodPress()
     {
         var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_advancedBloodPress];
         AddRefinementRecipes(stationEntity, _bloodCrystalRecipe);

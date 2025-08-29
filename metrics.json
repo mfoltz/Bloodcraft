@@ -1,0 +1,49 @@
+[
+  {
+    "run_id": "00000000-0000-0000-0000-000000000001",
+    "commit": "888a92f",
+    "argos_version": "1.8.0",
+    "model_version": "1",
+    "file": "Resources/Localization/Messages/Spanish.json",
+    "timestamp": "2025-08-16T15:49:38Z",
+    "processed": 2,
+    "successes": 1,
+    "timeouts": 0,
+    "token_reorders": 0,
+    "failures": {
+      "2844729307": "token mismatch on strict retry (expected ['0', '1', '2'], got [])"
+    },
+    "hash_stats": {
+      "2844729307": {
+        "original_tokens": 3,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3981447812": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      }
+    }
+  },
+  {
+    "run_id": "00000000-0000-0000-0000-000000000002",
+    "commit": "888a92f",
+    "argos_version": "1.8.0",
+    "model_version": "1",
+    "file": "Resources/Localization/Messages/Spanish.json",
+    "timestamp": "2025-08-16T15:50:19Z",
+    "processed": 1,
+    "successes": 1,
+    "timeouts": 0,
+    "token_reorders": 0,
+    "failures": {},
+    "hash_stats": {
+      "3981447812": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      }
+    }
+  }
+]

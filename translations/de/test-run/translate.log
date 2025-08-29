@@ -1,0 +1,15 @@
+2025-08-27 00:02:29,956 INFO target_file=Resources/Localization/Messages/German.json src=en dst=de batch_size=10 timeout=10 max_retries=3 run_dir=/workspace/Bloodcraft/translations/de/test-run git_commit=7c2fb55c model_version=unknown
+2025-08-27 00:02:29,957 INFO NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.
+2025-08-27 00:02:29,960 INFO Batch 1/1 start @ 0.00s
+2025-08-27 00:02:32,313 INFO 3439613370: TRANSLATED
+  Original: Welcome to Bloodcraft
+  Result: Willkommen bei Bloodcraft
+2025-08-27 00:02:32,314 INFO Batch 1/1 end @ 2.35s (2.35s)
+2025-08-27 00:02:32,314 INFO Processed 1/1 lines
+2025-08-27 00:02:32,314 INFO Processed 1 batches in 2.35 seconds
+2025-08-27 00:02:32,315 INFO Report breakdown: none
+2025-08-27 00:02:36,486 INFO Wrote translations to /workspace/Bloodcraft/Resources/Localization/Messages/German.json
+2025-08-27 00:02:36,488 INFO Summary: 1/1 translated, 0 timeouts, 0 token reorders, 0 token mismatches. Metrics written to /workspace/Bloodcraft/translations/de/test-run/metrics.json
+2025-08-27 00:02:36,488 INFO Received 0 rows; deduplicated to 0 rows
+2025-08-27 00:02:36,489 INFO Wrote skip report to /workspace/Bloodcraft/translations/de/test-run/skipped.csv with 0 row(s)
+2025-08-27 00:02:36,489 INFO Totals: processed=1 translated=1 skipped=0

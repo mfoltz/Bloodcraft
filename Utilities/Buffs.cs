@@ -154,7 +154,7 @@ internal static class Buffs
         {
             if (buffPrefabGuid.Equals(BonusStatsBuff))
             {
-                // if (entity.IsPlayer()) ScriptSpawnServerPatch.RemovePlayerBonusStats(buffEntity, entity);
+                // if (entity.IsPlayer()) ScriptSpawnServerHooks.RemovePlayerBonusStats(buffEntity, entity);
                 // else if (entity.IsFamiliar()) Progression.RemoveFamiliarStats(buffEntity, entity);
             }
 

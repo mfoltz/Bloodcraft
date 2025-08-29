@@ -12,6 +12,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `1076291728` | Use the VBlood menu to track bosses! |
 | `1081599663` | No active battle group selected! Use .fam cbg... |
 | `1095669519` | Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? "enabled" : "disabled")}. |
+| `110573833` | You can't use emote actions when using bat... |
 | `1105957988` | Nearest … was …f away to the …! |
 | `1106946472` | {replyMessage} |
 | `1108347105` | Level must be between 0 and {ConfigService.MaxBloodLevel}. |
@@ -20,6 +21,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `1182925736` | No players have prestiged in {parsedPrestigeType} yet! |
 | `1201875369` | No progress in {professionHandler.GetProfessionName()} yet! |
 | `121410310` | Spells locked. |
+| `1214712585` | Familiar combat disabled. |
 | `1218917876` | Targets have all been killed, give them a... |
 | `1223341524` | …[…] prestiged successfully! Growth rate reduced by …... |
 | `1228611582` | Familiar Battle Groups: |
@@ -32,7 +34,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `1293896668` | No stat synergies found for {FormatClassName(playerClass)}. |
 | `1298892920` | No legacy available for {bloodType}. |
 | `1315865629` | You couldn't afford to reroll your wekly... (…... |
-| `1318067012` | Invalid index, use 1-…! (Active Box - …) |
+| `1318067012` | Invalid index, use 1-{MaxIndex}! (Active Box - {ActiveBox}) |
 | `132267140` | Growth rate reduction for experience: … |
 | `134200388` | Invalid profession. |
 | `1345204457` | This command should only be used as required... |
@@ -40,23 +42,28 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `1369871380` | Available Weapon Expertises: … |
 | `1381058165` | Familiars are not enabled. |
 | `1391708521` | Your familiar has prestiged [{prestigeLevel}]! |
+| `1407688215` | …x… received from … |
 | `1411528307` | {parsedPrestigeType} prestige reset for {playerInfo.User.CharacterName.Value}. |
 | `1420278477` | Tracking is only available for incomplete kill quests. |
 | `1440482998` | {playerInfo.User.CharacterName.Value} added to the ignore prestige leaderboard list! |
 | `1440602422` | Active familiar for {user.CharacterName.Value} has been set to... |
 | `1443941563` | Removed prestige buffs from all players. |
+| `1446796844` | Familiar combat enabled. |
 | `1446811317` | … removed from the ignore shared experience list! |
 | `1449977777` | You do not have the required item to... |
 | `1454481026` | You don't have the required item to reset... |
 | `145841390` | You must reach the maximum level in Experience... |
 | `1465975319` | Reminders …. |
 | `1469754031` | Looks like your familiar is still able to... |
+| `1491097539` | Binding failed... |
 | `1496603105` | Leveling is not enabled. |
 | `1516467471` | You haven't unlocked any familiars yet! |
 | `1548584430` | Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? "enabled"... |
 | `1562141642` | You don't have the required prestige level for... |
 | `1575879194` | Couldn't find box to rename or there's already... |
 | `1581983564` | Shiny added! Rebind familiar to see effects. Use... |
+| `159434725` | You can't toggle familiar combat mode during PvE/PvP... |
+| `159604155` | Can't interact with familiar when dismissed! |
 | `1597216248` | Invalid class, use '.class l' to see options. |
 | `1601487032` | First unarmed slot set to … for …. |
 | `160628229` | {playerInfo.User.CharacterName.Value} added to the ignore shared experience list! |
@@ -80,6 +87,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `1744159514` | Can't unbind familiar right now! (dismissed) |
 | `1757634753` | You do not have enough of the required... |
 | `1762641650` | You already have an active familiar! Unbind that... |
+| `1763623253` | New Daily Quest available: … …x… […/…] |
 | `1763729577` | Exo form emote action (taunt) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ?... |
 | `1769980541` | Couldn't find bool key from scrolling text type... |
 | `179462471` | Can't unbind familiar right now! (interacting) |
@@ -91,6 +99,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `1846116445` | Extra spell slots for unarmed are not enabled. |
 | `1880632188` | {finalWeaponStat} has been chosen for {finalWeaponType}! |
 | `1884272339` | You must consume Dracula's essence before manifesting his... |
+| `1884892470` | You've received …x… for completing your …! It... |
 | `1894878159` | Familiar assigned to {groupName} in slot {slotIndex}. |
 | `1897692916` | You must reach max level before Exo prestiging... |
 | `1899346128` | Total change in growth rate including leveling prestige... |
@@ -103,9 +112,11 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `1977482431` | Familiar Boxes: |
 | `1985982508` | You couldn't afford to reroll your daily... ({item.GetLocalizedName()}... |
 | `2001389111` | Invalid spell, use '.class lsp' to see options. |
+| `2007397999` | +… proficiency in … (…%) |
 | `2008856310` | Invalid weapon choice, use '.wep lst' to see... |
 | `203356865` | Growth rate increase for expertise and legacies: … |
 | `2051256929` | {roundedXP} bonus experience remaining from resting~ |
+| `206072549` | Active familiar doesn't exist! If that doesn't seem... |
 | `2069903402` | Starter kit is not enabled. |
 | `2076214502` | Exo prestiging is not enabled. |
 | `20873033` | You haven't selected a class or you haven't... |
@@ -133,6 +144,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `2214985381` | … Prestige Info: |
 | `2228202821` | {playerInfo.User.CharacterName} is already queued for battle! |
 | `223311103` | Invalid unit name (no full or partial matches). |
+| `2252098529` | Gold Orex… received from … |
 | `2252129438` | Invalid weapon type. |
 | `226227140` | No progress in {handler.GetBloodType()} yet. |
 | `2271729042` | Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? "enabled"... |
@@ -171,6 +183,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `2554001784` | {professionHandler.GetProfessionName()} set to [{level}] for {playerInfo.User.CharacterName.Value} |
 | `2557313311` | Familiar arena position changed! (only one arena currently... |
 | `2563987683` | Target cache isn't ready yet, check back shortly! |
+| `2576121314` | Bonus Saplings(s)x… received from …! |
 | `2577116713` | Couldn't find familiar actives or familiar already active!... |
 | `2615857787` | You've already completed your …! Time until …... |
 | `2637421818` | Couldn't find stat synergies for …... |
@@ -188,11 +201,13 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `2720898024` | You can't toggle combat for a familiar in... |
 | `2721627196` | Couldn't find matching vBlood! |
 | `2724064627` | Must have at least one unit unlocked to... |
+| `2731743065` | You can't use emote actions when using dominate... |
 | `2740121583` | VBlood emotes disabled. |
 | `2747211297` | Removed all class buffs then applied current class... |
 | `2761429858` | Removed all class buffs for all players. |
 | `2772168133` | …[…] |
 | `2785130336` | {finalBloodStat} selected for {finalBloodType}! |
+| `2786260061` | Your Daily Quest has been refreshed! |
 | `27929505` | Invalid stat, use '.wep lst' to see valid... |
 | `2794958495` | {line} |
 | `2814501768` | ……* unbound! |
@@ -200,6 +215,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `2817800174` | You've received a starting kit with: |
 | `2828720719` | Couldn't find experience data for … |
 | `284459823` | Multiple matches found! SmartBind doesn't support this yet...... |
+| `2844729307` | Your familiar has prestiged [{prestigeLevel}]; the accumulated knowledge... |
 | `2846646667` | Invalid familiar prestige stat, use '.fam lst' to... |
 | `2881393089` | Expertise logging is now …. |
 | `2925666850` | Couldn't find binding preset, try binding or smartbind... |
@@ -208,29 +224,39 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `2965167816` | No weapon stats available at this time. |
 | `2967576286` | Shift spell: {spellName} |
 | `2968342812` | You can't challenge another player while queued for... |
+| `2972244104` | Radiant Fiberx… received from … |
 | `2978826451` | {famName}{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? "{colorCode}*" : "")} [{level}][{prestiges}] added to... |
 | `2979158417` | Prestiging is not enabled. |
 | `2997561401` | … has been chosen for …! |
 | `2998300513` | Invalid slot (1 for Q or 2 for... |
 | `3013651462` | Couldn't find matching save method for weapon type... |
 | `3052690511` | {vBloodPrefabGuid.GetLocalizedName()} is not available per configured familiar bans! |
+| `3054245516` | Mutant Greasex… received from …, but it dropped... |
 | `3055272330` | Familiar attempting to prestige must be at max... |
 | `3055902112` | {parsedPrestigeType} prestiging is not enabled. |
+| `3060176103` | You can't call your familiar during PvP combat! |
 | `3060695596` | Second unarmed slot set to … for …. |
 | `3066749917` | {famName}{(buffsData.FamiliarBuffs.ContainsKey(familiarId) ? $"{colorCode}*" : "")} [{level}][{prestiges}] added to... |
 | `3084457547` | Available Weapon Expertises: {weaponTypes} |
 | `3097011724` | Invalid class, use '.class l' to see options. |
 | `3097544876` | … added to the ignore shared experience list! |
+| `3102592194` | Couldn't find active familiar! |
+| `3105730177` | Not enough energy to maintain form... ({Energy}) |
 | `3112026815` | Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? "enabled"... |
+| `3115116616` | Gold Orex… received from …, but it dropped... |
+| `3116249505` | You can't interact with your familiar during combat! |
+| `311765273` | Your Weekly Quest has been refreshed! |
 | `3125006928` | Familiar already has {FamiliarPrestigeStats[value]} ({value + 1}) from... |
 | `3125108847` | You are now prepared for the hunt! |
 | `3133295357` | Your weapon expertise is […][…] and you have... |
 | `313887201` | Change spells to the ones you want in... |
 | `3139406824` | … removed from …. |
+| `3141472524` | Bonus Seed(s)x… received from …, but some fell... |
 | `3158650477` | No familiars in battle group! |
 | `3170250471` | Expertise handler for weapon is null; this shouldn't... |
 | `3170335283` | Couldn't find active familiar... |
 | `317079168` | Professions are not enabled. |
+| `3182899806` | Can't interact with familiar when binding/unbinding! |
 | `3182929151` | Slot input out of range! (use 1, 2,... |
 | `318734715` | Familiar battles are not enabled. |
 | `3195375072` | {vBloodPrefabGuid.GetLocalizedName()} is already unlocked! |
@@ -246,6 +272,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `3318828181` | Prestige buffs applied! (if they were missing) |
 | `3320804900` | Available professions: {ProfessionFactory.GetProfessionNames()} |
 | `3320998835` | {prestiges} |
+| `3324923525` | Mutant Greasex… received from … |
 | `3326145371` | You're level […][…] with … experience (…%)! |
 | `3334433396` | Familiar attempting to prestige must be at max... |
 | `3335571950` | Legacies are not enabled. |
@@ -255,6 +282,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `3380184352` | Unable to verify cost for {vBloodPrefabGuid.GetPrefabName()}! |
 | `3399068440` | VBloods Slain: … \| Units Killed: … \|... |
 | `3402815477` | VBloods Slain: … \| Units Killed: … \|... |
+| `3439613370` | Welcome to Bloodcraft |
 | `3443164458` | Shiny familiars enabled. |
 | `3466860311` | Failed to remove enough of the item required... |
 | `3468772905` | The maximum level for {parsedPrestigeType} prestige is {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}. |
@@ -263,6 +291,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `349704338` | Can't challenge another player until an existing challenge... |
 | `3498334942` | Unable to verify exo prestige reward item! ({exoItem}) |
 | `3499636759` | Time until … reset - … \| …... |
+| `3540014872` | Familiar combat is not enabled. |
 | `3543031585` | {FormatClassName(playerClass)} passives: |
 | `3546356968` | Invalid unit prefab (match found but does not... |
 | `3587073963` | Current Exoform: {form} |
@@ -274,6 +303,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `3637584655` | Failed to remove enough of the item required... |
 | `3648038609` | Player does not have an active … quest... |
 | `3664649404` | You can't challenge yourself! |
+| `3665962604` | Bonus Saplings(s)x… received from …, but some fell... |
 | `3681675424` | Level must be between 0 and {ConfigService.MaxLevel}! |
 | `3706109126` | You have not prestiged in {parsedPrestigeType}. |
 | `3706417587` | Invalid quest type '{questTypeName}'. Valid values are: {string.Join(",... |
@@ -290,6 +320,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `3761848707` | Familiar arena position set, battle service started! (only... |
 | `3819833139` | You have no battle groups. |
 | `3823143990` | You don't have any quests yet, check back... |
+| `384069927` | You've received …x… for completing your …! |
 | `3862629133` | Battle group {groupName} created. |
 | `3863739608` | No bonuses from currently equipped weapon. |
 | `3878313095` | Couldn't find player... |
@@ -303,6 +334,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `3960937922` | You can't toggle combat for a familiar when... |
 | `3961332984` | {parsedPrestigeType}[{exoPrestiges}] prestige complete! You have been awarded with... |
 | `3987763597` | … unbound! |
+| `3997845506` | Bonus Seed(s)x… received from …! |
 | `400324857` | You haven't earned any experience yet! |
 | `4003734136` | … scrolling text …. |
 | `4007697799` | You don't have any quests yet, check back... |
@@ -316,9 +348,11 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `4061888430` | Blood Legacies are not enabled. |
 | `4066899438` | Shift spell enabled! |
 | `406861876` | Can't dismiss familiar when binding/unbinding! |
+| `4110714393` | Radiant Fiberx… received from …, but it dropped... |
 | `4126149106` | Invalid blood type, use '.bl l' to see... |
 | `4140406916` | You haven't selected a class yet, use '.class... |
 | `4162514026` | Deleted battle group {groupName}. |
+| `4177199465` | Select a form you've unlocked first! ('.prestige sf... |
 | `4190631897` | … Stats: … |
 | `421960942` | VBlood emotes enabled. |
 | `4226920647` | … is not available per configured familiar bans! |
@@ -343,6 +377,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `559704045` | … passives: |
 | `563018011` | Invalid quest type '{questTypeName}'. Valid values are: {string.Join( |
 | `566938273` | Level set to … for …! |
+| `606627316` | … improved to […] |
 | `608689499` | Growth rate reduction from … prestige level: -… |
 | `615667259` | Couldn't find active familiar box to remove from... |
 | `617911048` | Reminders …. |
@@ -392,37 +427,3 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `985830382` | Expertise is not enabled. |
 | `998944061` | The {questType} quest is already complete for {playerInfo.User.CharacterName.Value}. |
 | `999548370` | {FormatClassName(playerClass)} stat synergies[x{ConfigService.SynergyMultiplier}]: |
-| `binding-failed` | Binding failed... |
-| `emote-actions-bat-form` | You can't use emote actions when using bat... |
-| `emote-actions-dominate-form` | You can't use emote actions when using dominate... |
-| `familiar-active-not-exist` | Active familiar doesn't exist! If that doesn't seem... |
-| `familiar-call-pvp-combat` | You can't call your familiar during PvP combat! |
-| `familiar-combat-disabled` | Familiar combat disabled. |
-| `familiar-combat-enabled` | Familiar combat enabled. |
-| `familiar-combat-not-enabled` | Familiar combat is not enabled. |
-| `familiar-combat-toggle-in-combat` | You can't toggle familiar combat mode during PvE/PvP... |
-| `familiar-interact-binding` | Can't interact with familiar when binding/unbinding! |
-| `familiar-interact-combat` | You can't interact with your familiar during combat! |
-| `familiar-interact-dismissed` | Can't interact with familiar when dismissed! |
-| `familiar-not-found` | Couldn't find active familiar... |
-| `profession-bonus-received` | …x… received from … |
-| `profession-bonus-saplings-dropped` | Bonus Saplings(s)x… received from …, but some fell... |
-| `profession-bonus-saplings-received` | Bonus Saplings(s)x… received from …! |
-| `profession-bonus-seeds-dropped` | Bonus Seed(s)x… received from …, but some fell... |
-| `profession-bonus-seeds-received` | Bonus Seed(s)x… received from …! |
-| `profession-gold-ore-dropped` | Gold Orex… received from …, but it dropped... |
-| `profession-gold-ore-received` | Gold Orex… received from … |
-| `profession-improved` | … improved to […] |
-| `profession-mutant-grease-dropped` | Mutant Greasex… received from …, but it dropped... |
-| `profession-mutant-grease-received` | Mutant Greasex… received from … |
-| `profession-proficiency-gain` | +… proficiency in … (…%) |
-| `profession-radiant-fiber-dropped` | Radiant Fiberx… received from …, but it dropped... |
-| `profession-radiant-fiber-received` | Radiant Fiberx… received from … |
-| `quest-daily-refreshed` | Your Daily Quest has been refreshed! |
-| `quest-new-daily` | New Daily Quest available: … …x… […/…] |
-| `quest-reward-dropped` | You've received …x… for completing your …! It... |
-| `quest-reward-received` | You've received …x… for completing your …! |
-| `quest-weekly-refreshed` | Your Weekly Quest has been refreshed! |
-| `shapeshift-not-enough-energy` | Not enough energy to maintain form... (…) |
-| `shapeshift-select-form` | Select a form you've unlocked first! ('.prestige sf... |
-| `welcome` | Welcome to Bloodcraft |

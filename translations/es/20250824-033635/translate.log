@@ -1,0 +1,74 @@
+2025-08-24 03:36:35,910 INFO target_file=Resources/Localization/Messages/Spanish.json src=en dst=es batch_size=100 timeout=60 max_retries=3 run_dir=/workspace/Bloodcraft/translations/es/20250824-033635 git_commit=8663225 model_version=unknown
+2025-08-24 03:36:35,911 INFO NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.
+2025-08-24 03:36:35,913 INFO Batch 1/11 start @ 0.00s
+2025-08-24 03:36:38,781 WARNING 2252098529: tokens reordered
+2025-08-24 03:36:38,782 INFO 2252098529: TRANSLATED
+  Original: <color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}
+  Result: <color=green>Gold Ore</color>x<color=white> {0} </color> </color> recibido de {1}
+2025-08-24 03:36:38,782 INFO Batch 1/11 end @ 2.87s (2.87s)
+2025-08-24 03:36:38,782 INFO Batch 2/11 start @ 2.87s
+2025-08-24 03:36:39,174 WARNING 3141472524: tokens reordered
+2025-08-24 03:36:39,174 INFO 3141472524: TRANSLATED
+  Original: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.
+  Result: <color=green>Bonus Seed(s)</color>x<color=white> {0} </color> </color> recibido de {1}, pero algunos cayeron sobre el terreno ya que su inventario está lleno.
+2025-08-24 03:36:39,174 INFO Batch 2/11 end @ 3.26s (0.39s)
+2025-08-24 03:36:39,174 INFO Batch 3/11 start @ 3.26s
+2025-08-24 03:36:39,553 WARNING 3054245516: tokens reordered
+2025-08-24 03:36:39,554 INFO 3054245516: TRANSLATED
+  Original: <color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
+  Result: <color=green>Mutant Grease</color>x<color=white> {0} </color> </color> recibido de {1}, pero cayó sobre el terreno desde que su inventario está lleno.
+2025-08-24 03:36:39,554 INFO Batch 3/11 end @ 3.64s (0.38s)
+2025-08-24 03:36:39,554 INFO Batch 4/11 start @ 3.64s
+2025-08-24 03:36:39,856 WARNING 3729714988: tokens reordered
+2025-08-24 03:36:39,856 INFO 3729714988: TRANSLATED
+  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!
+  Result: <color=#90EE90> {parsedPrestigeType} </color> <color=white> {exoPrestiges} </color> </color> prestigio completo!
+2025-08-24 03:36:39,856 INFO Batch 4/11 end @ 3.94s (0.30s)
+2025-08-24 03:36:39,857 INFO Batch 5/11 start @ 3.94s
+2025-08-24 03:36:40,263 WARNING 2402733055: tokens reordered
+2025-08-24 03:36:40,264 INFO 2402733055: TRANSLATED
+  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
+  Result: <color=#90EE90> {parsedPrestigeType} </color> <color=white> {exoPrestiges} </color> </color> prestigio completo! También le han concedido <color=#ffd9eb> {exoReward.GetLocalizedName()} </color>x<color=white> {ConfigService.ExoPrestigeRewardQuantity} </color>!
+2025-08-24 03:36:40,264 INFO Batch 5/11 end @ 4.35s (0.41s)
+2025-08-24 03:36:40,264 INFO Batch 6/11 start @ 4.35s
+2025-08-24 03:36:40,669 WARNING 3961332984: tokens reordered
+2025-08-24 03:36:40,669 INFO 3961332984: TRANSLATED
+  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.
+  Result: <color=#90EE90> {parsedPrestigeType} </color> <color=white> {exoPrestiges} </color> </color> prestigio completo! Usted ha sido premiado con <color=#ffd9eb> {exoReward.GetLocalizedName()} </color>x<color=white> {ConfigService.ExoPrestigeRewardQuantity} </color>! Se cayó en el suelo porque su inventario estaba lleno.
+2025-08-24 03:36:40,669 INFO Batch 6/11 end @ 4.76s (0.41s)
+2025-08-24 03:36:40,669 INFO Batch 7/11 start @ 4.76s
+2025-08-24 03:36:40,965 WARNING 1411528307: tokens reordered
+2025-08-24 03:36:40,965 INFO 1411528307: TRANSLATED
+  Original: <color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.
+  Result: <color=#90EE90> {parsedPrestigeType} </color> <color=white> {playerInfo.User.CharacterName.Value} </color> </color>.
+2025-08-24 03:36:40,966 INFO Batch 7/11 end @ 5.05s (0.30s)
+2025-08-24 03:36:40,966 INFO Batch 8/11 start @ 5.05s
+2025-08-24 03:36:41,684 WARNING 3591926048: tokens reordered
+2025-08-24 03:36:41,684 INFO 3591926048: TRANSLATED
+  Original: Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!
+  Result: Su experiencia en armas es <color=white> {ExpertiseData.Key} </color> <color=#90EE90> {prestigeLevel} </color> y usted tiene <color=yellow> {progress} </color> </color> <color=#FFC0CB>expertise</color> (<color=white> {GetLevelProgress(steamId, handler)} % </color> <color=#c0c0c0> {weaponType} </color>!
+2025-08-24 03:36:41,684 INFO Batch 8/11 end @ 5.77s (0.72s)
+2025-08-24 03:36:41,684 INFO Batch 9/11 start @ 5.77s
+2025-08-24 03:36:41,974 WARNING 698362524: tokens reordered
+2025-08-24 03:36:41,974 INFO 698362524: TRANSLATED
+  Original: Box <color=white>{current}</color> renamed - <color=yellow>{name}</color>
+  Result: Box <color=white> {current} </color> renombrado - <color=yellow> {name} {name} </color>
+2025-08-24 03:36:41,974 INFO Batch 9/11 end @ 6.06s (0.29s)
+2025-08-24 03:36:41,974 INFO Batch 10/11 start @ 6.06s
+2025-08-24 03:36:42,299 WARNING 1105957988: tokens reordered
+2025-08-24 03:36:42,299 INFO 1105957988: TRANSLATED
+  Original: Nearest <color=white>{0}</color> was <color=#00FFFF>{1}</color>f away to the {2}!
+  Result: <color=white> {0} </color> <color=#00FFFF> {1} </color> </color>  {2}!
+2025-08-24 03:36:42,299 INFO Batch 10/11 end @ 6.39s (0.32s)
+2025-08-24 03:36:42,299 INFO Batch 11/11 start @ 6.39s
+2025-08-24 03:36:43,018 WARNING 3133295357: tokens reordered
+2025-08-24 03:36:43,019 INFO 3133295357: TRANSLATED
+  Original: Your weapon expertise is [<color=white>{0}</color>][<color=#90EE90>{1}</color>] and you have <color=yellow>{2}</color> <color=#FFC0CB>expertise</color> (<color=white>{3}%</color>) with <color=#c0c0c0>{4}</color>!
+  Result: Su experiencia en armas es <color=white> {0} </color> <color=#90EE90> {1} </color> y usted tiene <color=yellow> {2} </color> </color> <color=#FFC0CB>expertise</color> (<color=white> {3} % </color> <color=#c0c0c0> {4} </color>!
+2025-08-24 03:36:43,019 INFO Batch 11/11 end @ 7.11s (0.72s)
+2025-08-24 03:36:43,019 INFO Processed 11 batches in 7.11 seconds
+2025-08-24 03:36:43,021 INFO Report breakdown: none
+2025-08-24 03:36:46,097 ERROR Summary: 0/0 translated, 0 timeouts, 0 token reorders. Failed: 1. Metrics written to /workspace/Bloodcraft/translations/es/20250824-033635/metrics.json
+2025-08-24 03:36:46,098 INFO Received 0 rows; deduplicated to 0 rows
+2025-08-24 03:36:46,098 INFO Wrote skip report to /workspace/Bloodcraft/translations/es/20250824-033635/skipped.csv with 0 row(s)
+2025-08-24 03:36:46,098 INFO Totals: processed=0 translated=0 skipped=0

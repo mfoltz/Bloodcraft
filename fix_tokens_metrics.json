@@ -1,0 +1,514 @@
+[
+  {
+    "timestamp": "2025-08-27T00:46:40Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 2,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/German.json",
+        "key": "1880632188",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/German.json",
+        "key": "2997561401",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-27T00:52:21Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 2,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/German.json",
+        "key": "1880632188",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/German.json",
+        "key": "2997561401",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T01:12:35Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 1,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "3343555659",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T01:12:57Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 1,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "3343555659",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T01:13:06Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 7,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "3343555659",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "3125006928",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "1763729577",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "</color>",
+          "{(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "3334433396",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "</color>",
+          "</color>",
+          "{clampedCost}",
+          "{clampedCost}",
+          "{clampedCost}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "881612152",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "</color>",
+          "{(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "3055272330",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "<color=white>",
+          "</color>",
+          "</color>",
+          "{2}",
+          "{2}",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "935039462",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T17:34:30Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 1,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "2007397999",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T17:35:01Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 1,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "2007397999",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T17:35:27Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 12,
+    "token_mismatches": 4,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "2007397999",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "1763623253",
+        "missing": [],
+        "extra": [
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "3399068440",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=#808080>",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "3402815477",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=#808080>",
+          "{2}"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T17:35:44Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 4,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "2007397999",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "1763623253",
+        "missing": [],
+        "extra": [
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "3399068440",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=#808080>",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "3402815477",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=#808080>",
+          "{2}"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T17:36:01Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 4,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "2007397999",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "1763623253",
+        "missing": [],
+        "extra": [
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "3399068440",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=#808080>",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "3402815477",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=#808080>",
+          "{2}"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T17:36:48Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 0,
+    "mismatches": []
+  },
+  {
+    "timestamp": "2025-08-29T17:36:57Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 0,
+    "mismatches": []
+  },
+  {
+    "timestamp": "2025-08-29T17:39:13Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 1,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "2007397999",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T17:39:43Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 1,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "2007397999",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T17:40:09Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 12,
+    "token_mismatches": 4,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "2007397999",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "1763623253",
+        "missing": [],
+        "extra": [
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "3399068440",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=#808080>",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "3402815477",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=#808080>",
+          "{2}"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T17:40:26Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 4,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "2007397999",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "1763623253",
+        "missing": [],
+        "extra": [
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "3399068440",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=#808080>",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/TChinese.json",
+        "key": "3402815477",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "<color=#808080>",
+          "{2}"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T17:40:47Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 0,
+    "mismatches": []
+  },
+  {
+    "timestamp": "2025-08-29T17:40:57Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 0,
+    "mismatches": []
+  }
+]

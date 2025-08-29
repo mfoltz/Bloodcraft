@@ -1,0 +1,22 @@
+hash,english,reason,category
+1763623253,New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>],stray brackets on strict retry,other
+2967576286,Shift spell: <color=#CBC3E3>{spellName}</color>,placeholders only,placeholder
+1716911803,<color=white>{box}</color>:,identical to source on strict retry,identical
+2213724716,Deleted box - <color=white>{name}</color>,placeholders only,placeholder
+2051256929,<color=#FFD700>{roundedXP}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~,stray brackets on strict retry,other
+4066899438,Shift spell <color=green>enabled</color>!,identical to source on strict retry,identical
+2320898349,Shift spell <color=red>disabled</color>!,identical to source on strict retry,identical
+3399068440,<color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L,stray brackets on strict retry,other
+2511919794,"<color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $""{colorCode}*</color> {levelAndPrestiges}"" : $"" {levelAndPrestiges}"")}",identical to source on strict retry,identical
+3402815477,<color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L,stray brackets on strict retry,other
+2537547396,<color=#FFD700>{0}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~,stray brackets on strict retry,other
+800655279,{0}: <color=green>{1}</color> <color=white>{2}</color>x<color=#FFC0CB>{3}</color> [<color=white>{4}</color>/<color=yellow>{3}</color>],stray brackets on strict retry,other
+885434933,Shift spell: <color=#CBC3E3>{0}</color>,placeholders only,placeholder
+2383766993,Stat bonuses improvement: <color=green>{0}</color>,placeholders only,placeholder
+421960942,VBlood emotes <color=green>enabled</color>.,identical to source on strict retry,identical
+2740121583,VBlood emotes <color=red>disabled</color>.,identical to source on strict retry,identical
+1248377615,<color=yellow>Familiar</color> <color=green>enabled</color>!,identical to source on strict retry,identical
+2814501768,<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!,identical to source on strict retry,identical
+3987763597,<color=green>{0}</color> <color=#FFC0CB>unbound</color>!,identical to source on strict retry,identical
+2772168133,{0}[<color=white>{1}</color>],placeholders only,placeholder
+,,"{""other"": 6, ""placeholder"": 5, ""identical"": 9}",summary

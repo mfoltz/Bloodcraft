@@ -1,0 +1,33 @@
+[
+  {
+    "timestamp": "2025-08-27T00:52:26Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 2,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/German.json",
+        "key": "1880632188",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/German.json",
+        "key": "2997561401",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-27T00:55:09Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 0,
+    "mismatches": []
+  }
+]

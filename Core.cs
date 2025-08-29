@@ -91,17 +91,24 @@ internal static class Core
         // string hexString = SecretManager.GetNewSharedKey();
         // NEW_SHARED_KEY = [..Enumerable.Range(0, hexString.Length / 2).Select(i => Convert.ToByte(hexString.Substring(i * 2, 2), 16))];
 
+        InitializeServices();
+        RegisterEventHandlers();
+        ConfigureSystems();
+
+        _initialized = true;
+        DebugLoggerPatch._initialized = true;
+    }
+
+    static void InitializeServices()
+    {
         if (!ComponentRegistry._initialized) ComponentRegistry.Initialize();
-        
+
         _ = new PlayerService();
         _ = new LocalizationService();
 
         if (ConfigService.Eclipse) _ = new EclipseService();
-
         if (ConfigService.ExtraRecipes) Recipes.ModifyRecipes();
-
         if (ConfigService.StarterKit) Configuration.GetStarterKitItems();
-
         if (ConfigService.PrestigeSystem) Buffs.GetPrestigeBuffs();
 
         if (ConfigService.ClassSystem)
@@ -111,26 +118,41 @@ internal static class Core
             Classes.GetAbilityJewels();
         }
 
-        if (ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEventHandler += LevelingSystem.OnUpdate;
-
-        if (ConfigService.ExpertiseSystem) DeathEventListenerSystemPatch.OnDeathEventHandler += WeaponSystem.OnUpdate;
-
         if (ConfigService.QuestSystem)
         {
             _ = new QuestService();
-            DeathEventListenerSystemPatch.OnDeathEventHandler += QuestSystem.OnUpdate;
         }
 
         if (ConfigService.FamiliarSystem)
         {
             Configuration.GetExcludedFamiliars();
-            if (!ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarLevelingSystem.OnUpdate;
-            DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarUnlockSystem.OnUpdate;
-
             _ = new BattleService();
             _ = new FamiliarService();
         }
+    }
 
+    static void RegisterEventHandlers()
+    {
+        if (ConfigService.LevelingSystem)
+            DeathEventListenerSystemPatch.OnDeathEventHandler += LevelingSystem.OnUpdate;
+
+        if (ConfigService.ExpertiseSystem)
+            DeathEventListenerSystemPatch.OnDeathEventHandler += WeaponSystem.OnUpdate;
+
+        if (ConfigService.QuestSystem)
+            DeathEventListenerSystemPatch.OnDeathEventHandler += QuestSystem.OnUpdate;
+
+        if (ConfigService.FamiliarSystem)
+        {
+            if (!ConfigService.LevelingSystem)
+                DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarLevelingSystem.OnUpdate;
+
+            DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarUnlockSystem.OnUpdate;
+        }
+    }
+
+    static void ConfigureSystems()
+    {
         if (ConfigService.ProfessionSystem)
         {
             // Misc.GetStatModPrefabs(); // modifier stuff, although... fusion forge, hm
@@ -154,9 +176,6 @@ internal static class Core
         {
             ResetShardBearers();
         }
-
-        _initialized = true;
-        DebugLoggerPatch._initialized = true;
     }
     static World GetServerWorld()
     {
@@ -198,7 +217,7 @@ internal static class Core
         DelayedRoutine(delay, method, args).Run();
     }
 
-    private static IEnumerator DelayedRoutine(float delay, Delegate method, object[] args)
+    static IEnumerator DelayedRoutine(float delay, Delegate method, object[] args)
     {
         if (delay > 0f)
             yield return new WaitForSeconds(delay);

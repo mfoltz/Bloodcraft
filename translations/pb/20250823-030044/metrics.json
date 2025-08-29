@@ -1,0 +1,48 @@
+[
+  {
+    "run_id": "652c934c-79f4-40cf-a158-8f8e2e4fbcf5",
+    "log_file": "/workspace/Bloodcraft/translations/pb/20250823-030044/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/pb/20250823-030044/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/pb/20250823-030044/metrics.json",
+    "git_commit": "ed48c19",
+    "python_version": "3.11.12",
+    "argos_version": "1.9.6",
+    "model_version": "unknown",
+    "cli_args": {
+      "target_file": "Resources/Localization/Messages/Brazilian.json",
+      "src": "en",
+      "dst": "pb",
+      "root": "/workspace/Bloodcraft",
+      "run_dir": "/workspace/Bloodcraft/translations/pb/20250823-030044",
+      "batch_size": 100,
+      "max_retries": 3,
+      "timeout": 60,
+      "overwrite": false,
+      "hashes": [
+        "3439613370"
+      ],
+      "log_level": "INFO",
+      "verbose": false,
+      "log_file": "/workspace/Bloodcraft/translations/pb/20250823-030044/translate.log",
+      "report_file": "/workspace/Bloodcraft/translations/pb/20250823-030044/skipped.csv",
+      "metrics_file": "/workspace/Bloodcraft/translations/pb/20250823-030044/metrics.json",
+      "dry_run": false,
+      "run_index_file": "/workspace/Bloodcraft/translations/run_index.json"
+    },
+    "run_dir": "/workspace/Bloodcraft/translations/pb/20250823-030044",
+    "file": "Resources/Localization/Messages/Brazilian.json",
+    "timestamp": "2025-08-23T03:00:52Z",
+    "processed": 1,
+    "successes": 1,
+    "timeouts": 0,
+    "token_reorders": 0,
+    "failures": {},
+    "hash_stats": {
+      "3439613370": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      }
+    }
+  }
+]

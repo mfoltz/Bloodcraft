@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace Bloodcraft.Tools;
 internal static class CheckTranslations
 {
-    public static void Run(string rootPath, bool showText = false)
+    public static void Run(string rootPath, bool showText = false, string? summaryJsonPath = null)
     {
         englishStopWords = LoadStopWords(rootPath);
         string messagesDir = Path.Combine(rootPath, "Resources", "Localization", "Messages");
@@ -20,7 +20,7 @@ internal static class CheckTranslations
         var englishFile = JsonSerializer.Deserialize<MessageFile>(File.ReadAllText(engPath), options) ?? new MessageFile();
         englishFile.Messages ??= new Dictionary<string, string>();
 
-        bool hasIssues = false;
+        var summary = new Dictionary<string, LanguageSummary>(StringComparer.OrdinalIgnoreCase);
         foreach (string path in Directory.GetFiles(messagesDir, "*.json"))
         {
             if (Path.GetFileName(path).Equals("English.json", StringComparison.OrdinalIgnoreCase))
@@ -38,10 +38,15 @@ internal static class CheckTranslations
                 else if (LooksEnglish(langFile.Messages[hash]))
                     englishLike.Add(hash);
             }
+            string langName = Path.GetFileName(path);
+            summary[langName] = new LanguageSummary
+            {
+                Missing = missing.Count,
+                EnglishLike = englishLike.Count
+            };
 
             if (missing.Count > 0)
             {
-                hasIssues = true;
                 Console.WriteLine($"Missing hashes in {Path.GetFileName(path)}:");
                 foreach (string h in missing)
                 {
@@ -59,7 +64,6 @@ internal static class CheckTranslations
 
             if (englishLike.Count > 0)
             {
-                hasIssues = true;
                 Console.WriteLine($"Potential untranslated strings in {Path.GetFileName(path)}:");
                 foreach (string h in englishLike)
                 {
@@ -77,13 +81,41 @@ internal static class CheckTranslations
             }
         }
 
-        if (hasIssues)
+        int totalMissing = summary.Values.Sum(s => s.Missing);
+        int totalEnglishLike = summary.Values.Sum(s => s.EnglishLike);
+
+        if (!string.IsNullOrEmpty(summaryJsonPath))
+        {
+            var json = new
+            {
+                Languages = summary,
+                Totals = new { Missing = totalMissing, EnglishLike = totalEnglishLike }
+            };
+            var jsonOptions = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+            File.WriteAllText(summaryJsonPath, JsonSerializer.Serialize(json, jsonOptions));
+        }
+
+        if (totalMissing > 0 || totalEnglishLike > 0)
+        {
+            if (!string.IsNullOrEmpty(summaryJsonPath))
+                Console.WriteLine($"Issues found. See {summaryJsonPath} for details.");
             Environment.Exit(1);
+        }
     }
 
     class MessageFile
     {
         public Dictionary<string, string> Messages { get; set; } = new();
+    }
+
+    class LanguageSummary
+    {
+        public int Missing { get; set; }
+        public int EnglishLike { get; set; }
     }
 
     static HashSet<string> englishStopWords = new(StringComparer.OrdinalIgnoreCase);
