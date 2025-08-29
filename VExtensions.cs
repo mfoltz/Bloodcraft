@@ -150,6 +150,10 @@ internal static class VExtensions
 
         return false;
     }
+    public static Entity GetPrefabEntity(this PrefabGUID prefabGuid)
+    {
+        return prefabGuid.HasValue() ? ServerGameManager.GetPrefabEntity(prefabGuid) : Entity.Null;
+    }
     public static bool TryGetPlayer(this Entity entity, out Entity player)
     {
         player = Entity.Null;
