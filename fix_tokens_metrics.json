@@ -538,5 +538,229 @@
     "tokens_reordered": 0,
     "token_mismatches": 0,
     "mismatches": []
+  },
+  {
+    "timestamp": "2025-08-29T21:52:36Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 8,
+    "token_mismatches": 12,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "2402733055",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{exoPrestiges}",
+          "<color=white>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3961332984",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{exoPrestiges}",
+          "<color=white>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3591926048",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "2709293439",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3334433396",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "743696282",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{progress}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "216725398",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3055272330",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3326145371",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3499636759",
+        "missing": [],
+        "extra": [
+          "{3}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "1318067012",
+        "missing": [],
+        "extra": [
+          "<color=white>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3133295357",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-29T21:52:45Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 12,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "2402733055",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{exoPrestiges}",
+          "<color=white>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3961332984",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{exoPrestiges}",
+          "<color=white>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3591926048",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "2709293439",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3334433396",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "743696282",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{progress}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "216725398",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3055272330",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3326145371",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3499636759",
+        "missing": [],
+        "extra": [
+          "{3}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "1318067012",
+        "missing": [],
+        "extra": [
+          "<color=white>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Turkish.json",
+        "key": "3133295357",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
   }
 ]
