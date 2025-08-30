@@ -498,5 +498,16 @@
     "metrics_file": "/workspace/Bloodcraft/translations/tr/20250830-053522/metrics.json",
     "success_rate": 0.5116822429906542,
     "status": "success"
+  },
+  {
+    "run_id": "f6b1126f-1845-4391-8f63-890d5e0382f7",
+    "timestamp": "2025-08-30T15:16:22Z",
+    "language": "it",
+    "run_dir": "/workspace/Bloodcraft/translations/it/20250830-151441",
+    "log_file": "/workspace/Bloodcraft/translations/it/20250830-151441/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/it/20250830-151441/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/it/20250830-151441/metrics.json",
+    "success_rate": 0.7686915887850467,
+    "status": "success"
   }
 ]
