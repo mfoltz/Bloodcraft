@@ -1,0 +1,473 @@
+[
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2007397999",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{2}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "1407688215",
+    "missing": [],
+    "extra": [
+      "{1}",
+      "{1}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2252098529",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3115116616",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2972244104",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "4110714393",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3997845506",
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3141472524",
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2576121314",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3324923525",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3054245516",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "1763623253",
+    "missing": [],
+    "extra": [
+      "{3}",
+      "{3}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "384069927",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "1884892470",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3637474013",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "<color=white>",
+      "<color=white>",
+      "<color=#90EE90>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3729714988",
+    "missing": [],
+    "extra": [
+      "{exoPrestiges}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2402733055",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{exoPrestiges}",
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3961332984",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{exoPrestiges}",
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "1411528307",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{playerInfo.User.CharacterName.Value}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3591926048",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "<color=#c0c0c0>",
+      "{weaponType}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "1880632188",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{finalWeaponType}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "719993404",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2480816305",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{playerInfo.User.CharacterName.Value}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2785130336",
+    "missing": [],
+    "extra": [
+      "{finalBloodType}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2196432591",
+    "missing": [],
+    "extra": [
+      "{level}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "698362524",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "823180732",
+    "missing": [],
+    "extra": [
+      "{name}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2191580006",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "780970161",
+    "missing": [],
+    "extra": [
+      "{activeBox}",
+      "{activeBox}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2709293439",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3235862068",
+    "missing": [],
+    "extra": [
+      "{newXP.Key}",
+      "{newXP.Key}",
+      "{newXP.Key}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "4009901629",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "743696282",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{progress}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "216725398",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2554001784",
+    "missing": [],
+    "extra": [
+      "{playerInfo.User.CharacterName.Value}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3399068440",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "<color=#1E90FF>",
+      "{3}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3066749917",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "<color=white>",
+      "<color=white>",
+      "<color=#90EE90>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2978826451",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "<color=white>",
+      "<color=white>",
+      "<color=#90EE90>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2272306226",
+    "missing": [],
+    "extra": [
+      "{1}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3938781329",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3139406824",
+    "missing": [],
+    "extra": [
+      "{1}",
+      "{1}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3402815477",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "<color=#1E90FF>",
+      "{3}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3326145371",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{2}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "370730849",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "800655279",
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3499636759",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{3}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3914295487",
+    "missing": [],
+    "extra": [
+      "{1}",
+      "{1}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "4052165110",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{1}",
+      "{2}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "1318067012",
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3133295357",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "<color=#c0c0c0>",
+      "{4}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "2997561401",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{1}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "1454481026",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Turkish.json",
+    "key": "3227554981",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{2}"
+    ]
+  }
+]
