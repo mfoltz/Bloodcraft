@@ -146,6 +146,28 @@ def test_mixed_placeholders_round_trip_with_reorder():
     assert restored == expected
 
 
+def test_many_placeholders_round_trip():
+    text = "".join(f"{{{i}}}" for i in range(40))
+    safe, tokens = translate_argos.protect_strict(text)
+    assert len(tokens) == 40
+    wrapped, mapping = translate_argos.wrap_placeholders(safe)
+    unwrapped = translate_argos.unwrap_placeholders(wrapped, mapping)
+    restored = translate_argos.unprotect(unwrapped, tokens)
+    assert restored == text
+
+
+def test_unwrap_restores_translated_order():
+    count = 30
+    text = "".join(f"{{{i}}}" for i in range(count))
+    safe, tokens = translate_argos.protect_strict(text)
+    wrapped, mapping = translate_argos.wrap_placeholders(safe)
+    translated_wrapped = wrapped[::-1]
+    unwrapped = translate_argos.unwrap_placeholders(translated_wrapped, mapping)
+    restored = translate_argos.unprotect(unwrapped, tokens)
+    expected = "".join(f"{{{i}}}" for i in reversed(range(count)))
+    assert restored == expected
+
+
 def test_extra_placeholders_trimmed(tmp_path, monkeypatch, caplog):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"

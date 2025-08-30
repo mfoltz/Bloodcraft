@@ -109,13 +109,55 @@ FATAL_ARGOS_ERRORS = [
 class FatalTranslationError(Exception):
     """Raised when Argos Translate encounters an unrecoverable error."""
 
-def wrap_placeholders(text: str) -> str:
-    """No-op placeholder wrapper."""
-    return text
+PLACEHOLDER_BASE = 0xE000
+PLACEHOLDER_WRAP_THRESHOLD = 20
 
 
-def unwrap_placeholders(text: str) -> str:
-    """No-op placeholder unwrapper."""
+def wrap_placeholders(text: str) -> tuple[str, list[str]]:
+    """Optionally encode ``[[TOKEN_n]]`` placeholders as private-use characters.
+
+    For lines with a large number of placeholders, Argos tends to mis-handle
+    the ``[[TOKEN_n]]`` syntax. When the number of tokens exceeds
+    :data:`PLACEHOLDER_WRAP_THRESHOLD`, placeholders are replaced with sequential
+    characters from the Unicode private-use area. Otherwise the input is
+    returned unchanged. In all cases the list of token identifiers is returned
+    to allow later validation.
+    """
+
+    ids = TOKEN_RE.findall(text)
+    if len(ids) <= PLACEHOLDER_WRAP_THRESHOLD:
+        return text, ids
+
+    counter = iter(range(len(ids)))
+
+    def repl(_: re.Match) -> str:
+        return chr(PLACEHOLDER_BASE + next(counter))
+
+    return TOKEN_RE.sub(repl, text), ids
+
+
+def unwrap_placeholders(text: str, ids: list[str]) -> str:
+    """Restore placeholders and verify token integrity.
+
+    If wrapping occurred, encoded characters are translated back to their
+    ``[[TOKEN_n]]`` forms. Otherwise, the function asserts that the set of
+    placeholders in ``text`` matches ``ids`` (ignoring order) and returns the
+    text unchanged.
+    """
+
+    if len(ids) > PLACEHOLDER_WRAP_THRESHOLD:
+        result: list[str] = []
+        for ch in text:
+            code = ord(ch)
+            offset = code - PLACEHOLDER_BASE
+            if 0 <= offset < len(ids):
+                result.append(f"[[TOKEN_{ids[offset]}]]")
+            elif PLACEHOLDER_BASE <= code < PLACEHOLDER_BASE + len(ids):
+                raise ValueError(f"Unknown placeholder index: {offset}")
+            else:
+                result.append(ch)
+        return "".join(result)
+
     return text
 
 
@@ -323,12 +365,12 @@ def translate_batch(
     timed_out: List[int] = []
     with ThreadPoolExecutor(max_workers=1) as executor:
         for idx, line in enumerate(lines):
-            wrapped = wrap_placeholders(line)
+            wrapped, ids = wrap_placeholders(line)
             for attempt in range(1, max_retries + 1):
                 future = executor.submit(translator.translate, wrapped)
                 try:
                     translated = future.result(timeout=timeout)
-                    results.append(unwrap_placeholders(translated))
+                    results.append(unwrap_placeholders(translated, ids))
                     break
                 except FuturesTimeout:
                     future.cancel()
