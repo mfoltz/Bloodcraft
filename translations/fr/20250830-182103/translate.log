@@ -1,0 +1,175 @@
+2025-08-30 18:21:03,236 INFO target_file=Resources/Localization/Messages/French.json src=en dst=fr batch_size=100 timeout=60 max_retries=3 run_dir=/workspace/Bloodcraft/translations/fr/20250830-182103 git_commit=e19e688d model_version=unknown
+2025-08-30 18:21:03,236 INFO NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.
+2025-08-30 18:21:03,258 INFO Batch 1/362 start @ 0.00s
+2025-08-30 18:21:05,848 INFO 3439613370: TRANSLATED
+  Original: Welcome to Bloodcraft
+  Result: Bienvenue à Bloodcraft
+2025-08-30 18:21:05,849 INFO 1491097539: TRANSLATED
+  Original: Binding failed...
+  Result: La liaison a échoué...
+2025-08-30 18:21:05,849 INFO Batch 1/362 end @ 2.59s (2.59s)
+2025-08-30 18:21:05,849 INFO Processed 2/428 lines
+2025-08-30 18:21:05,849 INFO Batch 2/362 start @ 2.59s
+2025-08-30 18:21:06,157 INFO 606627316: TRANSLATED
+  Original: {0} improved to [<color=white>{1}</color>]
+  Result: {0} amélioré à <color=white>{1}</color>
+2025-08-30 18:21:06,157 INFO Batch 2/362 end @ 2.90s (0.31s)
+2025-08-30 18:21:06,157 INFO Processed 3/428 lines
+2025-08-30 18:21:06,158 INFO Batch 3/362 start @ 2.90s
+2025-08-30 18:21:06,719 WARNING 2007397999: tokens reordered
+2025-08-30 18:21:06,720 INFO 2007397999: TRANSLATED
+  Original: +<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>)
+  Result: +<color=yellow>{0}</color><color=#FFC0CB></color>{1}<color=white>{2}%</color></color>
+2025-08-30 18:21:06,720 INFO Batch 3/362 end @ 3.46s (0.56s)
+2025-08-30 18:21:06,720 INFO Processed 4/428 lines
+2025-08-30 18:21:06,720 INFO Batch 4/362 start @ 3.46s
+2025-08-30 18:21:07,119 INFO 1407688215: TRANSLATED
+  Original: <color=green>{0}</color>x<color=white>{1}</color> received from {2}
+  Result: <color=green>{0}</color>x<color=white>{1}</color> reçus de {2}
+2025-08-30 18:21:07,119 INFO Batch 4/362 end @ 3.86s (0.40s)
+2025-08-30 18:21:07,119 INFO Processed 5/428 lines
+2025-08-30 18:21:07,119 INFO Batch 5/362 start @ 3.86s
+2025-08-30 18:21:07,533 WARNING 2252098529: SKIPPED (contains English)
+  Original: <color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}
+  Result: <color=green>Or </color>x<color=white>{0}</color> reçu de {1}
+2025-08-30 18:21:07,533 INFO Batch 5/362 end @ 4.27s (0.41s)
+2025-08-30 18:21:07,533 INFO Processed 6/428 lines
+2025-08-30 18:21:07,534 INFO Batch 6/362 start @ 4.28s
+2025-08-30 18:21:08,136 WARNING 3115116616: SKIPPED (contains English)
+  Original: <color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
+  Result: <color=green>Or </color>x<color=white>{0}</color> reçu de {1}, mais il est tombé au sol puisque votre inventaire est complet.
+2025-08-30 18:21:08,137 INFO Batch 6/362 end @ 4.88s (0.60s)
+2025-08-30 18:21:08,137 INFO Processed 7/428 lines
+2025-08-30 18:21:08,137 INFO Batch 7/362 start @ 4.88s
+2025-08-30 18:21:08,484 INFO 2972244104: TRANSLATED
+  Original: <color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}
+  Result: <color=green>Fiber </color>x<color=white>{0}</color> reçue de {1}
+2025-08-30 18:21:08,486 INFO Batch 7/362 end @ 5.23s (0.35s)
+2025-08-30 18:21:08,487 INFO Processed 8/428 lines
+2025-08-30 18:21:08,487 INFO Batch 8/362 start @ 5.23s
+2025-08-30 18:21:08,963 INFO 4110714393: TRANSLATED
+  Original: <color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
+  Result: <color=green>Radiant Fiber</color>x<color=white>{0}</color> reçu de {1}, mais il est tombé au sol puisque votre inventaire est complet.
+2025-08-30 18:21:08,963 INFO Batch 8/362 end @ 5.70s (0.48s)
+2025-08-30 18:21:08,963 INFO Processed 9/428 lines
+2025-08-30 18:21:08,963 INFO Batch 9/362 start @ 5.70s
+2025-08-30 18:21:09,402 INFO 3997845506: TRANSLATED
+  Original: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}!
+  Result: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> reçu de {1}!
+2025-08-30 18:21:09,403 INFO Batch 9/362 end @ 6.14s (0.44s)
+2025-08-30 18:21:09,403 INFO Processed 10/428 lines
+2025-08-30 18:21:09,403 INFO Batch 10/362 start @ 6.14s
+2025-08-30 18:21:09,922 INFO 3141472524: TRANSLATED
+  Original: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.
+  Result: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> reçu de {1}, mais certains sont tombés sur le terrain puisque votre inventaire est complet.
+2025-08-30 18:21:09,924 INFO Batch 10/362 end @ 6.67s (0.52s)
+2025-08-30 18:21:09,924 INFO Processed 11/428 lines
+2025-08-30 18:21:09,924 INFO Batch 11/362 start @ 6.67s
+2025-08-30 18:21:10,327 INFO 2576121314: TRANSLATED
+  Original: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}!
+  Result: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> reçus de {1}!
+2025-08-30 18:21:10,327 INFO Batch 11/362 end @ 7.07s (0.40s)
+2025-08-30 18:21:10,327 INFO Processed 12/428 lines
+2025-08-30 18:21:10,328 INFO Batch 12/362 start @ 7.07s
+2025-08-30 18:21:10,825 INFO 3665962604: TRANSLATED
+  Original: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.
+  Result: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> reçus de {1}, mais certains sont tombés sur le terrain puisque votre inventaire est complet.
+2025-08-30 18:21:10,827 INFO Batch 12/362 end @ 7.57s (0.50s)
+2025-08-30 18:21:10,827 INFO Processed 13/428 lines
+2025-08-30 18:21:10,827 INFO Batch 13/362 start @ 7.57s
+2025-08-30 18:21:11,193 INFO 3324923525: TRANSLATED
+  Original: <color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}
+  Result: <color=green>Graisse</color>x<color=white>{0}</color> reçue de {1}
+2025-08-30 18:21:11,193 INFO Batch 13/362 end @ 7.93s (0.37s)
+2025-08-30 18:21:11,193 INFO Processed 14/428 lines
+2025-08-30 18:21:11,193 INFO Batch 14/362 start @ 7.93s
+2025-08-30 18:21:11,642 INFO 3054245516: TRANSLATED
+  Original: <color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
+  Result: <color=green>Graisse mixte</color>x<color=white>{0}</color> reçue de {1}, mais elle est tombée au sol puisque votre inventaire est complet.
+2025-08-30 18:21:11,643 INFO Batch 14/362 end @ 8.38s (0.45s)
+2025-08-30 18:21:11,643 INFO Processed 15/428 lines
+2025-08-30 18:21:11,643 INFO Batch 15/362 start @ 8.38s
+2025-08-30 18:21:11,886 INFO 2786260061: TRANSLATED
+  Original: Your <color=#00FFFF>Daily Quest</color> has been refreshed!
+  Result: Votre <color=#00FFFF>Jaily Quest</color> a été rafraîchi!
+2025-08-30 18:21:11,886 INFO Batch 15/362 end @ 8.63s (0.24s)
+2025-08-30 18:21:11,886 INFO Processed 16/428 lines
+2025-08-30 18:21:11,886 INFO Batch 16/362 start @ 8.63s
+2025-08-30 18:21:12,119 INFO 311765273: TRANSLATED
+  Original: Your <color=#BF40BF>Weekly Quest</color> has been refreshed!
+  Result: Votre <color=#BF40BF>Semainement Quest</color> a été rafraîchi!
+2025-08-30 18:21:12,121 INFO Batch 16/362 end @ 8.86s (0.23s)
+2025-08-30 18:21:12,122 INFO Processed 17/428 lines
+2025-08-30 18:21:12,122 INFO Batch 17/362 start @ 8.86s
+2025-08-30 18:21:13,112 INFO 1763623253: TRANSLATED
+  Original: New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>]
+  Result: Nouveau <color=#00FFFF>Quête quotidienne</color> disponible: <color=green>{0}</color><color=white>{1}</color>x<color=#FFC0CB>{2}</color><color=white>{3}</color><color=yellow>{2}</color>
+2025-08-30 18:21:13,112 INFO Batch 17/362 end @ 9.85s (0.99s)
+2025-08-30 18:21:13,113 INFO Processed 18/428 lines
+2025-08-30 18:21:13,113 INFO Batch 18/362 start @ 9.85s
+2025-08-30 18:21:13,497 INFO 384069927: TRANSLATED
+  Original: You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}!
+  Result: Vous avez reçu <color=#ffd9eb>{0}</color>x<color=white>{1}</color> pour avoir complété votre {2} !
+2025-08-30 18:21:13,499 INFO Batch 18/362 end @ 10.24s (0.39s)
+2025-08-30 18:21:13,499 INFO Processed 19/428 lines
+2025-08-30 18:21:13,499 INFO Batch 19/362 start @ 10.24s
+2025-08-30 18:21:13,946 INFO 1884892470: TRANSLATED
+  Original: You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}! It dropped on the ground because your inventory was full.
+  Result: Vous avez reçu <color=#ffd9eb>{0}</color>x<color=white>{1}</color> pour avoir complété votre {2} ! Il est tombé au sol parce que votre inventaire était complet.
+2025-08-30 18:21:13,946 INFO Batch 19/362 end @ 10.69s (0.45s)
+2025-08-30 18:21:13,946 INFO Processed 20/428 lines
+2025-08-30 18:21:13,946 INFO Batch 20/362 start @ 10.69s
+2025-08-30 18:21:14,078 INFO 3158650477: TRANSLATED
+  Original: No familiars in battle group!
+  Result: Pas de familiers dans le groupe de combat !
+2025-08-30 18:21:14,079 INFO Batch 20/362 end @ 10.82s (0.13s)
+2025-08-30 18:21:14,080 INFO Processed 21/428 lines
+2025-08-30 18:21:14,080 INFO Batch 21/362 start @ 10.82s
+2025-08-30 18:21:14,255 INFO 2673031653: TRANSLATED
+  Original: Battle Group - {0}
+  Result: Groupe tactique - {0}
+2025-08-30 18:21:14,258 INFO Batch 21/362 end @ 11.00s (0.18s)
+2025-08-30 18:21:14,258 INFO Processed 22/428 lines
+2025-08-30 18:21:14,258 INFO Batch 22/362 start @ 11.00s
+2025-08-30 18:21:15,035 INFO 3637474013: TRANSLATED
+  Original: <color=green>{0}</color>{1} [<color=white>{2}</color>][<color=#90EE90>{3}</color>] added to <color=white>{4}</color>! (<color=yellow>{5}</color>)
+  Result: <color=green>{0}</color>{1}<color=white>{2}</color><color=#90EE90>{3}</color> ajouté à <color=white>{4}</color>! <color=yellow>{5}</color>
+2025-08-30 18:21:15,035 INFO Batch 22/362 end @ 11.78s (0.78s)
+2025-08-30 18:21:15,036 INFO Processed 23/428 lines
+2025-08-30 18:21:15,037 INFO Batch 23/362 start @ 11.78s
+2025-08-30 18:21:16,229 INFO 2932385107: TRANSLATED
+  Original: Targets have all been killed, give them a chance to respawn!
+  Result: Les cibles ont toutes été tuées, donnez-leur une chance de se reproduire !
+2025-08-30 18:21:16,229 INFO 1076291728: TRANSLATED
+  Original: Use the VBlood menu to track bosses!
+  Result: Utilisez le menu VBlood pour suivre les patrons !
+2025-08-30 18:21:16,229 INFO 1420278477: TRANSLATED
+  Original: Tracking is only available for incomplete kill quests.
+  Result: Le suivi n'est disponible que pour les quêtes incomplètes.
+2025-08-30 18:21:16,229 INFO 3546356968: TRANSLATED
+  Original: Invalid unit prefab (match found but does not start with CHAR/char).
+  Result: Unité non valide préfab (match trouvé mais ne commence pas avec CHAR/char).
+2025-08-30 18:21:16,229 INFO 2169578147: TRANSLATED
+  Original: Invalid unit name (match found but does not start with CHAR/char).
+  Result: Nom de l'unité non valide (correspondant trouvé mais ne commence pas avec CHAR/char).
+2025-08-30 18:21:16,229 INFO 223311103: TRANSLATED
+  Original: Invalid unit name (no full or partial matches).
+  Result: Nom de l'unité non valide (aucune correspondance complète ou partielle).
+2025-08-30 18:21:16,230 INFO 2155028867: TRANSLATED
+  Original: Invalid prefab (not an integer) or name (does not start with CHAR/char).
+  Result: Préfab non valide (pas un entier) ou nom (ne commence pas avec CHAR/char).
+2025-08-30 18:21:16,230 INFO Batch 23/362 end @ 12.97s (1.19s)
+2025-08-30 18:21:16,230 INFO Processed 30/428 lines
+2025-08-30 18:21:16,230 INFO Batch 24/362 start @ 12.97s
+2025-08-30 18:21:16,503 INFO 2689850927: TRANSLATED
+  Original: Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.
+  Result: Type de statistique de prestige inconnu, utilisez '<color=white>.fam lst</color>' pour voir les options.
+2025-08-30 18:21:16,503 INFO Batch 24/362 end @ 13.24s (0.27s)
+2025-08-30 18:21:16,503 INFO Processed 31/428 lines
+2025-08-30 18:21:16,503 INFO Batch 25/362 start @ 13.25s
+2025-08-30 18:21:16,965 INFO Received 0 rows; deduplicated to 0 rows
+2025-08-30 18:21:17,060 ERROR Failed: Interrupted. Metrics written to /workspace/Bloodcraft/translations/fr/20250830-182103/metrics.json
+2025-08-30 18:21:17,063 INFO Received 0 rows; deduplicated to 0 rows
+2025-08-30 18:21:17,063 INFO Wrote skip report to /workspace/Bloodcraft/translations/fr/20250830-182103/skipped.csv with 0 row(s)
+2025-08-30 18:21:17,063 ERROR No messages processed; verify input hashes and Argos model.
+2025-08-30 18:21:17,063 ERROR Summary: 0/0 translated, 0 skipped. Failed: Interrupted

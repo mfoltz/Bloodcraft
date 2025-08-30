@@ -1,0 +1,3 @@
+2025-08-30 18:23:53,303 ERROR Failed: Interrupted. Metrics written to /workspace/Bloodcraft/translations/fr/20250830-182158/metrics.json
+2025-08-30 18:23:53,304 ERROR No messages processed; verify input hashes and Argos model.
+2025-08-30 18:23:53,309 ERROR Summary: 0/0 translated, 0 skipped. Failed: Interrupted

@@ -1,0 +1,375 @@
+2025-08-30 18:21:25,507 INFO target_file=Resources/Localization/Messages/French.json src=en dst=fr batch_size=100 timeout=60 max_retries=3 run_dir=/workspace/Bloodcraft/translations/fr/20250830-182125 git_commit=e19e688d model_version=unknown
+2025-08-30 18:21:25,508 INFO NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.
+2025-08-30 18:21:25,527 INFO Batch 1/362 start @ 0.00s
+2025-08-30 18:21:27,987 INFO 3439613370: TRANSLATED
+  Original: Welcome to Bloodcraft
+  Result: Bienvenue à Bloodcraft
+2025-08-30 18:21:27,988 INFO 1491097539: TRANSLATED
+  Original: Binding failed...
+  Result: La liaison a échoué...
+2025-08-30 18:21:27,988 INFO Batch 1/362 end @ 2.46s (2.46s)
+2025-08-30 18:21:27,988 INFO Processed 2/428 lines
+2025-08-30 18:21:27,988 INFO Batch 2/362 start @ 2.46s
+2025-08-30 18:21:28,259 INFO 606627316: TRANSLATED
+  Original: {0} improved to [<color=white>{1}</color>]
+  Result: {0} amélioré à <color=white>{1}</color>
+2025-08-30 18:21:28,259 INFO Batch 2/362 end @ 2.73s (0.27s)
+2025-08-30 18:21:28,259 INFO Processed 3/428 lines
+2025-08-30 18:21:28,259 INFO Batch 3/362 start @ 2.73s
+2025-08-30 18:21:28,799 WARNING 2007397999: tokens reordered
+2025-08-30 18:21:28,799 INFO 2007397999: TRANSLATED
+  Original: +<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>)
+  Result: +<color=yellow>{0}</color><color=#FFC0CB></color>{1}<color=white>{2}%</color></color>
+2025-08-30 18:21:28,799 INFO Batch 3/362 end @ 3.27s (0.54s)
+2025-08-30 18:21:28,799 INFO Processed 4/428 lines
+2025-08-30 18:21:28,799 INFO Batch 4/362 start @ 3.27s
+2025-08-30 18:21:29,227 INFO 1407688215: TRANSLATED
+  Original: <color=green>{0}</color>x<color=white>{1}</color> received from {2}
+  Result: <color=green>{0}</color>x<color=white>{1}</color> reçus de {2}
+2025-08-30 18:21:29,227 INFO Batch 4/362 end @ 3.70s (0.43s)
+2025-08-30 18:21:29,227 INFO Processed 5/428 lines
+2025-08-30 18:21:29,227 INFO Batch 5/362 start @ 3.70s
+2025-08-30 18:21:29,701 WARNING 2252098529: SKIPPED (contains English)
+  Original: <color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}
+  Result: <color=green>Or </color>x<color=white>{0}</color> reçu de {1}
+2025-08-30 18:21:29,702 INFO Batch 5/362 end @ 4.17s (0.47s)
+2025-08-30 18:21:29,702 INFO Processed 6/428 lines
+2025-08-30 18:21:29,702 INFO Batch 6/362 start @ 4.17s
+2025-08-30 18:21:30,265 WARNING 3115116616: SKIPPED (contains English)
+  Original: <color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
+  Result: <color=green>Or </color>x<color=white>{0}</color> reçu de {1}, mais il est tombé au sol puisque votre inventaire est complet.
+2025-08-30 18:21:30,265 INFO Batch 6/362 end @ 4.74s (0.56s)
+2025-08-30 18:21:30,265 INFO Processed 7/428 lines
+2025-08-30 18:21:30,265 INFO Batch 7/362 start @ 4.74s
+2025-08-30 18:21:30,627 INFO 2972244104: TRANSLATED
+  Original: <color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}
+  Result: <color=green>Fiber </color>x<color=white>{0}</color> reçue de {1}
+2025-08-30 18:21:30,627 INFO Batch 7/362 end @ 5.10s (0.36s)
+2025-08-30 18:21:30,627 INFO Processed 8/428 lines
+2025-08-30 18:21:30,627 INFO Batch 8/362 start @ 5.10s
+2025-08-30 18:21:31,106 INFO 4110714393: TRANSLATED
+  Original: <color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
+  Result: <color=green>Radiant Fiber</color>x<color=white>{0}</color> reçu de {1}, mais il est tombé au sol puisque votre inventaire est complet.
+2025-08-30 18:21:31,107 INFO Batch 8/362 end @ 5.58s (0.48s)
+2025-08-30 18:21:31,107 INFO Processed 9/428 lines
+2025-08-30 18:21:31,107 INFO Batch 9/362 start @ 5.58s
+2025-08-30 18:21:31,534 INFO 3997845506: TRANSLATED
+  Original: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}!
+  Result: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> reçu de {1}!
+2025-08-30 18:21:31,534 INFO Batch 9/362 end @ 6.01s (0.43s)
+2025-08-30 18:21:31,534 INFO Processed 10/428 lines
+2025-08-30 18:21:31,534 INFO Batch 10/362 start @ 6.01s
+2025-08-30 18:21:32,021 INFO 3141472524: TRANSLATED
+  Original: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.
+  Result: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> reçu de {1}, mais certains sont tombés sur le terrain puisque votre inventaire est complet.
+2025-08-30 18:21:32,023 INFO Batch 10/362 end @ 6.50s (0.49s)
+2025-08-30 18:21:32,023 INFO Processed 11/428 lines
+2025-08-30 18:21:32,023 INFO Batch 11/362 start @ 6.50s
+2025-08-30 18:21:32,428 INFO 2576121314: TRANSLATED
+  Original: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}!
+  Result: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> reçus de {1}!
+2025-08-30 18:21:32,428 INFO Batch 11/362 end @ 6.90s (0.40s)
+2025-08-30 18:21:32,428 INFO Processed 12/428 lines
+2025-08-30 18:21:32,428 INFO Batch 12/362 start @ 6.90s
+2025-08-30 18:21:32,924 INFO 3665962604: TRANSLATED
+  Original: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.
+  Result: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> reçus de {1}, mais certains sont tombés sur le terrain puisque votre inventaire est complet.
+2025-08-30 18:21:32,924 INFO Batch 12/362 end @ 7.40s (0.50s)
+2025-08-30 18:21:32,925 INFO Processed 13/428 lines
+2025-08-30 18:21:32,925 INFO Batch 13/362 start @ 7.40s
+2025-08-30 18:21:33,355 INFO 3324923525: TRANSLATED
+  Original: <color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}
+  Result: <color=green>Graisse</color>x<color=white>{0}</color> reçue de {1}
+2025-08-30 18:21:33,356 INFO Batch 13/362 end @ 7.83s (0.43s)
+2025-08-30 18:21:33,358 INFO Processed 14/428 lines
+2025-08-30 18:21:33,358 INFO Batch 14/362 start @ 7.83s
+2025-08-30 18:21:33,816 INFO 3054245516: TRANSLATED
+  Original: <color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
+  Result: <color=green>Graisse mixte</color>x<color=white>{0}</color> reçue de {1}, mais elle est tombée au sol puisque votre inventaire est complet.
+2025-08-30 18:21:33,818 INFO Batch 14/362 end @ 8.29s (0.46s)
+2025-08-30 18:21:33,818 INFO Processed 15/428 lines
+2025-08-30 18:21:33,818 INFO Batch 15/362 start @ 8.29s
+2025-08-30 18:21:34,029 INFO 2786260061: TRANSLATED
+  Original: Your <color=#00FFFF>Daily Quest</color> has been refreshed!
+  Result: Votre <color=#00FFFF>Jaily Quest</color> a été rafraîchi!
+2025-08-30 18:21:34,030 INFO Batch 15/362 end @ 8.50s (0.21s)
+2025-08-30 18:21:34,030 INFO Processed 16/428 lines
+2025-08-30 18:21:34,030 INFO Batch 16/362 start @ 8.50s
+2025-08-30 18:21:34,239 INFO 311765273: TRANSLATED
+  Original: Your <color=#BF40BF>Weekly Quest</color> has been refreshed!
+  Result: Votre <color=#BF40BF>Semainement Quest</color> a été rafraîchi!
+2025-08-30 18:21:34,239 INFO Batch 16/362 end @ 8.71s (0.21s)
+2025-08-30 18:21:34,240 INFO Processed 17/428 lines
+2025-08-30 18:21:34,240 INFO Batch 17/362 start @ 8.71s
+2025-08-30 18:21:35,182 INFO 1763623253: TRANSLATED
+  Original: New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>]
+  Result: Nouveau <color=#00FFFF>Quête quotidienne</color> disponible: <color=green>{0}</color><color=white>{1}</color>x<color=#FFC0CB>{2}</color><color=white>{3}</color><color=yellow>{2}</color>
+2025-08-30 18:21:35,183 INFO Batch 17/362 end @ 9.66s (0.94s)
+2025-08-30 18:21:35,183 INFO Processed 18/428 lines
+2025-08-30 18:21:35,183 INFO Batch 18/362 start @ 9.66s
+2025-08-30 18:21:35,597 INFO 384069927: TRANSLATED
+  Original: You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}!
+  Result: Vous avez reçu <color=#ffd9eb>{0}</color>x<color=white>{1}</color> pour avoir complété votre {2} !
+2025-08-30 18:21:35,597 INFO Batch 18/362 end @ 10.07s (0.41s)
+2025-08-30 18:21:35,597 INFO Processed 19/428 lines
+2025-08-30 18:21:35,597 INFO Batch 19/362 start @ 10.07s
+2025-08-30 18:21:36,050 INFO 1884892470: TRANSLATED
+  Original: You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}! It dropped on the ground because your inventory was full.
+  Result: Vous avez reçu <color=#ffd9eb>{0}</color>x<color=white>{1}</color> pour avoir complété votre {2} ! Il est tombé au sol parce que votre inventaire était complet.
+2025-08-30 18:21:36,051 INFO Batch 19/362 end @ 10.52s (0.45s)
+2025-08-30 18:21:36,051 INFO Processed 20/428 lines
+2025-08-30 18:21:36,051 INFO Batch 20/362 start @ 10.52s
+2025-08-30 18:21:36,181 INFO 3158650477: TRANSLATED
+  Original: No familiars in battle group!
+  Result: Pas de familiers dans le groupe de combat !
+2025-08-30 18:21:36,182 INFO Batch 20/362 end @ 10.65s (0.13s)
+2025-08-30 18:21:36,182 INFO Processed 21/428 lines
+2025-08-30 18:21:36,182 INFO Batch 21/362 start @ 10.66s
+2025-08-30 18:21:36,319 INFO 2673031653: TRANSLATED
+  Original: Battle Group - {0}
+  Result: Groupe tactique - {0}
+2025-08-30 18:21:36,319 INFO Batch 21/362 end @ 10.79s (0.14s)
+2025-08-30 18:21:36,319 INFO Processed 22/428 lines
+2025-08-30 18:21:36,319 INFO Batch 22/362 start @ 10.79s
+2025-08-30 18:21:37,108 INFO 3637474013: TRANSLATED
+  Original: <color=green>{0}</color>{1} [<color=white>{2}</color>][<color=#90EE90>{3}</color>] added to <color=white>{4}</color>! (<color=yellow>{5}</color>)
+  Result: <color=green>{0}</color>{1}<color=white>{2}</color><color=#90EE90>{3}</color> ajouté à <color=white>{4}</color>! <color=yellow>{5}</color>
+2025-08-30 18:21:37,110 INFO Batch 22/362 end @ 11.58s (0.79s)
+2025-08-30 18:21:37,110 INFO Processed 23/428 lines
+2025-08-30 18:21:37,110 INFO Batch 23/362 start @ 11.58s
+2025-08-30 18:21:38,288 INFO 2932385107: TRANSLATED
+  Original: Targets have all been killed, give them a chance to respawn!
+  Result: Les cibles ont toutes été tuées, donnez-leur une chance de se reproduire !
+2025-08-30 18:21:38,290 INFO 1076291728: TRANSLATED
+  Original: Use the VBlood menu to track bosses!
+  Result: Utilisez le menu VBlood pour suivre les patrons !
+2025-08-30 18:21:38,290 INFO 1420278477: TRANSLATED
+  Original: Tracking is only available for incomplete kill quests.
+  Result: Le suivi n'est disponible que pour les quêtes incomplètes.
+2025-08-30 18:21:38,291 INFO 3546356968: TRANSLATED
+  Original: Invalid unit prefab (match found but does not start with CHAR/char).
+  Result: Unité non valide préfab (match trouvé mais ne commence pas avec CHAR/char).
+2025-08-30 18:21:38,291 INFO 2169578147: TRANSLATED
+  Original: Invalid unit name (match found but does not start with CHAR/char).
+  Result: Nom de l'unité non valide (correspondant trouvé mais ne commence pas avec CHAR/char).
+2025-08-30 18:21:38,291 INFO 223311103: TRANSLATED
+  Original: Invalid unit name (no full or partial matches).
+  Result: Nom de l'unité non valide (aucune correspondance complète ou partielle).
+2025-08-30 18:21:38,291 INFO 2155028867: TRANSLATED
+  Original: Invalid prefab (not an integer) or name (does not start with CHAR/char).
+  Result: Préfab non valide (pas un entier) ou nom (ne commence pas avec CHAR/char).
+2025-08-30 18:21:38,291 INFO Batch 23/362 end @ 12.76s (1.18s)
+2025-08-30 18:21:38,291 INFO Processed 30/428 lines
+2025-08-30 18:21:38,291 INFO Batch 24/362 start @ 12.76s
+2025-08-30 18:21:38,541 INFO 2689850927: TRANSLATED
+  Original: Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.
+  Result: Type de statistique de prestige inconnu, utilisez '<color=white>.fam lst</color>' pour voir les options.
+2025-08-30 18:21:38,542 INFO Batch 24/362 end @ 13.02s (0.25s)
+2025-08-30 18:21:38,542 INFO Processed 31/428 lines
+2025-08-30 18:21:38,542 INFO Batch 25/362 start @ 13.02s
+2025-08-30 18:21:39,103 WARNING 3125006928: token mismatch [701e2a88] (missing ['6', '7']) — Suggested fix: add ['6', '7']
+2025-08-30 18:21:39,103 WARNING 3125006928: SKIPPED (token mismatch (missing ['6', '7']) [701e2a88])
+  Original: Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.
+  Result: Familiar a déjà [[TOKEN_0]][[TOKEN_1]][[TOKEN_2]][[TOKEN_3]][[TOKEN_4]][[TOKEN_5]] [[TOKEN_5]] pour voir les options.
+2025-08-30 18:21:39,103 INFO Batch 25/362 end @ 13.58s (0.56s)
+2025-08-30 18:21:39,103 INFO Processed 32/428 lines
+2025-08-30 18:21:39,103 INFO Batch 26/362 start @ 13.58s
+2025-08-30 18:21:39,398 INFO 2846646667: TRANSLATED
+  Original: Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.
+  Result: Statistiques de prestige familières non valides, utilisez '<color=white>.fam lst</color>' pour voir les options.
+2025-08-30 18:21:39,398 INFO Batch 26/362 end @ 13.87s (0.29s)
+2025-08-30 18:21:39,398 INFO Processed 33/428 lines
+2025-08-30 18:21:39,398 INFO Batch 27/362 start @ 13.87s
+2025-08-30 18:21:39,902 INFO 705325693: TRANSLATED
+  Original: Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')
+  Result: Familiar a déjà toutes les statistiques de prestige! ('<color=white>.fam pr</color>' au lieu de '<color=white>.fam pr [PrestigeStat]</color>')
+2025-08-30 18:21:39,903 INFO Batch 27/362 end @ 14.38s (0.50s)
+2025-08-30 18:21:39,903 INFO Processed 34/428 lines
+2025-08-30 18:21:39,903 INFO Batch 28/362 start @ 14.38s
+2025-08-30 18:21:40,366 INFO 2712718738: TRANSLATED
+  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
+  Result: Votre familier a connu le prestige <color=#90EE90>{prestigeLevel}</color>; les connaissances accumulées leur ont permis de conserver leur niveau! <color=#00FFFF>{FamiliarPrestigeStats[value]}</color>
+2025-08-30 18:21:40,367 INFO Batch 28/362 end @ 14.84s (0.46s)
+2025-08-30 18:21:40,367 INFO Processed 35/428 lines
+2025-08-30 18:21:40,367 INFO Batch 29/362 start @ 14.84s
+2025-08-30 18:21:40,515 INFO 872190851: TRANSLATED
+  Original: Failed to remove schematics from your inventory!
+  Result: Impossible de supprimer les schémas de votre inventaire !
+2025-08-30 18:21:40,516 INFO Batch 29/362 end @ 14.99s (0.15s)
+2025-08-30 18:21:40,517 INFO Processed 36/428 lines
+2025-08-30 18:21:40,517 INFO Batch 30/362 start @ 14.99s
+2025-08-30 18:21:40,922 INFO 3466860311: TRANSLATED
+  Original: Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
+  Result: Il n'a pas été possible de retirer suffisamment de l'élément requis (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
+2025-08-30 18:21:40,923 INFO Batch 30/362 end @ 15.40s (0.41s)
+2025-08-30 18:21:40,924 INFO Processed 37/428 lines
+2025-08-30 18:21:40,924 INFO Batch 31/362 start @ 15.40s
+2025-08-30 18:21:41,055 INFO 3720524051: TRANSLATED
+  Original: {FormatClassName(playerClass)} passives not found!
+  Result: {FormatClassName(playerClass)} passifs non trouvés!
+2025-08-30 18:21:41,057 INFO Batch 31/362 end @ 15.53s (0.13s)
+2025-08-30 18:21:41,058 INFO Processed 38/428 lines
+2025-08-30 18:21:41,059 INFO Batch 32/362 start @ 15.53s
+2025-08-30 18:21:41,182 INFO 3543031585: TRANSLATED
+  Original: {FormatClassName(playerClass)} passives:
+  Result: {FormatClassName(playerClass)} passifs:
+2025-08-30 18:21:41,184 INFO Batch 32/362 end @ 15.66s (0.13s)
+2025-08-30 18:21:41,185 INFO Processed 39/428 lines
+2025-08-30 18:21:41,186 INFO Batch 33/362 start @ 15.66s
+2025-08-30 18:21:41,316 INFO 1106946472: TRANSLATED
+  Original: {replyMessage}
+  Result: {replyMessage} SENTINÉL
+2025-08-30 18:21:41,318 INFO Batch 33/362 end @ 15.79s (0.13s)
+2025-08-30 18:21:41,319 INFO Processed 40/428 lines
+2025-08-30 18:21:41,319 INFO Batch 34/362 start @ 15.79s
+2025-08-30 18:21:41,511 INFO 2164633984: TRANSLATED
+  Original: Couldn't find stat synergies for {FormatClassName(playerClass)}...
+  Result: Impossible de trouver des synergies statistiques pour {FormatClassName(playerClass)}...
+2025-08-30 18:21:41,511 INFO Batch 34/362 end @ 15.98s (0.19s)
+2025-08-30 18:21:41,511 INFO Processed 41/428 lines
+2025-08-30 18:21:41,511 INFO Batch 35/362 start @ 15.98s
+2025-08-30 18:21:41,708 INFO 1293896668: TRANSLATED
+  Original: No stat synergies found for {FormatClassName(playerClass)}.
+  Result: Aucune synergie statistique n'a été trouvée pour {FormatClassName(playerClass)}.
+2025-08-30 18:21:41,710 INFO Batch 35/362 end @ 16.18s (0.20s)
+2025-08-30 18:21:41,711 INFO Processed 42/428 lines
+2025-08-30 18:21:41,711 INFO Batch 36/362 start @ 16.18s
+2025-08-30 18:21:41,977 INFO 2147420594: TRANSLATED
+  Original: {FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:
+  Result: {FormatClassName(playerClass)} synergies statistiques x<color=white>{ConfigService.SynergyMultiplier}</color>:
+2025-08-30 18:21:41,980 INFO Batch 36/362 end @ 16.45s (0.27s)
+2025-08-30 18:21:41,980 INFO Processed 43/428 lines
+2025-08-30 18:21:41,981 INFO Batch 37/362 start @ 16.45s
+2025-08-30 18:21:42,251 INFO 999548370: TRANSLATED
+  Original: {FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:
+  Result: {FormatClassName(playerClass)} synergies statistiquesx<color=white>{ConfigService.SynergyMultiplier}</color>:
+2025-08-30 18:21:42,252 INFO Batch 37/362 end @ 16.72s (0.27s)
+2025-08-30 18:21:42,252 INFO Processed 44/428 lines
+2025-08-30 18:21:42,252 INFO Batch 38/362 start @ 16.72s
+2025-08-30 18:21:42,426 INFO 460602473: TRANSLATED
+  Original: {FormatClassName(playerClass)} has no spells configured...
+  Result: {FormatClassName(playerClass)} n'a aucun sort configuré...
+2025-08-30 18:21:42,426 INFO Batch 38/362 end @ 16.90s (0.17s)
+2025-08-30 18:21:42,426 INFO Processed 45/428 lines
+2025-08-30 18:21:42,426 INFO Batch 39/362 start @ 16.90s
+2025-08-30 18:21:42,548 INFO 442755566: TRANSLATED
+  Original: {FormatClassName(playerClass)} spells:
+  Result: {FormatClassName(playerClass)} sorts :
+2025-08-30 18:21:42,549 INFO Batch 39/362 end @ 17.02s (0.12s)
+2025-08-30 18:21:42,549 INFO Processed 46/428 lines
+2025-08-30 18:21:42,549 INFO Batch 40/362 start @ 17.02s
+2025-08-30 18:21:42,754 INFO 2967576286: TRANSLATED
+  Original: Shift spell: <color=#CBC3E3>{spellName}</color>
+  Result: Verrouillage : <color=#CBC3E3>{spellName}</color>
+2025-08-30 18:21:42,754 INFO Batch 40/362 end @ 17.23s (0.21s)
+2025-08-30 18:21:42,754 INFO Processed 47/428 lines
+2025-08-30 18:21:42,754 INFO Batch 41/362 start @ 17.23s
+2025-08-30 18:21:43,007 INFO 1597216248: TRANSLATED
+  Original: Invalid class, use <color=white>'.class l'</color> to see options.
+  Result: Classe non valide, utilisez <color=white>'.class l'</color> pour voir les options.
+2025-08-30 18:21:43,007 INFO Batch 41/362 end @ 17.48s (0.25s)
+2025-08-30 18:21:43,007 INFO Processed 48/428 lines
+2025-08-30 18:21:43,007 INFO Batch 42/362 start @ 17.48s
+2025-08-30 18:21:43,477 INFO 2747211297: TRANSLATED
+  Original: Removed all class buffs then applied current class buffs for all players.
+  Result: Supprimé tous les buffs de classe puis appliqué les buffs de classe courante pour tous les joueurs.
+2025-08-30 18:21:43,477 INFO 2761429858: TRANSLATED
+  Original: Removed all class buffs for all players.
+  Result: Supprimé tous les buffs de classe pour tous les joueurs.
+2025-08-30 18:21:43,477 INFO 327031724: TRANSLATED
+  Original: Active familiar already present in battle group!
+  Result: Connaissant actif déjà présent dans le groupe de combat!
+2025-08-30 18:21:43,477 INFO Batch 42/362 end @ 17.95s (0.47s)
+2025-08-30 18:21:43,477 INFO Processed 51/428 lines
+2025-08-30 18:21:43,478 INFO Batch 43/362 start @ 17.95s
+2025-08-30 18:21:43,729 INFO 625301684: TRANSLATED
+  Original: Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!
+  Result: Ne peut pas avoir plus de <color=white>{MAX_BATTLE_GROUPS} </color> groupes de combat!
+2025-08-30 18:21:43,729 INFO Batch 43/362 end @ 18.20s (0.25s)
+2025-08-30 18:21:43,730 INFO Processed 52/428 lines
+2025-08-30 18:21:43,730 INFO Batch 44/362 start @ 18.20s
+2025-08-30 18:21:43,959 INFO 3944404979: TRANSLATED
+  Original: Deleted battle group <color=white>{groupName}</color>!
+  Result: Groupe de combat supprimé <color=white>{groupName}</color>!
+2025-08-30 18:21:43,961 INFO Batch 44/362 end @ 18.43s (0.23s)
+2025-08-30 18:21:43,962 INFO Processed 53/428 lines
+2025-08-30 18:21:43,962 INFO Batch 45/362 start @ 18.43s
+2025-08-30 18:21:44,084 INFO 2979158417: TRANSLATED
+  Original: Prestiging is not enabled.
+  Result: Le préjugé n'est pas activé.
+2025-08-30 18:21:44,085 INFO Batch 45/362 end @ 18.56s (0.12s)
+2025-08-30 18:21:44,085 INFO Processed 54/428 lines
+2025-08-30 18:21:44,085 INFO Batch 46/362 start @ 18.56s
+2025-08-30 18:21:44,326 INFO 2350508902: TRANSLATED
+  Original: Invalid prestige type, use <color=white>'.prestige l'</color> to see options.
+  Result: Type de prestige non valide, utilisez <color=white>'.prestige l'</color> pour voir les options.
+2025-08-30 18:21:44,327 INFO Batch 46/362 end @ 18.80s (0.24s)
+2025-08-30 18:21:44,327 INFO Processed 55/428 lines
+2025-08-30 18:21:44,327 INFO Batch 47/362 start @ 18.80s
+2025-08-30 18:21:44,558 INFO 1897692916: TRANSLATED
+  Original: You must reach max level before <color=#90EE90>Exo</color> prestiging again.
+  Result: Vous devez atteindre le niveau maximum avant <color=#90EE90>Exo</color> prestant à nouveau.
+2025-08-30 18:21:44,559 INFO Batch 47/362 end @ 19.03s (0.23s)
+2025-08-30 18:21:44,559 INFO Processed 56/428 lines
+2025-08-30 18:21:44,559 INFO Batch 48/362 start @ 19.03s
+2025-08-30 18:21:44,831 INFO 9816116: TRANSLATED
+  Original: You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges. (<color=white>{EXO_PRESTIGES}</color>)
+  Result: Vous avez atteint le maximum de prestiges <color=#90EE90>Exo</color>. <color=white>{EXO_PRESTIGES}</color>
+2025-08-30 18:21:44,833 INFO Batch 48/362 end @ 19.31s (0.27s)
+2025-08-30 18:21:44,833 INFO Processed 57/428 lines
+2025-08-30 18:21:44,833 INFO Batch 49/362 start @ 19.31s
+2025-08-30 18:21:45,179 INFO 3729714988: TRANSLATED
+  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!
+  Result: <color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color> prestige complet!
+2025-08-30 18:21:45,179 INFO Batch 49/362 end @ 19.65s (0.35s)
+2025-08-30 18:21:45,180 INFO Processed 58/428 lines
+2025-08-30 18:21:45,180 INFO Batch 50/362 start @ 19.65s
+2025-08-30 18:21:45,630 INFO 2402733055: TRANSLATED
+  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
+  Result: <color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color> prestige complet! Vous avez également reçu <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
+2025-08-30 18:21:45,633 INFO Batch 50/362 end @ 20.11s (0.45s)
+2025-08-30 18:21:45,634 INFO Processed 59/428 lines
+2025-08-30 18:21:45,634 INFO Batch 51/362 start @ 20.11s
+2025-08-30 18:21:46,145 INFO 3961332984: TRANSLATED
+  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.
+  Result: <color=#90EE90>{parsedPrestigeType}</color><color=white>{exoPrestiges}</color> prestige complet! Vous avez reçu <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! Il est tombé sur le sol car votre inventaire était plein.
+2025-08-30 18:21:46,146 INFO Batch 51/362 end @ 20.62s (0.51s)
+2025-08-30 18:21:46,147 INFO Processed 60/428 lines
+2025-08-30 18:21:46,147 INFO Batch 52/362 start @ 20.62s
+2025-08-30 18:21:46,479 INFO 145841390: TRANSLATED
+  Original: You must reach the maximum level in <color=#90EE90>Experience</color> prestige before <color=#90EE90>Exo</color> prestiging.
+  Result: Vous devez atteindre le niveau maximum dans <color=#90EE90>Expérience</color> prestige avant <color=#90EE90>Exo</color> prestant.
+2025-08-30 18:21:46,482 INFO Batch 52/362 end @ 20.96s (0.34s)
+2025-08-30 18:21:46,483 INFO Processed 61/428 lines
+2025-08-30 18:21:46,484 INFO Batch 53/362 start @ 20.96s
+2025-08-30 18:21:46,696 INFO 2076214502: TRANSLATED
+  Original: <color=#90EE90>Exo</color> prestiging is not enabled.
+  Result: <color=#90EE90>L'exo</color> prestiging n'est pas activé.
+2025-08-30 18:21:46,696 INFO Batch 53/362 end @ 21.17s (0.21s)
+2025-08-30 18:21:46,696 INFO Processed 62/428 lines
+2025-08-30 18:21:46,696 INFO Batch 54/362 start @ 21.17s
+2025-08-30 18:21:46,934 INFO 1641131342: TRANSLATED
+  Original: Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.
+  Result: prestige non valide, utilisez <color=white>'.prestige l'</color> pour voir les options valides.
+2025-08-30 18:21:46,935 INFO Batch 54/362 end @ 21.41s (0.24s)
+2025-08-30 18:21:46,936 INFO Processed 63/428 lines
+2025-08-30 18:21:46,936 INFO Batch 55/362 start @ 21.41s
+2025-08-30 18:21:47,237 INFO 484801240: TRANSLATED
+  Original: You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.
+  Result: Vous n'avez pas atteint le niveau de prestige requis dans <color=#90EE90>{parsedPrestigeType}</color> ou êtes au niveau de prestige maximal.
+2025-08-30 18:21:47,240 INFO Batch 55/362 end @ 21.71s (0.30s)
+2025-08-30 18:21:47,241 INFO Processed 64/428 lines
+2025-08-30 18:21:47,241 INFO Batch 56/362 start @ 21.71s
+2025-08-30 18:21:47,670 WARNING 11642316: token mismatch [67de2aed] (missing ['6', '7', '8']) — Suggested fix: add ['6', '7', '8']
+2025-08-30 18:21:47,670 WARNING 11642316: SKIPPED (token mismatch (missing ['6', '7', '8']) [67de2aed])
+  Original: Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s
+  Result: Actuellement [[TOKEN_0]]Exo[[TOKEN_1]] Niveau de prestige: [[TOKEN_2]][[TOKEN_3]][[TOKEN_4]]/[[TOKEN_5]]
+2025-08-30 18:21:47,671 INFO Batch 56/362 end @ 22.14s (0.43s)
+2025-08-30 18:21:47,671 INFO Processed 65/428 lines
+2025-08-30 18:21:47,671 INFO Batch 57/362 start @ 22.14s
+2025-08-30 18:21:47,769 INFO Received 0 rows; deduplicated to 0 rows
+2025-08-30 18:21:47,910 ERROR Failed: Interrupted. Metrics written to /workspace/Bloodcraft/translations/fr/20250830-182125/metrics.json
+2025-08-30 18:21:47,910 INFO Received 0 rows; deduplicated to 0 rows
+2025-08-30 18:21:47,911 INFO Wrote skip report to /workspace/Bloodcraft/translations/fr/20250830-182125/skipped.csv with 0 row(s)
+2025-08-30 18:21:47,911 ERROR No messages processed; verify input hashes and Argos model.
+2025-08-30 18:21:47,911 ERROR Summary: 0/0 translated, 0 skipped. Failed: Interrupted

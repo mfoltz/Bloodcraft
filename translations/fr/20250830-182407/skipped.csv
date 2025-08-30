@@ -1,0 +1,15 @@
+hash,english,reason,category
+2252098529,<color=green>Gold Ore</color>x<color=white>{0}</color> received from {1},contains English on strict retry,english
+3115116616,"<color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.",contains English on strict retry,english
+2480816305,<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>,placeholders only,placeholder
+1716911803,<color=white>{box}</color>:,identical to source on strict retry,identical
+1469754031,Looks like your familiar is still able to be found; unbind it normally after calling if it's dismissed instead.,contains English on strict retry,english
+3823143990,"You don't have any quests yet, check back soon!",contains English on strict retry,english
+400324857,You haven't earned any experience yet!,contains English on strict retry,english
+3938051122,Classes: {classTypes},identical to source on strict retry,identical
+2511919794,"<color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $""{colorCode}*</color> {levelAndPrestiges}"" : $"" {levelAndPrestiges}"")}",placeholders only,placeholder
+2772168133,{0}[<color=white>{1}</color>],placeholders only,placeholder
+3227554981,<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>,placeholders only,placeholder
+3334433396,Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.,placeholders only,placeholder
+3055272330,Familiar attempting to prestige must be at max level (<color=white>{0}</color>) or requires <color=#ffd9eb>{1}</color><color=yellow>x</color><color=white>{2}</color>.,placeholders only,placeholder
+,,"{""english"": 5, ""placeholder"": 6, ""identical"": 2}",summary
