@@ -5432,5 +5432,527 @@
         ]
       }
     ]
+  },
+  {
+    "timestamp": "2025-08-30T19:24:44Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 12,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "2007397999",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "<color=white>",
+          "{2}",
+          "{2}",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "1407688215",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "<color=white>",
+          "{2}",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "2712718738",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}",
+          "{FamiliarPrestigeStats[value]}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "2402733055",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "3961332984",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "3343555659",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "<color=#90EE90>",
+          "{parsedPrestigeType}",
+          "{parsedPrestigeType}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "1440482998",
+        "missing": [],
+        "extra": [
+          "<color=green>",
+          "<color=green>",
+          "<color=green>",
+          "<color=green>",
+          "<color=green>",
+          "{playerInfo.User.CharacterName.Value}",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "3591926048",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "719993404",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "<color=white>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "3761416018",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "{playerInfo.User.CharacterName.Value}",
+          "{playerInfo.User.CharacterName.Value}",
+          "{playerInfo.User.CharacterName.Value}",
+          "{playerInfo.User.CharacterName.Value}",
+          "{playerInfo.User.CharacterName.Value}",
+          "{playerInfo.User.CharacterName.Value}",
+          "{playerInfo.User.CharacterName.Value}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "1826355702",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "{playerInfo.User.CharacterName.Value}",
+          "{playerInfo.User.CharacterName.Value}",
+          "{playerInfo.User.CharacterName.Value}",
+          "{playerInfo.User.CharacterName.Value}",
+          "{playerInfo.User.CharacterName.Value}",
+          "{playerInfo.User.CharacterName.Value}",
+          "{playerInfo.User.CharacterName.Value}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "3254231727",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-30T19:25:40Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 11,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "3125006928",
+        "missing": [
+          "{FamiliarPrestigeStats[value]}",
+          "{value + 1}"
+        ],
+        "extra": [
+          "{0}",
+          "{1}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "705325693",
+        "missing": [
+          "[PrestigeStat]"
+        ],
+        "extra": []
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "2712718738",
+        "missing": [
+          "{prestigeLevel}",
+          "{FamiliarPrestigeStats[value]}"
+        ],
+        "extra": [
+          "{0}",
+          "{1}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "11642316",
+        "missing": [
+          "{exoLevel}",
+          "{PrestigeTypeToMaxPrestiges[parsedPrestigeType]}",
+          "{(int)Shapeshifts.CalculateFormDuration(exoLevel)}"
+        ],
+        "extra": [
+          "{0}",
+          "{1}",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "3468772905",
+        "missing": [
+          "{parsedPrestigeType}",
+          "{PrestigeTypeToMaxPrestiges[parsedPrestigeType]}"
+        ],
+        "extra": [
+          "{0}",
+          "{1}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "1066178325",
+        "missing": [
+          "[Name]"
+        ],
+        "extra": []
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "54858227",
+        "missing": [
+          "{prestigeLevel}",
+          "{newXP.Key}",
+          "{FamiliarPrestigeStats[value]}"
+        ],
+        "extra": [
+          "{0}",
+          "{1}",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "1081599663",
+        "missing": [
+          "[Name]"
+        ],
+        "extra": []
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "2129553669",
+        "missing": [
+          "[PlayerName]"
+        ],
+        "extra": []
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "20873033",
+        "missing": [
+          "[Class]"
+        ],
+        "extra": []
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "4140406916",
+        "missing": [
+          "[Class]"
+        ],
+        "extra": []
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-30T19:26:44Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 11,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "3125006928",
+        "missing": [
+          "{FamiliarPrestigeStats[value]}",
+          "{value + 1}"
+        ],
+        "extra": [
+          "{0}",
+          "{1}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "705325693",
+        "missing": [
+          "[PrestigeStat]"
+        ],
+        "extra": []
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "2712718738",
+        "missing": [
+          "{prestigeLevel}",
+          "{FamiliarPrestigeStats[value]}"
+        ],
+        "extra": [
+          "{0}",
+          "{1}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "11642316",
+        "missing": [
+          "{exoLevel}",
+          "{PrestigeTypeToMaxPrestiges[parsedPrestigeType]}",
+          "{(int)Shapeshifts.CalculateFormDuration(exoLevel)}"
+        ],
+        "extra": [
+          "{0}",
+          "{1}",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "3468772905",
+        "missing": [
+          "{parsedPrestigeType}",
+          "{PrestigeTypeToMaxPrestiges[parsedPrestigeType]}"
+        ],
+        "extra": [
+          "{0}",
+          "{1}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "1066178325",
+        "missing": [
+          "[Name]"
+        ],
+        "extra": []
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "54858227",
+        "missing": [
+          "{prestigeLevel}",
+          "{newXP.Key}",
+          "{FamiliarPrestigeStats[value]}"
+        ],
+        "extra": [
+          "{0}",
+          "{1}",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "1081599663",
+        "missing": [
+          "[Name]"
+        ],
+        "extra": []
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "2129553669",
+        "missing": [
+          "[PlayerName]"
+        ],
+        "extra": []
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "20873033",
+        "missing": [
+          "[Class]"
+        ],
+        "extra": []
+      },
+      {
+        "file": "Resources/Localization/Messages/Korean.json",
+        "key": "4140406916",
+        "missing": [
+          "[Class]"
+        ],
+        "extra": []
+      }
+    ]
   }
 ]

@@ -564,5 +564,49 @@
     "metrics_file": "/workspace/Bloodcraft/metrics_ja.json",
     "success_rate": 1.0,
     "status": "success"
+  },
+  {
+    "run_id": "9256b7f2-b2e2-4dcd-bd80-6386138c853e",
+    "timestamp": "2025-08-30T19:24:20Z",
+    "language": "ko",
+    "run_dir": "/workspace/Bloodcraft/translations/ko/20250830-192310",
+    "log_file": "/workspace/Bloodcraft/translations/ko/20250830-192310/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/ko/20250830-192310/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/ko/20250830-192310/metrics.json",
+    "success_rate": 0,
+    "status": "interrupted"
+  },
+  {
+    "run_id": "2f22e5c9-2b70-4c9b-a3d6-13a8793afdd1",
+    "timestamp": "2025-08-30T19:24:45Z",
+    "language": "ko",
+    "run_dir": "/workspace/Bloodcraft/translations/ko/20250830-192437",
+    "log_file": "/workspace/Bloodcraft/translations/ko/20250830-192437/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/ko/20250830-192437/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/ko/20250830-192437/metrics.json",
+    "success_rate": 1.0,
+    "status": "success"
+  },
+  {
+    "run_id": "85e2d713-de6b-4e14-93f0-2ac8584d4840",
+    "timestamp": "2025-08-30T19:25:41Z",
+    "language": "ko",
+    "run_dir": "/workspace/Bloodcraft/translations/ko/20250830-192534",
+    "log_file": "/workspace/Bloodcraft/translations/ko/20250830-192534/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/ko/20250830-192534/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/ko/20250830-192534/metrics.json",
+    "success_rate": 1.0,
+    "status": "success"
+  },
+  {
+    "run_id": "0c33c082-dab5-43de-9c0f-a6393fe51f82",
+    "timestamp": "2025-08-30T19:26:45Z",
+    "language": "ko",
+    "run_dir": "/workspace/Bloodcraft/translations/ko/20250830-192637",
+    "log_file": "/workspace/Bloodcraft/translations/ko/20250830-192637/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/ko/20250830-192637/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/ko/20250830-192637/metrics.json",
+    "success_rate": 1.0,
+    "status": "success"
   }
 ]
