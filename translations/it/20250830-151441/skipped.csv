@@ -1,0 +1,72 @@
+hash,english,reason,category
+606627316,{0} improved to [<color=white>{1}</color>],placeholders only,placeholder
+2932385107,"Targets have all been killed, give them a chance to respawn!",contains English on strict retry,english
+1076291728,Use the VBlood menu to track bosses!,contains English on strict retry,english
+2747211297,Removed all class buffs then applied current class buffs for all players.,contains English on strict retry,english
+2761429858,Removed all class buffs for all players.,contains English on strict retry,english
+145841390,You must reach the maximum level in <color=#90EE90>Experience</color> prestige before <color=#90EE90>Exo</color> prestiging.,contains English on strict retry,english
+2332227846,You have not prestiged in <color=#90EE90>Exo</color> yet.,contains English on strict retry,english
+3706109126,You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.,contains English on strict retry,english
+830139985,You have not prestiged in <color=#90EE90>{PrestigeType.Experience}</color>.,contains English on strict retry,english
+1182925736,No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!,contains English on strict retry,english
+2178615132,Permashroud <color=green>enabled</color>!,identical to source on strict retry,identical
+3489173133,<color=#c0c0c0>{weaponType}</color> Stats: {bonuses},placeholders only,placeholder
+2965167816,No weapon stats available at this time.,contains English on strict retry,english
+313887201,"Change spells to the ones you want in your unarmed slots. When done, toggle this again.",contains English on strict retry,english
+1711931034,<color=red>{bloodType}</color> Stats: {bonuses},placeholders only,placeholder
+226227140,No progress in <color=red>{handler.GetBloodType()}</color> yet.,contains English on strict retry,english
+1680589832,No blood stats available at this time.,contains English on strict retry,english
+1381058165,Familiars are not enabled.,contains English on strict retry,english
+321106656,Box Selected - <color=white>{name}</color>,placeholders only,placeholder
+3279926559,Added box - <color=white>{name}</color>,placeholders only,placeholder
+2648123409,VBlood familiars are not enabled.,contains English on strict retry,english
+3052690511,<color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is not available per configured familiar bans!,contains English on strict retry,english
+3380184352,Unable to verify cost for {vBloodPrefabGuid.GetPrefabName()}!,contains English on strict retry,english
+3498334942,Unable to verify exo prestige reward item! (<color=yellow>{exoItem}</color>),contains English on strict retry,english
+1469754031,Looks like your familiar is still able to be found; unbind it normally after calling if it's dismissed instead.,contains English on strict retry,english
+907868427,Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>),contains English on strict retry,english
+2129553669,You're not currently queued for battle! Use '<color=white>.fam challenge [PlayerName]</color>' to challenge another player.,contains English on strict retry,english
+2968342812,You can't challenge another player while queued for battle! Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>),contains English on strict retry,english
+2228202821,<color=green>{playerInfo.User.CharacterName}</color> is already queued for battle!,contains English on strict retry,english
+2817263998,<color=green>{playerInfo.User.CharacterName}</color> already has a pending challenge!,contains English on strict retry,english
+1231839381,Challenged <color=white>{playerInfo.User.CharacterName.Value}</color> to a battle! (<color=yellow>30s</color> until it expires),contains English on strict retry,english
+563018011,Invalid quest type '{questTypeName}'. Valid values are: {string.Join(,contains English on strict retry,english
+1254994229,Couldn't find experience data for {foundUser.CharacterName.Value},placeholders only,placeholder
+1201875369,No progress in {professionHandler.GetProfessionName()} yet!,contains English on strict retry,english
+2554001784,{professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>,placeholders only,placeholder
+24953571,"Can't change or activate class spells when inventory is full, need at least one space to safely handle jewels when switching.",contains English on strict retry,english
+1282509635,"You have class buffs enabled, use <color=white>'.class passives'</color> to disable them before changing classes!",contains English on strict retry,english
+349267262,"Can't change or active class spells when inventory is full, need at least one space to safely handle jewels when switching.",contains English on strict retry,english
+3756348742,Reminders {0}.,identical to source on strict retry,identical
+1443941563,Removed prestige buffs from all players.,contains English on strict retry,english
+1465975319,Reminders {0}.,identical to source on strict retry,identical
+3706417587,"Invalid quest type '{questTypeName}'. Valid values are: {string.Join("", "", Enum.GetNames(typeof(QuestType)))}",contains English on strict retry,english
+4226920647,<color=white>{0}</color> is not available per configured familiar bans!,contains English on strict retry,english
+617911048,Reminders {0}.,identical to source on strict retry,identical
+2828720719,Couldn't find experience data for {0},placeholders only,placeholder
+3744708697,Invalid quest type '{0}'. Valid values are: {1},contains English on strict retry,english
+1218917876,"Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {0}.",contains English on strict retry,english
+800655279,{0}: <color=green>{1}</color> <color=white>{2}</color>x<color=#FFC0CB>{3}</color> [<color=white>{4}</color>/<color=yellow>{3}</color>],stray brackets on strict retry,other
+1178832936,"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{0}</color>]! Growth rates for all expertise/legacies increased by <color=green>{1}</color>, experience from unit kills reduced by <color=red>{2}</color>.",contains English on strict retry,english
+421960942,VBlood emotes <color=green>enabled</color>.,identical to source on strict retry,identical
+2740121583,VBlood emotes <color=red>disabled</color>.,identical to source on strict retry,identical
+2495105303,"You can't bind in combat or when using certain forms! (dominating presence, bat)",contains English on strict retry,english
+179462471,Can't unbind familiar right now! (interacting),contains English on strict retry,english
+1744159514,Can't unbind familiar right now! (dismissed),contains English on strict retry,english
+4190631897,<color=#c0c0c0>{0}</color> Stats: {1},placeholders only,placeholder
+2660507905,No Castle Heart!,identical to source on strict retry,identical
+182159004,No Familiar Active!,identical to source on strict retry,identical
+2007397999,+<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>),placeholders only,placeholder
+1763623253,New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>],placeholders only,placeholder
+484801240,You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.,contains English on strict retry,english
+3343555659,Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.,contains English on strict retry,english
+2480816305,<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>,placeholders only,placeholder
+2196432591,<color=red>{BloodHandler.GetBloodType()}</color> legacy set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>,placeholders only,placeholder
+1716911803,<color=white>{box}</color>:,placeholders only,placeholder
+707311945,You couldn't afford to reroll your wekly... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>),placeholders only,placeholder
+2511919794,"<color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $""{colorCode}*</color> {levelAndPrestiges}"" : $"" {levelAndPrestiges}"")}",placeholders only,placeholder
+1315865629,You couldn't afford to reroll your wekly... (<color=#C0C0C0>{0}</color> x<color=white>{1}</color>),placeholders only,placeholder
+2814501768,<color=green>{0}</color>{1}*</color> <color=#FFC0CB>unbound</color>!,placeholders only,placeholder
+2772168133,{0}[<color=white>{1}</color>],placeholders only,placeholder
+3227554981,<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>,placeholders only,placeholder
+,,"{""placeholder"": 20, ""english"": 41, ""identical"": 8, ""other"": 1}",summary

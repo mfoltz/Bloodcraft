@@ -5000,5 +5000,79 @@
         ]
       }
     ]
+  },
+  {
+    "timestamp": "2025-08-30T15:16:21Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 1,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/Italian.json",
+        "key": "1223341524",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-30T15:18:24Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 1,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/Italian.json",
+        "key": "1223341524",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-30T15:19:58Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 11,
+    "token_mismatches": 4,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/Italian.json",
+        "key": "1223341524",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Italian.json",
+        "key": "3125006928",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Italian.json",
+        "key": "54858227",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Italian.json",
+        "key": "935039462",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>"
+        ]
+      }
+    ]
   }
 ]
