@@ -1,0 +1,250 @@
+{
+  "1407688215": {
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  "2252098529": {
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  "3115116616": {
+    "missing": [],
+    "extra": [
+      "</color>",
+      "<color=white>"
+    ]
+  },
+  "2972244104": {
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  "4110714393": {
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  "3997845506": {
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  "3141472524": {
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  "2576121314": {
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  "3665962604": {
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  "3324923525": {
+    "missing": [],
+    "extra": [
+      "{0}"
+    ]
+  },
+  "384069927": {
+    "missing": [],
+    "extra": [
+      "{0}"
+    ]
+  },
+  "1884892470": {
+    "missing": [],
+    "extra": [
+      "{0}"
+    ]
+  },
+  "2712718738": {
+    "missing": [],
+    "extra": [
+      "{prestigeLevel}"
+    ]
+  },
+  "999548370": {
+    "missing": [],
+    "extra": [
+      "{ConfigService.SynergyMultiplier}"
+    ]
+  },
+  "4023020194": {
+    "missing": [],
+    "extra": [
+      "{weaponType}"
+    ]
+  },
+  "3274700132": {
+    "missing": [],
+    "extra": [
+      "{weaponType}"
+    ]
+  },
+  "2785130336": {
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  "1716911803": {
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  "863911874": {
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  "3628025920": {
+    "missing": [],
+    "extra": [
+      "{groupName}"
+    ]
+  },
+  "2228202821": {
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  "3499636759": {
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{2}"
+    ]
+  },
+  "3914295487": {
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  "4049081768": {
+    "missing": [],
+    "extra": [
+      "{0}"
+    ]
+  },
+  "2383766993": {
+    "missing": [],
+    "extra": [
+      "{0}"
+    ]
+  },
+  "1223341524": {
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{2}"
+    ]
+  },
+  "1318067012": {
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  "3987763597": {
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  "1641855254": {
+    "missing": [],
+    "extra": [
+      "{0}"
+    ]
+  },
+  "2687655344": {
+    "missing": [],
+    "extra": [
+      "{0}"
+    ]
+  },
+  "2844729307": {
+    "missing": [],
+    "extra": [
+      "{prestigeLevel}"
+    ]
+  },
+  "606627316": {
+    "missing": [],
+    "extra": [
+      "{1}"
+    ]
+  },
+  "2007397999": {
+    "missing": [],
+    "extra": [
+      "{1}"
+    ]
+  },
+  "3637474013": {
+    "missing": [],
+    "extra": [
+      "</color>",
+      "<color=#90EE90>",
+      "<color=#90EE90>",
+      "{3}",
+      "{3}"
+    ]
+  },
+  "3125006928": {
+    "missing": [],
+    "extra": [
+      "{FamiliarPrestigeStats[value]}"
+    ]
+  },
+  "3466860311": {
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  "3729714988": {
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  "2402733055": {
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  "3961332984": {
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  "11642316": {
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{PrestigeTypeToMaxPrestiges[parsedPrestigeType]}"
+    ]
+  }
+}
