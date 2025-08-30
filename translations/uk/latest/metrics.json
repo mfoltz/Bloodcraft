@@ -1,0 +1,3543 @@
+[
+  {
+    "run_id": "39bb9c0a-5bf1-4b48-96ef-cf39cb71a84f",
+    "log_file": "/workspace/Bloodcraft/translations/uk/latest/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/uk/latest/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/uk/latest/metrics.json",
+    "git_commit": "ca0dfa0d",
+    "python_version": "3.11.12",
+    "argos_version": "1.8.0",
+    "model_version": "unknown",
+    "cli_args": {
+      "target_file": "Resources/Localization/Messages/Ukrainian.json",
+      "src": "en",
+      "dst": "uk",
+      "root": "/workspace/Bloodcraft",
+      "run_dir": "/workspace/Bloodcraft/translations/uk/latest",
+      "batch_size": 100,
+      "max_retries": 3,
+      "timeout": 60,
+      "overwrite": true,
+      "hashes": null,
+      "log_level": "ERROR",
+      "verbose": false,
+      "log_file": "/workspace/Bloodcraft/translations/uk/latest/translate.log",
+      "report_file": "/workspace/Bloodcraft/translations/uk/latest/skipped.csv",
+      "metrics_file": "/workspace/Bloodcraft/translations/uk/latest/metrics.json",
+      "dry_run": false,
+      "lenient_tokens": false,
+      "retry_mismatches": false,
+      "fix_order": false,
+      "run_index_file": "/workspace/Bloodcraft/translations/run_index.json"
+    },
+    "run_dir": "/workspace/Bloodcraft/translations/uk/latest",
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "timestamp": "2025-08-29T23:28:12Z",
+    "status": "success",
+    "processed": 428,
+    "successes": 367,
+    "timeouts": 0,
+    "token_reorders": 88,
+    "token_mismatches": 26,
+    "retry_attempts": 0,
+    "retry_successes": 0,
+    "retry_missing_tokens": 0,
+    "retry_extra_tokens": 0,
+    "token_mismatch_details": {
+      "1763623253": {
+        "missing": [
+          "15",
+          "16"
+        ],
+        "extra": [
+          "17",
+          "17"
+        ]
+      },
+      "145841390": {
+        "missing": [
+          "1",
+          "2",
+          "3"
+        ],
+        "extra": []
+      },
+      "2332227846": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "1763729577": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "2178615132": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "1057363547": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "3235862068": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "907868427": {
+        "missing": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "extra": []
+      },
+      "2968342812": {
+        "missing": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "extra": []
+      },
+      "1677522996": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "707311945": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "107297214": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "2051256929": {
+        "missing": [
+          "6"
+        ],
+        "extra": []
+      },
+      "4066899438": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "2320898349": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "3399068440": {
+        "missing": [
+          "0",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29"
+        ],
+        "extra": []
+      },
+      "1095669519": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "881612152": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "3402815477": {
+        "missing": [
+          "0",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29"
+        ],
+        "extra": []
+      },
+      "493237764": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "2537547396": {
+        "missing": [
+          "6"
+        ],
+        "extra": []
+      },
+      "1315865629": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "800655279": {
+        "missing": [
+          "15"
+        ],
+        "extra": []
+      },
+      "4052025947": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "1248377615": {
+        "missing": [
+          "3"
+        ],
+        "extra": []
+      },
+      "1014495694": {
+        "missing": [
+          "3"
+        ],
+        "extra": []
+      },
+      "1446796844": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "1214712585": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      }
+    },
+    "failures": {
+      "606627316": "placeholders only",
+      "2252098529": "placeholders only",
+      "3324923525": "placeholders only",
+      "311765273": "placeholders only",
+      "1763623253": "token mismatch on strict retry (missing ['15', '16'], unexpected ['17', '17']) [73b309e0]",
+      "2967576286": "placeholders only",
+      "145841390": "token mismatch on strict retry (missing ['1', '2', '3'], unexpected []) [ed9c7773]",
+      "2332227846": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "1182925736": "placeholders only",
+      "1763729577": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "3587073963": "placeholders only",
+      "2178615132": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "4023020194": "placeholders only",
+      "2480816305": "placeholders only",
+      "3084457547": "placeholders only",
+      "226227140": "placeholders only",
+      "2196432591": "placeholders only",
+      "85537047": "placeholders only",
+      "1716911803": "identical to source on strict retry",
+      "321106656": "placeholders only",
+      "823180732": "placeholders only",
+      "3279926559": "placeholders only",
+      "4255236631": "placeholders only",
+      "1057363547": "token mismatch on strict retry (missing ['0'], unexpected []) [1cdc317b]",
+      "3235862068": "token mismatch on strict retry (missing ['0'], unexpected []) [1cdc317b]",
+      "907868427": "token mismatch on strict retry (missing ['1', '2', '3', '4'], unexpected []) [66939eb2]",
+      "2968342812": "token mismatch on strict retry (missing ['1', '2', '3', '4'], unexpected []) [66939eb2]",
+      "3878896595": "placeholders only",
+      "1677522996": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "707311945": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "107297214": "token mismatch on strict retry (missing ['0'], unexpected []) [1cdc317b]",
+      "2051256929": "token mismatch on strict retry (missing ['6'], unexpected []) [9ca6ab0e]",
+      "1201875369": "placeholders only",
+      "2554001784": "placeholders only",
+      "4066899438": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "2320898349": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "3399068440": "stray brackets on strict retry",
+      "2511919794": "placeholders only",
+      "1095669519": "token mismatch on strict retry (missing ['0'], unexpected []) [1cdc317b]",
+      "881612152": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "2272306226": "placeholders only",
+      "2428442751": "placeholders only",
+      "3402815477": "stray brackets on strict retry",
+      "493237764": "token mismatch on strict retry (missing ['0'], unexpected []) [1cdc317b]",
+      "2537547396": "token mismatch on strict retry (missing ['6'], unexpected []) [9ca6ab0e]",
+      "2698551496": "placeholders only",
+      "1315865629": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "800655279": "token mismatch on strict retry (missing ['15'], unexpected []) [9cea038d]",
+      "885434933": "placeholders only",
+      "2383766993": "placeholders only",
+      "4052025947": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "2740121583": "placeholders only",
+      "1248377615": "token mismatch on strict retry (missing ['3'], unexpected []) [35857b71]",
+      "1014495694": "token mismatch on strict retry (missing ['3'], unexpected []) [35857b71]",
+      "2772168133": "placeholders only",
+      "1446796844": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "1214712585": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "1641855254": "placeholders only",
+      "3227554981": "placeholders only",
+      "1369871380": "placeholders only",
+      "3002809107": "placeholders only"
+    },
+    "hash_stats": {
+      "3439613370": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1491097539": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "606627316": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "2007397999": {
+        "original_tokens": 10,
+        "translated_tokens": 12,
+        "reordered": true
+      },
+      "1407688215": {
+        "original_tokens": 7,
+        "translated_tokens": 7,
+        "reordered": false
+      },
+      "2252098529": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "3115116616": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "2972244104": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "4110714393": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "3997845506": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "3141472524": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "2576121314": {
+        "original_tokens": 6,
+        "translated_tokens": 25,
+        "reordered": true
+      },
+      "3665962604": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "3324923525": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "3054245516": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "2786260061": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "311765273": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1763623253": {
+        "original_tokens": 17,
+        "translated_tokens": 21,
+        "reordered": true,
+        "missing_tokens": 2,
+        "removed_tokens": 2
+      },
+      "384069927": {
+        "original_tokens": 7,
+        "translated_tokens": 9,
+        "reordered": true
+      },
+      "1884892470": {
+        "original_tokens": 7,
+        "translated_tokens": 9,
+        "reordered": true
+      },
+      "3158650477": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2673031653": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "3637474013": {
+        "original_tokens": 16,
+        "translated_tokens": 18,
+        "reordered": true
+      },
+      "2932385107": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1076291728": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1420278477": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3546356968": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2169578147": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "223311103": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2155028867": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2689850927": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "3125006928": {
+        "original_tokens": 8,
+        "translated_tokens": 8,
+        "reordered": false
+      },
+      "2846646667": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "705325693": {
+        "original_tokens": 5,
+        "translated_tokens": 5,
+        "reordered": false
+      },
+      "2712718738": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "872190851": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3466860311": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "3720524051": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "3543031585": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "1106946472": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2164633984": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "1293896668": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2147420594": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "999548370": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "460602473": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "442755566": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2967576286": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1597216248": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "2747211297": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2761429858": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "327031724": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "625301684": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "3944404979": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2979158417": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2350508902": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1897692916": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "9816116": {
+        "original_tokens": 5,
+        "translated_tokens": 5,
+        "reordered": false
+      },
+      "3729714988": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "2402733055": {
+        "original_tokens": 12,
+        "translated_tokens": 25,
+        "reordered": true
+      },
+      "3961332984": {
+        "original_tokens": 12,
+        "translated_tokens": 14,
+        "reordered": true
+      },
+      "145841390": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": true,
+        "missing_tokens": 3
+      },
+      "2076214502": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1641131342": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "484801240": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "11642316": {
+        "original_tokens": 9,
+        "translated_tokens": 11,
+        "reordered": true
+      },
+      "836746607": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2332227846": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "3706109126": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1689690159": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3055902112": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "3468772905": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "3343555659": {
+        "original_tokens": 9,
+        "translated_tokens": 10,
+        "reordered": true
+      },
+      "101395383": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3878313095": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1411528307": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "3318828181": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "830139985": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2461283441": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3320998835": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "947905559": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1182925736": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1687700552": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1763729577": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "1711247206": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3882215894": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "1884272339": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "816810753": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3587073963": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1440482998": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2659109549": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2178615132": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "1797973559": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "985830382": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3170250471": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3591926048": {
+        "original_tokens": 18,
+        "translated_tokens": 29,
+        "reordered": true
+      },
+      "3489173133": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "3863739608": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "4023020194": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "736301693": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "27929505": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1880632188": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "2008856310": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "3274700132": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "719993404": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "2128999876": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2252129438": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2480816305": {
+        "original_tokens": 9,
+        "translated_tokens": 10,
+        "reordered": true
+      },
+      "3013651462": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2965167816": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3084457547": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2202242526": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2998300513": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "3761416018": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "1826355702": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "2712082651": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1846116445": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "446698782": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "313887201": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "121410310": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "4061888430": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3361608225": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "18401539": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3254231727": {
+        "original_tokens": 18,
+        "translated_tokens": 21,
+        "reordered": true
+      },
+      "1711931034": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "939340687": {
+        "original_tokens": 5,
+        "translated_tokens": 6,
+        "reordered": true
+      },
+      "226227140": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "4051608029": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "3335571950": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2194796157": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "2785130336": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "4126149106": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "4258273173": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1298892920": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1740355579": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1449977777": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "1690022722": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1680589832": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1108347105": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2196432591": {
+        "original_tokens": 9,
+        "translated_tokens": 10,
+        "reordered": true
+      },
+      "85537047": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1381058165": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1716911803": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "863911874": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "1066178325": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2462277004": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1977482431": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2321621014": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "854134032": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "321106656": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2465841402": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "698362524": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "1575879194": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "823180732": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "3236338434": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2213724716": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "4289445665": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3279926559": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2724064627": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2648123409": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2179875375": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2721627196": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1976698463": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3052690511": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "3195375072": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "3380184352": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "3498334942": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "4255236631": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2191580006": {
+        "original_tokens": 7,
+        "translated_tokens": 8,
+        "reordered": true
+      },
+      "1809964020": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "1057363547": {
+        "original_tokens": 8,
+        "translated_tokens": 10,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "780970161": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "615667259": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "210979117": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "744989655": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3960937922": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3219279796": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2720898024": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3946665029": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2709293439": {
+        "original_tokens": 15,
+        "translated_tokens": 16,
+        "reordered": true
+      },
+      "2794958495": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "488752679": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "1440602422": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "2526362535": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "701382701": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "802918832": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1391708521": {
+        "original_tokens": 3,
+        "translated_tokens": 4,
+        "reordered": true
+      },
+      "3235862068": {
+        "original_tokens": 6,
+        "translated_tokens": 9,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "54858227": {
+        "original_tokens": 9,
+        "translated_tokens": 12,
+        "reordered": true
+      },
+      "3334433396": {
+        "original_tokens": 11,
+        "translated_tokens": 12,
+        "reordered": true
+      },
+      "2169705185": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1469754031": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "628275031": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2474938940": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "4055019293": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1939118629": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1516467471": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "284459823": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2165480178": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1581983564": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "2682530289": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "53933494": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "2486628899": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "3170335283": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1354182381": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "318734715": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1228611582": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3819833139": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1081599663": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "3628025920": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "480925981": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3862629133": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "3182929151": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "1894878159": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "4162514026": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "907868427": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": true,
+        "missing_tokens": 4
+      },
+      "2129553669": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2968342812": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": true,
+        "missing_tokens": 4
+      },
+      "3664649404": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2228202821": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "349704338": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2817263998": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1231839381": {
+        "original_tokens": 5,
+        "translated_tokens": 5,
+        "reordered": false
+      },
+      "3761848707": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2557313311": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1836101498": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2271729042": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "1955962459": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "4007697799": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2563987683": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3823143990": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3878896595": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "334075444": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1952946751": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "860320001": {
+        "original_tokens": 8,
+        "translated_tokens": 11,
+        "reordered": true
+      },
+      "1985982508": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "677562659": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1677522996": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "4009901629": {
+        "original_tokens": 8,
+        "translated_tokens": 11,
+        "reordered": true
+      },
+      "707311945": {
+        "original_tokens": 6,
+        "translated_tokens": 8,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "2402916111": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3719118489": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "563018011": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "3751423711": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "998944061": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1496603105": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "107297214": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "743696282": {
+        "original_tokens": 15,
+        "translated_tokens": 17,
+        "reordered": true
+      },
+      "2051256929": {
+        "original_tokens": 7,
+        "translated_tokens": 8,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "400324857": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3681675424": {
+        "original_tokens": 5,
+        "translated_tokens": 5,
+        "reordered": false
+      },
+      "2437634726": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "1254994229": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "160628229": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1725928464": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "317079168": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1548584430": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2935471585": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "134200388": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "216725398": {
+        "original_tokens": 13,
+        "translated_tokens": 15,
+        "reordered": true
+      },
+      "1201875369": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2095668308": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2554001784": {
+        "original_tokens": 7,
+        "translated_tokens": 8,
+        "reordered": true
+      },
+      "3320804900": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2410464917": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "947371822": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "714432788": {
+        "original_tokens": 10,
+        "translated_tokens": 10,
+        "reordered": false
+      },
+      "173404118": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "24953571": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2497805382": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2645405211": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "677404705": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1562141642": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2001389111": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "20873033": {
+        "original_tokens": 5,
+        "translated_tokens": 5,
+        "reordered": false
+      },
+      "4140406916": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1282509635": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "501637283": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "3938051122": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "167244174": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3730830670": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "349267262": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "4066899438": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "2320898349": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "3756348742": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "1769980541": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "4003734136": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "2069903402": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2817800174": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2316405313": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2303740299": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3125108847": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3399068440": {
+        "original_tokens": 30,
+        "translated_tokens": 15,
+        "reordered": true
+      },
+      "1345204457": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3732046729": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "479209254": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1443941563": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1286090332": {
+        "original_tokens": 18,
+        "translated_tokens": 21,
+        "reordered": true
+      },
+      "3066749917": {
+        "original_tokens": 16,
+        "translated_tokens": 18,
+        "reordered": true
+      },
+      "1465975319": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "1945389717": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "2511919794": {
+        "original_tokens": 7,
+        "translated_tokens": 8,
+        "reordered": true
+      },
+      "508045935": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "52573990": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "1904876515": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "3706417587": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1095669519": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "3112026815": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "542066310": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "881612152": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "2978826451": {
+        "original_tokens": 16,
+        "translated_tokens": 18,
+        "reordered": true
+      },
+      "1669157395": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2346236465": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "835889078": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "361092587": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2272306226": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "4226920647": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1695244872": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2428442751": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1271017097": {
+        "original_tokens": 5,
+        "translated_tokens": 5,
+        "reordered": false
+      },
+      "3938781329": {
+        "original_tokens": 7,
+        "translated_tokens": 8,
+        "reordered": true
+      },
+      "3139406824": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "3055272330": {
+        "original_tokens": 11,
+        "translated_tokens": 12,
+        "reordered": true
+      },
+      "66882170": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "617911048": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "1651916565": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "931800025": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "3402815477": {
+        "original_tokens": 30,
+        "translated_tokens": 15,
+        "reordered": true
+      },
+      "493237764": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "3326145371": {
+        "original_tokens": 15,
+        "translated_tokens": 17,
+        "reordered": true
+      },
+      "2537547396": {
+        "original_tokens": 7,
+        "translated_tokens": 8,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "842146063": {
+        "original_tokens": 5,
+        "translated_tokens": 5,
+        "reordered": false
+      },
+      "566938273": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "2828720719": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "3097544876": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1446811317": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2137562404": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2698551496": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2286869349": {
+        "original_tokens": 8,
+        "translated_tokens": 11,
+        "reordered": true
+      },
+      "4273383622": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "370730849": {
+        "original_tokens": 8,
+        "translated_tokens": 11,
+        "reordered": true
+      },
+      "1315865629": {
+        "original_tokens": 6,
+        "translated_tokens": 8,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "3744708697": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "3648038609": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "692006723": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "2174214346": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "1218917876": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "1105957988": {
+        "original_tokens": 7,
+        "translated_tokens": 33,
+        "reordered": true
+      },
+      "800655279": {
+        "original_tokens": 16,
+        "translated_tokens": 28,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "3499636759": {
+        "original_tokens": 8,
+        "translated_tokens": 9,
+        "reordered": true
+      },
+      "2615857787": {
+        "original_tokens": 5,
+        "translated_tokens": 5,
+        "reordered": false
+      },
+      "743202161": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "3914295487": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "4052165110": {
+        "original_tokens": 9,
+        "translated_tokens": 10,
+        "reordered": true
+      },
+      "2121377442": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "935039462": {
+        "original_tokens": 8,
+        "translated_tokens": 8,
+        "reordered": false
+      },
+      "4049081768": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1757634753": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "3637584655": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "835968431": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "559704045": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2637421818": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2323778454": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "3613050716": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "9562573": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2421466322": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "885434933": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2214985381": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2316242941": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "203356865": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "132267140": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "608689499": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "2383766993": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1899346128": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1178832936": {
+        "original_tokens": 11,
+        "translated_tokens": 13,
+        "reordered": true
+      },
+      "1223341524": {
+        "original_tokens": 15,
+        "translated_tokens": 17,
+        "reordered": true
+      },
+      "3443164458": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "4052025947": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "421960942": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "2740121583": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1248377615": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "406861876": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1014495694": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "1762641650": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2495105303": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "861952046": {
+        "original_tokens": 5,
+        "translated_tokens": 5,
+        "reordered": false
+      },
+      "85794626": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2925666850": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1318067012": {
+        "original_tokens": 8,
+        "translated_tokens": 8,
+        "reordered": false
+      },
+      "2577116713": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "179462471": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1744159514": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2471836655": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "2814501768": {
+        "original_tokens": 7,
+        "translated_tokens": 32,
+        "reordered": true
+      },
+      "3987763597": {
+        "original_tokens": 5,
+        "translated_tokens": 6,
+        "reordered": true
+      },
+      "2772168133": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "2731743065": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "110573833": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3116249505": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "4177199465": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "3105730177": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "3060176103": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "206072549": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "3540014872": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "159434725": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "1446796844": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "1214712585": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "159604155": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3182899806": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "3133295357": {
+        "original_tokens": 18,
+        "translated_tokens": 29,
+        "reordered": true
+      },
+      "4190631897": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "1641855254": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2881393089": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2997561401": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "2687655344": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1454481026": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "2508084566": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "3227554981": {
+        "original_tokens": 9,
+        "translated_tokens": 10,
+        "reordered": true
+      },
+      "1369871380": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1601487032": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "3060695596": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "3097011724": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "3102592194": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2844729307": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "3002809107": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2597161495": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2660507905": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "182159004": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2336012040": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      }
+    }
+  },
+  {
+    "run_id": "39bb9c0a-5bf1-4b48-96ef-cf39cb71a84f",
+    "log_file": "/workspace/Bloodcraft/translations/uk/latest/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/uk/latest/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/uk/latest/metrics.json",
+    "git_commit": "ca0dfa0d",
+    "python_version": "3.11.12",
+    "argos_version": "1.8.0",
+    "model_version": "unknown",
+    "cli_args": {
+      "target_file": "Resources/Localization/Messages/Ukrainian.json",
+      "src": "en",
+      "dst": "uk",
+      "root": "/workspace/Bloodcraft",
+      "run_dir": "/workspace/Bloodcraft/translations/uk/latest",
+      "batch_size": 100,
+      "max_retries": 3,
+      "timeout": 60,
+      "overwrite": true,
+      "hashes": null,
+      "log_level": "ERROR",
+      "verbose": false,
+      "log_file": "/workspace/Bloodcraft/translations/uk/latest/translate.log",
+      "report_file": "/workspace/Bloodcraft/translations/uk/latest/skipped.csv",
+      "metrics_file": "/workspace/Bloodcraft/translations/uk/latest/metrics.json",
+      "dry_run": false,
+      "lenient_tokens": false,
+      "retry_mismatches": false,
+      "fix_order": false,
+      "run_index_file": "/workspace/Bloodcraft/translations/run_index.json"
+    },
+    "run_dir": "/workspace/Bloodcraft/translations/uk/latest",
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "timestamp": "2025-08-29T23:31:23Z",
+    "status": "success",
+    "processed": 61,
+    "successes": 0,
+    "timeouts": 0,
+    "token_reorders": 35,
+    "token_mismatches": 26,
+    "retry_attempts": 0,
+    "retry_successes": 0,
+    "retry_missing_tokens": 0,
+    "retry_extra_tokens": 0,
+    "token_mismatch_details": {
+      "1763623253": {
+        "missing": [
+          "15",
+          "16"
+        ],
+        "extra": [
+          "17",
+          "17"
+        ]
+      },
+      "145841390": {
+        "missing": [
+          "1",
+          "2",
+          "3"
+        ],
+        "extra": []
+      },
+      "2332227846": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "1763729577": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "2178615132": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "1057363547": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "3235862068": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "907868427": {
+        "missing": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "extra": []
+      },
+      "2968342812": {
+        "missing": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "extra": []
+      },
+      "1677522996": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "707311945": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "107297214": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "2051256929": {
+        "missing": [
+          "6"
+        ],
+        "extra": []
+      },
+      "4066899438": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "2320898349": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "3399068440": {
+        "missing": [
+          "0",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29"
+        ],
+        "extra": []
+      },
+      "1095669519": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "881612152": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "3402815477": {
+        "missing": [
+          "0",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29"
+        ],
+        "extra": []
+      },
+      "493237764": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "2537547396": {
+        "missing": [
+          "6"
+        ],
+        "extra": []
+      },
+      "1315865629": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "800655279": {
+        "missing": [
+          "15"
+        ],
+        "extra": []
+      },
+      "4052025947": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "1248377615": {
+        "missing": [
+          "3"
+        ],
+        "extra": []
+      },
+      "1014495694": {
+        "missing": [
+          "3"
+        ],
+        "extra": []
+      },
+      "1446796844": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "1214712585": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      }
+    },
+    "failures": {
+      "606627316": "placeholders only",
+      "2252098529": "placeholders only",
+      "3324923525": "placeholders only",
+      "311765273": "placeholders only",
+      "1763623253": "token mismatch on strict retry (missing ['15', '16'], unexpected ['17', '17']) [73b309e0]",
+      "2967576286": "placeholders only",
+      "145841390": "token mismatch on strict retry (missing ['1', '2', '3'], unexpected []) [ed9c7773]",
+      "2332227846": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "1182925736": "placeholders only",
+      "1763729577": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "3587073963": "placeholders only",
+      "2178615132": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "4023020194": "placeholders only",
+      "2480816305": "placeholders only",
+      "3084457547": "placeholders only",
+      "226227140": "placeholders only",
+      "2196432591": "placeholders only",
+      "85537047": "placeholders only",
+      "1716911803": "identical to source on strict retry",
+      "321106656": "placeholders only",
+      "823180732": "placeholders only",
+      "3279926559": "placeholders only",
+      "4255236631": "placeholders only",
+      "1057363547": "token mismatch on strict retry (missing ['0'], unexpected []) [1cdc317b]",
+      "3235862068": "token mismatch on strict retry (missing ['0'], unexpected []) [1cdc317b]",
+      "907868427": "token mismatch on strict retry (missing ['1', '2', '3', '4'], unexpected []) [66939eb2]",
+      "2968342812": "token mismatch on strict retry (missing ['1', '2', '3', '4'], unexpected []) [66939eb2]",
+      "3878896595": "placeholders only",
+      "1677522996": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "707311945": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "107297214": "token mismatch on strict retry (missing ['0'], unexpected []) [1cdc317b]",
+      "2051256929": "token mismatch on strict retry (missing ['6'], unexpected []) [9ca6ab0e]",
+      "1201875369": "placeholders only",
+      "2554001784": "placeholders only",
+      "4066899438": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "2320898349": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "3399068440": "stray brackets on strict retry",
+      "2511919794": "placeholders only",
+      "1095669519": "token mismatch on strict retry (missing ['0'], unexpected []) [1cdc317b]",
+      "881612152": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "2272306226": "placeholders only",
+      "2428442751": "placeholders only",
+      "3402815477": "stray brackets on strict retry",
+      "493237764": "token mismatch on strict retry (missing ['0'], unexpected []) [1cdc317b]",
+      "2537547396": "token mismatch on strict retry (missing ['6'], unexpected []) [9ca6ab0e]",
+      "2698551496": "placeholders only",
+      "1315865629": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "800655279": "token mismatch on strict retry (missing ['15'], unexpected []) [9cea038d]",
+      "885434933": "placeholders only",
+      "2383766993": "placeholders only",
+      "4052025947": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "2740121583": "placeholders only",
+      "1248377615": "token mismatch on strict retry (missing ['3'], unexpected []) [35857b71]",
+      "1014495694": "token mismatch on strict retry (missing ['3'], unexpected []) [35857b71]",
+      "2772168133": "placeholders only",
+      "1446796844": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "1214712585": "token mismatch on strict retry (missing ['1'], unexpected []) [dd89a2b8]",
+      "1641855254": "placeholders only",
+      "3227554981": "placeholders only",
+      "1369871380": "placeholders only",
+      "3002809107": "placeholders only"
+    },
+    "hash_stats": {
+      "606627316": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "2252098529": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "3324923525": {
+        "original_tokens": 6,
+        "translated_tokens": 7,
+        "reordered": true
+      },
+      "311765273": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1763623253": {
+        "original_tokens": 17,
+        "translated_tokens": 21,
+        "reordered": true,
+        "missing_tokens": 2,
+        "removed_tokens": 2
+      },
+      "2967576286": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "145841390": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": true,
+        "missing_tokens": 3
+      },
+      "2332227846": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "1182925736": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1763729577": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "3587073963": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2178615132": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "4023020194": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2480816305": {
+        "original_tokens": 9,
+        "translated_tokens": 10,
+        "reordered": true
+      },
+      "3084457547": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "226227140": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2196432591": {
+        "original_tokens": 9,
+        "translated_tokens": 10,
+        "reordered": true
+      },
+      "85537047": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1716911803": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "321106656": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "823180732": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "3279926559": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "4255236631": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1057363547": {
+        "original_tokens": 8,
+        "translated_tokens": 10,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "3235862068": {
+        "original_tokens": 6,
+        "translated_tokens": 9,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "907868427": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": true,
+        "missing_tokens": 4
+      },
+      "2968342812": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": true,
+        "missing_tokens": 4
+      },
+      "3878896595": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1677522996": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "707311945": {
+        "original_tokens": 6,
+        "translated_tokens": 8,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "107297214": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "2051256929": {
+        "original_tokens": 7,
+        "translated_tokens": 8,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "1201875369": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2554001784": {
+        "original_tokens": 7,
+        "translated_tokens": 8,
+        "reordered": true
+      },
+      "4066899438": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "2320898349": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "3399068440": {
+        "original_tokens": 30,
+        "translated_tokens": 15,
+        "reordered": true
+      },
+      "2511919794": {
+        "original_tokens": 7,
+        "translated_tokens": 8,
+        "reordered": true
+      },
+      "1095669519": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "881612152": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "2272306226": {
+        "original_tokens": 6,
+        "translated_tokens": 6,
+        "reordered": false
+      },
+      "2428442751": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "3402815477": {
+        "original_tokens": 30,
+        "translated_tokens": 15,
+        "reordered": true
+      },
+      "493237764": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "2537547396": {
+        "original_tokens": 7,
+        "translated_tokens": 8,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "2698551496": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "1315865629": {
+        "original_tokens": 6,
+        "translated_tokens": 8,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "800655279": {
+        "original_tokens": 16,
+        "translated_tokens": 28,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "885434933": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "2383766993": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "4052025947": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "2740121583": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1248377615": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "1014495694": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "2772168133": {
+        "original_tokens": 4,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "1446796844": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "1214712585": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": true,
+        "missing_tokens": 1
+      },
+      "1641855254": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "3227554981": {
+        "original_tokens": 9,
+        "translated_tokens": 10,
+        "reordered": true
+      },
+      "1369871380": {
+        "original_tokens": 3,
+        "translated_tokens": 3,
+        "reordered": false
+      },
+      "3002809107": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      }
+    }
+  },
+  {
+    "run_id": "39bb9c0a-5bf1-4b48-96ef-cf39cb71a84f",
+    "log_file": "/workspace/Bloodcraft/translations/uk/latest/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/uk/latest/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/uk/latest/metrics.json",
+    "git_commit": "ca0dfa0d",
+    "python_version": "3.11.12",
+    "argos_version": "1.8.0",
+    "model_version": "unknown",
+    "cli_args": {
+      "target_file": "Resources/Localization/Messages/Ukrainian.json",
+      "src": "en",
+      "dst": "uk",
+      "root": "/workspace/Bloodcraft",
+      "run_dir": "/workspace/Bloodcraft/translations/uk/latest",
+      "batch_size": 100,
+      "max_retries": 3,
+      "timeout": 60,
+      "overwrite": true,
+      "hashes": null,
+      "log_level": "ERROR",
+      "verbose": false,
+      "log_file": "/workspace/Bloodcraft/translations/uk/latest/translate.log",
+      "report_file": "/workspace/Bloodcraft/translations/uk/latest/skipped.csv",
+      "metrics_file": "/workspace/Bloodcraft/translations/uk/latest/metrics.json",
+      "dry_run": false,
+      "lenient_tokens": false,
+      "retry_mismatches": false,
+      "fix_order": false,
+      "run_index_file": "/workspace/Bloodcraft/translations/run_index.json"
+    },
+    "run_dir": "/workspace/Bloodcraft/translations/uk/latest",
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "timestamp": "2025-08-29T23:32:59Z",
+    "status": "success",
+    "processed": 26,
+    "successes": 20,
+    "timeouts": 0,
+    "token_reorders": 12,
+    "token_mismatches": 26,
+    "retry_attempts": 0,
+    "retry_successes": 0,
+    "retry_missing_tokens": 0,
+    "retry_extra_tokens": 0,
+    "token_mismatch_details": {
+      "1763623253": {
+        "missing": [
+          "15",
+          "16"
+        ],
+        "extra": [
+          "17",
+          "17"
+        ]
+      },
+      "145841390": {
+        "missing": [
+          "1",
+          "2",
+          "3"
+        ],
+        "extra": []
+      },
+      "2332227846": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "1763729577": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "2178615132": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "1057363547": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "3235862068": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "907868427": {
+        "missing": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "extra": []
+      },
+      "2968342812": {
+        "missing": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "extra": []
+      },
+      "1677522996": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "707311945": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "107297214": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "2051256929": {
+        "missing": [
+          "6"
+        ],
+        "extra": []
+      },
+      "4066899438": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "2320898349": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "1095669519": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "881612152": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "493237764": {
+        "missing": [
+          "0"
+        ],
+        "extra": []
+      },
+      "2537547396": {
+        "missing": [
+          "6"
+        ],
+        "extra": []
+      },
+      "1315865629": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "800655279": {
+        "missing": [
+          "15"
+        ],
+        "extra": []
+      },
+      "4052025947": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "1248377615": {
+        "missing": [
+          "3"
+        ],
+        "extra": []
+      },
+      "1014495694": {
+        "missing": [
+          "3"
+        ],
+        "extra": []
+      },
+      "1446796844": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      },
+      "1214712585": {
+        "missing": [
+          "1"
+        ],
+        "extra": []
+      }
+    },
+    "failures": {
+      "2332227846": "placeholders only",
+      "907868427": "placeholders only",
+      "4066899438": "placeholders only",
+      "2320898349": "placeholders only",
+      "1446796844": "placeholders only",
+      "1214712585": "placeholders only"
+    },
+    "hash_stats": {
+      "1763623253": {
+        "original_tokens": 17,
+        "removed_tokens": 2,
+        "missing_tokens": 2,
+        "translated_tokens": 21,
+        "reordered": true
+      },
+      "145841390": {
+        "original_tokens": 4,
+        "missing_tokens": 3,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "2332227846": {
+        "original_tokens": 2,
+        "missing_tokens": 1,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1763729577": {
+        "original_tokens": 3,
+        "missing_tokens": 1,
+        "translated_tokens": 3,
+        "reordered": true
+      },
+      "2178615132": {
+        "original_tokens": 2,
+        "missing_tokens": 1,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1057363547": {
+        "original_tokens": 8,
+        "missing_tokens": 1,
+        "translated_tokens": 10,
+        "reordered": true
+      },
+      "3235862068": {
+        "original_tokens": 6,
+        "missing_tokens": 1,
+        "translated_tokens": 9,
+        "reordered": true
+      },
+      "907868427": {
+        "original_tokens": 6,
+        "missing_tokens": 4,
+        "translated_tokens": 6,
+        "reordered": true
+      },
+      "2968342812": {
+        "original_tokens": 6,
+        "missing_tokens": 4,
+        "translated_tokens": 6,
+        "reordered": true
+      },
+      "1677522996": {
+        "original_tokens": 2,
+        "missing_tokens": 1,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "707311945": {
+        "original_tokens": 6,
+        "missing_tokens": 1,
+        "translated_tokens": 8,
+        "reordered": true
+      },
+      "107297214": {
+        "original_tokens": 1,
+        "missing_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2051256929": {
+        "original_tokens": 7,
+        "missing_tokens": 1,
+        "translated_tokens": 8,
+        "reordered": true
+      },
+      "4066899438": {
+        "original_tokens": 2,
+        "missing_tokens": 1,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "2320898349": {
+        "original_tokens": 2,
+        "missing_tokens": 1,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1095669519": {
+        "original_tokens": 1,
+        "missing_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "881612152": {
+        "original_tokens": 3,
+        "missing_tokens": 1,
+        "translated_tokens": 3,
+        "reordered": true
+      },
+      "493237764": {
+        "original_tokens": 1,
+        "missing_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2537547396": {
+        "original_tokens": 7,
+        "missing_tokens": 1,
+        "translated_tokens": 8,
+        "reordered": true
+      },
+      "1315865629": {
+        "original_tokens": 6,
+        "missing_tokens": 1,
+        "translated_tokens": 8,
+        "reordered": true
+      },
+      "800655279": {
+        "original_tokens": 16,
+        "missing_tokens": 1,
+        "translated_tokens": 28,
+        "reordered": true
+      },
+      "4052025947": {
+        "original_tokens": 2,
+        "missing_tokens": 1,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1248377615": {
+        "original_tokens": 4,
+        "missing_tokens": 1,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "1014495694": {
+        "original_tokens": 4,
+        "missing_tokens": 1,
+        "translated_tokens": 4,
+        "reordered": false
+      },
+      "1446796844": {
+        "original_tokens": 2,
+        "missing_tokens": 1,
+        "translated_tokens": 2,
+        "reordered": false
+      },
+      "1214712585": {
+        "original_tokens": 2,
+        "missing_tokens": 1,
+        "translated_tokens": 2,
+        "reordered": false
+      }
+    }
+  }
+]
