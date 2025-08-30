@@ -1,0 +1,82 @@
+[
+  {
+    "run_id": "a30b1ce2-9c28-4460-9304-72c5cf41ab5d",
+    "log_file": "/workspace/Bloodcraft/translations/pl/20250830-203723/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/pl/20250830-203723/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/pl/20250830-203723/metrics.json",
+    "git_commit": "d33053d0",
+    "python_version": "3.11.12",
+    "argos_version": "1.9.6",
+    "model_version": "unknown",
+    "cli_args": {
+      "target_file": "Resources/Localization/Messages/Polish.json",
+      "src": "en",
+      "dst": "pl",
+      "root": "/workspace/Bloodcraft",
+      "run_dir": "/workspace/Bloodcraft/translations/pl/20250830-203723",
+      "batch_size": 100,
+      "max_retries": 3,
+      "timeout": 60,
+      "overwrite": true,
+      "hashes": [
+        "3002809107",
+        "2597161495",
+        "2660507905",
+        "182159004",
+        "2336012040"
+      ],
+      "log_level": "INFO",
+      "verbose": false,
+      "log_file": "/workspace/Bloodcraft/translations/pl/20250830-203723/translate.log",
+      "report_file": "/workspace/Bloodcraft/translations/pl/20250830-203723/skipped.csv",
+      "metrics_file": "/workspace/Bloodcraft/translations/pl/20250830-203723/metrics.json",
+      "dry_run": false,
+      "lenient_tokens": false,
+      "retry_mismatches": false,
+      "fix_order": false,
+      "run_index_file": "/workspace/Bloodcraft/translations/run_index.json"
+    },
+    "run_dir": "/workspace/Bloodcraft/translations/pl/20250830-203723",
+    "file": "Resources/Localization/Messages/Polish.json",
+    "timestamp": "2025-08-30T20:37:29Z",
+    "status": "success",
+    "processed": 5,
+    "successes": 5,
+    "timeouts": 0,
+    "token_reorders": 0,
+    "token_mismatches": 0,
+    "retry_attempts": 0,
+    "retry_successes": 0,
+    "retry_missing_tokens": 0,
+    "retry_extra_tokens": 0,
+    "token_mismatch_details": {},
+    "failures": {},
+    "hash_stats": {
+      "3002809107": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2597161495": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2660507905": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "182159004": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2336012040": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      }
+    }
+  }
+]

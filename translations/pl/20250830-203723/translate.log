@@ -1,0 +1,32 @@
+2025-08-30 20:37:23,962 INFO target_file=Resources/Localization/Messages/Polish.json src=en dst=pl batch_size=100 timeout=60 max_retries=3 run_dir=/workspace/Bloodcraft/translations/pl/20250830-203723 git_commit=d33053d0 model_version=unknown
+2025-08-30 20:37:23,962 INFO NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.
+2025-08-30 20:37:23,964 INFO Batch 1/3 start @ 0.00s
+2025-08-30 20:37:26,166 INFO 3002809107: TRANSLATED
+  Original: Prefab with GUID {guidHash} not found!
+  Result: Prefab z GUID {guidHash} nie znaleziono!
+2025-08-30 20:37:26,167 INFO Batch 1/3 end @ 2.20s (2.20s)
+2025-08-30 20:37:26,167 INFO Processed 1/5 lines
+2025-08-30 20:37:26,167 INFO Batch 2/3 start @ 2.20s
+2025-08-30 20:37:26,340 INFO 2597161495: TRANSLATED
+  Original: No hovered entity!
+  Result: Nie ma unoszonej istoty!
+2025-08-30 20:37:26,340 INFO 2660507905: TRANSLATED
+  Original: No Castle Heart!
+  Result: Nie Castle Heart!
+2025-08-30 20:37:26,340 INFO 182159004: TRANSLATED
+  Original: No Familiar Active!
+  Result: Brak Familiar Active!
+2025-08-30 20:37:26,340 INFO Batch 2/3 end @ 2.38s (0.17s)
+2025-08-30 20:37:26,340 INFO Processed 4/5 lines
+2025-08-30 20:37:26,340 INFO Batch 3/3 start @ 2.38s
+2025-08-30 20:37:26,467 INFO 2336012040: TRANSLATED
+  Original: Renamed '{oldName}' to '{newName}'!
+  Result: Zmiana nazwy "{oldName}" na "{newName}"!
+2025-08-30 20:37:26,469 INFO Batch 3/3 end @ 2.50s (0.13s)
+2025-08-30 20:37:26,470 INFO Processed 5/5 lines
+2025-08-30 20:37:26,470 INFO Processed 3 batches in 2.51 seconds
+2025-08-30 20:37:26,471 INFO Report breakdown: none
+2025-08-30 20:37:29,548 INFO Wrote translations to /workspace/Bloodcraft/Resources/Localization/Messages/Polish.json
+2025-08-30 20:37:29,550 INFO Received 0 rows; deduplicated to 0 rows
+2025-08-30 20:37:29,551 INFO Wrote skip report to /workspace/Bloodcraft/translations/pl/20250830-203723/skipped.csv with 0 row(s)
+2025-08-30 20:37:29,551 INFO Summary: 5/5 translated, 0 skipped
