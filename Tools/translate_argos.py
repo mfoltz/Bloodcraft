@@ -573,6 +573,64 @@ def _append_metrics_entry(args, *, status: str, **extra) -> dict:
     return entry
 
 
+def _latest_metrics_entry(args) -> tuple[list, dict | None]:
+    """Return metrics log and most recent entry for ``args.run_id``."""
+
+    try:
+        log = _read_json(args.metrics_file, default=[])
+    except Exception:
+        logger.exception("Failed to read metrics file")
+        return [], None
+    if not isinstance(log, list):
+        return [], None
+    for entry in reversed(log):
+        if entry.get("run_id") == getattr(args, "run_id", None):
+            return log, entry
+    return log, None
+
+
+def _finalize_metrics(
+    args,
+    processed: int,
+    successes: int,
+    exit_code: int,
+    exit_msg: str | None,
+) -> None:
+    """Update the metrics entry with final counts and status."""
+
+    log, entry = _latest_metrics_entry(args)
+    status = "failed" if exit_code else "success"
+    if entry is None and log and getattr(args, "metrics_recorded", False):
+        entry = log[-1]
+    if entry is None:
+        extra: dict = {}
+        if exit_msg:
+            extra["error"] = exit_msg
+        _append_metrics_entry(
+            args,
+            status=status,
+            processed=processed,
+            successes=successes,
+            timeouts=0,
+            token_reorders=0,
+            token_mismatches=0,
+            token_mismatch_details={},
+            failures={},
+            hash_stats={},
+            **extra,
+        )
+        return
+
+    entry["processed"] = processed
+    entry["successes"] = successes
+    if exit_code:
+        if entry.get("status") not in ("failed", "interrupted"):
+            entry["status"] = "failed"
+        if exit_msg:
+            entry["error"] = exit_msg
+    _write_json(args.metrics_file, log)
+
+
 def write_failure_metrics(args, error, *, status: str = "failed") -> None:
     """Record metrics for a failed run if none were written."""
 
@@ -1912,11 +1970,21 @@ def main():
                     )
                     args.hashes = hashes
             except KeyboardInterrupt:
+                _, entry = _latest_metrics_entry(args)
+                if entry:
+                    processed_total = entry.get("processed", 0)
+                    translated_total = entry.get("successes", 0)
+                    failures_total = len(entry.get("failures", {}))
                 write_failure_metrics(args, "interrupted", status="interrupted")
                 logger.warning("Translation aborted by user")
                 exit_code = 1
                 exit_msg = "Interrupted"
             except BaseException as exc:
+                _, entry = _latest_metrics_entry(args)
+                if entry:
+                    processed_total = entry.get("processed", 0)
+                    translated_total = entry.get("successes", 0)
+                    failures_total = len(entry.get("failures", {}))
                 write_failure_metrics(args, exc, status="failed")
                 error_msg = str(exc) or exc.__class__.__name__
                 logger.error(
@@ -2036,6 +2104,14 @@ def main():
             exit_code = exit_code or 1
         if failures_total:
             exit_code = exit_code or 1
+
+        _finalize_metrics(
+            args,
+            processed_total,
+            translated_total,
+            exit_code,
+            exit_msg,
+        )
 
         for handler in logger.handlers:
             handler.flush()
