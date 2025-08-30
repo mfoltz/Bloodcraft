@@ -1,0 +1,131 @@
+[
+  {
+    "run_id": "05ed0582-ae8f-42b6-9609-8fca117ba9c2",
+    "log_file": "/workspace/Bloodcraft/translations/ja/20250830-184826/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/ja/20250830-184826/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/metrics_ja.json",
+    "git_commit": "48904d0b",
+    "python_version": "3.11.12",
+    "argos_version": "1.8.0",
+    "model_version": "unknown",
+    "cli_args": {
+      "target_file": "Resources/Localization/Messages/Japanese.json",
+      "src": "en",
+      "dst": "ja",
+      "root": "/workspace/Bloodcraft",
+      "run_dir": "/workspace/Bloodcraft/translations/ja/20250830-184826",
+      "batch_size": 100,
+      "max_retries": 3,
+      "timeout": 60,
+      "overwrite": true,
+      "hashes": null,
+      "log_level": "INFO",
+      "verbose": false,
+      "log_file": "/workspace/Bloodcraft/translations/ja/20250830-184826/translate.log",
+      "report_file": "/workspace/Bloodcraft/translations/ja/20250830-184826/skipped.csv",
+      "metrics_file": "/workspace/Bloodcraft/metrics_ja.json",
+      "dry_run": false,
+      "lenient_tokens": false,
+      "retry_mismatches": false,
+      "fix_order": false,
+      "run_index_file": "/workspace/Bloodcraft/translations/run_index.json"
+    },
+    "run_dir": "/workspace/Bloodcraft/translations/ja/20250830-184826",
+    "file": "Resources/Localization/Messages/Japanese.json",
+    "timestamp": "2025-08-30T18:49:18Z",
+    "status": "interrupted",
+    "processed": 0,
+    "successes": 0,
+    "timeouts": 0,
+    "token_reorders": 0,
+    "token_mismatches": 0,
+    "retry_attempts": 0,
+    "retry_successes": 0,
+    "retry_missing_tokens": 0,
+    "retry_extra_tokens": 0,
+    "token_mismatch_details": {},
+    "failures": {},
+    "hash_stats": {},
+    "error": "Interrupted"
+  },
+  {
+    "run_id": "3d379f6b-63c1-4071-9e68-5e3f1f64d37c",
+    "log_file": "/workspace/Bloodcraft/translations/ja/20250830-184955/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/ja/20250830-184955/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/metrics_ja.json",
+    "git_commit": "48904d0b",
+    "python_version": "3.11.12",
+    "argos_version": "1.8.0",
+    "model_version": "unknown",
+    "cli_args": {
+      "target_file": "Resources/Localization/Messages/Japanese.json",
+      "src": "en",
+      "dst": "ja",
+      "root": "/workspace/Bloodcraft",
+      "run_dir": "/workspace/Bloodcraft/translations/ja/20250830-184955",
+      "batch_size": 100,
+      "max_retries": 3,
+      "timeout": 60,
+      "overwrite": true,
+      "hashes": [
+        "3002809107",
+        "2597161495",
+        "2660507905",
+        "182159004",
+        "2336012040"
+      ],
+      "log_level": "INFO",
+      "verbose": false,
+      "log_file": "/workspace/Bloodcraft/translations/ja/20250830-184955/translate.log",
+      "report_file": "/workspace/Bloodcraft/translations/ja/20250830-184955/skipped.csv",
+      "metrics_file": "/workspace/Bloodcraft/metrics_ja.json",
+      "dry_run": false,
+      "lenient_tokens": false,
+      "retry_mismatches": false,
+      "fix_order": false,
+      "run_index_file": "/workspace/Bloodcraft/translations/run_index.json"
+    },
+    "run_dir": "/workspace/Bloodcraft/translations/ja/20250830-184955",
+    "file": "Resources/Localization/Messages/Japanese.json",
+    "timestamp": "2025-08-30T18:50:00Z",
+    "status": "failed",
+    "processed": 5,
+    "successes": 5,
+    "timeouts": 0,
+    "token_reorders": 0,
+    "token_mismatches": 0,
+    "retry_attempts": 0,
+    "retry_successes": 0,
+    "retry_missing_tokens": 0,
+    "retry_extra_tokens": 0,
+    "token_mismatch_details": {},
+    "failures": {},
+    "hash_stats": {
+      "3002809107": {
+        "original_tokens": 1,
+        "translated_tokens": 1,
+        "reordered": false
+      },
+      "2597161495": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2660507905": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "182159004": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      },
+      "2336012040": {
+        "original_tokens": 2,
+        "translated_tokens": 2,
+        "reordered": false
+      }
+    }
+  }
+]
