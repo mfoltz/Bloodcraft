@@ -5158,5 +5158,279 @@
         ]
       }
     ]
+  },
+  {
+    "timestamp": "2025-08-30T18:50:00Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 14,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "3637474013",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{3}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "3254231727",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{handler.GetBloodType()}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "2785130336",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "2191580006",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{vBloodPrefabGuid.GetPrefabName()}",
+          "{vBloodPrefabGuid.GetPrefabName()}",
+          "{vBloodPrefabGuid.GetPrefabName()}",
+          "{vBloodPrefabGuid.GetPrefabName()}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "2709293439",
+        "missing": [],
+        "extra": [
+          "{progress}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "54858227",
+        "missing": [],
+        "extra": [
+          "{prestigeLevel}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "860320001",
+        "missing": [],
+        "extra": [
+          "{quantity}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "4009901629",
+        "missing": [],
+        "extra": [
+          "{quantity}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "1286090332",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{handler.GetBloodType()}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "3066749917",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{prestiges}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "2978826451",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{prestiges}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "3938781329",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{2}",
+          "{2}",
+          "{2}",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "2286869349",
+        "missing": [],
+        "extra": [
+          "{1}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "370730849",
+        "missing": [],
+        "extra": [
+          "{1}"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-30T18:50:19Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 14,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "3637474013",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{3}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "3254231727",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{handler.GetBloodType()}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "2785130336",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>",
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "2191580006",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{vBloodPrefabGuid.GetPrefabName()}",
+          "{vBloodPrefabGuid.GetPrefabName()}",
+          "{vBloodPrefabGuid.GetPrefabName()}",
+          "{vBloodPrefabGuid.GetPrefabName()}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "2709293439",
+        "missing": [],
+        "extra": [
+          "{progress}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "54858227",
+        "missing": [],
+        "extra": [
+          "{prestigeLevel}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "860320001",
+        "missing": [],
+        "extra": [
+          "{quantity}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "4009901629",
+        "missing": [],
+        "extra": [
+          "{quantity}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "1286090332",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{handler.GetBloodType()}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "3066749917",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{prestiges}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "2978826451",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{prestiges}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "3938781329",
+        "missing": [],
+        "extra": [
+          "</color>",
+          "{2}",
+          "{2}",
+          "{2}",
+          "{2}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "2286869349",
+        "missing": [],
+        "extra": [
+          "{1}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/Japanese.json",
+        "key": "370730849",
+        "missing": [],
+        "extra": [
+          "{1}"
+        ]
+      }
+    ]
   }
 ]
