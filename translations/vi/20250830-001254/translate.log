@@ -1,0 +1,3 @@
+2025-08-30 00:15:24,445 ERROR Failed: Interrupted. Metrics written to /workspace/Bloodcraft/translations/vi/20250830-001254/metrics.json
+2025-08-30 00:15:28,380 ERROR Exited with code Interrupted
+2025-08-30 00:15:28,382 ERROR Summary: 328/428 translated, 9 skipped. Failed: Exited with code Interrupted

@@ -1,0 +1,11 @@
+hash,english,reason,category
+1491097539,Binding failed...,contains English on strict retry,english
+1763623253,New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>],stray brackets on strict retry,other
+24953571,"Can't change or activate class spells when inventory is full, need at least one space to safely handle jewels when switching.",contains English on strict retry,english
+349267262,"Can't change or active class spells when inventory is full, need at least one space to safely handle jewels when switching.",contains English on strict retry,english
+3399068440,<color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L,stray brackets on strict retry,other
+2511919794,"<color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $""{colorCode}*</color> {levelAndPrestiges}"" : $"" {levelAndPrestiges}"")}",placeholders only,placeholder
+3402815477,<color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L,stray brackets on strict retry,other
+800655279,{0}: <color=green>{1}</color> <color=white>{2}</color>x<color=#FFC0CB>{3}</color> [<color=white>{4}</color>/<color=yellow>{3}</color>],stray brackets on strict retry,other
+2772168133,{0}[<color=white>{1}</color>],placeholders only,placeholder
+,,"{""english"": 3, ""other"": 4, ""placeholder"": 2}",summary

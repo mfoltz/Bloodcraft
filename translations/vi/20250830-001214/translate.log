@@ -1,0 +1,815 @@
+2025-08-30 00:12:14,534 INFO target_file=Resources/Localization/Messages/Vietnamese.json src=en dst=vi batch_size=100 timeout=60 max_retries=3 run_dir=/workspace/Bloodcraft/translations/vi/20250830-001214 git_commit=55fa62b4 model_version=unknown
+2025-08-30 00:12:14,535 INFO NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.
+2025-08-30 00:12:14,554 INFO Batch 1/362 start @ 0.00s
+2025-08-30 00:12:16,886 INFO 3439613370: TRANSLATED
+  Original: Welcome to Bloodcraft
+  Result: Chào mừng đến với nghệ thuật máu
+2025-08-30 00:12:16,887 WARNING 1491097539: SKIPPED (contains English)
+  Original: Binding failed...
+  Result: Việc in bị lỗi...
+2025-08-30 00:12:16,887 INFO Batch 1/362 end @ 2.33s (2.33s)
+2025-08-30 00:12:16,887 INFO Processed 2/428 lines
+2025-08-30 00:12:16,887 INFO Batch 2/362 start @ 2.33s
+2025-08-30 00:12:17,094 WARNING 606627316: token mismatch [35857b71] (missing ['3']) — Suggested fix: add ['3']
+2025-08-30 00:12:17,095 WARNING 606627316: SKIPPED (token mismatch (missing ['3']) [35857b71])
+  Original: {0} improved to [<color=white>{1}</color>]
+  Result: [[TOKEN_0]] cải thiện [[TOKEN_1]] [[TOKEN_2]]) [[TOKEN_2]])
+2025-08-30 00:12:17,095 INFO Batch 2/362 end @ 2.54s (0.21s)
+2025-08-30 00:12:17,095 INFO Processed 3/428 lines
+2025-08-30 00:12:17,095 INFO Batch 3/362 start @ 2.54s
+2025-08-30 00:12:17,592 WARNING 2007397999: token mismatch [35857b71] (missing ['3']) — Suggested fix: add ['3']
+2025-08-30 00:12:17,595 WARNING 2007397999: SKIPPED (token mismatch (missing ['3']) [35857b71])
+  Original: +<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>)
+  Result: [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_6]] [[TOKEN_2]]) [[TOKEN_7]] [[TOKEN_8]] [[TOKEN_4]]) [[TOKEN_5]]) [[TOKEN_5]]) [[TOKEN_9]]
+2025-08-30 00:12:17,595 INFO Batch 3/362 end @ 3.04s (0.50s)
+2025-08-30 00:12:17,595 INFO Processed 4/428 lines
+2025-08-30 00:12:17,595 INFO Batch 4/362 start @ 3.04s
+2025-08-30 00:12:17,899 WARNING 1407688215: tokens reordered
+2025-08-30 00:12:17,902 INFO 1407688215: TRANSLATED
+  Original: <color=green>{0}</color>x<color=white>{1}</color> received from {2}
+  Result: <color=green> {0} </color>) </color>x <color=white> {1} </color> nhận từ {2}
+2025-08-30 00:12:17,904 INFO Batch 4/362 end @ 3.35s (0.31s)
+2025-08-30 00:12:17,904 INFO Processed 5/428 lines
+2025-08-30 00:12:17,905 INFO Batch 5/362 start @ 3.35s
+2025-08-30 00:12:18,194 WARNING 2252098529: tokens reordered
+2025-08-30 00:12:18,195 INFO 2252098529: TRANSLATED
+  Original: <color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}
+  Result: <color=green>Gold Ore</color>)x <color=white>) <color=white>) {0} </color> đã nhận từ {1})
+2025-08-30 00:12:18,195 INFO Batch 5/362 end @ 3.64s (0.29s)
+2025-08-30 00:12:18,195 INFO Processed 6/428 lines
+2025-08-30 00:12:18,195 INFO Batch 6/362 start @ 3.64s
+2025-08-30 00:12:18,600 WARNING 3115116616: tokens reordered
+2025-08-30 00:12:18,605 INFO 3115116616: TRANSLATED
+  Original: <color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
+  Result: <color=green>Gold Ore</color>)x <color=white>) <color=white>) {0} </color>) </color> nhận từ {1}), nhưng nó rơi xuống đất từ khi kho hàng của bạn đầy.
+2025-08-30 00:12:18,605 INFO Batch 6/362 end @ 4.05s (0.41s)
+2025-08-30 00:12:18,606 INFO Processed 7/428 lines
+2025-08-30 00:12:18,606 INFO Batch 7/362 start @ 4.05s
+2025-08-30 00:12:18,911 WARNING 2972244104: tokens reordered
+2025-08-30 00:12:18,913 INFO 2972244104: TRANSLATED
+  Original: <color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}
+  Result: <color=green> Radiant Fiber </color>)x <color=white>) <color=white>) {0} </color> đã nhận từ {1})
+2025-08-30 00:12:18,914 INFO Batch 7/362 end @ 4.36s (0.31s)
+2025-08-30 00:12:18,915 INFO Processed 8/428 lines
+2025-08-30 00:12:18,916 INFO Batch 8/362 start @ 4.36s
+2025-08-30 00:12:19,285 WARNING 4110714393: tokens reordered
+2025-08-30 00:12:19,288 INFO 4110714393: TRANSLATED
+  Original: <color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
+  Result: <color=green> Radent Fiber </color>)x <color=white>) <color=white>) {0} </color> nhận từ {1}), nhưng nó rơi xuống đất từ khi kho hàng của bạn đầy.
+2025-08-30 00:12:19,288 INFO Batch 8/362 end @ 4.73s (0.37s)
+2025-08-30 00:12:19,288 INFO Processed 9/428 lines
+2025-08-30 00:12:19,288 INFO Batch 9/362 start @ 4.73s
+2025-08-30 00:12:19,716 WARNING 3997845506: tokens reordered
+2025-08-30 00:12:19,717 INFO 3997845506: TRANSLATED
+  Original: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}!
+  Result: <color=green> Dòng DõiBonus </color>x <color=white>) <color=white>) {0} </color> đã nhận từ {1})!
+2025-08-30 00:12:19,717 INFO Batch 9/362 end @ 5.16s (0.43s)
+2025-08-30 00:12:19,717 INFO Processed 10/428 lines
+2025-08-30 00:12:19,717 INFO Batch 10/362 start @ 5.16s
+2025-08-30 00:12:20,123 WARNING 3141472524: tokens reordered
+2025-08-30 00:12:20,123 INFO 3141472524: TRANSLATED
+  Original: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.
+  Result: <color=green> Dòng DõiBonus </color>)x <color=white>) <color=white>) {0} </color> đã nhận từ {1}, nhưng một số đã rơi xuống đất từ khi kho hàng của bạn đầy.
+2025-08-30 00:12:20,125 INFO Batch 10/362 end @ 5.57s (0.41s)
+2025-08-30 00:12:20,126 INFO Processed 11/428 lines
+2025-08-30 00:12:20,128 INFO Batch 11/362 start @ 5.57s
+2025-08-30 00:12:20,461 WARNING 2576121314: tokens reordered
+2025-08-30 00:12:20,465 INFO 2576121314: TRANSLATED
+  Original: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}!
+  Result: <color=green>Bonus Saplings </color>x <color=white>) <color=white>) {0} </color> đã nhận từ {1})!
+2025-08-30 00:12:20,465 INFO Batch 11/362 end @ 5.91s (0.34s)
+2025-08-30 00:12:20,466 INFO Processed 12/428 lines
+2025-08-30 00:12:20,466 INFO Batch 12/362 start @ 5.91s
+2025-08-30 00:12:20,834 WARNING 3665962604: tokens reordered
+2025-08-30 00:12:20,835 INFO 3665962604: TRANSLATED
+  Original: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.
+  Result: <color=green>Bonus Saplings </color>)x <color=white>) <color=white> {0} </color> nhận từ {1}, nhưng một số rơi xuống đất từ khi kho hàng của bạn đầy.
+2025-08-30 00:12:20,836 INFO Batch 12/362 end @ 6.28s (0.37s)
+2025-08-30 00:12:20,836 INFO Processed 13/428 lines
+2025-08-30 00:12:20,837 INFO Batch 13/362 start @ 6.28s
+2025-08-30 00:12:21,130 WARNING 3324923525: tokens reordered
+2025-08-30 00:12:21,131 INFO 3324923525: TRANSLATED
+  Original: <color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}
+  Result: <color=green> </color>x <color=white>) {0}) {0} </color> đã nhận từ {1}
+2025-08-30 00:12:21,131 INFO Batch 13/362 end @ 6.58s (0.29s)
+2025-08-30 00:12:21,131 INFO Processed 14/428 lines
+2025-08-30 00:12:21,131 INFO Batch 14/362 start @ 6.58s
+2025-08-30 00:12:21,465 INFO 3054245516: TRANSLATED
+  Original: <color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
+  Result: <color=green> TOKEN </color>)x <color=white> {0} </color> đã nhận từ {1}), nhưng nó đã rơi xuống đất từ khi kho hàng của bạn đầy.
+2025-08-30 00:12:21,468 INFO Batch 14/362 end @ 6.91s (0.34s)
+2025-08-30 00:12:21,469 INFO Processed 15/428 lines
+2025-08-30 00:12:21,470 INFO Batch 15/362 start @ 6.92s
+2025-08-30 00:12:21,609 INFO 2786260061: TRANSLATED
+  Original: Your <color=#00FFFF>Daily Quest</color> has been refreshed!
+  Result: Tìm kiếm <color=#00FFFF> Daily </color> đã được làm mới!
+2025-08-30 00:12:21,610 INFO Batch 15/362 end @ 7.06s (0.14s)
+2025-08-30 00:12:21,610 INFO Processed 16/428 lines
+2025-08-30 00:12:21,610 INFO Batch 16/362 start @ 7.06s
+2025-08-30 00:12:21,780 INFO 311765273: TRANSLATED
+  Original: Your <color=#BF40BF>Weekly Quest</color> has been refreshed!
+  Result: Tìm kiếm <color=#BF40BF> của bạn </color>) đã được làm mới!
+2025-08-30 00:12:21,781 INFO Batch 16/362 end @ 7.23s (0.17s)
+2025-08-30 00:12:21,782 INFO Processed 17/428 lines
+2025-08-30 00:12:21,783 INFO Batch 17/362 start @ 7.23s
+2025-08-30 00:12:22,321 WARNING 1763623253: token mismatch [8d8577b5] (missing ['0', '1', '2', '3', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16']) — Suggested fix: add ['0', '1', '2', '3', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16']
+2025-08-30 00:12:22,322 WARNING 1763623253: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16']) [8d8577b5])
+  Original: New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>]
+  Result: Dịch bởi Vũ Hạnh, Mai Linh, Nga, Huy Tô, Huy Tô, Yuki, Ann, Ann, Phương, Ann, Phương The Vampire3, Yuki, Phương The Vampire3X Subteam [[TOKEN_4]]) [[TOKEN_5]]) [[TOKEN_5]] [TOK] [[TOKEN_6]] [TOK] K OK K OK [TOK] K OK
+2025-08-30 00:12:22,322 INFO Batch 17/362 end @ 7.77s (0.54s)
+2025-08-30 00:12:22,322 INFO Processed 18/428 lines
+2025-08-30 00:12:22,322 INFO Batch 18/362 start @ 7.77s
+2025-08-30 00:12:22,690 WARNING 384069927: tokens reordered
+2025-08-30 00:12:22,691 INFO 384069927: TRANSLATED
+  Original: You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}!
+  Result: <color=#ffd9eb> {0}) {0}) </color>x <color=white> {1} </color>) để hoàn thành {2}!
+2025-08-30 00:12:22,691 INFO Batch 18/362 end @ 8.14s (0.37s)
+2025-08-30 00:12:22,691 INFO Processed 19/428 lines
+2025-08-30 00:12:22,691 INFO Batch 19/362 start @ 8.14s
+2025-08-30 00:12:23,052 WARNING 1884892470: tokens reordered
+2025-08-30 00:12:23,053 INFO 1884892470: TRANSLATED
+  Original: You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}! It dropped on the ground because your inventory was full.
+  Result: <color=#ffd9eb> {0}) {0}) </color>x <color=white> {1} </color>) để hoàn thành {2}! Nó rơi xuống đất vì kho hàng của anh đầy rồi.
+2025-08-30 00:12:23,053 INFO Batch 19/362 end @ 8.50s (0.36s)
+2025-08-30 00:12:23,053 INFO Processed 20/428 lines
+2025-08-30 00:12:23,053 INFO Batch 20/362 start @ 8.50s
+2025-08-30 00:12:23,141 INFO 3158650477: TRANSLATED
+  Original: No familiars in battle group!
+  Result: Không quen thuộc với nhóm chiến đấu!
+2025-08-30 00:12:23,142 INFO Batch 20/362 end @ 8.59s (0.09s)
+2025-08-30 00:12:23,142 INFO Processed 21/428 lines
+2025-08-30 00:12:23,143 INFO Batch 21/362 start @ 8.59s
+2025-08-30 00:12:23,221 WARNING 2673031653: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-30 00:12:23,222 WARNING 2673031653: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: Battle Group - {0}
+  Result: Nhóm chiến đấu
+2025-08-30 00:12:23,222 INFO Batch 21/362 end @ 8.67s (0.08s)
+2025-08-30 00:12:23,222 INFO Processed 22/428 lines
+2025-08-30 00:12:23,224 INFO Batch 22/362 start @ 8.67s
+2025-08-30 00:12:23,900 WARNING 3637474013: token mismatch [77039cfd] (missing ['2', '3', '9', '10', '11', '12']) — Suggested fix: add ['2', '3', '9', '10', '11', '12']
+2025-08-30 00:12:23,901 WARNING 3637474013: SKIPPED (token mismatch (missing ['2', '3', '9', '10', '11', '12']) [77039cfd])
+  Original: <color=green>{0}</color>{1} [<color=white>{2}</color>][<color=#90EE90>{3}</color>] added to <color=white>{4}</color>! (<color=yellow>{5}</color>)
+  Result: [[TOKEN_0]] [[TOKEN_6]] [[TOKEN_7]] [[TOKEN_7]] [[TOKEN_8]] [[TOKEN_4]] [[TOKEN_5]] [[TOKEN_1]]) [[TOKEN_6]] [[TOKEN_7]] [[TOKEN_8]] [[TOKEN_8]] TOK_9 thêm TOK_10 TOK_11 [[TOKEN_13]] [[TOKEN_14]] [[TOKEN_15]]
+2025-08-30 00:12:23,901 INFO Batch 22/362 end @ 9.35s (0.68s)
+2025-08-30 00:12:23,901 INFO Processed 23/428 lines
+2025-08-30 00:12:23,901 INFO Batch 23/362 start @ 9.35s
+2025-08-30 00:12:24,771 INFO 2932385107: TRANSLATED
+  Original: Targets have all been killed, give them a chance to respawn!
+  Result: Mục tiêu đã bị giết, hãy cho họ cơ hội hồi phục!
+2025-08-30 00:12:24,771 INFO 1076291728: TRANSLATED
+  Original: Use the VBlood menu to track bosses!
+  Result: Dùng thực đơn máu đông để theo dõi sếp!
+2025-08-30 00:12:24,771 INFO 1420278477: TRANSLATED
+  Original: Tracking is only available for incomplete kill quests.
+  Result: Việc theo dõi chỉ có thể xảy ra cho những cuộc truy lùng không đầy đủ.
+2025-08-30 00:12:24,771 INFO 3546356968: TRANSLATED
+  Original: Invalid unit prefab (match found but does not start with CHAR/char).
+  Result: Đơn vị sẵnfab không hợp lệ (đã tìm nhưng không bắt đầu với CHAR/char).
+2025-08-30 00:12:24,771 INFO 2169578147: TRANSLATED
+  Original: Invalid unit name (match found but does not start with CHAR/char).
+  Result: Tên đơn vị không hợp lệ (đã tìm nhưng không bắt đầu với CHAR/char).
+2025-08-30 00:12:24,771 INFO 223311103: TRANSLATED
+  Original: Invalid unit name (no full or partial matches).
+  Result: Tên đơn vị không hợp lệ (không khớp đầy đủ hay phần).
+2025-08-30 00:12:24,772 INFO 2155028867: TRANSLATED
+  Original: Invalid prefab (not an integer) or name (does not start with CHAR/char).
+  Result: prefab (không phải số nguyên) hay tên (không bắt đầu với CHAR/char).
+2025-08-30 00:12:24,772 INFO Batch 23/362 end @ 10.22s (0.87s)
+2025-08-30 00:12:24,772 INFO Processed 30/428 lines
+2025-08-30 00:12:24,772 INFO Batch 24/362 start @ 10.22s
+2025-08-30 00:12:24,947 INFO 2689850927: TRANSLATED
+  Original: Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.
+  Result: Kiểu chữ tín dụng quen thuộc không hợp lệ, dùng '<color=white>.fam</color>) để xem tùy chọn.
+2025-08-30 00:12:24,947 INFO Batch 24/362 end @ 10.39s (0.18s)
+2025-08-30 00:12:24,947 INFO Processed 31/428 lines
+2025-08-30 00:12:24,947 INFO Batch 25/362 start @ 10.39s
+2025-08-30 00:12:25,455 WARNING 3125006928: token mismatch [e0c7ce47] (missing ['2', '5', '7']) — Suggested fix: add ['2', '5', '7']
+2025-08-30 00:12:25,455 WARNING 3125006928: SKIPPED (token mismatch (missing ['2', '5', '7']) [e0c7ce47])
+  Original: Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.
+  Result: Sự quen thuộc đã [[TOKEN_0]] [[TOKEN_1]]) [[TOKEN_1]] [[TOKEN_6]].fam [[TOKEN_3]] [[TOKEN_4]]) để xem tùy chọn.
+2025-08-30 00:12:25,456 INFO Batch 25/362 end @ 10.90s (0.51s)
+2025-08-30 00:12:25,456 INFO Processed 32/428 lines
+2025-08-30 00:12:25,456 INFO Batch 26/362 start @ 10.90s
+2025-08-30 00:12:25,665 INFO 2846646667: TRANSLATED
+  Original: Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.
+  Result: Thông tin về uy tín quen thuộc không hợp lệ, dùng '<color=white>.fam</color>) để xem tùy chọn.
+2025-08-30 00:12:25,666 INFO Batch 26/362 end @ 11.11s (0.21s)
+2025-08-30 00:12:25,666 INFO Processed 33/428 lines
+2025-08-30 00:12:25,666 INFO Batch 27/362 start @ 11.11s
+2025-08-30 00:12:25,951 INFO 705325693: TRANSLATED
+  Original: Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')
+  Result: Sự quen thuộc đã có tất cả các mức độ uy tín! (<color=white>.fam </color>' thay vì '<color=white>.fam [PrestigeStat] </color>)
+2025-08-30 00:12:25,951 INFO Batch 27/362 end @ 11.40s (0.29s)
+2025-08-30 00:12:25,951 INFO Processed 34/428 lines
+2025-08-30 00:12:25,951 INFO Batch 28/362 start @ 11.40s
+2025-08-30 00:12:26,226 WARNING 2712718738: tokens reordered
+2025-08-30 00:12:26,226 INFO 2712718738: TRANSLATED
+  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
+  Result: <color=#90EE90> {prestigeLevel}) {prestigeLevel}) </color>; kiến thức tích lũy cho phép họ giữ mức độ của họ! <color=#00FFFF> {FamiliarPrestigeStats[value]} </color>)
+2025-08-30 00:12:26,226 INFO Batch 28/362 end @ 11.67s (0.28s)
+2025-08-30 00:12:26,226 INFO Processed 35/428 lines
+2025-08-30 00:12:26,226 INFO Batch 29/362 start @ 11.67s
+2025-08-30 00:12:26,311 INFO 872190851: TRANSLATED
+  Original: Failed to remove schematics from your inventory!
+  Result: Lỗi gỡ bỏ sơ đồ trong kho hàng!
+2025-08-30 00:12:26,311 INFO Batch 29/362 end @ 11.76s (0.08s)
+2025-08-30 00:12:26,311 INFO Processed 36/428 lines
+2025-08-30 00:12:26,311 INFO Batch 30/362 start @ 11.76s
+2025-08-30 00:12:26,581 WARNING 3466860311: token mismatch [c9cbc6e9] (missing ['5']) — Suggested fix: add ['5']
+2025-08-30 00:12:26,581 WARNING 3466860311: SKIPPED (token mismatch (missing ['5']) [c9cbc6e9])
+  Original: Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
+  Result: Không thể gỡ bỏ đủ mục cần thiết ([[TOKEN_0]] [[TOKEN_1]] [[TOKEN_2]]) [[TOKEN_2]])x [[TOKEN_3]] [[TOKEN_4]])
+2025-08-30 00:12:26,581 INFO Batch 30/362 end @ 12.03s (0.27s)
+2025-08-30 00:12:26,582 INFO Processed 37/428 lines
+2025-08-30 00:12:26,582 INFO Batch 31/362 start @ 12.03s
+2025-08-30 00:12:26,667 WARNING 3720524051: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-30 00:12:26,667 WARNING 3720524051: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: {FormatClassName(playerClass)} passives not found!
+  Result: Không tìm thấy thụ động!
+2025-08-30 00:12:26,667 INFO Batch 31/362 end @ 12.11s (0.09s)
+2025-08-30 00:12:26,668 INFO Processed 38/428 lines
+2025-08-30 00:12:26,668 INFO Batch 32/362 start @ 12.11s
+2025-08-30 00:12:26,817 WARNING 3543031585: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-30 00:12:26,817 WARNING 3543031585: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: {FormatClassName(playerClass)} passives:
+  Result: Dịch bởi Vũ Hạnh, Mai Linh, Nga, Huy Tô, Yuki, Ann, Phương
+2025-08-30 00:12:26,817 INFO Batch 32/362 end @ 12.26s (0.15s)
+2025-08-30 00:12:26,818 INFO Processed 39/428 lines
+2025-08-30 00:12:26,818 INFO Batch 33/362 start @ 12.26s
+2025-08-30 00:12:26,901 INFO 1106946472: TRANSLATED
+  Original: {replyMessage}
+  Result: {replyMessage} TOKE_SEN
+2025-08-30 00:12:26,902 INFO Batch 33/362 end @ 12.35s (0.08s)
+2025-08-30 00:12:26,902 INFO Processed 40/428 lines
+2025-08-30 00:12:26,902 INFO Batch 34/362 start @ 12.35s
+2025-08-30 00:12:27,017 INFO 2164633984: TRANSLATED
+  Original: Couldn't find stat synergies for {FormatClassName(playerClass)}...
+  Result: Không thể tìm thấy sự cộng tác thống kê cho {FormatClassName(playerClass)}...
+2025-08-30 00:12:27,018 INFO Batch 34/362 end @ 12.46s (0.12s)
+2025-08-30 00:12:27,018 INFO Processed 41/428 lines
+2025-08-30 00:12:27,018 INFO Batch 35/362 start @ 12.46s
+2025-08-30 00:12:27,125 INFO 1293896668: TRANSLATED
+  Original: No stat synergies found for {FormatClassName(playerClass)}.
+  Result: Không tìm thấy liên kết thống kê cho {FormatClassName(playerClass)}.
+2025-08-30 00:12:27,125 INFO Batch 35/362 end @ 12.57s (0.11s)
+2025-08-30 00:12:27,125 INFO Processed 42/428 lines
+2025-08-30 00:12:27,126 INFO Batch 36/362 start @ 12.57s
+2025-08-30 00:12:27,370 WARNING 2147420594: token mismatch [ed9c7773] (missing ['1', '2', '3']) — Suggested fix: add ['1', '2', '3']
+2025-08-30 00:12:27,370 WARNING 2147420594: SKIPPED (token mismatch (missing ['1', '2', '3']) [ed9c7773])
+  Original: {FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:
+  Result: [[TOKEN_0]]
+2025-08-30 00:12:27,370 INFO Batch 36/362 end @ 12.82s (0.24s)
+2025-08-30 00:12:27,370 INFO Processed 43/428 lines
+2025-08-30 00:12:27,370 INFO Batch 37/362 start @ 12.82s
+2025-08-30 00:12:27,658 WARNING 999548370: tokens reordered
+2025-08-30 00:12:27,658 INFO 999548370: TRANSLATED
+  Original: {FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:
+  Result: {FormatClassName(playerClass)} x<color=white>) {ConfigService.SynergyMultiplier}) {ConfigService.SynergyMultiplier}) </color>:
+2025-08-30 00:12:27,658 INFO Batch 37/362 end @ 13.10s (0.29s)
+2025-08-30 00:12:27,658 INFO Processed 44/428 lines
+2025-08-30 00:12:27,658 INFO Batch 38/362 start @ 13.10s
+2025-08-30 00:12:27,757 INFO 460602473: TRANSLATED
+  Original: {FormatClassName(playerClass)} has no spells configured...
+  Result: {FormatClassName(playerClass)} chưa cấu hình...
+2025-08-30 00:12:27,758 INFO Batch 38/362 end @ 13.20s (0.10s)
+2025-08-30 00:12:27,758 INFO Processed 45/428 lines
+2025-08-30 00:12:27,758 INFO Batch 39/362 start @ 13.20s
+2025-08-30 00:12:27,836 WARNING 442755566: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-30 00:12:27,836 WARNING 442755566: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: {FormatClassName(playerClass)} spells:
+  Result: Câu thần chú:
+2025-08-30 00:12:27,836 INFO Batch 39/362 end @ 13.28s (0.08s)
+2025-08-30 00:12:27,836 INFO Processed 46/428 lines
+2025-08-30 00:12:27,836 INFO Batch 40/362 start @ 13.28s
+2025-08-30 00:12:27,973 INFO 2967576286: TRANSLATED
+  Original: Shift spell: <color=#CBC3E3>{spellName}</color>
+  Result: Dịch chính tả: <color=#CBC3E3> {spellName} </color>)
+2025-08-30 00:12:27,973 INFO Batch 40/362 end @ 13.42s (0.14s)
+2025-08-30 00:12:27,973 INFO Processed 47/428 lines
+2025-08-30 00:12:27,974 INFO Batch 41/362 start @ 13.42s
+2025-08-30 00:12:28,124 INFO 1597216248: TRANSLATED
+  Original: Invalid class, use <color=white>'.class l'</color> to see options.
+  Result: Hạng không hợp lệ, hãy dùng <color=white>. class </color> để xem tùy chọn.
+2025-08-30 00:12:28,124 INFO Batch 41/362 end @ 13.57s (0.15s)
+2025-08-30 00:12:28,124 INFO Processed 48/428 lines
+2025-08-30 00:12:28,124 INFO Batch 42/362 start @ 13.57s
+2025-08-30 00:12:28,456 INFO 2747211297: TRANSLATED
+  Original: Removed all class buffs then applied current class buffs for all players.
+  Result: Loại bỏ tất cả các buff lớp sau đó áp dụng buff lớp học hiện nay cho tất cả các cầu thủ.
+2025-08-30 00:12:28,457 INFO 2761429858: TRANSLATED
+  Original: Removed all class buffs for all players.
+  Result: Loại bỏ tất cả các hạng người cho tất cả các cầu thủ.
+2025-08-30 00:12:28,457 INFO 327031724: TRANSLATED
+  Original: Active familiar already present in battle group!
+  Result: Rất quen thuộc trong nhóm chiến đấu!
+2025-08-30 00:12:28,457 INFO Batch 42/362 end @ 13.90s (0.33s)
+2025-08-30 00:12:28,457 INFO Processed 51/428 lines
+2025-08-30 00:12:28,458 INFO Batch 43/362 start @ 13.90s
+2025-08-30 00:12:28,621 WARNING 625301684: token mismatch [27ca59b5] (missing ['2']) — Suggested fix: add ['2']
+2025-08-30 00:12:28,621 WARNING 625301684: SKIPPED (token mismatch (missing ['2']) [27ca59b5])
+  Original: Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!
+  Result: Không thể có nhiều hơn [[TOKEN_0]] [[TOKEN_1]] Các nhóm chiến đấu!
+2025-08-30 00:12:28,622 INFO Batch 43/362 end @ 14.07s (0.16s)
+2025-08-30 00:12:28,622 INFO Processed 52/428 lines
+2025-08-30 00:12:28,622 INFO Batch 44/362 start @ 14.07s
+2025-08-30 00:12:28,772 INFO 3944404979: TRANSLATED
+  Original: Deleted battle group <color=white>{groupName}</color>!
+  Result: Xóa nhóm chiến đấu <color=white> {groupName} </color>)!
+2025-08-30 00:12:28,773 INFO Batch 44/362 end @ 14.22s (0.15s)
+2025-08-30 00:12:28,773 INFO Processed 53/428 lines
+2025-08-30 00:12:28,773 INFO Batch 45/362 start @ 14.22s
+2025-08-30 00:12:28,841 INFO 2979158417: TRANSLATED
+  Original: Prestiging is not enabled.
+  Result: Chưa hiệu lực việc dự phòng.
+2025-08-30 00:12:28,842 INFO Batch 45/362 end @ 14.29s (0.07s)
+2025-08-30 00:12:28,842 INFO Processed 54/428 lines
+2025-08-30 00:12:28,842 INFO Batch 46/362 start @ 14.29s
+2025-08-30 00:12:29,045 INFO 2350508902: TRANSLATED
+  Original: Invalid prestige type, use <color=white>'.prestige l'</color> to see options.
+  Result: Kiểu uy tín không hợp lệ, dùng <color=white>. prestige l </color> để xem tùy chọn.
+2025-08-30 00:12:29,045 INFO Batch 46/362 end @ 14.49s (0.20s)
+2025-08-30 00:12:29,045 INFO Processed 55/428 lines
+2025-08-30 00:12:29,045 INFO Batch 47/362 start @ 14.49s
+2025-08-30 00:12:29,209 INFO 1897692916: TRANSLATED
+  Original: You must reach max level before <color=#90EE90>Exo</color> prestiging again.
+  Result: Bạn phải đạt đến mức tối đa trước <color=#90EE90> EX </color> tiền đề một lần nữa.
+2025-08-30 00:12:29,212 INFO Batch 47/362 end @ 14.66s (0.17s)
+2025-08-30 00:12:29,213 INFO Processed 56/428 lines
+2025-08-30 00:12:29,214 INFO Batch 48/362 start @ 14.66s
+2025-08-30 00:12:29,412 INFO 9816116: TRANSLATED
+  Original: You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges. (<color=white>{EXO_PRESTIGES}</color>)
+  Result: Bạn đã đạt đến số uy tín tối đa <color=#90EE90> EXO </color>. <color=white> {EXO_PRESTIGES} </color>)
+2025-08-30 00:12:29,412 INFO Batch 48/362 end @ 14.86s (0.20s)
+2025-08-30 00:12:29,414 INFO Processed 57/428 lines
+2025-08-30 00:12:29,415 INFO Batch 49/362 start @ 14.86s
+2025-08-30 00:12:29,669 WARNING 3729714988: token mismatch [91a1bc7f] (missing ['4', '5']) — Suggested fix: add ['4', '5']
+2025-08-30 00:12:29,670 WARNING 3729714988: SKIPPED (token mismatch (missing ['4', '5']) [91a1bc7f])
+  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!
+  Result: [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_2]] [[TOKEN_3]] [[TOKEN_3]]) uy tín hoàn tất!
+2025-08-30 00:12:29,670 INFO Batch 49/362 end @ 15.12s (0.26s)
+2025-08-30 00:12:29,670 INFO Processed 58/428 lines
+2025-08-30 00:12:29,670 INFO Batch 50/362 start @ 15.12s
+2025-08-30 00:12:30,001 WARNING 2402733055: token mismatch [30a720cb] (missing ['4', '5', '11']) — Suggested fix: add ['4', '5', '11']
+2025-08-30 00:12:30,002 WARNING 2402733055: SKIPPED (token mismatch (missing ['4', '5', '11']) [30a720cb])
+  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
+  Result: [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_2]] [[TOKEN_3]] [[TOKEN_3]]) uy tín hoàn tất! Bạn cũng đã được thưởng [[TOKEN_6]] [[TOKEN_7]] [[TOKEN_8]]x [[TOKEN_9]] [[TOKEN_10]]!
+2025-08-30 00:12:30,002 INFO Batch 50/362 end @ 15.45s (0.33s)
+2025-08-30 00:12:30,002 INFO Processed 59/428 lines
+2025-08-30 00:12:30,002 INFO Batch 51/362 start @ 15.45s
+2025-08-30 00:12:30,359 WARNING 3961332984: token mismatch [30a720cb] (missing ['4', '5', '11']) — Suggested fix: add ['4', '5', '11']
+2025-08-30 00:12:30,360 WARNING 3961332984: SKIPPED (token mismatch (missing ['4', '5', '11']) [30a720cb])
+  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.
+  Result: [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_2]] [[TOKEN_3]] [[TOKEN_3]]) uy tín hoàn tất! Bạn đã nhận được [[TOKEN_6]] [[TOKEN_7]] [[TOKEN_8]]x [[TOKEN_9]] [[TOKEN_10]]! Nó rơi xuống mặt đất và kho hàng của anh đầy rồi.
+2025-08-30 00:12:30,360 INFO Batch 51/362 end @ 15.81s (0.36s)
+2025-08-30 00:12:30,360 INFO Processed 60/428 lines
+2025-08-30 00:12:30,360 INFO Batch 52/362 start @ 15.81s
+2025-08-30 00:12:30,636 WARNING 145841390: token mismatch [35857b71] (missing ['3']) — Suggested fix: add ['3']
+2025-08-30 00:12:30,636 WARNING 145841390: SKIPPED (token mismatch (missing ['3']) [35857b71])
+  Original: You must reach the maximum level in <color=#90EE90>Experience</color> prestige before <color=#90EE90>Exo</color> prestiging.
+  Result: Bạn phải đạt đến mức tối đa trong [[TOKEN_0]] khả năng mở rộng [[TOKEN_1]] trước [[TOKEN_2]] KOKEN_3.
+2025-08-30 00:12:30,636 INFO Batch 52/362 end @ 16.08s (0.28s)
+2025-08-30 00:12:30,636 INFO Processed 61/428 lines
+2025-08-30 00:12:30,636 INFO Batch 53/362 start @ 16.08s
+2025-08-30 00:12:30,780 INFO 2076214502: TRANSLATED
+  Original: <color=#90EE90>Exo</color> prestiging is not enabled.
+  Result: Không bật chạy <color=#90EE90> exo</color>.
+2025-08-30 00:12:30,781 INFO Batch 53/362 end @ 16.23s (0.14s)
+2025-08-30 00:12:30,781 INFO Processed 62/428 lines
+2025-08-30 00:12:30,781 INFO Batch 54/362 start @ 16.23s
+2025-08-30 00:12:30,986 INFO 1641131342: TRANSLATED
+  Original: Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.
+  Result: Uy tín không hợp lệ, sử dụng <color=white>. prestige l </color> để xem các tùy chọn hợp lệ.
+2025-08-30 00:12:30,987 INFO Batch 54/362 end @ 16.43s (0.21s)
+2025-08-30 00:12:30,987 INFO Processed 63/428 lines
+2025-08-30 00:12:30,987 INFO Batch 55/362 start @ 16.43s
+2025-08-30 00:12:31,225 INFO 484801240: TRANSLATED
+  Original: You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.
+  Result: Bạn chưa đạt đến mức cần thiết để có uy tín <color=#90EE90> {parsedPrestigeType} </color>) hoặc đang ở mức uy tín tối đa.
+2025-08-30 00:12:31,226 INFO Batch 55/362 end @ 16.67s (0.24s)
+2025-08-30 00:12:31,226 INFO Processed 64/428 lines
+2025-08-30 00:12:31,226 INFO Batch 56/362 start @ 16.67s
+2025-08-30 00:12:31,624 WARNING 11642316: token mismatch [4a2d3b6e] (missing ['0', '1', '6', '7', '8']) — Suggested fix: add ['0', '1', '6', '7', '8']
+2025-08-30 00:12:31,624 WARNING 11642316: SKIPPED (token mismatch (missing ['0', '1', '6', '7', '8']) [4a2d3b6e])
+  Original: Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s
+  Result: Hiện tại Mức độ tiền định: [[TOKEN_2]] [[TOKEN_3]] [[TOKEN_4]]) [[TOKEN_4]] / [[TOKEN_5]] [[TOKEN_5]] TOKn_8
+2025-08-30 00:12:31,624 INFO Batch 56/362 end @ 17.07s (0.40s)
+2025-08-30 00:12:31,624 INFO Processed 65/428 lines
+2025-08-30 00:12:31,624 INFO Batch 57/362 start @ 17.07s
+2025-08-30 00:12:31,778 INFO 836746607: TRANSLATED
+  Original: Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s
+  Result: Đủ sạc để duy trì hình thức <color=white> {(int)exoFormData.Value} </color>)
+2025-08-30 00:12:31,779 INFO Batch 57/362 end @ 17.22s (0.15s)
+2025-08-30 00:12:31,779 INFO Processed 66/428 lines
+2025-08-30 00:12:31,779 INFO Batch 58/362 start @ 17.23s
+2025-08-30 00:12:31,913 INFO 2332227846: TRANSLATED
+  Original: You have not prestiged in <color=#90EE90>Exo</color> yet.
+  Result: Bạn chưa có uy tín trong <color=#90EE90> EX </color>.
+2025-08-30 00:12:31,917 INFO Batch 58/362 end @ 17.36s (0.14s)
+2025-08-30 00:12:31,917 INFO Processed 67/428 lines
+2025-08-30 00:12:31,918 INFO Batch 59/362 start @ 17.36s
+2025-08-30 00:12:32,066 INFO 3706109126: TRANSLATED
+  Original: You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.
+  Result: Bạn đã không có uy tín trong <color=#90EE90> {parsedPrestigeType} </color>).
+2025-08-30 00:12:32,070 INFO Batch 59/362 end @ 17.52s (0.15s)
+2025-08-30 00:12:32,070 INFO Processed 68/428 lines
+2025-08-30 00:12:32,070 INFO Batch 60/362 start @ 17.52s
+2025-08-30 00:12:32,126 INFO 1689690159: TRANSLATED
+  Original: Couldn't find player.
+  Result: Không tìm thấy cầu thủ.
+2025-08-30 00:12:32,129 INFO Batch 60/362 end @ 17.57s (0.06s)
+2025-08-30 00:12:32,129 INFO Processed 69/428 lines
+2025-08-30 00:12:32,129 INFO Batch 61/362 start @ 17.58s
+2025-08-30 00:12:32,269 INFO 3055902112: TRANSLATED
+  Original: <color=#90EE90>{parsedPrestigeType}</color> prestiging is not enabled.
+  Result: <color=#90EE90> {parsedPrestigeType} </color> chưa bật.
+2025-08-30 00:12:32,270 INFO Batch 61/362 end @ 17.72s (0.14s)
+2025-08-30 00:12:32,270 INFO Processed 70/428 lines
+2025-08-30 00:12:32,270 INFO Batch 62/362 start @ 17.72s
+2025-08-30 00:12:32,490 INFO 3468772905: TRANSLATED
+  Original: The maximum level for <color=#90EE90>{parsedPrestigeType}</color> prestige is {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.
+  Result: Mức tối đa cho <color=#90EE90> {parsedPrestigeType} </color> là {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.
+2025-08-30 00:12:32,493 INFO Batch 62/362 end @ 17.94s (0.22s)
+2025-08-30 00:12:32,494 INFO Processed 71/428 lines
+2025-08-30 00:12:32,495 INFO Batch 63/362 start @ 17.94s
+2025-08-30 00:12:32,988 WARNING 3343555659: token mismatch [8be15e13] (missing ['3', '4', '5'], unexpected ['c']) — Suggested fix: add ['3', '4', '5']; remove ['c']
+2025-08-30 00:12:32,991 WARNING 3343555659: SKIPPED (token mismatch (missing ['3', '4', '5'], unexpected ['c']) [8be15e13])
+  Original: Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.
+  Result: Người chơi [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_6]] [[TOKEN_2]]) [[TOKEN_7]] [[TOKEN_8]]) [[TOKEN_8]]) trong uy tín [[TOKEN_8]]) [[TOKEN_6]] [[TOKEN_c]]húc [[TOKEN_7]] TOK_7 [[TOKEN_8]]).
+2025-08-30 00:12:32,992 INFO Batch 63/362 end @ 18.44s (0.50s)
+2025-08-30 00:12:32,992 INFO Processed 72/428 lines
+2025-08-30 00:12:32,993 INFO Batch 64/362 start @ 18.44s
+2025-08-30 00:12:33,141 INFO 101395383: TRANSLATED
+  Original: Exo prestiging is not enabled.
+  Result: Chưa hiệu lực khả năng tiền định.
+2025-08-30 00:12:33,143 INFO 3878313095: TRANSLATED
+  Original: Couldn't find player...
+  Result: Không tìm thấy người chơi...
+2025-08-30 00:12:33,143 INFO Batch 64/362 end @ 18.59s (0.15s)
+2025-08-30 00:12:33,143 INFO Processed 74/428 lines
+2025-08-30 00:12:33,143 INFO Batch 65/362 start @ 18.59s
+2025-08-30 00:12:33,441 WARNING 1411528307: token mismatch [c9cbc6e9] (missing ['5']) — Suggested fix: add ['5']
+2025-08-30 00:12:33,442 WARNING 1411528307: SKIPPED (token mismatch (missing ['5']) [c9cbc6e9])
+  Original: <color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.
+  Result: [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_2]]) [[TOKEN_2]] thiết lập lại uy tín [[TOKEN_3]] [[TOKEN_4]].
+2025-08-30 00:12:33,443 INFO Batch 65/362 end @ 18.89s (0.30s)
+2025-08-30 00:12:33,444 INFO Processed 75/428 lines
+2025-08-30 00:12:33,445 INFO Batch 66/362 start @ 18.89s
+2025-08-30 00:12:33,537 INFO 3318828181: TRANSLATED
+  Original: Prestige buffs applied! (if they were missing)
+  Result: Thuốc mỡ được áp dụng! (nếu họ mất tích)
+2025-08-30 00:12:33,541 INFO Batch 66/362 end @ 18.99s (0.10s)
+2025-08-30 00:12:33,541 INFO Processed 76/428 lines
+2025-08-30 00:12:33,541 INFO Batch 67/362 start @ 18.99s
+2025-08-30 00:12:33,701 INFO 830139985: TRANSLATED
+  Original: You have not prestiged in <color=#90EE90>{PrestigeType.Experience}</color>.
+  Result: Bạn đã không có uy tín trong <color=#90EE90> {PrestigeType.Experience} </color>).
+2025-08-30 00:12:33,702 INFO Batch 67/362 end @ 19.15s (0.16s)
+2025-08-30 00:12:33,703 INFO Processed 77/428 lines
+2025-08-30 00:12:33,703 INFO Batch 68/362 start @ 19.15s
+2025-08-30 00:12:33,754 INFO 2461283441: TRANSLATED
+  Original: Prestiges:
+  Result: Tiền tố:
+2025-08-30 00:12:33,755 INFO Batch 68/362 end @ 19.20s (0.05s)
+2025-08-30 00:12:33,755 INFO Processed 78/428 lines
+2025-08-30 00:12:33,755 INFO Batch 69/362 start @ 19.20s
+2025-08-30 00:12:33,838 INFO 3320998835: TRANSLATED
+  Original: {prestiges}
+  Result: {prestiges} TOKE_SEN
+2025-08-30 00:12:33,839 INFO Batch 69/362 end @ 19.28s (0.08s)
+2025-08-30 00:12:33,839 INFO Processed 79/428 lines
+2025-08-30 00:12:33,839 INFO Batch 70/362 start @ 19.29s
+2025-08-30 00:12:33,906 INFO 947905559: TRANSLATED
+  Original: Leaderboards are not enabled.
+  Result: Không bật bảng điều khiển.
+2025-08-30 00:12:33,907 INFO Batch 70/362 end @ 19.35s (0.07s)
+2025-08-30 00:12:33,908 INFO Processed 80/428 lines
+2025-08-30 00:12:33,908 INFO Batch 71/362 start @ 19.35s
+2025-08-30 00:12:34,067 INFO 1182925736: TRANSLATED
+  Original: No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!
+  Result: Chưa có người chơi nào có uy tín trong <color=#90EE90> {parsedPrestigeType} </color>)!
+2025-08-30 00:12:34,067 INFO Batch 71/362 end @ 19.51s (0.16s)
+2025-08-30 00:12:34,067 INFO Processed 81/428 lines
+2025-08-30 00:12:34,067 INFO Batch 72/362 start @ 19.51s
+2025-08-30 00:12:34,145 INFO 1687700552: TRANSLATED
+  Original: You must consume at least one primordial essence...
+  Result: Anh phải tiêu thụ ít nhất một nguyên chất...
+2025-08-30 00:12:34,145 INFO Batch 72/362 end @ 19.59s (0.08s)
+2025-08-30 00:12:34,145 INFO Processed 82/428 lines
+2025-08-30 00:12:34,145 INFO Batch 73/362 start @ 19.59s
+2025-08-30 00:12:34,289 INFO 1763729577: TRANSLATED
+  Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
+  Result: Thực hiện hành động emote (<color=white> mat </color> {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")})
+2025-08-30 00:12:34,289 INFO Batch 73/362 end @ 19.74s (0.14s)
+2025-08-30 00:12:34,289 INFO Processed 83/428 lines
+2025-08-30 00:12:34,290 INFO Batch 74/362 start @ 19.74s
+2025-08-30 00:12:34,368 INFO 1711247206: TRANSLATED
+  Original: You are not yet worthy...
+  Result: Ngươi vẫn chưa xứng đáng...
+2025-08-30 00:12:34,369 INFO Batch 74/362 end @ 19.82s (0.08s)
+2025-08-30 00:12:34,369 INFO Processed 84/428 lines
+2025-08-30 00:12:34,369 INFO Batch 75/362 start @ 19.82s
+2025-08-30 00:12:34,517 INFO 3882215894: TRANSLATED
+  Original: Invalid shapeshift! Valid options: {shapeshifts}
+  Result: Hình chuyển dạng không hợp lệ! Tùy chọn hợp lệ: {shapeshifts}
+2025-08-30 00:12:34,519 INFO Batch 75/362 end @ 19.96s (0.15s)
+2025-08-30 00:12:34,519 INFO Processed 85/428 lines
+2025-08-30 00:12:34,519 INFO Batch 76/362 start @ 19.97s
+2025-08-30 00:12:34,761 INFO 1884272339: TRANSLATED
+  Original: You must consume Dracula's essence before manifesting his form...
+  Result: Anh phải tiêu thụ tinh chất của Dracula trước khi xuất hiện hình dạng của hắn...
+2025-08-30 00:12:34,762 INFO 816810753: TRANSLATED
+  Original: You must consume Megara's essence before manifesting her form...
+  Result: Anh phải tiêu thụ tinh chất của Megara trước khi thể hiện hình dáng của cô ấy...
+2025-08-30 00:12:34,762 INFO Batch 76/362 end @ 20.21s (0.24s)
+2025-08-30 00:12:34,762 INFO Processed 87/428 lines
+2025-08-30 00:12:34,762 INFO Batch 77/362 start @ 20.21s
+2025-08-30 00:12:34,917 INFO 3587073963: TRANSLATED
+  Original: Current Exoform: <color=white>{form}</color>
+  Result: Thoát hiện tại: <color=white> {form} </color>)
+2025-08-30 00:12:34,918 INFO Batch 77/362 end @ 20.36s (0.16s)
+2025-08-30 00:12:34,919 INFO Processed 88/428 lines
+2025-08-30 00:12:34,919 INFO Batch 78/362 start @ 20.37s
+2025-08-30 00:12:35,133 INFO 1440482998: TRANSLATED
+  Original: <color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore prestige leaderboard list!
+  Result: <color=green> {playerInfo.User.CharacterName.Value} </color> thêm vào danh sách lãnh đạo uy tín bỏ qua!
+2025-08-30 00:12:35,135 INFO Batch 78/362 end @ 20.58s (0.22s)
+2025-08-30 00:12:35,135 INFO Processed 89/428 lines
+2025-08-30 00:12:35,135 INFO Batch 79/362 start @ 20.58s
+2025-08-30 00:12:35,316 INFO 2659109549: TRANSLATED
+  Original: <color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore prestige leaderboard list!
+  Result: <color=green> {playerInfo.User.CharacterName.Value} </color> thoát khỏi danh sách uy tín bỏ qua!
+2025-08-30 00:12:35,318 INFO Batch 79/362 end @ 20.76s (0.18s)
+2025-08-30 00:12:35,319 INFO Processed 90/428 lines
+2025-08-30 00:12:35,319 INFO Batch 80/362 start @ 20.76s
+2025-08-30 00:12:35,436 INFO 2178615132: TRANSLATED
+  Original: Permashroud <color=green>enabled</color>!
+  Result: Permashroud <color=green> </color>!
+2025-08-30 00:12:35,438 INFO Batch 80/362 end @ 20.88s (0.12s)
+2025-08-30 00:12:35,439 INFO Processed 91/428 lines
+2025-08-30 00:12:35,439 INFO Batch 81/362 start @ 20.89s
+2025-08-30 00:12:35,554 INFO 1797973559: TRANSLATED
+  Original: Permashroud <color=red>disabled</color>!
+  Result: Permashroud <color=red> </color>)!
+2025-08-30 00:12:35,555 INFO Batch 81/362 end @ 21.00s (0.12s)
+2025-08-30 00:12:35,556 INFO Processed 92/428 lines
+2025-08-30 00:12:35,556 INFO Batch 82/362 start @ 21.00s
+2025-08-30 00:12:35,774 INFO 985830382: TRANSLATED
+  Original: Expertise is not enabled.
+  Result: Không bật khả năng chuyên gia.
+2025-08-30 00:12:35,776 INFO 3170250471: TRANSLATED
+  Original: Expertise handler for weapon is null; this shouldn't happen and you may want to inform the developer.
+  Result: Chuyên gia quản lý vũ khí là vô giá trị; điều này không nên xảy ra và bạn có thể muốn thông báo cho nhà phát triển.
+2025-08-30 00:12:35,777 INFO Batch 82/362 end @ 21.22s (0.22s)
+2025-08-30 00:12:35,778 INFO Processed 94/428 lines
+2025-08-30 00:12:35,779 INFO Batch 83/362 start @ 21.22s
+2025-08-30 00:12:36,462 WARNING 3591926048: token mismatch [2ed9dbfc] (missing ['2', '8', '17'], unexpected ['c']) — Suggested fix: add ['2', '8', '17']; remove ['c']
+2025-08-30 00:12:36,463 WARNING 3591926048: SKIPPED (token mismatch (missing ['2', '8', '17'], unexpected ['c']) [2ed9dbfc])
+  Original: Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!
+  Result: Chuyên môn về vũ khí của bạn là [[TOKEN_0]] [[TOKEN_1]]) [[TOKEN_1]]) [[TOKEN_6]] [[TOKEN_3]] [[TOKEN_4]] [[TOKEN_5]] và bạn có [[TOKEN_c]]húc [[TOKEN_6]] [[TOKEN_7]] [[TOKEN_7]] [[TOKEN_9]] [[TOKEN_10]] ([[TOKEN_10]] [[TOKEN_11]] [[TOKEN_12]] [[TOKEN_13]] [[TOKEN_14]] [[TOKEN_14]] [[TOKEN_15]] [[TOKEN_16]] [[TOKEN_16]]!
+2025-08-30 00:12:36,465 INFO Batch 83/362 end @ 21.91s (0.69s)
+2025-08-30 00:12:36,466 INFO Processed 95/428 lines
+2025-08-30 00:12:36,467 INFO Batch 84/362 start @ 21.91s
+2025-08-30 00:12:36,637 INFO 3489173133: TRANSLATED
+  Original: <color=#c0c0c0>{weaponType}</color> Stats: {bonuses}
+  Result: <color=#c0c0c0> {weaponType} </color>) Thống kê: {bonuses}
+2025-08-30 00:12:36,639 INFO Batch 84/362 end @ 22.08s (0.17s)
+2025-08-30 00:12:36,640 INFO Processed 96/428 lines
+2025-08-30 00:12:36,640 INFO Batch 85/362 start @ 22.09s
+2025-08-30 00:12:36,746 INFO 3863739608: TRANSLATED
+  Original: No bonuses from currently equipped weapon.
+  Result: Không có tiền thưởng từ vũ khí được trang bị hiện nay.
+2025-08-30 00:12:36,747 INFO Batch 85/362 end @ 22.19s (0.11s)
+2025-08-30 00:12:36,748 INFO Processed 97/428 lines
+2025-08-30 00:12:36,748 INFO Batch 86/362 start @ 22.19s
+2025-08-30 00:12:36,917 WARNING 4023020194: tokens reordered
+2025-08-30 00:12:36,917 INFO 4023020194: TRANSLATED
+  Original: You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet!
+  Result: <color=#c0c0c0> {weaponType}) {weaponType} </color>)!
+2025-08-30 00:12:36,917 INFO Batch 86/362 end @ 22.36s (0.17s)
+2025-08-30 00:12:36,917 INFO Processed 98/428 lines
+2025-08-30 00:12:36,917 INFO Batch 87/362 start @ 22.36s
+2025-08-30 00:12:37,010 INFO 736301693: TRANSLATED
+  Original: Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: Đăng nhập cao hơn bây giờ {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+2025-08-30 00:12:37,011 INFO Batch 87/362 end @ 22.46s (0.09s)
+2025-08-30 00:12:37,012 INFO Processed 99/428 lines
+2025-08-30 00:12:37,013 INFO Batch 88/362 start @ 22.46s
+2025-08-30 00:12:37,177 INFO 27929505: TRANSLATED
+  Original: Invalid stat, use '<color=white>.wep lst</color>' to see valid options.
+  Result: Thống kê không hợp lệ, hãy dùng '<color=white>. wep </color> để xem các tùy chọn hợp lệ.
+2025-08-30 00:12:37,179 INFO Batch 88/362 end @ 22.62s (0.17s)
+2025-08-30 00:12:37,179 INFO Processed 100/428 lines
+2025-08-30 00:12:37,180 INFO Batch 89/362 start @ 22.63s
+2025-08-30 00:12:37,440 WARNING 1880632188: token mismatch [c9cbc6e9] (missing ['5']) — Suggested fix: add ['5']
+2025-08-30 00:12:37,442 WARNING 1880632188: SKIPPED (token mismatch (missing ['5']) [c9cbc6e9])
+  Original: <color=#00FFFF>{finalWeaponStat}</color> has been chosen for <color=#c0c0c0>{finalWeaponType}</color>!
+  Result: [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_2]]) [[TOKEN_2]] đã được chọn [[TOKEN_3]] [[TOKEN_4]])!
+2025-08-30 00:12:37,443 INFO Batch 89/362 end @ 22.89s (0.26s)
+2025-08-30 00:12:37,443 INFO Processed 101/428 lines
+2025-08-30 00:12:37,444 INFO Batch 90/362 start @ 22.89s
+2025-08-30 00:12:37,626 INFO 2008856310: TRANSLATED
+  Original: Invalid weapon choice, use '<color=white>.wep lst</color>' to see valid options.
+  Result: Lựa chọn vũ khí không hợp lệ, dùng '<color=white>. wep </color> để xem các tùy chọn hợp lệ.
+2025-08-30 00:12:37,627 INFO Batch 90/362 end @ 23.07s (0.18s)
+2025-08-30 00:12:37,627 INFO Processed 102/428 lines
+2025-08-30 00:12:37,627 INFO Batch 91/362 start @ 23.07s
+2025-08-30 00:12:37,778 WARNING 3274700132: tokens reordered
+2025-08-30 00:12:37,781 INFO 3274700132: TRANSLATED
+  Original: Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!
+  Result: {weaponType}) <color=#c0c0c0> {weaponType}) </color>)!
+2025-08-30 00:12:37,781 INFO Batch 91/362 end @ 23.23s (0.15s)
+2025-08-30 00:12:37,782 INFO Processed 103/428 lines
+2025-08-30 00:12:37,783 INFO Batch 92/362 start @ 23.23s
+2025-08-30 00:12:38,050 WARNING 719993404: token mismatch [c9cbc6e9] (missing ['5']) — Suggested fix: add ['5']
+2025-08-30 00:12:38,051 WARNING 719993404: SKIPPED (token mismatch (missing ['5']) [c9cbc6e9])
+  Original: You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
+  Result: Anh không có đồ cần thiết để khởi động lại hệ thống vũ khí! [[TOKEN_0]] [[TOKEN_1]]) [[TOKEN_2]]) [[TOKEN_2]]x [[TOKEN_3]] [[TOKEN_4]]) [[TOKEN_4]]
+2025-08-30 00:12:38,054 INFO Batch 92/362 end @ 23.50s (0.27s)
+2025-08-30 00:12:38,054 INFO Processed 104/428 lines
+2025-08-30 00:12:38,055 INFO Batch 93/362 start @ 23.50s
+2025-08-30 00:12:38,145 INFO 2128999876: TRANSLATED
+  Original: Level must be between 0 and {ConfigService.MaxExpertiseLevel}.
+  Result: Cấp phải ở giữa 0 và {ConfigService.MaxExpertiseLevel}.
+2025-08-30 00:12:38,145 INFO Batch 93/362 end @ 23.59s (0.09s)
+2025-08-30 00:12:38,146 INFO Processed 105/428 lines
+2025-08-30 00:12:38,146 INFO Batch 94/362 start @ 23.59s
+2025-08-30 00:12:38,202 INFO 2252129438: TRANSLATED
+  Original: Invalid weapon type.
+  Result: Kiểu vũ khí không hợp lệ.
+2025-08-30 00:12:38,202 INFO Batch 94/362 end @ 23.65s (0.06s)
+2025-08-30 00:12:38,202 INFO Processed 106/428 lines
+2025-08-30 00:12:38,202 INFO Batch 95/362 start @ 23.65s
+2025-08-30 00:12:38,709 WARNING 2480816305: token mismatch [a910725e] (missing ['3', '4', '5']) — Suggested fix: add ['3', '4', '5']
+2025-08-30 00:12:38,710 WARNING 2480816305: SKIPPED (token mismatch (missing ['3', '4', '5']) [a910725e])
+  Original: <color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>
+  Result: [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_6]] [[TOKEN_2]]) [[TOKEN_7]] TOKEN_ [[TOKEN_8]]) [[TOKEN_8]] [[TOKEN_8]]) [[TOKEN_6]] [[TOKEN_7]] TOK_7 TOK_
+2025-08-30 00:12:38,711 INFO Batch 95/362 end @ 24.16s (0.51s)
+2025-08-30 00:12:38,711 INFO Processed 107/428 lines
+2025-08-30 00:12:38,712 INFO Batch 96/362 start @ 24.16s
+2025-08-30 00:12:38,955 INFO 3013651462: TRANSLATED
+  Original: Couldn't find matching save method for weapon type...
+  Result: Không tìm thấy phương pháp tương ứng với kiểu vũ khí...
+2025-08-30 00:12:38,957 INFO 2965167816: TRANSLATED
+  Original: No weapon stats available at this time.
+  Result: Hiện tại không có vũ khí.
+2025-08-30 00:12:38,959 INFO Batch 96/362 end @ 24.40s (0.25s)
+2025-08-30 00:12:38,960 INFO Processed 109/428 lines
+2025-08-30 00:12:38,960 INFO Batch 97/362 start @ 24.41s
+2025-08-30 00:12:39,132 INFO 3084457547: TRANSLATED
+  Original: Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>
+  Result: Chuyên gia vũ khí sẵn sàng: <color=#c0c0c0> {weaponTypes} </color>)
+2025-08-30 00:12:39,132 INFO Batch 97/362 end @ 24.58s (0.17s)
+2025-08-30 00:12:39,132 INFO Processed 110/428 lines
+2025-08-30 00:12:39,132 INFO Batch 98/362 start @ 24.58s
+2025-08-30 00:12:39,229 INFO 2202242526: TRANSLATED
+  Original: Extra spell slots are not enabled.
+  Result: Chưa bật khả năng thêm khả năng đánh dấu.
+2025-08-30 00:12:39,231 INFO Batch 98/362 end @ 24.68s (0.10s)
+2025-08-30 00:12:39,231 INFO Processed 111/428 lines
+2025-08-30 00:12:39,232 INFO Batch 99/362 start @ 24.68s
+2025-08-30 00:12:39,434 INFO 2998300513: TRANSLATED
+  Original: Invalid slot (<color=white>1</color> for Q or <color=white>2</color> for E)
+  Result: khe không hợp lệ (<color=white>1 </color>) cho Q hoặc <color=white> </color> cho E)
+2025-08-30 00:12:39,435 INFO Batch 99/362 end @ 24.88s (0.20s)
+2025-08-30 00:12:39,435 INFO Processed 112/428 lines
+2025-08-30 00:12:39,435 INFO Batch 100/362 start @ 24.88s
+2025-08-30 00:12:39,674 WARNING 3761416018: token mismatch [c9cbc6e9] (missing ['5']) — Suggested fix: add ['5']
+2025-08-30 00:12:39,675 WARNING 3761416018: SKIPPED (token mismatch (missing ['5']) [c9cbc6e9])
+  Original: First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
+  Result: [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_2]]) [[TOKEN_2]] cho [[TOKEN_3]] [[TOKEN_4]].
+2025-08-30 00:12:39,676 INFO Batch 100/362 end @ 25.12s (0.24s)
+2025-08-30 00:12:39,677 INFO Processed 113/428 lines
+2025-08-30 00:12:39,677 INFO Batch 101/362 start @ 25.12s
+2025-08-30 00:12:39,954 WARNING 1826355702: token mismatch [c9cbc6e9] (missing ['5']) — Suggested fix: add ['5']
+2025-08-30 00:12:39,954 WARNING 1826355702: SKIPPED (token mismatch (missing ['5']) [c9cbc6e9])
+  Original: Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
+  Result: Phần không có vũ khí thứ hai đặt [[TOKEN_0]] [[TOKEN_1]] [[TOKEN_2]]) [[TOKEN_2]]) cho [[TOKEN_3]] [[TOKEN_4]]).
+2025-08-30 00:12:39,955 INFO Batch 101/362 end @ 25.40s (0.28s)
+2025-08-30 00:12:39,956 INFO Processed 114/428 lines
+2025-08-30 00:12:39,956 INFO Batch 102/362 start @ 25.40s
+2025-08-30 00:12:40,702 INFO 2712082651: TRANSLATED
+  Original: Radius must be positive!
+  Result: Bán kính phải là tích cực!
+2025-08-30 00:12:40,703 INFO 1846116445: TRANSLATED
+  Original: Extra spell slots for unarmed are not enabled.
+  Result: Chưa bật khả năng thêm vào khe cắm không dùng.
+2025-08-30 00:12:40,703 INFO 446698782: TRANSLATED
+  Original: Spells cannot be locked when using exoform.
+  Result: Không thể khoá chính tả khi dùng ngoại dạng.
+2025-08-30 00:12:40,703 INFO 313887201: TRANSLATED
+  Original: Change spells to the ones you want in your unarmed slots. When done, toggle this again.
+  Result: Đổi câu thần chú thành cái anh muốn trong khe cắm không vũ khí. Khi xong, bật lại cái này.
+2025-08-30 00:12:40,704 INFO 121410310: TRANSLATED
+  Original: Spells locked.
+  Result: Các chính tả bị khóa.
+2025-08-30 00:12:40,704 INFO 4061888430: TRANSLATED
+  Original: Blood Legacies are not enabled.
+  Result: Chưa dùng chứng chỉ máu.
+2025-08-30 00:12:40,704 INFO 3361608225: TRANSLATED
+  Original: Invalid blood, use '.bl l' to see options.
+  Result: Máu không hợp lệ, dùng '.bl l' để xem các tùy chọn.
+2025-08-30 00:12:40,704 INFO 18401539: TRANSLATED
+  Original: Invalid blood legacy.
+  Result: Di sản máu không hợp lệ.
+2025-08-30 00:12:40,705 INFO Batch 102/362 end @ 26.15s (0.75s)
+2025-08-30 00:12:40,705 INFO Processed 122/428 lines
+2025-08-30 00:12:40,705 INFO Batch 103/362 start @ 26.15s
+2025-08-30 00:12:41,350 WARNING 3254231727: token mismatch [dd5e08c5] (missing ['2', '8', '11', '17']) — Suggested fix: add ['2', '8', '11', '17']
+2025-08-30 00:12:41,353 WARNING 3254231727: SKIPPED (token mismatch (missing ['2', '8', '11', '17']) [dd5e08c5])
+  Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
+  Result: Bạn đang ở mức [[TOKEN_0]] [[TOKEN_1]]) [[TOKEN_6]] [[TOKEN_7]] [[TOKEN_3]] [[TOKEN_4]] [[TOKEN_5]] [[TOKEN_5]]) [[TOKEN_6]] [[TOKEN_7]] [[TOKEN_9]] [[TOKEN_10]] [[TOKEN_10]] TOKE_11 [[TOKEN_12]] [[TOKEN_13]] trong [[TOKEN_14]] [[TOKEN_15]] [[TOKEN_16]] [[TOKEN_16]]!
+2025-08-30 00:12:41,354 INFO Batch 103/362 end @ 26.80s (0.65s)
+2025-08-30 00:12:41,354 INFO Processed 123/428 lines
+2025-08-30 00:12:41,354 INFO Batch 104/362 start @ 26.80s
+2025-08-30 00:12:41,489 INFO 1711931034: TRANSLATED
+  Original: <color=red>{bloodType}</color> Stats: {bonuses}
+  Result: <color=red> {bloodType} </color>) Thống kê: {bonuses}
+2025-08-30 00:12:41,489 INFO Batch 104/362 end @ 26.94s (0.13s)
+2025-08-30 00:12:41,489 INFO Processed 124/428 lines
+2025-08-30 00:12:41,490 INFO Batch 105/362 start @ 26.94s
+2025-08-30 00:12:41,782 INFO 939340687: TRANSLATED
+  Original: No stats selected for <color=red>{bloodType}</color>, use <color=white>'.bl lst'</color> to see valid options.
+  Result: Không có thống kê nào được chọn cho <color=red> {bloodType} </color>, sử dụng <color=white>.bl lt</color>) để xem các tùy chọn hợp lệ.
+2025-08-30 00:12:41,782 INFO Batch 105/362 end @ 27.23s (0.29s)
+2025-08-30 00:12:41,782 INFO Processed 125/428 lines
+2025-08-30 00:12:41,782 INFO Batch 106/362 start @ 27.23s
+2025-08-30 00:12:41,927 INFO 226227140: TRANSLATED
+  Original: No progress in <color=red>{handler.GetBloodType()}</color> yet.
+  Result: Chưa có tiến triển nào trong <color=red> {handler.GetBloodType()} </color>).
+2025-08-30 00:12:41,929 INFO Batch 106/362 end @ 27.37s (0.15s)
+2025-08-30 00:12:41,929 INFO Processed 126/428 lines
+2025-08-30 00:12:41,929 INFO Batch 107/362 start @ 27.38s
+2025-08-30 00:12:42,017 INFO 4051608029: TRANSLATED
+  Original: Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: Ghi chép di sản máu {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+2025-08-30 00:12:42,017 INFO Batch 107/362 end @ 27.46s (0.09s)
+2025-08-30 00:12:42,017 INFO Processed 127/428 lines
+2025-08-30 00:12:42,017 INFO Batch 108/362 start @ 27.46s
+2025-08-30 00:12:42,085 INFO 3335571950: TRANSLATED
+  Original: Legacies are not enabled.
+  Result: Chưa bật các phép tính.
+2025-08-30 00:12:42,085 INFO Batch 108/362 end @ 27.53s (0.07s)
+2025-08-30 00:12:42,085 INFO Processed 128/428 lines
+2025-08-30 00:12:42,085 INFO Batch 109/362 start @ 27.53s
+2025-08-30 00:12:42,257 INFO 2194796157: TRANSLATED
+  Original: Invalid blood stat, use '<color=white>.bl lst</color>' to see valid options.
+  Result: Huyết thống không hợp lệ, hãy dùng '<color=white>. bl </color> để xem các tùy chọn hợp lệ.
+2025-08-30 00:12:42,259 INFO Batch 109/362 end @ 27.70s (0.17s)
+2025-08-30 00:12:42,259 INFO Processed 129/428 lines
+2025-08-30 00:12:42,260 INFO Batch 110/362 start @ 27.71s
+2025-08-30 00:12:42,511 WARNING 2785130336: tokens reordered
+2025-08-30 00:12:42,513 INFO 2785130336: TRANSLATED
+  Original: <color=#00FFFF>{finalBloodStat}</color> selected for <color=red>{finalBloodType}</color>!
+  Result: <color=#00FFFF> {finalBloodStat} </color>) </color> được chọn <color=red> {finalBloodType}) </color>)!
+2025-08-30 00:12:42,513 INFO Batch 110/362 end @ 27.96s (0.25s)
+2025-08-30 00:12:42,513 INFO Processed 130/428 lines
+2025-08-30 00:12:42,513 INFO Batch 111/362 start @ 27.96s
+2025-08-30 00:12:42,699 INFO 4126149106: TRANSLATED
+  Original: Invalid blood type, use '<color=white>.bl l</color>' to see valid options.
+  Result: Nhóm máu không hợp lệ, hãy dùng '<color=white>. bl </color> để xem các tùy chọn hợp lệ.
+2025-08-30 00:12:42,701 INFO Batch 111/362 end @ 28.15s (0.19s)
+2025-08-30 00:12:42,702 INFO Processed 131/428 lines
+2025-08-30 00:12:42,702 INFO Batch 112/362 start @ 28.15s
+2025-08-30 00:12:42,877 INFO 4258273173: TRANSLATED
+  Original: Invalid blood legacy, use '<color=white>.bl l</color>' to see valid options.
+  Result: Di sản máu không hợp lệ, hãy dùng '<color=white>. bl </color> để xem các tùy chọn hợp lệ.
+2025-08-30 00:12:42,880 INFO Batch 112/362 end @ 28.33s (0.18s)
+2025-08-30 00:12:42,880 INFO Processed 132/428 lines
+2025-08-30 00:12:42,880 INFO Batch 113/362 start @ 28.33s
+2025-08-30 00:12:43,028 INFO 1298892920: TRANSLATED
+  Original: No legacy available for <color=white>{bloodType}</color>.
+  Result: Không có di sản nào cho <color=white> {bloodType} </color>).
+2025-08-30 00:12:43,031 INFO Batch 113/362 end @ 28.48s (0.15s)
+2025-08-30 00:12:43,033 INFO Processed 133/428 lines
+2025-08-30 00:12:43,033 INFO Batch 114/362 start @ 28.48s
+2025-08-30 00:12:43,189 INFO 1740355579: TRANSLATED
+  Original: Your blood stats have been reset for <color=red>{bloodType}</color>!
+  Result: Huyết thống của bạn đã được đặt lại cho <color=red> {bloodType} </color>)!
+2025-08-30 00:12:43,190 INFO Batch 114/362 end @ 28.64s (0.16s)
+2025-08-30 00:12:43,190 INFO Processed 134/428 lines
+2025-08-30 00:12:43,190 INFO Batch 115/362 start @ 28.64s
+2025-08-30 00:12:43,504 WARNING 1449977777: token mismatch [c9cbc6e9] (missing ['5']) — Suggested fix: add ['5']
+2025-08-30 00:12:43,504 WARNING 1449977777: SKIPPED (token mismatch (missing ['5']) [c9cbc6e9])
+  Original: You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
+  Result: Bạn không có mục yêu cầu để đặt lại huyết thống ([[TOKEN_0]] [[TOKEN_1]]) [[TOKEN_1]]) [[TOKEN_2]]x [[TOKEN_3]] [[TOKEN_4]]) [[TOKEN_4]])
+2025-08-30 00:12:43,504 INFO Batch 115/362 end @ 28.95s (0.31s)
+2025-08-30 00:12:43,505 INFO Processed 135/428 lines
+2025-08-30 00:12:43,506 INFO Batch 116/362 start @ 28.95s
+2025-08-30 00:12:43,655 INFO 1690022722: TRANSLATED
+  Original: Your blood stats have been reset for <color=red>{bloodType}</color>.
+  Result: Huyết thống của bạn đã được đặt lại <color=red> {bloodType} </color>).
+2025-08-30 00:12:43,656 INFO Batch 116/362 end @ 29.10s (0.15s)
+2025-08-30 00:12:43,656 INFO Processed 136/428 lines
+2025-08-30 00:12:43,657 INFO Batch 117/362 start @ 29.10s
+2025-08-30 00:12:43,721 INFO 1680589832: TRANSLATED
+  Original: No blood stats available at this time.
+  Result: Không có thống kê máu vào lúc này.
+2025-08-30 00:12:43,721 INFO Batch 117/362 end @ 29.17s (0.06s)
+2025-08-30 00:12:43,721 INFO Processed 137/428 lines
+2025-08-30 00:12:43,721 INFO Batch 118/362 start @ 29.17s
+2025-08-30 00:12:43,808 INFO Received 0 rows; deduplicated to 0 rows
+2025-08-30 00:12:43,816 ERROR Failed: Interrupted. Metrics written to /workspace/Bloodcraft/translations/vi/20250830-001214/metrics.json
+2025-08-30 00:12:43,817 INFO Received 0 rows; deduplicated to 0 rows
+2025-08-30 00:12:43,820 INFO Wrote skip report to /workspace/Bloodcraft/translations/vi/20250830-001214/skipped.csv with 0 row(s)
+2025-08-30 00:12:43,821 ERROR No messages processed; verify input hashes and Argos model.
+2025-08-30 00:12:43,822 ERROR Summary: 0/0 translated, 0 skipped. Failed: Interrupted
