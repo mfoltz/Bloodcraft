@@ -35,16 +35,18 @@ def test_token_metrics_collected(tmp_path, monkeypatch):
             target = cmd[cmd.index("Tools/translate_argos.py") + 1]
             (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         elif any("fix_tokens.py" in c for c in cmd):
-            metrics_file = Path(cmd[cmd.index("--metrics-file") + 1])
-            metrics_file.write_text(
-                json.dumps(
-                    {
-                        "tokens_restored": 1,
-                        "tokens_reordered": 2,
-                        "token_mismatches": 0,
-                    }
+            if "--metrics-file" in cmd:
+                metrics_file = Path(cmd[cmd.index("--metrics-file") + 1])
+                metrics_file.write_text(
+                    json.dumps(
+                        {
+                            "tokens_restored": 1,
+                            "tokens_reordered": 2,
+                            "token_mismatches": 0,
+                        }
+                    )
                 )
-            )
+            return SimpleNamespace(returncode=0), 0.0
         return SimpleNamespace(returncode=0), 0.0
 
     monkeypatch.setattr(localization_pipeline, "run", fake_run)
@@ -53,6 +55,7 @@ def test_token_metrics_collected(tmp_path, monkeypatch):
 
     metrics = json.loads((root / "localization_metrics.json").read_text())
     lang = metrics["languages"]["French"]
+    assert lang["token_check"]["returncode"] == 0
     assert lang["token_fix"]["tokens_restored"] == 1
     assert lang["token_fix"]["tokens_reordered"] == 2
     totals = metrics["steps"]["token_fix"]["totals"]

@@ -291,6 +291,38 @@ def main() -> None:
             propagate_hashes(path)
         metrics["steps"]["propagation"]["end"] = timestamp()
 
+        logger.info("Checking tokens before translation")
+        metrics["steps"]["token_check"] = {"start": timestamp()}
+        failed_checks: list[str] = []
+        for name, path in targets.items():
+            lang_metrics = metrics["languages"].setdefault(name, {})
+            check_proc, duration = run(
+                [
+                    sys.executable,
+                    "Tools/fix_tokens.py",
+                    str(path.relative_to(ROOT)),
+                    "--check-only",
+                ],
+                check=False,
+                logger=logger,
+            )
+            lang_metrics["token_check"] = {
+                "returncode": check_proc.returncode,
+                "duration": duration,
+            }
+            if check_proc.returncode != 0:
+                failed_checks.append(name)
+        metrics["steps"]["token_check"]["end"] = timestamp()
+        if failed_checks:
+            overall_ok = False
+            metrics["status"] = "token_check_failed"
+            with metrics_path.open("w", encoding="utf-8") as f:
+                json.dump(metrics, f, indent=2, ensure_ascii=False)
+            logger.error(
+                "Token check failed for: %s", ", ".join(failed_checks)
+            )
+            raise SystemExit(1)
+
         logger.info("Translating messages")
         metrics["steps"]["translation"] = {"start": timestamp()}
         metrics["steps"]["token_fix"] = {
@@ -313,7 +345,7 @@ def main() -> None:
 
         for res in results:
             name = res["name"]
-            lang_metrics = res["lang_metrics"]
+            lang_metrics = {**metrics["languages"].get(name, {}), **res["lang_metrics"]}
             metrics["languages"][name] = lang_metrics
             report = res.get("report")
             if report:
