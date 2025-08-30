@@ -5074,5 +5074,89 @@
         ]
       }
     ]
+  },
+  {
+    "timestamp": "2025-08-30T18:26:17Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 1,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "2007397999",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-30T18:26:46Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 1,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "2007397999",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-08-30T18:27:14Z",
+    "tokens_restored": 0,
+    "tokens_reordered": 0,
+    "token_mismatches": 5,
+    "mismatches": [
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "2007397999",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "3125006928",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "1763729577",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "</color>",
+          "{(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "881612152",
+        "missing": [],
+        "extra": [
+          "<color=white>",
+          "</color>",
+          "{(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? \"<color=green>enabled</color>\" : \"<color=red>disabled</color>\")}"
+        ]
+      },
+      {
+        "file": "Resources/Localization/Messages/French.json",
+        "key": "935039462",
+        "missing": [],
+        "extra": [
+          "</color>"
+        ]
+      }
+    ]
   }
 ]
