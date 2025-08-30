@@ -1,0 +1,635 @@
+[
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "2007397999",
+    "missing": [],
+    "extra": [
+      "{2}",
+      "%"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "2576121314",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "<color=white>",
+      "<color=white>",
+      "<color=white>",
+      "<color=white>",
+      "<color=white>",
+      "<color=white>",
+      "<color=white>",
+      "<color=white>",
+      "<color=white>",
+      "<color=white>",
+      "<color=white>",
+      "<color=white>",
+      "<color=white>",
+      "{0}",
+      "{1}",
+      "{1}",
+      "{1}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3665962604",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "384069927",
+    "missing": [],
+    "extra": [
+      "<color=#ffd9eb>",
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1884892470",
+    "missing": [],
+    "extra": [
+      "<color=#ffd9eb>",
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3637474013",
+    "missing": [],
+    "extra": [
+      "{3}",
+      "{4}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "2402733055",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "<color=#ffd9eb>",
+      "{ConfigService.ExoPrestigeRewardQuantity}",
+      "{ConfigService.ExoPrestigeRewardQuantity}",
+      "{ConfigService.ExoPrestigeRewardQuantity}",
+      "{ConfigService.ExoPrestigeRewardQuantity}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3961332984",
+    "missing": [],
+    "extra": [
+      "{exoReward.GetLocalizedName()}",
+      "{ConfigService.ExoPrestigeRewardQuantity}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "11642316",
+    "missing": [],
+    "extra": [
+      "<color=yellow>",
+      "{(int)Shapeshifts.CalculateFormDuration(exoLevel)}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3343555659",
+    "missing": [],
+    "extra": [
+      "{parsedPrestigeType}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3591926048",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "<color=yellow>",
+      "{progress}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1880632188",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3761416018",
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1826355702",
+    "missing": [],
+    "extra": [
+      "{playerInfo.User.CharacterName.Value}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3254231727",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "{progress}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "939340687",
+    "missing": [],
+    "extra": [
+      "<color=red>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "2785130336",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "863911874",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "2191580006",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "2709293439",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1440602422",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1391708521",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "54858227",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "<color=#00FFFF>",
+      "{FamiliarPrestigeStats[value]}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3334433396",
+    "missing": [],
+    "extra": [
+      "{clampedCost}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "860320001",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "<color=white>",
+      "{quantity}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1985982508",
+    "missing": [],
+    "extra": [
+      "{quantity}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "4009901629",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "743696282",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{progress}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "2437634726",
+    "missing": [],
+    "extra": [
+      "{foundUser.CharacterName.Value}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "216725398",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{progress}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1286090332",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "{progress}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3066749917",
+    "missing": [],
+    "extra": [
+      "{prestiges}",
+      "{groupName}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "2978826451",
+    "missing": [],
+    "extra": [
+      "{prestiges}",
+      "{groupName}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3938781329",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3055272330",
+    "missing": [],
+    "extra": [
+      "{2}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3326145371",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{2}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "566938273",
+    "missing": [],
+    "extra": [
+      "{1}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "2286869349",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "<color=white>",
+      "{1}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "4273383622",
+    "missing": [],
+    "extra": [
+      "{1}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "370730849",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1105957988",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "</color>",
+      "<color=#00FFFF>",
+      "<color=#00FFFF>",
+      "<color=#00FFFF>",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{1}",
+      "{2}",
+      "{2}",
+      "{2}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3499636759",
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "4052165110",
+    "missing": [],
+    "extra": [
+      "{2}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1757634753",
+    "missing": [],
+    "extra": [
+      "{1}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "608689499",
+    "missing": [],
+    "extra": [
+      "{1}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1178832936",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{0}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1223341524",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{3}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "2814501768",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "{1}",
+      "{1}",
+      "<color=#FFC0CB>",
+      "<color=#FFC0CB>",
+      "<color=#FFC0CB>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3987763597",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3133295357",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "</color>",
+      "<color=yellow>",
+      "{2}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "2997561401",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1601487032",
+    "missing": [],
+    "extra": [
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3060695596",
+    "missing": [],
+    "extra": [
+      "{1}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1763623253",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{3}",
+      "<color=yellow>",
+      "<color=yellow>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1057363547",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "<color=white>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "3235862068",
+    "missing": [],
+    "extra": [
+      "{newXP.Key}",
+      "{newXP.Key}",
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "707311945",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{quantity}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "2051256929",
+    "missing": [],
+    "extra": [
+      "<color=green>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "2537547396",
+    "missing": [],
+    "extra": [
+      "<color=green>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "1315865629",
+    "missing": [],
+    "extra": [
+      "</color>",
+      "{1}"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/Ukrainian.json",
+    "key": "800655279",
+    "missing": [],
+    "extra": [
+      "<color=white>",
+      "<color=white>",
+      "{3}",
+      "{4}",
+      "{4}",
+      "{4}",
+      "{4}",
+      "{4}",
+      "{4}",
+      "{4}",
+      "{4}",
+      "{4}"
+    ]
+  }
+]

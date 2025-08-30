@@ -1,0 +1,43 @@
+hash,english,reason,category
+606627316,{0} improved to [<color=white>{1}</color>],placeholders only,placeholder
+2252098529,<color=green>Gold Ore</color>x<color=white>{0}</color> received from {1},placeholders only,placeholder
+3324923525,<color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1},placeholders only,placeholder
+311765273,Your <color=#BF40BF>Weekly Quest</color> has been refreshed!,placeholders only,placeholder
+2967576286,Shift spell: <color=#CBC3E3>{spellName}</color>,placeholders only,placeholder
+1182925736,No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!,placeholders only,placeholder
+3587073963,Current Exoform: <color=white>{form}</color>,placeholders only,placeholder
+4023020194,You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet!,placeholders only,placeholder
+2480816305,<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>,placeholders only,placeholder
+3084457547,Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>,placeholders only,placeholder
+226227140,No progress in <color=red>{handler.GetBloodType()}</color> yet.,placeholders only,placeholder
+2196432591,<color=red>{BloodHandler.GetBloodType()}</color> legacy set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>,placeholders only,placeholder
+85537047,Available Blood Legacies: <color=red>{bloodTypesList}</color>,placeholders only,placeholder
+1716911803,<color=white>{box}</color>:,identical to source on strict retry,identical
+321106656,Box Selected - <color=white>{name}</color>,placeholders only,placeholder
+823180732,<color=green>{PrefabGUID.GetLocalizedName()}</color> moved - <color=white>{name}</color>,placeholders only,placeholder
+3279926559,Added box - <color=white>{name}</color>,placeholders only,placeholder
+4255236631,New unit unlocked: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>,placeholders only,placeholder
+3878896595,Quests for <color=green>{playerInfo.User.CharacterName.Value}</color> have been refreshed.,placeholders only,placeholder
+1201875369,No progress in {professionHandler.GetProfessionName()} yet!,placeholders only,placeholder
+2554001784,{professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>,placeholders only,placeholder
+3399068440,<color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L,stray brackets on strict retry,other
+2511919794,"<color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $""{colorCode}*</color> {levelAndPrestiges}"" : $"" {levelAndPrestiges}"")}",placeholders only,placeholder
+2272306226,<color=green>{0}</color> moved - <color=white>{1}</color>,placeholders only,placeholder
+2428442751,New unit unlocked: <color=green>{0}</color>,placeholders only,placeholder
+3402815477,<color=white>VBloods Slain</color>: <color=#FF5733>{0}</color> | <color=white>Units Killed</color>: <color=#FFD700>{1}</color> | <color=white>Deaths</color>: <color=#808080>{2}</color> | <color=white>Time Online</color>: <color=#1E90FF>{3}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{4}</color>kf | <color=white>Blood Consumed</color>: <color=red>{5}</color>L,stray brackets on strict retry,other
+2698551496,Quests for <color=green>{0}</color> have been refreshed.,placeholders only,placeholder
+885434933,Shift spell: <color=#CBC3E3>{0}</color>,placeholders only,placeholder
+2383766993,Stat bonuses improvement: <color=green>{0}</color>,placeholders only,placeholder
+2740121583,VBlood emotes <color=red>disabled</color>.,placeholders only,placeholder
+2772168133,{0}[<color=white>{1}</color>],placeholders only,placeholder
+1641855254,You haven't gained any expertise for <color=#c0c0c0>{0}</color> yet!,placeholders only,placeholder
+3227554981,<color=#c0c0c0>{0}</color> expertise set to [<color=white>{1}</color>] for <color=green>{2}</color>,placeholders only,placeholder
+1369871380,Available Weapon Expertises: <color=#c0c0c0>{0}</color>,placeholders only,placeholder
+3002809107,Prefab with GUID {guidHash} not found!,placeholders only,placeholder
+2332227846,You have not prestiged in <color=#90EE90>Exo</color> yet.,placeholders only,placeholder
+907868427,Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>),placeholders only,placeholder
+4066899438,Shift spell <color=green>enabled</color>!,placeholders only,placeholder
+2320898349,Shift spell <color=red>disabled</color>!,placeholders only,placeholder
+1446796844,Familiar combat <color=green>enabled</color>.,placeholders only,placeholder
+1214712585,Familiar combat <color=red>disabled</color>.,placeholders only,placeholder
+,,"{""placeholder"": 38, ""identical"": 1, ""other"": 2}",summary
