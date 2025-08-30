@@ -207,7 +207,7 @@ python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Languag
 python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json
 ```
 
-Run the check-only mode first to fail fast if tokens were altered, then apply the fixes. Perform this validation after every translation pass and before committing changes. The `localization_pipeline.py` script runs this step automatically with `--reorder` after each translation run.
+Run the check-only mode first to fail fast if tokens were altered, then apply the fixes. Perform this validation after every translation pass and before committing changes. The `localization_pipeline.py` script runs the check-only step before translation and applies fixes with `--reorder` after each translation run.
 
 #### Lenient token checks
 
