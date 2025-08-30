@@ -13,6 +13,7 @@ import argparse
 import csv
 import json
 import logging
+import re
 import subprocess
 import sys
 import signal
@@ -88,6 +89,36 @@ def propagate_hashes(target: Path) -> None:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
 
+PROBLEM_REASONS = ("contains english", "identical to source")
+
+
+def collect_problematic_hashes(run_dir: Path) -> set[str]:
+    """Return hashes with English or identical-to-source issues."""
+    hashes: set[str] = set()
+    report = run_dir / "skipped.csv"
+    if report.is_file():
+        with report.open("r", encoding="utf-8") as fp:
+            reader = csv.DictReader(fp)
+            for row in reader:
+                reason = row.get("reason", "").lower()
+                if any(r in reason for r in PROBLEM_REASONS):
+                    hash_id = row.get("hash", "")
+                    if hash_id.isdigit():
+                        hashes.add(str(int(hash_id)))
+    log_file = run_dir / "translate.log"
+    if log_file.is_file():
+        pattern = re.compile(r"(\d+):\s+SKIPPED\s+\(([^)]+)\)")
+        with log_file.open("r", encoding="utf-8") as fp:
+            for line in fp:
+                match = pattern.search(line)
+                if not match:
+                    continue
+                reason = match.group(2).lower()
+                if any(r in reason for r in PROBLEM_REASONS):
+                    hashes.add(str(int(match.group(1))))
+    return hashes
+
+
 def process_language(name: str, path: Path, logger: logging.Logger) -> dict:
     """Translate, validate and fix tokens for a single language."""
     lang_metrics: Dict[str, Dict] = {"skipped_hashes": {}}
@@ -135,8 +166,57 @@ def process_language(name: str, path: Path, logger: logging.Logger) -> dict:
         raise SystemExit(
             f"Run directory {run_dir} metrics mismatch: {actual_file} != {expected_file}"
         )
-
     report = run_dir / "skipped.csv"
+    retry_hashes = collect_problematic_hashes(run_dir)
+    manual_review_hashes: set[str] = set()
+    if retry_hashes:
+        cmd = [
+            sys.executable,
+            "Tools/translate_argos.py",
+            str(path.relative_to(ROOT)),
+            "--to",
+            code,
+            "--run-dir",
+            str(run_dir),
+            "--batch-size",
+            "100",
+            "--max-retries",
+            "3",
+            "--log-level",
+            "INFO",
+            "--overwrite",
+        ]
+        for h in sorted(retry_hashes):
+            cmd.extend(["--hash", h])
+        run(cmd, check=False, logger=logger)
+        manual_review_hashes = collect_problematic_hashes(run_dir).intersection(
+            retry_hashes
+        )
+        if manual_review_hashes and report.is_file():
+            review_file = run_dir / "manual_review.csv"
+            with report.open("r", encoding="utf-8") as in_fp, review_file.open(
+                "w", newline="", encoding="utf-8"
+            ) as out_fp:
+                reader = csv.DictReader(in_fp)
+                writer = csv.DictWriter(out_fp, fieldnames=reader.fieldnames)
+                writer.writeheader()
+                for row in reader:
+                    if row.get("hash") in manual_review_hashes and any(
+                        r in row.get("reason", "").lower() for r in PROBLEM_REASONS
+                    ):
+                        writer.writerow(row)
+            run(
+                [
+                    sys.executable,
+                    "Tools/review_skipped.py",
+                    str(review_file.relative_to(ROOT)),
+                    "--language-file",
+                    str(path.relative_to(ROOT)),
+                ],
+                check=False,
+                logger=logger,
+            )
+
     t_end = timestamp()
     lang_metrics["translation"] = {
         "start": t_start,
@@ -152,6 +232,10 @@ def process_language(name: str, path: Path, logger: logging.Logger) -> dict:
                 reason = row.get("reason", "")
                 skipped_counts[reason] = skipped_counts.get(reason, 0) + 1
     lang_metrics["skipped_hashes"] = skipped_counts
+    lang_metrics["strict_retry"] = {
+        "retried": len(retry_hashes),
+        "manual_review": len(manual_review_hashes),
+    }
 
     mismatches = 0
     with path.open("r", encoding="utf-8") as fp:
@@ -333,6 +417,7 @@ def main() -> None:
                 "token_mismatches": 0,
             },
         }
+        metrics["steps"]["strict_retry"] = {"retried": 0, "manual_review": 0}
         report_paths: list[Path] = []
         results = []
         with ThreadPoolExecutor() as executor:
@@ -358,6 +443,13 @@ def main() -> None:
             totals["tokens_restored"] += token_data.get("tokens_restored", 0)
             totals["tokens_reordered"] += token_data.get("tokens_reordered", 0)
             totals["token_mismatches"] += token_data.get("token_mismatches", 0)
+            retry_data = lang_metrics.get("strict_retry", {})
+            metrics["steps"]["strict_retry"]["retried"] += retry_data.get(
+                "retried", 0
+            )
+            metrics["steps"]["strict_retry"]["manual_review"] += retry_data.get(
+                "manual_review", 0
+            )
         metrics["steps"]["translation"]["end"] = timestamp()
         metrics["steps"]["token_fix"]["end"] = timestamp()
 
