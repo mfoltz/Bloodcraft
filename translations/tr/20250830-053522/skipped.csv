@@ -1,0 +1,22 @@
+hash,english,reason,category
+1420278477,Tracking is only available for incomplete kill quests.,contains English on strict retry,english
+2461283441,Prestiges:,identical to source on strict retry,identical
+1809964020,Unable to verify tier for {vBloodPrefabGuid.GetPrefabName()}! Shouldn't really happen at this point and may want to inform the developer.,contains English on strict retry,english
+4140406916,"You haven't selected a class yet, use <color=white>'.class s [Class]'</color> instead.",contains English on strict retry,english
+1218917876,"Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {0}.",contains English on strict retry,english
+2660507905,No Castle Heart!,identical to source on strict retry,identical
+999548370,{FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:,contains English on strict retry,english
+3343555659,Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.,contains English on strict retry,english
+3761416018,First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.,contains English on strict retry,english
+1826355702,Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.,contains English on strict retry,english
+3254231727,"You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!",contains English on strict retry,english
+1440602422,Active familiar for <color=green>{user.CharacterName.Value}</color> has been set to level <color=white>{level}</color>.,contains English on strict retry,english
+998944061,The {questType} quest is already complete for {playerInfo.User.CharacterName.Value}.,contains English on strict retry,english
+714432788,"You've already selected {FormatClassName(currentClass.Value)}, use <color=white>'.class c [Class]'</color> to change. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)",contains English on strict retry,english
+1286090332,"You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!",contains English on strict retry,english
+692006723,The {0} quest is already complete for {1}.,contains English on strict retry,english
+1178832936,"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{0}</color>]! Growth rates for all expertise/legacies increased by <color=green>{1}</color>, experience from unit kills reduced by <color=red>{2}</color>.",contains English on strict retry,english
+1223341524,<color=#90EE90>{0}</color>[<color=white>{1}</color>] prestiged successfully! Growth rate reduced by <color=red>{2}</color> and stat bonuses improved by <color=green>{3}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{4}</color>.,contains English on strict retry,english
+1601487032,First unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.,contains English on strict retry,english
+3060695596,Second unarmed slot set to <color=white>{0}</color> for <color=green>{1}</color>.,contains English on strict retry,english
+,,"{""english"": 18, ""identical"": 2}",summary

@@ -454,5 +454,49 @@
     "metrics_file": "/workspace/Bloodcraft/translations/vi/20250830-001543/metrics.json",
     "success_rate": 0.7663551401869159,
     "status": "interrupted"
+  },
+  {
+    "run_id": "2ed2256b-e6f4-48e5-966f-32f98cc63339",
+    "timestamp": "2025-08-30T05:34:34Z",
+    "language": "tr",
+    "run_dir": "/workspace/Bloodcraft/translations/tr/20250830-053423",
+    "log_file": "/workspace/Bloodcraft/translations/tr/20250830-053423/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/tr/20250830-053423/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/tr/20250830-053423/metrics.json",
+    "success_rate": 0,
+    "status": "interrupted"
+  },
+  {
+    "run_id": "66a9eb53-1395-46ec-9a22-0b95c8ff8e09",
+    "timestamp": "2025-08-30T05:35:11Z",
+    "language": "tr",
+    "run_dir": "/workspace/Bloodcraft/translations/tr/20250830-053423",
+    "log_file": "/workspace/Bloodcraft/translations/tr/20250830-053423/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/tr/20250830-053423/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/tr/20250830-053423/metrics.json",
+    "success_rate": 0,
+    "status": "interrupted"
+  },
+  {
+    "run_id": "0a02e1b5-b9c2-4632-8507-866a6d83530b",
+    "timestamp": "2025-08-30T05:38:07Z",
+    "language": "tr",
+    "run_dir": "/workspace/Bloodcraft/translations/tr/20250830-053522",
+    "log_file": "/workspace/Bloodcraft/translations/tr/20250830-053522/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/tr/20250830-053522/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/tr/20250830-053522/metrics.json",
+    "success_rate": 0.5116822429906542,
+    "status": "success"
+  },
+  {
+    "run_id": "8d10aec0-2737-4b85-8812-7b50407e6731",
+    "timestamp": "2025-08-30T05:45:32Z",
+    "language": "tr",
+    "run_dir": "/workspace/Bloodcraft/translations/tr/20250830-053522",
+    "log_file": "/workspace/Bloodcraft/translations/tr/20250830-053522/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/tr/20250830-053522/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/tr/20250830-053522/metrics.json",
+    "success_rate": 0.5116822429906542,
+    "status": "success"
   }
 ]
