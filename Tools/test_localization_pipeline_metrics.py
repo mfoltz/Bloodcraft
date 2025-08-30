@@ -51,6 +51,7 @@ def test_metrics_written(tmp_path, monkeypatch):
         "token_check",
         "translation",
         "token_fix",
+        "strict_retry",
         "verification",
     }
     assert "French" in metrics["languages"]
@@ -68,6 +69,10 @@ def test_metrics_written(tmp_path, monkeypatch):
         "tokens_restored": 0,
         "tokens_reordered": 0,
         "token_mismatches": 0,
+    }
+    assert metrics["steps"]["strict_retry"] == {
+        "retried": 0,
+        "manual_review": 0,
     }
     assert metrics["steps"]["verification"]["duration"] == 0.0
 
@@ -107,6 +112,57 @@ def test_exit_code_on_skipped(tmp_path, monkeypatch):
     assert lang["token_fix"]["tokens_restored"] == 0
     assert lang["token_fix"]["token_mismatches"] == 0
     assert lang["success"] is False
+
+
+def test_strict_retry_metrics(tmp_path, monkeypatch):
+    root, messages_dir, english_path = _setup_repo(tmp_path)
+    monkeypatch.setattr(localization_pipeline, "ROOT", root)
+    monkeypatch.setattr(localization_pipeline, "MESSAGES_DIR", messages_dir)
+    monkeypatch.setattr(localization_pipeline, "ENGLISH_PATH", english_path)
+    monkeypatch.setattr(localization_pipeline, "LANGUAGE_CODES", {"French": "fr"})
+    monkeypatch.setattr(sys, "argv", ["localization_pipeline.py"])
+
+    calls = {"translate": 0, "review": 0}
+
+    def fake_run(cmd, *, check=True, logger):
+        if any("translate_argos.py" in c for c in cmd):
+            calls["translate"] += 1
+            run_dir = Path(cmd[cmd.index("--run-dir") + 1])
+            run_dir.mkdir(parents=True, exist_ok=True)
+            with (run_dir / "skipped.csv").open("w", newline="", encoding="utf-8") as fp:
+                writer = csv.DictWriter(fp, fieldnames=["hash", "english", "reason", "category"])
+                writer.writeheader()
+                writer.writerow({
+                    "hash": "1",
+                    "english": "Hello",
+                    "reason": "identical to source",
+                    "category": "other",
+                })
+            target = cmd[cmd.index("Tools/translate_argos.py") + 1]
+            (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
+            (run_dir / "translate.log").write_text(
+                "2024 INFO 1: SKIPPED (identical to source)\n"
+            )
+        elif any("review_skipped.py" in c for c in cmd):
+            calls["review"] += 1
+        elif any("fix_tokens.py" in c for c in cmd):
+            return SimpleNamespace(returncode=0), 0.0
+        return SimpleNamespace(returncode=0), 0.0
+
+    monkeypatch.setattr(localization_pipeline, "run", fake_run)
+
+    with pytest.raises(SystemExit):
+        localization_pipeline.main()
+
+    metrics = json.loads((root / "localization_metrics.json").read_text())
+    lang = metrics["languages"]["French"]
+    assert lang["strict_retry"] == {"retried": 1, "manual_review": 1}
+    assert metrics["steps"]["strict_retry"] == {
+        "retried": 1,
+        "manual_review": 1,
+    }
+    assert calls["translate"] == 2
+    assert calls["review"] == 1
 
 
 def test_custom_output_paths(tmp_path, monkeypatch):
