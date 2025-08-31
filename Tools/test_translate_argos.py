@@ -79,6 +79,7 @@ def test_run_dir_creates_outputs(tmp_path, monkeypatch):
         translate_argos.argos_translate, "load_installed_languages", lambda: None
     )
     monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(translate_argos, "ensure_model_installed", lambda root, dst: None)
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
     monkeypatch.setattr(
         sys,
@@ -132,6 +133,7 @@ def test_run_dir_redirects_paths(tmp_path, monkeypatch):
     monkeypatch.setattr(
         translate_argos.argos_translate, "load_installed_languages", lambda: None
     )
+    monkeypatch.setattr(translate_argos, "ensure_model_installed", lambda root, dst: None)
     monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
     monkeypatch.setattr(
@@ -194,6 +196,7 @@ def test_summary_and_success_logged_at_info(tmp_path, monkeypatch, caplog):
         translate_argos.argos_translate, "load_installed_languages", lambda: None
     )
     monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(translate_argos, "ensure_model_installed", lambda root, dst: None)
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
     monkeypatch.setattr(
         sys,
@@ -303,6 +306,7 @@ def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
         translate_argos.argos_translate, "load_installed_languages", lambda: None
     )
     monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(translate_argos, "ensure_model_installed", lambda root, dst: None)
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
     monkeypatch.setattr(
         sys,
@@ -322,14 +326,12 @@ def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
     with caplog.at_level("ERROR"):
         with pytest.raises(SystemExit) as exc:
             translate_argos.main()
-    msg = "No Argos translation model for en->xx"
-    assert msg in str(exc.value)
+    assert exc.value.code == 1
+    msg = "No Argos translation model for"
     assert msg in caplog.text
     install_hint = "argospm install translate-en_xx"
-    assert install_hint in str(exc.value)
     assert install_hint in caplog.text
     rebuild_hint = "cd Resources/Localization/Models/xx"
-    assert rebuild_hint in str(exc.value)
     assert rebuild_hint in caplog.text
 
 
@@ -378,14 +380,12 @@ def test_exit_when_translation_engine_attribute_error(tmp_path, monkeypatch, cap
     with caplog.at_level("ERROR"):
         with pytest.raises(SystemExit) as exc:
             translate_argos.main()
+    assert exc.value.code == 1
     msg = "No Argos translation model for en->xx"
-    assert msg in str(exc.value)
     assert msg in caplog.text
     install_hint = "argospm install translate-en_xx"
-    assert install_hint in str(exc.value)
     assert install_hint in caplog.text
     rebuild_hint = "cd Resources/Localization/Models/xx"
-    assert rebuild_hint in str(exc.value)
     assert rebuild_hint in caplog.text
 
 
@@ -401,6 +401,7 @@ def test_missing_model_logs_install_hint(tmp_path, monkeypatch, caplog):
     monkeypatch.setattr(
         translate_argos.argos_translate, "load_installed_languages", lambda: None
     )
+    monkeypatch.setattr(translate_argos, "ensure_model_installed", lambda root, dst: None)
     monkeypatch.setattr(
         sys,
         "argv",
@@ -417,11 +418,10 @@ def test_missing_model_logs_install_hint(tmp_path, monkeypatch, caplog):
     with caplog.at_level("ERROR"):
         with pytest.raises(SystemExit) as exc:
             translate_argos.main()
+    assert exc.value.code == 1
     hint = "argospm install translate-en_es"
-    assert hint in str(exc.value)
     assert hint in caplog.text
     rebuild_hint = "cd Resources/Localization/Models/es"
-    assert rebuild_hint in str(exc.value)
     assert rebuild_hint in caplog.text
 
 
@@ -1208,7 +1208,7 @@ def test_multiple_interpolation_blocks_translated(tmp_path, monkeypatch):
 
 
 
-def test_fatal_error_aborts(tmp_path, monkeypatch):
+def test_fatal_error_aborts(tmp_path, monkeypatch, caplog):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
     messages_dir.mkdir(parents=True)
@@ -1256,9 +1256,11 @@ def test_fatal_error_aborts(tmp_path, monkeypatch):
         ],
     )
 
-    with pytest.raises(SystemExit) as exc:
-        translate_argos.main()
-    assert "Unsupported model binary version" in str(exc.value)
+    with caplog.at_level("ERROR"):
+        with pytest.raises(SystemExit) as exc:
+            translate_argos.main()
+    assert exc.value.code == 1
+    assert "Unsupported model binary version" in caplog.text
     assert translator.calls == 1
 
 
@@ -1592,10 +1594,10 @@ def test_token_only_lines_restored_without_skip(tmp_path, monkeypatch):
     )
     monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
 
-    called = {}
+    calls = []
 
     def fake_run(args, *a, **k):
-        called["args"] = args
+        calls.append(args)
         return DummyCompleted()
 
     monkeypatch.setattr(subprocess, "run", fake_run)
@@ -1623,7 +1625,7 @@ def test_token_only_lines_restored_without_skip(tmp_path, monkeypatch):
 
     report = json.loads(report_path.read_text())
     assert report == []
-    assert "--reorder" in called.get("args", [])
+    assert any("--reorder" in c for c in calls)
 
 
 def test_retry_loop_resolves_skipped_translation(tmp_path, monkeypatch):
@@ -1902,8 +1904,9 @@ def test_report_written_once_and_deduplicated(tmp_path, monkeypatch, caplog):
             skipped,
             failures,
             fix_code,
+            err,
         ) = real_run_translation(args, root)
-        return rows + rows, processed, successes, skipped, failures, fix_code
+        return rows + rows, processed, successes, skipped, failures, fix_code, err
 
     monkeypatch.setattr(translate_argos, "_run_translation", dup_run_translation)
 
@@ -2164,6 +2167,65 @@ def test_run_index_appended(tmp_path, monkeypatch):
     assert metrics[-1]["status"] == "success"
 
 
+def test_run_index_failed_on_validation(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "Hello"}})
+    )
+
+    target_rel = "Resources/Localization/Messages/Test.json"
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "Bonjour"
+
+    class DummyCompleted:
+        def __init__(self, code):
+            self.returncode = code
+
+    def fake_run(cmd, *a, **k):
+        if any("validate_translation_run.py" in part for part in cmd):
+            return DummyCompleted(1)
+        return DummyCompleted(0)
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "xx",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    with pytest.raises(SystemExit):
+        translate_argos.main()
+
+    index_path = root / "translations" / "run_index.json"
+    data = json.loads(index_path.read_text())
+    entry = data[-1]
+    assert entry["status"] == "failed"
+    metrics = json.loads(Path(entry["metrics_file"]).read_text())
+    assert metrics[-1]["status"] == "failed"
+    assert "validate_translation_run.py" in metrics[-1]["error"]
+
+
 def test_stack_trace_logged_on_exception(tmp_path, monkeypatch, caplog):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
@@ -2260,5 +2322,5 @@ def test_error_when_no_messages_processed(tmp_path, monkeypatch, caplog):
     with caplog.at_level(logging.ERROR, logger="translate_argos"):
         with pytest.raises(SystemExit) as exc:
             translate_argos.main()
-    assert str(exc.value) == msg
+    assert exc.value.code == 1
     assert msg in caplog.text
