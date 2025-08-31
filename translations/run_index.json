@@ -641,5 +641,27 @@
     "metrics_file": "/workspace/Bloodcraft/translations/pl/20250830-203723/metrics.json",
     "success_rate": 1.0,
     "status": "success"
+  },
+  {
+    "run_id": "2ee04b87-ed11-4d2f-aaf1-0fd52c2e192d",
+    "timestamp": "2025-08-31T00:14:17Z",
+    "language": "zh",
+    "run_dir": "/workspace/Bloodcraft/translations/zh/20250831-001417",
+    "log_file": "/workspace/Bloodcraft/translations/zh/20250831-001417/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/zh/20250831-001417/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/zh/20250831-001417/metrics.json",
+    "success_rate": 0,
+    "status": "failed"
+  },
+  {
+    "run_id": "61546d4f-3ee4-405f-8bfb-40b52fbaca98",
+    "timestamp": "2025-08-31T00:14:42Z",
+    "language": "zh",
+    "run_dir": "/workspace/Bloodcraft/translations/zh/20250831-001437",
+    "log_file": "/workspace/Bloodcraft/translations/zh/20250831-001437/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/zh/20250831-001437/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/zh/20250831-001437/metrics.json",
+    "success_rate": 0.8,
+    "status": "success"
   }
 ]
