@@ -663,8 +663,12 @@ def write_failure_metrics(args, error, *, status: str = "failed") -> None:
     )
 
 
-def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, int, int, int]:
+def _run_translation(
+    args, root: str
+) -> tuple[list[dict[str, str]], int, int, int, int, int, str | None]:
     fix_tokens_code = 0
+    validate_code = 0
+    error_msg: str | None = None
     try:
         translator = argos_translate.get_translation_from_codes(args.src, args.dst)
         to_code = getattr(getattr(translator, "to_lang", None), "code", args.dst)
@@ -741,7 +745,7 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
 
     if not to_translate:
         logger.info("No messages need translation.")
-        return [], 0, 0, 0, 0, 0
+        return [], 0, 0, 0, 0, 0, None
 
     safe_lines: List[str] = []
     tokens_list: List[tuple[dict[str, str], bool]] = []
@@ -1397,6 +1401,17 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
         result = subprocess.run(cmd)
         fix_tokens_code = result.returncode
 
+        validate_cmd = [
+            sys.executable,
+            os.path.join(os.path.dirname(__file__), "validate_translation_run.py"),
+            "--run-dir",
+            args.run_dir,
+        ]
+        validate_result = subprocess.run(validate_cmd)
+        validate_code = validate_result.returncode
+
+        exit_code = fix_tokens_code or validate_code
+
         logger.info(f"Wrote translations to {target_path}")
         token_mismatches = sum(
             1
@@ -1405,24 +1420,40 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
         )
         retry_attempts = sum(1 for stats in token_stats.values() if stats.get("retry_attempted"))
         retry_successes = sum(1 for stats in token_stats.values() if stats.get("retry_succeeded"))
-        retry_missing_tokens = sum(stats.get("retry_missing_tokens", 0) for stats in token_stats.values())
-        retry_extra_tokens = sum(stats.get("retry_extra_tokens", 0) for stats in token_stats.values())
-        _append_metrics_entry(
-            args,
-            status="success",
-            processed=processed_lines,
-            successes=successes,
-            timeouts=timeouts_count,
-            token_reorders=token_reorders,
-            token_mismatches=token_mismatches,
-            retry_attempts=retry_attempts,
-            retry_successes=retry_successes,
-            retry_missing_tokens=retry_missing_tokens,
-            retry_extra_tokens=retry_extra_tokens,
-            token_mismatch_details=token_mismatch_details,
-            failures={k: v[0] for k, v in failures.items()},
-            hash_stats=token_stats,
+        retry_missing_tokens = sum(
+            stats.get("retry_missing_tokens", 0) for stats in token_stats.values()
         )
+        retry_extra_tokens = sum(
+            stats.get("retry_extra_tokens", 0) for stats in token_stats.values()
+        )
+        status = "success" if exit_code == 0 else "failed"
+        error_msg = None
+        if exit_code:
+            parts = []
+            if fix_tokens_code:
+                parts.append(f"fix_tokens.py exited with {fix_tokens_code}")
+            if validate_code:
+                parts.append(
+                    f"validate_translation_run.py exited with {validate_code}"
+                )
+            error_msg = "; ".join(parts)
+        extra = {
+            "processed": processed_lines,
+            "successes": successes,
+            "timeouts": timeouts_count,
+            "token_reorders": token_reorders,
+            "token_mismatches": token_mismatches,
+            "retry_attempts": retry_attempts,
+            "retry_successes": retry_successes,
+            "retry_missing_tokens": retry_missing_tokens,
+            "retry_extra_tokens": retry_extra_tokens,
+            "token_mismatch_details": token_mismatch_details,
+            "failures": {k: v[0] for k, v in failures.items()},
+            "hash_stats": token_stats,
+        }
+        if error_msg:
+            extra["error"] = error_msg
+        _append_metrics_entry(args, status=status, **extra)
     except KeyboardInterrupt:
         messages.update(translated)
         target["Messages"] = messages
@@ -1456,17 +1487,28 @@ def _run_translation(args, root: str) -> tuple[list[dict[str, str]], int, int, i
 
     skipped = len(report)
     failures_count = len(failures)
+    exit_code = fix_tokens_code or validate_code
+    if exit_code and not error_msg:
+        parts = []
+        if fix_tokens_code:
+            parts.append(f"fix_tokens.py exited with {fix_tokens_code}")
+        if validate_code:
+            parts.append(f"validate_translation_run.py exited with {validate_code}")
+        error_msg = "; ".join(parts)
     return (
         list(report.values()),
         processed_lines,
         successes,
         skipped,
         failures_count,
-        fix_tokens_code,
+        exit_code,
+        error_msg,
     )
 
 
-def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, int, int]:
+def _run_dry_run(
+    args, root: str
+) -> tuple[list[dict[str, str]], int, int, int, int, int, str | None]:
     """Check existing translations without invoking Argos."""
 
     english_path = os.path.join(
@@ -1650,6 +1692,7 @@ def _run_dry_run(args, root: str) -> tuple[list[dict[str, str]], int, int, int, 
         skipped,
         failures_count,
         0,
+        None,
     )
 
 
@@ -1931,10 +1974,13 @@ def main():
                 _skipped,
                 failures_total,
                 run_exit_code,
+                run_exit_msg,
             ) = _run_dry_run(args, root)
             skipped_entries.extend(run_remaining)
             remaining = run_remaining
             exit_code = exit_code or run_exit_code
+            if run_exit_code and run_exit_msg and not exit_msg:
+                exit_msg = run_exit_msg
         else:
             prev_hashes: set[str] | None = None
             try:
@@ -1946,6 +1992,7 @@ def main():
                         _skipped,
                         failures_run,
                         run_exit_code,
+                        run_exit_msg,
                     ) = _run_translation(args, root)
                     skipped_entries.extend(run_remaining)
                     token_mismatch_hashes.extend(
@@ -1960,6 +2007,8 @@ def main():
                     translated_total += translated
                     failures_total = failures_run
                     exit_code = exit_code or run_exit_code
+                    if run_exit_code and run_exit_msg and not exit_msg:
+                        exit_msg = run_exit_msg
                     if not args.report_file:
                         break
                     hashes = [row["hash"] for row in remaining]
@@ -2023,6 +2072,7 @@ def main():
                     _skipped,
                     failures_retry,
                     run_exit_code,
+                    run_exit_msg,
                 ) = _run_translation(args, root)
                 skipped_entries.extend(run_remaining)
                 remaining.extend(run_remaining)
@@ -2032,6 +2082,8 @@ def main():
                 translated_total += translated
                 failures_total = failures_retry
                 exit_code = run_exit_code
+                if run_exit_code and run_exit_msg and not exit_msg:
+                    exit_msg = run_exit_msg
                 args.hashes = original_hashes
                 args.lenient_tokens = original_lenient
             if not exit_code and remaining:
@@ -2127,7 +2179,7 @@ def main():
         logger.handlers.clear()
 
     if exit_code:
-        raise SystemExit(exit_msg or exit_code)
+        raise SystemExit(exit_code)
 
 
 if __name__ == "__main__":
