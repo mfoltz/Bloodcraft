@@ -1,0 +1,18 @@
+[
+  {
+    "file": "Resources/Localization/Messages/SChinese.json",
+    "key": "2007397999",
+    "missing": [],
+    "extra": [
+      "</color>"
+    ]
+  },
+  {
+    "file": "Resources/Localization/Messages/SChinese.json",
+    "key": "3141472524",
+    "missing": [],
+    "extra": [
+      "{1}"
+    ]
+  }
+]
