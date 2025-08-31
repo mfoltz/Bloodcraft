@@ -47,15 +47,33 @@ def _read_mismatch_summary(path: Path) -> Tuple[int, Iterable[str]]:
 
     total = 0
     hashes: list[str] = []
+
     if isinstance(data, dict):
-        total += data.get("token_mismatches", 0)
-        for mismatch in data.get("mismatches", []) or []:
-            hashes.append(str(mismatch.get("key")))
+        # ``token_mismatch_summary.json`` has appeared in a few different
+        # shapes.  Earlier versions keyed the file by hash with the value being
+        # the mismatch details, while later versions stored statistics such as
+        # ``token_mismatches`` alongside a ``mismatches`` list.  Support both
+        # layouts so older archives remain readable.
+        if "token_mismatches" in data or "mismatches" in data:
+            total += int(data.get("token_mismatches", 0))
+            for mismatch in data.get("mismatches", []) or []:
+                key = mismatch.get("key") or mismatch.get("hash")
+                if key is not None:
+                    hashes.append(str(key))
+        else:
+            total = len(data)
+            hashes.extend(str(k) for k in data.keys())
     else:
+        # Newer summaries may be a list of report entries.  Each entry contains
+        # aggregate fields as above.
         for entry in data:
-            total += entry.get("token_mismatches", 0)
+            if not isinstance(entry, dict):
+                continue
+            total += int(entry.get("token_mismatches", 0))
             for mismatch in entry.get("mismatches", []) or []:
-                hashes.append(str(mismatch.get("key")))
+                key = mismatch.get("key") or mismatch.get("hash")
+                if key is not None:
+                    hashes.append(str(key))
     return total, hashes
 
 
