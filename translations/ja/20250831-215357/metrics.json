@@ -1,0 +1,58 @@
+[
+  {
+    "run_id": "ef148fc2-6fbf-44b1-a277-9a6430e2e4b5",
+    "log_file": "/workspace/Bloodcraft/translations/ja/20250831-215357/translate.log",
+    "report_file": "/workspace/Bloodcraft/translations/ja/20250831-215357/skipped.csv",
+    "metrics_file": "/workspace/Bloodcraft/translations/ja/20250831-215357/metrics.json",
+    "git_commit": "5624c8db",
+    "python_version": "3.11.12",
+    "argos_version": "1.8.0",
+    "model_version": "unknown",
+    "cli_args": {
+      "target_file": "Resources/Localization/Messages/Japanese.json",
+      "src": "en",
+      "dst": "ja",
+      "root": "/workspace/Bloodcraft",
+      "run_dir": "/workspace/Bloodcraft/translations/ja/20250831-215357",
+      "batch_size": 100,
+      "max_retries": 3,
+      "timeout": 60,
+      "overwrite": true,
+      "hashes": [
+        "3439613370"
+      ],
+      "log_level": "WARNING",
+      "verbose": false,
+      "log_file": "/workspace/Bloodcraft/translations/ja/20250831-215357/translate.log",
+      "report_file": "/workspace/Bloodcraft/translations/ja/20250831-215357/skipped.csv",
+      "metrics_file": "/workspace/Bloodcraft/translations/ja/20250831-215357/metrics.json",
+      "dry_run": false,
+      "lenient_tokens": true,
+      "retry_mismatches": false,
+      "fix_order": false,
+      "run_index_file": "/workspace/Bloodcraft/translations/run_index.json"
+    },
+    "run_dir": "/workspace/Bloodcraft/translations/ja/20250831-215357",
+    "file": "Resources/Localization/Messages/Japanese.json",
+    "timestamp": "2025-08-31T21:54:02Z",
+    "status": "success",
+    "processed": 1,
+    "successes": 1,
+    "timeouts": 0,
+    "token_reorders": 0,
+    "token_mismatches": 0,
+    "retry_attempts": 0,
+    "retry_successes": 0,
+    "retry_missing_tokens": 0,
+    "retry_extra_tokens": 0,
+    "token_mismatch_details": {},
+    "failures": {},
+    "hash_stats": {
+      "3439613370": {
+        "original_tokens": 0,
+        "translated_tokens": 0,
+        "reordered": false
+      }
+    }
+  }
+]
