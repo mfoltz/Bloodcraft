@@ -2159,6 +2159,9 @@ def test_run_index_appended(tmp_path, monkeypatch):
     assert entry["log_file"]
     assert entry["report_file"]
     assert entry["metrics_file"]
+    assert entry["status"] == "success"
+    metrics = json.loads(Path(entry["metrics_file"]).read_text())
+    assert metrics[-1]["status"] == "success"
 
 
 def test_stack_trace_logged_on_exception(tmp_path, monkeypatch, caplog):

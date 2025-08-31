@@ -47,6 +47,11 @@ _INTERRUPT_ARGS = None
 _INTERRUPT_SKIPPED: list[dict[str, str]] | None = None
 _INTERRUPT_FLUSH: Callable[[], None] | None = None
 
+# Known terminal states for a translation run. Every metrics and run index
+# entry must record one of these so downstream tooling can reliably query
+# results.
+VALID_STATUSES = {"success", "failed", "interrupted"}
+
 
 def handle_interrupt(signum, frame):
     """Handle SIGINT/SIGTERM by writing interrupted state and exiting."""
@@ -514,6 +519,9 @@ def _write_report(
 
 def _append_metrics_entry(args, *, status: str, **extra) -> dict:
     """Append a metrics entry to ``args.metrics_file``."""
+
+    if status not in VALID_STATUSES:
+        raise ValueError(f"Invalid status: {status!r}")
 
     metrics_dir = os.path.dirname(args.metrics_file)
     if metrics_dir:
