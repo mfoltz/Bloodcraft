@@ -73,7 +73,8 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
   under `translations/<iso-code>/<timestamp>/` by default; override with
   `--run-dir` if a custom location is desired. The translator writes
   `translate.log`, `skipped.csv`, and `metrics.json` to this run
-  directory and appends a summary to `translations/run_index.json`.
+  directory and appends a summary with a terminal `status` to
+  `translations/run_index.json`.
   Commit every run directory to version control so logs remain available
   for QA. Omitting `--log-file` or `--report-file` constructs these
   defaults within the run directory, and the script prints the resolved
@@ -147,11 +148,12 @@ Translation runs or the full localization pipeline may terminate early. Both
 `translate_argos.py` and `localization_pipeline.py` record a `status` field in
 their metrics so interruptions are visible after the fact. Each translation run
 writes `metrics.json` alongside `translate.log` in its run directory, and
-`translations/run_index.json` aggregates the `status` for every run.
+`translations/run_index.json` aggregates the `status` for every run. The
+`status` field is always one of `success`, `failed`, or `interrupted`.
 
 ```bash
 # Inspect run index for unfinished or failed runs
-jq '.[] | select(.status != "completed") | {run_dir, status}' translations/run_index.json
+jq '.[] | select(.status != "success") | {run_dir, status}' translations/run_index.json
 
 # Check metrics for the same run directory
 jq '.[] | select(.status != "completed") | {file, status}' translations/<iso-code>/<timestamp>/metrics.json
