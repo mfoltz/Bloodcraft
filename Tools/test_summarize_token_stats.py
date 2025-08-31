@@ -1,74 +1,80 @@
 import json
 import sys
+from pathlib import Path
 
 import summarize_token_stats as sts
 
 
-def test_aggregate():
-    entries = [
-        {
-            "file": "a.json",
-            "failures": {"1": "token mismatch"},
-            "hash_stats": {
-                "1": {"original_tokens": 1, "translated_tokens": 0, "reordered": False},
-                "2": {"original_tokens": 1, "translated_tokens": 1, "reordered": True},
-            },
-            "token_mismatch_details": {"1": {"missing": ["4"], "extra": []}},
-        },
-        {
-            "file": "b.json",
-            "failures": {},
-            "hash_stats": {
-                "2": {"original_tokens": 1, "translated_tokens": 1, "reordered": False}
-            },
-            "token_mismatch_details": {"2": {"missing": ["4", "5"], "extra": []}},
-        },
-    ]
-    stats, token_counts = sts._aggregate(entries)
-    assert stats == {
-        "1": {"mismatches": 1, "reorders": 0, "file": "a.json"},
-        "2": {"mismatches": 1, "reorders": 1, "file": "b.json"},
-    }
-    assert token_counts == {"4": 2, "5": 1}
-
-
-def test_run_dir_cli(tmp_path, monkeypatch, capsys):
-    metrics = tmp_path / "metrics.json"
-    metrics.write_text(
-        json.dumps(
-            [
-                {
-                    "file": "a.json",
-                    "failures": {},
-                    "hash_stats": {
-                        "1": {
-                            "original_tokens": 1,
-                            "translated_tokens": 0,
-                            "reordered": False,
-                        }
-                    },
-                    "token_mismatch_details": {
-                        "1": {"missing": ["4"], "extra": []}
-                    },
-                }
-            ]
-        )
+def _make_run(tmp: Path, lang: str, run: str, metrics: dict, summary: dict) -> None:
+    run_dir = tmp / lang / run
+    run_dir.mkdir(parents=True)
+    (run_dir / "metrics.json").write_text(json.dumps([metrics]), encoding="utf-8")
+    (run_dir / "token_mismatch_summary.json").write_text(
+        json.dumps([summary]), encoding="utf-8"
     )
-    token_csv = tmp_path / "tokens.csv"
+
+
+def test_collect_stats(tmp_path):
+    _make_run(
+        tmp_path,
+        "fr",
+        "run1",
+        {"processed": 10, "successes": 8, "timeouts": 1},
+        {
+            "token_mismatches": 2,
+            "mismatches": [
+                {"key": "1", "missing": [], "extra": ["{0}"]},
+                {"key": "2", "missing": [], "extra": []},
+            ],
+        },
+    )
+    _make_run(
+        tmp_path,
+        "de",
+        "runA",
+        {"processed": 5, "successes": 5, "timeouts": 0},
+        {"token_mismatches": 1, "mismatches": [{"key": "1", "missing": [], "extra": []}]},
+    )
+
+    lang_stats, hash_counts = sts.collect_stats(tmp_path)
+    assert lang_stats["fr"]["processed"] == 10
+    assert lang_stats["fr"]["token_mismatches"] == 2
+    assert lang_stats["de"]["success_rate"] == 1.0
+    assert hash_counts["1"] == 2
+    assert hash_counts["2"] == 1
+
+
+def test_cli_outputs(tmp_path, monkeypatch):
+    _make_run(
+        tmp_path,
+        "es",
+        "run2",
+        {"processed": 1, "successes": 1, "timeouts": 0},
+        {"token_mismatches": 0, "mismatches": []},
+    )
+    json_out = tmp_path / "out.json"
+    lang_csv = tmp_path / "langs.csv"
+    hash_csv = tmp_path / "hashes.csv"
+
     monkeypatch.setattr(
         sys,
         "argv",
         [
             "summarize_token_stats.py",
-            "--run-dir",
+            "--translations-root",
             str(tmp_path),
-            "--token-csv",
-            str(token_csv),
+            "--json",
+            str(json_out),
+            "--languages-csv",
+            str(lang_csv),
+            "--hashes-csv",
+            str(hash_csv),
         ],
     )
+
     sts.main()
-    out = capsys.readouterr().out
-    assert out.splitlines()[0] == "Top missing tokens:"
-    assert "hash" in out
-    assert token_csv.exists()
-    assert token_csv.read_text().strip().splitlines()[1] == "4,1"
+
+    assert json_out.exists()
+    data = json.loads(json_out.read_text(encoding="utf-8"))
+    assert data["languages"][0]["language"] == "es"
+    assert lang_csv.exists() and hash_csv.exists()

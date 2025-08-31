@@ -1,166 +1,170 @@
-#!/usr/bin/env python3
-"""Summarize per-hash token mismatches and reorders.
+"""Aggregate translation metrics and token mismatch data.
 
-The metrics file may include run metadata (e.g., ``run_id``, ``git_commit``,
-``python_version``) and paths to log, report, and metrics files. These fields are
-ignored; only ``file``, ``failures``, and ``hash_stats`` are used."""
+This script traverses ``translations/<lang>/<run>/`` directories looking for
+``metrics.json`` and ``token_mismatch_summary.json`` files.  For each language
+it aggregates processed lines, successes, timeouts and token mismatches.  It
+also counts how frequently each hash appears in mismatch reports so languages
+and hashes can be ranked by problem frequency.
+
+Two CSV files and a JSON report are produced for downstream dashboards or
+manual analysis.
+"""
 
 from __future__ import annotations
 
 import argparse
 import csv
 import json
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, Iterable, Tuple
+
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def _load_metrics(path: Path) -> List[dict]:
+def _read_metrics(path: Path) -> Tuple[int, int, int]:
+    """Return processed, successes and timeouts for a metrics file."""
+
     try:
-        with path.open(encoding="utf-8") as fp:
-            return json.load(fp)
-    except FileNotFoundError:
-        return []
-    except json.JSONDecodeError:
-        return []
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return 0, 0, 0
+
+    processed = sum(entry.get("processed", 0) for entry in data)
+    successes = sum(entry.get("successes", 0) for entry in data)
+    timeouts = sum(entry.get("timeouts", 0) for entry in data)
+    return processed, successes, timeouts
 
 
-def _aggregate(entries: List[dict]) -> Tuple[Dict[str, Dict[str, int | str]], Dict[str, int]]:
-    stats: Dict[str, Dict[str, int | str]] = {}
-    token_counts: Counter[str] = Counter()
-    for entry in entries:
-        file = entry.get("file", "")
-        failures = entry.get("failures", {})
-        mismatch_details = entry.get("token_mismatch_details", {})
-        for hash_id, info in entry.get("hash_stats", {}).items():
-            mismatch = info.get("original_tokens") != info.get("translated_tokens")
-            if hash_id in failures:
-                mismatch = True
-            details = mismatch_details.get(hash_id, {})
-            missing = details.get("missing") or info.get("missing") or []
-            extra = details.get("extra") or info.get("extra") or []
-            if missing or extra:
-                mismatch = True
-            reordered = bool(info.get("reordered"))
-            if mismatch or reordered:
-                record = stats.setdefault(hash_id, {"mismatches": 0, "reorders": 0, "file": file})
-                if mismatch:
-                    record["mismatches"] += 1
-                if reordered:
-                    record["reorders"] += 1
-                record["file"] = file
-            for token in missing:
-                token_counts[str(token)] += 1
-    return stats, dict(token_counts)
+def _read_mismatch_summary(path: Path) -> Tuple[int, Iterable[str]]:
+    """Return total mismatch count and iterable of hash ids."""
+
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return 0, []
+
+    total = 0
+    hashes: list[str] = []
+    if isinstance(data, dict):
+        total += data.get("token_mismatches", 0)
+        for mismatch in data.get("mismatches", []) or []:
+            hashes.append(str(mismatch.get("key")))
+    else:
+        for entry in data:
+            total += entry.get("token_mismatches", 0)
+            for mismatch in entry.get("mismatches", []) or []:
+                hashes.append(str(mismatch.get("key")))
+    return total, hashes
 
 
-def _sort_rows(stats: Dict[str, Dict[str, int | str]]) -> List[Tuple[str, int, int, str]]:
-    rows = [
-        (hash_id, data["mismatches"], data["reorders"], str(data.get("file", "")))
-        for hash_id, data in stats.items()
-    ]
-    rows.sort(key=lambda r: (r[1] + r[2], r[0]), reverse=True)
-    return rows
+def collect_stats(translations_root: Path) -> Tuple[Dict[str, Dict[str, float]], Counter[str]]:
+    """Gather language stats and hash mismatch counts."""
+
+    language_stats: Dict[str, Dict[str, float]] = defaultdict(
+        lambda: {"processed": 0, "successes": 0, "timeouts": 0, "token_mismatches": 0}
+    )
+    hash_counter: Counter[str] = Counter()
+
+    for lang_dir in translations_root.iterdir():
+        if not lang_dir.is_dir():
+            continue
+        lang = lang_dir.name
+        for run_dir in lang_dir.iterdir():
+            if not run_dir.is_dir():
+                continue
+            processed, successes, timeouts = _read_metrics(run_dir / "metrics.json")
+            mismatches, mismatch_hashes = _read_mismatch_summary(
+                run_dir / "token_mismatch_summary.json"
+            )
+            stats = language_stats[lang]
+            stats["processed"] += processed
+            stats["successes"] += successes
+            stats["timeouts"] += timeouts
+            stats["token_mismatches"] += mismatches
+            for hash_id in mismatch_hashes:
+                hash_counter[hash_id] += 1
+
+    for stats in language_stats.values():
+        processed = stats.get("processed", 0)
+        stats["success_rate"] = (stats["successes"] / processed) if processed else 0.0
+
+    return language_stats, hash_counter
 
 
-def _print_table(rows: List[Tuple[str, int, int, str]]) -> None:
-    if not rows:
-        return
-    header = ("hash", "mismatches", "reorders", "file")
-    widths = [max(len(str(x)) for x in col) for col in zip(*(rows + [header]))]
-    fmt = "{:<%d} {:>%d} {:>%d} {:<%d}" % tuple(widths)
-    print(fmt.format(*header))
-    for row in rows:
-        print(fmt.format(*row))
-
-
-def _write_csv(rows: List[Tuple[str, int, int, str]], path: Path) -> None:
+def _write_language_csv(rows: Iterable[Tuple[str, Dict[str, float]]], path: Path) -> None:
     with path.open("w", newline="", encoding="utf-8") as fp:
         writer = csv.writer(fp)
-        writer.writerow(["hash", "mismatches", "reorders", "file"])
-        for row in rows:
-            writer.writerow(row)
+        writer.writerow(
+            ["language", "processed", "successes", "timeouts", "token_mismatches", "success_rate"]
+        )
+        for lang, stats in rows:
+            writer.writerow(
+                [
+                    lang,
+                    int(stats["processed"]),
+                    int(stats["successes"]),
+                    int(stats["timeouts"]),
+                    int(stats["token_mismatches"]),
+                    f"{stats['success_rate']:.4f}",
+                ]
+            )
 
 
-def _sort_token_rows(token_counts: Dict[str, int]) -> List[Tuple[str, int]]:
-    rows = sorted(token_counts.items(), key=lambda r: (-r[1], r[0]))
-    return rows
-
-
-def _print_token_table(rows: List[Tuple[str, int]]) -> None:
-    if not rows:
-        return
-    header = ("token", "count")
-    widths = [max(len(str(x)) for x in col) for col in zip(*(rows + [header]))]
-    fmt = "{:<%d} {:>%d}" % tuple(widths)
-    print(fmt.format(*header))
-    for row in rows:
-        print(fmt.format(*row))
-
-
-def _write_token_csv(rows: List[Tuple[str, int]], path: Path) -> None:
+def _write_hash_csv(rows: Iterable[Tuple[str, int]], path: Path) -> None:
     with path.open("w", newline="", encoding="utf-8") as fp:
         writer = csv.writer(fp)
-        writer.writerow(["token", "count"])
-        for row in rows:
-            writer.writerow(row)
+        writer.writerow(["hash", "mismatch_count"])
+        for hash_id, count in rows:
+            writer.writerow([hash_id, count])
+
+
+def _write_json(
+    language_rows: Iterable[Tuple[str, Dict[str, float]]], hash_rows: Iterable[Tuple[str, int]], path: Path
+) -> None:
+    out = {
+        "languages": [
+            {
+                "language": lang,
+                **stats,
+            }
+            for lang, stats in language_rows
+        ],
+        "hashes": [
+            {"hash": hash_id, "mismatch_count": count} for hash_id, count in hash_rows
+        ],
+    }
+    path.write_text(json.dumps(out, indent=2), encoding="utf-8")
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Summarize token stats from metrics.json")
+    ap = argparse.ArgumentParser(description="Summarize token mismatch data")
     ap.add_argument(
-        "--run-dir",
+        "--translations-root",
         type=Path,
-        help="Translation run directory containing metrics.json",
+        default=ROOT / "translations",
+        help="Root directory containing language run folders",
     )
-    ap.add_argument(
-        "--metrics-file",
-        type=Path,
-        help="Path to metrics.json (overrides --run-dir)",
-    )
-    ap.add_argument(
-        "--csv",
-        type=Path,
-        help="Optional CSV output file",
-    )
-    ap.add_argument(
-        "--token-csv",
-        type=Path,
-        help="Optional CSV output for top missing tokens",
-    )
-    ap.add_argument(
-        "--top",
-        type=int,
-        default=0,
-        help="Limit results to top N hashes",
-    )
+    ap.add_argument("--json", type=Path, help="Optional JSON output file")
+    ap.add_argument("--languages-csv", type=Path, help="Optional language CSV output")
+    ap.add_argument("--hashes-csv", type=Path, help="Optional hash CSV output")
     args = ap.parse_args()
 
-    metrics_path = args.metrics_file
-    if args.run_dir and metrics_path is None:
-        metrics_path = args.run_dir / "metrics.json"
-    if metrics_path is None:
-        metrics_path = ROOT / "metrics.json"
-    entries = _load_metrics(metrics_path)
-    stats, token_counts = _aggregate(entries)
-    rows = _sort_rows(stats)
-    token_rows = _sort_token_rows(token_counts)
-    if args.top and args.top > 0:
-        rows = rows[: args.top]
-        token_rows = token_rows[: args.top]
+    language_stats, hash_counter = collect_stats(args.translations_root)
+    language_rows = sorted(
+        language_stats.items(), key=lambda kv: kv[1]["token_mismatches"], reverse=True
+    )
+    hash_rows = hash_counter.most_common()
 
-    if args.csv:
-        _write_csv(rows, args.csv)
-    if args.token_csv:
-        _write_token_csv(token_rows, args.token_csv)
-    if token_rows:
-        print("Top missing tokens:")
-        _print_token_table(token_rows)
-        print()
-    _print_table(rows)
+    if args.languages_csv:
+        _write_language_csv(language_rows, args.languages_csv)
+    if args.hashes_csv:
+        _write_hash_csv(hash_rows, args.hashes_csv)
+    if args.json:
+        _write_json(language_rows, hash_rows, args.json)
 
 
 if __name__ == "__main__":
     main()
+
