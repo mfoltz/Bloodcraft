@@ -1,0 +1,1073 @@
+2025-08-31 05:45:09,221 INFO target_file=Resources/Localization/Messages/Thai.json src=en dst=th batch_size=100 timeout=60 max_retries=3 run_dir=/workspace/Bloodcraft/translations/th/20250831-054509 git_commit=4fb11f74 model_version=unknown
+2025-08-31 05:45:09,222 INFO NOTE TO TRANSLATORS: **DO NOT** alter anything inside [[TOKEN_n]], <...> tags, or {...} variables.
+2025-08-31 05:45:09,242 INFO Batch 1/362 start @ 0.00s
+2025-08-31 05:45:11,817 INFO 3439613370: TRANSLATED
+  Original: Welcome to Bloodcraft
+  Result: ยินดี ต้อนรับ สู่ หัตถกรรม
+2025-08-31 05:45:11,817 INFO 1491097539: TRANSLATED
+  Original: Binding failed...
+  Result: การจับคู่ล้มเหลว...
+2025-08-31 05:45:11,818 INFO Batch 1/362 end @ 2.58s (2.58s)
+2025-08-31 05:45:11,818 INFO Processed 2/428 lines
+2025-08-31 05:45:11,819 INFO Batch 2/362 start @ 2.58s
+2025-08-31 05:45:12,167 WARNING 606627316: token mismatch [c6521aca] (missing ['0', '1', '2', '3']) — Suggested fix: add ['0', '1', '2', '3']
+2025-08-31 05:45:12,167 WARNING 606627316: SKIPPED (token mismatch (missing ['0', '1', '2', '3']) [c6521aca])
+  Original: {0} improved to [<color=white>{1}</color>]
+  Result: [TOGN] ปรับเป็น TOKNN_1 [TOKNN] 2 [TIKNKN]
+2025-08-31 05:45:12,167 INFO Batch 2/362 end @ 2.93s (0.35s)
+2025-08-31 05:45:12,168 INFO Processed 3/428 lines
+2025-08-31 05:45:12,168 INFO Batch 3/362 start @ 2.93s
+2025-08-31 05:45:12,808 WARNING 2007397999: token mismatch [e2a4d47d] (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+2025-08-31 05:45:12,808 WARNING 2007397999: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']) [e2a4d47d])
+  Original: +<color=yellow>{0}</color> <color=#FFC0CB>proficiency</color> in {1} (<color=white>{2}%</color>)
+  Result: +[TOGN] [TOKN][TOKN] [TOKNN] 3 procition [TOGNN] in [TIKNN] in 2 2 2 2
+2025-08-31 05:45:12,808 INFO Batch 3/362 end @ 3.57s (0.64s)
+2025-08-31 05:45:12,809 INFO Processed 4/428 lines
+2025-08-31 05:45:12,809 INFO Batch 4/362 start @ 3.57s
+2025-08-31 05:45:13,396 WARNING 1407688215: token mismatch [f7d6320c] (missing ['0', '1', '2', '3', '4', '5', '6']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6']
+2025-08-31 05:45:13,396 WARNING 1407688215: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6']) [f7d6320c])
+  Original: <color=green>{0}</color>x<color=white>{1}</color> received from {2}
+  Result: TOKNN_0 [TOKNN][THNN] x[TIKNN][TIKNN][TIVN][TIVN] 2 รับจาก [TIKNKN]
+2025-08-31 05:45:13,396 INFO Batch 4/362 end @ 4.15s (0.59s)
+2025-08-31 05:45:13,396 INFO Processed 5/428 lines
+2025-08-31 05:45:13,396 INFO Batch 5/362 start @ 4.15s
+2025-08-31 05:45:13,948 WARNING 2252098529: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:13,948 WARNING 2252098529: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}
+  Result: TOKKN_0 Gold OreTakeN_1 xTOKN_2 [TOKN] [TIKNN] [TIKNN] [TIKNN] [TIKN] รับจาก [TIKN]
+2025-08-31 05:45:13,948 INFO Batch 5/362 end @ 4.71s (0.55s)
+2025-08-31 05:45:13,949 INFO Processed 6/428 lines
+2025-08-31 05:45:13,949 INFO Batch 6/362 start @ 4.71s
+2025-08-31 05:45:14,700 WARNING 3115116616: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:14,701 WARNING 3115116616: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=green>Gold Ore</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
+  Result: TOKN_0 Gold OreTOKNN_1 xTOKN_2 [TOKN] TOKNN_3 [TOKNN] ได้รับจาก [TIKN] แต่ลดลงบนพื้นตั้งแต่คลังสินค้าของคุณเต็ม
+2025-08-31 05:45:14,701 INFO Batch 6/362 end @ 5.46s (0.75s)
+2025-08-31 05:45:14,701 INFO Processed 7/428 lines
+2025-08-31 05:45:14,701 INFO Batch 7/362 start @ 5.46s
+2025-08-31 05:45:15,213 WARNING 2972244104: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:15,214 WARNING 2972244104: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}
+  Result: TOKNN_0 : Radiant FimberTOKN_1 x[TOGN] [TOGN] [TIKN] [TIKNN] [TIKN] รับจาก [TIKNN]
+2025-08-31 05:45:15,215 INFO Batch 7/362 end @ 5.97s (0.51s)
+2025-08-31 05:45:15,215 INFO Processed 8/428 lines
+2025-08-31 05:45:15,215 INFO Batch 8/362 start @ 5.97s
+2025-08-31 05:45:15,765 WARNING 4110714393: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:15,769 WARNING 4110714393: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=green>Radiant Fiber</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
+  Result: TOKN_0 : ราดินันท์ ฟีแบร์TOKN_1 xTOKN_2 [TOGN] [TOKNN] [TIKN] [TIKNN] ได้รับจาก [TIKN] แต่ลดลงบนพื้นตั้งแต่คลังสินค้าของคุณเต็ม
+2025-08-31 05:45:15,770 INFO Batch 8/362 end @ 6.53s (0.56s)
+2025-08-31 05:45:15,771 INFO Processed 9/428 lines
+2025-08-31 05:45:15,772 INFO Batch 9/362 start @ 6.53s
+2025-08-31 05:45:16,242 WARNING 3997845506: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:16,243 WARNING 3997845506: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}!
+  Result: TOKKN_0 [TOKNN] เมล็ดพันธุ์ [S] TOKNN_1x[TOGN] [TRIKN] [TIKNN] [TIKN] รับจาก [TIKNN]!
+2025-08-31 05:45:16,243 INFO Batch 9/362 end @ 7.00s (0.47s)
+2025-08-31 05:45:16,243 INFO Processed 10/428 lines
+2025-08-31 05:45:16,243 INFO Batch 10/362 start @ 7.00s
+2025-08-31 05:45:16,802 WARNING 3141472524: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:16,802 WARNING 3141472524: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=green>Bonus Seed(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.
+  Result: TOKKN_0 [TOKNN] เมล็ดพันธุ์ [S] [TOKNN]x[TOKN] [TOKNN] [TOKNN] 3 ได้รับจาก [TIKNN] แต่บางคนล้มบนพื้นตั้งแต่คลังสินค้าของคุณเต็ม
+2025-08-31 05:45:16,802 INFO Batch 10/362 end @ 7.56s (0.56s)
+2025-08-31 05:45:16,802 INFO Processed 11/428 lines
+2025-08-31 05:45:16,802 INFO Batch 11/362 start @ 7.56s
+2025-08-31 05:45:17,312 WARNING 2576121314: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:17,315 WARNING 2576121314: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}!
+  Result: [TOKNN] [TOKNN] โบนุส แซปลิงส์ TOKNN_1x[TOGN] [TIKNN] [TIKN] [TIKN] รับจาก [TIKN]!
+2025-08-31 05:45:17,315 INFO Batch 11/362 end @ 8.07s (0.51s)
+2025-08-31 05:45:17,315 INFO Processed 12/428 lines
+2025-08-31 05:45:17,315 INFO Batch 12/362 start @ 8.07s
+2025-08-31 05:45:17,877 WARNING 3665962604: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:17,878 WARNING 3665962604: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=green>Bonus Saplings(s)</color>x<color=white>{0}</color> received from {1}, but some fell on the ground since your inventory is full.
+  Result: TOKN_0 โบนุส ซาลิงส์ (STOKN_1x[TOGN][TIVN] [TIKN] [TIKNN] 2 ได้รับจาก [TIKNN] แต่บางคนล้มทับพื้นเนื่องจากคลังสินค้าของคุณเต็ม
+2025-08-31 05:45:17,879 INFO Batch 12/362 end @ 8.64s (0.56s)
+2025-08-31 05:45:17,879 INFO Processed 13/428 lines
+2025-08-31 05:45:17,881 INFO Batch 13/362 start @ 8.64s
+2025-08-31 05:45:18,414 WARNING 3324923525: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:18,415 WARNING 3324923525: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}
+  Result: TOKNN_0 TOKNTAGE TOKN_1 xTOKN_2 [TOKNN] [TIKNN] [TIKNN] [TIKN] รับจาก [TIKN]
+2025-08-31 05:45:18,415 INFO Batch 13/362 end @ 9.17s (0.53s)
+2025-08-31 05:45:18,415 INFO Processed 14/428 lines
+2025-08-31 05:45:18,416 INFO Batch 14/362 start @ 9.17s
+2025-08-31 05:45:18,960 WARNING 3054245516: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:18,960 WARNING 3054245516: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=green>Mutant Grease</color>x<color=white>{0}</color> received from {1}, but it dropped on the ground since your inventory is full.
+  Result: TOKNN_0 [TOKNTHE] TOKN_1 [TOKN] [TOGN] [TIKN] [TIKNN] [TIKN] ได้รับจาก [TOGN] แต่ตกลงบนพื้นตั้งแต่คลังสินค้าของคุณเต็ม
+2025-08-31 05:45:18,961 INFO Batch 14/362 end @ 9.72s (0.54s)
+2025-08-31 05:45:18,961 INFO Processed 15/428 lines
+2025-08-31 05:45:18,961 INFO Batch 15/362 start @ 9.72s
+2025-08-31 05:45:19,198 WARNING 2786260061: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:19,198 WARNING 2786260061: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Your <color=#00FFFF>Daily Quest</color> has been refreshed!
+  Result: ดาลี เควส (TOKN_1) ของคุณ ได้รับความสดชื่น!
+2025-08-31 05:45:19,198 INFO Batch 15/362 end @ 9.96s (0.24s)
+2025-08-31 05:45:19,198 INFO Processed 16/428 lines
+2025-08-31 05:45:19,198 INFO Batch 16/362 start @ 9.96s
+2025-08-31 05:45:19,453 WARNING 311765273: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:19,454 WARNING 311765273: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Your <color=#BF40BF>Weekly Quest</color> has been refreshed!
+  Result: (TOKN 0 ของคุณ [TOKNTHE]. สืบค้นเมื่อ 20 พฤษภาคม พ.ศ.
+2025-08-31 05:45:19,454 INFO Batch 16/362 end @ 10.21s (0.26s)
+2025-08-31 05:45:19,454 INFO Processed 17/428 lines
+2025-08-31 05:45:19,454 INFO Batch 17/362 start @ 10.21s
+2025-08-31 05:45:22,591 WARNING 1763623253: token mismatch [6d16f6b3] (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16']
+2025-08-31 05:45:22,592 WARNING 1763623253: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16']) [6d16f6b3])
+  Original: New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>]
+  Result: [TIVE] [TIGN] New [TOGN] สืบค้น เดลี สืบค้น [TOKN] ว่างอยู่: [TOGN] [TOGN] [TIKN] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 2 2 2 2 2 2 2 2 1 1 2 2 1 2 2 2 1
+2025-08-31 05:45:22,592 INFO Batch 17/362 end @ 13.35s (3.14s)
+2025-08-31 05:45:22,592 INFO Processed 18/428 lines
+2025-08-31 05:45:22,592 INFO Batch 18/362 start @ 13.35s
+2025-08-31 05:45:23,288 WARNING 384069927: token mismatch [f7d6320c] (missing ['0', '1', '2', '3', '4', '5', '6']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6']
+2025-08-31 05:45:23,288 WARNING 384069927: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6']) [f7d6320c])
+  Original: You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}!
+  Result: คุณได้รับ [TOGN] TOKNN_1[TOGN] x[TOGN] [TOGN] [TOGN] [TIVN] [TIKN] 2 2 2 2 สําหรับการทํา [TCOKNN] ของคุณเสร็จ [THN]!
+2025-08-31 05:45:23,288 INFO Batch 18/362 end @ 14.05s (0.70s)
+2025-08-31 05:45:23,288 INFO Processed 19/428 lines
+2025-08-31 05:45:23,288 INFO Batch 19/362 start @ 14.05s
+2025-08-31 05:45:24,079 WARNING 1884892470: token mismatch [f7d6320c] (missing ['0', '1', '2', '3', '4', '5', '6']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6']
+2025-08-31 05:45:24,080 WARNING 1884892470: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6']) [f7d6320c])
+  Original: You've received <color=#ffd9eb>{0}</color>x<color=white>{1}</color> for completing your {2}! It dropped on the ground because your inventory was full.
+  Result: คุณได้รับ [TOGN] TOKNN_1[TOGN] x[TOGN] [TOGN] [TOGN] [TIVN] [TIKN] 2 2 2 2 สําหรับการทํา [TCOKNN] ของคุณเสร็จ [THN]! มันหล่นลงบนพื้นเพราะสินค้าของคุณเต็ม
+2025-08-31 05:45:24,080 INFO Batch 19/362 end @ 14.84s (0.79s)
+2025-08-31 05:45:24,080 INFO Processed 20/428 lines
+2025-08-31 05:45:24,080 INFO Batch 20/362 start @ 14.84s
+2025-08-31 05:45:24,198 INFO 3158650477: TRANSLATED
+  Original: No familiars in battle group!
+  Result: ไม่คุ้นเคยกับกลุ่มรบ!
+2025-08-31 05:45:24,198 INFO Batch 20/362 end @ 14.96s (0.12s)
+2025-08-31 05:45:24,198 INFO Processed 21/428 lines
+2025-08-31 05:45:24,198 INFO Batch 21/362 start @ 14.96s
+2025-08-31 05:45:24,343 WARNING 2673031653: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:45:24,344 WARNING 2673031653: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: Battle Group - {0}
+  Result: กลุ่มต่อสู้ - [TOKN]
+2025-08-31 05:45:24,344 INFO Batch 21/362 end @ 15.10s (0.15s)
+2025-08-31 05:45:24,344 INFO Processed 22/428 lines
+2025-08-31 05:45:24,344 INFO Batch 22/362 start @ 15.10s
+2025-08-31 05:45:27,172 WARNING 3637474013: token mismatch [7a898e2e] (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15']
+2025-08-31 05:45:27,173 WARNING 3637474013: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15']) [7a898e2e])
+  Original: <color=green>{0}</color>{1} [<color=white>{2}</color>][<color=#90EE90>{3}</color>] added to <color=white>{4}</color>! (<color=yellow>{5}</color>)
+  Result: [TIKN] [TOKNN] [TOGN] [TOGN] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 2 2 2 2 2 2 2 2 1 2 2 2 2 2 2 2 2 2 2 2 1 2 2 2 2 2 2 2 2 2 2 2 2 TIKNTVN_13 [TIKNN] [THNTHE] [TIKNN]
+2025-08-31 05:45:27,173 INFO Batch 22/362 end @ 17.93s (2.83s)
+2025-08-31 05:45:27,173 INFO Processed 23/428 lines
+2025-08-31 05:45:27,173 INFO Batch 23/362 start @ 17.93s
+2025-08-31 05:45:28,342 INFO 2932385107: TRANSLATED
+  Original: Targets have all been killed, give them a chance to respawn!
+  Result: เป้าหมายทั้งหมดถูกฆ่า ให้โอกาสพวกมันได้กลับมา
+2025-08-31 05:45:28,343 INFO 1076291728: TRANSLATED
+  Original: Use the VBlood menu to track bosses!
+  Result: ใช้เมนูเลือด V เพื่อติดตามหัวหน้า!
+2025-08-31 05:45:28,343 INFO 1420278477: TRANSLATED
+  Original: Tracking is only available for incomplete kill quests.
+  Result: การติดตามมีไว้สําหรับภารกิจฆ่าที่ไม่สมบูรณ์เท่านั้น
+2025-08-31 05:45:28,344 INFO 3546356968: TRANSLATED
+  Original: Invalid unit prefab (match found but does not start with CHAR/char).
+  Result: นําหน้าหน่วยไม่ถูกต้อง (พบตรงกันแต่ไม่ได้ขึ้นต้นด้วย CHAR/Char)
+2025-08-31 05:45:28,344 INFO 2169578147: TRANSLATED
+  Original: Invalid unit name (match found but does not start with CHAR/char).
+  Result: ชื่อหน่วยไม่ถูกต้อง (พบที่ภาพแต่ไม่ได้ขึ้นต้นด้วย CHAR/Char)
+2025-08-31 05:45:28,344 INFO 223311103: TRANSLATED
+  Original: Invalid unit name (no full or partial matches).
+  Result: ชื่อหน่วยไม่ถูกต้อง (ไม่มีตรงกันเต็มหรือตรงกันบางส่วน)
+2025-08-31 05:45:28,344 INFO 2155028867: TRANSLATED
+  Original: Invalid prefab (not an integer) or name (does not start with CHAR/char).
+  Result: prefab ไม่ถูกต้อง (ไม่ใช่จํานวนเต็ม) หรือชื่อ (ไม่ได้เริ่มด้วย CHAR/Char)
+2025-08-31 05:45:28,344 INFO Batch 23/362 end @ 19.10s (1.17s)
+2025-08-31 05:45:28,344 INFO Processed 30/428 lines
+2025-08-31 05:45:28,344 INFO Batch 24/362 start @ 19.10s
+2025-08-31 05:45:28,641 WARNING 2689850927: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:28,641 WARNING 2689850927: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.
+  Result: ชนิดชื่อเพลงที่คุ้นเคยไม่ถูกต้อง ให้ใช้ 'TakeN_ 0.fim lastTakeen_1' เพื่อดูตัวเลือก
+2025-08-31 05:45:28,641 INFO Batch 24/362 end @ 19.40s (0.30s)
+2025-08-31 05:45:28,642 INFO Processed 31/428 lines
+2025-08-31 05:45:28,642 INFO Batch 25/362 start @ 19.40s
+2025-08-31 05:45:29,628 WARNING 3125006928: token mismatch [7a9a98f0] (missing ['0', '1', '2', '3', '4', '5', '6', '7']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6', '7']
+2025-08-31 05:45:29,629 WARNING 3125006928: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6', '7']) [7a9a98f0])
+  Original: Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.
+  Result: Familyer มี [TOGN]TOKNN_1TOGN_2 [TIGN] [TIGN] [TIGN] [TIGN] [TIGN] 2 [TIVNN] จาก พรีเซนทัพัพธ์ ใช้ '[TOKN]. FAKN. สืบค้นทางเลือก.
+2025-08-31 05:45:29,629 INFO Batch 25/362 end @ 20.39s (0.99s)
+2025-08-31 05:45:29,629 INFO Processed 32/428 lines
+2025-08-31 05:45:29,629 INFO Batch 26/362 start @ 20.39s
+2025-08-31 05:45:29,932 WARNING 2846646667: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:29,933 WARNING 2846646667: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.
+  Result: ค่าสถิติคุณสมบัติที่คุ้นเคยไม่ถูกต้อง ให้ใช้ 'Takeen_ 0.fim lastTakeen_1' เพื่อดูตัวเลือก
+2025-08-31 05:45:29,933 INFO Batch 26/362 end @ 20.69s (0.30s)
+2025-08-31 05:45:29,933 INFO Processed 33/428 lines
+2025-08-31 05:45:29,933 INFO Batch 27/362 start @ 20.69s
+2025-08-31 05:45:30,423 WARNING 705325693: token mismatch [08cc2c75] (missing ['0', '1', '2', '3', '4']) — Suggested fix: add ['0', '1', '2', '3', '4']
+2025-08-31 05:45:30,423 WARNING 705325693: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4']) [08cc2c75])
+  Original: Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')
+  Result: ฟามิเลียร์มีสถิติการมีชื่อเสียงอยู่แล้ว ([TOGN].fam prTOKN_1' แทน '[TOGN]. pham pr [TIKNN] [TIKN]'
+2025-08-31 05:45:30,423 INFO Batch 27/362 end @ 21.18s (0.49s)
+2025-08-31 05:45:30,423 INFO Processed 34/428 lines
+2025-08-31 05:45:30,423 INFO Batch 28/362 start @ 21.18s
+2025-08-31 05:45:30,870 WARNING 2712718738: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:30,871 WARNING 2712718738: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)
+  Result: ความคุ้นเคยของคุณได้รับการยกย่อง [TOKN][TOKN] TOKN_1 [TOGN]; ความรู้สะสมของพวกเขาอนุญาตให้พวกเขารักษาระดับของพวกเขา! [TOGN] [TOKNN] [TOKN] [THNN]
+2025-08-31 05:45:30,871 INFO Batch 28/362 end @ 21.63s (0.45s)
+2025-08-31 05:45:30,871 INFO Processed 35/428 lines
+2025-08-31 05:45:30,871 INFO Batch 29/362 start @ 21.63s
+2025-08-31 05:45:31,015 INFO 872190851: TRANSLATED
+  Original: Failed to remove schematics from your inventory!
+  Result: ล้มเหลวในการลบผังแป้นพิมพ์ออกจากคลังแพกเกจของคุณ!
+2025-08-31 05:45:31,015 INFO Batch 29/362 end @ 21.77s (0.14s)
+2025-08-31 05:45:31,015 INFO Processed 36/428 lines
+2025-08-31 05:45:31,015 INFO Batch 30/362 start @ 21.77s
+2025-08-31 05:45:31,621 WARNING 3466860311: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:31,623 WARNING 3466860311: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
+  Result: การลบรายการที่ต้องการล้มเหลว (TOKN_ 0TOKN_1[TOGN] [TRIKN] x[TIGN][TIVN] [TIKN] [TIKN] [TRIKN] 5
+2025-08-31 05:45:31,623 INFO Batch 30/362 end @ 22.38s (0.61s)
+2025-08-31 05:45:31,623 INFO Processed 37/428 lines
+2025-08-31 05:45:31,623 INFO Batch 31/362 start @ 22.38s
+2025-08-31 05:45:31,789 WARNING 3720524051: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:45:31,790 WARNING 3720524051: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: {FormatClassName(playerClass)} passives not found!
+  Result: (TOKN_0) ไม่พบการนิ่งเฉย!
+2025-08-31 05:45:31,790 INFO Batch 31/362 end @ 22.55s (0.17s)
+2025-08-31 05:45:31,790 INFO Processed 38/428 lines
+2025-08-31 05:45:31,790 INFO Batch 32/362 start @ 22.55s
+2025-08-31 05:45:31,948 WARNING 3543031585: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:45:31,948 WARNING 3543031585: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: {FormatClassName(playerClass)} passives:
+  Result: TOKN_0 เคลื่อนไหว:
+2025-08-31 05:45:31,949 INFO Batch 32/362 end @ 22.71s (0.16s)
+2025-08-31 05:45:31,949 INFO Processed 39/428 lines
+2025-08-31 05:45:31,949 INFO Batch 33/362 start @ 22.71s
+2025-08-31 05:45:32,136 WARNING 1106946472: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:45:32,137 WARNING 1106946472: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: {replyMessage}
+  Result: [TOGN] [TIKINE]
+2025-08-31 05:45:32,137 INFO Batch 33/362 end @ 22.89s (0.19s)
+2025-08-31 05:45:32,137 INFO Processed 40/428 lines
+2025-08-31 05:45:32,137 INFO Batch 34/362 start @ 22.90s
+2025-08-31 05:45:32,315 WARNING 2164633984: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:45:32,315 WARNING 2164633984: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: Couldn't find stat synergies for {FormatClassName(playerClass)}...
+  Result: ไม่สามารถหาอาการจําลองสําหรับ [TOGN]...
+2025-08-31 05:45:32,315 INFO Batch 34/362 end @ 23.07s (0.18s)
+2025-08-31 05:45:32,315 INFO Processed 41/428 lines
+2025-08-31 05:45:32,315 INFO Batch 35/362 start @ 23.07s
+2025-08-31 05:45:32,470 WARNING 1293896668: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:45:32,470 WARNING 1293896668: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: No stat synergies found for {FormatClassName(playerClass)}.
+  Result: ไม่พบข้อมูลสถิติสําหรับ Takeen_ 0.
+2025-08-31 05:45:32,471 INFO Batch 35/362 end @ 23.23s (0.16s)
+2025-08-31 05:45:32,471 INFO Processed 42/428 lines
+2025-08-31 05:45:32,471 INFO Batch 36/362 start @ 23.23s
+2025-08-31 05:45:32,902 WARNING 2147420594: token mismatch [c6521aca] (missing ['0', '1', '2', '3']) — Suggested fix: add ['0', '1', '2', '3']
+2025-08-31 05:45:32,902 WARNING 2147420594: SKIPPED (token mismatch (missing ['0', '1', '2', '3']) [c6521aca])
+  Original: {FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:
+  Result: TOKNN_0 Syncergies [TOKNN] [TIKNN] [TIKNN] [TIKNKN]
+2025-08-31 05:45:32,903 INFO Batch 36/362 end @ 23.66s (0.43s)
+2025-08-31 05:45:32,903 INFO Processed 43/428 lines
+2025-08-31 05:45:32,903 INFO Batch 37/362 start @ 23.66s
+2025-08-31 05:45:33,302 WARNING 999548370: token mismatch [c6521aca] (missing ['0', '1', '2', '3']) — Suggested fix: add ['0', '1', '2', '3']
+2025-08-31 05:45:33,302 WARNING 999548370: SKIPPED (token mismatch (missing ['0', '1', '2', '3']) [c6521aca])
+  Original: {FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:
+  Result: TOKNN_0 สถิติ SyndergiesTOKN_1 [TIKNN] [TICKNN] [TIKNN]
+2025-08-31 05:45:33,303 INFO Batch 37/362 end @ 24.06s (0.40s)
+2025-08-31 05:45:33,303 INFO Processed 44/428 lines
+2025-08-31 05:45:33,303 INFO Batch 38/362 start @ 24.06s
+2025-08-31 05:45:33,485 WARNING 460602473: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:45:33,486 WARNING 460602473: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: {FormatClassName(playerClass)} has no spells configured...
+  Result: TOKN_0 ไม่มีคาถาที่ปรับแต่ง...
+2025-08-31 05:45:33,486 INFO Batch 38/362 end @ 24.24s (0.18s)
+2025-08-31 05:45:33,486 INFO Processed 45/428 lines
+2025-08-31 05:45:33,486 INFO Batch 39/362 start @ 24.24s
+2025-08-31 05:45:33,634 WARNING 442755566: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:45:33,634 WARNING 442755566: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: {FormatClassName(playerClass)} spells:
+  Result: [TOKN] สะกด:
+2025-08-31 05:45:33,634 INFO Batch 39/362 end @ 24.39s (0.15s)
+2025-08-31 05:45:33,634 INFO Processed 46/428 lines
+2025-08-31 05:45:33,634 INFO Batch 40/362 start @ 24.39s
+2025-08-31 05:45:33,958 WARNING 2967576286: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:33,958 WARNING 2967576286: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Shift spell: <color=#CBC3E3>{spellName}</color>
+  Result: มนต์ Shift:TOKN_0 TOKNN_1[TOGN] [THN]
+2025-08-31 05:45:33,958 INFO Batch 40/362 end @ 24.72s (0.32s)
+2025-08-31 05:45:33,958 INFO Processed 47/428 lines
+2025-08-31 05:45:33,958 INFO Batch 41/362 start @ 24.72s
+2025-08-31 05:45:34,217 WARNING 1597216248: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:34,218 WARNING 1597216248: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Invalid class, use <color=white>'.class l'</color> to see options.
+  Result: คลาสไม่ถูกต้อง ใช้ Takeen_ 0. คลาส I'Takeen_1 เพื่อดูตัวเลือก
+2025-08-31 05:45:34,218 INFO Batch 41/362 end @ 24.98s (0.26s)
+2025-08-31 05:45:34,218 INFO Processed 48/428 lines
+2025-08-31 05:45:34,218 INFO Batch 42/362 start @ 24.98s
+2025-08-31 05:45:34,743 INFO 2747211297: TRANSLATED
+  Original: Removed all class buffs then applied current class buffs for all players.
+  Result: เอา Friends คลาสทั้งหมดออก แล้วปรับใช้ Footers ปัจจุบันสําหรับผู้เล่นทั้งหมด
+2025-08-31 05:45:34,743 INFO 2761429858: TRANSLATED
+  Original: Removed all class buffs for all players.
+  Result: เอาเพื่อนทุกชั้นของผู้เล่นทั้งหมดออก
+2025-08-31 05:45:34,744 INFO 327031724: TRANSLATED
+  Original: Active familiar already present in battle group!
+  Result: เคลื่อนไหวอย่างคุ้นเคย มีอยู่ในกลุ่มรบแล้ว!
+2025-08-31 05:45:34,744 INFO Batch 42/362 end @ 25.50s (0.53s)
+2025-08-31 05:45:34,744 INFO Processed 51/428 lines
+2025-08-31 05:45:34,744 INFO Batch 43/362 start @ 25.50s
+2025-08-31 05:45:35,046 WARNING 625301684: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:35,047 WARNING 625301684: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!
+  Result: ไม่สามารถมีมากกว่าTOKN0 TOKNN_1 [TOGN] กลุ่มรบ!
+2025-08-31 05:45:35,047 INFO Batch 43/362 end @ 25.81s (0.30s)
+2025-08-31 05:45:35,047 INFO Processed 52/428 lines
+2025-08-31 05:45:35,047 INFO Batch 44/362 start @ 25.81s
+2025-08-31 05:45:35,314 WARNING 3944404979: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:35,314 WARNING 3944404979: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Deleted battle group <color=white>{groupName}</color>!
+  Result: ทีมรบที่ถูกลบ [TOKNN] TOKNN_1 [TOKN]!
+2025-08-31 05:45:35,314 INFO Batch 44/362 end @ 26.07s (0.27s)
+2025-08-31 05:45:35,314 INFO Processed 53/428 lines
+2025-08-31 05:45:35,314 INFO Batch 45/362 start @ 26.07s
+2025-08-31 05:45:35,427 INFO 2979158417: TRANSLATED
+  Original: Prestiging is not enabled.
+  Result: ไม่เปิดใช้งานการคิดล่วงหน้า
+2025-08-31 05:45:35,427 INFO Batch 45/362 end @ 26.19s (0.11s)
+2025-08-31 05:45:35,427 INFO Processed 54/428 lines
+2025-08-31 05:45:35,427 INFO Batch 46/362 start @ 26.19s
+2025-08-31 05:45:35,691 WARNING 2350508902: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:35,691 WARNING 2350508902: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Invalid prestige type, use <color=white>'.prestige l'</color> to see options.
+  Result: ประเภทชื่อเสียงไม่ถูกต้อง, ใช้ Takeen_ 0. Pristage lTakeen_1 เพื่อดูตัวเลือก
+2025-08-31 05:45:35,691 INFO Batch 46/362 end @ 26.45s (0.26s)
+2025-08-31 05:45:35,691 INFO Processed 55/428 lines
+2025-08-31 05:45:35,691 INFO Batch 47/362 start @ 26.45s
+2025-08-31 05:45:35,945 WARNING 1897692916: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:35,945 WARNING 1897692916: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: You must reach max level before <color=#90EE90>Exo</color> prestiging again.
+  Result: คุณต้องไปถึงระดับสูงสุดก่อน TOKN_0 ExoTIKN_1 ล่วงหน้าอีกครั้ง
+2025-08-31 05:45:35,946 INFO Batch 47/362 end @ 26.70s (0.25s)
+2025-08-31 05:45:35,946 INFO Processed 56/428 lines
+2025-08-31 05:45:35,946 INFO Batch 48/362 start @ 26.70s
+2025-08-31 05:45:36,364 WARNING 9816116: token mismatch [08cc2c75] (missing ['0', '1', '2', '3', '4']) — Suggested fix: add ['0', '1', '2', '3', '4']
+2025-08-31 05:45:36,365 WARNING 9816116: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4']) [08cc2c75])
+  Original: You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges. (<color=white>{EXO_PRESTIGES}</color>)
+  Result: คุณได้อันดับสูงสุดของ TOKN_0 ExoTOKN_1 เกียรตินิยม. [TIKNTH] [TOGNN] [THNTHE] [THNKN]
+2025-08-31 05:45:36,365 INFO Batch 48/362 end @ 27.12s (0.42s)
+2025-08-31 05:45:36,365 INFO Processed 57/428 lines
+2025-08-31 05:45:36,365 INFO Batch 49/362 start @ 27.12s
+2025-08-31 05:45:37,109 WARNING 3729714988: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:37,109 WARNING 3729714988: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!
+  Result: [TIKN] [TOKNN] [TOKNN] [TIKN] 2 2 2 2 2 2 2 2 เกียรตินิยมสมบูรณ์!
+2025-08-31 05:45:37,110 INFO Batch 49/362 end @ 27.87s (0.74s)
+2025-08-31 05:45:37,110 INFO Processed 58/428 lines
+2025-08-31 05:45:37,110 INFO Batch 50/362 start @ 27.87s
+2025-08-31 05:45:37,905 WARNING 2402733055: token mismatch [18935d4d] (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']
+2025-08-31 05:45:37,906 WARNING 2402733055: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']) [18935d4d])
+  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!
+  Result: [TIKN] [TOKNN] [TOKNN] [TIKN] 2 2 2 2 2 2 2 2 เกียรตินิยมสมบูรณ์! คุณได้รับรางวัลด้วย [TOKN] TOKNN_7[TOGN]x[TOGN][TRIGN] [TIKN]  2 2 2.
+2025-08-31 05:45:37,906 INFO Batch 50/362 end @ 28.66s (0.80s)
+2025-08-31 05:45:37,906 INFO Processed 59/428 lines
+2025-08-31 05:45:37,906 INFO Batch 51/362 start @ 28.66s
+2025-08-31 05:45:38,784 WARNING 3961332984: token mismatch [18935d4d] (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']
+2025-08-31 05:45:38,785 WARNING 3961332984: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']) [18935d4d])
+  Original: <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.
+  Result: [TIKN] [TOKNN] [TOKNN] [TIKN] 2 2 2 2 2 2 2 2 เกียรตินิยมสมบูรณ์! คุณได้รับรางวัลด้วย [TOKN] TOKNN_7[TOGN] x[TOGN] [TOGN] [TOGN] [THNKN] [EKNKN] [EKN] [TVN]. มันหล่นลงบนพื้นแล้ว ข้าวของของคุณเต็มแล้ว
+2025-08-31 05:45:38,785 INFO Batch 51/362 end @ 29.54s (0.88s)
+2025-08-31 05:45:38,785 INFO Processed 60/428 lines
+2025-08-31 05:45:38,786 INFO Batch 52/362 start @ 29.54s
+2025-08-31 05:45:39,243 WARNING 145841390: token mismatch [c6521aca] (missing ['0', '1', '2', '3']) — Suggested fix: add ['0', '1', '2', '3']
+2025-08-31 05:45:39,243 WARNING 145841390: SKIPPED (token mismatch (missing ['0', '1', '2', '3']) [c6521aca])
+  Original: You must reach the maximum level in <color=#90EE90>Experience</color> prestige before <color=#90EE90>Exo</color> prestiging.
+  Result: คุณต้องถึงระดับสูงสุดใน TOKN_0 ความสูง TOKNN_1 เกียรตินิยม ก่อน [TOKN] ExoTIKN_3 planguage.
+2025-08-31 05:45:39,243 INFO Batch 52/362 end @ 30.00s (0.46s)
+2025-08-31 05:45:39,243 INFO Processed 61/428 lines
+2025-08-31 05:45:39,243 INFO Batch 53/362 start @ 30.00s
+2025-08-31 05:45:39,490 WARNING 2076214502: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:39,491 WARNING 2076214502: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: <color=#90EE90>Exo</color> prestiging is not enabled.
+  Result: TOKN_0 Exo TOGN_1 การเตรียมล่วงหน้ายังไม่เปิดใช้งาน
+2025-08-31 05:45:39,492 INFO Batch 53/362 end @ 30.25s (0.25s)
+2025-08-31 05:45:39,492 INFO Processed 62/428 lines
+2025-08-31 05:45:39,492 INFO Batch 54/362 start @ 30.25s
+2025-08-31 05:45:39,774 WARNING 1641131342: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:39,774 WARNING 1641131342: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.
+  Result: เกียรตินิยมไม่ถูกต้อง, ใช้ TOKN_ 0. Pristage lTakeen_1 เพื่อดูตัวเลือกที่ถูกต้อง
+2025-08-31 05:45:39,774 INFO Batch 54/362 end @ 30.53s (0.28s)
+2025-08-31 05:45:39,774 INFO Processed 63/428 lines
+2025-08-31 05:45:39,774 INFO Batch 55/362 start @ 30.53s
+2025-08-31 05:45:40,203 WARNING 484801240: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:40,203 WARNING 484801240: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.
+  Result: คุณยังไม่ได้ถึงระดับที่ต้องการเพื่อชื่อเสียงใน TOKN_0TOKN_1 [TOKN][TIKN] [TRIKNN] หรืออยู่ในระดับเกียรติยศสูงสุด
+2025-08-31 05:45:40,203 INFO Batch 55/362 end @ 30.96s (0.43s)
+2025-08-31 05:45:40,203 INFO Processed 64/428 lines
+2025-08-31 05:45:40,203 INFO Batch 56/362 start @ 30.96s
+2025-08-31 05:45:41,074 WARNING 11642316: token mismatch [fbe646fa] (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6', '7', '8']
+2025-08-31 05:45:41,075 WARNING 11642316: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8']) [fbe646fa])
+  Original: Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)Shapeshifts.CalculateFormDuration(exoLevel)}</color>s
+  Result: ปัจจุบัน TOCKN_0 Exo TOKNN_1 TOKNN_3/TOKNN_4[TIKNN] [TIGN] [TCNE] | Max Form time: [TOKNN] [TIKNN] [TIKNN] [TIKN] [TIKNUKN] [TUKN].
+2025-08-31 05:45:41,075 INFO Batch 56/362 end @ 31.83s (0.87s)
+2025-08-31 05:45:41,075 INFO Processed 65/428 lines
+2025-08-31 05:45:41,075 INFO Batch 57/362 start @ 31.83s
+2025-08-31 05:45:41,474 WARNING 836746607: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:41,474 WARNING 836746607: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s
+  Result: ค่าใช้จ่ายพอที่จะรักษารูปแบบสําหรับ TOKN_0 TOKN_1 [TOGN] [TOGN]
+2025-08-31 05:45:41,474 INFO Batch 57/362 end @ 32.23s (0.40s)
+2025-08-31 05:45:41,475 INFO Processed 66/428 lines
+2025-08-31 05:45:41,475 INFO Batch 58/362 start @ 32.23s
+2025-08-31 05:45:41,700 WARNING 2332227846: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:41,701 WARNING 2332227846: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: You have not prestiged in <color=#90EE90>Exo</color> yet.
+  Result: คุณยังไม่ได้มีชื่อเสียงใน [TOCKN] Exo[TOGN] ยัง.
+2025-08-31 05:45:41,701 INFO Batch 58/362 end @ 32.46s (0.23s)
+2025-08-31 05:45:41,701 INFO Processed 67/428 lines
+2025-08-31 05:45:41,701 INFO Batch 59/362 start @ 32.46s
+2025-08-31 05:45:42,069 WARNING 3706109126: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:42,070 WARNING 3706109126: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.
+  Result: [TOKN][TOKNTH] [TCNN] [THNN] [TICKN].
+2025-08-31 05:45:42,071 INFO Batch 59/362 end @ 32.83s (0.37s)
+2025-08-31 05:45:42,071 INFO Processed 68/428 lines
+2025-08-31 05:45:42,071 INFO Batch 60/362 start @ 32.83s
+2025-08-31 05:45:42,182 INFO 1689690159: TRANSLATED
+  Original: Couldn't find player.
+  Result: หาผู้เล่นไม่เจอ
+2025-08-31 05:45:42,183 INFO Batch 60/362 end @ 32.94s (0.11s)
+2025-08-31 05:45:42,183 INFO Processed 69/428 lines
+2025-08-31 05:45:42,184 INFO Batch 61/362 start @ 32.94s
+2025-08-31 05:45:42,524 WARNING 3055902112: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:42,525 WARNING 3055902112: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: <color=#90EE90>{parsedPrestigeType}</color> prestiging is not enabled.
+  Result: TOKKN_0 TOKNN_1 [TOKN] [TOKNN] ล่วงหน้ายังไม่เปิดใช้งาน
+2025-08-31 05:45:42,525 INFO Batch 61/362 end @ 33.28s (0.34s)
+2025-08-31 05:45:42,525 INFO Processed 70/428 lines
+2025-08-31 05:45:42,525 INFO Batch 62/362 start @ 33.28s
+2025-08-31 05:45:42,836 WARNING 3468772905: token mismatch [c6521aca] (missing ['0', '1', '2', '3']) — Suggested fix: add ['0', '1', '2', '3']
+2025-08-31 05:45:42,836 WARNING 3468772905: SKIPPED (token mismatch (missing ['0', '1', '2', '3']) [c6521aca])
+  Original: The maximum level for <color=#90EE90>{parsedPrestigeType}</color> prestige is {PrestigeTypeToMaxPrestiges[parsedPrestigeType]}.
+  Result: ระดับสูงสุดของ [TOKN] TOKNN_1 [TOKN] เกียรติศักดิ์คือ [TOKNN].
+2025-08-31 05:45:42,836 INFO Batch 62/362 end @ 33.59s (0.31s)
+2025-08-31 05:45:42,836 INFO Processed 71/428 lines
+2025-08-31 05:45:42,837 INFO Batch 63/362 start @ 33.59s
+2025-08-31 05:45:43,544 WARNING 3343555659: token mismatch [fbe646fa] (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6', '7', '8']
+2025-08-31 05:45:43,545 WARNING 3343555659: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8']) [fbe646fa])
+  Original: Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.
+  Result: ผู้เล่น [TOKNN] [TOKN] [TOKN] ได้รับการตั้งค่าเป็นระดับ [TOGN] [TOGN] [TOGN] [TOGN] 2 in [TIKNN] in [TOKN] [CNKN] 7 ชื่อเพลง.
+2025-08-31 05:45:43,545 INFO Batch 63/362 end @ 34.30s (0.71s)
+2025-08-31 05:45:43,545 INFO Processed 72/428 lines
+2025-08-31 05:45:43,545 INFO Batch 64/362 start @ 34.30s
+2025-08-31 05:45:43,807 INFO 101395383: TRANSLATED
+  Original: Exo prestiging is not enabled.
+  Result: ไม่เปิดใช้งานการประมวลผลก่อน
+2025-08-31 05:45:43,808 INFO 3878313095: TRANSLATED
+  Original: Couldn't find player...
+  Result: หาผู้เล่นไม่ได้...
+2025-08-31 05:45:43,808 INFO Batch 64/362 end @ 34.57s (0.26s)
+2025-08-31 05:45:43,808 INFO Processed 74/428 lines
+2025-08-31 05:45:43,808 INFO Batch 65/362 start @ 34.57s
+2025-08-31 05:45:44,371 WARNING 1411528307: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:44,371 WARNING 1411528307: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.
+  Result: TOKNN_0 [TOKNN] [TOKN] การรีเซ็ตยศนิยมสําหรับ [TOKNN] [TIKNN] 2 2 2 2 2 2.
+2025-08-31 05:45:44,371 INFO Batch 65/362 end @ 35.13s (0.56s)
+2025-08-31 05:45:44,371 INFO Processed 75/428 lines
+2025-08-31 05:45:44,371 INFO Batch 66/362 start @ 35.13s
+2025-08-31 05:45:44,519 INFO 3318828181: TRANSLATED
+  Original: Prestige buffs applied! (if they were missing)
+  Result: prestage footers ใช้! (ถ้ามันหายไป)
+2025-08-31 05:45:44,519 INFO Batch 66/362 end @ 35.28s (0.15s)
+2025-08-31 05:45:44,519 INFO Processed 76/428 lines
+2025-08-31 05:45:44,519 INFO Batch 67/362 start @ 35.28s
+2025-08-31 05:45:44,872 WARNING 830139985: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:44,875 WARNING 830139985: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: You have not prestiged in <color=#90EE90>{PrestigeType.Experience}</color>.
+  Result: [TOKN][TOKNTH] [TCNN] [THNN] [TICKN].
+2025-08-31 05:45:44,875 INFO Batch 67/362 end @ 35.63s (0.36s)
+2025-08-31 05:45:44,875 INFO Processed 77/428 lines
+2025-08-31 05:45:44,875 INFO Batch 68/362 start @ 35.63s
+2025-08-31 05:45:44,993 INFO 2461283441: TRANSLATED
+  Original: Prestiges:
+  Result: prestages:
+2025-08-31 05:45:44,993 INFO Batch 68/362 end @ 35.75s (0.12s)
+2025-08-31 05:45:44,993 INFO Processed 78/428 lines
+2025-08-31 05:45:44,993 INFO Batch 69/362 start @ 35.75s
+2025-08-31 05:45:45,165 WARNING 3320998835: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:45:45,166 WARNING 3320998835: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: {prestiges}
+  Result: [TOGN] [TIKINE]
+2025-08-31 05:45:45,166 INFO Batch 69/362 end @ 35.92s (0.17s)
+2025-08-31 05:45:45,166 INFO Processed 79/428 lines
+2025-08-31 05:45:45,166 INFO Batch 70/362 start @ 35.92s
+2025-08-31 05:45:45,291 INFO 947905559: TRANSLATED
+  Original: Leaderboards are not enabled.
+  Result: ไม่เปิดใช้งานแผงควบคุม
+2025-08-31 05:45:45,292 INFO Batch 70/362 end @ 36.05s (0.13s)
+2025-08-31 05:45:45,292 INFO Processed 80/428 lines
+2025-08-31 05:45:45,292 INFO Batch 71/362 start @ 36.05s
+2025-08-31 05:45:45,656 WARNING 1182925736: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:45,657 WARNING 1182925736: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!
+  Result: ไม่มีผู้เล่นคนใดเคยมีชื่อเสียงใน [TOKN] TOKNTN_1 [THNTHN] [THN] ยัง!
+2025-08-31 05:45:45,657 INFO Batch 71/362 end @ 36.41s (0.36s)
+2025-08-31 05:45:45,657 INFO Processed 81/428 lines
+2025-08-31 05:45:45,657 INFO Batch 72/362 start @ 36.41s
+2025-08-31 05:45:45,783 INFO 1687700552: TRANSLATED
+  Original: You must consume at least one primordial essence...
+  Result: คุณต้องบริโภคอย่างน้อยที่สุดหนึ่งสาระสําคัญ
+2025-08-31 05:45:45,784 INFO Batch 72/362 end @ 36.54s (0.13s)
+2025-08-31 05:45:45,784 INFO Processed 82/428 lines
+2025-08-31 05:45:45,784 INFO Batch 73/362 start @ 36.54s
+2025-08-31 05:45:46,030 WARNING 1763729577: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:46,031 WARNING 1763729577: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, SHAPESHIFT_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}
+  Result: Exo ฟอร์มการกระทํา (TOKN_0 taunt TOKNN_1 [TOGN]
+2025-08-31 05:45:46,031 INFO Batch 73/362 end @ 36.79s (0.25s)
+2025-08-31 05:45:46,031 INFO Processed 83/428 lines
+2025-08-31 05:45:46,031 INFO Batch 74/362 start @ 36.79s
+2025-08-31 05:45:46,143 INFO 1711247206: TRANSLATED
+  Original: You are not yet worthy...
+  Result: เจ้ายังไม่คู่ควร...
+2025-08-31 05:45:46,144 INFO Batch 74/362 end @ 36.90s (0.11s)
+2025-08-31 05:45:46,144 INFO Processed 84/428 lines
+2025-08-31 05:45:46,144 INFO Batch 75/362 start @ 36.90s
+2025-08-31 05:45:46,301 WARNING 3882215894: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:45:46,302 WARNING 3882215894: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: Invalid shapeshift! Valid options: {shapeshifts}
+  Result: การเปลี่ยนรูปร่างไม่ถูกต้อง! ตัวเลือกที่ใช้ได้:
+2025-08-31 05:45:46,302 INFO Batch 75/362 end @ 37.06s (0.16s)
+2025-08-31 05:45:46,302 INFO Processed 85/428 lines
+2025-08-31 05:45:46,302 INFO Batch 76/362 start @ 37.06s
+2025-08-31 05:45:46,619 INFO 1884272339: TRANSLATED
+  Original: You must consume Dracula's essence before manifesting his form...
+  Result: คุณต้องกินแก่นแท้ของแดร็กคิวล่า ก่อนที่จะเผยรูปร่างของเขา
+2025-08-31 05:45:46,620 INFO 816810753: TRANSLATED
+  Original: You must consume Megara's essence before manifesting her form...
+  Result: คุณต้องกินแก่นแท้ของมาการา ก่อนที่จะเผยรูปร่างของเธอ
+2025-08-31 05:45:46,620 INFO Batch 76/362 end @ 37.38s (0.32s)
+2025-08-31 05:45:46,620 INFO Processed 87/428 lines
+2025-08-31 05:45:46,620 INFO Batch 77/362 start @ 37.38s
+2025-08-31 05:45:46,899 WARNING 3587073963: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:46,900 WARNING 3587073963: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Current Exoform: <color=white>{form}</color>
+  Result: เอ็กซ์โซฟอร์มปัจจุบัน: TOKN_0TOKN_1 [TOGN]
+2025-08-31 05:45:46,900 INFO Batch 77/362 end @ 37.66s (0.28s)
+2025-08-31 05:45:46,900 INFO Processed 88/428 lines
+2025-08-31 05:45:46,900 INFO Batch 78/362 start @ 37.66s
+2025-08-31 05:45:47,194 WARNING 1440482998: token mismatch [8c5864dd] (missing ['1', '2']) — Suggested fix: add ['1', '2']
+2025-08-31 05:45:47,195 WARNING 1440482998: SKIPPED (token mismatch (missing ['1', '2']) [8c5864dd])
+  Original: <color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore prestige leaderboard list!
+  Result: [[TOKEN_0]]TOKNN_1TOKN_2 เพิ่มรายชื่อผู้นําผู้เกิ
+2025-08-31 05:45:47,195 INFO Batch 78/362 end @ 37.95s (0.29s)
+2025-08-31 05:45:47,195 INFO Processed 89/428 lines
+2025-08-31 05:45:47,195 INFO Batch 79/362 start @ 37.95s
+2025-08-31 05:45:47,498 WARNING 2659109549: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:47,498 WARNING 2659109549: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: <color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore prestige leaderboard list!
+  Result: TOKKN_0 TOKNN_1 TOKNN_2 ถอนออกจากรายชื่อผู้นําผู้เกิ
+2025-08-31 05:45:47,499 INFO Batch 79/362 end @ 38.26s (0.30s)
+2025-08-31 05:45:47,499 INFO Processed 90/428 lines
+2025-08-31 05:45:47,499 INFO Batch 80/362 start @ 38.26s
+2025-08-31 05:45:47,748 WARNING 2178615132: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:47,748 WARNING 2178615132: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Permashroud <color=green>enabled</color>!
+  Result: Permashrured [TOKN] ออกเสียง [TOKKN]!
+2025-08-31 05:45:47,748 INFO Batch 80/362 end @ 38.51s (0.25s)
+2025-08-31 05:45:47,749 INFO Processed 91/428 lines
+2025-08-31 05:45:47,749 INFO Batch 81/362 start @ 38.51s
+2025-08-31 05:45:48,031 WARNING 1797973559: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:48,031 WARNING 1797973559: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Permashroud <color=red>disabled</color>!
+  Result: Permashrured [TOKN] diversable (TIKNN_1!
+2025-08-31 05:45:48,031 INFO Batch 81/362 end @ 38.79s (0.28s)
+2025-08-31 05:45:48,031 INFO Processed 92/428 lines
+2025-08-31 05:45:48,031 INFO Batch 82/362 start @ 38.79s
+2025-08-31 05:45:48,339 INFO 985830382: TRANSLATED
+  Original: Expertise is not enabled.
+  Result: ไม่ถูกเปิดใช้ความเชี่ยวชาญ
+2025-08-31 05:45:48,341 INFO 3170250471: TRANSLATED
+  Original: Expertise handler for weapon is null; this shouldn't happen and you may want to inform the developer.
+  Result: ผู้ดูแลอาวุธผู้เชี่ยวชาญเป็นโมฆะ; นี้ไม่ควรจะเกิดขึ้นและคุณอาจจะต้องการที่จะแจ้งนักพัฒนา
+2025-08-31 05:45:48,341 INFO Batch 82/362 end @ 39.10s (0.31s)
+2025-08-31 05:45:48,342 INFO Processed 94/428 lines
+2025-08-31 05:45:48,342 INFO Batch 83/362 start @ 39.10s
+2025-08-31 05:45:49,198 WARNING 3591926048: token mismatch [41b4fddc] (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17']
+2025-08-31 05:45:49,198 WARNING 3591926048: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17']) [41b4fddc])
+  Original: Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!
+  Result: [TOGN] ความเชี่ยวชาญด้านอาวุธคือ [TOKN][THNN][TCNN] [TOGNN] [TIGNN] [THE] [THNGN] 2 2 2 2. TOKN_9 อนุมาน[TOKNN] [TOKN] [TOKNN] [TOGNN] 2 [TOKNN] 2 2 2 2.
+2025-08-31 05:45:49,198 INFO Batch 83/362 end @ 39.96s (0.86s)
+2025-08-31 05:45:49,198 INFO Processed 95/428 lines
+2025-08-31 05:45:49,198 INFO Batch 84/362 start @ 39.96s
+2025-08-31 05:45:49,553 WARNING 3489173133: token mismatch [c6521aca] (missing ['0', '1', '2', '3']) — Suggested fix: add ['0', '1', '2', '3']
+2025-08-31 05:45:49,555 WARNING 3489173133: SKIPPED (token mismatch (missing ['0', '1', '2', '3']) [c6521aca])
+  Original: <color=#c0c0c0>{weaponType}</color> Stats: {bonuses}
+  Result: TOKNN_0TOKNN_1 [TIKNN] 2 สถิติ:
+2025-08-31 05:45:49,555 INFO Batch 84/362 end @ 40.31s (0.36s)
+2025-08-31 05:45:49,555 INFO Processed 96/428 lines
+2025-08-31 05:45:49,555 INFO Batch 85/362 start @ 40.31s
+2025-08-31 05:45:49,672 INFO 3863739608: TRANSLATED
+  Original: No bonuses from currently equipped weapon.
+  Result: ไม่มีโบนัสจากอาวุธที่ใช้อยู่ในปัจจุบัน
+2025-08-31 05:45:49,673 INFO Batch 85/362 end @ 40.43s (0.12s)
+2025-08-31 05:45:49,673 INFO Processed 97/428 lines
+2025-08-31 05:45:49,673 INFO Batch 86/362 start @ 40.43s
+2025-08-31 05:45:49,985 WARNING 4023020194: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:49,986 WARNING 4023020194: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet!
+  Result: คุณยังไม่ได้รับความชํานาญสําหรับ [TOKN] [TOKNN] [TIKN] 2 ยัง!
+2025-08-31 05:45:49,986 INFO Batch 86/362 end @ 40.74s (0.31s)
+2025-08-31 05:45:49,986 INFO Processed 98/428 lines
+2025-08-31 05:45:49,987 INFO Batch 87/362 start @ 40.74s
+2025-08-31 05:45:50,143 WARNING 736301693: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:45:50,144 WARNING 736301693: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: ปัจจุบัน Taken_0).
+2025-08-31 05:45:50,144 INFO Batch 87/362 end @ 40.90s (0.16s)
+2025-08-31 05:45:50,144 INFO Processed 99/428 lines
+2025-08-31 05:45:50,144 INFO Batch 88/362 start @ 40.90s
+2025-08-31 05:45:50,461 WARNING 27929505: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:50,461 WARNING 27929505: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Invalid stat, use '<color=white>.wep lst</color>' to see valid options.
+  Result: ค่าสถิติไม่ถูกต้อง, ใช้ 'TCNN_ 0. wep lastTIKN_1' เพื่อดูตัวเลือกที่ถูกต้อง
+2025-08-31 05:45:50,461 INFO Batch 88/362 end @ 41.22s (0.32s)
+2025-08-31 05:45:50,461 INFO Processed 100/428 lines
+2025-08-31 05:45:50,461 INFO Batch 89/362 start @ 41.22s
+2025-08-31 05:45:51,033 WARNING 1880632188: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:51,034 WARNING 1880632188: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=#00FFFF>{finalWeaponStat}</color> has been chosen for <color=#c0c0c0>{finalWeaponType}</color>!
+  Result: TOKN_0 [TOKNN] [TOKN] ได้รับคัดเลือกสําหรับ [TIKNN] [TOKN] [TIKN] [TIKNN] 2 2 2!
+2025-08-31 05:45:51,034 INFO Batch 89/362 end @ 41.79s (0.57s)
+2025-08-31 05:45:51,034 INFO Processed 101/428 lines
+2025-08-31 05:45:51,034 INFO Batch 90/362 start @ 41.79s
+2025-08-31 05:45:51,321 WARNING 2008856310: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:51,321 WARNING 2008856310: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Invalid weapon choice, use '<color=white>.wep lst</color>' to see valid options.
+  Result: ตัวเลือกการใช้อาวุธไม่ถูกต้อง, ใช้ 'Takeen_0. wep lastTakeen_1' เพื่อดูตัวเลือกที่ถูกต้อง
+2025-08-31 05:45:51,321 INFO Batch 90/362 end @ 42.08s (0.29s)
+2025-08-31 05:45:51,321 INFO Processed 102/428 lines
+2025-08-31 05:45:51,321 INFO Batch 91/362 start @ 42.08s
+2025-08-31 05:45:51,660 WARNING 3274700132: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:51,661 WARNING 3274700132: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!
+  Result: สถิติอาวุธของคุณได้รับการรีเซ็ตสําหรับ TOKN_0 TOKN_1 [TICKNN] [TICKN]!
+2025-08-31 05:45:51,661 INFO Batch 91/362 end @ 42.42s (0.34s)
+2025-08-31 05:45:51,661 INFO Processed 103/428 lines
+2025-08-31 05:45:51,662 INFO Batch 92/362 start @ 42.42s
+2025-08-31 05:45:52,245 WARNING 719993404: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:52,245 WARNING 719993404: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
+  Result: คุณไม่มีของที่จําเป็นที่จะรีเซ็ตสถิติอาวุธของคุณ! [TOKNN] [TOKNN][TOKN] x[THEGN][TIKNN] 2 2 2 2 2 2 2
+2025-08-31 05:45:52,245 INFO Batch 92/362 end @ 43.00s (0.58s)
+2025-08-31 05:45:52,245 INFO Processed 104/428 lines
+2025-08-31 05:45:52,245 INFO Batch 93/362 start @ 43.00s
+2025-08-31 05:45:52,428 WARNING 2128999876: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:45:52,429 WARNING 2128999876: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: Level must be between 0 and {ConfigService.MaxExpertiseLevel}.
+  Result: ระดับต้องอยู่ระหว่าง 0 กับ TOCKN_0.
+2025-08-31 05:45:52,430 INFO Batch 93/362 end @ 43.19s (0.18s)
+2025-08-31 05:45:52,431 INFO Processed 105/428 lines
+2025-08-31 05:45:52,431 INFO Batch 94/362 start @ 43.19s
+2025-08-31 05:45:52,539 INFO 2252129438: TRANSLATED
+  Original: Invalid weapon type.
+  Result: ชนิดของอาวุธไม่ถูกต้อง
+2025-08-31 05:45:52,541 INFO Batch 94/362 end @ 43.30s (0.11s)
+2025-08-31 05:45:52,541 INFO Processed 106/428 lines
+2025-08-31 05:45:52,541 INFO Batch 95/362 start @ 43.30s
+2025-08-31 05:45:53,144 WARNING 2480816305: token mismatch [fbe646fa] (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6', '7', '8']
+2025-08-31 05:45:53,146 WARNING 2480816305: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8']) [fbe646fa])
+  Original: <color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>
+  Result: [TIKN] [TOKNN] [TOKNN] ความเชี่ยวชาญตั้ง [TOGN] [TICKNN] 2 2 2 2 2 2 2
+2025-08-31 05:45:53,147 INFO Batch 95/362 end @ 43.91s (0.61s)
+2025-08-31 05:45:53,147 INFO Processed 107/428 lines
+2025-08-31 05:45:53,147 INFO Batch 96/362 start @ 43.91s
+2025-08-31 05:45:53,379 INFO 3013651462: TRANSLATED
+  Original: Couldn't find matching save method for weapon type...
+  Result: ไม่พบวิธีบันทึกชนิดอาวุธ
+2025-08-31 05:45:53,381 INFO 2965167816: TRANSLATED
+  Original: No weapon stats available at this time.
+  Result: ไม่มีสถิติอาวุธในตอนนี้
+2025-08-31 05:45:53,382 INFO Batch 96/362 end @ 44.14s (0.23s)
+2025-08-31 05:45:53,382 INFO Processed 109/428 lines
+2025-08-31 05:45:53,383 INFO Batch 97/362 start @ 44.14s
+2025-08-31 05:45:53,688 WARNING 3084457547: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:53,689 WARNING 3084457547: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>
+  Result: [TCOKN] TOKNN_1 [TOGN] [TICKN]
+2025-08-31 05:45:53,689 INFO Batch 97/362 end @ 44.45s (0.31s)
+2025-08-31 05:45:53,689 INFO Processed 110/428 lines
+2025-08-31 05:45:53,689 INFO Batch 98/362 start @ 44.45s
+2025-08-31 05:45:53,839 INFO 2202242526: TRANSLATED
+  Original: Extra spell slots are not enabled.
+  Result: ไม่เปิดใช้ช่องสําหรับสะกดพิเศษ
+2025-08-31 05:45:53,841 INFO Batch 98/362 end @ 44.60s (0.15s)
+2025-08-31 05:45:53,841 INFO Processed 111/428 lines
+2025-08-31 05:45:53,841 INFO Batch 99/362 start @ 44.60s
+2025-08-31 05:45:54,244 WARNING 2998300513: token mismatch [c6521aca] (missing ['0', '1', '2', '3']) — Suggested fix: add ['0', '1', '2', '3']
+2025-08-31 05:45:54,245 WARNING 2998300513: SKIPPED (token mismatch (missing ['0', '1', '2', '3']) [c6521aca])
+  Original: Invalid slot (<color=white>1</color> for Q or <color=white>2</color> for E)
+  Result: ช่องว่างไม่ถูกต้อง (TOKN_ 01TOKN_1 สําหรับ Q หรือ [TRIGN]2[TIGN] สําหรับ E
+2025-08-31 05:45:54,245 INFO Batch 99/362 end @ 45.00s (0.40s)
+2025-08-31 05:45:54,245 INFO Processed 112/428 lines
+2025-08-31 05:45:54,245 INFO Batch 100/362 start @ 45.00s
+2025-08-31 05:45:54,749 WARNING 3761416018: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:54,750 WARNING 3761416018: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
+  Result: TOKNN_1 [TOKNN] [TOKN] [THNN] สําหรับ [TOGN] [TIKNN] 2 2.
+2025-08-31 05:45:54,750 INFO Batch 100/362 end @ 45.51s (0.50s)
+2025-08-31 05:45:54,750 INFO Processed 113/428 lines
+2025-08-31 05:45:54,750 INFO Batch 101/362 start @ 45.51s
+2025-08-31 05:45:55,298 WARNING 1826355702: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:55,299 WARNING 1826355702: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.
+  Result: TakeN_2 ช่องสองพร้อมยิง [TCNN]TCNN_1 [TOGN] สําหรับ [TOKNN] [TIKNN] 2 2.
+2025-08-31 05:45:55,299 INFO Batch 101/362 end @ 46.06s (0.55s)
+2025-08-31 05:45:55,299 INFO Processed 114/428 lines
+2025-08-31 05:45:55,299 INFO Batch 102/362 start @ 46.06s
+2025-08-31 05:45:56,387 INFO 2712082651: TRANSLATED
+  Original: Radius must be positive!
+  Result: รัศมีต้องเป็นบวก!
+2025-08-31 05:45:56,387 INFO 1846116445: TRANSLATED
+  Original: Extra spell slots for unarmed are not enabled.
+  Result: ยังไม่ได้ถูกเปิดใช้ช่องว่างของคําสะกดพิเศษสําหรับไม่มีอาวุธ
+2025-08-31 05:45:56,387 INFO 446698782: TRANSLATED
+  Original: Spells cannot be locked when using exoform.
+  Result: ไม่สามารถล็อคการสะกดได้เมื่อใช้โปรแกรม exocorm
+2025-08-31 05:45:56,387 INFO 313887201: TRANSLATED
+  Original: Change spells to the ones you want in your unarmed slots. When done, toggle this again.
+  Result: เปลี่ยนคาถาให้ตัวที่คุณต้องการ ในช่องที่ไม่มีอาวุธของคุณ เมื่อทํา, จะสลับนี้อีกครั้ง
+2025-08-31 05:45:56,387 INFO 121410310: TRANSLATED
+  Original: Spells locked.
+  Result: สะกดล็อค
+2025-08-31 05:45:56,388 INFO 4061888430: TRANSLATED
+  Original: Blood Legacies are not enabled.
+  Result: ไม่ มี การ เปิด ช่อง เลือด.
+2025-08-31 05:45:56,388 INFO 3361608225: TRANSLATED
+  Original: Invalid blood, use '.bl l' to see options.
+  Result: เลือดไม่ถูกต้อง ให้ใช้ '.bl' เพื่อดูตัวเลือก
+2025-08-31 05:45:56,388 INFO 18401539: TRANSLATED
+  Original: Invalid blood legacy.
+  Result: มรดกเลือดไม่ถูกต้อง
+2025-08-31 05:45:56,388 INFO Batch 102/362 end @ 47.15s (1.09s)
+2025-08-31 05:45:56,388 INFO Processed 122/428 lines
+2025-08-31 05:45:56,388 INFO Batch 103/362 start @ 47.15s
+2025-08-31 05:45:57,208 WARNING 3254231727: token mismatch [41b4fddc] (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17']
+2025-08-31 05:45:57,208 WARNING 3254231727: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17']) [41b4fddc])
+  Original: You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!
+  Result: คุณอยู่ในระดับ [TOGN] [TOKN] [TOGN] [TOGN] 2 2 2 2 2 2 2 2 TOKN_9 [TOKNN][TOKN] [TOGN] [TTOVN] [TIGN] [TIGN] 2 in 2 2 2!
+2025-08-31 05:45:57,209 INFO Batch 103/362 end @ 47.97s (0.82s)
+2025-08-31 05:45:57,209 INFO Processed 123/428 lines
+2025-08-31 05:45:57,209 INFO Batch 104/362 start @ 47.97s
+2025-08-31 05:45:57,534 WARNING 1711931034: token mismatch [c6521aca] (missing ['0', '1', '2', '3']) — Suggested fix: add ['0', '1', '2', '3']
+2025-08-31 05:45:57,534 WARNING 1711931034: SKIPPED (token mismatch (missing ['0', '1', '2', '3']) [c6521aca])
+  Original: <color=red>{bloodType}</color> Stats: {bonuses}
+  Result: TOKNN_0TOKNN_1 [TIKNN] 2 สถิติ:
+2025-08-31 05:45:57,535 INFO Batch 104/362 end @ 48.29s (0.33s)
+2025-08-31 05:45:57,535 INFO Processed 124/428 lines
+2025-08-31 05:45:57,535 INFO Batch 105/362 start @ 48.29s
+2025-08-31 05:45:57,967 WARNING 939340687: token mismatch [08cc2c75] (missing ['0', '1', '2', '3', '4']) — Suggested fix: add ['0', '1', '2', '3', '4']
+2025-08-31 05:45:57,968 WARNING 939340687: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4']) [08cc2c75])
+  Original: No stats selected for <color=red>{bloodType}</color>, use <color=white>'.bl lst'</color> to see valid options.
+  Result: ไม่มีการเลือกสถิติสําหรับ TOCKN_0TOKN_1TOKN_2 ใช้ TOKN_3'. abl lst'[TOKN] เพื่อดูตัวเลือกที่ถูกต้อง
+2025-08-31 05:45:57,968 INFO Batch 105/362 end @ 48.73s (0.43s)
+2025-08-31 05:45:57,969 INFO Processed 125/428 lines
+2025-08-31 05:45:57,970 INFO Batch 106/362 start @ 48.73s
+2025-08-31 05:45:58,252 WARNING 226227140: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:45:58,252 WARNING 226227140: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: No progress in <color=red>{handler.GetBloodType()}</color> yet.
+  Result: ยังไม่มีความคืบหน้าใน [TOKN] TOKNN_1 [TOGN] ยัง.
+2025-08-31 05:45:58,253 INFO Batch 106/362 end @ 49.01s (0.28s)
+2025-08-31 05:45:58,253 INFO Processed 126/428 lines
+2025-08-31 05:45:58,253 INFO Batch 107/362 start @ 49.01s
+2025-08-31 05:45:58,430 WARNING 4051608029: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:45:58,430 WARNING 4051608029: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.
+  Result: การตัดถ่ายเลือด
+2025-08-31 05:45:58,430 INFO Batch 107/362 end @ 49.19s (0.18s)
+2025-08-31 05:45:58,431 INFO Processed 127/428 lines
+2025-08-31 05:45:58,431 INFO Batch 108/362 start @ 49.19s
+2025-08-31 05:45:58,571 INFO 3335571950: TRANSLATED
+  Original: Legacies are not enabled.
+  Result: เลกซี่ยังไม่ถูกเปิดใช้
+2025-08-31 05:45:58,572 INFO Batch 108/362 end @ 49.33s (0.14s)
+2025-08-31 05:45:58,572 INFO Processed 128/428 lines
+2025-08-31 05:45:58,572 INFO Batch 109/362 start @ 49.33s
+2025-08-31 05:45:58,948 WARNING 2194796157: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:58,949 WARNING 2194796157: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Invalid blood stat, use '<color=white>.bl lst</color>' to see valid options.
+  Result: ค่าสถิติของเลือดไม่ถูกต้อง, ใช้ 'Takeen_0. bllastTaken_1' เพื่อดูตัวเลือกที่ถูกต้อง
+2025-08-31 05:45:58,949 INFO Batch 109/362 end @ 49.71s (0.38s)
+2025-08-31 05:45:58,949 INFO Processed 129/428 lines
+2025-08-31 05:45:58,949 INFO Batch 110/362 start @ 49.71s
+2025-08-31 05:45:59,486 WARNING 2785130336: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:45:59,487 WARNING 2785130336: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=#00FFFF>{finalBloodStat}</color> selected for <color=red>{finalBloodType}</color>!
+  Result: TOKNN_0 [TOKNN] [TOKN] เลือกสําหรับ [TOKNN] 2 2 2 2 2 2 2 2 2!
+2025-08-31 05:45:59,487 INFO Batch 110/362 end @ 50.24s (0.54s)
+2025-08-31 05:45:59,487 INFO Processed 130/428 lines
+2025-08-31 05:45:59,487 INFO Batch 111/362 start @ 50.25s
+2025-08-31 05:45:59,824 WARNING 4126149106: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:45:59,825 WARNING 4126149106: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Invalid blood type, use '<color=white>.bl l</color>' to see valid options.
+  Result: กรุ๊ปเลือดไม่ถูกต้อง, ใช้ 'Takeen_ 0. blblTakeen_1' เพื่อดูตัวเลือกที่ถูกต้อง
+2025-08-31 05:45:59,825 INFO Batch 111/362 end @ 50.58s (0.34s)
+2025-08-31 05:45:59,825 INFO Processed 131/428 lines
+2025-08-31 05:45:59,825 INFO Batch 112/362 start @ 50.58s
+2025-08-31 05:46:00,119 WARNING 4258273173: token mismatch [84c3ce95] (missing ['0', '1']) — Suggested fix: add ['0', '1']
+2025-08-31 05:46:00,120 WARNING 4258273173: SKIPPED (token mismatch (missing ['0', '1']) [84c3ce95])
+  Original: Invalid blood legacy, use '<color=white>.bl l</color>' to see valid options.
+  Result: มรดกของเลือดไม่ถูกต้อง, ใช้ 'Takeen_ 0.blTakeen_1' เพื่อดูตัวเลือกที่ถูกต้อง
+2025-08-31 05:46:00,120 INFO Batch 112/362 end @ 50.88s (0.29s)
+2025-08-31 05:46:00,120 INFO Processed 132/428 lines
+2025-08-31 05:46:00,120 INFO Batch 113/362 start @ 50.88s
+2025-08-31 05:46:00,386 WARNING 1298892920: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:00,387 WARNING 1298892920: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: No legacy available for <color=white>{bloodType}</color>.
+  Result: ไม่มีมรดกให้ TOKN_0 TOKNN_1[TOKN].
+2025-08-31 05:46:00,387 INFO Batch 113/362 end @ 51.15s (0.27s)
+2025-08-31 05:46:00,387 INFO Processed 133/428 lines
+2025-08-31 05:46:00,387 INFO Batch 114/362 start @ 51.15s
+2025-08-31 05:46:00,739 WARNING 1740355579: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:00,740 WARNING 1740355579: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Your blood stats have been reset for <color=red>{bloodType}</color>!
+  Result: สถิติเลือดของคุณได้รับการรีเซ็ตสําหรับ TOKN_0 [TIKN] 1 [TICKNN] [TICKN]!
+2025-08-31 05:46:00,740 INFO Batch 114/362 end @ 51.50s (0.35s)
+2025-08-31 05:46:00,740 INFO Processed 134/428 lines
+2025-08-31 05:46:00,740 INFO Batch 115/362 start @ 51.50s
+2025-08-31 05:46:01,233 WARNING 1449977777: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:46:01,233 WARNING 1449977777: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)
+  Result: คุณไม่มีของที่ต้องการรีเซ็ตค่าโลหิตของคุณ (TOKN_0TOKN_1[TOGN] [TOGNN] x[TIKNN][THNN] [THNKN]
+2025-08-31 05:46:01,233 INFO Batch 115/362 end @ 51.99s (0.49s)
+2025-08-31 05:46:01,234 INFO Processed 135/428 lines
+2025-08-31 05:46:01,235 INFO Batch 116/362 start @ 51.99s
+2025-08-31 05:46:01,670 WARNING 1690022722: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:01,671 WARNING 1690022722: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Your blood stats have been reset for <color=red>{bloodType}</color>.
+  Result: สถิติเลือดของคุณได้รับการรีเซ็ตสําหรับ TakeN_0 TOKNN_1 [TICKNN] [TIKNKN].
+2025-08-31 05:46:01,671 INFO Batch 116/362 end @ 52.43s (0.44s)
+2025-08-31 05:46:01,671 INFO Processed 136/428 lines
+2025-08-31 05:46:01,671 INFO Batch 117/362 start @ 52.43s
+2025-08-31 05:46:01,804 INFO 1680589832: TRANSLATED
+  Original: No blood stats available at this time.
+  Result: ตอนนี้ไม่มีเลือดเหลือ
+2025-08-31 05:46:01,804 INFO Batch 117/362 end @ 52.56s (0.13s)
+2025-08-31 05:46:01,804 INFO Processed 137/428 lines
+2025-08-31 05:46:01,804 INFO Batch 118/362 start @ 52.56s
+2025-08-31 05:46:01,964 WARNING 1108347105: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:46:01,964 WARNING 1108347105: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: Level must be between 0 and {ConfigService.MaxBloodLevel}.
+  Result: ระดับต้องอยู่ระหว่าง 0 กับ TOCKN_0.
+2025-08-31 05:46:01,964 INFO Batch 118/362 end @ 52.72s (0.16s)
+2025-08-31 05:46:01,965 INFO Processed 138/428 lines
+2025-08-31 05:46:01,965 INFO Batch 119/362 start @ 52.72s
+2025-08-31 05:46:02,534 WARNING 2196432591: token mismatch [fbe646fa] (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6', '7', '8']
+2025-08-31 05:46:02,535 WARNING 2196432591: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6', '7', '8']) [fbe646fa])
+  Original: <color=red>{BloodHandler.GetBloodType()}</color> legacy set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>
+  Result: [TIKN] [TOKNN] [TOKN] มรดก [TOKNN] [TIKNN] 2 2 2 2 2 2 2
+2025-08-31 05:46:02,535 INFO Batch 119/362 end @ 53.29s (0.57s)
+2025-08-31 05:46:02,535 INFO Processed 139/428 lines
+2025-08-31 05:46:02,535 INFO Batch 120/362 start @ 53.29s
+2025-08-31 05:46:02,809 WARNING 85537047: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:02,810 WARNING 85537047: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Available Blood Legacies: <color=red>{bloodTypesList}</color>
+  Result: Takeen_1 Taken_2
+2025-08-31 05:46:02,810 INFO Batch 120/362 end @ 53.57s (0.27s)
+2025-08-31 05:46:02,810 INFO Processed 140/428 lines
+2025-08-31 05:46:02,810 INFO Batch 121/362 start @ 53.57s
+2025-08-31 05:46:02,930 INFO 1381058165: TRANSLATED
+  Original: Familiars are not enabled.
+  Result: ไม่เปิดใช้งานตัวรับสัญญาณ
+2025-08-31 05:46:02,930 INFO Batch 121/362 end @ 53.69s (0.12s)
+2025-08-31 05:46:02,930 INFO Processed 141/428 lines
+2025-08-31 05:46:02,930 INFO Batch 122/362 start @ 53.69s
+2025-08-31 05:46:03,264 WARNING 1716911803: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:03,267 WARNING 1716911803: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: <color=white>{box}</color>:
+  Result: TOKNN_0 [TOKNN] [THNTHE] [THNKN] 2 :
+2025-08-31 05:46:03,267 INFO Batch 122/362 end @ 54.03s (0.34s)
+2025-08-31 05:46:03,268 INFO Processed 142/428 lines
+2025-08-31 05:46:03,268 INFO Batch 123/362 start @ 54.03s
+2025-08-31 05:46:03,976 WARNING 863911874: token mismatch [60ee597d] (missing ['0', '1', '2', '4', '5']) — Suggested fix: add ['0', '1', '2', '4', '5']
+2025-08-31 05:46:03,976 WARNING 863911874: SKIPPED (token mismatch (missing ['0', '1', '2', '4', '5']) [60ee597d])
+  Original: <color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $
+  Result: TOKNN_0 [TOKNN] [TIKNN] 2 [[TOKEN_3]][TOKNN] TOKN_5 TOKNN_5FFIMMFFIMIABFSDATA. Familyerbuffs.CONTHNKEKE (FFMKY). $
+2025-08-31 05:46:03,976 INFO Batch 123/362 end @ 54.73s (0.71s)
+2025-08-31 05:46:03,976 INFO Processed 143/428 lines
+2025-08-31 05:46:03,976 INFO Batch 124/362 start @ 54.73s
+2025-08-31 05:46:04,367 WARNING 1066178325: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:04,369 WARNING 1066178325: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: No active box! Try using <color=white>'.fam sb [Name]'</color> if you know the familiar you're looking for. (use quotes for names with a space)
+  Result: ไม่มีกล่องใช้งาน! ลองใช้TOKN_0 '.fam sb TOKN_1'[TOGN] ถ้าคุณรู้จักความคุ้นเคยที่คุณกําลังมองหาอยู่ (ใช้คําพูดแทนชื่อที่มีช่องว่าง)
+2025-08-31 05:46:04,370 INFO Batch 124/362 end @ 55.13s (0.39s)
+2025-08-31 05:46:04,370 INFO Processed 144/428 lines
+2025-08-31 05:46:04,370 INFO Batch 125/362 start @ 55.13s
+2025-08-31 05:46:04,612 INFO 2462277004: TRANSLATED
+  Original: Couldn't find active box!
+  Result: ไม่พบกล่องใช้งาน!
+2025-08-31 05:46:04,615 INFO 1977482431: TRANSLATED
+  Original: Familiar Boxes:
+  Result: กล่องข้อมูล:
+2025-08-31 05:46:04,616 INFO Batch 125/362 end @ 55.37s (0.25s)
+2025-08-31 05:46:04,616 INFO Processed 146/428 lines
+2025-08-31 05:46:04,616 INFO Batch 126/362 start @ 55.37s
+2025-08-31 05:46:04,802 WARNING 2321621014: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:46:04,802 WARNING 2321621014: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: {fams}
+  Result: [TOGN] [TIKINE]
+2025-08-31 05:46:04,802 INFO Batch 126/362 end @ 55.56s (0.19s)
+2025-08-31 05:46:04,802 INFO Processed 147/428 lines
+2025-08-31 05:46:04,802 INFO Batch 127/362 start @ 55.56s
+2025-08-31 05:46:04,921 INFO 854134032: TRANSLATED
+  Original: You don't have any unlocks yet!
+  Result: คุณยังไม่มีกุญแจ
+2025-08-31 05:46:04,922 INFO Batch 127/362 end @ 55.68s (0.12s)
+2025-08-31 05:46:04,922 INFO Processed 148/428 lines
+2025-08-31 05:46:04,922 INFO Batch 128/362 start @ 55.68s
+2025-08-31 05:46:05,211 WARNING 321106656: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:05,212 WARNING 321106656: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Box Selected - <color=white>{name}</color>
+  Result: กล่องที่เลือก - [TOGN]TOKNN_1[TOKN] [THN]
+2025-08-31 05:46:05,212 INFO Batch 128/362 end @ 55.97s (0.29s)
+2025-08-31 05:46:05,212 INFO Processed 149/428 lines
+2025-08-31 05:46:05,212 INFO Batch 129/362 start @ 55.97s
+2025-08-31 05:46:05,323 INFO 2465841402: TRANSLATED
+  Original: Couldn't find box!
+  Result: หากล่องไม่เจอ!
+2025-08-31 05:46:05,324 INFO Batch 129/362 end @ 56.08s (0.11s)
+2025-08-31 05:46:05,324 INFO Processed 150/428 lines
+2025-08-31 05:46:05,324 INFO Batch 130/362 start @ 56.08s
+2025-08-31 05:46:05,843 WARNING 698362524: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:46:05,843 WARNING 698362524: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: Box <color=white>{current}</color> renamed - <color=yellow>{name}</color>
+  Result: กล่อง TOKNN_0 TOKNN_1 [TOKNN] เปลี่ยนชื่อ - [TIKN] [TIKNN] 2 [TOKNN] 2 2
+2025-08-31 05:46:05,844 INFO Batch 130/362 end @ 56.60s (0.52s)
+2025-08-31 05:46:05,844 INFO Processed 151/428 lines
+2025-08-31 05:46:05,844 INFO Batch 131/362 start @ 56.60s
+2025-08-31 05:46:05,987 INFO 1575879194: TRANSLATED
+  Original: Couldn't find box to rename or there's already a box with that name!
+  Result: ไม่พบกล่องที่จะเปลี่ยนชื่อ หรือกล่องที่ชื่อนั้นอยู่แล้ว!
+2025-08-31 05:46:05,988 INFO Batch 131/362 end @ 56.75s (0.14s)
+2025-08-31 05:46:05,989 INFO Processed 152/428 lines
+2025-08-31 05:46:05,989 INFO Batch 132/362 start @ 56.75s
+2025-08-31 05:46:06,416 WARNING 823180732: token mismatch [7b3d6e81] (missing ['0', '1', '2', '3', '4', '5']) — Suggested fix: add ['0', '1', '2', '3', '4', '5']
+2025-08-31 05:46:06,417 WARNING 823180732: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5']) [7b3d6e81])
+  Original: <color=green>{PrefabGUID.GetLocalizedName()}</color> moved - <color=white>{name}</color>
+  Result: TOKNN_0 [TOKNN] [THNN] ย้าย [TOKNN] 2 [TIKNN] 2 2 2
+2025-08-31 05:46:06,417 INFO Batch 132/362 end @ 57.18s (0.43s)
+2025-08-31 05:46:06,417 INFO Processed 153/428 lines
+2025-08-31 05:46:06,417 INFO Batch 133/362 start @ 57.18s
+2025-08-31 05:46:06,522 INFO 3236338434: TRANSLATED
+  Original: Box is full!
+  Result: กล่องเต็มแล้ว
+2025-08-31 05:46:06,522 INFO Batch 133/362 end @ 57.28s (0.10s)
+2025-08-31 05:46:06,522 INFO Processed 154/428 lines
+2025-08-31 05:46:06,523 INFO Batch 134/362 start @ 57.28s
+2025-08-31 05:46:06,796 WARNING 2213724716: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:06,796 WARNING 2213724716: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Deleted box - <color=white>{name}</color>
+  Result: กล่องลบ - [TOGN]TOKNN_1[TOGN]
+2025-08-31 05:46:06,796 INFO Batch 134/362 end @ 57.55s (0.27s)
+2025-08-31 05:46:06,796 INFO Processed 155/428 lines
+2025-08-31 05:46:06,796 INFO Batch 135/362 start @ 57.55s
+2025-08-31 05:46:06,915 INFO 4289445665: TRANSLATED
+  Original: Box is not empty!
+  Result: กล่องไม่ได้ว่างเปล่า!
+2025-08-31 05:46:06,915 INFO Batch 135/362 end @ 57.67s (0.12s)
+2025-08-31 05:46:06,915 INFO Processed 156/428 lines
+2025-08-31 05:46:06,915 INFO Batch 136/362 start @ 57.67s
+2025-08-31 05:46:07,195 WARNING 3279926559: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:07,196 WARNING 3279926559: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Added box - <color=white>{name}</color>
+  Result: เพิ่มกล่อง - [TOGN] TOKNN_1 [TOKNN]
+2025-08-31 05:46:07,196 INFO Batch 136/362 end @ 57.95s (0.28s)
+2025-08-31 05:46:07,196 INFO Processed 157/428 lines
+2025-08-31 05:46:07,196 INFO Batch 137/362 start @ 57.95s
+2025-08-31 05:46:07,602 WARNING 2724064627: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:07,602 WARNING 2724064627: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Must have at least one unit unlocked to start adding boxes. Additionally, the total number of boxes cannot exceed <color=yellow>{BOX_CAP}</color>.
+  Result: ต้องมีอย่างน้อยหนึ่งหน่วยที่ปลดล็อค เพื่อเริ่มเพิ่มกล่อง นอกจากนี้ จํานวนของกล่องไม่สามารถเกิน TOKN0 TOKNN_1 [TOKNN][THNKN].
+2025-08-31 05:46:07,602 INFO Batch 137/362 end @ 58.36s (0.41s)
+2025-08-31 05:46:07,602 INFO Processed 158/428 lines
+2025-08-31 05:46:07,602 INFO Batch 138/362 start @ 58.36s
+2025-08-31 05:46:08,157 INFO 2648123409: TRANSLATED
+  Original: VBlood familiars are not enabled.
+  Result: ไม่เปิดการใช้งาน v Bloods
+2025-08-31 05:46:08,158 INFO 2179875375: TRANSLATED
+  Original: VBlood purchasing is not enabled.
+  Result: ยังไม่มีการเปิดใช้งานการซื้อ VBR
+2025-08-31 05:46:08,159 INFO 2721627196: TRANSLATED
+  Original: Couldn't find matching vBlood!
+  Result: หาเลือดที่เข้ากันไม่ได้
+2025-08-31 05:46:08,159 INFO 1976698463: TRANSLATED
+  Original: Multiple matches, please be more specific!
+  Result: ตรงกันหลายนัด กรุณาเจาะจงกว่านี้
+2025-08-31 05:46:08,159 INFO Batch 138/362 end @ 58.92s (0.56s)
+2025-08-31 05:46:08,159 INFO Processed 162/428 lines
+2025-08-31 05:46:08,159 INFO Batch 139/362 start @ 58.92s
+2025-08-31 05:46:08,465 WARNING 3052690511: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:08,466 WARNING 3052690511: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is not available per configured familiar bans!
+  Result: TOKN_0 TOKNN_1 [TOKKN] ไม่มีให้ใช้ตามคําสั่งห้ามที่คุ้นเคย!
+2025-08-31 05:46:08,468 INFO Batch 139/362 end @ 59.23s (0.31s)
+2025-08-31 05:46:08,469 INFO Processed 163/428 lines
+2025-08-31 05:46:08,469 INFO Batch 140/362 start @ 59.23s
+2025-08-31 05:46:08,766 WARNING 3195375072: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:08,766 WARNING 3195375072: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: <color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is already unlocked!
+  Result: TOKNN_0 [TOKNN] [TOKN] [TCKN] ปลดล็อคแล้ว!
+2025-08-31 05:46:08,766 INFO Batch 140/362 end @ 59.52s (0.30s)
+2025-08-31 05:46:08,766 INFO Processed 164/428 lines
+2025-08-31 05:46:08,766 INFO Batch 141/362 start @ 59.52s
+2025-08-31 05:46:08,935 WARNING 3380184352: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:46:08,935 WARNING 3380184352: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: Unable to verify cost for {vBloodPrefabGuid.GetPrefabName()}!
+  Result: ไม่สามารถตรวจสอบค่าใช้จ่ายสําหรับ TOCKN_0)!
+2025-08-31 05:46:08,935 INFO Batch 141/362 end @ 59.69s (0.17s)
+2025-08-31 05:46:08,936 INFO Processed 165/428 lines
+2025-08-31 05:46:08,936 INFO Batch 142/362 start @ 59.69s
+2025-08-31 05:46:09,252 WARNING 3498334942: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:09,253 WARNING 3498334942: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: Unable to verify exo prestige reward item! (<color=yellow>{exoItem}</color>)
+  Result: ไม่สามารถตรวจสอบรายการเงินรางวัล Exo! [TOKNN] [TOKNN] [TOKN] [THNTHN]
+2025-08-31 05:46:09,253 INFO Batch 142/362 end @ 60.01s (0.32s)
+2025-08-31 05:46:09,253 INFO Processed 166/428 lines
+2025-08-31 05:46:09,253 INFO Batch 143/362 start @ 60.01s
+2025-08-31 05:46:09,547 WARNING 4255236631: token mismatch [7589d0f8] (missing ['0', '1', '2']) — Suggested fix: add ['0', '1', '2']
+2025-08-31 05:46:09,547 WARNING 4255236631: SKIPPED (token mismatch (missing ['0', '1', '2']) [7589d0f8])
+  Original: New unit unlocked: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>
+  Result: หน่วยใหม่ปลดล็อค:[TOKN]TOKNN_1[TOGN]
+2025-08-31 05:46:09,547 INFO Batch 143/362 end @ 60.31s (0.29s)
+2025-08-31 05:46:09,547 INFO Processed 167/428 lines
+2025-08-31 05:46:09,547 INFO Batch 144/362 start @ 60.31s
+2025-08-31 05:46:10,120 WARNING 2191580006: token mismatch [f7d6320c] (missing ['0', '1', '2', '3', '4', '5', '6']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6']
+2025-08-31 05:46:10,120 WARNING 2191580006: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6']) [f7d6320c])
+  Original: Not enough <color=#ffd9eb>{exoItem.GetLocalizedName()}</color>x<color=white>{factoredCost}</color> for {vBloodPrefabGuid.GetPrefabName()}!
+  Result: ไม่พอ TOKNN_0TOKNN_1[TOKN] x[THN][TIKNN] [TIKNN] 2 2 2 2 2 2.
+2025-08-31 05:46:10,120 INFO Batch 144/362 end @ 60.88s (0.57s)
+2025-08-31 05:46:10,120 INFO Processed 168/428 lines
+2025-08-31 05:46:10,120 INFO Batch 145/362 start @ 60.88s
+2025-08-31 05:46:10,325 WARNING 1809964020: token mismatch [1cdc317b] (missing ['0']) — Suggested fix: add ['0']
+2025-08-31 05:46:10,325 WARNING 1809964020: SKIPPED (token mismatch (missing ['0']) [1cdc317b])
+  Original: Unable to verify tier for {vBloodPrefabGuid.GetPrefabName()}! Shouldn't really happen at this point and may want to inform the developer.
+  Result: ไม่สามารถตรวจสอบติมอร์สําหรับ Takeen_ 0! ไม่ควรเกิดขึ้น ณ จุดนี้ และอาจต้องการแจ้งนักพัฒนา
+2025-08-31 05:46:10,325 INFO Batch 145/362 end @ 61.08s (0.20s)
+2025-08-31 05:46:10,325 INFO Processed 169/428 lines
+2025-08-31 05:46:10,325 INFO Batch 146/362 start @ 61.08s
+2025-08-31 05:46:10,910 WARNING 1057363547: token mismatch [7a9a98f0] (missing ['0', '1', '2', '3', '4', '5', '6', '7']) — Suggested fix: add ['0', '1', '2', '3', '4', '5', '6', '7']
+2025-08-31 05:46:10,910 WARNING 1057363547: SKIPPED (token mismatch (missing ['0', '1', '2', '3', '4', '5', '6', '7']) [7a9a98f0])
+  Original: Invalid choice, please use <color=white>1</color> to <color=white>{familiarSet.Count}</color> (Current List:<color=yellow>{activeBox}</color>)
+  Result: ตัวเลือกไม่ถูกต้อง, โปรดใช้ TakeN_01TakeN_1 toTOKNN_2[TRIGN][TIGN][TRIKN] [TIKN] [TIKN] (รายชื่อ:[TOGN] TOKNN_6 [TOGN]
+2025-08-31 05:46:10,910 INFO Batch 146/362 end @ 61.67s (0.58s)
+2025-08-31 05:46:10,910 INFO Processed 170/428 lines
+2025-08-31 05:46:10,910 INFO Batch 147/362 start @ 61.67s
+2025-08-31 05:46:11,066 INFO Received 0 rows; deduplicated to 0 rows
+2025-08-31 05:46:11,456 ERROR Failed: Interrupted. Metrics written to /workspace/Bloodcraft/translations/th/20250831-054509/metrics.json
+2025-08-31 05:46:11,458 INFO Received 0 rows; deduplicated to 0 rows
+2025-08-31 05:46:11,458 INFO Wrote skip report to /workspace/Bloodcraft/translations/th/20250831-054509/skipped.csv with 0 row(s)
+2025-08-31 05:46:11,458 ERROR No messages processed; verify input hashes and Argos model.
+2025-08-31 05:46:11,458 ERROR Summary: 0/0 translated, 0 skipped. Failed: Interrupted
