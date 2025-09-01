@@ -419,10 +419,10 @@
     "3097011724": "Invalide Klasse, verwenden Sie '<color=white>.class l</color>', um Optionen zu sehen.",
     "3102592194": "Ich konnte nicht aktiv vertraut finden!",
     "2844729307": "Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!",
-    "3002809107": "Prefab with GUID {guidHash} not found!",
-    "2597161495": "No hovered entity!",
-    "2660507905": "No Castle Heart!",
-    "182159004": "No Familiar Active!",
-    "2336012040": "Renamed '{oldName}' to '{newName}'!"
+    "3002809107": "Prefab mit GUID {guidHash} nicht gefunden!",
+    "2597161495": "Keine Entität unter dem Cursor!",
+    "2660507905": "Kein Schlossherz!",
+    "182159004": "Kein Vertrauter aktiv!",
+    "2336012040": "'{oldName}' wurde in '{newName}' umbenannt!"
   }
 }
