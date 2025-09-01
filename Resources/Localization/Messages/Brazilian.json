@@ -419,10 +419,10 @@
     "3097011724": "Classe inválida, use '<color=white>.class l</color>' para ver as opções.",
     "3102592194": "Não foi possível encontrar o familiar ativo!",
     "2844729307": "Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!",
-    "3002809107": "Prefab with GUID {guidHash} not found!",
-    "2597161495": "No hovered entity!",
-    "2660507905": "No Castle Heart!",
-    "182159004": "No Familiar Active!",
-    "2336012040": "Renamed '{oldName}' to '{newName}'!"
+    "3002809107": "Prefab com GUID {guidHash} não encontrado!",
+    "2597161495": "Nenhuma entidade sob o cursor!",
+    "2660507905": "Nenhum Coração do Castelo!",
+    "182159004": "Nenhum familiar ativo!",
+    "2336012040": "Renomeado '{oldName}' para '{newName}'!"
   }
 }
