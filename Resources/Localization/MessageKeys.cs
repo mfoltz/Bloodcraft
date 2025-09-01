@@ -42,4 +42,21 @@ internal static class MessageKeys
     public const string CLASS_INVALID = "Invalid class, use <color=white>'.class l'</color> to see options.";
     public const string CLASS_BUFFS_REFRESHED = "Removed all class buffs then applied current class buffs for all players.";
     public const string CLASS_BUFFS_REMOVED = "Removed all class buffs for all players.";
+
+    // Generic
+    public const string PLAYER_NOT_FOUND = "Couldn't find player...";
+    public const string LEVEL_MUST_BE_BETWEEN = "Level must be between 0 and {0}.";
+
+    // Blood Legacy
+    public const string BLOOD_NO_PROGRESS = "No progress in <color=red>{0}</color> yet.";
+    public const string BLOOD_LOGGING_STATUS = "Blood Legacy logging {0}.";
+    public const string BLOOD_STAT_SELECTED = "<color=#00FFFF>{0}</color> selected for <color=red>{1}</color>!";
+    public const string BLOOD_LEGACY_SET = "<color=red>{0}</color> legacy set to [<color=white>{1}</color>] for <color=green>{2}</color>";
+    public const string BLOOD_AVAILABLE_LEGACIES = "Available Blood Legacies: <color=red>{0}</color>";
+    public const string BLOOD_PROGRESS = "You're level [<color=white>{0}</color>][<color=#90EE90>{1}</color>] with <color=yellow>{2}</color> <color=#FFC0CB>essence</color> (<color=white>{3}%</color>) in <color=red>{4}</color>!";
+    public const string BLOOD_NO_STATS_SELECTED = "No stats selected for <color=red>{0}</color>, use <color=white>'.bl lst'</color> to see valid options.";
+    public const string BLOOD_STATS = "<color=red>{0}</color> Stats: {1}";
+    public const string BLOOD_NO_LEGACY_AVAILABLE = "No legacy available for <color=white>{0}</color>.";
+    public const string BLOOD_RESET_ITEM_REQUIRED = "You do not have the required item to reset your blood stats (<color=#ffd9eb>{0}</color>x<color=white>{1}</color>)";
+    public const string BLOOD_STATS_RESET = "Your blood stats have been reset for <color=red>{0}</color>!";
 }
