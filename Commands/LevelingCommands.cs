@@ -1,5 +1,6 @@
 using Bloodcraft.Interfaces;
 using Bloodcraft.Services;
+using Bloodcraft.Resources.Localization;
 using Bloodcraft.Systems.Leveling;
 using ProjectM.Network;
 using VampireCommandFramework;
@@ -113,7 +114,7 @@ internal static class LevelingCommands
         PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
-            LocalizationService.Reply(ctx, $"Couldn't find player...");
+            LocalizationService.Reply(ctx, MessageKeys.PLAYER_NOT_FOUND);
             return;
         }
 
