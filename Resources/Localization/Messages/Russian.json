@@ -22,6 +22,8 @@
     "1763623253": "Новый <color=#00FFFF> Ежедневный поиск </color> доступен: <color=green>{0}</color><color=white>{1}</color>x<color=#FFC0CB>{2}</color><color=white>{3}/</color><color=yellow>{2} </color>",
     "384069927": "Вы получили <color=#ffd9eb>{0}</color>x<color=white>{1}</color> для завершения {2}!",
     "1884892470": "Вы получили <color=#ffd9eb>{0}</color>x<color=white>{1}</color> для завершения {2}! Он упал на землю, потому что ваш инвентарь был полон.",
+    "3678240084": "You've been awarded <color=yellow>{0:F1}%</color> of your total {1}!",
+    "2693194341": "Progress added to {0}: <color=green>{1}</color> <color=white>{2}</color> [<color=white>{3}</color>/<color=yellow>{4}</color>]",
     "3158650477": "Никаких знакомых в боевой группе!",
     "2673031653": "Боевая группа — {0}",
     "3637474013": "Токен_0Токен_1Токен_2Токен_3Токен_4Токен_5Токен_6Токен_7Токен_8Токен_9Токен_10Токен_11Токен_12 Токен_13Токен_14Токен_15 <color=green> {0} </color> {1} <color=white> {2} </color> <color=#90EE90> {3} </color> <color=white> {4} </color> <color=yellow> {5} </color>",

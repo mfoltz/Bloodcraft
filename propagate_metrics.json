@@ -1,7 +1,87 @@
 {
-  "/workspace/Bloodcraft/Resources/Localization/Messages/Vietnamese.json": {
-    "added": 0,
+  "/workspace/Bloodcraft/Resources/Localization/Messages/Brazilian.json": {
+    "added": 2,
     "removed": 0,
-    "unchanged": 428
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/French.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/German.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/Hungarian.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/Italian.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/Japanese.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/Korean.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/Latam.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/Polish.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/Russian.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/SChinese.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/Spanish.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/TChinese.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/Thai.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/Turkish.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/Ukrainian.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
+  },
+  "/workspace/Bloodcraft/Resources/Localization/Messages/Vietnamese.json": {
+    "added": 2,
+    "removed": 0,
+    "unchanged": 425
   }
 }
