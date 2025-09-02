@@ -47,9 +47,14 @@ internal static class MessageKeys
     public const string PLAYER_NOT_FOUND = "Couldn't find player...";
     public const string LEVEL_MUST_BE_BETWEEN = "Level must be between 0 and {0}.";
 
+    // Leveling
+    public const string LEVEL_SHARED_EXPERIENCE_ADDED = "<color=green>{0}</color> added to the ignore shared experience list!";
+    public const string LEVEL_SHARED_EXPERIENCE_REMOVED = "<color=green>{0}</color> removed from the ignore shared experience list!";
+
     // Blood Legacy
     public const string BLOOD_NO_PROGRESS = "No progress in <color=red>{0}</color> yet.";
-    public const string BLOOD_LOGGING_STATUS = "Blood Legacy logging {0}.";
+    public const string BLOOD_LOGGING_ENABLED = "Blood Legacy logging <color=green>enabled</color>.";
+    public const string BLOOD_LOGGING_DISABLED = "Blood Legacy logging <color=red>disabled</color>.";
     public const string BLOOD_STAT_SELECTED = "<color=#00FFFF>{0}</color> selected for <color=red>{1}</color>!";
     public const string BLOOD_LEGACY_SET = "<color=red>{0}</color> legacy set to [<color=white>{1}</color>] for <color=green>{2}</color>";
     public const string BLOOD_AVAILABLE_LEGACIES = "Available Blood Legacies: <color=red>{0}</color>";

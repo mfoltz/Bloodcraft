@@ -123,14 +123,14 @@ internal static class LevelingCommands
             DataService.PlayerDictionaries._ignoreSharedExperience.Add(playerInfo.User.PlatformId);
             DataService.PlayerPersistence.SaveIgnoredSharedExperience();
 
-            LocalizationService.Reply(ctx, "<color=green>{0}</color> added to the ignore shared experience list!", playerInfo.User.CharacterName.Value);
+            LocalizationService.Reply(ctx, MessageKeys.LEVEL_SHARED_EXPERIENCE_ADDED, playerInfo.User.CharacterName.Value);
         }
         else if (DataService.PlayerDictionaries._ignoreSharedExperience.Contains(playerInfo.User.PlatformId))
         {
             DataService.PlayerDictionaries._ignoreSharedExperience.Remove(playerInfo.User.PlatformId);
             DataService.PlayerPersistence.SaveIgnoredSharedExperience();
 
-            LocalizationService.Reply(ctx, "<color=green>{0}</color> removed from the ignore shared experience list!", playerInfo.User.CharacterName.Value);
+            LocalizationService.Reply(ctx, MessageKeys.LEVEL_SHARED_EXPERIENCE_REMOVED, playerInfo.User.CharacterName.Value);
         }
     }
 }
