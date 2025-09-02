@@ -65,6 +65,8 @@ internal static class FamiliarBindingSystem
     const string SHINY_DEFAULT = "<color=#FF69B4>";
 
     const string BINDING_FAILED_MESSAGE = "Binding failed...";
+    const string FAMILIAR_BOUND_SHINY_MESSAGE = "<color=green>{0}</color>{1}*</color> <color=#00FFFF>bound</color>!";
+    const string FAMILIAR_BOUND_MESSAGE = "<color=green>{0}</color> <color=#00FFFF>bound</color>!";
 
     static readonly int _maxFamiliarLevel = ConfigService.MaxFamiliarLevel;
     static readonly float _familiarPrestigeStatMultiplier = ConfigService.FamiliarPrestigeStatMultiplier;
@@ -797,11 +799,11 @@ internal static class FamiliarBindingSystem
             
             if (isShiny)
             {
-                LocalizationService.Reply(EntityManager, user, "<color=green>{0}</color>{1}*</color> <color=#00FFFF>bound</color>!", familiarId.GetLocalizedName(), colorCode);
+                LocalizationService.Reply(EntityManager, user, FAMILIAR_BOUND_SHINY_MESSAGE, familiarId.GetLocalizedName(), colorCode);
             }
             else
             {
-                LocalizationService.Reply(EntityManager, user, "<color=green>{0}</color> <color=#00FFFF>bound</color>!", familiarId.GetLocalizedName());
+                LocalizationService.Reply(EntityManager, user, FAMILIAR_BOUND_MESSAGE, familiarId.GetLocalizedName());
             }
         }
     }

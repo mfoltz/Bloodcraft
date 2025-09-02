@@ -10,13 +10,14 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `1066178325` | No active box! Try using '.fam sb [Name]'... |
 | `107297214` | Level logging {(GetPlayerBool(steamId, EXPERIENCE_LOG_KEY) ? "enabled" : "disabled")}. |
 | `1076291728` | Use the VBlood menu to track bosses! |
+| `1080442941` | No progress in … yet. |
 | `1081599663` | No active battle group selected! Use .fam cbg... |
 | `1095669519` | Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? "enabled" : "disabled")}. |
 | `110573833` | You can't use emote actions when using bat... |
 | `1105957988` | Nearest … was …f away to the …! |
 | `1106946472` | {replyMessage} |
-| `1108347105` | Level must be between 0 and {ConfigService.MaxBloodLevel}. |
 | `11642316` | Current Exo Prestige Level: {exoLevel}/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} \| Max Form... |
+| `117473441` | ……* bound! |
 | `1178832936` | You have prestiged in Experience[…]! Growth rates for... |
 | `1182925736` | No players have prestiged in {parsedPrestigeType} yet! |
 | `1201875369` | No progress in {professionHandler.GetProfessionName()} yet! |
@@ -30,9 +31,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `1254994229` | Couldn't find experience data for {foundUser.CharacterName.Value} |
 | `1271017097` | New shiny unit unlocked: … |
 | `1282509635` | You have class buffs enabled, use '.class passives'... |
-| `1286090332` | You're level [{data.Key}][{prestigeLevel}] with {progress} essence ({BloodSystem.GetLevelProgress(ctx.Event.User.PlatformId, handler)}%)... |
 | `1293896668` | No stat synergies found for {FormatClassName(playerClass)}. |
-| `1298892920` | No legacy available for {bloodType}. |
 | `1315865629` | You couldn't afford to reroll your wekly... (…... |
 | `1318067012` | Invalid index, use 1-{MaxIndex}! (Active Box - {ActiveBox}) |
 | `132267140` | Growth rate reduction for experience: … |
@@ -44,13 +43,13 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `1391708521` | Your familiar has prestiged [{prestigeLevel}]! |
 | `1407688215` | …x… received from … |
 | `1411528307` | {parsedPrestigeType} prestige reset for {playerInfo.User.CharacterName.Value}. |
+| `1416519130` | Blood Legacy logging disabled. |
 | `1420278477` | Tracking is only available for incomplete kill quests. |
 | `1440482998` | {playerInfo.User.CharacterName.Value} added to the ignore prestige leaderboard list! |
 | `1440602422` | Active familiar for {user.CharacterName.Value} has been set to... |
 | `1443941563` | Removed prestige buffs from all players. |
 | `1446796844` | Familiar combat enabled. |
 | `1446811317` | … removed from the ignore shared experience list! |
-| `1449977777` | You do not have the required item to... |
 | `1454481026` | You don't have the required item to reset... |
 | `145841390` | You must reach the maximum level in Experience... |
 | `1465975319` | Reminders …. |
@@ -58,6 +57,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `1491097539` | Binding failed... |
 | `1496603105` | Leveling is not enabled. |
 | `1516467471` | You haven't unlocked any familiars yet! |
+| `1519182060` | … bound! |
 | `1548584430` | Profession logging is now {(GetPlayerBool(steamId, PROFESSION_LOG_KEY) ? "enabled"... |
 | `1562141642` | You don't have the required prestige level for... |
 | `1575879194` | Couldn't find box to rename or there's already... |
@@ -66,24 +66,20 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `159604155` | Can't interact with familiar when dismissed! |
 | `1597216248` | Invalid class, use '.class l' to see options. |
 | `1601487032` | First unarmed slot set to … for …. |
-| `160628229` | {playerInfo.User.CharacterName.Value} added to the ignore shared experience list! |
 | `1641131342` | Invalid prestige, use '.prestige l' to see valid... |
 | `1641855254` | You haven't gained any expertise for … yet! |
 | `1651916565` | … scrolling text …. |
+| `1652346821` | Blood Legacy logging enabled. |
 | `1669157395` | Your bag feels slightly heavier... |
 | `167244174` | Classes are not enabled and spells can't be... |
 | `1677522996` | You've already completed your Weekly Quest. Check back... |
 | `1680589832` | No blood stats available at this time. |
 | `1687700552` | You must consume at least one primordial essence... |
 | `1689690159` | Couldn't find player. |
-| `1690022722` | Your blood stats have been reset for {bloodType}. |
 | `1695244872` | … is already unlocked! |
 | `1711247206` | You are not yet worthy... |
-| `1711931034` | {bloodType} Stats: {bonuses} |
 | `1716911803` | {box}: |
-| `1725928464` | {playerInfo.User.CharacterName.Value} removed from the ignore shared experience list! |
 | `173404118` | Shift spells are not enabled. |
-| `1740355579` | Your blood stats have been reset for {bloodType}! |
 | `1744159514` | Can't unbind familiar right now! (dismissed) |
 | `1757634753` | You do not have enough of the required... |
 | `1762641650` | You already have an active familiar! Unbind that... |
@@ -93,6 +89,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `179462471` | Can't unbind familiar right now! (interacting) |
 | `1797973559` | Permashroud disabled! |
 | `1809964020` | Unable to verify tier for {vBloodPrefabGuid.GetPrefabName()}! Shouldn't really... |
+| `182159004` | No Familiar Active! |
 | `1826355702` | Second unarmed slot set to {new PrefabGUID(ability).GetPrefabName()} for... |
 | `1836101498` | Quests are not enabled. |
 | `18401539` | Invalid blood legacy. |
@@ -127,6 +124,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `2129553669` | You're not currently queued for battle! Use '.fam... |
 | `2137562404` | Quest logging is now …. |
 | `2147420594` | {FormatClassName(playerClass)} stat synergies [x{ConfigService.SynergyMultiplier}]: |
+| `215076014` | Available Blood Legacies: … |
 | `2155028867` | Invalid prefab (not an integer) or name (does... |
 | `2164633984` | Couldn't find stat synergies for {FormatClassName(playerClass)}... |
 | `2165480178` | Couldn't find matching shinyBuff from entered spell school.... |
@@ -138,7 +136,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `2179875375` | VBlood purchasing is not enabled. |
 | `2191580006` | Not enough {exoItem.GetLocalizedName()}x{factoredCost} for {vBloodPrefabGuid.GetPrefabName()}! |
 | `2194796157` | Invalid blood stat, use '.bl lst' to see... |
-| `2196432591` | {BloodHandler.GetBloodType()} legacy set to [{level}] for {foundUser.CharacterName} |
+| `2198487874` | … Stats: … |
 | `2202242526` | Extra spell slots are not enabled. |
 | `2213724716` | Deleted box - {name} |
 | `2214985381` | … Prestige Info: |
@@ -146,7 +144,6 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `223311103` | Invalid unit name (no full or partial matches). |
 | `2252098529` | Gold Orex… received from … |
 | `2252129438` | Invalid weapon type. |
-| `226227140` | No progress in {handler.GetBloodType()} yet. |
 | `2271729042` | Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? "enabled"... |
 | `2272306226` | … moved - … |
 | `2286869349` | Your Daily Quest has been rerolled for …... |
@@ -157,6 +154,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `2321621014` | {fams} |
 | `2323778454` | No stat synergies found for …. |
 | `2332227846` | You have not prestiged in Exo yet. |
+| `2336012040` | Renamed '{oldName}' to '{newName}'! |
 | `2346236465` | Something fell out of your bag! |
 | `2350508902` | Invalid prestige type, use '.prestige l' to see... |
 | `2383766993` | Stat bonuses improvement: … |
@@ -185,11 +183,13 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `2563987683` | Target cache isn't ready yet, check back shortly! |
 | `2576121314` | Bonus Saplings(s)x… received from …! |
 | `2577116713` | Couldn't find familiar actives or familiar already active!... |
+| `2597161495` | No hovered entity! |
 | `2615857787` | You've already completed your …! Time until …... |
 | `2637421818` | Couldn't find stat synergies for …... |
 | `2645405211` | Invalid spell, use '.class lsp' to see options. |
 | `2648123409` | VBlood familiars are not enabled. |
 | `2659109549` | {playerInfo.User.CharacterName.Value} removed from the ignore prestige leaderboard list! |
+| `2660507905` | No Castle Heart! |
 | `2673031653` | Battle Group - … |
 | `2682530289` | You don't have the required amount of {_vampiricDust.GetLocalizedName()}!... |
 | `2687655344` | Your weapon stats have been reset for …! |
@@ -205,8 +205,8 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `2740121583` | VBlood emotes disabled. |
 | `2747211297` | Removed all class buffs then applied current class... |
 | `2761429858` | Removed all class buffs for all players. |
+| `277002471` | … selected for …! |
 | `2772168133` | …[…] |
-| `2785130336` | {finalBloodStat} selected for {finalBloodType}! |
 | `2786260061` | Your Daily Quest has been refreshed! |
 | `27929505` | Invalid stat, use '.wep lst' to see valid... |
 | `2794958495` | {line} |
@@ -229,6 +229,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `2979158417` | Prestiging is not enabled. |
 | `2997561401` | … has been chosen for …! |
 | `2998300513` | Invalid slot (1 for Q or 2 for... |
+| `3002809107` | Prefab with GUID {guidHash} not found! |
 | `3013651462` | Couldn't find matching save method for weapon type... |
 | `3052690511` | {vBloodPrefabGuid.GetLocalizedName()} is not available per configured familiar bans! |
 | `3054245516` | Mutant Greasex… received from …, but it dropped... |
@@ -265,7 +266,6 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `3227554981` | … expertise set to […] for … |
 | `3235862068` | Your familiar has prestiged [{prestigeLevel}] and is now... |
 | `3236338434` | Box is full! |
-| `3254231727` | You're level [{data.Key}][{prestigeLevel}] with {progress} essence ({BloodSystem.GetLevelProgress(steamId, handler)}%)... |
 | `327031724` | Active familiar already present in battle group! |
 | `3274700132` | Your weapon stats have been reset for {weaponType}! |
 | `3279926559` | Added box - {name} |
@@ -318,6 +318,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `3756348742` | Reminders …. |
 | `3761416018` | First unarmed slot set to {new PrefabGUID(ability).GetPrefabName()} for... |
 | `3761848707` | Familiar arena position set, battle service started! (only... |
+| `3815983891` | You're level […][…] with … essence (…%) in... |
 | `3819833139` | You have no battle groups. |
 | `3823143990` | You don't have any quests yet, check back... |
 | `384069927` | You've received …x… for completing your …! |
@@ -327,6 +328,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `3878896595` | Quests for {playerInfo.User.CharacterName.Value} have been refreshed. |
 | `3882215894` | Invalid shapeshift! Valid options: {shapeshifts} |
 | `3914295487` | … added to …. |
+| `3925002747` | Your blood stats have been reset for …! |
 | `3938051122` | Classes: {classTypes} |
 | `3938781329` | Not enough …x… for …! |
 | `3944404979` | Deleted battle group {groupName}! |
@@ -341,11 +343,11 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `4009901629` | Your Weekly Quest has been rerolled for {item.GetLocalizedName()}... |
 | `4023020194` | You haven't gained any expertise for {weaponType} yet! |
 | `4049081768` | Your familiar has prestiged […]; the accumulated knowledge... |
-| `4051608029` | Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "enabled" :... |
 | `4052025947` | Shiny familiars disabled. |
 | `4052165110` | … (…) added to …. |
 | `4055019293` | Couldn't find any matches... |
 | `4061888430` | Blood Legacies are not enabled. |
+| `4066783686` | … legacy set to […] for … |
 | `4066899438` | Shift spell enabled! |
 | `406861876` | Can't dismiss familiar when binding/unbinding! |
 | `4110714393` | Radiant Fiberx… received from …, but it dropped... |
@@ -354,6 +356,8 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `4162514026` | Deleted battle group {groupName}. |
 | `4177199465` | Select a form you've unlocked first! ('.prestige sf... |
 | `4190631897` | … Stats: … |
+| `4193529612` | No legacy available for …. |
+| `4205622287` | No stats selected for …, use '.bl lst'... |
 | `421960942` | VBlood emotes enabled. |
 | `4226920647` | … is not available per configured familiar bans! |
 | `4255236631` | New unit unlocked: {vBloodPrefabGuid.GetLocalizedName()} |
@@ -372,7 +376,6 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `508045935` | Emote actions {(GetPlayerBool(steamId, EMOTE_ACTIONS_KEY) ? "enabled" : "disabled")}! |
 | `52573990` | Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "enabled"... |
 | `53933494` | Shiny changed! Rebind familiar to see effects. Use... |
-| `542066310` | Blood Legacy logging {(GetPlayerBool(steamId, BLOOD_LOG_KEY) ? "enabled" :... |
 | `54858227` | Your familiar has prestiged [{prestigeLevel}] and is now... |
 | `559704045` | … passives: |
 | `563018011` | Invalid quest type '{questTypeName}'. Valid values are: {string.Join( |
@@ -386,6 +389,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `66882170` | You don't have the required amount of …!... |
 | `677404705` | No spell for class default configured! |
 | `677562659` | No daily reroll item configured or couldn't find... |
+| `685629961` | You do not have the required item to... |
 | `692006723` | The … quest is already complete for …. |
 | `698362524` | Box {current} renamed - {name} |
 | `701382701` | Familiar prestige is not enabled. |
@@ -408,7 +412,6 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `836746607` | Enough charge to maintain form for {(int)exoFormData.Value}s |
 | `842146063` | Level must be between 0 and …! |
 | `854134032` | You don't have any unlocks yet! |
-| `85537047` | Available Blood Legacies: {bloodTypesList} |
 | `85794626` | Invalid index for active box, try binding or... |
 | `860320001` | Your Daily Quest has been rerolled for {item.GetLocalizedName()}... |
 | `861952046` | Couldn't find active box! Use '.fam listboxes' and... |
@@ -419,7 +422,6 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `907868427` | Position in queue: {position} ({Misc.FormatTimespan(timeRemaining)}) |
 | `931800025` | … |
 | `935039462` | Familiar already has … (…) from prestiging, use... |
-| `939340687` | No stats selected for {bloodType}, use '.bl lst'... |
 | `947371822` | You've selected {FormatClassName(playerClass)}! |
 | `947905559` | Leaderboards are not enabled. |
 | `9562573` | … has no spells configured... |
