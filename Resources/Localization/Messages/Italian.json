@@ -22,6 +22,8 @@
     "1763623253": "New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>]",
     "384069927": "Avete ricevuto <color=#ffd9eb>{0} </color>x<color=white>{1}</color> per aver completato il vostro {2}!",
     "1884892470": "Avete ricevuto <color=#ffd9eb>{0} </color>x<color=white>{1}</color> per aver completato il vostro {2}! E' caduto a terra perche' il tuo inventario era pieno.",
+    "3678240084": "You've been awarded <color=yellow>{0:F1}%</color> of your total {1}!",
+    "2693194341": "Progress added to {0}: <color=green>{1}</color> <color=white>{2}</color> [<color=white>{3}</color>/<color=yellow>{4}</color>]",
     "3158650477": "Nessun familiare nel gruppo di battaglia!",
     "2673031653": "Gruppo di battaglia - {0}",
     "3637474013": "<color=green>{0}</color> {1} <color=white>{2}</color><color=#90EE90>{3}</color> aggiunto TOKEN_ <color=white>{4}</color> <color=yellow>{5}</color>",

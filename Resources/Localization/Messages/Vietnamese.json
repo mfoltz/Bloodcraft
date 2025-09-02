@@ -22,6 +22,8 @@
     "1763623253": "New <color=#00FFFF>Daily Quest</color> available: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>]",
     "384069927": "<color=#ffd9eb> {0}) {0}) </color>x <color=white> {1} </color>) để hoàn thành {2}!",
     "1884892470": "<color=#ffd9eb> {0}) {0}) </color>x <color=white> {1} </color>) để hoàn thành {2}! Nó rơi xuống đất vì kho hàng của anh đầy rồi.",
+    "3678240084": "You've been awarded <color=yellow>{0:F1}%</color> of your total {1}!",
+    "2693194341": "Progress added to {0}: <color=green>{1}</color> <color=white>{2}</color> [<color=white>{3}</color>/<color=yellow>{4}</color>]",
     "3158650477": "Không quen thuộc với nhóm chiến đấu!",
     "2673031653": "Nhóm chiến đấu {0}",
     "3637474013": "<color=green> </color> <color=#90EE90> <color=#90EE90> {3} <color=white> {2} {0}) </color> <color=#90EE90> {3} {3} TOK_9 thêm TOK_10 TOK_11 <color=yellow> {5} </color> </color> {1} </color> <color=white> {4} </color>",

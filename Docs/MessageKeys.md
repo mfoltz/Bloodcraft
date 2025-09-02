@@ -194,6 +194,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `2682530289` | You don't have the required amount of {_vampiricDust.GetLocalizedName()}!... |
 | `2687655344` | Your weapon stats have been reset for …! |
 | `2689850927` | Invalid familiar prestige stat type, use '.fam lst'... |
+| `2693194341` | Progress added to …: … … […/…] |
 | `2698551496` | Quests for … have been refreshed. |
 | `2709293439` | Your familiar is level [{xpData.Key}][{prestigeLevel}] and has {progress}... |
 | `2712082651` | Radius must be positive! |
@@ -304,6 +305,7 @@ Auto-generated from `Resources/Localization/Messages/English.json`.
 | `3648038609` | Player does not have an active … quest... |
 | `3664649404` | You can't challenge yourself! |
 | `3665962604` | Bonus Saplings(s)x… received from …, but some fell... |
+| `3678240084` | You've been awarded {0:F1}% of your total …! |
 | `3681675424` | Level must be between 0 and {ConfigService.MaxLevel}! |
 | `3706109126` | You have not prestiged in {parsedPrestigeType}. |
 | `3706417587` | Invalid quest type '{questTypeName}'. Valid values are: {string.Join(",... |

@@ -22,6 +22,8 @@
     "1763623253": "新的 <color=#00FFFF>每日任務</color> 可用: <color=green>{0}</color> <color=white>{1}</color>x<color=#FFC0CB>{2}</color> [<color=white>{3}</color>/<color=yellow>{2}</color>]",
     "384069927": "<color=#ffd9eb> {0} </color> x <color=white>{1}</color> 完成你的{2}!",
     "1884892470": "<color=#ffd9eb> {0} </color> x <color=white>{1}</color> 完成你的{2}! 它掉在地上 因為你的數據滿了",
+    "3678240084": "You've been awarded <color=yellow>{0:F1}%</color> of your total {1}!",
+    "2693194341": "Progress added to {0}: <color=green>{1}</color> <color=white>{2}</color> [<color=white>{3}</color>/<color=yellow>{4}</color>]",
     "3158650477": "在戰鬥群組里沒有熟人!",
     "2673031653": "戰鬥群組 - {0}",
     "3637474013": "<color=green>{0}</color>{1}<color=white>{2}</color><color=#90EE90>{3} (</color><color=white>{4}) </color> <color=yellow>{5}</color>",

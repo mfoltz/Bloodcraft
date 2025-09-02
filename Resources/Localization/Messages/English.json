@@ -22,6 +22,8 @@
     "1763623253": "New \u003Ccolor=#00FFFF\u003EDaily Quest\u003C/color\u003E available: \u003Ccolor=green\u003E{0}\u003C/color\u003E \u003Ccolor=white\u003E{1}\u003C/color\u003Ex\u003Ccolor=#FFC0CB\u003E{2}\u003C/color\u003E [\u003Ccolor=white\u003E{3}\u003C/color\u003E/\u003Ccolor=yellow\u003E{2}\u003C/color\u003E]",
     "384069927": "You\u0027ve received \u003Ccolor=#ffd9eb\u003E{0}\u003C/color\u003Ex\u003Ccolor=white\u003E{1}\u003C/color\u003E for completing your {2}!",
     "1884892470": "You\u0027ve received \u003Ccolor=#ffd9eb\u003E{0}\u003C/color\u003Ex\u003Ccolor=white\u003E{1}\u003C/color\u003E for completing your {2}! It dropped on the ground because your inventory was full.",
+    "3678240084": "You\u0027ve been awarded \u003Ccolor=yellow\u003E{0:F1}%\u003C/color\u003E of your total {1}!",
+    "2693194341": "Progress added to {0}: \u003Ccolor=green\u003E{1}\u003C/color\u003E \u003Ccolor=white\u003E{2}\u003C/color\u003E [\u003Ccolor=white\u003E{3}\u003C/color\u003E/\u003Ccolor=yellow\u003E{4}\u003C/color\u003E]",
     "3158650477": "No familiars in battle group!",
     "2673031653": "Battle Group - {0}",
     "3637474013": "\u003Ccolor=green\u003E{0}\u003C/color\u003E{1} [\u003Ccolor=white\u003E{2}\u003C/color\u003E][\u003Ccolor=#90EE90\u003E{3}\u003C/color\u003E] added to \u003Ccolor=white\u003E{4}\u003C/color\u003E! (\u003Ccolor=yellow\u003E{5}\u003C/color\u003E)",
