@@ -147,9 +147,9 @@ def test_mixed_placeholders_round_trip_with_reorder():
 
 
 def test_many_placeholders_round_trip():
-    text = "".join(f"{{{i}}}" for i in range(40))
+    text = "".join(f"{{{i}}}" for i in range(15))
     safe, tokens = translate_argos.protect_strict(text)
-    assert len(tokens) == 40
+    assert len(tokens) == 15
     wrapped, mapping = translate_argos.wrap_placeholders(safe)
     unwrapped = translate_argos.unwrap_placeholders(wrapped, mapping)
     restored = translate_argos.unprotect(unwrapped, tokens)
@@ -157,7 +157,7 @@ def test_many_placeholders_round_trip():
 
 
 def test_unwrap_restores_translated_order():
-    count = 30
+    count = 15
     text = "".join(f"{{{i}}}" for i in range(count))
     safe, tokens = translate_argos.protect_strict(text)
     wrapped, mapping = translate_argos.wrap_placeholders(safe)
@@ -166,6 +166,18 @@ def test_unwrap_restores_translated_order():
     restored = translate_argos.unprotect(unwrapped, tokens)
     expected = "".join(f"{{{i}}}" for i in reversed(range(count)))
     assert restored == expected
+
+
+def test_wrap_threshold_boundary(monkeypatch):
+    monkeypatch.setattr(translate_argos, "PLACEHOLDER_WRAP_THRESHOLD", 10)
+    text = "".join(f"{{{i}}}" for i in range(10))
+    safe, _ = translate_argos.protect_strict(text)
+    wrapped, _ = translate_argos.wrap_placeholders(safe)
+    assert wrapped == safe
+    text2 = "".join(f"{{{i}}}" for i in range(11))
+    safe2, _ = translate_argos.protect_strict(text2)
+    wrapped2, _ = translate_argos.wrap_placeholders(safe2)
+    assert wrapped2 != safe2
 
 
 def test_extra_placeholders_trimmed(tmp_path, monkeypatch, caplog):

@@ -115,7 +115,7 @@ class FatalTranslationError(Exception):
     """Raised when Argos Translate encounters an unrecoverable error."""
 
 PLACEHOLDER_BASE = 0xE000
-PLACEHOLDER_WRAP_THRESHOLD = 20
+PLACEHOLDER_WRAP_THRESHOLD = 10
 
 
 def wrap_placeholders(text: str) -> tuple[str, list[str]]:
@@ -1815,7 +1815,19 @@ def main():
         action="store_true",
         help="Rewrite output to match source token order when tokens are reordered",
     )
+    ap.add_argument(
+        "--wrap-threshold",
+        type=int,
+        default=10,
+        help=(
+            "Encode placeholders as private-use characters when the count "
+            "exceeds this threshold (default: 10)"
+        ),
+    )
     args = ap.parse_args()
+
+    global PLACEHOLDER_WRAP_THRESHOLD
+    PLACEHOLDER_WRAP_THRESHOLD = args.wrap_threshold
 
     if not args.target_file:
         overrides = {"pb": "Brazilian", "zh": "SChinese", "zt": "TChinese"}
