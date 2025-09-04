@@ -115,7 +115,8 @@ class FatalTranslationError(Exception):
     """Raised when Argos Translate encounters an unrecoverable error."""
 
 PLACEHOLDER_BASE = 0xE000
-PLACEHOLDER_WRAP_THRESHOLD = 10
+DEFAULT_WRAP_THRESHOLD = 10
+PLACEHOLDER_WRAP_THRESHOLD = DEFAULT_WRAP_THRESHOLD
 
 
 def wrap_placeholders(text: str) -> tuple[str, list[str]]:
@@ -1827,10 +1828,10 @@ def main():
     ap.add_argument(
         "--wrap-threshold",
         type=int,
-        default=10,
+        default=DEFAULT_WRAP_THRESHOLD,
         help=(
             "Encode placeholders as private-use characters when the count "
-            "exceeds this threshold (default: 10)"
+            "exceeds this threshold (default: %(default)s)"
         ),
     )
     args = ap.parse_args()
