@@ -78,13 +78,33 @@ def replace_placeholders(
 
     replaced = bool(matches) or bool(restored_positions)
     value = value.replace('\\"', '"').replace("\\'", "'")
+
+    # Drop tokens not present in the baseline list.
+    expected_counts = Counter(tokens)
+    parts = []
+    last = 0
+    removed_extras: List[str] = []
+    for m in TOKEN_PATTERN.finditer(value):
+        parts.append(value[last:m.start()])
+        token = m.group(0)
+        if expected_counts[token] > 0:
+            expected_counts[token] -= 1
+            parts.append(token)
+        else:
+            removed_extras.append(token)
+        last = m.end()
+    parts.append(value[last:])
+    if removed_extras:
+        replaced = True
+    value = "".join(parts)
+
     tokenized = extract_tokens(value)
     expected = Counter(tokens)
     found = Counter(tokenized)
     missing = list((expected - found).elements())
     extra = list((found - expected).elements())
     mismatch = bool(missing or extra)
-    return value, replaced, mismatch, missing, extra, restored_positions
+    return value, replaced, mismatch, missing, removed_extras, restored_positions
 
 
 def reorder_tokens_in_text(value: str, tokens: List[str]) -> Tuple[str, bool]:
@@ -125,6 +145,7 @@ class Counters:
     tokens_restored: int = 0
     tokens_reordered: int = 0
     token_mismatches: int = 0
+    tokens_removed: int = 0
 
 
 def process_messages_file(
@@ -142,7 +163,7 @@ def process_messages_file(
     counters = Counters()
     mismatches: List[Dict[str, List[str]]] = []
     for key, text in list(messages.items()):
-        new_text, replaced, bad, missing, extra, restored_positions = replace_placeholders(
+        new_text, replaced, bad, missing, removed, restored_positions = replace_placeholders(
             text, baseline.get(key, [])
         )
         reordered = False
@@ -150,7 +171,11 @@ def process_messages_file(
             new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(key, []))
         if bad:
             log = logger.warning if allow_mismatch else logger.error
-            log("%s: %s token count mismatch", path, key)
+            if removed:
+                log("%s: %s token count mismatch (removed extras %s)", path, key, removed)
+                counters.tokens_removed += len(removed)
+            else:
+                log("%s: %s token count mismatch", path, key)
             counters.token_mismatches += 1
             rel = str(path)
             try:
@@ -161,39 +186,25 @@ def process_messages_file(
                 "file": rel,
                 "key": key,
                 "missing": missing,
-                "extra": extra,
+                "extra": [],
+                "removed": removed,
             })
             if replaced and not check_only:
                 messages[key] = new_text
                 changed = True
             continue
-        if replaced or reordered:
-            if replaced and reordered:
-                if restored_positions:
-                    logger.info(
-                        "%s: %s tokens restored at positions %s and reordered",
-                        path,
-                        key,
-                        restored_positions,
-                    )
-                else:
-                    logger.info("%s: %s tokens restored and reordered", path, key)
-                counters.tokens_restored += len(restored_positions)
-                counters.tokens_reordered += 1
-            elif replaced:
-                if restored_positions:
-                    logger.info(
-                        "%s: %s tokens restored at positions %s",
-                        path,
-                        key,
-                        restored_positions,
-                    )
-                else:
-                    logger.info("%s: %s tokens restored", path, key)
-                counters.tokens_restored += len(restored_positions)
-            else:
-                logger.info("%s: %s tokens reordered", path, key)
-                counters.tokens_reordered += 1
+        actions: List[str] = []
+        if restored_positions:
+            actions.append(f"tokens restored at positions {restored_positions}")
+            counters.tokens_restored += len(restored_positions)
+        if removed:
+            actions.append(f"extra tokens removed {removed}")
+            counters.tokens_removed += len(removed)
+        if reordered:
+            actions.append("tokens reordered")
+            counters.tokens_reordered += 1
+        if actions:
+            logger.info("%s: %s %s", path, key, " and ".join(actions))
             if not check_only:
                 messages[key] = new_text
             changed = True
@@ -225,7 +236,7 @@ def process_root_file(
         text = node[text_key]
         if not isinstance(text, str):
             continue
-        new_text, replaced, bad, missing, extra, restored_positions = replace_placeholders(
+        new_text, replaced, bad, missing, removed, restored_positions = replace_placeholders(
             text, baseline.get(guid, [])
         )
         reordered = False
@@ -233,7 +244,11 @@ def process_root_file(
             new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(guid, []))
         if bad:
             log = logger.warning if allow_mismatch else logger.error
-            log("%s: %s token count mismatch", path, guid)
+            if removed:
+                log("%s: %s token count mismatch (removed extras %s)", path, guid, removed)
+                counters.tokens_removed += len(removed)
+            else:
+                log("%s: %s token count mismatch", path, guid)
             counters.token_mismatches += 1
             rel = str(path)
             try:
@@ -244,39 +259,25 @@ def process_root_file(
                 "file": rel,
                 "key": guid,
                 "missing": missing,
-                "extra": extra,
+                "extra": [],
+                "removed": removed,
             })
             if replaced and not check_only:
                 node[text_key] = new_text
                 changed = True
             continue
-        if replaced or reordered:
-            if replaced and reordered:
-                if restored_positions:
-                    logger.info(
-                        "%s: %s tokens restored at positions %s and reordered",
-                        path,
-                        guid,
-                        restored_positions,
-                    )
-                else:
-                    logger.info("%s: %s tokens restored and reordered", path, guid)
-                counters.tokens_restored += len(restored_positions)
-                counters.tokens_reordered += 1
-            elif replaced:
-                if restored_positions:
-                    logger.info(
-                        "%s: %s tokens restored at positions %s",
-                        path,
-                        guid,
-                        restored_positions,
-                    )
-                else:
-                    logger.info("%s: %s tokens restored", path, guid)
-                counters.tokens_restored += len(restored_positions)
-            else:
-                logger.info("%s: %s tokens reordered", path, guid)
-                counters.tokens_reordered += 1
+        actions: List[str] = []
+        if restored_positions:
+            actions.append(f"tokens restored at positions {restored_positions}")
+            counters.tokens_restored += len(restored_positions)
+        if removed:
+            actions.append(f"extra tokens removed {removed}")
+            counters.tokens_removed += len(removed)
+        if reordered:
+            actions.append("tokens reordered")
+            counters.tokens_reordered += 1
+        if actions:
+            logger.info("%s: %s %s", path, guid, " and ".join(actions))
             if not check_only:
                 node[text_key] = new_text
             changed = True
@@ -367,6 +368,7 @@ def main() -> None:
         totals.tokens_restored += result.tokens_restored
         totals.tokens_reordered += result.tokens_reordered
         totals.token_mismatches += result.token_mismatches
+        totals.tokens_removed += result.tokens_removed
         all_mismatches.extend(mismatches)
 
     metrics_path = None
@@ -378,6 +380,7 @@ def main() -> None:
             "tokens_restored": totals.tokens_restored,
             "tokens_reordered": totals.tokens_reordered,
             "token_mismatches": totals.token_mismatches,
+            "tokens_removed": totals.tokens_removed,
             "mismatches": all_mismatches,
         }
         existing: List[dict] = []
@@ -407,7 +410,11 @@ def main() -> None:
         else:
             raise SystemExit(msg)
 
-    if args.check_only and (totals.tokens_restored or totals.tokens_reordered):
+    if args.check_only and (
+        totals.tokens_restored
+        or totals.tokens_reordered
+        or totals.tokens_removed
+    ):
         msg = "token issues detected"
         if metrics_path:
             msg += f"; metrics written to {metrics_path}"
