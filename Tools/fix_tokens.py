@@ -108,15 +108,32 @@ def replace_placeholders(
 
 
 def reorder_tokens_in_text(value: str, tokens: List[str]) -> Tuple[str, bool]:
-    found = TOKEN_PATTERN.findall(value or "")
-    if len(found) != len(tokens):
+    """Reorder tokens in ``value`` to match the baseline sequence.
+
+    The original implementation assumed that the token lists were unique and
+    only checked lengths before performing a simple substitution. This breaks
+    down when the line contains the same token multiple times or when tokens
+    are nested inside tags (e.g. ``<b>{0}</b><b>{1}</b>``). By iterating over
+    explicit match spans we can safely reconstruct the string with tokens in
+    the expected order while supporting repeated tokens and maintaining any
+    surrounding text.
+    """
+
+    matches = list(TOKEN_PATTERN.finditer(value or ""))
+    found = [m.group(0) for m in matches]
+    if Counter(found) != Counter(tokens):
         return value, False
     if found == tokens:
         return value, False
-    token_iter = iter(tokens)
-    def repl(_m: re.Match) -> str:
-        return next(token_iter)
-    return TOKEN_PATTERN.sub(repl, value, count=len(tokens)), True
+
+    parts: List[str] = []
+    last = 0
+    for match, token in zip(matches, tokens):
+        parts.append(value[last:match.start()])
+        parts.append(token)
+        last = match.end()
+    parts.append(value[last:])
+    return "".join(parts), True
 
 
 def load_english_messages(path: Path) -> Dict[str, List[str]]:
