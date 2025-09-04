@@ -13,28 +13,61 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 from translate_argos import normalize_tokens
-from token_patterns import TOKEN_PATTERN, TOKEN_PLACEHOLDER, extract_tokens
+from token_patterns import (
+    TOKEN_PATTERN,
+    TOKEN_PLACEHOLDER,
+    TOKEN_RE,
+    extract_tokens,
+)
 
 logger = logging.getLogger(__name__)
 
 
 def replace_placeholders(
     value: str, tokens: List[str]
-) -> Tuple[str, bool, bool, List[str], List[str]]:
+) -> Tuple[str, bool, bool, List[str], List[str], List[int]]:
     value = normalize_tokens(value)
     matches = list(TOKEN_PLACEHOLDER.finditer(value))
+    restored_positions: List[int] = []
     replaced = False
     if matches:
         parts: List[str] = []
         last = 0
-        for m, token in zip(matches, tokens):
+        index_positions: Dict[int, int] = {}
+        for m in matches:
             parts.append(value[last : m.start()])
-            parts.append(token)
+            id_match = TOKEN_RE.match(m.group(0))
+            if id_match:
+                idx_str = id_match.group(1)
+                try:
+                    idx = int(idx_str)
+                except ValueError:
+                    idx = int(idx_str, 16)
+                if idx < len(tokens):
+                    index_positions[idx] = sum(len(p) for p in parts)
+                    parts.append(tokens[idx])
+                    last = m.end()
+                    continue
+            parts.append(m.group(0))
             last = m.end()
         parts.append(value[last:])
-        if len(tokens) > len(matches):
-            parts.extend(tokens[len(matches):])
         value = "".join(parts)
+        missing_indices = [i for i in range(len(tokens)) if i not in index_positions]
+        missing_indices.sort()
+        for idx in missing_indices:
+            token = tokens[idx]
+            next_candidates = [j for j in index_positions if j > idx]
+            if next_candidates:
+                next_idx = min(next_candidates, key=lambda j: index_positions[j])
+                insert_pos = index_positions[next_idx]
+            else:
+                insert_pos = len(value)
+            value = value[:insert_pos] + token + value[insert_pos:]
+            restored_positions.append(idx)
+            for j in index_positions:
+                if index_positions[j] >= insert_pos:
+                    index_positions[j] += len(token)
+            index_positions[idx] = insert_pos
         replaced = True
     value = value.replace('\\"', '"').replace("\\'", "'")
     tokenized = extract_tokens(value)
@@ -43,7 +76,7 @@ def replace_placeholders(
     missing = list((expected - found).elements())
     extra = list((found - expected).elements())
     mismatch = bool(missing or extra)
-    return value, replaced, mismatch, missing, extra
+    return value, replaced, mismatch, missing, extra, restored_positions
 
 
 def reorder_tokens_in_text(value: str, tokens: List[str]) -> Tuple[str, bool]:
@@ -101,7 +134,7 @@ def process_messages_file(
     counters = Counters()
     mismatches: List[Dict[str, List[str]]] = []
     for key, text in list(messages.items()):
-        new_text, replaced, bad, missing, extra = replace_placeholders(
+        new_text, replaced, bad, missing, extra, restored_positions = replace_placeholders(
             text, baseline.get(key, [])
         )
         reordered = False
@@ -128,12 +161,28 @@ def process_messages_file(
             continue
         if replaced or reordered:
             if replaced and reordered:
-                logger.info("%s: %s tokens restored and reordered", path, key)
-                counters.tokens_restored += 1
+                if restored_positions:
+                    logger.info(
+                        "%s: %s tokens restored at positions %s and reordered",
+                        path,
+                        key,
+                        restored_positions,
+                    )
+                else:
+                    logger.info("%s: %s tokens restored and reordered", path, key)
+                counters.tokens_restored += len(restored_positions)
                 counters.tokens_reordered += 1
             elif replaced:
-                logger.info("%s: %s tokens restored", path, key)
-                counters.tokens_restored += 1
+                if restored_positions:
+                    logger.info(
+                        "%s: %s tokens restored at positions %s",
+                        path,
+                        key,
+                        restored_positions,
+                    )
+                else:
+                    logger.info("%s: %s tokens restored", path, key)
+                counters.tokens_restored += len(restored_positions)
             else:
                 logger.info("%s: %s tokens reordered", path, key)
                 counters.tokens_reordered += 1
@@ -168,7 +217,7 @@ def process_root_file(
         text = node[text_key]
         if not isinstance(text, str):
             continue
-        new_text, replaced, bad, missing, extra = replace_placeholders(
+        new_text, replaced, bad, missing, extra, restored_positions = replace_placeholders(
             text, baseline.get(guid, [])
         )
         reordered = False
@@ -195,12 +244,28 @@ def process_root_file(
             continue
         if replaced or reordered:
             if replaced and reordered:
-                logger.info("%s: %s tokens restored and reordered", path, guid)
-                counters.tokens_restored += 1
+                if restored_positions:
+                    logger.info(
+                        "%s: %s tokens restored at positions %s and reordered",
+                        path,
+                        guid,
+                        restored_positions,
+                    )
+                else:
+                    logger.info("%s: %s tokens restored and reordered", path, guid)
+                counters.tokens_restored += len(restored_positions)
                 counters.tokens_reordered += 1
             elif replaced:
-                logger.info("%s: %s tokens restored", path, guid)
-                counters.tokens_restored += 1
+                if restored_positions:
+                    logger.info(
+                        "%s: %s tokens restored at positions %s",
+                        path,
+                        guid,
+                        restored_positions,
+                    )
+                else:
+                    logger.info("%s: %s tokens restored", path, guid)
+                counters.tokens_restored += len(restored_positions)
             else:
                 logger.info("%s: %s tokens reordered", path, guid)
                 counters.tokens_reordered += 1
