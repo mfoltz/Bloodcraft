@@ -146,8 +146,11 @@ def test_normalization_merges_split_tokens(tmp_path, monkeypatch):
         ],
     )
 
-    with pytest.raises(SystemExit):
-        fix_tokens.main()
+    fix_tokens.main()
+    data = json.loads(target.read_text())
+    assert data["Messages"]["hash"] == "{a}"
+    metrics = json.loads(metrics_path.read_text())[-1]
+    assert metrics["tokens_removed"] == 1
 
 
 def test_exit_on_mismatch(tmp_path, monkeypatch):
@@ -159,7 +162,7 @@ def test_exit_on_mismatch(tmp_path, monkeypatch):
     )
     (root / "Resources" / "Localization" / "English.json").write_text(json.dumps({}))
     target = messages_dir / "Test.json"
-    target.write_text(json.dumps({"Messages": {"hash": "[[TOKEN_0]] [[TOKEN_1]]"}}))
+    target.write_text(json.dumps({"Messages": {"hash": ""}}))
     metrics_path = root / "metrics.json"
 
     monkeypatch.setattr(
@@ -192,7 +195,7 @@ def test_allow_mismatch(tmp_path, monkeypatch, caplog):
     (messages_dir / "English.json").write_text(json.dumps({"Messages": {"hash": "{a}"}}))
     (root / "Resources" / "Localization" / "English.json").write_text(json.dumps({}))
     target = messages_dir / "Test.json"
-    target.write_text(json.dumps({"Messages": {"hash": "[[TOKEN_0]] [[TOKEN_1]]"}}))
+    target.write_text(json.dumps({"Messages": {"hash": ""}}))
     metrics_path = root / "metrics.json"
 
     monkeypatch.setattr(

@@ -12,9 +12,9 @@ def test_replace_placeholders_preserves_quotes_705325693():
         "[PrestigeStat]",
         "</color>",
     ]
-    new_value, replaced, mismatch, missing, extra = fix_tokens.replace_placeholders(value, tokens)
+    new_value, replaced, mismatch, missing, extra, restored = fix_tokens.replace_placeholders(value, tokens)
     assert new_value == (
         "Familiar already has all prestige stats! (\"<color=white>.fam pr</color>\" "
         "instead of '<color=white>.fam pr [PrestigeStat] </color>')"
     )
-    assert replaced and not mismatch and not missing and not extra
+    assert replaced and not mismatch and not missing and not extra and not restored
