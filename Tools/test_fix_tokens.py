@@ -69,37 +69,41 @@ def test_normalize_tokens_merge_adjacent():
 def test_replace_placeholders_token_only_line():
     tokens = ["<b>", "{x}", "</b>"]
     value = "[[TOKEN_0]] [[TOKEN_1]] [[TOKEN_2]]"
-    new_value, replaced, mismatch, missing, extra = fix_tokens.replace_placeholders(value, tokens)
+    new_value, replaced, mismatch, missing, extra, restored = fix_tokens.replace_placeholders(
+        value, tokens
+    )
     assert new_value.replace(" ", "") == "<b>{x}</b>"
-    assert replaced and not mismatch and not missing and not extra
+    assert replaced and not mismatch and not missing and not extra and not restored
 
 
 def test_replace_placeholders_with_various_tokens():
     tokens = ["{0}", "${var}", "[[TOKEN_0]]", "{PlayerName}"]
     value = " ".join(f"[[TOKEN_{i}]]" for i in range(len(tokens)))
-    new_value, replaced, mismatch, missing, extra = fix_tokens.replace_placeholders(value, tokens)
+    new_value, replaced, mismatch, missing, extra, restored = fix_tokens.replace_placeholders(
+        value, tokens
+    )
     assert new_value.replace(" ", "") == "".join(tokens)
-    assert replaced and not mismatch and not missing and not extra
+    assert replaced and not mismatch and not missing and not extra and not restored
 
 
 def test_replace_placeholders_restores_missing_token4_and_token5():
     tokens = ["<a>", "</a>", "<b>", "</b>", "<c>", "</c>"]
     value = " ".join(f"[[TOKEN_{i}]]" for i in range(4))
-    new_value, replaced, mismatch, missing, extra = fix_tokens.replace_placeholders(
+    new_value, replaced, mismatch, missing, extra, restored = fix_tokens.replace_placeholders(
         value, tokens
     )
     assert new_value.replace(" ", "") == "<a></a><b></b><c></c>"
-    assert replaced and not mismatch and not missing and not extra
+    assert replaced and not mismatch and not missing and not extra and restored == [4, 5]
 
 
 def test_replace_placeholders_restores_missing_token4():
     tokens = ["<a>", "</a>", "<b>", "</b>", "<c>", "</c>"]
     value = " ".join(["[[TOKEN_0]]", "[[TOKEN_1]]", "[[TOKEN_2]]", "[[TOKEN_3]]", "[[TOKEN_5]]"])
-    new_value, replaced, mismatch, missing, extra = fix_tokens.replace_placeholders(
+    new_value, replaced, mismatch, missing, extra, restored = fix_tokens.replace_placeholders(
         value, tokens
     )
     assert new_value.replace(" ", "") == "<a></a><b></b><c></c>"
-    assert replaced and not mismatch and not missing and not extra
+    assert replaced and not mismatch and not missing and not extra and restored == [4]
 
 
 def test_normalize_tokens_single_bracket_forms():
@@ -210,9 +214,48 @@ def test_extract_tokens_bracket_tags_and_percent():
 def test_replace_placeholders_with_bracket_tags_and_percent():
     tokens = ["[b]", "%", "[/b]"]
     value = "[[TOKEN_0]]100[[TOKEN_1]][[TOKEN_2]]"
-    new_value, replaced, mismatch, missing, extra = fix_tokens.replace_placeholders(value, tokens)
+    new_value, replaced, mismatch, missing, extra, restored = fix_tokens.replace_placeholders(
+        value, tokens
+    )
     assert new_value == "[b]100%[/b]"
-    assert replaced and not mismatch and not missing and not extra
+    assert replaced and not mismatch and not missing and not extra and not restored
+
+
+def test_missing_token_metrics_and_logging(tmp_path, monkeypatch, caplog):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "<a>{x}</a>"}})
+    )
+    (root / "Resources" / "Localization" / "English.json").write_text(json.dumps({}))
+    target = messages_dir / "Test.json"
+    target.write_text(json.dumps({"Messages": {"hash": "[[TOKEN_0]] [[TOKEN_2]]"}}))
+    metrics_path = root / "metrics.json"
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "fix_tokens.py",
+            "--root",
+            str(root),
+            "--metrics-file",
+            str(metrics_path),
+            str(target),
+        ],
+    )
+
+    with caplog.at_level(logging.INFO):
+        fix_tokens.main()
+
+    data = json.loads(target.read_text())
+    assert data["Messages"]["hash"].replace(" ", "") == "<a>{x}</a>"
+    metrics = json.loads(metrics_path.read_text())[-1]
+    assert metrics["tokens_restored"] == 1
+    assert metrics["tokens_reordered"] == 0
+    assert metrics["token_mismatches"] == 0
+    assert "positions [1]" in caplog.text
 
 
 @pytest.mark.skip(reason="log format varies with argostranslate version")
