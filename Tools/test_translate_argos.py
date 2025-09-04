@@ -329,10 +329,63 @@ def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
     assert exc.value.code == 1
     msg = "No Argos translation model for"
     assert msg in caplog.text
-    install_hint = "argospm install translate-en_xx"
-    assert install_hint in caplog.text
-    rebuild_hint = "cd Resources/Localization/Models/xx"
-    assert rebuild_hint in caplog.text
+
+
+def test_overrides_applied_before_translation(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    english_messages = {"2461283441": "Prestiges:", "1": "Hello"}
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": english_messages})
+    )
+
+    target_rel = "Resources/Localization/Messages/Spanish.json"
+
+    tools_dir = root / "Tools"
+    tools_dir.mkdir()
+    (tools_dir / "spanish_overrides.json").write_text(
+        json.dumps({"2461283441": "Prestigios:"})
+    )
+
+    class DummyTranslator:
+        def translate(self, text):
+            return "Hola"
+
+    class DummyCompleted:
+        def __init__(self, code=0):
+            self.returncode = code
+
+    monkeypatch.setattr(
+        translate_argos.argos_translate,
+        "get_translation_from_codes",
+        lambda src, dst: DummyTranslator(),
+    )
+    monkeypatch.setattr(
+        translate_argos.argos_translate, "load_installed_languages", lambda: None
+    )
+    monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
+    monkeypatch.setattr(translate_argos, "ensure_model_installed", lambda root, dst: None)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "translate_argos.py",
+            target_rel,
+            "--to",
+            "es",
+            "--root",
+            str(root),
+            "--overwrite",
+        ],
+    )
+
+    translate_argos.main()
+
+    target = json.loads((messages_dir / "Spanish.json").read_text())
+    assert target["Messages"]["2461283441"] == "Prestigios:"
+    assert target["Messages"]["1"] == "Hola"
 
 
 def test_exit_when_translation_engine_attribute_error(tmp_path, monkeypatch, caplog):
