@@ -604,8 +604,15 @@ def _finalize_metrics(
     successes: int,
     exit_code: int,
     exit_msg: str | None,
+    *,
+    extra: dict | None = None,
 ) -> None:
-    """Update the metrics entry with final counts and status."""
+    """Update the metrics entry with final counts and status.
+
+    ``extra`` is merged into the metrics entry to persist supplemental
+    information gathered after the run (for example, hashes retried with
+    lenient tokens).
+    """
 
     log, entry = _latest_metrics_entry(args)
     status = "failed" if exit_code else "success"
@@ -615,23 +622,25 @@ def _finalize_metrics(
         extra: dict = {}
         if exit_msg:
             extra["error"] = exit_msg
-        _append_metrics_entry(
-            args,
-            status=status,
-            processed=processed,
-            successes=successes,
-            timeouts=0,
-            token_reorders=0,
-            token_mismatches=0,
-            token_mismatch_details={},
-            failures={},
-            hash_stats={},
-            **extra,
-        )
+        entry_extra: dict = {
+            "processed": processed,
+            "successes": successes,
+            "timeouts": 0,
+            "token_reorders": 0,
+            "token_mismatches": 0,
+            "token_mismatch_details": {},
+            "failures": {},
+            "hash_stats": {},
+        }
+        if extra:
+            entry_extra.update(extra)
+        _append_metrics_entry(args, status=status, **entry_extra)
         return
 
     entry["processed"] = processed
     entry["successes"] = successes
+    if extra:
+        entry.update(extra)
     if exit_code:
         if entry.get("status") not in ("failed", "interrupted"):
             entry["status"] = "failed"
@@ -2009,6 +2018,9 @@ def main():
     skipped_entries: list[dict[str, str]] = _load_report(args.report_file)
     global _INTERRUPT_SKIPPED
     _INTERRUPT_SKIPPED = skipped_entries
+    sentinel_hashes = [
+        row["hash"] for row in skipped_entries if row.get("category") == "sentinel"
+    ]
     token_mismatch_hashes = [
         row["hash"] for row in skipped_entries if row.get("category") == "token_mismatch"
     ]
@@ -2016,11 +2028,16 @@ def main():
         skipped_entries = [
             row for row in skipped_entries if row.get("category") != "token_mismatch"
         ]
+    if sentinel_hashes:
+        skipped_entries = [
+            row for row in skipped_entries if row.get("category") != "sentinel"
+        ]
     remaining: list[dict[str, str]] = []
     processed_total = translated_total = failures_total = 0
     processed_recorded = False
     exit_code = 0
     exit_msg: str | None = None
+    retried_sentinel_hashes: list[str] = []
     try:
         if args.dry_run:
             (
@@ -2055,6 +2072,11 @@ def main():
                         row["hash"]
                         for row in run_remaining
                         if row.get("category") == "token_mismatch"
+                    )
+                    sentinel_hashes.extend(
+                        row["hash"]
+                        for row in run_remaining
+                        if row.get("category") == "sentinel"
                     )
                     remaining = run_remaining
                     if not processed_recorded:
@@ -2105,6 +2127,48 @@ def main():
                 )
                 exit_code = 1
                 exit_msg = error_msg
+            remaining = [
+                row for row in remaining if row.get("category") != "sentinel"
+            ]
+            skipped_entries = [
+                row for row in skipped_entries if row.get("category") != "sentinel"
+            ]
+            sentinel_hashes = sorted(set(sentinel_hashes))
+            retried_sentinel_hashes: list[str] = []
+            if sentinel_hashes and not args.lenient_tokens:
+                logger.info(
+                    "Retrying %d sentinel hash(es) with lenient tokens",
+                    len(sentinel_hashes),
+                )
+                original_hashes = args.hashes
+                original_lenient = args.lenient_tokens
+                args.hashes = sentinel_hashes
+                args.lenient_tokens = True
+                (
+                    run_remaining,
+                    processed,
+                    translated,
+                    _skipped,
+                    failures_retry,
+                    run_exit_code,
+                    run_exit_msg,
+                ) = _run_translation(args, root)
+                skipped_entries.extend(run_remaining)
+                remaining.extend(run_remaining)
+                if not processed_recorded:
+                    processed_total = processed
+                    processed_recorded = True
+                translated_total += translated
+                failures_total = failures_retry
+                exit_code = run_exit_code
+                if run_exit_code and run_exit_msg and not exit_msg:
+                    exit_msg = run_exit_msg
+                args.hashes = original_hashes
+                args.lenient_tokens = original_lenient
+                retried_sentinel_hashes = sentinel_hashes
+            else:
+                retried_sentinel_hashes = []
+
             remaining = [
                 row for row in remaining if row.get("category") != "token_mismatch"
             ]
@@ -2227,6 +2291,7 @@ def main():
             translated_total,
             exit_code,
             exit_msg,
+            extra={"sentinel_retry_hashes": retried_sentinel_hashes},
         )
 
         for handler in logger.handlers:

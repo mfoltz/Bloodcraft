@@ -114,9 +114,12 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
 4. **Handle skipped rows**
 
    Any hashes listed in `skipped.csv` within the run directory must be
-   translated manually. Re-run the translator until the file is empty.
-   After translating, capture placeholder issues alongside the skip
-   report:
+   translated manually. The translator automatically retries lines that
+   consist solely of `[[TOKEN_n]]` placeholders with `--lenient-tokens`,
+   but hashes that still output only placeholders are flagged under the
+   `sentinel` category and require manual translation. Re-run the
+   translator until the file is empty. After translating, capture
+   placeholder issues alongside the skip report:
 
    ```bash
    python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json --mismatches-file translations/<iso-code>/<timestamp>/token_mismatches.json
@@ -195,9 +198,9 @@ can be investigated before triggering another run.
    3. Run `python Tools/fix_tokens.py` for that JSON file.
    4. Re-run the translator to verify the hash no longer appears in `skipped.csv`.
 
-   ### Placeholder-only results
+    ### Placeholder-only results
 
-    Sometimes the translator may output only `[[TOKEN_n]]` placeholders without any surrounding text. These messages are left in their original English form and appear in `skipped.csv` with the `placeholder` category so they can be reviewed manually.
+     Sometimes the translator may output only `[[TOKEN_n]]` placeholders without any surrounding text. The translation script retries these hashes with `--lenient-tokens` to give Argos another chance to produce real text. Hashes that still return only placeholders after the retry are left in their original English form and appear in `skipped.csv` with the `sentinel` category. The retried hashes are also recorded in `metrics.json` under `sentinel_retry_hashes` so lingering failures can be revisited later.
 
     ### Manual review script
 
