@@ -738,8 +738,17 @@ def _run_translation(
         requested = set(args.hashes)
         to_translate = [(k, v) for k, v in english.items() if k in requested]
     elif args.overwrite:
-        to_translate = list(english.items())
-        messages = {}
+        lang_name = CODE_TO_LANG.get(args.dst.lower(), args.dst).lower()
+        override_file = os.path.join(root, "Tools", f"{lang_name}_overrides.json")
+        overrides = _read_json(override_file, default={})
+        if not isinstance(overrides, dict):
+            overrides = {}
+        messages = dict(overrides)
+        if overrides:
+            logger.info(
+                "Applied %d overrides from %s", len(overrides), override_file
+            )
+        to_translate = [(k, v) for k, v in english.items() if k not in messages]
     else:
         to_translate = [(k, v) for k, v in english.items() if k not in messages]
 
