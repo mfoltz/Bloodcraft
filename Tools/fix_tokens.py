@@ -29,29 +29,31 @@ def replace_placeholders(
     value = normalize_tokens(value)
     matches = list(TOKEN_PLACEHOLDER.finditer(value))
     restored_positions: List[int] = []
-    replaced = False
-    if matches:
-        parts: List[str] = []
-        last = 0
-        index_positions: Dict[int, int] = {}
-        for m in matches:
-            parts.append(value[last : m.start()])
-            id_match = TOKEN_RE.match(m.group(0))
-            if id_match:
-                idx_str = id_match.group(1)
-                try:
-                    idx = int(idx_str)
-                except ValueError:
-                    idx = int(idx_str, 16)
-                if idx < len(tokens):
-                    index_positions[idx] = sum(len(p) for p in parts)
-                    parts.append(tokens[idx])
-                    last = m.end()
-                    continue
-            parts.append(m.group(0))
-            last = m.end()
-        parts.append(value[last:])
-        value = "".join(parts)
+
+    parts: List[str] = []
+    last = 0
+    index_positions: Dict[int, int] = {}
+    for m in matches:
+        parts.append(value[last : m.start()])
+        id_match = TOKEN_RE.match(m.group(0))
+        if id_match:
+            idx_str = id_match.group(1)
+            try:
+                idx = int(idx_str)
+            except ValueError:
+                idx = int(idx_str, 16)
+            if idx < len(tokens):
+                index_positions[idx] = sum(len(p) for p in parts)
+                parts.append(tokens[idx])
+                last = m.end()
+                continue
+        parts.append(m.group(0))
+        last = m.end()
+    parts.append(value[last:])
+    value = "".join(parts)
+
+    missing_indices: List[int] = []
+    if matches and len(tokens) > len(matches):
         missing_indices = [i for i in range(len(tokens)) if i not in index_positions]
         missing_indices.sort()
         for idx in missing_indices:
@@ -61,14 +63,20 @@ def replace_placeholders(
                 next_idx = min(next_candidates, key=lambda j: index_positions[j])
                 insert_pos = index_positions[next_idx]
             else:
-                insert_pos = len(value)
+                prev_candidates = [j for j in index_positions if j < idx]
+                if prev_candidates:
+                    prev_idx = max(prev_candidates, key=lambda j: j)
+                    insert_pos = index_positions[prev_idx] + len(tokens[prev_idx])
+                else:
+                    insert_pos = 0
             value = value[:insert_pos] + token + value[insert_pos:]
             restored_positions.append(idx)
             for j in index_positions:
                 if index_positions[j] >= insert_pos:
                     index_positions[j] += len(token)
             index_positions[idx] = insert_pos
-        replaced = True
+
+    replaced = bool(matches) or bool(restored_positions)
     value = value.replace('\\"', '"').replace("\\'", "'")
     tokenized = extract_tokens(value)
     expected = Counter(tokens)

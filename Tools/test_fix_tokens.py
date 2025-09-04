@@ -106,6 +106,16 @@ def test_replace_placeholders_restores_missing_token4():
     assert replaced and not mismatch and not missing and not extra and restored == [4]
 
 
+def test_replace_placeholders_inserts_missing_tokens_before_text():
+    tokens = ["<a>", "{x}", "</a>"]
+    value = "[[TOKEN_0]] tail"
+    new_value, replaced, mismatch, missing, extra, restored = fix_tokens.replace_placeholders(
+        value, tokens
+    )
+    assert new_value == "<a>{x}</a> tail"
+    assert replaced and not mismatch and not missing and not extra and restored == [1, 2]
+
+
 def test_normalize_tokens_single_bracket_forms():
     assert translate_argos.normalize_tokens("[TOKEN_4]") == "[[TOKEN_4]]"
     assert translate_argos.normalize_tokens("[token_5]") == "[[TOKEN_5]]"
@@ -256,6 +266,43 @@ def test_missing_token_metrics_and_logging(tmp_path, monkeypatch, caplog):
     assert metrics["tokens_reordered"] == 0
     assert metrics["token_mismatches"] == 0
     assert "positions [1]" in caplog.text
+
+
+def test_missing_tokens_before_text_metrics_and_logging(tmp_path, monkeypatch, caplog):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(
+        json.dumps({"Messages": {"hash": "<a>{x}</a> tail"}})
+    )
+    (root / "Resources" / "Localization" / "English.json").write_text(json.dumps({}))
+    target = messages_dir / "Test.json"
+    target.write_text(json.dumps({"Messages": {"hash": "[[TOKEN_0]] tail"}}))
+    metrics_path = root / "metrics.json"
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "fix_tokens.py",
+            "--root",
+            str(root),
+            "--metrics-file",
+            str(metrics_path),
+            str(target),
+        ],
+    )
+
+    with caplog.at_level(logging.INFO):
+        fix_tokens.main()
+
+    data = json.loads(target.read_text())
+    assert data["Messages"]["hash"] == "<a>{x}</a> tail"
+    metrics = json.loads(metrics_path.read_text())[-1]
+    assert metrics["tokens_restored"] == 2
+    assert metrics["tokens_reordered"] == 0
+    assert metrics["token_mismatches"] == 0
+    assert "positions [1, 2]" in caplog.text
 
 
 @pytest.mark.skip(reason="log format varies with argostranslate version")
