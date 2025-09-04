@@ -661,6 +661,7 @@ def write_failure_metrics(args, error, *, status: str = "failed") -> None:
         failures={},
         hash_stats={},
         error=str(error) or error.__class__.__name__,
+        error_reason=error.__class__.__name__,
     )
 
 
@@ -1491,6 +1492,39 @@ def _run_translation(
             error="interrupted",
         )
         logger.warning("Translation interrupted; partial results written to %s", target_path)
+        raise
+    except Exception as exc:  # pragma: no cover - best effort flush
+        try:
+            _flush_partial()
+        except Exception:
+            logger.exception("Failed to flush translations on error")
+        successes = processed_so_far - len(failures)
+        retry_attempts = sum(1 for stats in token_stats.values() if stats.get("retry_attempted"))
+        retry_successes = sum(1 for stats in token_stats.values() if stats.get("retry_succeeded"))
+        retry_missing_tokens = sum(
+            stats.get("retry_missing_tokens", 0) for stats in token_stats.values()
+        )
+        retry_extra_tokens = sum(
+            stats.get("retry_extra_tokens", 0) for stats in token_stats.values()
+        )
+        _append_metrics_entry(
+            args,
+            status="failed",
+            processed=processed_so_far,
+            successes=successes,
+            timeouts=timeouts_count,
+            token_reorders=token_reorders,
+            token_mismatches=token_mismatches,
+            retry_attempts=retry_attempts,
+            retry_successes=retry_successes,
+            retry_missing_tokens=retry_missing_tokens,
+            retry_extra_tokens=retry_extra_tokens,
+            token_mismatch_details=token_mismatch_details,
+            failures={k: v[0] for k, v in failures.items()},
+            hash_stats=token_stats,
+            error=str(exc) or exc.__class__.__name__,
+            error_reason=exc.__class__.__name__,
+        )
         raise
     finally:
         _INTERRUPT_FLUSH = None
