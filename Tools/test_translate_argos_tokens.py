@@ -168,13 +168,14 @@ def test_unwrap_restores_translated_order():
     assert restored == expected
 
 
-def test_wrap_threshold_boundary(monkeypatch):
-    monkeypatch.setattr(translate_argos, "PLACEHOLDER_WRAP_THRESHOLD", 10)
-    text = "".join(f"{{{i}}}" for i in range(10))
+@pytest.mark.parametrize("threshold", [5, 10, 15])
+def test_wrap_threshold_boundary(monkeypatch, threshold):
+    monkeypatch.setattr(translate_argos, "PLACEHOLDER_WRAP_THRESHOLD", threshold)
+    text = "".join(f"{{{i}}}" for i in range(threshold))
     safe, _ = translate_argos.protect_strict(text)
     wrapped, _ = translate_argos.wrap_placeholders(safe)
     assert wrapped == safe
-    text2 = "".join(f"{{{i}}}" for i in range(11))
+    text2 = "".join(f"{{{i}}}" for i in range(threshold + 1))
     safe2, _ = translate_argos.protect_strict(text2)
     wrapped2, _ = translate_argos.wrap_placeholders(safe2)
     assert wrapped2 != safe2
