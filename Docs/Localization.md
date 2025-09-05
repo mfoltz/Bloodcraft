@@ -114,11 +114,14 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
 4. **Handle skipped rows**
 
    Any hashes listed in `skipped.csv` within the run directory must be
-   translated manually. The translator automatically retries lines that
-   consist solely of `[[TOKEN_n]]` placeholders with `--lenient-tokens`,
-   but hashes that still output only placeholders are flagged under the
-   `sentinel` category and require manual translation. Re-run the
-   translator until the file is empty. After translating, capture
+   translated manually. After the pipeline retries problematic hashes, it
+   writes an `identical.csv` file for any entries that still match the
+   English source exactly; review and translate those rows as well. The
+   translator automatically retries lines that consist solely of
+   `[[TOKEN_n]]` placeholders with `--lenient-tokens`, but hashes that
+   still output only placeholders are flagged under the `sentinel`
+   category and require manual translation. Re-run the translator until
+   the file is empty. After translating, capture
    placeholder issues alongside the skip report:
 
    ```bash
