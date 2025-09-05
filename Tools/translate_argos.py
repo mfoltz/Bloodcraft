@@ -284,7 +284,49 @@ def normalize_tokens(text: str) -> str:
 
     tmp = TOKEN_PATTERN.sub(store, text)
     tmp = tmp.replace("[", "").replace("]", "")
+
+    def drop_unmatched_brackets(s: str) -> str:
+        pairs = {"[": "]", "(": ")", "{": "}", "<": ">"}
+        opens = set(pairs)
+        closes = set(pairs.values())
+        stack: List[tuple[str, int]] = []
+        remove: set[int] = set()
+        for idx, ch in enumerate(s):
+            if ch in opens:
+                stack.append((ch, idx))
+            elif ch in closes:
+                if stack and pairs[stack[-1][0]] == ch:
+                    stack.pop()
+                else:
+                    remove.add(idx)
+        remove.update(pos for _, pos in stack)
+        if not remove:
+            return s
+        return "".join(ch for i, ch in enumerate(s) if i not in remove)
+
+    tmp = drop_unmatched_brackets(tmp)
     restored = re.sub(r"@@(\d+)@@", restore, tmp)
+
+    def remove_extra_color_closings(s: str) -> str:
+        pattern = re.compile(r"</?color[^>]*>", re.I)
+        depth = 0
+        result: List[str] = []
+        last = 0
+        for m in pattern.finditer(s):
+            result.append(s[last : m.start()])
+            tag = m.group(0)
+            if not tag.lower().startswith("</"):
+                depth += 1
+                result.append(tag)
+            elif depth > 0:
+                depth -= 1
+                result.append(tag)
+            # else drop unmatched closing tag
+            last = m.end()
+        result.append(s[last:])
+        return "".join(result)
+
+    restored = remove_extra_color_closings(restored)
 
     # Trim whitespace around format tokens within colour tags.
     restored = re.sub(
