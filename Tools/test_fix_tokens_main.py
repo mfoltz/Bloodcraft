@@ -121,6 +121,16 @@ def test_normalize_tokens_single_bracket_forms():
     assert translate_argos.normalize_tokens("[token_5]") == "[[TOKEN_5]]"
 
 
+def test_normalize_tokens_strips_unmatched_brackets():
+    assert translate_argos.normalize_tokens("[[TOKEN_0]]}") == "[[TOKEN_0]]"
+    assert translate_argos.normalize_tokens("{[[TOKEN_0]]") == "[[TOKEN_0]]"
+
+
+def test_normalize_tokens_strips_redundant_color_end_tags():
+    raw = "<color=red>{0}</color></color>"
+    assert translate_argos.normalize_tokens(raw) == "<color=red>{0}</color>"
+
+
 def test_normalization_merges_split_tokens(tmp_path, monkeypatch):
     root = tmp_path
     messages_dir = root / "Resources" / "Localization" / "Messages"
