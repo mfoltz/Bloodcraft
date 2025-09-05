@@ -6,6 +6,8 @@ Bloodcraft uses hash-based localization. Follow these steps when adding or editi
 
 Install the .NET 8 SDK and the .NET 6 runtime. Verify with `dotnet --list-runtimes` that `Microsoft.NETCore.App 6.0.x` is installed before running any `dotnet run` commands.
 
+Argos translation models are not persisted across sessions. At the start of every session—and before running any command that relies on them (`translate_argos.py`, `fix_tokens.py`, or `check-translations`)—reassemble and install the appropriate model for each language. The reconstruction snippet later in this guide shows the exact commands.
+
 Before introducing a new message, check the catalog in
 `Docs/MessageKeys.md` to avoid creating duplicate entries. Run
 `python Tools/generate_message_catalog.py` if you change
@@ -36,7 +38,7 @@ The script preserves existing translations, adds any new English hashes, and rem
 
 Only the JSON files in `Resources/Localization/Messages` contain user-facing messages. Use Argos Translate to automate translating these files.
 
-Argos models are stored under `Resources/Localization/Models/<LANG>` as split archives and must be reconstructed and installed at the start of each session:
+Argos models are stored under `Resources/Localization/Models/<LANG>` as split archives and must be reconstructed and installed at the start of each session before running the translator, token fixer, or `check-translations`:
 
 1. **Reassemble and install the model**
 
