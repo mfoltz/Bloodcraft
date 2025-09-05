@@ -819,11 +819,9 @@ def _run_translation(
     for key, text in to_translate:
         safe, tokens = protect_strict(text)
         token_only = TOKEN_RE.sub("", safe).strip() == ""
-        if token_only and args.lenient_tokens and len(tokens) > 1:
+        if token_only:
             pretranslated.append((key, english[key], tokens))
             continue
-        if token_only:
-            safe += f" {TOKEN_SENTINEL}"
         safe_lines.append(safe)
         tokens_list.append((tokens, token_only))
         keys.append(key)

@@ -32,11 +32,11 @@ def summarize_log(path: Path) -> tuple[int, int, Counter[str]]:
                 if not m:
                     continue
                 status, reason = m.group(1), (m.group(2) or "")
-                if status == "TRANSLATED":
+                cleaned = reason.strip().lower().replace(" ", "_")
+                if status == "TRANSLATED" or cleaned == "copied":
                     translated += 1
                 else:
                     skipped += 1
-                    cleaned = reason.strip().lower().replace(" ", "_")
                     if cleaned:
                         reasons[cleaned] += 1
     except FileNotFoundError:
@@ -51,7 +51,10 @@ def summarize_skipped(path: Path) -> Counter[str]:
             reader = csv.DictReader(fp)
             for row in reader:
                 cat = (row.get("category") or "unknown").strip() or "unknown"
-                counts[cat] += 1
+                cleaned = cat.lower().replace(" ", "_")
+                if cleaned == "copied":
+                    continue
+                counts[cleaned] += 1
     except FileNotFoundError:
         pass
     return counts

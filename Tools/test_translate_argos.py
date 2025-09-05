@@ -692,7 +692,7 @@ def test_sentinel_missing_repaired(tmp_path, monkeypatch, caplog):
     assert rows == []
     data = json.loads((root / target_rel).read_text())
     assert data["Messages"]["hash"] == "{name}"
-    assert "hash: sentinel missing, reinserting" in caplog.text
+    assert "sentinel missing" not in caplog.text
 
 
 def test_sentinel_only_report(tmp_path, monkeypatch):
@@ -741,12 +741,11 @@ def test_sentinel_only_report(tmp_path, monkeypatch):
         ],
     )
 
-    with pytest.raises(SystemExit) as exc:
-        translate_argos.main()
-    assert exc.value.code == 1
+    translate_argos.main()
     rows = list(csv.DictReader(report_path.open()))
-    assert rows[0]["category"] == "sentinel"
-    assert "sentinel only" in rows[0]["reason"]
+    assert rows == []
+    data = json.loads((root / target_rel).read_text())
+    assert data["Messages"]["hash"] == "{name}"
 
 
 def test_placeholder_only_report(tmp_path, monkeypatch):
