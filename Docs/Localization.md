@@ -6,7 +6,13 @@ Bloodcraft uses hash-based localization. Follow these steps when adding or editi
 
 Install the .NET 8 SDK and the .NET 6 runtime. Verify with `dotnet --list-runtimes` that `Microsoft.NETCore.App 6.0.x` is installed before running any `dotnet run` commands.
 
-Argos translation models are not persisted across sessions. At the start of every session—and before running any command that relies on them (`translate_argos.py`, `fix_tokens.py`, or `check-translations`)—reassemble and install the appropriate model for each language. The reconstruction snippet later in this guide shows the exact commands.
+Argos translation models are not persisted across sessions. At the start of every session—and before running any command that relies on them (`translate_argos.py`, `fix_tokens.py`, or `check-translations`)—reconstruct and install the appropriate model for each language using the preflight utility:
+
+```bash
+python Tools/ensure_argos_model.py <iso-code>
+```
+
+Run this once per language per session. The script rebuilds the split archives under `Resources/Localization/Models/<iso-code>` and installs the Argos package if it is missing.
 
 Before introducing a new message, check the catalog in
 `Docs/MessageKeys.md` to avoid creating duplicate entries. Run
@@ -40,7 +46,15 @@ Only the JSON files in `Resources/Localization/Messages` contain user-facing mes
 
 Argos models are stored under `Resources/Localization/Models/<LANG>` as split archives and must be reconstructed and installed at the start of each session before running the translator, token fixer, or `check-translations`:
 
-1. **Reassemble and install the model**
+1. **Prepare the model**
+
+   ```bash
+   python Tools/ensure_argos_model.py <iso-code>
+   ```
+
+   The utility combines the split archives under `Resources/Localization/Models/<iso-code>`, verifies the metadata and installs the package if necessary.
+
+   To perform the steps manually:
 
    ```bash
    cd Resources/Localization/Models/<LANG>
@@ -49,8 +63,6 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
    unzip -p translate-*.argosmodel */metadata.json | jq '.from_code, .to_code'
    argos-translate install translate-*.argosmodel
    ```
-
-   Run these commands every session to rebuild the model archive and confirm the `from_code`/`to_code` pair.
 
 2. **Verify model installation**
 
@@ -538,7 +550,7 @@ python Tools/summarize_token_stats.py translations/de/<timestamp>/translate.log
 
 ## Troubleshooting & Notes
 
-- **Argos model installation**: If the `argos-translate install` subcommand is unavailable, reassemble the split archives as shown above and install using the Python API each session:
+- **Argos model installation**: If the `argos-translate install` subcommand is unavailable, run the preflight utility or manually reassemble the split archives and install using the Python API each session:
   ```bash
   cd Resources/Localization/Models/EN_ES
   cat translate-*.z[0-9][0-9] translate-*.zip > model.zip
