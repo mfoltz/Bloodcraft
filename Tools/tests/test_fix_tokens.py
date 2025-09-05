@@ -55,3 +55,25 @@ def test_check_only_passes_after_removal(tmp_path, monkeypatch):
         ],
     )
     fix_tokens.main()
+
+
+def test_reorder_handles_repeated_and_nested_tokens():
+    tokens = ["<b>", "{0}", "</b>", "<i>", "{1}", "</i>"]
+    value = "<i>{1}</i><b>{0}</b>"
+    new_value, changed = fix_tokens.reorder_tokens_in_text(value, tokens)
+    assert changed
+    assert new_value == "<b>{0}</b><i>{1}</i>"
+
+
+def test_restore_missing_token_and_reorder_nested():
+    tokens = ["<color=red>", "{0}", "{1}", "</color>"]
+    # Translation dropped the third token and shuffled the rest.
+    value = "[[TOKEN_1]][[TOKEN_0]][[TOKEN_3]]"
+    new_value, replaced, mismatch, missing, removed, restored = fix_tokens.replace_placeholders(
+        value, tokens
+    )
+    assert replaced and not mismatch
+    assert restored == [2]
+    new_value, changed = fix_tokens.reorder_tokens_in_text(new_value, tokens)
+    assert changed
+    assert new_value == "<color=red>{0}{1}</color>"

@@ -115,7 +115,7 @@ class FatalTranslationError(Exception):
     """Raised when Argos Translate encounters an unrecoverable error."""
 
 PLACEHOLDER_BASE = 0xE000
-DEFAULT_WRAP_THRESHOLD = 10
+DEFAULT_WRAP_THRESHOLD = 5
 PLACEHOLDER_WRAP_THRESHOLD = DEFAULT_WRAP_THRESHOLD
 
 
