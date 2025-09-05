@@ -123,11 +123,14 @@ def test_strict_retry_metrics(tmp_path, monkeypatch):
     monkeypatch.setattr(sys, "argv", ["localization_pipeline.py"])
 
     calls = {"translate": 0, "review": 0}
+    run_path: list[Path] = []
 
     def fake_run(cmd, *, check=True, logger):
         if any("translate_argos.py" in c for c in cmd):
             calls["translate"] += 1
             run_dir = Path(cmd[cmd.index("--run-dir") + 1])
+            if not run_path:
+                run_path.append(run_dir)
             run_dir.mkdir(parents=True, exist_ok=True)
             with (run_dir / "skipped.csv").open("w", newline="", encoding="utf-8") as fp:
                 writer = csv.DictWriter(fp, fieldnames=["hash", "english", "reason", "category"])
@@ -163,6 +166,10 @@ def test_strict_retry_metrics(tmp_path, monkeypatch):
     }
     assert calls["translate"] == 2
     assert calls["review"] == 1
+    ident = run_path[0] / "identical.csv"
+    assert ident.is_file()
+    rows = list(csv.DictReader(ident.open("r", encoding="utf-8")))
+    assert rows[0]["hash"] == "1"
 
 
 def test_custom_output_paths(tmp_path, monkeypatch):

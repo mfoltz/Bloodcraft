@@ -93,18 +93,36 @@ PROBLEM_REASONS = ("contains english", "identical to source")
 
 
 def collect_problematic_hashes(run_dir: Path) -> set[str]:
-    """Return hashes with English or identical-to-source issues."""
+    """Return hashes with English or identical-to-source issues.
+
+    Also writes ``identical.csv`` listing rows whose translations remain
+    identical to the English source. Any existing file is removed when no
+    such rows are present.
+    """
     hashes: set[str] = set()
+    identical_rows: list[dict[str, str]] = []
     report = run_dir / "skipped.csv"
+    ident_file = run_dir / "identical.csv"
     if report.is_file():
         with report.open("r", encoding="utf-8") as fp:
             reader = csv.DictReader(fp)
+            fieldnames = reader.fieldnames
             for row in reader:
                 reason = row.get("reason", "").lower()
                 if any(r in reason for r in PROBLEM_REASONS):
                     hash_id = row.get("hash", "")
                     if hash_id.isdigit():
                         hashes.add(str(int(hash_id)))
+                    if "identical to source" in reason:
+                        identical_rows.append(row)
+        if identical_rows:
+            with ident_file.open("w", newline="", encoding="utf-8") as fp:
+                writer = csv.DictWriter(fp, fieldnames=fieldnames)
+                writer.writeheader()
+                for row in identical_rows:
+                    writer.writerow(row)
+        elif ident_file.is_file():
+            ident_file.unlink()
     log_file = run_dir / "translate.log"
     if log_file.is_file():
         pattern = re.compile(r"(\d+):\s+SKIPPED\s+\(([^)]+)\)")
