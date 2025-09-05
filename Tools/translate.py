@@ -11,6 +11,8 @@ from typing import List
 from argostranslate import translate as argos_translate
 from language_utils import contains_english
 from translate_argos import normalize_tokens
+from ensure_argos_model import ensure_model
+from pathlib import Path
 from token_patterns import extract_tokens
 
 print(
@@ -55,10 +57,14 @@ def translate_batch(
     argos_translate.load_installed_languages()
     translator = argos_translate.get_translation_from_codes(src, dst)
     if translator is None:
-        raise RuntimeError(
-            f"No Argos translation model for {src}->{dst}. "
-            "Assemble or install the model, or run `.codex/install.sh`."
-        )
+        ensure_model(dst, Path(os.path.dirname(os.path.dirname(__file__))))
+        argos_translate.load_installed_languages()
+        translator = argos_translate.get_translation_from_codes(src, dst)
+        if translator is None:
+            raise RuntimeError(
+                f"No Argos translation model for {src}->{dst}. "
+                "Run Tools/ensure_argos_model.py to reconstruct it."
+            )
     joined = "\n".join(lines)
     for attempt in range(1, max_retries + 1):
         try:

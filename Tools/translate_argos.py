@@ -24,12 +24,14 @@ import platform
 import uuid
 import hashlib
 import signal
+from pathlib import Path
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from typing import List, Callable
 
 from argostranslate import translate as argos_translate
 from language_utils import contains_english, CODE_TO_LANG
+from ensure_argos_model import ensure_model
 from token_patterns import (
     TOKEN_PATTERN,
     TOKEN_RE,
@@ -365,39 +367,6 @@ def reorder_tokens(
     return text, changed
 
 
-def ensure_model_installed(root: str, dst: str) -> None:
-    """Verify split Argos model segments are combined and installed.
-
-    Scans ``Resources/Localization/Models/<dst>`` for ``.z01`` segments.
-    If segments exist but no ``.argosmodel`` is present, instruct the user to
-    assemble and install the model.
-    """
-    model_dir = os.path.join(
-        root, "Resources", "Localization", "Models", dst
-    )
-    if os.path.isdir(model_dir):
-        entries = os.listdir(model_dir)
-        has_segments = any(name.endswith(".z01") for name in entries)
-        has_model = any(name.endswith(".argosmodel") for name in entries)
-        if has_segments and not has_model:
-            snippet = (
-                f"cd Resources/Localization/Models/{dst}\n"
-                "cat translate-*.z[0-9][0-9] translate-*.zip > model.zip\n"
-                "unzip -o model.zip\n"
-                "unzip -p translate-*.argosmodel */metadata.json | jq '.from_code, .to_code'\n"
-                "argos-translate install translate-*.argosmodel"
-            )
-            raise RuntimeError(
-                "Split Argos model segments detected without an installed model. "
-                "Combine and install the model:\n" + snippet
-            )
-
-    translator = argos_translate.get_translation_from_codes("en", dst)
-    if translator is None:
-        raise RuntimeError(
-            f"No Argos translation model installed for en→{dst}. "
-            f"Reassemble or install the model under Resources/Localization/Models/{dst}."
-        )
 def translate_batch(
     translator,
     lines: List[str],
@@ -742,7 +711,7 @@ def _run_translation(
 
     if translator is None:
         try:
-            ensure_model_installed(root, args.dst)
+            ensure_model(args.dst, Path(root))
             argos_translate.load_installed_languages()
             translator = argos_translate.get_translation_from_codes(
                 args.src, args.dst
@@ -762,16 +731,9 @@ def _run_translation(
             ) from e
 
     if translator is None:
-        package = f"translate-{args.src}_{args.dst}"
         msg = (
             f"No Argos translation model for {args.src}->{args.dst}. "
-            f"Install it with `argospm install {package}`. If split segments are\n"
-            f"present, rebuild and install from `Resources/Localization/Models/{args.dst}`:\n"
-            f"cd Resources/Localization/Models/{args.dst}\n"
-            "cat translate-*.z[0-9][0-9] translate-*.zip > model.zip\n"
-            "unzip -o model.zip\n"
-            "unzip -p translate-*.argosmodel */metadata.json | jq '.from_code, .to_code'\n"
-            "argos-translate install translate-*.argosmodel"
+            f"Run `python Tools/ensure_argos_model.py {args.dst}` to reconstruct and install the split archive."
         )
         logger.error(msg)
         raise SystemExit(msg)
@@ -1835,7 +1797,10 @@ def _load_report(path: str) -> list[dict[str, str]]:
 def main():
     ap = argparse.ArgumentParser(
         description="Translate message JSON files with Argos Translate",
-        epilog="Reassemble and install the Argos model before running this script.",
+        epilog=(
+            "Missing Argos models are reconstructed automatically; "
+            "run Tools/ensure_argos_model.py for manual preflight checks."
+        ),
     )
     ap.add_argument("target_file", nargs="?", help="Path to the target language JSON file")
     ap.add_argument("--from", "--src", dest="src", default="en", help="Source language code (default: en)")
