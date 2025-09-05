@@ -628,6 +628,7 @@ def _finalize_metrics(
             "timeouts": 0,
             "token_reorders": 0,
             "token_mismatches": 0,
+            "tokens_removed": 0,
             "token_mismatch_details": {},
             "failures": {},
             "hash_stats": {},
@@ -662,6 +663,7 @@ def write_failure_metrics(args, error, *, status: str = "failed") -> None:
         timeouts=0,
         token_reorders=0,
         token_mismatches=0,
+        tokens_removed=0,
         retry_attempts=0,
         retry_successes=0,
         retry_missing_tokens=0,
@@ -1438,6 +1440,9 @@ def _run_translation(
             for stats in token_stats.values()
             if stats.get("missing_tokens") or stats.get("removed_tokens")
         )
+        tokens_removed = sum(
+            stats.get("removed_tokens", 0) for stats in token_stats.values()
+        )
         retry_attempts = sum(1 for stats in token_stats.values() if stats.get("retry_attempted"))
         retry_successes = sum(1 for stats in token_stats.values() if stats.get("retry_succeeded"))
         retry_missing_tokens = sum(
@@ -1463,6 +1468,7 @@ def _run_translation(
             "timeouts": timeouts_count,
             "token_reorders": token_reorders,
             "token_mismatches": token_mismatches,
+            "tokens_removed": tokens_removed,
             "retry_attempts": retry_attempts,
             "retry_successes": retry_successes,
             "retry_missing_tokens": retry_missing_tokens,
@@ -1483,6 +1489,9 @@ def _run_translation(
         retry_successes = sum(1 for stats in token_stats.values() if stats.get("retry_succeeded"))
         retry_missing_tokens = sum(stats.get("retry_missing_tokens", 0) for stats in token_stats.values())
         retry_extra_tokens = sum(stats.get("retry_extra_tokens", 0) for stats in token_stats.values())
+        tokens_removed = sum(
+            stats.get("removed_tokens", 0) for stats in token_stats.values()
+        )
         _append_metrics_entry(
             args,
             status="interrupted",
@@ -1491,6 +1500,7 @@ def _run_translation(
             timeouts=timeouts_count,
             token_reorders=token_reorders,
             token_mismatches=token_mismatches,
+            tokens_removed=tokens_removed,
             retry_attempts=retry_attempts,
             retry_successes=retry_successes,
             retry_missing_tokens=retry_missing_tokens,
@@ -1516,6 +1526,9 @@ def _run_translation(
         retry_extra_tokens = sum(
             stats.get("retry_extra_tokens", 0) for stats in token_stats.values()
         )
+        tokens_removed = sum(
+            stats.get("removed_tokens", 0) for stats in token_stats.values()
+        )
         _append_metrics_entry(
             args,
             status="failed",
@@ -1524,6 +1537,7 @@ def _run_translation(
             timeouts=timeouts_count,
             token_reorders=token_reorders,
             token_mismatches=token_mismatches,
+            tokens_removed=tokens_removed,
             retry_attempts=retry_attempts,
             retry_successes=retry_successes,
             retry_missing_tokens=retry_missing_tokens,
@@ -1721,6 +1735,9 @@ def _run_dry_run(
         for stats in token_stats.values()
         if stats.get("missing_tokens") or stats.get("removed_tokens")
     )
+    tokens_removed = sum(
+        stats.get("removed_tokens", 0) for stats in token_stats.values()
+    )
 
     _append_metrics_entry(
         args,
@@ -1730,6 +1747,7 @@ def _run_dry_run(
         timeouts=0,
         token_reorders=token_reorders,
         token_mismatches=token_mismatches,
+        tokens_removed=tokens_removed,
         token_mismatch_details=token_mismatch_details,
         failures={k: v[0] for k, v in failures.items()},
         hash_stats=token_stats,
@@ -2227,6 +2245,7 @@ def main():
                     timeouts=0,
                     token_reorders=0,
                     token_mismatches=0,
+                    tokens_removed=0,
                     token_mismatch_details={},
                     failures={},
                     hash_stats={},
@@ -2244,6 +2263,7 @@ def main():
                 timeouts=0,
                 token_reorders=0,
                 token_mismatches=0,
+                tokens_removed=0,
                 token_mismatch_details={},
                 failures={},
                 hash_stats={},

@@ -240,6 +240,7 @@ def test_extra_placeholders_trimmed(tmp_path, monkeypatch, caplog):
     run_dir = next((root / "translations" / "xx").iterdir())
     metrics = json.loads((run_dir / "metrics.json").read_text())
     assert metrics[0]["hash_stats"]["hash"]["removed_tokens"] == 1
+    assert metrics[0]["tokens_removed"] == 1
 
     monkeypatch.setattr(
         sys, "argv", ["fix_tokens.py", "--root", str(root), "--check-only", target_rel]
