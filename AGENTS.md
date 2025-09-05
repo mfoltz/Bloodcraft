@@ -43,6 +43,7 @@ Current PRDs and task lists are stored in `.project-management/current-prd/`, wh
 
 ### Translation Workflow
 
+0. **Reassemble Argos models for each language.** Rebuild and install the translation models before running any command that depends on them (translation, token fixing, or `check-translations`). Models are not persisted across sessions; use the reconstruction snippet below to restore them.
 1. **Refresh the English source.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
 2. **Propagate new hashes.** Copy the refreshed `English.json` entries into each `Resources/Localization/Messages/<Language>.json` while preserving numeric hashes.
