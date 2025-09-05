@@ -1057,23 +1057,37 @@ def _run_translation(
                             "missing": missing,
                             "extra": extra,
                         }
+                        orig_missing = missing
+                        orig_extra = extra
+                        if orig_extra:
+                            result = TOKEN_RE.sub(
+                                lambda m: "" if m.group(1) in orig_extra else m.group(0),
+                                result,
+                            )
+                            result = re.sub(r"\s{2,}", " ", result).strip()
+                            token_stats[key]["removed_tokens"] = len(orig_extra)
+                            found_tokens = [t for t in found_tokens if t not in orig_extra]
+                        if orig_missing:
+                            result += "".join(f" [[TOKEN_{m}]]" for m in orig_missing)
+                            found_tokens.extend(orig_missing)
+                            token_stats[key]["missing_tokens"] = len(orig_missing)
                         parts: list[str] = []
-                        if missing:
-                            parts.append(f"missing {missing}")
-                        if extra:
+                        if orig_missing:
+                            parts.append(f"missing {orig_missing}")
+                        if orig_extra:
                             parts.append(
-                                f"dropped {extra}" if args.lenient_tokens else f"unexpected {extra}"
+                                f"dropped {orig_extra}" if args.lenient_tokens else f"unexpected {orig_extra}"
                             )
                         issue_id = hashlib.sha1(
-                            ("|".join(sorted(missing)) + "|" + "|".join(sorted(extra))).encode(
+                            ("|".join(sorted(orig_missing)) + "|" + "|".join(sorted(orig_extra))).encode(
                                 "utf-8"
                             )
                         ).hexdigest()[:8]
                         suggestion_bits: list[str] = []
-                        if missing:
-                            suggestion_bits.append(f"add {missing}")
-                        if extra:
-                            suggestion_bits.append(f"remove {extra}")
+                        if orig_missing:
+                            suggestion_bits.append(f"add {orig_missing}")
+                        if orig_extra:
+                            suggestion_bits.append(f"remove {orig_extra}")
                         logger.warning(
                             f"{key}: token mismatch [{issue_id}] (" + ", ".join(parts) + ")" +
                             (f" — Suggested fix: {'; '.join(suggestion_bits)}" if suggestion_bits else "")
@@ -1091,18 +1105,6 @@ def _run_translation(
                             failures[key] = (reason, category)
                             token_stats[key]["translated_tokens"] = len(found_tokens)
                             continue
-                        if extra:
-                            result = TOKEN_RE.sub(
-                                lambda m: "" if m.group(1) in extra else m.group(0),
-                                result,
-                            )
-                            result = re.sub(r"\s{2,}", " ", result).strip()
-                            token_stats[key]["removed_tokens"] = len(extra)
-                            found_tokens = [t for t in found_tokens if t not in extra]
-                        if missing:
-                            result += "".join(f" [[TOKEN_{m}]]" for m in missing)
-                            found_tokens.extend(missing)
-                            token_stats[key]["missing_tokens"] = len(missing)
                     changed = found_tokens != expected
                     if changed and args.fix_order:
                         result, _ = reorder_tokens(result, expected, fix=True)
