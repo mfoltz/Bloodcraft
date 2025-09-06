@@ -11,8 +11,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
-import subprocess
 from pathlib import Path
 import zipfile
 
@@ -41,12 +39,14 @@ def _combine_segments(model_dir: Path) -> Path:
 
 def _extract_archive(model_zip: Path) -> Path:
     """Extract ``model.zip`` and return the resulting ``.argosmodel`` path."""
-    subprocess.run(["unzip", "-o", model_zip.name], cwd=model_zip.parent, check=True)
+    with zipfile.ZipFile(model_zip, "r") as zf:
+        zf.extractall(model_zip.parent)
     argosmodel = next(model_zip.parent.glob("translate-*.argosmodel"), None)
     if argosmodel is None:
         raise FileNotFoundError(
             f"Failed to extract Argos model from {model_zip}."
         )
+    model_zip.unlink(missing_ok=True)
     return argosmodel
 
 

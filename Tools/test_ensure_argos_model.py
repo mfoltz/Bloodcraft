@@ -71,6 +71,7 @@ def test_combine_and_extract_segments(tmp_path):
 
     argosmodel = ensure_argos_model._extract_archive(model_zip)
     assert argosmodel.is_file()
+    assert not model_zip.exists()
 
     with zipfile.ZipFile(argosmodel, "r") as zf:
         metadata = json.loads(zf.read("metadata.json").decode("utf-8"))
