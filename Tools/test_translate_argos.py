@@ -12,7 +12,8 @@ import platform
 import pytest
 
 import translate_argos
-from translate_argos import ensure_model_installed
+import ensure_argos_model
+from ensure_argos_model import ensure_model
 import token_patterns
 
 
@@ -26,28 +27,36 @@ def _stub_check_output(monkeypatch):
     monkeypatch.setattr(subprocess, "check_output", fake_check_output)
 
 
-def test_raises_when_segments_present_without_model():
+def test_raises_when_segments_present_without_model(monkeypatch):
     with tempfile.TemporaryDirectory() as root:
         model_dir = os.path.join(
             root, "Resources", "Localization", "Models", "xx"
         )
         os.makedirs(model_dir)
         open(os.path.join(model_dir, "translate-test.z01"), "wb").close()
-        with pytest.raises(RuntimeError) as err:
-            ensure_model_installed(root, "xx")
-        assert "cd Resources/Localization/Models/xx" in str(err.value)
+        monkeypatch.setattr(
+            ensure_argos_model.argos_translate,
+            "get_translation_from_codes",
+            lambda src, dst: None,
+        )
+        monkeypatch.setattr(
+            ensure_argos_model.argos_translate, "load_installed_languages", lambda: None
+        )
+        with pytest.raises(FileNotFoundError) as err:
+            ensure_model("xx", Path(root))
+        assert "Missing model segments" in str(err.value)
 
 
 def test_raises_when_model_missing(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        translate_argos.argos_translate,
+        ensure_argos_model.argos_translate,
         "get_translation_from_codes",
         lambda src, dst: None,
     )
-    with pytest.raises(RuntimeError) as err:
-        ensure_model_installed(str(tmp_path), "xx")
+    with pytest.raises(FileNotFoundError) as err:
+        ensure_model("xx", tmp_path)
     msg = str(err.value)
-    assert "Reassemble or install the model" in msg
+    assert "Model directory" in msg
     assert "Resources/Localization/Models/xx" in msg
 
 
@@ -79,7 +88,7 @@ def test_run_dir_creates_outputs(tmp_path, monkeypatch):
         translate_argos.argos_translate, "load_installed_languages", lambda: None
     )
     monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
-    monkeypatch.setattr(translate_argos, "ensure_model_installed", lambda root, dst: None)
+    monkeypatch.setattr(translate_argos, "ensure_model", lambda *a, **k: None)
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
     monkeypatch.setattr(
         sys,
@@ -133,7 +142,7 @@ def test_run_dir_redirects_paths(tmp_path, monkeypatch):
     monkeypatch.setattr(
         translate_argos.argos_translate, "load_installed_languages", lambda: None
     )
-    monkeypatch.setattr(translate_argos, "ensure_model_installed", lambda root, dst: None)
+    monkeypatch.setattr(translate_argos, "ensure_model", lambda *a, **k: None)
     monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
     monkeypatch.setattr(
@@ -196,7 +205,7 @@ def test_summary_and_success_logged_at_info(tmp_path, monkeypatch, caplog):
         translate_argos.argos_translate, "load_installed_languages", lambda: None
     )
     monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
-    monkeypatch.setattr(translate_argos, "ensure_model_installed", lambda root, dst: None)
+    monkeypatch.setattr(translate_argos, "ensure_model", lambda *a, **k: None)
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
     monkeypatch.setattr(
         sys,
@@ -298,7 +307,7 @@ def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
             self.returncode = code
 
     monkeypatch.setattr(
-        translate_argos.argos_translate,
+        ensure_argos_model.argos_translate,
         "get_translation_from_codes",
         lambda src, dst: None,
     )
@@ -306,7 +315,7 @@ def test_exit_when_translation_engine_missing(tmp_path, monkeypatch, caplog):
         translate_argos.argos_translate, "load_installed_languages", lambda: None
     )
     monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
-    monkeypatch.setattr(translate_argos, "ensure_model_installed", lambda root, dst: None)
+    monkeypatch.setattr(translate_argos, "ensure_model", lambda *a, **k: None)
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
     monkeypatch.setattr(
         sys,
@@ -365,7 +374,7 @@ def test_overrides_applied_before_translation(tmp_path, monkeypatch):
         translate_argos.argos_translate, "load_installed_languages", lambda: None
     )
     monkeypatch.setattr(translate_argos, "contains_english", lambda s: False)
-    monkeypatch.setattr(translate_argos, "ensure_model_installed", lambda root, dst: None)
+    monkeypatch.setattr(translate_argos, "ensure_model", lambda *a, **k: None)
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: DummyCompleted())
     monkeypatch.setattr(
         sys,
@@ -436,10 +445,8 @@ def test_exit_when_translation_engine_attribute_error(tmp_path, monkeypatch, cap
     assert exc.value.code == 1
     msg = "No Argos translation model for en->xx"
     assert msg in caplog.text
-    install_hint = "argospm install translate-en_xx"
+    install_hint = "python Tools/ensure_argos_model.py xx"
     assert install_hint in caplog.text
-    rebuild_hint = "cd Resources/Localization/Models/xx"
-    assert rebuild_hint in caplog.text
 
 
 def test_missing_model_logs_install_hint(tmp_path, monkeypatch, caplog):
@@ -454,7 +461,7 @@ def test_missing_model_logs_install_hint(tmp_path, monkeypatch, caplog):
     monkeypatch.setattr(
         translate_argos.argos_translate, "load_installed_languages", lambda: None
     )
-    monkeypatch.setattr(translate_argos, "ensure_model_installed", lambda root, dst: None)
+    monkeypatch.setattr(translate_argos, "ensure_model", lambda *a, **k: None)
     monkeypatch.setattr(
         sys,
         "argv",
@@ -472,10 +479,8 @@ def test_missing_model_logs_install_hint(tmp_path, monkeypatch, caplog):
         with pytest.raises(SystemExit) as exc:
             translate_argos.main()
     assert exc.value.code == 1
-    hint = "argospm install translate-en_es"
+    hint = "python Tools/ensure_argos_model.py es"
     assert hint in caplog.text
-    rebuild_hint = "cd Resources/Localization/Models/es"
-    assert rebuild_hint in caplog.text
 
 
 def test_translates_only_specified_hashes(tmp_path, monkeypatch):
