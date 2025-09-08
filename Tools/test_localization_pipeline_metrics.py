@@ -37,6 +37,19 @@ def test_metrics_written(tmp_path, monkeypatch):
             target = cmd[cmd.index("Tools/translate_argos.py") + 1]
             (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         elif any("fix_tokens.py" in c for c in cmd):
+            if "--metrics-file" in cmd:
+                metrics_path = Path(cmd[cmd.index("--metrics-file") + 1])
+                metrics_path.parent.mkdir(parents=True, exist_ok=True)
+                metrics_path.write_text(
+                    json.dumps(
+                        {
+                            "tokens_restored": 0,
+                            "tokens_reordered": 0,
+                            "tokens_removed": 0,
+                            "token_mismatches": 0,
+                        }
+                    )
+                )
             return SimpleNamespace(returncode=0), 0.0
         elif any("check_fix_tokens_metrics.py" in c for c in cmd):
             return SimpleNamespace(returncode=0), 0.0
@@ -62,15 +75,19 @@ def test_metrics_written(tmp_path, monkeypatch):
     assert lang["token_check"]["returncode"] == 0
     assert lang["translation"]["returncode"] == 0
     assert lang["translation"]["duration"] == 0.0
+    assert lang["token_autofix"]["returncode"] == 0
+    assert lang["token_autofix"]["tokens_restored"] == 0
+    assert lang["token_autofix"]["tokens_reordered"] == 0
+    assert lang["token_autofix"]["tokens_removed"] == 0
+    assert lang["token_autofix"]["token_mismatches"] == 0
     assert lang["token_fix"]["returncode"] == 0
-    assert lang["token_fix"]["tokens_restored"] == 0
-    assert lang["token_fix"]["tokens_reordered"] == 0
     assert lang["token_fix"]["token_mismatches"] == 0
     assert lang["skipped_hash_count"] == 0
     assert lang["success"] is True
     assert metrics["steps"]["token_fix"]["totals"] == {
         "tokens_restored": 0,
         "tokens_reordered": 0,
+        "tokens_removed": 0,
         "token_mismatches": 0,
     }
     assert metrics["steps"]["strict_retry"] == {
@@ -100,6 +117,19 @@ def test_exit_code_on_skipped(tmp_path, monkeypatch):
             target = cmd[cmd.index("Tools/translate_argos.py") + 1]
             (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         elif any("fix_tokens.py" in c for c in cmd):
+            if "--metrics-file" in cmd:
+                metrics_path = Path(cmd[cmd.index("--metrics-file") + 1])
+                metrics_path.parent.mkdir(parents=True, exist_ok=True)
+                metrics_path.write_text(
+                    json.dumps(
+                        {
+                            "tokens_restored": 0,
+                            "tokens_reordered": 0,
+                            "tokens_removed": 0,
+                            "token_mismatches": 0,
+                        }
+                    )
+                )
             return SimpleNamespace(returncode=0), 0.0
         elif any("check_fix_tokens_metrics.py" in c for c in cmd):
             return SimpleNamespace(returncode=0), 0.0
@@ -155,6 +185,19 @@ def test_strict_retry_metrics(tmp_path, monkeypatch):
         elif any("review_skipped.py" in c for c in cmd):
             calls["review"] += 1
         elif any("fix_tokens.py" in c for c in cmd):
+            if "--metrics-file" in cmd:
+                metrics_path = Path(cmd[cmd.index("--metrics-file") + 1])
+                metrics_path.parent.mkdir(parents=True, exist_ok=True)
+                metrics_path.write_text(
+                    json.dumps(
+                        {
+                            "tokens_restored": 0,
+                            "tokens_reordered": 0,
+                            "tokens_removed": 0,
+                            "token_mismatches": 0,
+                        }
+                    )
+                )
             return SimpleNamespace(returncode=0), 0.0
         elif any("check_fix_tokens_metrics.py" in c for c in cmd):
             return SimpleNamespace(returncode=0), 0.0
@@ -206,6 +249,19 @@ def test_custom_output_paths(tmp_path, monkeypatch):
             target = cmd[cmd.index("Tools/translate_argos.py") + 1]
             (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         elif any("fix_tokens.py" in c for c in cmd):
+            if "--metrics-file" in cmd:
+                metrics_path = Path(cmd[cmd.index("--metrics-file") + 1])
+                metrics_path.parent.mkdir(parents=True, exist_ok=True)
+                metrics_path.write_text(
+                    json.dumps(
+                        {
+                            "tokens_restored": 0,
+                            "tokens_reordered": 0,
+                            "tokens_removed": 0,
+                            "token_mismatches": 0,
+                        }
+                    )
+                )
             return SimpleNamespace(returncode=0), 0.0
         elif any("check_fix_tokens_metrics.py" in c for c in cmd):
             return SimpleNamespace(returncode=0), 0.0
@@ -238,6 +294,19 @@ def test_language_mismatch_detection(tmp_path, monkeypatch):
             target = cmd[cmd.index("Tools/translate_argos.py") + 1]
             (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         elif any("fix_tokens.py" in c for c in cmd):
+            if "--metrics-file" in cmd:
+                metrics_path = Path(cmd[cmd.index("--metrics-file") + 1])
+                metrics_path.parent.mkdir(parents=True, exist_ok=True)
+                metrics_path.write_text(
+                    json.dumps(
+                        {
+                            "tokens_restored": 0,
+                            "tokens_reordered": 0,
+                            "tokens_removed": 0,
+                            "token_mismatches": 0,
+                        }
+                    )
+                )
             return SimpleNamespace(returncode=0), 0.0
         elif any("check_fix_tokens_metrics.py" in c for c in cmd):
             return SimpleNamespace(returncode=0), 0.0
@@ -275,6 +344,19 @@ def test_wrong_language_detected(tmp_path, monkeypatch):
             target = cmd[cmd.index("Tools/translate_argos.py") + 1]
             (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         elif any("fix_tokens.py" in c for c in cmd):
+            if "--metrics-file" in cmd:
+                metrics_path = Path(cmd[cmd.index("--metrics-file") + 1])
+                metrics_path.parent.mkdir(parents=True, exist_ok=True)
+                metrics_path.write_text(
+                    json.dumps(
+                        {
+                            "tokens_restored": 0,
+                            "tokens_reordered": 0,
+                            "tokens_removed": 0,
+                            "token_mismatches": 0,
+                        }
+                    )
+                )
             return SimpleNamespace(returncode=0), 0.0
         elif any("check_fix_tokens_metrics.py" in c for c in cmd):
             return SimpleNamespace(returncode=0), 0.0

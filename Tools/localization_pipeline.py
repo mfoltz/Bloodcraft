@@ -149,26 +149,23 @@ def process_language(name: str, path: Path, logger: logging.Logger) -> dict:
     lang_metrics["skipped"] = False
     t_start = timestamp()
     run_dir = ROOT / "translations" / code / datetime.now().strftime("%Y%m%d-%H%M%S-%f")
-    result, duration = run(
-        [
-            sys.executable,
-            "Tools/translate_argos.py",
-            str(path.relative_to(ROOT)),
-            "--to",
-            code,
-            "--run-dir",
-            str(run_dir),
-            "--batch-size",
-            "100",
-            "--max-retries",
-            "3",
-            "--log-level",
-            "INFO",
-            "--overwrite",
-        ],
-        check=False,
-        logger=logger,
-    )
+    translate_cmd = [
+        sys.executable,
+        "Tools/translate_argos.py",
+        str(path.relative_to(ROOT)),
+        "--to",
+        code,
+        "--run-dir",
+        str(run_dir),
+        "--batch-size",
+        "100",
+        "--max-retries",
+        "3",
+        "--log-level",
+        "INFO",
+        "--overwrite",
+    ]
+    result, duration = run(translate_cmd, check=False, logger=logger)
     metrics_file_path = run_dir / "metrics.json"
     expected_file = str(path.relative_to(ROOT))
     if not metrics_file_path.is_file():
@@ -235,13 +232,6 @@ def process_language(name: str, path: Path, logger: logging.Logger) -> dict:
                 logger=logger,
             )
 
-    t_end = timestamp()
-    lang_metrics["translation"] = {
-        "start": t_start,
-        "end": t_end,
-        "duration": duration,
-        "returncode": result.returncode,
-    }
     skipped_counts: Dict[str, int] = {}
     if report.is_file():
         with report.open("r", encoding="utf-8") as fp:
@@ -255,20 +245,55 @@ def process_language(name: str, path: Path, logger: logging.Logger) -> dict:
         "manual_review": len(manual_review_hashes),
     }
 
-    mismatches = 0
-    with path.open("r", encoding="utf-8") as fp:
-        messages = json.load(fp).get("Messages", {})
-    for txt in messages.values():
-        if language_utils.has_words(txt) and not language_utils.contains_language_code(txt, code):
-            mismatches += 1
-    lang_metrics["language_mismatches"] = mismatches
-    if mismatches:
-        logger.error(
-            "%s: detected %d strings that do not match language code %s",
-            name,
-            mismatches,
-            code,
-        )
+    root_metrics = ROOT / "fix_tokens_metrics.json"
+    if root_metrics.exists():
+        root_metrics.unlink()
+    logger.info("Auto-fixing tokens for %s", name)
+    t_auto_start = timestamp()
+    autofix_proc, _ = run(
+        [
+            sys.executable,
+            "Tools/fix_tokens.py",
+            str(path.relative_to(ROOT)),
+            "--metrics-file",
+            str(root_metrics),
+            "--mismatches-file",
+            str(run_dir / "token_mismatches.json"),
+        ],
+        check=False,
+        logger=logger,
+    )
+    t_auto_end = timestamp()
+    auto_data = {
+        "tokens_restored": 0,
+        "tokens_reordered": 0,
+        "tokens_removed": 0,
+        "token_mismatches": 0,
+    }
+    if root_metrics.is_file():
+        with root_metrics.open("r", encoding="utf-8") as fp:
+            data = json.load(fp)
+            entry = data[-1] if isinstance(data, list) else data
+            for key in auto_data:
+                auto_data[key] = entry.get(key, 0)
+    lang_metrics["token_autofix"] = {
+        "start": t_auto_start,
+        "end": t_auto_end,
+        "returncode": autofix_proc.returncode,
+        **auto_data,
+    }
+
+    replacements = (
+        auto_data.get("tokens_restored", 0)
+        + auto_data.get("tokens_reordered", 0)
+        + auto_data.get("tokens_removed", 0)
+    )
+    duration_total = duration
+    if replacements:
+        logger.info("Re-running translation for %s after token fixes", name)
+        result, rerun_duration = run(translate_cmd, check=False, logger=logger)
+        duration_total += rerun_duration
+
     validate_proc, _ = run(
         [sys.executable, "Tools/validate_translation_run.py", "--run-dir", str(run_dir)],
         check=False,
@@ -276,7 +301,7 @@ def process_language(name: str, path: Path, logger: logging.Logger) -> dict:
     )
     lang_metrics["validation"] = {"returncode": validate_proc.returncode}
 
-    logger.info("Fixing tokens for %s", name)
+    logger.info("Verifying tokens for %s", name)
     t_fix_start = timestamp()
     metrics_file = ROOT / f"fix_tokens_{name}.json"
     fix_proc, _ = run(
@@ -308,6 +333,29 @@ def process_language(name: str, path: Path, logger: logging.Logger) -> dict:
         "end": t_fix_end,
         "returncode": fix_proc.returncode,
         **token_data,
+    }
+
+    mismatches = 0
+    with path.open("r", encoding="utf-8") as fp:
+        messages = json.load(fp).get("Messages", {})
+    for txt in messages.values():
+        if language_utils.has_words(txt) and not language_utils.contains_language_code(txt, code):
+            mismatches += 1
+    lang_metrics["language_mismatches"] = mismatches
+    if mismatches:
+        logger.error(
+            "%s: detected %d strings that do not match language code %s",
+            name,
+            mismatches,
+            code,
+        )
+
+    t_end = timestamp()
+    lang_metrics["translation"] = {
+        "start": t_start,
+        "end": t_end,
+        "duration": duration_total,
+        "returncode": result.returncode,
     }
 
     return {
@@ -434,6 +482,7 @@ def main() -> None:
             "totals": {
                 "tokens_restored": 0,
                 "tokens_reordered": 0,
+                "tokens_removed": 0,
                 "token_mismatches": 0,
             },
         }
@@ -458,10 +507,11 @@ def main() -> None:
             run_dir = res.get("run_dir")
             if run_dir:
                 run_dirs.append(run_dir)
-            token_data = lang_metrics.get("token_fix", {})
+            token_data = lang_metrics.get("token_autofix", {})
             totals = metrics["steps"]["token_fix"]["totals"]
             totals["tokens_restored"] += token_data.get("tokens_restored", 0)
             totals["tokens_reordered"] += token_data.get("tokens_reordered", 0)
+            totals["tokens_removed"] += token_data.get("tokens_removed", 0)
             totals["token_mismatches"] += token_data.get("token_mismatches", 0)
             retry_data = lang_metrics.get("strict_retry", {})
             metrics["steps"]["strict_retry"]["retried"] += retry_data.get(
@@ -514,6 +564,7 @@ def main() -> None:
             if lang_metrics.get("skipped"):
                 continue
             translation_ok = lang_metrics["translation"]["returncode"] == 0
+            autofix_ok = lang_metrics["token_autofix"]["returncode"] == 0
             token_ok = lang_metrics["token_fix"]["returncode"] == 0
             mismatch_ok = lang_metrics["token_fix"]["token_mismatches"] == 0
             validation_ok = lang_metrics.get("validation", {}).get("returncode", 0) == 0
@@ -522,6 +573,7 @@ def main() -> None:
             lang_metrics["skipped_hash_count"] = skipped_total
             success = (
                 translation_ok
+                and autofix_ok
                 and token_ok
                 and mismatch_ok
                 and language_ok
