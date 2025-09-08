@@ -38,6 +38,8 @@ def test_metrics_written(tmp_path, monkeypatch):
             (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         elif any("fix_tokens.py" in c for c in cmd):
             return SimpleNamespace(returncode=0), 0.0
+        elif any("check_fix_tokens_metrics.py" in c for c in cmd):
+            return SimpleNamespace(returncode=0), 0.0
         return SimpleNamespace(returncode=0), 0.0
 
     monkeypatch.setattr(localization_pipeline, "run", fake_run)
@@ -53,6 +55,7 @@ def test_metrics_written(tmp_path, monkeypatch):
         "token_fix",
         "strict_retry",
         "verification",
+        "token_metrics",
     }
     assert "French" in metrics["languages"]
     lang = metrics["languages"]["French"]
@@ -75,6 +78,7 @@ def test_metrics_written(tmp_path, monkeypatch):
         "manual_review": 0,
     }
     assert metrics["steps"]["verification"]["duration"] == 0.0
+    assert metrics["steps"]["token_metrics"]["returncode"] == 0
 
 
 def test_exit_code_on_skipped(tmp_path, monkeypatch):
@@ -96,6 +100,8 @@ def test_exit_code_on_skipped(tmp_path, monkeypatch):
             target = cmd[cmd.index("Tools/translate_argos.py") + 1]
             (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         elif any("fix_tokens.py" in c for c in cmd):
+            return SimpleNamespace(returncode=0), 0.0
+        elif any("check_fix_tokens_metrics.py" in c for c in cmd):
             return SimpleNamespace(returncode=0), 0.0
         return SimpleNamespace(returncode=0), 0.0
 
@@ -150,6 +156,8 @@ def test_strict_retry_metrics(tmp_path, monkeypatch):
             calls["review"] += 1
         elif any("fix_tokens.py" in c for c in cmd):
             return SimpleNamespace(returncode=0), 0.0
+        elif any("check_fix_tokens_metrics.py" in c for c in cmd):
+            return SimpleNamespace(returncode=0), 0.0
         return SimpleNamespace(returncode=0), 0.0
 
     monkeypatch.setattr(localization_pipeline, "run", fake_run)
@@ -199,6 +207,8 @@ def test_custom_output_paths(tmp_path, monkeypatch):
             (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         elif any("fix_tokens.py" in c for c in cmd):
             return SimpleNamespace(returncode=0), 0.0
+        elif any("check_fix_tokens_metrics.py" in c for c in cmd):
+            return SimpleNamespace(returncode=0), 0.0
         return SimpleNamespace(returncode=0), 0.0
 
     monkeypatch.setattr(localization_pipeline, "run", fake_run)
@@ -228,6 +238,8 @@ def test_language_mismatch_detection(tmp_path, monkeypatch):
             target = cmd[cmd.index("Tools/translate_argos.py") + 1]
             (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         elif any("fix_tokens.py" in c for c in cmd):
+            return SimpleNamespace(returncode=0), 0.0
+        elif any("check_fix_tokens_metrics.py" in c for c in cmd):
             return SimpleNamespace(returncode=0), 0.0
         return SimpleNamespace(returncode=0), 0.0
 
@@ -264,6 +276,8 @@ def test_wrong_language_detected(tmp_path, monkeypatch):
             (run_dir / "metrics.json").write_text(json.dumps({"file": target}))
         elif any("fix_tokens.py" in c for c in cmd):
             return SimpleNamespace(returncode=0), 0.0
+        elif any("check_fix_tokens_metrics.py" in c for c in cmd):
+            return SimpleNamespace(returncode=0), 0.0
         return SimpleNamespace(returncode=0), 0.0
 
     monkeypatch.setattr(localization_pipeline, "run", fake_run)
@@ -290,6 +304,8 @@ def test_abort_on_token_check_failure(tmp_path, monkeypatch):
     def fake_run(cmd, *, check=True, logger):
         if any("fix_tokens.py" in c for c in cmd):
             return SimpleNamespace(returncode=1), 0.0
+        elif any("check_fix_tokens_metrics.py" in c for c in cmd):
+            return SimpleNamespace(returncode=0), 0.0
         return SimpleNamespace(returncode=0), 0.0
 
     monkeypatch.setattr(localization_pipeline, "run", fake_run)
