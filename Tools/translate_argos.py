@@ -1417,15 +1417,24 @@ def _run_translation(
             os.path.join(os.path.dirname(__file__), "fix_tokens.py"),
             "--root",
             root,
-            "--reorder",
+            "--check-only",
             "--metrics-file",
             os.path.join(root, "fix_tokens_metrics.json"),
+            "--mismatches-file",
+            os.path.join(args.run_dir, "token_mismatches.json"),
         ]
         if args.lenient_tokens:
             cmd.append("--allow-mismatch")
         cmd.append(target_path)
         result = subprocess.run(cmd)
         fix_tokens_code = result.returncode
+
+        if fix_tokens_code:
+            logger.error(
+                "Token mismatches detected. Run `python Tools/fix_tokens.py %s --mismatches-file %s` to fix them.",
+                target_path,
+                os.path.join(args.run_dir, "token_mismatches.json"),
+            )
 
         validate_cmd = [
             sys.executable,
