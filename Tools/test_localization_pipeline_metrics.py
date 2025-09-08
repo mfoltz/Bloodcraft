@@ -47,6 +47,7 @@ def test_metrics_written(tmp_path, monkeypatch):
                             "tokens_reordered": 0,
                             "tokens_removed": 0,
                             "token_mismatches": 0,
+                            "tokens_normalized": 0,
                         }
                     )
                 )
@@ -80,6 +81,7 @@ def test_metrics_written(tmp_path, monkeypatch):
     assert lang["token_autofix"]["tokens_reordered"] == 0
     assert lang["token_autofix"]["tokens_removed"] == 0
     assert lang["token_autofix"]["token_mismatches"] == 0
+    assert lang["token_autofix"]["tokens_normalized"] == 0
     assert lang["token_fix"]["returncode"] == 0
     assert lang["token_fix"]["token_mismatches"] == 0
     assert lang["skipped_hash_count"] == 0
@@ -89,6 +91,7 @@ def test_metrics_written(tmp_path, monkeypatch):
         "tokens_reordered": 0,
         "tokens_removed": 0,
         "token_mismatches": 0,
+        "tokens_normalized": 0,
     }
     assert metrics["steps"]["strict_retry"] == {
         "retried": 0,
@@ -127,6 +130,7 @@ def test_exit_code_on_skipped(tmp_path, monkeypatch):
                             "tokens_reordered": 0,
                             "tokens_removed": 0,
                             "token_mismatches": 0,
+                            "tokens_normalized": 0,
                         }
                     )
                 )
@@ -147,6 +151,7 @@ def test_exit_code_on_skipped(tmp_path, monkeypatch):
     assert lang["skipped_hashes"] == {"timeout": 1}
     assert lang["token_fix"]["tokens_restored"] == 0
     assert lang["token_fix"]["token_mismatches"] == 0
+    assert lang["token_fix"]["tokens_normalized"] == 0
     assert lang["success"] is False
 
 

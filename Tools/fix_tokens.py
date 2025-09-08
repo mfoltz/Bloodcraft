@@ -29,8 +29,8 @@ logger = logging.getLogger(__name__)
 
 
 def replace_placeholders(
-    value: str, tokens: List[str]
-) -> Tuple[str, bool, bool, List[str], List[str], List[int]]:
+    value: str, tokens: List[str], *, soft: bool = False
+) -> Tuple[str, bool, bool, List[str], List[str], List[int], List[Tuple[str, str]]]:
     value = normalize_tokens(value)
     matches = list(TOKEN_PLACEHOLDER.finditer(value))
     restored_positions: List[int] = []
@@ -103,13 +103,54 @@ def replace_placeholders(
         replaced = True
     value = "".join(parts)
 
+    normalized_pairs: List[Tuple[str, str]] = []
+    if soft:
+        def canonical(tok: str) -> str:
+            return re.sub(r"\s+", "", tok).strip(".,;:!?").lower()
+
+        matches = list(TOKEN_PATTERN.finditer(value))
+        parts = []
+        last = 0
+        canonical_map: Dict[str, List[str]] = {}
+        for t in tokens:
+            canonical_map.setdefault(canonical(t), []).append(t)
+        for m in matches:
+            tok = m.group(0)
+            canon = canonical(tok)
+            expected_list = canonical_map.get(canon)
+            if expected_list:
+                baseline_tok = expected_list.pop(0)
+                if tok != baseline_tok:
+                    parts.append(value[last:m.start()])
+                    parts.append(baseline_tok)
+                    normalized_pairs.append((tok, baseline_tok))
+                    last = m.end()
+                    replaced = True
+                else:
+                    parts.append(value[last:m.end()])
+                    last = m.end()
+            else:
+                parts.append(value[last:m.end()])
+                last = m.end()
+        parts.append(value[last:])
+        if normalized_pairs:
+            value = "".join(parts)
+
     tokenized = extract_tokens(value)
     expected = Counter(tokens)
     found = Counter(tokenized)
     missing = list((expected - found).elements())
     extra = list((found - expected).elements())
     mismatch = bool(missing or extra)
-    return value, replaced, mismatch, missing, removed_extras, restored_positions
+    return (
+        value,
+        replaced,
+        mismatch,
+        missing,
+        removed_extras,
+        restored_positions,
+        normalized_pairs,
+    )
 
 
 def reorder_tokens_in_text(value: str, tokens: List[str]) -> Tuple[str, bool]:
@@ -168,6 +209,7 @@ class Counters:
     tokens_reordered: int = 0
     token_mismatches: int = 0
     tokens_removed: int = 0
+    tokens_normalized: int = 0
 
 
 def process_messages_file(
@@ -177,6 +219,7 @@ def process_messages_file(
     reorder: bool,
     allow_mismatch: bool,
     root: Path,
+    soft: bool,
 ) -> Tuple[Counters, List[Dict[str, List[str]]]]:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -185,9 +228,15 @@ def process_messages_file(
     counters = Counters()
     mismatches: List[Dict[str, List[str]]] = []
     for key, text in list(messages.items()):
-        new_text, replaced, bad, missing, removed, restored_positions = replace_placeholders(
-            text, baseline.get(key, [])
-        )
+        (
+            new_text,
+            replaced,
+            bad,
+            missing,
+            removed,
+            restored_positions,
+            normalized,
+        ) = replace_placeholders(text, baseline.get(key, []), soft=soft)
         reordered = False
         if reorder and not bad:
             new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(key, []))
@@ -225,6 +274,12 @@ def process_messages_file(
         if reordered:
             actions.append("tokens reordered")
             counters.tokens_reordered += 1
+        if normalized:
+            actions.append(
+                "tokens normalized "
+                + ", ".join(f"{a}->{b}" for a, b in normalized)
+            )
+            counters.tokens_normalized += len(normalized)
         if actions:
             logger.info("%s: %s %s", path, key, " and ".join(actions))
             if not check_only:
@@ -243,6 +298,7 @@ def process_root_file(
     reorder: bool,
     allow_mismatch: bool,
     root: Path,
+    soft: bool,
 ) -> Tuple[Counters, List[Dict[str, List[str]]]]:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -258,9 +314,15 @@ def process_root_file(
         text = node[text_key]
         if not isinstance(text, str):
             continue
-        new_text, replaced, bad, missing, removed, restored_positions = replace_placeholders(
-            text, baseline.get(guid, [])
-        )
+        (
+            new_text,
+            replaced,
+            bad,
+            missing,
+            removed,
+            restored_positions,
+            normalized,
+        ) = replace_placeholders(text, baseline.get(guid, []), soft=soft)
         reordered = False
         if reorder and not bad:
             new_text, reordered = reorder_tokens_in_text(new_text, baseline.get(guid, []))
@@ -298,6 +360,12 @@ def process_root_file(
         if reordered:
             actions.append("tokens reordered")
             counters.tokens_reordered += 1
+        if normalized:
+            actions.append(
+                "tokens normalized "
+                + ", ".join(f"{a}->{b}" for a, b in normalized)
+            )
+            counters.tokens_normalized += len(normalized)
         if actions:
             logger.info("%s: %s %s", path, guid, " and ".join(actions))
             if not check_only:
@@ -317,6 +385,11 @@ def main() -> None:
         "--allow-mismatch",
         action="store_true",
         help="Only warn when token counts differ",
+    )
+    ap.add_argument(
+        "--soft",
+        action="store_true",
+        help="Tolerate case/spacing differences and normalize tokens",
     )
     ap.add_argument(
         "--reorder",
@@ -387,6 +460,7 @@ def main() -> None:
                 args.reorder,
                 args.allow_mismatch,
                 root,
+                args.soft,
             )
         else:
             result, mismatches = process_root_file(
@@ -396,11 +470,13 @@ def main() -> None:
                 args.reorder,
                 args.allow_mismatch,
                 root,
+                args.soft,
             )
         totals.tokens_restored += result.tokens_restored
         totals.tokens_reordered += result.tokens_reordered
         totals.token_mismatches += result.token_mismatches
         totals.tokens_removed += result.tokens_removed
+        totals.tokens_normalized += result.tokens_normalized
         all_mismatches.extend(mismatches)
 
     metrics_path = None
@@ -413,6 +489,7 @@ def main() -> None:
             "tokens_reordered": totals.tokens_reordered,
             "token_mismatches": totals.token_mismatches,
             "tokens_removed": totals.tokens_removed,
+            "tokens_normalized": totals.tokens_normalized,
             "mismatches": all_mismatches,
         }
         existing: List[dict] = []

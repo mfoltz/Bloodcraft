@@ -269,6 +269,7 @@ def process_language(name: str, path: Path, logger: logging.Logger) -> dict:
         "tokens_reordered": 0,
         "tokens_removed": 0,
         "token_mismatches": 0,
+        "tokens_normalized": 0,
     }
     if root_metrics.is_file():
         with root_metrics.open("r", encoding="utf-8") as fp:
@@ -287,6 +288,7 @@ def process_language(name: str, path: Path, logger: logging.Logger) -> dict:
         auto_data.get("tokens_restored", 0)
         + auto_data.get("tokens_reordered", 0)
         + auto_data.get("tokens_removed", 0)
+        + auto_data.get("tokens_normalized", 0)
     )
     duration_total = duration
     if replacements:
@@ -323,6 +325,7 @@ def process_language(name: str, path: Path, logger: logging.Logger) -> dict:
         "tokens_restored": 0,
         "tokens_reordered": 0,
         "token_mismatches": 0,
+        "tokens_normalized": 0,
     }
     if metrics_file.is_file():
         with metrics_file.open("r", encoding="utf-8") as fp:
@@ -484,6 +487,7 @@ def main() -> None:
                 "tokens_reordered": 0,
                 "tokens_removed": 0,
                 "token_mismatches": 0,
+                "tokens_normalized": 0,
             },
         }
         metrics["steps"]["strict_retry"] = {"retried": 0, "manual_review": 0}
@@ -513,6 +517,7 @@ def main() -> None:
             totals["tokens_reordered"] += token_data.get("tokens_reordered", 0)
             totals["tokens_removed"] += token_data.get("tokens_removed", 0)
             totals["token_mismatches"] += token_data.get("token_mismatches", 0)
+            totals["tokens_normalized"] += token_data.get("tokens_normalized", 0)
             retry_data = lang_metrics.get("strict_retry", {})
             metrics["steps"]["strict_retry"]["retried"] += retry_data.get(
                 "retried", 0

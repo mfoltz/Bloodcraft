@@ -10,11 +10,19 @@ import translate_argos
 def test_replace_placeholders_drops_unexpected_tokens():
     tokens = ["{x}"]
     value = "start<color=red></color>{x}{y}"
-    new_value, replaced, mismatch, missing, extra, restored = fix_tokens.replace_placeholders(value, tokens)
+    (
+        new_value,
+        replaced,
+        mismatch,
+        missing,
+        extra,
+        restored,
+        normalized,
+    ) = fix_tokens.replace_placeholders(value, tokens)
     assert new_value == "start{x}"
     assert replaced and not mismatch and not missing
     assert extra == ["<color=red>", "</color>", "{y}"]
-    assert not restored
+    assert not restored and not normalized
 
 
 def test_check_only_passes_after_removal(tmp_path, monkeypatch):
@@ -45,6 +53,7 @@ def test_check_only_passes_after_removal(tmp_path, monkeypatch):
     assert data["Messages"]["hash"] == "start{x}"
     metrics = json.loads(metrics_path.read_text())[-1]
     assert metrics["tokens_removed"] == 3
+    assert metrics["tokens_normalized"] == 0
 
     monkeypatch.setattr(
         sys,
@@ -72,11 +81,17 @@ def test_restore_missing_token_and_reorder_nested():
     tokens = ["<color=red>", "{0}", "{1}", "</color>"]
     # Translation dropped the third token and shuffled the rest.
     value = "[[TOKEN_1]][[TOKEN_0]][[TOKEN_3]]"
-    new_value, replaced, mismatch, missing, removed, restored = fix_tokens.replace_placeholders(
-        value, tokens
-    )
+    (
+        new_value,
+        replaced,
+        mismatch,
+        missing,
+        removed,
+        restored,
+        normalized,
+    ) = fix_tokens.replace_placeholders(value, tokens)
     assert replaced and not mismatch
-    assert restored == [2]
+    assert restored == [2] and not normalized
     new_value, changed = fix_tokens.reorder_tokens_in_text(new_value, tokens)
     assert changed
     assert new_value == "<color=red>{0}{1}</color>"

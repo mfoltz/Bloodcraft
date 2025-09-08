@@ -133,7 +133,7 @@ Argos models are stored under `Resources/Localization/Models/<LANG>` as split ar
    python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
    ```
 
-   Run this check after every translation pass. If mismatches are reported, run `fix_tokens.py` without `--check-only` to repair the file and re-run the translator.
+   Run this check after every translation pass. If mismatches are reported, run `fix_tokens.py` without `--check-only` to repair the file and re-run the translator. Use `--soft` to tolerate case or spacing differences and minor punctuation around tokens; the script normalizes those entries and logs the adjustments instead of failing.
 
 4. **Handle skipped rows**
 
