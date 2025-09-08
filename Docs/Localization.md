@@ -40,6 +40,16 @@ python Tools/propagate_hashes.py Resources/Localization/Messages/<Language>.json
 
 The script preserves existing translations, adds any new English hashes, and removes obsolete ones. Run it before any translation work so each language file stays in sync with English. See [`Tools/propagate_hashes.py`](../Tools/propagate_hashes.py) for details.
 
+## Glossary
+
+A shared glossary lives at `Resources/Localization/glossary.json`. Regenerate it from official localization files when terms change:
+
+```bash
+python Tools/generate_glossary.py
+```
+
+Run `make check-glossary` during QA to flag translations that diverge from the glossary. Translators should consult this file and expand `glossary_terms.txt` during reviews.
+
 ## Automated Translation for Messages
 
 Only the JSON files in `Resources/Localization/Messages` contain user-facing messages. Use Argos Translate to automate translating these files.
