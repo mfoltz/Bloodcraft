@@ -16,7 +16,11 @@ argos_stub.translate = types.SimpleNamespace(
     get_translation_from_codes=lambda *a, **k: None,
     load_installed_languages=lambda: None,
 )
+argos_stub.__path__ = []  # mark as package so submodules can be imported
+argos_package_stub = types.ModuleType("argostranslate.package")
+argos_package_stub.get_available_packages = lambda *a, **k: []
 sys.modules.setdefault("argostranslate", argos_stub)
+sys.modules.setdefault("argostranslate.package", argos_package_stub)
 
 import translate_argos
 import fix_tokens
@@ -150,8 +154,8 @@ def test_many_placeholders_round_trip():
     text = "".join(f"{{{i}}}" for i in range(15))
     safe, tokens = translate_argos.protect_strict(text)
     assert len(tokens) == 15
-    wrapped, mapping = translate_argos.wrap_placeholders(safe)
-    unwrapped = translate_argos.unwrap_placeholders(wrapped, mapping)
+    wrapped, mapping, threshold = translate_argos.wrap_placeholders(safe)
+    unwrapped = translate_argos.unwrap_placeholders(wrapped, mapping, threshold)
     restored = translate_argos.unprotect(unwrapped, tokens)
     assert restored == text
 
@@ -160,9 +164,9 @@ def test_unwrap_restores_translated_order():
     count = 15
     text = "".join(f"{{{i}}}" for i in range(count))
     safe, tokens = translate_argos.protect_strict(text)
-    wrapped, mapping = translate_argos.wrap_placeholders(safe)
+    wrapped, mapping, threshold = translate_argos.wrap_placeholders(safe)
     translated_wrapped = wrapped[::-1]
-    unwrapped = translate_argos.unwrap_placeholders(translated_wrapped, mapping)
+    unwrapped = translate_argos.unwrap_placeholders(translated_wrapped, mapping, threshold)
     restored = translate_argos.unprotect(unwrapped, tokens)
     expected = "".join(f"{{{i}}}" for i in reversed(range(count)))
     assert restored == expected
@@ -173,12 +177,17 @@ def test_wrap_threshold_boundary(monkeypatch, threshold):
     monkeypatch.setattr(translate_argos, "PLACEHOLDER_WRAP_THRESHOLD", threshold)
     text = "".join(f"{{{i}}}" for i in range(threshold))
     safe, _ = translate_argos.protect_strict(text)
-    wrapped, _ = translate_argos.wrap_placeholders(safe)
+    wrapped, mapping, used_threshold = translate_argos.wrap_placeholders(safe)
     assert wrapped == safe
+    assert used_threshold == threshold
+    unwrapped = translate_argos.unwrap_placeholders(wrapped, mapping, used_threshold)
+    assert unwrapped == safe
     text2 = "".join(f"{{{i}}}" for i in range(threshold + 1))
     safe2, _ = translate_argos.protect_strict(text2)
-    wrapped2, _ = translate_argos.wrap_placeholders(safe2)
+    wrapped2, mapping2, used_threshold2 = translate_argos.wrap_placeholders(safe2)
     assert wrapped2 != safe2
+    unwrapped2 = translate_argos.unwrap_placeholders(wrapped2, mapping2, used_threshold2)
+    assert unwrapped2 == safe2
 
 
 def test_extra_placeholders_trimmed(tmp_path, monkeypatch, caplog):

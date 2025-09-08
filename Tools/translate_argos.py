@@ -117,44 +117,72 @@ FATAL_ARGOS_ERRORS = [
 class FatalTranslationError(Exception):
     """Raised when Argos Translate encounters an unrecoverable error."""
 
+# Base code point for encoding wrapped placeholders.
 PLACEHOLDER_BASE = 0xE000
+
+# Baseline wrap threshold used when no heuristic override is provided.
 DEFAULT_WRAP_THRESHOLD = 5
-PLACEHOLDER_WRAP_THRESHOLD = DEFAULT_WRAP_THRESHOLD
+
+# Optional override supplied via the command line. When ``None`` the
+# threshold is determined dynamically for each line based on its length.
+PLACEHOLDER_WRAP_THRESHOLD: int | None = None
 
 
-def wrap_placeholders(text: str) -> tuple[str, list[str]]:
+def _compute_wrap_threshold(text: str, ids: list[str]) -> int:
+    """Compute the placeholder wrapping threshold for ``text``.
+
+    The threshold scales with line length to better handle large strings with
+    many placeholders. Callers may override this heuristic via the
+    ``--wrap-threshold`` command-line option which sets
+    :data:`PLACEHOLDER_WRAP_THRESHOLD`.
+    """
+
+    if PLACEHOLDER_WRAP_THRESHOLD is not None:
+        return PLACEHOLDER_WRAP_THRESHOLD
+
+    # Allow one additional placeholder for roughly every 20 characters. This
+    # simple heuristic grows the threshold with line length while defaulting to
+    # :data:`DEFAULT_WRAP_THRESHOLD` for short lines.
+    length_factor = max(len(text) // 20, DEFAULT_WRAP_THRESHOLD)
+    return length_factor
+
+
+def wrap_placeholders(text: str) -> tuple[str, list[str], int]:
     """Optionally encode ``[[TOKEN_n]]`` placeholders as private-use characters.
 
-    For lines with a large number of placeholders, Argos tends to mis-handle
-    the ``[[TOKEN_n]]`` syntax. When the number of tokens exceeds
-    :data:`PLACEHOLDER_WRAP_THRESHOLD`, placeholders are replaced with sequential
+    The decision to wrap is based on a dynamically computed threshold which
+    scales with the length of ``text``. For lines with many placeholders Argos
+    tends to mis-handle the ``[[TOKEN_n]]`` syntax, so when the number of
+    tokens exceeds the computed threshold they are replaced with sequential
     characters from the Unicode private-use area. Otherwise the input is
-    returned unchanged. In all cases the list of token identifiers is returned
-    to allow later validation.
+    returned unchanged. In all cases the list of token identifiers and the
+    threshold used are returned to allow later validation.
     """
 
     ids = TOKEN_RE.findall(text)
-    if len(ids) <= PLACEHOLDER_WRAP_THRESHOLD:
-        return text, ids
+    threshold = _compute_wrap_threshold(text, ids)
+    if len(ids) <= threshold:
+        return text, ids, threshold
 
     counter = iter(range(len(ids)))
 
     def repl(_: re.Match) -> str:
         return chr(PLACEHOLDER_BASE + next(counter))
 
-    return TOKEN_RE.sub(repl, text), ids
+    return TOKEN_RE.sub(repl, text), ids, threshold
 
 
-def unwrap_placeholders(text: str, ids: list[str]) -> str:
+def unwrap_placeholders(text: str, ids: list[str], threshold: int) -> str:
     """Restore placeholders and verify token integrity.
 
-    If wrapping occurred, encoded characters are translated back to their
-    ``[[TOKEN_n]]`` forms. Otherwise, the function asserts that the set of
-    placeholders in ``text`` matches ``ids`` (ignoring order) and returns the
-    text unchanged.
+    ``threshold`` must match the value returned by :func:`wrap_placeholders` for
+    the original line. If wrapping occurred, encoded characters are translated
+    back to their ``[[TOKEN_n]]`` forms. Otherwise the function asserts that the
+    set of placeholders in ``text`` matches ``ids`` (ignoring order) and returns
+    the text unchanged.
     """
 
-    if len(ids) > PLACEHOLDER_WRAP_THRESHOLD:
+    if len(ids) > threshold:
         result: list[str] = []
         for ch in text:
             code = ord(ch)
@@ -167,6 +195,10 @@ def unwrap_placeholders(text: str, ids: list[str]) -> str:
                 result.append(ch)
         return "".join(result)
 
+    # When no wrapping occurred ensure tokens were preserved exactly.
+    found = TOKEN_RE.findall(text)
+    if Counter(found) != Counter(ids):
+        raise ValueError("Token mismatch after translation")
     return text
 
 
@@ -391,12 +423,12 @@ def translate_batch(
     timed_out: List[int] = []
     with ThreadPoolExecutor(max_workers=1) as executor:
         for idx, line in enumerate(lines):
-            wrapped, ids = wrap_placeholders(line)
+            wrapped, ids, threshold = wrap_placeholders(line)
             for attempt in range(1, max_retries + 1):
                 future = executor.submit(translator.translate, wrapped)
                 try:
                     translated = future.result(timeout=timeout)
-                    results.append(unwrap_placeholders(translated, ids))
+                    results.append(unwrap_placeholders(translated, ids, threshold))
                     break
                 except FuturesTimeout:
                     future.cancel()
@@ -1971,10 +2003,9 @@ def main():
     ap.add_argument(
         "--wrap-threshold",
         type=int,
-        default=DEFAULT_WRAP_THRESHOLD,
+        default=None,
         help=(
-            "Encode placeholders as private-use characters when the count "
-            "exceeds this threshold (default: %(default)s)"
+            "Override the dynamic wrapping heuristic with an explicit threshold"
         ),
     )
     args = ap.parse_args()
