@@ -2219,9 +2219,19 @@ def test_run_index_appended(tmp_path, monkeypatch):
     assert entry["log_file"]
     assert entry["report_file"]
     assert entry["metrics_file"]
+    assert entry["diff_file"]
+    diff_path = Path(entry["diff_file"])
+    assert diff_path.is_file() and diff_path.read_text().strip()
     assert entry["status"] == "success"
     metrics = json.loads(Path(entry["metrics_file"]).read_text())
     assert metrics[-1]["status"] == "success"
+
+    lang_index = root / "translations" / "xx" / "run_index.json"
+    assert lang_index.is_file()
+    lang_data = json.loads(lang_index.read_text())
+    lang_entry = lang_data[-1]
+    assert lang_entry["approved"] is False
+    assert lang_entry["diff_file"] == entry["diff_file"]
 
 
 def test_run_index_failed_on_validation(tmp_path, monkeypatch):
@@ -2278,6 +2288,11 @@ def test_run_index_failed_on_validation(tmp_path, monkeypatch):
     data = json.loads(index_path.read_text())
     entry = data[-1]
     assert entry["status"] == "failed"
+    assert entry["diff_file"]
+    lang_index = root / "translations" / "xx" / "run_index.json"
+    lang_entry = json.loads(lang_index.read_text())[-1]
+    assert lang_entry["status"] == "failed"
+    assert lang_entry["approved"] is False
     metrics = json.loads(Path(entry["metrics_file"]).read_text())
     assert metrics[-1]["status"] == "failed"
     assert "validate_translation_run.py" in metrics[-1]["error"]

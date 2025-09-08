@@ -24,6 +24,7 @@ import platform
 import uuid
 import hashlib
 import signal
+import difflib
 from pathlib import Path
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
@@ -570,6 +571,7 @@ def _append_metrics_entry(args, *, status: str, **extra) -> dict:
             processed = extra.get("processed", 0)
             successes = extra.get("successes", 0)
             success_rate = successes / processed if processed else 0
+            diff_file = getattr(args, "diff_file", "")
             index_entry = {
                 "run_id": args.run_id,
                 "timestamp": entry["timestamp"],
@@ -578,6 +580,7 @@ def _append_metrics_entry(args, *, status: str, **extra) -> dict:
                 "log_file": args.log_file,
                 "report_file": args.report_file,
                 "metrics_file": args.metrics_file,
+                "diff_file": diff_file,
                 "success_rate": success_rate,
                 "status": status,
             }
@@ -586,6 +589,16 @@ def _append_metrics_entry(args, *, status: str, **extra) -> dict:
                 index_log = []
             index_log.append(index_entry)
             _write_json(run_index_file, index_log)
+            lang_index = os.path.join(
+                os.path.dirname(run_index_file), args.dst, "run_index.json"
+            )
+            os.makedirs(os.path.dirname(lang_index), exist_ok=True)
+            lang_log = _read_json(lang_index, default=[])
+            if not isinstance(lang_log, list):
+                lang_log = []
+            lang_entry = {**index_entry, "approved": False}
+            lang_log.append(lang_entry)
+            _write_json(lang_index, lang_log)
             args.run_index_recorded = True
     except Exception:
         logger.exception("Failed to update run index")
@@ -749,6 +762,11 @@ def _run_translation(
     english = _read_json(english_path)["Messages"]
 
     target = _read_json(target_path, default={"Messages": {}})
+    try:
+        with open(target_path, "r", encoding="utf-8") as fp:
+            args.original_lines = fp.read().splitlines()
+    except FileNotFoundError:
+        args.original_lines = []
 
     messages = target.get("Messages", {})
     if args.hashes:
@@ -1492,6 +1510,26 @@ def _run_translation(
         }
         if error_msg:
             extra["error"] = error_msg
+        try:
+            new_lines = Path(target_path).read_text(encoding="utf-8").splitlines()
+        except FileNotFoundError:
+            new_lines = []
+        diff = list(
+            difflib.unified_diff(
+                getattr(args, "original_lines", []),
+                new_lines,
+                fromfile="before",
+                tofile="after",
+                lineterm="",
+            )
+        )
+        if diff:
+            diff_path = os.path.join(args.run_dir, "review.diff")
+            with open(diff_path, "w", encoding="utf-8") as df:
+                df.write("\n".join(diff))
+            args.diff_file = diff_path
+        else:
+            args.diff_file = ""
         _append_metrics_entry(args, status=status, **extra)
     except KeyboardInterrupt:
         messages.update(translated)
@@ -1505,6 +1543,26 @@ def _run_translation(
         tokens_removed = sum(
             stats.get("removed_tokens", 0) for stats in token_stats.values()
         )
+        try:
+            new_lines = Path(target_path).read_text(encoding="utf-8").splitlines()
+        except FileNotFoundError:
+            new_lines = []
+        diff = list(
+            difflib.unified_diff(
+                getattr(args, "original_lines", []),
+                new_lines,
+                fromfile="before",
+                tofile="after",
+                lineterm="",
+            )
+        )
+        if diff:
+            diff_path = os.path.join(args.run_dir, "review.diff")
+            with open(diff_path, "w", encoding="utf-8") as df:
+                df.write("\n".join(diff))
+            args.diff_file = diff_path
+        else:
+            args.diff_file = ""
         _append_metrics_entry(
             args,
             status="interrupted",

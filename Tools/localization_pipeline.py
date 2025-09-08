@@ -563,6 +563,18 @@ def main() -> None:
         )
         overall_ok &= verify_proc.returncode == 0
 
+        proc, duration = run(
+            [sys.executable, "Tools/check_fix_tokens_metrics.py"],
+            check=False,
+            logger=logger,
+        )
+        metrics["steps"]["token_metrics"] = {
+            "end": timestamp(),
+            "duration": duration,
+            "returncode": proc.returncode,
+        }
+        overall_ok &= proc.returncode == 0
+
         with metrics_path.open("w", encoding="utf-8") as f:
             json.dump(metrics, f, indent=2, ensure_ascii=False)
         logger.info("Wrote metrics to %s", metrics_path)
