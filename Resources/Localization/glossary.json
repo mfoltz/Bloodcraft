@@ -1,0 +1,50 @@
+{
+  "Castle Heart": {
+    "key": "531e1fb9-a11a-41cd-9149-3b292c6361db",
+    "source": "Native",
+    "translations": {
+      "Brazilian": "Coração do Castelo",
+      "English": "Castle Heart",
+      "French": "Cœur de château",
+      "German": "Schlossherz",
+      "Hungarian": "Kastélyszív",
+      "Italian": "Cuore del castello",
+      "Japanese": "キャッスルハート",
+      "Koreana": "성채 심장",
+      "Latam": "Corazón de castillo",
+      "Polish": "Serce zamku",
+      "Russian": "Сердце замка",
+      "SChinese": "城堡之心",
+      "Spanish": "Corazón del castillo",
+      "TChinese": "城堡之心",
+      "Thai": "หัวใจปราสาท",
+      "Turkish": "Kale Kalbi",
+      "Ukrainian": "Серце замку",
+      "Vietnamese": "Trái Tim Lâu Đài"
+    }
+  },
+  "Familiar": {
+    "key": "3125006928",
+    "source": "Messages",
+    "translations": {
+      "Brazilian": "familiar",
+      "English": "Familiar",
+      "French": "Familiar",
+      "German": "Familiar",
+      "Hungarian": "Familiar",
+      "Italian": "Familiare",
+      "Japanese": "Familiar",
+      "Korean": "Familiar",
+      "Latam": "familiar",
+      "Polish": "Znajomość",
+      "Russian": "{FamiliarPrestigeStats[value]}{value",
+      "SChinese": "熟悉者已经从预设处{FamiliarPrestigeStats[value]}({value",
+      "Spanish": "familiar",
+      "TChinese": "熟悉者已經有",
+      "Thai": "Familiar",
+      "Turkish": "Familiar",
+      "Ukrainian": "Familiar",
+      "Vietnamese": "Sự"
+    }
+  }
+}
