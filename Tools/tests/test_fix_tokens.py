@@ -1,7 +1,10 @@
 import json
 import sys
+from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import fix_tokens
+import translate_argos
 
 
 def test_replace_placeholders_drops_unexpected_tokens():
@@ -77,3 +80,12 @@ def test_restore_missing_token_and_reorder_nested():
     new_value, changed = fix_tokens.reorder_tokens_in_text(new_value, tokens)
     assert changed
     assert new_value == "<color=red>{0}{1}</color>"
+
+
+def test_normalize_tokens_drops_stray_closing_tags():
+    raw = "<b>{0}</b></b><i></i></i>"
+    assert translate_argos.normalize_tokens(raw) == "<b>{0}</b><i></i>"
+
+
+def test_normalize_tokens_removes_unmatched_openings():
+    assert translate_argos.normalize_tokens("<b>{0}") == "{0}"

@@ -310,26 +310,34 @@ def normalize_tokens(text: str) -> str:
     tmp = drop_unmatched_brackets(tmp)
     restored = re.sub(r"@@(\d+)@@", restore, tmp)
 
-    def remove_extra_color_closings(s: str) -> str:
-        pattern = re.compile(r"</?color[^>]*>", re.I)
-        depth = 0
+    def remove_unmatched_tags(s: str) -> str:
+        """Strip stray opening or closing tags for any element name."""
+        pattern = re.compile(r"</?(\w+)(?:[^<>]*)>")
+        stack: List[tuple[str, int, int]] = []
+        remove: List[tuple[int, int]] = []
+        for m in pattern.finditer(s):
+            tag = m.group(0)
+            name = m.group(1).lower()
+            start, end = m.span()
+            if tag.startswith("</"):
+                if stack and stack[-1][0] == name:
+                    stack.pop()
+                else:
+                    remove.append((start, end))
+            elif not tag.endswith("/>"):
+                stack.append((name, start, end))
+        remove.extend((start, end) for _, start, end in stack)
+        if not remove:
+            return s
         result: List[str] = []
         last = 0
-        for m in pattern.finditer(s):
-            result.append(s[last : m.start()])
-            tag = m.group(0)
-            if not tag.lower().startswith("</"):
-                depth += 1
-                result.append(tag)
-            elif depth > 0:
-                depth -= 1
-                result.append(tag)
-            # else drop unmatched closing tag
-            last = m.end()
+        for start, end in sorted(remove):
+            result.append(s[last:start])
+            last = end
         result.append(s[last:])
         return "".join(result)
 
-    restored = remove_extra_color_closings(restored)
+    restored = remove_unmatched_tags(restored)
 
     # Trim whitespace around format tokens within colour tags.
     restored = re.sub(
