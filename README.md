@@ -809,4 +809,4 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Already using [VCF](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/)? Need a feature-rich, role-based commands solution that's easy on the eyes? 🌠
    
 ## Credits
-It's important to mention & attribute where novel ideas, critical bug reports or otherwise generally important contributions come from; I try (and usually succeed? >_>) to stay on top of that in the changelog and commit history, but please reach out for any big misses there!
+It's important to mention & attribute where novel ideas, critical bug reports or otherwise generally important contributions come from; always try (and usually succeed 😉) to stay on top of that in changelogs/commits, but please reach out for big misses there!
