@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Bloodcraft;
-using Xunit;
-
 namespace Bloodcraft.Tests;
 
-public class IExtensionsTests
+public sealed class IExtensionsTests : TestHost
 {
     [Fact]
     public void Reverse_ShouldSwapKeysAndValues()

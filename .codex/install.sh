@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 PROJECT_PATH="$REPO_ROOT/Bloodcraft.csproj"
+TEST_PROJECT_PATH="$REPO_ROOT/.codex/tests/Bloodcraft.Tests.csproj"
 INSTALL_DIR="${DOTNET_INSTALL_DIR:-$HOME/.dotnet}"
 CHANNEL="${DOTNET_INSTALL_CHANNEL:-6.0}"
 BEPINEX_PLUGIN_DIR="${BEPINEX_PLUGIN_DIR:-}"
@@ -38,6 +39,14 @@ fi
 if [ ! -f "$PROJECT_PATH" ]; then
     echo "Project file not found at $PROJECT_PATH" >&2
     exit 1
+fi
+
+echo "Restoring Bloodcraft project dependencies..."
+dotnet restore "$PROJECT_PATH"
+
+if [ -f "$TEST_PROJECT_PATH" ]; then
+    echo "Restoring test project dependencies..."
+    dotnet restore "$TEST_PROJECT_PATH"
 fi
 
 echo "Building Bloodcraft project..."

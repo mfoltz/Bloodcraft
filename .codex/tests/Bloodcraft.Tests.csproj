@@ -3,6 +3,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <PropertyGroup>
     <RestoreSources>https://api.nuget.org/v3/index.json;https://nuget.bepinex.dev/v3/index.json;</RestoreSources>
@@ -22,6 +23,6 @@
     <PackageReference Include="Lib.Harmony" Version="2.2.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../Bloodcraft.csproj" />
+    <ProjectReference Include="../../Bloodcraft.csproj" AdditionalProperties="RunGenerateREADME=false" />
   </ItemGroup>
 </Project>
