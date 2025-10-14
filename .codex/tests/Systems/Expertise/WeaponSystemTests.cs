@@ -17,53 +17,83 @@ public class WeaponSystemTests
     static WeaponSystemTests()
     {
         Harmony harmony = new("Bloodcraft.Tests.Systems.Expertise.WeaponSystemTests");
-        ConstructorInfo? typeInitializer = typeof(WeaponSystem).TypeInitializer;
-        MethodInfo? prefixMethod = typeof(WeaponSystemTests).GetMethod(nameof(WeaponSystemCctorPrefix), BindingFlags.Static | BindingFlags.NonPublic);
-        if (typeInitializer != null && prefixMethod != null)
+        PatchTypeInitializer(harmony, typeof(WeaponSystem), nameof(WeaponSystemCctorPrefix));
+        PatchTypeInitializer(harmony, typeof(Progression), nameof(ProgressionCctorPrefix));
+    }
+
+    static void PatchTypeInitializer(Harmony harmony, Type targetType, string prefixName)
+    {
+        ConstructorInfo? typeInitializer = targetType.TypeInitializer;
+        MethodInfo? prefixMethod = typeof(WeaponSystemTests).GetMethod(prefixName, BindingFlags.Static | BindingFlags.NonPublic);
+        if (typeInitializer == null || prefixMethod == null)
         {
-            HarmonyMethod prefix = new(prefixMethod);
-            MethodInfo? patch = typeof(Harmony).GetMethod(
+            return;
+        }
+
+        HarmonyMethod prefix = new(prefixMethod);
+        MethodInfo? patch = typeof(Harmony).GetMethod(
                 "Patch",
                 new[] { typeof(MethodBase), typeof(HarmonyMethod), typeof(HarmonyMethod), typeof(HarmonyMethod), typeof(HarmonyMethod) })
-                ?? typeof(Harmony).GetMethod(
-                    "Patch",
-                    new[]
-                    {
-                        typeof(MethodBase), typeof(HarmonyMethod), typeof(HarmonyMethod),
-                        typeof(HarmonyMethod), typeof(HarmonyMethod), typeof(HarmonyMethod)
-                    });
+            ?? typeof(Harmony).GetMethod(
+                "Patch",
+                new[]
+                {
+                    typeof(MethodBase), typeof(HarmonyMethod), typeof(HarmonyMethod),
+                    typeof(HarmonyMethod), typeof(HarmonyMethod), typeof(HarmonyMethod)
+                });
 
-            if (patch == null)
-            {
-                throw new InvalidOperationException("Harmony Patch overload not found.");
-            }
-
-            object?[] arguments = patch.GetParameters().Length switch
-            {
-                5 => new object?[] { typeInitializer, prefix, null, null, null },
-                6 => new object?[] { typeInitializer, prefix, null, null, null, null },
-                _ => throw new InvalidOperationException("Unexpected Harmony Patch signature.")
-            };
-
-            patch.Invoke(harmony, arguments);
+        if (patch == null)
+        {
+            throw new InvalidOperationException("Harmony Patch overload not found.");
         }
+
+        object?[] arguments = patch.GetParameters().Length switch
+        {
+            5 => new object?[] { typeInitializer, prefix, null, null, null },
+            6 => new object?[] { typeInitializer, prefix, null, null, null, null },
+            _ => throw new InvalidOperationException("Unexpected Harmony Patch signature.")
+        };
+
+        patch.Invoke(harmony, arguments);
+    }
+
+    static void SetReadonlyField(Type type, string fieldName, object? value)
+    {
+        FieldInfo? field = type.GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+        if (field == null)
+        {
+            throw new InvalidOperationException($"Field '{fieldName}' not found on {type.FullName}.");
+        }
+
+        if (field.IsInitOnly)
+        {
+            FieldInfo? attributesField = typeof(FieldInfo).GetField("m_fieldAttributes", BindingFlags.Instance | BindingFlags.NonPublic);
+            attributesField?.SetValue(field, field.Attributes & ~FieldAttributes.InitOnly);
+        }
+
+        field.SetValue(null, value);
     }
 
     static bool WeaponSystemCctorPrefix()
     {
-        Traverse weaponSystem = Traverse.Create(typeof(WeaponSystem));
+        Type weaponSystemType = typeof(WeaponSystem);
 
-        weaponSystem.Field("_maxExpertiseLevel").SetValue(ConfigService.MaxExpertiseLevel);
-        weaponSystem.Field("_expertiseStatChoices").SetValue(ConfigService.ExpertiseStatChoices);
-        weaponSystem.Field("_unitExpertiseMultiplier").SetValue(ConfigService.UnitExpertiseMultiplier);
-        weaponSystem.Field("_vBloodExpertiseMultiplier").SetValue(ConfigService.VBloodExpertiseMultiplier);
-        weaponSystem.Field("_prestigeRatesReducer").SetValue(ConfigService.PrestigeRatesReducer);
-        weaponSystem.Field("_prestigeRateMultiplier").SetValue(ConfigService.PrestigeRateMultiplier);
-        weaponSystem.Field("_unitSpawnerExpertiseFactor").SetValue(ConfigService.UnitSpawnerExpertiseFactor);
-        weaponSystem.Field("TryGetExtensionMap").SetValue(new Dictionary<WeaponType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>>());
-        weaponSystem.Field("SetExtensionMap").SetValue(new Dictionary<WeaponType, Action<ulong, KeyValuePair<int, float>>>());
-        weaponSystem.Field("_delay").SetValue(null);
+        SetReadonlyField(weaponSystemType, "_maxExpertiseLevel", ConfigService.MaxExpertiseLevel);
+        SetReadonlyField(weaponSystemType, "_expertiseStatChoices", ConfigService.ExpertiseStatChoices);
+        SetReadonlyField(weaponSystemType, "_unitExpertiseMultiplier", ConfigService.UnitExpertiseMultiplier);
+        SetReadonlyField(weaponSystemType, "_vBloodExpertiseMultiplier", ConfigService.VBloodExpertiseMultiplier);
+        SetReadonlyField(weaponSystemType, "_prestigeRatesReducer", ConfigService.PrestigeRatesReducer);
+        SetReadonlyField(weaponSystemType, "_prestigeRateMultiplier", ConfigService.PrestigeRateMultiplier);
+        SetReadonlyField(weaponSystemType, "_unitSpawnerExpertiseFactor", ConfigService.UnitSpawnerExpertiseFactor);
+        SetReadonlyField(weaponSystemType, "TryGetExtensionMap", new Dictionary<WeaponType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>>());
+        SetReadonlyField(weaponSystemType, "SetExtensionMap", new Dictionary<WeaponType, Action<ulong, KeyValuePair<int, float>>>());
+        SetReadonlyField(weaponSystemType, "_delay", null);
 
+        return false;
+    }
+
+    static bool ProgressionCctorPrefix()
+    {
         return false;
     }
 
