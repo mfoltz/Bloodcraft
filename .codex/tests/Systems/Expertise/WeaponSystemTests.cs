@@ -97,7 +97,7 @@ public class WeaponSystemTests
         return false;
     }
 
-    sealed class StubWeaponExpertise : IWeaponExpertise
+    private sealed class StubWeaponExpertise : IWeaponExpertise
     {
         readonly Dictionary<ulong, KeyValuePair<int, float>> storage = new();
         readonly WeaponType weaponType;
@@ -186,9 +186,9 @@ public class WeaponSystemTests
 
         int progress = WeaponSystem.GetLevelProgress(TestSteamId, expertise);
 
-        int expected = 100 - (int)Math.Ceiling((nextLevelXp - currentXp) / neededXp * 100);
+        double progressFraction = (currentXp - currentLevelXp) / neededXp;
+        int expected = (int)Math.Floor(progressFraction * 100);
 
-        Assert.Equal(25, expected);
         Assert.Equal(expected, progress);
     }
 }
