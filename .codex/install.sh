@@ -41,7 +41,7 @@ if [ ! -f "$PROJECT_PATH" ]; then
 fi
 
 echo "Building Bloodcraft project..."
-dotnet build "$PROJECT_PATH" --configuration Release -p:RunGenerateREADME=false
+dotnet build "$PROJECT_PATH" --configuration Release --no-restore -p:RunGenerateREADME=false
 
 DLL_PATH="$REPO_ROOT/bin/Release/net6.0/Bloodcraft.dll"
 if [ ! -f "$DLL_PATH" ]; then

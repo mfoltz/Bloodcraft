@@ -4,6 +4,7 @@ using ProjectM;
 using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft.Utilities;
@@ -361,7 +362,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// Updates the Primal Stygian recipe requirements, outputs, and metadata.
     /// </summary>
     /// <param name="recipeMap">The recipe lookup map to update.</param>
-    private static void ConfigurePrimalStygianRecipe(Dictionary<PrefabGUID, RecipeData> recipeMap)
+    private static void ConfigurePrimalStygianRecipe(NativeParallelHashMap<PrefabGUID, RecipeData> recipeMap)
     {
         var recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[RecipeIds.PrimalStygian];
 
@@ -385,7 +386,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// Updates the Blood Crystal recipe requirements, outputs, and metadata.
     /// </summary>
     /// <param name="recipeMap">The recipe lookup map to update.</param>
-    private static void ConfigureBloodCrystalRecipe(Dictionary<PrefabGUID, RecipeData> recipeMap)
+    private static void ConfigureBloodCrystalRecipe(NativeParallelHashMap<PrefabGUID, RecipeData> recipeMap)
     {
         var recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[RecipeIds.BloodCrystal];
 
@@ -517,7 +518,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// Enables Vampiric Dust on the advanced grinder and removes conflicting recipes.
     /// </summary>
     /// <param name="recipeMap">The recipe lookup map to update.</param>
-    private static void ConfigureAdvancedGrinder(Dictionary<PrefabGUID, RecipeData> recipeMap)
+    private static void ConfigureAdvancedGrinder(NativeParallelHashMap<PrefabGUID, RecipeData> recipeMap)
     {
         var recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[RecipeIds.VampiricDust];
         recipeEntity.With((ref RecipeData recipeData) =>
@@ -537,7 +538,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// Adds copper wires and charged battery recipes to the fabricator.
     /// </summary>
     /// <param name="recipeMap">The recipe lookup map to update.</param>
-    private static void ConfigureFabricator(Dictionary<PrefabGUID, RecipeData> recipeMap)
+    private static void ConfigureFabricator(NativeParallelHashMap<PrefabGUID, RecipeData> recipeMap)
     {
         var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[Stations.Fabricator];
 
