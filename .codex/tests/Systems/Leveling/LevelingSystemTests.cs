@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
-using Bloodcraft.Utilities;
 using Xunit;
 
 namespace Bloodcraft.Tests.Systems.Leveling;
@@ -34,13 +33,21 @@ public class LevelingSystemTests : IClassFixture<LevelingSystemTests.Fixture>
         DataService.PlayerDictionaries._playerRestedXP.Clear();
     }
 
+    static int ConvertLevelToXp(int level)
+    {
+        const double ExpConstant = 0.1;
+        const double ExpPower = 2d;
+
+        return (int)Math.Pow(level / ExpConstant, ExpPower);
+    }
+
     [Fact]
     public void SaveLevelingExperience_RaisesLevelWhenCrossingBoundary()
     {
         ResetPlayerData();
 
         const int startingLevel = 1;
-        float xpBefore = Progression.ConvertLevelToXp(startingLevel + 1) - 10;
+        float xpBefore = ConvertLevelToXp(startingLevel + 1) - 10;
         DataService.PlayerDictionaries._playerExperience[TestSteamId] = new KeyValuePair<int, float>(startingLevel, xpBefore);
 
         const float gainedXp = 20f;
@@ -62,16 +69,16 @@ public class LevelingSystemTests : IClassFixture<LevelingSystemTests.Fixture>
 
         int maxLevel = ConfigService.MaxLevel;
         int startingLevel = maxLevel - 1;
-        float startingXp = Progression.ConvertLevelToXp(startingLevel);
+        float startingXp = ConvertLevelToXp(startingLevel);
         DataService.PlayerDictionaries._playerExperience[TestSteamId] = new KeyValuePair<int, float>(startingLevel, startingXp);
 
-        float targetXp = Progression.ConvertLevelToXp(maxLevel + 5);
+        float targetXp = ConvertLevelToXp(maxLevel + 5);
         float gainedXp = targetXp - startingXp;
 
         LevelingSystem.SaveLevelingExperience(TestSteamId, gainedXp, out bool leveledUp, out int newLevel);
 
         KeyValuePair<int, float> storedData = DataService.PlayerDictionaries._playerExperience[TestSteamId];
-        float maxLevelXp = Progression.ConvertLevelToXp(maxLevel);
+        float maxLevelXp = ConvertLevelToXp(maxLevel);
 
         Assert.True(leveledUp);
         Assert.Equal(maxLevel, newLevel);
@@ -85,10 +92,10 @@ public class LevelingSystemTests : IClassFixture<LevelingSystemTests.Fixture>
         ResetPlayerData();
 
         const int startingLevel = 5;
-        float startingXp = Progression.ConvertLevelToXp(startingLevel);
+        float startingXp = ConvertLevelToXp(startingLevel);
         DataService.PlayerDictionaries._playerExperience[TestSteamId] = new KeyValuePair<int, float>(startingLevel, startingXp);
 
-        float nextLevelXp = Progression.ConvertLevelToXp(startingLevel + 1);
+        float nextLevelXp = ConvertLevelToXp(startingLevel + 1);
         float gainedXp = (nextLevelXp - startingXp) / 2f;
 
         LevelingSystem.SaveLevelingExperience(TestSteamId, gainedXp, out bool leveledUp, out int newLevel);
@@ -107,13 +114,13 @@ public class LevelingSystemTests : IClassFixture<LevelingSystemTests.Fixture>
         ResetPlayerData();
 
         const int currentLevel = 10;
-        float currentLevelXp = Progression.ConvertLevelToXp(currentLevel);
+        float currentLevelXp = ConvertLevelToXp(currentLevel);
         var experienceData = new KeyValuePair<int, float>(currentLevel, currentLevelXp);
         DataService.PlayerDictionaries._playerExperience[TestSteamId] = experienceData;
 
         DateTime timestamp = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         int restedLevel = Math.Min(ConfigService.RestedXPMax + currentLevel, ConfigService.MaxLevel);
-        float restedCap = Progression.ConvertLevelToXp(restedLevel) - Progression.ConvertLevelToXp(currentLevel);
+        float restedCap = ConvertLevelToXp(restedLevel) - ConvertLevelToXp(currentLevel);
         float storedRestedXp = restedCap * 1.5f;
 
         DataService.PlayerDictionaries._playerRestedXP[TestSteamId] = new KeyValuePair<DateTime, float>(timestamp, storedRestedXp);
