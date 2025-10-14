@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Resources;
+﻿using System;
+using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Shared;
@@ -162,11 +163,114 @@ internal static class Recipes // pending organization and refactoring, should al
             };
     }
 
+    private sealed class MiscItemAdjustment
+    {
+        public PrefabGUID ItemGuid { get; }
+
+        public PrefabGUID SalvageRecipeGuid { get; }
+
+        public float SalvageTimer { get; }
+
+        public (PrefabGUID guid, int amount)[] Requirements { get; }
+
+        public MiscItemAdjustment(
+            PrefabGUID itemGuid,
+            PrefabGUID salvageRecipeGuid,
+            float salvageTimer,
+            params (PrefabGUID guid, int amount)[] requirements)
+        {
+            ItemGuid = itemGuid;
+            SalvageRecipeGuid = salvageRecipeGuid;
+            SalvageTimer = salvageTimer;
+            Requirements = requirements ?? Array.Empty<(PrefabGUID guid, int amount)>();
+        }
+    }
+
+    private sealed class StationAdjustment
+    {
+        public PrefabGUID StationGuid { get; }
+
+        public PrefabGUID[] RecipesToAdd { get; }
+
+        public PrefabGUID[] RecipesToRemove { get; }
+
+        public StationAdjustment(
+            PrefabGUID stationGuid,
+            PrefabGUID[] recipesToAdd,
+            PrefabGUID[] recipesToRemove)
+        {
+            StationGuid = stationGuid;
+            RecipesToAdd = recipesToAdd ?? Array.Empty<PrefabGUID>();
+            RecipesToRemove = recipesToRemove ?? Array.Empty<PrefabGUID>();
+        }
+    }
+
+    private static readonly IReadOnlyList<MiscItemAdjustment> MiscItemAdjustments = new List<MiscItemAdjustment>
+    {
+        new MiscItemAdjustment(
+            Items.EmpBuilding,
+            PrefabGUIDs.Recipe_CastleUpkeep_T02,
+            20f,
+            (Items.DepletedBattery, 2),
+            (Items.TechScrap, 15)),
+        new MiscItemAdjustment(
+            Items.PrimalEssence,
+            PrefabGUIDs.Recipe_CastleUpkeep_T02,
+            10f,
+            (Items.BatteryCharge, 5)),
+        new MiscItemAdjustment(
+            Items.CopperWires,
+            PrefabGUIDs.Recipe_CastleUpkeep_T02,
+            15f,
+            (Items.BatteryCharge, 1)),
+        new MiscItemAdjustment(
+            Items.BatHide,
+            PrefabGUIDs.Recipe_CastleUpkeep_T02,
+            15f,
+            (Items.LesserStygian, 3),
+            (Items.BloodEssence, 5)),
+        new MiscItemAdjustment(
+            Components.GoldOre,
+            PrefabGUIDs.Recipe_CastleUpkeep_T02,
+            10f,
+            (Items.GoldJewelry, 2)),
+        new MiscItemAdjustment(
+            Components.RadiantFibre,
+            PrefabGUIDs.Recipe_CastleUpkeep_T02,
+            10f,
+            (PrefabGUIDs.Item_Ingredient_Gemdust, 8),
+            (PrefabGUIDs.Item_Ingredient_Plant_PlantFiber, 16),
+            (PrefabGUIDs.Item_Ingredient_Pollen, 24))
+    };
+
+    private static readonly IReadOnlyList<StationAdjustment> StationAdjustments = new List<StationAdjustment>
+    {
+        new StationAdjustment(
+            Stations.AdvancedGrinder,
+            new[] { RecipeIds.VampiricDust },
+            new[] { RecipeIds.PrimalStygian, RecipeIds.BloodCrystal }),
+        new StationAdjustment(
+            Stations.PrimitiveGrinder,
+            Array.Empty<PrefabGUID>(),
+            new[] { RecipeIds.PrimalStygian, RecipeIds.BloodCrystal }),
+        new StationAdjustment(
+            Stations.Fabricator,
+            new[] { RecipeIds.CopperWires, RecipeIds.ChargedBattery },
+            Array.Empty<PrefabGUID>()),
+        new StationAdjustment(
+            Stations.GemCuttingTable,
+            new[] { RecipeIds.PrimalStygian, RecipeIds.ExtractShard },
+            Array.Empty<PrefabGUID>()),
+        new StationAdjustment(
+            Stations.AdvancedBloodPress,
+            new[] { RecipeIds.BloodCrystal },
+            Array.Empty<PrefabGUID>())
+    };
+
     public static void ModifyRecipes()
     {
         var recipeMap = GameDataSystem.RecipeHashLookupMap;
 
-        ConfigureEmpBuildingItem();
         ConfigurePrimalStygianRecipe(recipeMap);
         ConfigureBloodCrystalRecipe(recipeMap);
         RemoveRecipeLinks(
@@ -174,31 +278,15 @@ internal static class Recipes // pending organization and refactoring, should al
             RecipeIds.PrimalStygian,
             RecipeIds.BloodCrystal);
 
-        ModifyMiscItem(Items.PrimalEssence, PrefabGUIDs.Recipe_CastleUpkeep_T02, 10f, (Items.BatteryCharge, 5));
-        ModifyMiscItem(Items.CopperWires, PrefabGUIDs.Recipe_CastleUpkeep_T02, 15f, (Items.BatteryCharge, 1));
-        ModifyMiscItem(Items.BatHide, PrefabGUIDs.Recipe_CastleUpkeep_T02, 15f, (Items.LesserStygian, 3), (Items.BloodEssence, 5));
-        ModifyMiscItem(Components.GoldOre, PrefabGUIDs.Recipe_CastleUpkeep_T02, 10f, (Items.GoldJewelry, 2));
-        ModifyMiscItem(
-            Components.RadiantFibre,
-            PrefabGUIDs.Recipe_CastleUpkeep_T02,
-            10f,
-            (PrefabGUIDs.Item_Ingredient_Gemdust, 8),
-            (PrefabGUIDs.Item_Ingredient_Plant_PlantFiber, 16),
-            (PrefabGUIDs.Item_Ingredient_Pollen, 24));
-
+        ApplyMiscItemAdjustments();
         RemoveSalvageableAndRequirements(Items.BatteryCharge);
 
         ConfigureExtractShardRecipeIfJewelValid();
         IncreaseShardContainerSlots();
         ConfigureAdvancedGrinder(recipeMap);
-        RemoveRefinementRecipes(
-            PrefabCollectionSystem._PrefabGuidToEntityMap[Stations.PrimitiveGrinder],
-            RecipeIds.PrimalStygian,
-            RecipeIds.BloodCrystal);
         ConfigureFabricator(recipeMap);
         FixFakeFlowerRecipe();
-        ConfigureGemCuttingTable();
-        ConfigureAdvancedBloodPress();
+        ApplyStationAdjustments();
 
         GameDataSystem.RegisterRecipes();
         GameDataSystem.RegisterItems();
@@ -342,23 +430,6 @@ internal static class Recipes // pending organization and refactoring, should al
     }
 
     /// <summary>
-    /// Configures the EMP building item with salvage data and recipe requirements.
-    /// </summary>
-    private static void ConfigureEmpBuildingItem()
-    {
-        Entity itemEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[Items.EmpBuilding];
-
-        var requirementBuffer = itemEntity.Has<RecipeRequirementBuffer>()
-            ? itemEntity.ReadBuffer<RecipeRequirementBuffer>()
-            : EntityManager.AddBuffer<RecipeRequirementBuffer>(itemEntity);
-
-        requirementBuffer.Add(new RecipeRequirementBuffer { Guid = Items.DepletedBattery, Amount = 2 });
-        requirementBuffer.Add(new RecipeRequirementBuffer { Guid = Items.TechScrap, Amount = 15 });
-
-        EnsureSalvageable(itemEntity, PrefabGUIDs.Recipe_CastleUpkeep_T02, 20f);
-    }
-
-    /// <summary>
     /// Updates the Primal Stygian recipe requirements, outputs, and metadata.
     /// </summary>
     /// <param name="recipeMap">The recipe lookup map to update.</param>
@@ -430,6 +501,18 @@ internal static class Recipes // pending organization and refactoring, should al
         AddRecipeRequirements(prefabEntity, requirements);
     }
 
+    private static void ApplyMiscItemAdjustments()
+    {
+        foreach (var adjustment in MiscItemAdjustments)
+        {
+            ModifyMiscItem(
+                adjustment.ItemGuid,
+                adjustment.SalvageRecipeGuid,
+                adjustment.SalvageTimer,
+                adjustment.Requirements);
+        }
+    }
+
     /// <summary>
     /// Removes salvageable and requirement data from the prefab if present.
     /// </summary>
@@ -449,6 +532,27 @@ internal static class Recipes // pending organization and refactoring, should al
         if (entity.Has<RecipeRequirementBuffer>())
         {
             entity.Remove<RecipeRequirementBuffer>();
+        }
+    }
+
+    private static void ApplyStationAdjustments()
+    {
+        foreach (var adjustment in StationAdjustments)
+        {
+            if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(adjustment.StationGuid, out var stationEntity))
+            {
+                continue;
+            }
+
+            if (adjustment.RecipesToAdd.Length > 0)
+            {
+                AddRefinementRecipes(stationEntity, adjustment.RecipesToAdd);
+            }
+
+            if (adjustment.RecipesToRemove.Length > 0)
+            {
+                RemoveRefinementRecipes(stationEntity, adjustment.RecipesToRemove);
+            }
         }
     }
 
@@ -515,7 +619,7 @@ internal static class Recipes // pending organization and refactoring, should al
     }
 
     /// <summary>
-    /// Enables Vampiric Dust on the advanced grinder and removes conflicting recipes.
+    /// Configures the Vampiric Dust recipe metadata for the advanced grinder.
     /// </summary>
     /// <param name="recipeMap">The recipe lookup map to update.</param>
     private static void ConfigureAdvancedGrinder(NativeParallelHashMap<PrefabGUID, RecipeData> recipeMap)
@@ -528,20 +632,14 @@ internal static class Recipes // pending organization and refactoring, should al
             recipeData.HudSortingOrder = 0;
         });
         recipeMap[RecipeIds.VampiricDust] = recipeEntity.Read<RecipeData>();
-
-        var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[Stations.AdvancedGrinder];
-        AddRefinementRecipes(stationEntity, RecipeIds.VampiricDust);
-        RemoveRefinementRecipes(stationEntity, RecipeIds.PrimalStygian, RecipeIds.BloodCrystal);
     }
 
     /// <summary>
-    /// Adds copper wires and charged battery recipes to the fabricator.
+    /// Updates copper wires and charged battery recipe metadata for the fabricator.
     /// </summary>
     /// <param name="recipeMap">The recipe lookup map to update.</param>
     private static void ConfigureFabricator(NativeParallelHashMap<PrefabGUID, RecipeData> recipeMap)
     {
-        var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[Stations.Fabricator];
-
         var copperRecipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[RecipeIds.CopperWires];
         UpdateRecipeData(copperRecipeEntity, 10f, true, false);
         recipeMap[RecipeIds.CopperWires] = copperRecipeEntity.Read<RecipeData>();
@@ -551,8 +649,6 @@ internal static class Recipes // pending organization and refactoring, should al
         requirementBuffer.Add(new RecipeRequirementBuffer { Guid = Items.BatteryCharge, Amount = 1 });
         UpdateRecipeData(chargedBatteryEntity, 90f, true, false);
         recipeMap[RecipeIds.ChargedBattery] = chargedBatteryEntity.Read<RecipeData>();
-
-        AddRefinementRecipes(stationEntity, RecipeIds.CopperWires, RecipeIds.ChargedBattery);
     }
 
     /// <summary>
@@ -575,21 +671,4 @@ internal static class Recipes // pending organization and refactoring, should al
         requirementBuffer[0] = firstRequirement;
     }
 
-    /// <summary>
-    /// Adds Primal Stygian and shard extraction recipes to the gem cutting table.
-    /// </summary>
-    private static void ConfigureGemCuttingTable()
-    {
-        var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[Stations.GemCuttingTable];
-        AddRefinementRecipes(stationEntity, RecipeIds.PrimalStygian, RecipeIds.ExtractShard);
-    }
-
-    /// <summary>
-    /// Adds the Blood Crystal recipe to the advanced blood press.
-    /// </summary>
-    private static void ConfigureAdvancedBloodPress()
-    {
-        var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[Stations.AdvancedBloodPress];
-        AddRefinementRecipes(stationEntity, RecipeIds.BloodCrystal);
-    }
 }
