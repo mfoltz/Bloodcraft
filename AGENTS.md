@@ -60,4 +60,9 @@ This guide provides universal, intelligent principles and patterns to master C# 
 * Stay updated on language features and industry best practices.
 * Learn from established open-source C# projects and communities.
 
+## 🗂️ Codex Tooling Structure
+
+* Place all Codex tooling and new tests under the `.codex/` directory (e.g., `.codex/tests/...`).
+* Ensure future Codex-related assets respect this directory structure, and reference or inherit this guidance in any additional `AGENTS.md` files that may be introduced.
+
 By internalizing these universal principles, you build a solid foundation to become a proficient and thoughtful C# developer.
