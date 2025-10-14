@@ -9,7 +9,16 @@ using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft.Utilities;
-internal static class Recipes // pending organization and refactoring, should also make able to be copy and pasted into Eclipse (make sure client does the parts needed on client but not server parts and vice versa)
+/*
+ * Refactor status checklist:
+ * [x] Centralized recipe GUID groupings into nested classes.
+ * [ ] Extract shard- and item-specific helpers into dedicated files.
+ * [ ] Replace remaining hard-coded identifiers with configuration lookups.
+ * [ ] Document server/client responsibility boundaries for recipe syncing.
+ *
+ * Contributors: update this checklist as you complete items to keep maintenance needs visible.
+ */
+internal static class Recipes
 {
     static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;
