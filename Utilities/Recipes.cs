@@ -1,4 +1,5 @@
 ﻿using System;
+using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Shared;

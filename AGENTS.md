@@ -60,4 +60,14 @@ This guide provides universal, intelligent principles and patterns to master C# 
 * Stay updated on language features and industry best practices.
 * Learn from established open-source C# projects and communities.
 
+## 🧪 Build & Test Workflow
+
+* Use the repository's provisioning script at `.codex/install.sh` for any build or test run. This script installs the required .NET SDK (if necessary) and builds the `Bloodcraft` project in Release mode. Invoke it from the repository root:
+
+  ```bash
+  bash .codex/install.sh
+  ```
+
+* After the SDK is available, execute tests (for example, within `.codex/tests`) with the `dotnet` CLI that the script installs/exposes.
+
 By internalizing these universal principles, you build a solid foundation to become a proficient and thoughtful C# developer.
