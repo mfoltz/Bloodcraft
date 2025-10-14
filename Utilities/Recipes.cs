@@ -3,6 +3,8 @@ using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Shared;
 using Stunlock.Core;
+using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft.Utilities;
@@ -13,126 +15,152 @@ internal static class Recipes // pending organization and refactoring, should al
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static GameDataSystem GameDataSystem => SystemService.GameDataSystem;
 
-    static readonly PrefabGUID _primalJewelRequirement = new(ConfigService.PrimalJewelCost);
-
-    static readonly PrefabGUID _advancedGrinder = new(-178579946);
-    static readonly PrefabGUID _primitiveGrinder = new(-600683642);
-    static readonly PrefabGUID _advancedFurnace = new(-222851985);
-    static readonly PrefabGUID _fabricator = new(-465055967);
-    static readonly PrefabGUID _shardExtractor = new(1794206684);
-    static readonly PrefabGUID _gemCuttingTable = new(-21483617);
-    static readonly PrefabGUID _advancedBloodPress = new(-684391635);
-
-    static readonly PrefabGUID _refinementInventoryLarge = new(1436956144);
-    static readonly PrefabGUID _refinementInventorySmall = new(-534407618);
-    static readonly PrefabGUID _extractorInventory = new(-1814907421);
-
-    static readonly PrefabGUID _ironBodyRecipe = new(-1270503528);
-    static readonly PrefabGUID _vampiricDustRecipe = new(311920560);
-    static readonly PrefabGUID _copperWiresRecipe = new(-2031309726);
-    static readonly PrefabGUID _silverIngotRecipe = new(-1633898285);
-    static readonly PrefabGUID _fakeFlowerRecipe = new(-2095604835);
-    static readonly PrefabGUID _chargedBatteryRecipe = new(-40415372);
-
-    static readonly PrefabGUID _batHide = new(1262845777);
-    static readonly PrefabGUID _lesserStygian = new(2103989354);
-    static readonly PrefabGUID _bloodEssence = new(862477668);
-    static readonly PrefabGUID _plantThistle = new(-598100816);
-    static readonly PrefabGUID _batteryCharge = new(-77555820);
-    static readonly PrefabGUID _techScrap = new(834864259);
-    static readonly PrefabGUID _primalEssence = new(1566989408);
-    static readonly PrefabGUID _copperWires = new(-456161884);
-    static readonly PrefabGUID _itemBuildingEMP = new(-1447213995);
-    static readonly PrefabGUID _depletedBattery = new(1270271716);
-    static readonly PrefabGUID _itemJewelTemplate = new(1075994038);
-
-    static readonly PrefabGUID _pristineHeart = new(-1413694594);
-    static readonly PrefabGUID _radiantFibre = new(-182923609);
-    static readonly PrefabGUID _resonator = new(-1629804427);
-    static readonly PrefabGUID _document = new(1334469825);
-    static readonly PrefabGUID _demonFragment = new(-77477508);
-    static readonly PrefabGUID _magicalComponent = new(1488205677);
-    static readonly PrefabGUID _tailoringComponent = new(828271620);
-    static readonly PrefabGUID _gemGrindStone = new(2115367516);
-
-    static readonly PrefabGUID _perfectAmethyst = new(-106283194);
-    static readonly PrefabGUID _perfectEmerald = new(1354115931);
-    static readonly PrefabGUID _perfectRuby = new(188653143);
-    static readonly PrefabGUID _perfectSapphire = new(-2020212226);
-    static readonly PrefabGUID _perfectTopaz = new(-1983566585);
-    static readonly PrefabGUID _perfectMiststone = new(750542699);
-
-    static readonly PrefabGUID _goldJewelry = new(-1749304196);
-    static readonly PrefabGUID _goldIngotRecipe = new(-882942445);
-    static readonly PrefabGUID _goldIngot = new(-1027710236);
-    static readonly PrefabGUID _goldOre = new(660533034);
-    static readonly PrefabGUID _processedSulphur = new(880699252);
-
-    static readonly PrefabGUID _extractShardRecipe = new(1743327679);
-    static readonly PrefabGUID _solarusShardRecipe = new(-958598508);
-    static readonly PrefabGUID _monsterShardRecipe = new(1791150988);
-    static readonly PrefabGUID _manticoreShardRecipe = new(-111826090);
-    static readonly PrefabGUID _draculaShardRecipe = new(-414358988);
-    static readonly PrefabGUID _morganaShardRecipe = PrefabGUIDs.Recipe_MagicSource_General_T09_Morgana;
-
-    static readonly PrefabGUID _solarusShard = new(-21943750);
-    static readonly PrefabGUID _monsterShard = new(-1581189572);
-    static readonly PrefabGUID _manticoreShard = new(-1260254082);
-    static readonly PrefabGUID _draculaShard = new(666638454);
-    static readonly PrefabGUID _morganaShard = PrefabGUIDs.Item_MagicSource_SoulShard_Morgana;
-
-    static readonly PrefabGUID _solarusShardContainer = new(-824445631);
-    static readonly PrefabGUID _monsterShardContainer = new(-1996942061);
-    static readonly PrefabGUID _manticoreShardContainer = new(653759442);
-    static readonly PrefabGUID _draculaShardContainer = new(1495743889);
-    static readonly PrefabGUID _morganaShardContainer = PrefabGUIDs.TM_Castle_Container_Specialized_Soulshards_Morgana;
-
-    static readonly PrefabGUID _fakeGemdustRecipe = new(-1105418306);
-
-    static readonly PrefabGUID _bloodCrystalRecipe = new(-597461125);  // using perfect topaz gemdust recipe for this
-    static readonly PrefabGUID _crystal = new(-257494203);
-    static readonly PrefabGUID _bloodCrystal = new(-1913156733);
-    static readonly PrefabGUID _greaterEssence = new(271594022);
-
-    static readonly PrefabGUID _primalStygianRecipe = new(-259193408); // using perfect amethyst gemdust recipe for this
-    static readonly PrefabGUID _greaterStygian = new(576389135);
-    static readonly PrefabGUID _primalStygian = new(28358550);
-
-    static readonly List<PrefabGUID> _shardRecipes =
-    [
-        _solarusShardRecipe,
-        _monsterShardRecipe,
-        _manticoreShardRecipe,
-        _draculaShardRecipe,
-        _morganaShardRecipe
-    ];
-
-    static readonly List<PrefabGUID> _soulShards =
-    [
-        _solarusShard,
-        _monsterShard,
-        _manticoreShard,
-        _draculaShard,
-        _morganaShard
-    ];
-
-    static readonly List<PrefabGUID> _shardContainers =
-    [
-        _solarusShardContainer,
-        _monsterShardContainer,
-        _manticoreShardContainer,
-        _draculaShardContainer,
-        _morganaShardContainer
-    ];
-
-    static readonly Dictionary<PrefabGUID, PrefabGUID> _recipesToShards = new()
+    private static class Requirements
     {
-        { _solarusShardRecipe, _solarusShard },
-        { _monsterShardRecipe, _monsterShard },
-        { _manticoreShardRecipe, _manticoreShard },
-        { _draculaShardRecipe, _draculaShard },
-        { _morganaShardRecipe, _morganaShard }
-    };
+        public static PrefabGUID PrimalJewel { get; } = new(ConfigService.PrimalJewelCost);
+    }
+
+    private static class Stations
+    {
+        public static PrefabGUID AdvancedGrinder { get; } = new(-178579946);
+        public static PrefabGUID PrimitiveGrinder { get; } = new(-600683642);
+        public static PrefabGUID AdvancedFurnace { get; } = new(-222851985);
+        public static PrefabGUID Fabricator { get; } = new(-465055967);
+        public static PrefabGUID ShardExtractor { get; } = new(1794206684);
+        public static PrefabGUID GemCuttingTable { get; } = new(-21483617);
+        public static PrefabGUID AdvancedBloodPress { get; } = new(-684391635);
+    }
+
+    private static class Inventories
+    {
+        public static PrefabGUID RefinementLarge { get; } = new(1436956144);
+        public static PrefabGUID RefinementSmall { get; } = new(-534407618);
+        public static PrefabGUID Extractor { get; } = new(-1814907421);
+    }
+
+    private static class RecipeIds
+    {
+        public static PrefabGUID IronBody { get; } = new(-1270503528);
+        public static PrefabGUID VampiricDust { get; } = new(311920560);
+        public static PrefabGUID CopperWires { get; } = new(-2031309726);
+        public static PrefabGUID SilverIngot { get; } = new(-1633898285);
+        public static PrefabGUID FakeFlower { get; } = new(-2095604835);
+        public static PrefabGUID ChargedBattery { get; } = new(-40415372);
+        public static PrefabGUID GoldIngot { get; } = new(-882942445);
+        public static PrefabGUID ExtractShard { get; } = new(1743327679);
+        public static PrefabGUID SolarusShard { get; } = new(-958598508);
+        public static PrefabGUID MonsterShard { get; } = new(1791150988);
+        public static PrefabGUID ManticoreShard { get; } = new(-111826090);
+        public static PrefabGUID DraculaShard { get; } = new(-414358988);
+        public static PrefabGUID MorganaShard { get; } = PrefabGUIDs.Recipe_MagicSource_General_T09_Morgana;
+        public static PrefabGUID FakeGemdust { get; } = new(-1105418306);
+        public static PrefabGUID BloodCrystal { get; } = new(-597461125);  // using perfect topaz gemdust recipe for this
+        public static PrefabGUID PrimalStygian { get; } = new(-259193408); // using perfect amethyst gemdust recipe for this
+    }
+
+    private static class Items
+    {
+        public static PrefabGUID BatHide { get; } = new(1262845777);
+        public static PrefabGUID LesserStygian { get; } = new(2103989354);
+        public static PrefabGUID BloodEssence { get; } = new(862477668);
+        public static PrefabGUID PlantThistle { get; } = new(-598100816);
+        public static PrefabGUID BatteryCharge { get; } = new(-77555820);
+        public static PrefabGUID TechScrap { get; } = new(834864259);
+        public static PrefabGUID PrimalEssence { get; } = new(1566989408);
+        public static PrefabGUID CopperWires { get; } = new(-456161884);
+        public static PrefabGUID EmpBuilding { get; } = new(-1447213995);
+        public static PrefabGUID DepletedBattery { get; } = new(1270271716);
+        public static PrefabGUID JewelTemplate { get; } = new(1075994038);
+        public static PrefabGUID GoldJewelry { get; } = new(-1749304196);
+        public static PrefabGUID GoldIngot { get; } = new(-1027710236);
+        public static PrefabGUID BloodCrystal { get; } = new(-1913156733);
+        public static PrefabGUID GreaterEssence { get; } = new(271594022);
+        public static PrefabGUID GreaterStygian { get; } = new(576389135);
+        public static PrefabGUID PrimalStygian { get; } = new(28358550);
+    }
+
+    private static class Components
+    {
+        public static PrefabGUID PristineHeart { get; } = new(-1413694594);
+        public static PrefabGUID RadiantFibre { get; } = new(-182923609);
+        public static PrefabGUID Resonator { get; } = new(-1629804427);
+        public static PrefabGUID Document { get; } = new(1334469825);
+        public static PrefabGUID DemonFragment { get; } = new(-77477508);
+        public static PrefabGUID MagicalComponent { get; } = new(1488205677);
+        public static PrefabGUID TailoringComponent { get; } = new(828271620);
+        public static PrefabGUID GemGrindstone { get; } = new(2115367516);
+        public static PrefabGUID GoldOre { get; } = new(660533034);
+        public static PrefabGUID ProcessedSulphur { get; } = new(880699252);
+        public static PrefabGUID Crystal { get; } = new(-257494203);
+    }
+
+    private static class Gems
+    {
+        public static PrefabGUID PerfectAmethyst { get; } = new(-106283194);
+        public static PrefabGUID PerfectEmerald { get; } = new(1354115931);
+        public static PrefabGUID PerfectRuby { get; } = new(188653143);
+        public static PrefabGUID PerfectSapphire { get; } = new(-2020212226);
+        public static PrefabGUID PerfectTopaz { get; } = new(-1983566585);
+        public static PrefabGUID PerfectMiststone { get; } = new(750542699);
+    }
+
+    private static class Shards
+    {
+        public static PrefabGUID Solarus { get; } = new(-21943750);
+        public static PrefabGUID Monster { get; } = new(-1581189572);
+        public static PrefabGUID Manticore { get; } = new(-1260254082);
+        public static PrefabGUID Dracula { get; } = new(666638454);
+        public static PrefabGUID Morgana { get; } = PrefabGUIDs.Item_MagicSource_SoulShard_Morgana;
+    }
+
+    private static class Containers
+    {
+        public static PrefabGUID SolarusShard { get; } = new(-824445631);
+        public static PrefabGUID MonsterShard { get; } = new(-1996942061);
+        public static PrefabGUID ManticoreShard { get; } = new(653759442);
+        public static PrefabGUID DraculaShard { get; } = new(1495743889);
+        public static PrefabGUID MorganaShard { get; } = PrefabGUIDs.TM_Castle_Container_Specialized_Soulshards_Morgana;
+    }
+
+    private static class Collections
+    {
+        public static IReadOnlyList<PrefabGUID> ShardRecipes { get; } = new List<PrefabGUID>
+        {
+            RecipeIds.SolarusShard,
+            RecipeIds.MonsterShard,
+            RecipeIds.ManticoreShard,
+            RecipeIds.DraculaShard,
+            RecipeIds.MorganaShard
+        };
+
+        public static IReadOnlyList<PrefabGUID> SoulShards { get; } = new List<PrefabGUID>
+        {
+            Shards.Solarus,
+            Shards.Monster,
+            Shards.Manticore,
+            Shards.Dracula,
+            Shards.Morgana
+        };
+
+        public static IReadOnlyList<PrefabGUID> ShardContainers { get; } = new List<PrefabGUID>
+        {
+            Containers.SolarusShard,
+            Containers.MonsterShard,
+            Containers.ManticoreShard,
+            Containers.DraculaShard,
+            Containers.MorganaShard
+        };
+
+        public static IReadOnlyDictionary<PrefabGUID, PrefabGUID> RecipesToShards { get; } =
+            new Dictionary<PrefabGUID, PrefabGUID>
+            {
+                { RecipeIds.SolarusShard, Shards.Solarus },
+                { RecipeIds.MonsterShard, Shards.Monster },
+                { RecipeIds.ManticoreShard, Shards.Manticore },
+                { RecipeIds.DraculaShard, Shards.Dracula },
+                { RecipeIds.MorganaShard, Shards.Morgana }
+            };
+    }
 
     public static void ModifyRecipes()
     {
@@ -142,31 +170,31 @@ internal static class Recipes // pending organization and refactoring, should al
         ConfigurePrimalStygianRecipe(recipeMap);
         ConfigureBloodCrystalRecipe(recipeMap);
         RemoveRecipeLinks(
-            PrefabCollectionSystem._PrefabGuidToEntityMap[_fakeGemdustRecipe],
-            _primalStygianRecipe,
-            _bloodCrystalRecipe);
+            PrefabCollectionSystem._PrefabGuidToEntityMap[RecipeIds.FakeGemdust],
+            RecipeIds.PrimalStygian,
+            RecipeIds.BloodCrystal);
 
-        ModifyMiscItem(_primalEssence, PrefabGUIDs.Recipe_CastleUpkeep_T02, 10f, (_batteryCharge, 5));
-        ModifyMiscItem(_copperWires, PrefabGUIDs.Recipe_CastleUpkeep_T02, 15f, (_batteryCharge, 1));
-        ModifyMiscItem(_batHide, PrefabGUIDs.Recipe_CastleUpkeep_T02, 15f, (_lesserStygian, 3), (_bloodEssence, 5));
-        ModifyMiscItem(_goldOre, PrefabGUIDs.Recipe_CastleUpkeep_T02, 10f, (_goldJewelry, 2));
+        ModifyMiscItem(Items.PrimalEssence, PrefabGUIDs.Recipe_CastleUpkeep_T02, 10f, (Items.BatteryCharge, 5));
+        ModifyMiscItem(Items.CopperWires, PrefabGUIDs.Recipe_CastleUpkeep_T02, 15f, (Items.BatteryCharge, 1));
+        ModifyMiscItem(Items.BatHide, PrefabGUIDs.Recipe_CastleUpkeep_T02, 15f, (Items.LesserStygian, 3), (Items.BloodEssence, 5));
+        ModifyMiscItem(Components.GoldOre, PrefabGUIDs.Recipe_CastleUpkeep_T02, 10f, (Items.GoldJewelry, 2));
         ModifyMiscItem(
-            _radiantFibre,
+            Components.RadiantFibre,
             PrefabGUIDs.Recipe_CastleUpkeep_T02,
             10f,
             (PrefabGUIDs.Item_Ingredient_Gemdust, 8),
             (PrefabGUIDs.Item_Ingredient_Plant_PlantFiber, 16),
             (PrefabGUIDs.Item_Ingredient_Pollen, 24));
 
-        RemoveSalvageableAndRequirements(_batteryCharge);
+        RemoveSalvageableAndRequirements(Items.BatteryCharge);
 
         ConfigureExtractShardRecipeIfJewelValid();
         IncreaseShardContainerSlots();
         ConfigureAdvancedGrinder(recipeMap);
         RemoveRefinementRecipes(
-            PrefabCollectionSystem._PrefabGuidToEntityMap[_primitiveGrinder],
-            _primalStygianRecipe,
-            _bloodCrystalRecipe);
+            PrefabCollectionSystem._PrefabGuidToEntityMap[Stations.PrimitiveGrinder],
+            RecipeIds.PrimalStygian,
+            RecipeIds.BloodCrystal);
         ConfigureFabricator(recipeMap);
         FixFakeFlowerRecipe();
         ConfigureGemCuttingTable();
@@ -318,14 +346,14 @@ internal static class Recipes // pending organization and refactoring, should al
     /// </summary>
     private static void ConfigureEmpBuildingItem()
     {
-        Entity itemEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_itemBuildingEMP];
+        Entity itemEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[Items.EmpBuilding];
 
         var requirementBuffer = itemEntity.Has<RecipeRequirementBuffer>()
             ? itemEntity.ReadBuffer<RecipeRequirementBuffer>()
             : EntityManager.AddBuffer<RecipeRequirementBuffer>(itemEntity);
 
-        requirementBuffer.Add(new RecipeRequirementBuffer { Guid = _depletedBattery, Amount = 2 });
-        requirementBuffer.Add(new RecipeRequirementBuffer { Guid = _techScrap, Amount = 15 });
+        requirementBuffer.Add(new RecipeRequirementBuffer { Guid = Items.DepletedBattery, Amount = 2 });
+        requirementBuffer.Add(new RecipeRequirementBuffer { Guid = Items.TechScrap, Amount = 15 });
 
         EnsureSalvageable(itemEntity, PrefabGUIDs.Recipe_CastleUpkeep_T02, 20f);
     }
@@ -334,50 +362,50 @@ internal static class Recipes // pending organization and refactoring, should al
     /// Updates the Primal Stygian recipe requirements, outputs, and metadata.
     /// </summary>
     /// <param name="recipeMap">The recipe lookup map to update.</param>
-    private static void ConfigurePrimalStygianRecipe(Dictionary<PrefabGUID, RecipeData> recipeMap)
+    private static void ConfigurePrimalStygianRecipe(NativeParallelHashMap<PrefabGUID, RecipeData> recipeMap)
     {
-        var recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_primalStygianRecipe];
+        var recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[RecipeIds.PrimalStygian];
 
         var requirements = recipeEntity.ReadBuffer<RecipeRequirementBuffer>();
         var firstRequirement = requirements[0];
-        firstRequirement.Guid = _greaterStygian;
+        firstRequirement.Guid = Items.GreaterStygian;
         firstRequirement.Amount = 8;
         requirements[0] = firstRequirement;
 
         var outputs = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
         var firstOutput = outputs[0];
-        firstOutput.Guid = _primalStygian;
+        firstOutput.Guid = Items.PrimalStygian;
         firstOutput.Amount = 1;
         outputs[0] = firstOutput;
 
         UpdateRecipeData(recipeEntity, 10f, true, false);
-        recipeMap[_primalStygianRecipe] = recipeEntity.Read<RecipeData>();
+        recipeMap[RecipeIds.PrimalStygian] = recipeEntity.Read<RecipeData>();
     }
 
     /// <summary>
     /// Updates the Blood Crystal recipe requirements, outputs, and metadata.
     /// </summary>
     /// <param name="recipeMap">The recipe lookup map to update.</param>
-    private static void ConfigureBloodCrystalRecipe(Dictionary<PrefabGUID, RecipeData> recipeMap)
+    private static void ConfigureBloodCrystalRecipe(NativeParallelHashMap<PrefabGUID, RecipeData> recipeMap)
     {
-        var recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_bloodCrystalRecipe];
+        var recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[RecipeIds.BloodCrystal];
 
         var requirements = recipeEntity.ReadBuffer<RecipeRequirementBuffer>();
         var firstRequirement = requirements[0];
-        firstRequirement.Guid = _crystal;
+        firstRequirement.Guid = Components.Crystal;
         firstRequirement.Amount = 100;
         requirements[0] = firstRequirement;
 
-        requirements.Add(new RecipeRequirementBuffer { Guid = _greaterEssence, Amount = 1 });
+        requirements.Add(new RecipeRequirementBuffer { Guid = Items.GreaterEssence, Amount = 1 });
 
         var outputs = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
         var firstOutput = outputs[0];
-        firstOutput.Guid = _bloodCrystal;
+        firstOutput.Guid = Items.BloodCrystal;
         firstOutput.Amount = 100;
         outputs[0] = firstOutput;
 
         UpdateRecipeData(recipeEntity, 10f, true, false);
-        recipeMap[_bloodCrystalRecipe] = recipeEntity.Read<RecipeData>();
+        recipeMap[RecipeIds.BloodCrystal] = recipeEntity.Read<RecipeData>();
     }
 
     /// <summary>
@@ -429,12 +457,12 @@ internal static class Recipes // pending organization and refactoring, should al
     /// </summary>
     private static void ConfigureExtractShardRecipeIfJewelValid()
     {
-        if (!_primalJewelRequirement.HasValue())
+        if (!Requirements.PrimalJewel.HasValue())
         {
             return;
         }
 
-        if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_primalJewelRequirement, out Entity itemPrefab)
+        if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Requirements.PrimalJewel, out Entity itemPrefab)
             || !itemPrefab.Has<ItemData>())
         {
             Core.Log.LogWarning(
@@ -443,21 +471,21 @@ internal static class Recipes // pending organization and refactoring, should al
             return;
         }
 
-        var extractRecipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_extractShardRecipe];
+        var extractRecipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[RecipeIds.ExtractShard];
         var requirementBuffer = extractRecipeEntity.ReadBuffer<RecipeRequirementBuffer>();
         var firstRequirement = requirementBuffer[0];
-        firstRequirement.Guid = _primalJewelRequirement;
+        firstRequirement.Guid = Requirements.PrimalJewel;
         requirementBuffer[0] = firstRequirement;
 
         var outputBuffer = extractRecipeEntity.ReadBuffer<RecipeOutputBuffer>();
-        outputBuffer.Add(new RecipeOutputBuffer { Guid = _itemJewelTemplate, Amount = 1 });
+        outputBuffer.Add(new RecipeOutputBuffer { Guid = Items.JewelTemplate, Amount = 1 });
 
-        foreach (PrefabGUID shardRecipe in _shardRecipes)
+        foreach (PrefabGUID shardRecipe in Collections.ShardRecipes)
         {
             var recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[shardRecipe];
             var shardRequirementBuffer = recipeEntity.ReadBuffer<RecipeRequirementBuffer>();
-            shardRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = _recipesToShards[shardRecipe], Amount = 1 });
-            shardRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = _primalJewelRequirement, Amount = 1 });
+            shardRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = Collections.RecipesToShards[shardRecipe], Amount = 1 });
+            shardRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = Requirements.PrimalJewel, Amount = 1 });
         }
     }
 
@@ -466,7 +494,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// </summary>
     private static void IncreaseShardContainerSlots()
     {
-        foreach (PrefabGUID shardContainer in _shardContainers)
+        foreach (PrefabGUID shardContainer in Collections.ShardContainers)
         {
             if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(shardContainer, out var prefabEntity))
             {
@@ -490,41 +518,41 @@ internal static class Recipes // pending organization and refactoring, should al
     /// Enables Vampiric Dust on the advanced grinder and removes conflicting recipes.
     /// </summary>
     /// <param name="recipeMap">The recipe lookup map to update.</param>
-    private static void ConfigureAdvancedGrinder(Dictionary<PrefabGUID, RecipeData> recipeMap)
+    private static void ConfigureAdvancedGrinder(NativeParallelHashMap<PrefabGUID, RecipeData> recipeMap)
     {
-        var recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_vampiricDustRecipe];
+        var recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[RecipeIds.VampiricDust];
         recipeEntity.With((ref RecipeData recipeData) =>
         {
             recipeData.AlwaysUnlocked = true;
             recipeData.HideInStation = false;
             recipeData.HudSortingOrder = 0;
         });
-        recipeMap[_vampiricDustRecipe] = recipeEntity.Read<RecipeData>();
+        recipeMap[RecipeIds.VampiricDust] = recipeEntity.Read<RecipeData>();
 
-        var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_advancedGrinder];
-        AddRefinementRecipes(stationEntity, _vampiricDustRecipe);
-        RemoveRefinementRecipes(stationEntity, _primalStygianRecipe, _bloodCrystalRecipe);
+        var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[Stations.AdvancedGrinder];
+        AddRefinementRecipes(stationEntity, RecipeIds.VampiricDust);
+        RemoveRefinementRecipes(stationEntity, RecipeIds.PrimalStygian, RecipeIds.BloodCrystal);
     }
 
     /// <summary>
     /// Adds copper wires and charged battery recipes to the fabricator.
     /// </summary>
     /// <param name="recipeMap">The recipe lookup map to update.</param>
-    private static void ConfigureFabricator(Dictionary<PrefabGUID, RecipeData> recipeMap)
+    private static void ConfigureFabricator(NativeParallelHashMap<PrefabGUID, RecipeData> recipeMap)
     {
-        var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_fabricator];
+        var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[Stations.Fabricator];
 
-        var copperRecipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_copperWiresRecipe];
+        var copperRecipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[RecipeIds.CopperWires];
         UpdateRecipeData(copperRecipeEntity, 10f, true, false);
-        recipeMap[_copperWiresRecipe] = copperRecipeEntity.Read<RecipeData>();
+        recipeMap[RecipeIds.CopperWires] = copperRecipeEntity.Read<RecipeData>();
 
-        var chargedBatteryEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_chargedBatteryRecipe];
+        var chargedBatteryEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[RecipeIds.ChargedBattery];
         var requirementBuffer = chargedBatteryEntity.ReadBuffer<RecipeRequirementBuffer>();
-        requirementBuffer.Add(new RecipeRequirementBuffer { Guid = _batteryCharge, Amount = 1 });
+        requirementBuffer.Add(new RecipeRequirementBuffer { Guid = Items.BatteryCharge, Amount = 1 });
         UpdateRecipeData(chargedBatteryEntity, 90f, true, false);
-        recipeMap[_chargedBatteryRecipe] = chargedBatteryEntity.Read<RecipeData>();
+        recipeMap[RecipeIds.ChargedBattery] = chargedBatteryEntity.Read<RecipeData>();
 
-        AddRefinementRecipes(stationEntity, _copperWiresRecipe, _chargedBatteryRecipe);
+        AddRefinementRecipes(stationEntity, RecipeIds.CopperWires, RecipeIds.ChargedBattery);
     }
 
     /// <summary>
@@ -532,7 +560,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// </summary>
     private static void FixFakeFlowerRecipe()
     {
-        if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_fakeFlowerRecipe, out Entity recipePrefab))
+        if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(RecipeIds.FakeFlower, out Entity recipePrefab))
         {
             return;
         }
@@ -543,7 +571,7 @@ internal static class Recipes // pending organization and refactoring, should al
         }
 
         var firstRequirement = requirementBuffer[0];
-        firstRequirement.Guid = _plantThistle;
+        firstRequirement.Guid = Items.PlantThistle;
         requirementBuffer[0] = firstRequirement;
     }
 
@@ -552,8 +580,8 @@ internal static class Recipes // pending organization and refactoring, should al
     /// </summary>
     private static void ConfigureGemCuttingTable()
     {
-        var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_gemCuttingTable];
-        AddRefinementRecipes(stationEntity, _primalStygianRecipe, _extractShardRecipe);
+        var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[Stations.GemCuttingTable];
+        AddRefinementRecipes(stationEntity, RecipeIds.PrimalStygian, RecipeIds.ExtractShard);
     }
 
     /// <summary>
@@ -561,7 +589,7 @@ internal static class Recipes // pending organization and refactoring, should al
     /// </summary>
     private static void ConfigureAdvancedBloodPress()
     {
-        var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_advancedBloodPress];
-        AddRefinementRecipes(stationEntity, _bloodCrystalRecipe);
+        var stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[Stations.AdvancedBloodPress];
+        AddRefinementRecipes(stationEntity, RecipeIds.BloodCrystal);
     }
 }
