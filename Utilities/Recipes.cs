@@ -8,18 +8,8 @@ using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft.Utilities;
-/*
- * Refactor status checklist:
- * [x] Centralized recipe GUID groupings into nested classes.
- * [ ] Extract shard- and item-specific helpers into dedicated files.
- * [ ] Replace remaining hard-coded identifiers with configuration lookups.
- * [ ] Document server/client responsibility boundaries for recipe syncing.
- *
- * Contributors: update this checklist as you complete items to keep maintenance needs visible.
- */
 internal static class Recipes
 {
-    static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static GameDataSystem GameDataSystem => SystemService.GameDataSystem;
