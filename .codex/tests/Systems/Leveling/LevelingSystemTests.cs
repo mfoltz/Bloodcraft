@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
-using HarmonyLib;
 using Xunit;
-using System.Runtime.CompilerServices;
 
 namespace Bloodcraft.Tests.Systems.Leveling;
 
@@ -14,71 +11,20 @@ public class LevelingSystemTests : IClassFixture<LevelingSystemTests.Fixture>
 {
     const ulong TestSteamId = 76561198000000042UL;
 
-    [ModuleInitializer]
-    internal static void RegisterHarmonyResolver()
-    {
-        AppDomain.CurrentDomain.AssemblyResolve += ResolveHarmonyAssembly;
-    }
-
-    static Assembly? ResolveHarmonyAssembly(object? sender, ResolveEventArgs args)
-    {
-        if (!args.Name.StartsWith("0Harmony", StringComparison.OrdinalIgnoreCase))
-        {
-            return null;
-        }
-
-        return typeof(Harmony).Assembly;
-    }
-
     public class Fixture : IDisposable
     {
-        readonly Harmony harmony;
+        readonly IDisposable persistenceScope;
 
         public Fixture()
         {
-            harmony = new Harmony("Bloodcraft.Tests.Systems.Leveling.LevelingSystemTests");
-            PatchPersistence(harmony, nameof(DataService.PlayerPersistence.SavePlayerExperience));
-            PatchPersistence(harmony, nameof(DataService.PlayerPersistence.SavePlayerRestedXP));
+            persistenceScope = DataService.SuppressPersistence();
+            LevelingSystem.EnablePrefabEffects = false;
         }
 
         public void Dispose()
         {
-            MethodInfo? unpatch = typeof(Harmony).GetMethod("UnpatchSelf", BindingFlags.Instance | BindingFlags.Public);
-            unpatch?.Invoke(harmony, null);
-        }
-
-        static void PatchPersistence(Harmony harmonyInstance, string methodName)
-        {
-            MethodInfo? target = typeof(DataService.PlayerPersistence).GetMethod(methodName, BindingFlags.Public | BindingFlags.Static);
-            Assert.NotNull(target);
-
-            MethodInfo prefix = typeof(Fixture).GetMethod(nameof(SkipPersistence), BindingFlags.NonPublic | BindingFlags.Static)!;
-            ApplyPatch(harmonyInstance, target!, prefix);
-        }
-
-        static bool SkipPersistence() => false;
-
-        static void ApplyPatch(Harmony harmonyInstance, MethodInfo original, MethodInfo prefix)
-        {
-            HarmonyMethod harmonyPrefix = new(prefix);
-            var signatures = new[]
-            {
-                new { Parameters = new[] { typeof(MethodBase), typeof(HarmonyMethod), typeof(HarmonyMethod), typeof(HarmonyMethod), typeof(HarmonyMethod), typeof(HarmonyMethod) }, Arguments = new object?[] { original, harmonyPrefix, null, null, null, null } },
-                new { Parameters = new[] { typeof(MethodBase), typeof(HarmonyMethod), typeof(HarmonyMethod), typeof(HarmonyMethod), typeof(HarmonyMethod) }, Arguments = new object?[] { original, harmonyPrefix, null, null, null } },
-                new { Parameters = new[] { typeof(MethodBase), typeof(HarmonyMethod), typeof(HarmonyMethod), typeof(HarmonyMethod) }, Arguments = new object?[] { original, harmonyPrefix, null, null } }
-            };
-
-            foreach (var signature in signatures)
-            {
-                MethodInfo? patchMethod = typeof(Harmony).GetMethod("Patch", BindingFlags.Instance | BindingFlags.Public, Type.DefaultBinder, signature.Parameters, null);
-                if (patchMethod != null)
-                {
-                    patchMethod.Invoke(harmonyInstance, signature.Arguments);
-                    return;
-                }
-            }
-
-            throw new InvalidOperationException("Harmony.Patch signature not supported.");
+            LevelingSystem.EnablePrefabEffects = true;
+            persistenceScope.Dispose();
         }
     }
 

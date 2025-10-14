@@ -34,6 +34,52 @@ using WeaponType = Bloodcraft.Interfaces.WeaponType;
 namespace Bloodcraft.Services;
 internal static class DataService
 {
+    static readonly object PersistenceSuppressionLock = new();
+    static int persistenceSuppressionDepth;
+
+    internal static IDisposable SuppressPersistence()
+    {
+        return new PersistenceSuppressionScope();
+    }
+
+    static bool IsPersistenceSuppressed
+    {
+        get
+        {
+            lock (PersistenceSuppressionLock)
+            {
+                return persistenceSuppressionDepth > 0;
+            }
+        }
+    }
+
+    sealed class PersistenceSuppressionScope : IDisposable
+    {
+        bool disposed;
+
+        public PersistenceSuppressionScope()
+        {
+            lock (PersistenceSuppressionLock)
+            {
+                persistenceSuppressionDepth++;
+            }
+        }
+
+        public void Dispose()
+        {
+            lock (PersistenceSuppressionLock)
+            {
+                if (disposed)
+                {
+                    return;
+                }
+
+                persistenceSuppressionDepth--;
+                disposed = true;
+            }
+        }
+    }
+
     public static bool TryGetPlayerExperience(this ulong steamId, out KeyValuePair<int, float> experience)
     {
         return _playerExperience.TryGetValue(steamId, out experience);
@@ -252,11 +298,21 @@ internal static class DataService
     public static void SetPlayerExperience(this ulong steamId, KeyValuePair<int, float> data)
     {
         _playerExperience[steamId] = data;
+        if (IsPersistenceSuppressed)
+        {
+            return;
+        }
+
         SavePlayerExperience();
     }
     public static void SetPlayerRestedXP(this ulong steamId, KeyValuePair<DateTime, float> data)
     {
         _playerRestedXP[steamId] = data;
+        if (IsPersistenceSuppressed)
+        {
+            return;
+        }
+
         SavePlayerRestedXP();
     }
     public static void SetPlayerClass(this ulong steamId, PlayerClass playerClass)
@@ -807,6 +863,11 @@ internal static class DataService
         }
         static void SaveData<T>(ConcurrentDictionary<ulong, T> data, string key)
         {
+            if (IsPersistenceSuppressed)
+            {
+                return;
+            }
+
             string path = _filePaths[key];
             try
             {
@@ -824,6 +885,11 @@ internal static class DataService
         }
         static void SaveData<T>(List<List<float>> data, string key)
         {
+            if (IsPersistenceSuppressed)
+            {
+                return;
+            }
+
             string path = _filePaths[key];
 
             try
@@ -842,6 +908,11 @@ internal static class DataService
         }
         static void SaveData<T>(List<ulong> data, string key)
         {
+            if (IsPersistenceSuppressed)
+            {
+                return;
+            }
+
             string path = _filePaths[key];
 
             try
