@@ -76,13 +76,13 @@ jobs:
           if [ "$current_version" = "$latest_version" ]; then
             pre_release_tag="v${current_version}-pre"
 
-            if git rev-parse "$pre_release_tag" >/dev/null 2>&1; then
-              echo "Current .csproj version $current_version matches latest release and pre-release tag $pre_release_tag exists; skipping build on push to main."
+            if git tag -l "$pre_release_tag" | grep -q .; then
+              echo "Current .csproj version $current_version matches latest release and pre-release tag $pre_release_tag already exists; skipping build because the pre-release is already published."
               echo "should_build=false" >> $GITHUB_OUTPUT
               exit 0
             fi
 
-            echo "Current .csproj version $current_version matches latest release but no pre-release tag $pre_release_tag found; proceeding to build to publish pre-release."
+            echo "Current .csproj version $current_version matches latest release but no pre-release tag $pre_release_tag is present; enabling build so the pre-release can be published automatically."
             echo "should_build=true" >> $GITHUB_OUTPUT
             exit 0
           fi
