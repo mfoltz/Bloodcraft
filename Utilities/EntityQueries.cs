@@ -1239,7 +1239,7 @@ internal static class ComponentRegistry
         RegisterComponent<RandomizeCustomization2DebugEvent>();
         RegisterComponent<ChangeHealthDebugEvent>();
         RegisterComponent<ChangeBloodDebugEvent>();
-        RegisterComponent<ConsumeBloodDebugEvent>();
+        // RegisterComponent<ConsumeBloodDebugEvent>();
         RegisterComponent<ChangeVBloodDebugEvent>();
         RegisterComponent<TeleportToVBloodDebugEvent>();
         RegisterComponent<UnlockAllVBloodAbilities>();
