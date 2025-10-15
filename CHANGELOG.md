@@ -1,3 +1,7 @@
+`1.12.17`
+- removed `ConsumeBloodDebugEvent` from component registry for compatability with V Rising `v1.1.10.1-r94466-b2` update.
+- let's all join hands and pray the ill-timed `Recipes.cs` refactor is fine >_>. (`#yolo`)
+
 `1.12.16`
 - minor hotfix to restore emote actions, forgot to remove some debug stuff; sorry about that!
 
