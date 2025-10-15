@@ -26,7 +26,8 @@ jobs:
           # Adjust if you have multiple .csproj files.
           csproj_file=$(find . -type f -name '*.csproj' \
             -not -path '*/bin/*' \
-            -not -path '*/obj/*' | head -n 1)
+            -not -path '*/obj/*' \
+            -not -path '*/.codex/*' | head -n 1)
           
           echo "csproj_file=$csproj_file" >> $GITHUB_OUTPUT
         
