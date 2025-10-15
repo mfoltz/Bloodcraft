@@ -117,7 +117,12 @@ jobs:
 
       - name: Build (Release)
         if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
-        run: dotnet build . --configuration Release -p:Version=${{ env.version }} -p:RunGenerateREADME=false
+        run: |
+          if [ -n "${{ env.version }}" ]; then
+            dotnet build . --configuration Release -p:Version=${{ env.version }} -p:RunGenerateREADME=false
+          else
+            dotnet build . --configuration Release -p:RunGenerateREADME=false
+          fi
 
       - name: GH Release (pre-release)
         uses: softprops/action-gh-release@v1
