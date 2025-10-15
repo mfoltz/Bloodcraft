@@ -39,7 +39,14 @@ jobs:
 
       - name: Publish build to Thunderstore
         run: |
-          trimmed_tag=${RELEASE_TAG:1}
-          tcli publish --token ${{ secrets.THUNDERSTORE_KEY }} --package-version $trimmed_tag
+          sanitized_tag=${RELEASE_TAG#v}
+          sanitized_tag=${sanitized_tag%%-*}
+
+          if [[ ! $sanitized_tag =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Release tag '$RELEASE_TAG' does not conform to Major.Minor.Patch after sanitization ('$sanitized_tag')." >&2
+            exit 1
+          fi
+
+          tcli publish --token ${{ secrets.THUNDERSTORE_KEY }} --package-version "$sanitized_tag"
         env:
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
