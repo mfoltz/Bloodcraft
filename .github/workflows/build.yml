@@ -102,6 +102,11 @@ jobs:
       - name: Update thunderstore.toml
         if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
         run: |
+          if [ -z "${{ env.version }}" ]; then
+            echo "Version is empty; skipping thunderstore.toml update."
+            exit 0
+          fi
+
           sed -i "s/versionNumber = \".*\"/versionNumber = \"${{ env.version }}\"/" thunderstore.toml
 
           git config user.name "github-actions"
