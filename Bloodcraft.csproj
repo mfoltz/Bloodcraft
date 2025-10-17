@@ -45,12 +45,17 @@
 		<EmbeddedResource Include="Resources\secrets.json" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
-		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.733" IncludeAssets="compile" />
-		<PackageReference Include="VRising.Unhollowed.Client" Version="1.1.9.9219901" />
-		<PackageReference Include="VRising.VampireCommandFramework" Version="0.10.4" />
-	</ItemGroup>
+        <ItemGroup>
+                <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
+                <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.733" IncludeAssets="compile" />
+                <PackageReference Include="VRising.Unhollowed.Client" Version="1.1.9.9219901" />
+                <PackageReference Include="VRising.VampireCommandFramework" Version="0.10.4" />
+        </ItemGroup>
+
+        <ItemGroup>
+                <Compile Remove="Factory/README-Usage.cs" />
+                <None Include="Factory/README-Usage.cs" />
+        </ItemGroup>
 	
 	<Target Name="BuildToServer" AfterTargets="Build">
 		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRisingDedicatedServer\BepInEx\plugins" />
