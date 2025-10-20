@@ -49,6 +49,8 @@ The sandbox now includes `DeathEventAggregationWork`, which mirrors the live `De
 
 `CraftingProgressionWork` expands the sandbox into the crafting progression hooks covered by `ReactToInventoryChangedSystemPatch` and `CraftingSystemPatches`. The fixture models the inventory-obtained query plus the forge, workstation, and prison crafting queries, registers the `InventoryConnection`/`QueuedWorkstationCraftAction` lookups, and exposes clan/job data sources so profession XP and quest propagation logic stay testable without relying on live Unity state.
 
+`AbilitySlotWork` captures the `ReplaceAbilityOnSlotSystem` Harmony prefix so we can validate the entity query, the `ReplaceAbilityOnSlotBuff` buffer registration, prefab lookup wiring, and the unarmed/shift/lock spell branches. This fixture demonstrates the migration path toward a native factory system where the prefix logic becomes an injectable work unit instead of a Harmony patch.
+
 ## Maintenance Notes
 
 * Revisit this roadmap after introducing new systems (e.g., Eclipse events, Primal War tweaks) to capture regression hotspots early.
