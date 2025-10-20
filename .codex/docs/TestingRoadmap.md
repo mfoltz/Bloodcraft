@@ -45,6 +45,8 @@ Gameplay systems that apply progression logic or orchestrate combat hooks. These
 
 The sandbox now includes `DeathEventAggregationWork`, which mirrors the live `DeathEventListenerSystem` patch. It captures the death-event query, registers the progression lookups (movement, block-feed, trader, unit level, minion, VBlood source), and exposes helper hooks so progression tests can emulate familiar resets and legacy feed-kill checks without spinning up a Unity world.
 
+`FamiliarEquipmentWork` extends the fixture coverage into the familiar servant pipeline by modelling the servant equipment/transfer handlers alongside teleport cleanup. The tests assert that every query observed in the Harmony patches is requested, the `BlockFeedBuff` lookup and mocked network-ID map are wired, and teleport debug events record the expected familiar return targets so that equipment gating and cleanup can be validated without a Unity runtime.
+
 ## Maintenance Notes
 
 * Revisit this roadmap after introducing new systems (e.g., Eclipse events, Primal War tweaks) to capture regression hotspots early.
