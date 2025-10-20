@@ -1,6 +1,21 @@
 # AGENTS.md: Universal Principles for CSharp and General Programming
 
-This guide provides universal, intelligent principles and patterns to master C# coding effectively, applicable across any project or repository.
+This guide provides universal, consistent principles and patterns to master C# coding effectively, applicable across any project or repository (within reason).
+
+## 🧪 Build & Test Workflow
+
+* Use the repository's provisioning script at `.codex/install.sh` for any build or test run. This script installs the required .NET SDK (if necessary) and builds the `Bloodcraft` project in Release mode. Invoke it from the repository root:
+
+  ```bash
+  bash .codex/install.sh
+  ```
+
+* After the SDK is available, execute tests (for example, within `.codex/tests`) with the `dotnet` CLI that the script installs/exposes.
+
+## 🗂️ Codex Tooling Structure
+
+* Place all Codex tooling and new tests under the `.codex/` directory (e.g., `.codex/tests/...`).
+* Ensure future Codex-related assets respect this directory structure, and reference or inherit this guidance in any additional `AGENTS.md` files that may be introduced.
 
 ## 🧠 Structured Reasoning
 

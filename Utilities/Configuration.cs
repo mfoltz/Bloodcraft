@@ -30,12 +30,29 @@ internal static class Configuration
     }
     public static List<int> ParseIntegersFromString(string configString)
     {
-        if (string.IsNullOrEmpty(configString))
+        if (string.IsNullOrWhiteSpace(configString))
         {
             return [];
         }
 
-        return [..configString.Split(',').Select(int.Parse)];
+        List<int> results = [];
+
+        foreach (string segment in configString.Split(','))
+        {
+            string trimmedSegment = segment.Trim();
+
+            if (string.IsNullOrEmpty(trimmedSegment))
+            {
+                continue;
+            }
+
+            if (int.TryParse(trimmedSegment, out int value))
+            {
+                results.Add(value);
+            }
+        }
+
+        return results;
     }
     public static List<T> ParseEnumsFromString<T>(string configString) where T : struct, Enum
     {

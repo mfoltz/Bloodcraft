@@ -24,6 +24,9 @@ internal static class BloodCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
+    private const int STATS_BATCH_SIZE = 6;
+    private const int LIST_BATCH_SIZE = 4;
+
     [Command(name: "get", adminOnly: false, usage: ".bl get [BloodType]", description: "Display current blood legacy details.")]
     public static void GetLegacyCommand(ChatCommandContext ctx, string blood = null)
     {
@@ -78,9 +81,8 @@ internal static class BloodCommands
                     bloodLegacyStats.Add(new KeyValuePair<BloodStatType, string>(bloodStatType, bloodStatString));
                 }
 
-                for (int i = 0; i < bloodLegacyStats.Count; i += 6)
+                foreach (var batch in bloodLegacyStats.Batch(STATS_BATCH_SIZE))
                 {
-                    var batch = bloodLegacyStats.Skip(i).Take(6);
                     string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
                     LocalizationService.HandleReply(ctx, $"<color=red>{bloodType}</color> Stats:");
                     LocalizationService.HandleReply(ctx, bonuses);
@@ -265,9 +267,8 @@ internal static class BloodCommands
         }
         else
         {
-            for (int i = 0; i < bloodStatsWithCaps.Count; i += 4)
+            foreach (var batch in bloodStatsWithCaps.Batch(LIST_BATCH_SIZE))
             {
-                var batch = bloodStatsWithCaps.Skip(i).Take(4);
                 string replyMessage = string.Join(", ", batch);
                 LocalizationService.HandleReply(ctx, replyMessage);
             }

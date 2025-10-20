@@ -74,8 +74,7 @@ internal static class CraftingSystemPatches
             entities.Dispose();
         }
 
-        entities = __instance.EntityQueries[4].ToEntityArray(Allocator.Temp);
-
+        // entities = __instance.EntityQueries[4].ToEntityArray(Allocator.Temp);
     }
     */
 

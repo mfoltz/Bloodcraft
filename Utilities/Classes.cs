@@ -41,6 +41,9 @@ internal static class Classes
 
     const string NO_NAME = "No Name";
     const string PRIMARY_ATTACK = "Primary Attack";
+    const int PASSIVE_BATCH = 3;
+    const int SYNERGY_BATCH = 6;
+    const int SPELL_BATCH = 4;
     static NativeParallelHashMap<PrefabGUID, ItemData> ItemLookup => SystemService.GameDataSystem.ItemHashLookupMap;
     static PrefabLookupMap _prefabLookupMap = PrefabCollectionSystem._PrefabLookupMap;
 
@@ -421,9 +424,8 @@ internal static class Classes
 
         LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} passives:");
 
-        for (int i = 0; i < classBuffs.Count; i += 3) // Using batches of 4 for better readability
+        foreach (var batch in classBuffs.Batch(PASSIVE_BATCH))
         {
-            var batch = classBuffs.Skip(i).Take(3);
             string replyMessage = string.Join(", ", batch);
             LocalizationService.HandleReply(ctx, $"{replyMessage}");
         }
@@ -460,9 +462,8 @@ internal static class Classes
 
         LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:");
 
-        for (int i = 0; i < allStats.Count; i += 6)
+        foreach (var batch in allStats.Batch(SYNERGY_BATCH))
         {
-            var batch = allStats.Skip(i).Take(6);
             string replyMessage = string.Join(", ", batch);
             LocalizationService.HandleReply(ctx, $"{replyMessage}");
         }
@@ -529,9 +530,8 @@ internal static class Classes
 
         LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} spells:");
 
-        for (int i = 0; i < classSpells.Count; i += 4)
+        foreach (var batch in classSpells.Batch(SPELL_BATCH))
         {
-            var batch = classSpells.Skip(i).Take(4);
             string replyMessage = string.Join(", ", batch);
             LocalizationService.HandleReply(ctx, $"{replyMessage}");
         }

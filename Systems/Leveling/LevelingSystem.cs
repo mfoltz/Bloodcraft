@@ -40,23 +40,33 @@ internal static class LevelingSystem
 
     static readonly float _levelingPrestigeReducer = ConfigService.LevelingPrestigeReducer;
 
-    static readonly WaitForSeconds _delay = new(0.75f);
     const float DELAY_ADD = 1f;
 
-    static readonly PrefabGUID _levelUpBuff = new(-1133938228);
-    static readonly PrefabGUID _warEventTrash = new(2090187901);
+    internal static bool EnablePrefabEffects { get; set; } = true;
 
-    static readonly float3 _gold = new(1f, 0.75f, 0f);
-    static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
-    static readonly PrefabGUID _sctGeneric = new(-1687715009);
+    static readonly Lazy<PrefabGUID> _levelUpBuff = new(() => new PrefabGUID(-1133938228));
+    static readonly Lazy<PrefabGUID> _warEventTrash = new(() => new PrefabGUID(2090187901));
+
+    static readonly Lazy<float3> _gold = new(() => new float3(1f, 0.75f, 0f));
+    static readonly Lazy<AssetGuid> _experienceAssetGuid = new(() => AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"));
+    static readonly Lazy<PrefabGUID> _sctGeneric = new(() => new PrefabGUID(-1687715009));
 
     // review these*
-    static readonly HashSet<PrefabGUID> _extraGearLevelBuffs =
+    static readonly Lazy<HashSet<PrefabGUID>> _extraGearLevelBuffs = new(() =>
     [
-        new(-1567599344), // SetBonus_PhysicalPower_GearLevel_01
-        new(244750581),   // SetBonus_GearLevel_02
-        new(-1469378405) // SetBonus_GearLevel_01
-    ];
+        new PrefabGUID(-1567599344), // SetBonus_PhysicalPower_GearLevel_01
+        new PrefabGUID(244750581),   // SetBonus_GearLevel_02
+        new PrefabGUID(-1469378405) // SetBonus_GearLevel_01
+    ]);
+
+    static readonly HashSet<PrefabGUID> _emptyPrefabSet = [];
+
+    static PrefabGUID LevelUpBuff => EnablePrefabEffects ? _levelUpBuff.Value : default;
+    static PrefabGUID WarEventTrash => EnablePrefabEffects ? _warEventTrash.Value : default;
+    static PrefabGUID ScrollingTextGeneric => EnablePrefabEffects ? _sctGeneric.Value : default;
+    static AssetGuid ExperienceAssetGuid => EnablePrefabEffects ? _experienceAssetGuid.Value : default;
+    static float3 Gold => EnablePrefabEffects ? _gold.Value : default;
+    static HashSet<PrefabGUID> ExtraGearLevelBuffs => EnablePrefabEffects ? _extraGearLevelBuffs.Value : _emptyPrefabSet;
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
         ProcessExperience(deathEvent);
@@ -132,7 +142,7 @@ internal static class LevelingSystem
 
             for (int i = 0; i < spawnBuffElement.Length; i++)
             {
-                if (spawnBuffElement[i].Buff.Equals(_warEventTrash))
+                if (EnablePrefabEffects && spawnBuffElement[i].Buff.Equals(WarEventTrash))
                 {
                     gainedXP *= _warEventMultiplier;
                     break;
@@ -211,7 +221,12 @@ internal static class LevelingSystem
     }
     static void HandlePlayerLevelUpEffects(Entity playerCharacter, ulong steamId)
     {
-        Buffs.TryApplyBuff(playerCharacter, _levelUpBuff);
+        if (!EnablePrefabEffects)
+        {
+            return;
+        }
+
+        Buffs.TryApplyBuff(playerCharacter, LevelUpBuff);
 
         if (_classes)
         {
@@ -255,9 +270,9 @@ internal static class LevelingSystem
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
 
-        if (GetPlayerBool(steamId, SCT_PLAYER_LVL_KEY))
+        if (EnablePrefabEffects && GetPlayerBool(steamId, SCT_PLAYER_LVL_KEY))
         {
-            PlayerExperienceSCTDelayRoutine(playerCharacter, userEntity, _gold, gainedXP, delay).Run();
+            PlayerExperienceSCTDelayRoutine(playerCharacter, userEntity, Gold, gainedXP, delay).Run();
         }
     }
     static IEnumerator PlayerExperienceSCTDelayRoutine(Entity playerCharacter, Entity userEntity, float3 color, float gainedXP, float delay) // maybe just have one of these in progression utilities but later
@@ -265,7 +280,7 @@ internal static class LevelingSystem
         yield return new WaitForSeconds(delay);
 
         float3 position = playerCharacter.GetPosition();
-        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, playerCharacter, gainedXP, _sctGeneric, userEntity);
+        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), ExperienceAssetGuid, position, color, playerCharacter, gainedXP, ScrollingTextGeneric, userEntity);
         // delay += DELAY_ADD;
     }
     static float GetXp(ulong steamId)
@@ -331,7 +346,7 @@ internal static class LevelingSystem
     }
     static void HandleExtraLevel(Entity playerCharacter, ref int playerLevel)
     {
-        if (_extraGearLevelBuffs.Any(buff => playerCharacter.HasBuff(buff)))
+        if (EnablePrefabEffects && ExtraGearLevelBuffs.Any(buff => playerCharacter.HasBuff(buff)))
         {
             playerLevel++;
         }

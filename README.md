@@ -458,6 +458,10 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).
   - Shortcut: *.wep spell [Name] [Slot] [PrefabGuid] [Radius]*
 
+</details>
+
+<details>
+<summary><strong>Configuration</strong></summary>
 
 ## Configuration
 
@@ -781,6 +785,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Death Mage Spells**: `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
   Death Mage shift spells, granted at levels of prestige.
 
+</details>
+
 ## Recommended Mods
 
 - [KindredCommands](https://thunderstore.io/c/v-rising/p/odjit/KindredCommands/) 
@@ -803,4 +809,4 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Already using [VCF](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/)? Need a feature-rich, role-based commands solution that's easy on the eyes? 🌠
    
 ## Credits
-It's important to mention & attribute where novel ideas, critical bug reports or otherwise generally important contributions come from; I try (and usually succeed! ;D) to stay on top of that in the changelog and commit history, but please reach out for any big misses there!
+It's important to mention & attribute where novel ideas, critical bug reports or otherwise generally important contributions come from; always try (and usually succeed 😉) to stay on top of that in changelogs/commits, but please reach out for big misses there!

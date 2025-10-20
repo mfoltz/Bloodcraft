@@ -1,6 +1,9 @@
 name: Build
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -10,21 +13,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: 7.0.x
-          
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0        
-        
-      - name: Restore dependencies
-        run: dotnet restore
-        
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
       - name: Discover .csproj
         id: discover_csproj
         run: |
@@ -32,7 +26,8 @@ jobs:
           # Adjust if you have multiple .csproj files.
           csproj_file=$(find . -type f -name '*.csproj' \
             -not -path '*/bin/*' \
-            -not -path '*/obj/*' | head -n 1)
+            -not -path '*/obj/*' \
+            -not -path '*/.codex/*' | head -n 1)
           
           echo "csproj_file=$csproj_file" >> $GITHUB_OUTPUT
         
@@ -52,8 +47,75 @@ jobs:
           version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" "${{ steps.discover_csproj.outputs.csproj_file }}")
           echo "version=$version" >> $GITHUB_ENV
 
-      - name: Update thunderstore.toml
+      - name: Determine build eligibility
+        id: version_guard
         run: |
+          if [ -z "${{ env.version }}" ]; then
+            echo "Unable to determine current version; continuing build to avoid false negative."
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual dispatch detected; proceeding with build regardless of version guard."
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          git fetch --force --tags
+          latest_tag=$(git tag -l 'v*' --sort=-v:refname | head -n 1)
+          latest_version=${latest_tag#v}
+
+          current_version="${{ env.version }}"
+
+          if [ -z "$latest_version" ]; then
+            echo "No previous tagged release detected; proceeding with build."
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if [ "$current_version" = "$latest_version" ]; then
+            pre_release_tag="v${current_version}-pre"
+
+            if git tag -l "$pre_release_tag" | grep -q .; then
+              echo "Current .csproj version $current_version matches latest release and pre-release tag $pre_release_tag already exists; skipping build because the pre-release is already published."
+              echo "should_build=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            echo "Current .csproj version $current_version matches latest release but no pre-release tag $pre_release_tag is present; enabling build so the pre-release can be published automatically."
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          highest_version=$(printf '%s\n' "$latest_version" "$current_version" | sort -V | tail -n 1)
+
+          if [ "$highest_version" = "$current_version" ]; then
+            echo "Current .csproj version $current_version is ahead of latest release $latest_version; proceeding with build."
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          else
+            echo "Current .csproj version $current_version is behind the latest release $latest_version; skipping build on push to main."
+            echo "should_build=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup .NET
+        if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Restore dependencies
+        if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
+        run: dotnet restore
+
+      - name: Update thunderstore.toml
+        if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
+        run: |
+          if [ -z "${{ env.version }}" ]; then
+            echo "Version is empty; skipping thunderstore.toml update."
+            exit 0
+          fi
+
           sed -i "s/versionNumber = \".*\"/versionNumber = \"${{ env.version }}\"/" thunderstore.toml
 
           git config user.name "github-actions"
@@ -62,30 +124,32 @@ jobs:
           if [ -n "$(git status --porcelain thunderstore.toml)" ]; then
             git add thunderstore.toml
             git commit -m "chore: Update thunderstore.toml version to ${{ env.version }}"
-            git push
+            git push origin HEAD:${{ github.ref }}
           else
             echo "No changes to commit in thunderstore.toml"
           fi
-          
-      - name: Create secrets.json
-        run: |
-          mkdir -p /home/runner/work/Bloodcraft/Bloodcraft/Resources
-          echo '{
-            "NEW_SHARED_KEY": "${{ secrets.NEW_SHARED_KEY }}"
-          }' > /home/runner/work/Bloodcraft/Bloodcraft/Resources/secrets.json
-          
-      - name: Build (Release)
-        run: dotnet build . --configuration Release -p:Version=${{ env.version }} -p:RunGenerateREADME=false
 
-      - name: GH Release
+      - name: Build (Release)
+        if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
+        run: |
+          if [ -n "${{ env.version }}" ]; then
+            dotnet build . --configuration Release -p:Version=${{ env.version }} -p:RunGenerateREADME=false
+          else
+            dotnet build . --configuration Release -p:RunGenerateREADME=false
+          fi
+
+      - name: GH Release (pre-release)
         uses: softprops/action-gh-release@v1
-        if: github.event_name == 'workflow_dispatch'
+        if: (steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch') && env.version != ''
         with:
-          body: Manual pre-release of ${{ env.version }}
-          name: v${{ env.version }}
+          body: |
+            Automated pre-release for version ${{ env.version }} generated from this GitHub Actions build.
+            - Commit: ${{ github.sha }}
+            - Run: ${{ github.run_id }}
+          name: Pre-release v${{ env.version }}
           fail_on_unmatched_files: true
           prerelease: true
-          tag_name: v${{ env.version }}
+          tag_name: v${{ env.version }}-pre
           files: |
             ./bin/Release/net6.0/${{ steps.get_dll_name.outputs.dll_name }}.dll
             CHANGELOG.md
