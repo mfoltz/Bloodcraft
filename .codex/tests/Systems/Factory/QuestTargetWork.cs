@@ -1,3 +1,4 @@
+using System;
 using ProjectM;
 using Stunlock.Core;
 
@@ -65,8 +66,9 @@ public readonly struct QuestTargetWork : ISystemWork
     public QueryDescription ImprisonedQuery => imprisonedQuery;
 
     /// <inheritdoc />
-    public void Build(ref TestEntityQueryBuilder builder)
+    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
     {
+        var builder = new TestEntityQueryBuilder();
         builder.AddAllReadOnly<PrefabGUID>();
         builder.AddAllReadOnly<Health>();
         builder.AddAllReadOnly<UnitLevel>();
@@ -80,17 +82,26 @@ public readonly struct QuestTargetWork : ISystemWork
         builder.AddNone(ComponentRequirements.ReadOnly<BlockFeedBuff>());
 
         builder.WithOptions(EntityQueryOptions.IncludeDisabled);
+        builder.Describe(out all, out any, out none, out options);
     }
 
     /// <inheritdoc />
-    public void OnCreate(SystemContext context)
+    public void Setup(IRegistrar registrar, in SystemContext context)
     {
-        context.Registrar.Register(facade =>
+        if (registrar == null)
+            throw new ArgumentNullException(nameof(registrar));
+
+        registrar.Register(facade =>
         {
             _ = facade.GetEntityTypeHandle();
             _ = facade.GetEntityStorageInfoLookup();
             _ = facade.GetComponentTypeHandle<PrefabGUID>(isReadOnly: true);
             _ = facade.GetComponentTypeHandle<Buff>(isReadOnly: true);
         });
+    }
+
+    /// <inheritdoc />
+    public void Tick(in SystemContext context)
+    {
     }
 }

@@ -15,32 +15,32 @@ public sealed class QuestTargetWorkTests
             description.All,
             requirement =>
             {
-                Assert.Equal(typeof(PrefabGUID), requirement.ComponentType);
+                Assert.Equal(typeof(PrefabGUID), requirement.ElementType);
                 Assert.Equal(ComponentAccessMode.ReadOnly, requirement.AccessMode);
             },
             requirement =>
             {
-                Assert.Equal(typeof(Health), requirement.ComponentType);
+                Assert.Equal(typeof(Health), requirement.ElementType);
                 Assert.Equal(ComponentAccessMode.ReadOnly, requirement.AccessMode);
             },
             requirement =>
             {
-                Assert.Equal(typeof(UnitLevel), requirement.ComponentType);
+                Assert.Equal(typeof(UnitLevel), requirement.ElementType);
                 Assert.Equal(ComponentAccessMode.ReadOnly, requirement.AccessMode);
             },
             requirement =>
             {
-                Assert.Equal(typeof(UnitStats), requirement.ComponentType);
+                Assert.Equal(typeof(UnitStats), requirement.ElementType);
                 Assert.Equal(ComponentAccessMode.ReadOnly, requirement.AccessMode);
             },
             requirement =>
             {
-                Assert.Equal(typeof(Movement), requirement.ComponentType);
+                Assert.Equal(typeof(Movement), requirement.ElementType);
                 Assert.Equal(ComponentAccessMode.ReadOnly, requirement.AccessMode);
             },
             requirement =>
             {
-                Assert.Equal(typeof(AggroConsumer), requirement.ComponentType);
+                Assert.Equal(typeof(AggroConsumer), requirement.ElementType);
                 Assert.Equal(ComponentAccessMode.ReadOnly, requirement.AccessMode);
             });
 
@@ -50,22 +50,22 @@ public sealed class QuestTargetWorkTests
             description.None,
             requirement =>
             {
-                Assert.Equal(typeof(Minion), requirement.ComponentType);
+                Assert.Equal(typeof(Minion), requirement.ElementType);
                 Assert.Equal(ComponentAccessMode.ReadOnly, requirement.AccessMode);
             },
             requirement =>
             {
-                Assert.Equal(typeof(DestroyOnSpawn), requirement.ComponentType);
+                Assert.Equal(typeof(DestroyOnSpawn), requirement.ElementType);
                 Assert.Equal(ComponentAccessMode.ReadOnly, requirement.AccessMode);
             },
             requirement =>
             {
-                Assert.Equal(typeof(Trader), requirement.ComponentType);
+                Assert.Equal(typeof(Trader), requirement.ElementType);
                 Assert.Equal(ComponentAccessMode.ReadOnly, requirement.AccessMode);
             },
             requirement =>
             {
-                Assert.Equal(typeof(BlockFeedBuff), requirement.ComponentType);
+                Assert.Equal(typeof(BlockFeedBuff), requirement.ElementType);
                 Assert.Equal(ComponentAccessMode.ReadOnly, requirement.AccessMode);
             });
 
@@ -83,12 +83,12 @@ public sealed class QuestTargetWorkTests
             description.All,
             requirement =>
             {
-                Assert.Equal(typeof(Buff), requirement.ComponentType);
+                Assert.Equal(typeof(Buff), requirement.ElementType);
                 Assert.Equal(ComponentAccessMode.ReadOnly, requirement.AccessMode);
             },
             requirement =>
             {
-                Assert.Equal(typeof(ImprisonedBuff), requirement.ComponentType);
+                Assert.Equal(typeof(ImprisonedBuff), requirement.ElementType);
                 Assert.Equal(ComponentAccessMode.ReadOnly, requirement.AccessMode);
             });
 
@@ -99,13 +99,14 @@ public sealed class QuestTargetWorkTests
     }
 
     [Fact]
-    public void OnCreate_RegistersHandleRefreshes()
+    public void Setup_RegistersHandleRefreshes()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
         var work = FactoryTestUtilities.CreateWork<QuestTargetWork>();
 
-        work.OnCreate(context);
+        work.Setup(registrar, in context);
+        work.Tick(in context);
 
         Assert.Equal(1, registrar.RegistrationCount);
 
