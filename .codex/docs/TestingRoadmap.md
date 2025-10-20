@@ -39,6 +39,10 @@ Gameplay systems that apply progression logic or orchestrate combat hooks. These
 | Familiar leveling shares XP with parties and differentiates VBlood/docile targets | [FamiliarLevelingSystem.ProcessFamiliarExperience](../../Systems/Familiars/FamiliarLevelingSystem.cs) | _Gap — add_ `FamiliarLevelingSystemTests.cs` | ⛔ Not covered |
 | Profession XP gain and cap enforcement across handlers | [ProfessionSystem.SaveProfessionExperience](../../Systems/Professions/ProfessionSystem.cs) | _Gap — add_ `ProfessionSystemExperienceTests.cs` | ⛔ Not covered |
 
+### Factory Pattern Sandbox
+
+`.codex/tests/Systems/Factory` hosts isolated fixtures for experimenting with the upcoming factory orchestration layer. The current focus is validating the `PrimalWarEventWork` and `QuestTargetWork` flows as reference implementations that demonstrate how work units register themselves, acquire dependencies, and emit results without requiring a live Unity world. These fixtures should evolve alongside the planned `FactorySystemBase` migration, preserving registrar-based assertions as the primary verification tool while deferring any world bootstrap until the factory stack stabilizes.
+
 ## Maintenance Notes
 
 * Revisit this roadmap after introducing new systems (e.g., Eclipse events, Primal War tweaks) to capture regression hotspots early.
