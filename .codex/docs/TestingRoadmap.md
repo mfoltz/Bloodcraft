@@ -51,6 +51,8 @@ The sandbox now includes `DeathEventAggregationWork`, which mirrors the live `De
 
 `AbilitySlotWork` captures the `ReplaceAbilityOnSlotSystem` Harmony prefix so we can validate the entity query, the `ReplaceAbilityOnSlotBuff` buffer registration, prefab lookup wiring, and the unarmed/shift/lock spell branches. This fixture demonstrates the migration path toward a native factory system where the prefix logic becomes an injectable work unit instead of a Harmony patch.
 
+`SpawnBuffWork` extends the sandbox to the `ScriptSpawnServer` and `UnitSpawnerReactSystem` patches. The fixture publishes the shapeshift/blood-bolt/werewolf prefab tables, requests the player/familiar/minion lookups, and exposes injectable delegates so tests can assert ability cooldown and stat refresh behaviour without relying on the live systems.
+
 ## Maintenance Notes
 
 * Revisit this roadmap after introducing new systems (e.g., Eclipse events, Primal War tweaks) to capture regression hotspots early.
