@@ -95,7 +95,9 @@ public sealed class QuestTargetWorkTests
         Assert.Empty(description.Any);
         Assert.Empty(description.None);
         Assert.Equal(EntityQueryOptions.IncludeDisabled, description.Options);
-        Assert.True(description.RequireForUpdate);
+        // Mirroring production, the imprisoned query remains optional to avoid
+        // stalling updates when no prisoners are present.
+        Assert.False(description.RequireForUpdate);
     }
 
     [Fact]

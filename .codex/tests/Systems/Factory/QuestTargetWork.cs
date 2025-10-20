@@ -49,7 +49,9 @@ public readonly struct QuestTargetWork : ISystemWork
         builder.AddAllReadOnly<Buff>();
         builder.AddAllReadOnly<ImprisonedBuff>();
         builder.WithOptions(EntityQueryOptions.IncludeDisabled);
-        return builder.Describe(requireForUpdate: true);
+        // The production system keeps this query optional because imprisoned units
+        // are processed opportunistically rather than gating the system update.
+        return builder.Describe(requireForUpdate: false);
     }
 
     static readonly QueryDescription targetQuery = CreateTargetQuery();
