@@ -47,16 +47,36 @@ public enum EntityQueryOptions
 }
 
 /// <summary>
-/// Describes a single component requirement within a query definition.
+/// Lightweight representation of a Unity DOTS <c>ComponentType</c> used by test infrastructure.
 /// </summary>
-/// <param name="ComponentType">Type requested by the query.</param>
+/// <param name="ElementType">Type requested by the query.</param>
 /// <param name="AccessMode">Access level required for the component.</param>
-public readonly record struct ComponentRequirement(Type ComponentType, ComponentAccessMode AccessMode)
+public readonly record struct ComponentType(Type ElementType, ComponentAccessMode AccessMode)
 {
+    /// <summary>
+    /// Creates a read-only component type descriptor for the specified component.
+    /// </summary>
+    public static ComponentType ReadOnly<TComponent>() => new(typeof(TComponent), ComponentAccessMode.ReadOnly);
+
+    /// <summary>
+    /// Creates a read-only component type descriptor for the specified component type.
+    /// </summary>
+    public static ComponentType ReadOnly(Type componentType) => new(componentType, ComponentAccessMode.ReadOnly);
+
+    /// <summary>
+    /// Creates a read-write component type descriptor for the specified component.
+    /// </summary>
+    public static ComponentType ReadWrite<TComponent>() => new(typeof(TComponent), ComponentAccessMode.ReadWrite);
+
+    /// <summary>
+    /// Creates a read-write component type descriptor for the specified component type.
+    /// </summary>
+    public static ComponentType ReadWrite(Type componentType) => new(componentType, ComponentAccessMode.ReadWrite);
+
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"{ComponentType.Name} ({AccessMode})";
+        return $"{ElementType.Name} ({AccessMode})";
     }
 }
 
@@ -68,22 +88,22 @@ public static class ComponentRequirements
     /// <summary>
     /// Describes a read-only component requirement.
     /// </summary>
-    public static ComponentRequirement ReadOnly<TComponent>() => new(typeof(TComponent), ComponentAccessMode.ReadOnly);
+    public static ComponentType ReadOnly<TComponent>() => ComponentType.ReadOnly<TComponent>();
 
     /// <summary>
     /// Describes a read-only component requirement.
     /// </summary>
-    public static ComponentRequirement ReadOnly(Type componentType) => new(componentType, ComponentAccessMode.ReadOnly);
+    public static ComponentType ReadOnly(Type componentType) => ComponentType.ReadOnly(componentType);
 
     /// <summary>
     /// Describes a read-write component requirement.
     /// </summary>
-    public static ComponentRequirement ReadWrite<TComponent>() => new(typeof(TComponent), ComponentAccessMode.ReadWrite);
+    public static ComponentType ReadWrite<TComponent>() => ComponentType.ReadWrite<TComponent>();
 
     /// <summary>
     /// Describes a read-write component requirement.
     /// </summary>
-    public static ComponentRequirement ReadWrite(Type componentType) => new(componentType, ComponentAccessMode.ReadWrite);
+    public static ComponentType ReadWrite(Type componentType) => ComponentType.ReadWrite(componentType);
 }
 
 /// <summary>
@@ -91,24 +111,24 @@ public static class ComponentRequirements
 /// </summary>
 public sealed class TestEntityQueryBuilder
 {
-    readonly List<ComponentRequirement> all = new();
-    readonly List<ComponentRequirement> any = new();
-    readonly List<ComponentRequirement> none = new();
+    readonly List<ComponentType> all = new();
+    readonly List<ComponentType> any = new();
+    readonly List<ComponentType> none = new();
 
     /// <summary>
     /// Gets the collection of all component requirements.
     /// </summary>
-    public IReadOnlyList<ComponentRequirement> All => all;
+    public IReadOnlyList<ComponentType> All => all;
 
     /// <summary>
     /// Gets the collection of any component requirements.
     /// </summary>
-    public IReadOnlyList<ComponentRequirement> Any => any;
+    public IReadOnlyList<ComponentType> Any => any;
 
     /// <summary>
     /// Gets the collection of none component requirements.
     /// </summary>
-    public IReadOnlyList<ComponentRequirement> None => none;
+    public IReadOnlyList<ComponentType> None => none;
 
     /// <summary>
     /// Gets the options applied to the query.
@@ -118,7 +138,7 @@ public sealed class TestEntityQueryBuilder
     /// <summary>
     /// Adds a component requirement that must be present on matching entities.
     /// </summary>
-    public void AddAll(ComponentRequirement requirement)
+    public void AddAll(ComponentType requirement)
     {
         all.Add(requirement);
     }
@@ -126,7 +146,7 @@ public sealed class TestEntityQueryBuilder
     /// <summary>
     /// Adds a component requirement where at least one must be present on matching entities.
     /// </summary>
-    public void AddAny(ComponentRequirement requirement)
+    public void AddAny(ComponentType requirement)
     {
         any.Add(requirement);
     }
@@ -134,7 +154,7 @@ public sealed class TestEntityQueryBuilder
     /// <summary>
     /// Adds a component requirement that must be absent on matching entities.
     /// </summary>
-    public void AddNone(ComponentRequirement requirement)
+    public void AddNone(ComponentType requirement)
     {
         none.Add(requirement);
     }
@@ -160,14 +180,21 @@ public sealed class TestEntityQueryBuilder
     /// <summary>
     /// Produces an immutable description of the query state collected so far.
     /// </summary>
+    public void Describe(out ComponentType[] allComponents, out ComponentType[] anyComponents, out ComponentType[] noneComponents, out EntityQueryOptions options)
+    {
+        allComponents = all.ToArray();
+        anyComponents = any.ToArray();
+        noneComponents = none.ToArray();
+        options = Options;
+    }
+
+    /// <summary>
+    /// Produces an immutable description of the query state collected so far.
+    /// </summary>
     public QueryDescription Describe(bool requireForUpdate)
     {
-        return new QueryDescription(
-            all.ToArray(),
-            any.ToArray(),
-            none.ToArray(),
-            Options,
-            requireForUpdate);
+        Describe(out var allComponents, out var anyComponents, out var noneComponents, out var options);
+        return new QueryDescription(allComponents, anyComponents, noneComponents, options, requireForUpdate);
     }
 }
 
@@ -180,9 +207,9 @@ public sealed class TestEntityQueryBuilder
 /// <param name="Options">Query options applied during construction.</param>
 /// <param name="RequireForUpdate">Indicates whether the owning system should require the query for updates.</param>
 public sealed record QueryDescription(
-    IReadOnlyList<ComponentRequirement> All,
-    IReadOnlyList<ComponentRequirement> Any,
-    IReadOnlyList<ComponentRequirement> None,
+    IReadOnlyList<ComponentType> All,
+    IReadOnlyList<ComponentType> Any,
+    IReadOnlyList<ComponentType> None,
     EntityQueryOptions Options,
     bool RequireForUpdate)
 {
@@ -190,9 +217,9 @@ public sealed record QueryDescription(
     /// Gets an empty query description.
     /// </summary>
     public static QueryDescription Empty { get; } = new(
-        Array.Empty<ComponentRequirement>(),
-        Array.Empty<ComponentRequirement>(),
-        Array.Empty<ComponentRequirement>(),
+        Array.Empty<ComponentType>(),
+        Array.Empty<ComponentType>(),
+        Array.Empty<ComponentType>(),
         EntityQueryOptions.None,
         true);
 }
@@ -203,10 +230,13 @@ public sealed record QueryDescription(
 public interface IQuerySpec
 {
     /// <summary>
-    /// Configures the provided builder with the query definition.
+    /// Describes the component lists and options that form the entity query definition.
     /// </summary>
-    /// <param name="builder">Builder to populate with component requirements.</param>
-    void Build(ref TestEntityQueryBuilder builder);
+    /// <param name="all">Components that must be present on matching entities.</param>
+    /// <param name="any">Components where at least one must be present.</param>
+    /// <param name="none">Components that must be absent.</param>
+    /// <param name="options">Additional options applied to the query.</param>
+    void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options);
 
     /// <summary>
     /// Indicates whether the constructed query must be required for update.
@@ -381,34 +411,23 @@ public readonly struct SystemContext
 public interface ISystemWork : IQuerySpec
 {
     /// <summary>
-    /// Invoked when the owning system is created.
+    /// Invoked when the owning system is being initialised.
     /// </summary>
+    /// <param name="registrar">Registrar used to schedule refresh actions.</param>
     /// <param name="context">The active system context.</param>
-    void OnCreate(SystemContext context) { }
+    void Setup(IRegistrar registrar, in SystemContext context);
 
     /// <summary>
-    /// Invoked when the owning system starts running.
+    /// Invoked during each update tick.
     /// </summary>
     /// <param name="context">The active system context.</param>
-    void OnStartRunning(SystemContext context) { }
-
-    /// <summary>
-    /// Invoked at the beginning of each update cycle.
-    /// </summary>
-    /// <param name="context">The active system context.</param>
-    void OnUpdate(SystemContext context) { }
-
-    /// <summary>
-    /// Invoked when the owning system stops running.
-    /// </summary>
-    /// <param name="context">The active system context.</param>
-    void OnStopRunning(SystemContext context) { }
+    void Tick(in SystemContext context);
 
     /// <summary>
     /// Invoked when the owning system is destroyed.
     /// </summary>
     /// <param name="context">The active system context.</param>
-    void OnDestroy(SystemContext context) { }
+    void Destroy(in SystemContext context) { }
 }
 
 /// <summary>
@@ -618,10 +637,9 @@ public static class FactoryTestUtilities
     public static QueryDescription DescribeQuery<TWork>()
         where TWork : struct, ISystemWork
     {
-        var builder = new TestEntityQueryBuilder();
         TWork work = new();
-        work.Build(ref builder);
-        return builder.Describe(work.RequireForUpdate);
+        work.DescribeQuery(out var all, out var any, out var none, out var options);
+        return new QueryDescription(all, any, none, options, work.RequireForUpdate);
     }
 
     /// <summary>
