@@ -5,15 +5,71 @@ using System.Reflection;
 using Bloodcraft.Interfaces;
 using Bloodcraft.Services;
 using Bloodcraft.Utilities;
+using HarmonyLib;
 using Xunit;
 
 namespace Bloodcraft.Tests.Utilities;
 
 public sealed class PlayerProgressionCacheManagerTests : IDisposable
 {
-    static readonly FieldInfo CacheField = typeof(Progression.PlayerProgressionCacheManager)
-        .GetField("_playerProgressionCache", BindingFlags.NonPublic | BindingFlags.Static)
-        ?? throw new InvalidOperationException("The player progression cache field could not be located.");
+    static readonly FieldInfo CacheField;
+
+    static PlayerProgressionCacheManagerTests()
+    {
+        ConstructorInfo? typeInitializer = typeof(Progression).TypeInitializer;
+        MethodInfo? prefix = typeof(PlayerProgressionCacheManagerTests)
+            .GetMethod(nameof(ProgressionCctorPrefix), BindingFlags.Static | BindingFlags.NonPublic);
+
+        Harmony harmony = new("Bloodcraft.Tests.Utilities.PlayerProgressionCacheManagerTests");
+
+        if (typeInitializer != null && prefix != null)
+        {
+            PatchTypeInitializer(harmony, typeInitializer, prefix);
+        }
+
+        CacheField = typeof(Progression.PlayerProgressionCacheManager)
+            .GetField("_playerProgressionCache", BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("The player progression cache field could not be located.");
+
+        object? cacheInstance = CacheField.GetValue(null);
+        if (cacheInstance == null)
+        {
+            Type dataType = typeof(Progression.PlayerProgressionCacheManager.PlayerProgressionData);
+            Type dictionaryType = typeof(ConcurrentDictionary<,>).MakeGenericType(typeof(ulong), dataType);
+            cacheInstance = Activator.CreateInstance(dictionaryType)
+                ?? throw new InvalidOperationException("Failed to create player progression cache instance.");
+            CacheField.SetValue(null, cacheInstance);
+        }
+    }
+
+    static void PatchTypeInitializer(Harmony harmony, ConstructorInfo typeInitializer, MethodInfo prefix)
+    {
+        HarmonyMethod prefixMethod = new(prefix);
+        MethodInfo? patch = typeof(Harmony).GetMethod(
+                "Patch",
+                new[] { typeof(MethodBase), typeof(HarmonyMethod), typeof(HarmonyMethod), typeof(HarmonyMethod), typeof(HarmonyMethod) })
+            ?? typeof(Harmony).GetMethod(
+                "Patch",
+                new[]
+                {
+                    typeof(MethodBase), typeof(HarmonyMethod), typeof(HarmonyMethod),
+                    typeof(HarmonyMethod), typeof(HarmonyMethod), typeof(HarmonyMethod)
+                });
+
+        if (patch == null)
+        {
+            throw new InvalidOperationException("Harmony Patch overload not found.");
+        }
+
+        object?[] arguments = patch.GetParameters().Length switch
+        {
+            5 => new object?[] { typeInitializer, prefixMethod, null, null, null },
+            6 => new object?[] { typeInitializer, prefixMethod, null, null, null, null },
+            _ => throw new InvalidOperationException("Unexpected Harmony Patch signature.")
+        };
+
+        patch.Invoke(harmony, arguments);
+    }
 
     readonly List<ulong> seededSteamIds = new();
 
@@ -116,5 +172,10 @@ public sealed class PlayerProgressionCacheManagerTests : IDisposable
         {
             [PrestigeType.Experience] = prestigeCount
         };
+    }
+
+    static bool ProgressionCctorPrefix()
+    {
+        return false;
     }
 }
