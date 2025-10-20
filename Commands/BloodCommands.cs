@@ -84,7 +84,8 @@ internal static class BloodCommands
                 foreach (var batch in bloodLegacyStats.Batch(STATS_BATCH_SIZE))
                 {
                     string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
-                    LocalizationService.HandleReply(ctx, $"<color=red>{bloodType}</color> Stats: {bonuses}");
+                    LocalizationService.HandleReply(ctx, $"<color=red>{bloodType}</color> Stats:");
+                    LocalizationService.HandleReply(ctx, bonuses);
                 }
             }
             else

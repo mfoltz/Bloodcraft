@@ -288,22 +288,12 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-
 # Local Development
 *.secrets
 *.lutconfig
 build/
 dist/
-/Bloodcraft.sln
 /*.sln
-/TODO.txt
 *.env
 secrets.json
-TestCommands.cs
 DevCommands.cs
-SystemTesting.cs
-TestPatches.cs
-Debugging.cs
-Notepad.cs
-VSystem.cs
-Bridges.cs

@@ -30,7 +30,7 @@ internal static class FamiliarUnlockSystem
     // static readonly SequenceGUID _shinySequence = SequenceGUIDs.SEQ_MagicSource_BloodKey_Active_Buff;
 
     static readonly SequenceGUID _unlockSequence = SequenceGUIDs.SEQ_Shared_Object_Destroy_1;
-    static readonly SequenceGUID _shinySequence = SequenceGUIDs.SEQ_Interact_PickupItem_InventoryFull_01_6;
+    static readonly SequenceGUID _shinySequence = SequenceGUIDs.SEQ_Shared_Ability_Cast_420;
 
     public static readonly HashSet<PrefabGUID> ConfiguredPrefabGuidBans = [];
     public static readonly HashSet<UnitCategory> ConfiguredCategoryBans = [];
