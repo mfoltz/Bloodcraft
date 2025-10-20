@@ -53,6 +53,8 @@ The sandbox now includes `DeathEventAggregationWork`, which mirrors the live `De
 
 `SpawnBuffWork` extends the sandbox to the `ScriptSpawnServer` and `UnitSpawnerReactSystem` patches. The fixture publishes the shapeshift/blood-bolt/werewolf prefab tables, requests the player/familiar/minion lookups, and exposes injectable delegates so tests can assert ability cooldown and stat refresh behaviour without relying on the live systems.
 
+`SecureChatWork` captures the eclipse chat interception sequence, detailing the `ChatMessageEvent` query, the read-only registrar wiring, and the injectable regex/HMAC helpers that validate message authenticity. These notes ensure the encrypted messaging flow and cryptographic hooks remain transparent within the roadmap.
+
 ## Maintenance Notes
 
 * Revisit this roadmap after introducing new systems (e.g., Eclipse events, Primal War tweaks) to capture regression hotspots early.
