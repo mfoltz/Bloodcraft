@@ -43,6 +43,8 @@ Gameplay systems that apply progression logic or orchestrate combat hooks. These
 
 `.codex/tests/Systems/Factory` hosts isolated fixtures for experimenting with the upcoming factory orchestration layer. The current focus is validating the `PrimalWarEventWork` and `QuestTargetWork` flows as reference implementations that demonstrate how work units register themselves, acquire dependencies, and emit results without requiring a live Unity world. These fixtures should evolve alongside the planned `FactorySystemBase` migration, preserving registrar-based assertions as the primary verification tool while deferring any world bootstrap until the factory stack stabilizes.
 
+The sandbox now includes `DeathEventAggregationWork`, which mirrors the live `DeathEventListenerSystem` patch. It captures the death-event query, registers the progression lookups (movement, block-feed, trader, unit level, minion, VBlood source), and exposes helper hooks so progression tests can emulate familiar resets and legacy feed-kill checks without spinning up a Unity world.
+
 ## Maintenance Notes
 
 * Revisit this roadmap after introducing new systems (e.g., Eclipse events, Primal War tweaks) to capture regression hotspots early.
