@@ -47,6 +47,8 @@ The sandbox now includes `DeathEventAggregationWork`, which mirrors the live `De
 
 `FamiliarEquipmentWork` extends the fixture coverage into the familiar servant pipeline by modelling the servant equipment/transfer handlers alongside teleport cleanup. The tests assert that every query observed in the Harmony patches is requested, the `BlockFeedBuff` lookup and mocked network-ID map are wired, and teleport debug events record the expected familiar return targets so that equipment gating and cleanup can be validated without a Unity runtime.
 
+`CraftingProgressionWork` expands the sandbox into the crafting progression hooks covered by `ReactToInventoryChangedSystemPatch` and `CraftingSystemPatches`. The fixture models the inventory-obtained query plus the forge, workstation, and prison crafting queries, registers the `InventoryConnection`/`QueuedWorkstationCraftAction` lookups, and exposes clan/job data sources so profession XP and quest propagation logic stay testable without relying on live Unity state.
+
 ## Maintenance Notes
 
 * Revisit this roadmap after introducing new systems (e.g., Eclipse events, Primal War tweaks) to capture regression hotspots early.
