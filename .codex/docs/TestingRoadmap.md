@@ -57,6 +57,8 @@ The sandbox now includes `DeathEventAggregationWork`, which mirrors the live `De
 
 `FamiliarMinionSpawnWork` captures the familiar minion tracking implemented by [`LinkMinionToOwnerOnSpawnSystemPatch`](../../Patches/LinkMinionToOwnerOnSpawnSystemPatch.cs). It mirrors the spawn query, wires the owner/minion/block-feed lookups, and surfaces injectable hooks for resolving the active familiar along with the lifetime scheduler so tests can exercise the familiar-minion dictionary without a Unity world.
 
+`FamiliarImprisonmentWork` mirrors the imprisonment cleanup flow handled by [`ImprisonedBuffSystemPatch`](../../Patches/ImprisonedBuffSystemPatch.cs). It captures the imprisoned-buff query, registers the buff/CharmSource/block-feed lookups, and exposes component-removal plus destruction hooks so factory tests can assert familiars are released and destroyed when the patch removes their BlockFeed state.
+
 `SecureChatWork` captures the eclipse chat interception sequence, detailing the `ChatMessageEvent` query, the read-only registrar wiring, and the injectable regex/HMAC helpers that validate message authenticity. These notes ensure the encrypted messaging flow and cryptographic hooks remain transparent within the roadmap.
 
 ## Maintenance Notes
