@@ -55,6 +55,8 @@ The sandbox now includes `DeathEventAggregationWork`, which mirrors the live `De
 
 `SpawnBuffWork` extends the sandbox to the `ScriptSpawnServer` and `UnitSpawnerReactSystem` patches. The fixture publishes the shapeshift/blood-bolt/werewolf prefab tables, requests the player/familiar/minion lookups, and exposes injectable delegates so tests can assert ability cooldown and stat refresh behaviour without relying on the live systems.
 
+`FamiliarMinionSpawnWork` captures the familiar minion tracking implemented by [`LinkMinionToOwnerOnSpawnSystemPatch`](../../Patches/LinkMinionToOwnerOnSpawnSystemPatch.cs). It mirrors the spawn query, wires the owner/minion/block-feed lookups, and surfaces injectable hooks for resolving the active familiar along with the lifetime scheduler so tests can exercise the familiar-minion dictionary without a Unity world.
+
 `SecureChatWork` captures the eclipse chat interception sequence, detailing the `ChatMessageEvent` query, the read-only registrar wiring, and the injectable regex/HMAC helpers that validate message authenticity. These notes ensure the encrypted messaging flow and cryptographic hooks remain transparent within the roadmap.
 
 ## Maintenance Notes
