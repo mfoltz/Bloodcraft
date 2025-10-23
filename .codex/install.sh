@@ -9,21 +9,22 @@ INSTALL_DIR="${DOTNET_INSTALL_DIR:-$HOME/.dotnet}"
 CHANNEL="${DOTNET_INSTALL_CHANNEL:-6.0}"
 BEPINEX_PLUGIN_DIR="${BEPINEX_PLUGIN_DIR:-}"
 DOTNET_INSTALLED=0
+REQUIRED_RUNTIME="Microsoft.NETCore.App 6.0"
 
-if command -v dotnet >/dev/null 2>&1; then
-    echo ".NET SDK already installed: $(dotnet --version)"
-    DOTNET_INSTALLED=1
-else
+install_dotnet() {
     mkdir -p "$INSTALL_DIR"
-    INSTALL_SCRIPT="$(mktemp)"
-    trap 'rm -f "$INSTALL_SCRIPT"' EXIT
+    local install_script
+    install_script="$(mktemp)"
 
-    curl -sSL https://dot.net/v1/dotnet-install.sh -o "$INSTALL_SCRIPT"
+    curl -sSL https://dot.net/v1/dotnet-install.sh -o "$install_script"
 
-    bash "$INSTALL_SCRIPT" --install-dir "$INSTALL_DIR" --channel "$CHANNEL"
+    bash "$install_script" --install-dir "$INSTALL_DIR" --channel "$CHANNEL"
+
+    rm -f "$install_script"
 
     export DOTNET_ROOT="$INSTALL_DIR"
     export PATH="$INSTALL_DIR:$INSTALL_DIR/tools:$PATH"
+    hash -r
 
     if command -v dotnet >/dev/null 2>&1; then
         echo "Installed .NET SDK $(dotnet --version) to $INSTALL_DIR"
@@ -34,6 +35,19 @@ else
         echo "Installation completed but dotnet is not on PATH. Add $INSTALL_DIR to PATH manually." >&2
         exit 1
     fi
+}
+
+if command -v dotnet >/dev/null 2>&1; then
+    echo ".NET SDK already installed: $(dotnet --version)"
+    # Inspect the installed runtimes to ensure the required Microsoft.NETCore.App 6.0 runtime is available.
+    if dotnet --list-runtimes 2>/dev/null | grep -q "^Microsoft.NETCore.App 6\\.0"; then
+        DOTNET_INSTALLED=1
+    else
+        echo "Microsoft.NETCore.App 6.0 runtime not found; installing local runtime into $INSTALL_DIR"
+        install_dotnet
+    fi
+else
+    install_dotnet
 fi
 
 if [ ! -f "$PROJECT_PATH" ]; then
