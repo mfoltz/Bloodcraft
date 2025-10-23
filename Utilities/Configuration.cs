@@ -73,32 +73,77 @@ internal static class Configuration
     }
     public static void GetQuestRewardItems()
     {
-        List<int> rewardAmounts = [..ParseIntegersFromString(ConfigService.QuestRewardAmounts)];
-        List<PrefabGUID> questRewards = [..ParseIntegersFromString(ConfigService.QuestRewards).Select(itemPrefab => new PrefabGUID(itemPrefab))];
+        GetQuestRewardItems(
+            ConfigService.QuestRewards,
+            ConfigService.QuestRewardAmounts,
+            QuestSystem.QuestRewards,
+            message => Core.Log.LogWarning(message));
+    }
+
+    internal static void GetQuestRewardItems(
+        string questRewardsConfig,
+        string questRewardAmountsConfig,
+        IDictionary<PrefabGUID, int> destination,
+        Action<string> logWarning = null)
+    {
+        ArgumentNullException.ThrowIfNull(destination);
+
+        List<int> rewardAmounts = ParseIntegersFromString(questRewardAmountsConfig);
+        List<PrefabGUID> questRewards = [..ParseIntegersFromString(questRewardsConfig).Select(itemPrefab => new PrefabGUID(itemPrefab))];
 
         if (questRewards.Count != rewardAmounts.Count)
         {
-            Core.Log.LogWarning("QuestRewards and QuestRewardAmounts are not the same length, please correct this for predictable behavior when receiving quest rewards!");
+            logWarning?.Invoke("QuestRewards and QuestRewardAmounts are not the same length, please correct this for predictable behavior when receiving quest rewards!");
         }
 
-        for (int i = 0; i < questRewards.Count; i++)
+        int pairCount = Math.Min(questRewards.Count, rewardAmounts.Count);
+
+        for (int i = 0; i < pairCount; i++)
         {
-            QuestSystem.QuestRewards.TryAdd(questRewards[i], rewardAmounts[i]);
+            PrefabGUID reward = questRewards[i];
+
+            if (!destination.ContainsKey(reward))
+            {
+                destination[reward] = rewardAmounts[i];
+            }
         }
     }
+
     public static void GetStarterKitItems()
     {
-        List<int> kitAmounts = [..ParseIntegersFromString(ConfigService.KitQuantities)];
-        List<PrefabGUID> kitPrefabs = [..ParseIntegersFromString(ConfigService.KitPrefabs).Select(itemPrefab => new PrefabGUID(itemPrefab))];
+        GetStarterKitItems(
+            ConfigService.KitPrefabs,
+            ConfigService.KitQuantities,
+            MiscCommands.StarterKitItemPrefabGUIDs,
+            message => Core.Log.LogWarning(message));
+    }
+
+    internal static void GetStarterKitItems(
+        string kitPrefabsConfig,
+        string kitQuantitiesConfig,
+        IDictionary<PrefabGUID, int> destination,
+        Action<string> logWarning = null)
+    {
+        ArgumentNullException.ThrowIfNull(destination);
+
+        List<int> kitAmounts = ParseIntegersFromString(kitQuantitiesConfig);
+        List<PrefabGUID> kitPrefabs = [..ParseIntegersFromString(kitPrefabsConfig).Select(itemPrefab => new PrefabGUID(itemPrefab))];
 
         if (kitPrefabs.Count != kitAmounts.Count)
         {
-            Core.Log.LogWarning("KitPrefabs and KitQuantities are not the same length, please correct this for predictable behavior when using the kit command!");
+            logWarning?.Invoke("KitPrefabs and KitQuantities are not the same length, please correct this for predictable behavior when using the kit command!");
         }
 
-        for (int i = 0; i < kitPrefabs.Count; i++)
+        int pairCount = Math.Min(kitPrefabs.Count, kitAmounts.Count);
+
+        for (int i = 0; i < pairCount; i++)
         {
-            MiscCommands.StarterKitItemPrefabGUIDs.TryAdd(kitPrefabs[i], kitAmounts[i]);
+            PrefabGUID prefab = kitPrefabs[i];
+
+            if (!destination.ContainsKey(prefab))
+            {
+                destination[prefab] = kitAmounts[i];
+            }
         }
     }
     public static void GetClassSpellCooldowns()
