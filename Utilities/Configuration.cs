@@ -71,13 +71,14 @@ internal static class Configuration
 
         return result;
     }
+
     public static void GetQuestRewardItems()
     {
         GetQuestRewardItems(
             ConfigService.QuestRewards,
             ConfigService.QuestRewardAmounts,
             QuestSystem.QuestRewards,
-            message => Core.Log.LogWarning(message));
+            LogConfigurationWarning);
     }
 
     internal static void GetQuestRewardItems(
@@ -87,6 +88,8 @@ internal static class Configuration
         Action<string> logWarning = null)
     {
         ArgumentNullException.ThrowIfNull(destination);
+
+        logWarning ??= LogConfigurationWarning;
 
         List<int> rewardAmounts = ParseIntegersFromString(questRewardAmountsConfig);
         List<PrefabGUID> questRewards = [..ParseIntegersFromString(questRewardsConfig).Select(itemPrefab => new PrefabGUID(itemPrefab))];
@@ -115,7 +118,7 @@ internal static class Configuration
             ConfigService.KitPrefabs,
             ConfigService.KitQuantities,
             MiscCommands.StarterKitItemPrefabGUIDs,
-            message => Core.Log.LogWarning(message));
+            LogConfigurationWarning);
     }
 
     internal static void GetStarterKitItems(
@@ -125,6 +128,8 @@ internal static class Configuration
         Action<string> logWarning = null)
     {
         ArgumentNullException.ThrowIfNull(destination);
+
+        logWarning ??= LogConfigurationWarning;
 
         List<int> kitAmounts = ParseIntegersFromString(kitQuantitiesConfig);
         List<PrefabGUID> kitPrefabs = [..ParseIntegersFromString(kitPrefabsConfig).Select(itemPrefab => new PrefabGUID(itemPrefab))];
@@ -146,6 +151,12 @@ internal static class Configuration
             }
         }
     }
+
+    private static void LogConfigurationWarning(string message)
+    {
+        global::Bloodcraft.Plugin.Instance?.Log?.LogWarning(message);
+    }
+
     public static void GetClassSpellCooldowns()
     {
         foreach (var keyValuePair in Classes.ClassSpellsMap)
