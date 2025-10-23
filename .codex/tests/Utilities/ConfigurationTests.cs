@@ -44,8 +44,156 @@ public sealed class ConfigurationTests : TestHost
             ("QuestRewards", "1001, 1002, 1002, 1003"),
             ("QuestRewardAmounts", "5, 10, 99, 20"));
         using var log = LogCaptureScope.Create();
-        using var questScope = new DictionaryStateScope<PrefabGUID, int>(QuestSystem.QuestRewards);
+#nullable enable
 
+using Bloodcraft.Commands;
+using Bloodcraft.Patches;
+using Bloodcraft.Services;
+using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Systems.Quests;
+using ProjectM;
+using Stunlock.Core;
+
+namespace Bloodcraft.Utilities;
+internal static class Configuration
+{
+    public static void GetExcludedFamiliars()
+    {
+        List<PrefabGUID> unitBans = [..ParseIntegersFromString(ConfigService.BannedUnits).Select(unit => new PrefabGUID(unit))];
+
+        foreach (PrefabGUID unit in unitBans)
+        {
+            if (unit.HasValue()) FamiliarUnlockSystem.ConfiguredPrefabGuidBans.Add(unit);
+        }
+
+        List<string> categoryBans = ConfigService.BannedTypes.Split(',').Select(s => s.Trim()).ToList();
+
+        foreach (string category in categoryBans)
+        {
+            if (Enum.TryParse(category, out UnitCategory unitCategory))
+            {
+                FamiliarUnlockSystem.ConfiguredCategoryBans.Add(unitCategory);
+            }
+        }
+    }
+    public static List<int> ParseIntegersFromString(string configString)
+    {
+        if (string.IsNullOrWhiteSpace(configString))
+        {
+            return [];
+        }
+
+        List<int> results = [];
+
+        foreach (string segment in configString.Split(','))
+        {
+            string trimmedSegment = segment.Trim();
+
+            if (string.IsNullOrEmpty(trimmedSegment))
+            {
+                continue;
+            }
+
+            if (int.TryParse(trimmedSegment, out int value))
+            {
+                results.Add(value);
+            }
+        }
+
+        return results;
+    }
+    public static List<T> ParseEnumsFromString<T>(string configString) where T : struct, Enum
+    {
+        if (string.IsNullOrWhiteSpace(configString))
+            return [];
+
+        List<T> result = [];
+
+        foreach (var part in configString.Split(','))
+        {
+            if (Enum.TryParse<T>(part.Trim(), ignoreCase: true, out var value))
+            {
+                result.Add(value);
+            }
+        }
+
+        return result;
+    }
+    public static void GetQuestRewardItems()
+    {
+        GetQuestRewardItems(
+            ConfigService.QuestRewards,
+            ConfigService.QuestRewardAmounts,
+            QuestSystem.QuestRewards,
+            message => Core.Log.LogWarning(message));
+    }
+
+    public static void GetQuestRewardItems(
+        string questRewardsConfig,
+        string questRewardAmountsConfig,
+        IDictionary<PrefabGUID, int> destination,
+        Action<string>? logWarning = null)
+    {
+        ArgumentNullException.ThrowIfNull(destination);
+
+        List<int> rewardAmounts = ParseIntegersFromString(questRewardAmountsConfig);
+        List<PrefabGUID> questRewards = [..ParseIntegersFromString(questRewardsConfig).Select(itemPrefab => new PrefabGUID(itemPrefab))];
+
+        if (questRewards.Count != rewardAmounts.Count)
+        {
+            logWarning?.Invoke("QuestRewards and QuestRewardAmounts are not the same length, please correct this for predictable behavior when receiving quest rewards!");
+        }
+
+        int pairCount = questRewards.Count < rewardAmounts.Count ? questRewards.Count : rewardAmounts.Count;
+
+        for (int i = 0; i < pairCount; i++)
+        {
+            PrefabGUID reward = questRewards[i];
+
+            if (!destination.ContainsKey(reward))
+            {
+                destination[reward] = rewardAmounts[i];
+            }
+        }
+    }
+
+    public static void GetStarterKitItems()
+    {
+        GetStarterKitItems(
+            ConfigService.KitPrefabs,
+            ConfigService.KitQuantities,
+            MiscCommands.StarterKitItemPrefabGUIDs,
+            message => Core.Log.LogWarning(message));
+    }
+
+    public static void GetStarterKitItems(
+        string kitPrefabsConfig,
+        string kitQuantitiesConfig,
+        IDictionary<PrefabGUID, int> destination,
+        Action<string>? logWarning = null)
+    {
+        ArgumentNullException.ThrowIfNull(destination);
+
+        List<int> kitAmounts = ParseIntegersFromString(kitQuantitiesConfig);
+        List<PrefabGUID> kitPrefabs = [..ParseIntegersFromString(kitPrefabsConfig).Select(itemPrefab => new PrefabGUID(itemPrefab))];
+
+        if (kitPrefabs.Count != kitAmounts.Count)
+        {
+            logWarning?.Invoke("KitPrefabs and KitQuantities are not the same length, please correct this for predictable behavior when using the kit command!");
+        }
+
+        int pairCount = kitPrefabs.Count < kitAmounts.Count ? kitPrefabs.Count : kitAmounts.Count;
+
+        for (int i = 0; i < pairCount; i++)
+        {
+            PrefabGUID prefab = kitPrefabs[i];
+
+            if (!destination.ContainsKey(prefab))
+            {
+                destination[prefab] = kitAmounts[i];
+            }
+        }
+    }
         Configuration.GetQuestRewardItems();
 
         Assert.Equal(3, QuestSystem.QuestRewards.Count);
