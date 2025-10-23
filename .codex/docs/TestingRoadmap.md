@@ -10,9 +10,11 @@ Stateless helpers and cache managers that translate configuration or compute der
 | --- | --- | --- | --- |
 | Configuration string parsing trims whitespace and skips invalid tokens | [Configuration.ParseIntegersFromString](../../Utilities/Configuration.cs) / [Configuration.ParseEnumsFromString](../../Utilities/Configuration.cs) | [ConfigurationParsingTests](../tests/Utilities/ConfigurationParsingTests.cs) | ✅ Covered |
 | Player progression cache seeds from `DataService` and updates in-place for level/prestige changes | [Progression.PlayerProgressionCacheManager](../../Utilities/Progression.cs) | [PlayerProgressionCacheManagerTests](../tests/Utilities/PlayerProgressionCacheManagerTests.cs) | ✅ Covered |
-| Quest reward and starter kit extraction warns on mismatched counts and populates command dictionaries | [Configuration.GetQuestRewardItems](../../Utilities/Configuration.cs) / [Configuration.GetStarterKitItems](../../Utilities/Configuration.cs) | _Gap — add_ `QuestRewardConfigurationTests.cs` | ⛔ Not covered |
+| Quest reward and starter kit extraction warns on mismatched counts and populates command dictionaries | [Configuration.GetQuestRewardItems](../../Utilities/Configuration.cs) / [Configuration.GetStarterKitItems](../../Utilities/Configuration.cs) | [ConfigurationTests](../tests/Utilities/ConfigurationTests.cs) (verifies config strings hydrate runtime dictionaries, capture warnings, and ignore duplicates) | ✅ Covered |
 | Class spell cooldown wiring enumerates parsed prefab lists without duplicate side effects | [Configuration.GetClassSpellCooldowns](../../Utilities/Configuration.cs) | _Gap — add_ `ClassSpellCooldownConfigurationTests.cs` | ⛔ Not covered |
 | Experience conversion helpers clamp group share distance and respect share level bounds | [Progression.GetExperienceRecipients](../../Utilities/Progression.cs) (exp share radius/level checks) | _Gap — add_ `ExperienceShareRulesTests.cs` | ⛔ Not covered |
+
+`ConfigurationTests` drives deterministic overrides through `ConfigService` so the quest reward and starter kit dictionaries are populated exactly as the configuration strings describe. The fixture asserts that mismatched list lengths raise warnings, duplicate prefab entries keep their first quantity, and both dictionaries end up in predictable states—guarding the full config-to-runtime translation pipeline.
 
 ## Services (Configuration / Data Access)
 
