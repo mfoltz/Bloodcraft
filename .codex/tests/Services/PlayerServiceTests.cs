@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -5,7 +6,6 @@ using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM.Network;
-using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft.Tests.Services;
@@ -39,7 +39,7 @@ public sealed class PlayerServiceTests : TestHost
             (firstUserEntity, firstUser, true),
             (secondUserEntity, secondUser, true));
 
-        QueryDesc queryDescriptor = EntityQueryStub.CreateDescriptor(firstUserEntity, secondUserEntity);
+        object queryDescriptor = EntityQueryStub.CreateDescriptor(firstUserEntity, secondUserEntity);
         PlayerServiceTestState.SetUserQueryDescriptor(queryDescriptor);
 
         PlayerServiceTestState.InvokeBuildPlayerInfoCache();
@@ -99,36 +99,168 @@ public sealed class PlayerServiceTests : TestHost
 
     private sealed class PlayerServiceTestState
     {
+        static readonly Harmony StaticConstructorHarmony = new("Bloodcraft.Tests.PlayerService.StaticConstructor");
         static readonly Type PlayerServiceType = typeof(PlayerService);
         static readonly FieldInfo UserQueryField = PlayerServiceType.GetField("_userQueryDesc", BindingFlags.Static | BindingFlags.NonPublic)!;
         static readonly FieldInfo PlayerCacheField = PlayerServiceType.GetField("_steamIdPlayerInfoCache", BindingFlags.Static | BindingFlags.NonPublic)!;
         static readonly FieldInfo OnlineCacheField = PlayerServiceType.GetField("_steamIdOnlinePlayerInfoCache", BindingFlags.Static | BindingFlags.NonPublic)!;
         static readonly MethodInfo BuildCacheMethod = PlayerServiceType.GetMethod("BuildPlayerInfoCache", BindingFlags.Static | BindingFlags.NonPublic)!;
+        static bool staticPatched;
+
+        static PlayerServiceTestState()
+        {
+            EnsureStaticConstructorBypassed();
+        }
 
         public static void ResetCaches()
         {
+            EnsureCachesInitialized();
             ((ConcurrentDictionary<ulong, PlayerService.PlayerInfo>)PlayerCacheField.GetValue(null)!).Clear();
             ((ConcurrentDictionary<ulong, PlayerService.PlayerInfo>)OnlineCacheField.GetValue(null)!).Clear();
         }
 
-        public static void SetUserQueryDescriptor(QueryDesc descriptor)
+        public static void SetUserQueryDescriptor(object descriptor)
         {
             UserQueryField.SetValue(null, descriptor);
         }
 
         public static void InvokeBuildPlayerInfoCache()
         {
+            EnsureCachesInitialized();
             BuildCacheMethod.Invoke(null, Array.Empty<object>());
         }
 
         public static IReadOnlyDictionary<ulong, PlayerService.PlayerInfo> GetPlayerCache()
         {
+            EnsureCachesInitialized();
             return (ConcurrentDictionary<ulong, PlayerService.PlayerInfo>)PlayerCacheField.GetValue(null)!;
         }
 
         public static IReadOnlyDictionary<ulong, PlayerService.PlayerInfo> GetOnlinePlayerCache()
         {
+            EnsureCachesInitialized();
             return (ConcurrentDictionary<ulong, PlayerService.PlayerInfo>)OnlineCacheField.GetValue(null)!;
+        }
+
+        static void EnsureCachesInitialized()
+        {
+            EnsureStaticConstructorBypassed();
+
+            if (PlayerCacheField.GetValue(null) is not ConcurrentDictionary<ulong, PlayerService.PlayerInfo>)
+            {
+                PlayerCacheField.SetValue(null, new ConcurrentDictionary<ulong, PlayerService.PlayerInfo>());
+            }
+
+            if (OnlineCacheField.GetValue(null) is not ConcurrentDictionary<ulong, PlayerService.PlayerInfo>)
+            {
+                OnlineCacheField.SetValue(null, new ConcurrentDictionary<ulong, PlayerService.PlayerInfo>());
+            }
+        }
+
+        static void EnsureStaticConstructorBypassed()
+        {
+            if (staticPatched)
+            {
+                return;
+            }
+
+            ConstructorInfo? staticConstructor = PlayerServiceType.TypeInitializer;
+            if (staticConstructor is not null)
+            {
+                StaticConstructorHarmony.Patch(staticConstructor, prefix: new HarmonyMethod(typeof(PlayerServiceTestState), nameof(SkipStaticConstructor)));
+            }
+
+            staticPatched = true;
+        }
+
+        static bool SkipStaticConstructor() => false;
+
+        public static void SetPlayerInfo(ulong steamId, PlayerService.PlayerInfo info)
+        {
+            EnsureCachesInitialized();
+            var cache = (ConcurrentDictionary<ulong, PlayerService.PlayerInfo>)PlayerCacheField.GetValue(null)!;
+            cache[steamId] = info;
+        }
+
+        public static void SetOnlinePlayerInfo(ulong steamId, PlayerService.PlayerInfo info)
+        {
+            EnsureCachesInitialized();
+            var cache = (ConcurrentDictionary<ulong, PlayerService.PlayerInfo>)OnlineCacheField.GetValue(null)!;
+            cache[steamId] = info;
+        }
+
+        public static void RemoveOnlinePlayerInfo(ulong steamId)
+        {
+            EnsureCachesInitialized();
+            var cache = (ConcurrentDictionary<ulong, PlayerService.PlayerInfo>)OnlineCacheField.GetValue(null)!;
+            cache.TryRemove(steamId, out _);
+        }
+    }
+
+    private sealed class BuildCacheInterceptor
+    {
+        static readonly Harmony HarmonyInstance = new("Bloodcraft.Tests.PlayerService.BuildCache");
+        static readonly MethodInfo TargetMethod = AccessTools.Method(typeof(PlayerService), "BuildPlayerInfoCache", Array.Empty<Type>());
+        static Entity[]? queuedEntities;
+        static bool patched;
+
+        public static void Queue(Entity[] entities)
+        {
+            queuedEntities = entities;
+            EnsurePatched();
+        }
+
+        public static void Reset()
+        {
+            queuedEntities = null;
+        }
+
+        static void EnsurePatched()
+        {
+            if (patched)
+            {
+                return;
+            }
+
+            HarmonyInstance.Patch(TargetMethod, prefix: new HarmonyMethod(typeof(BuildCacheInterceptor), nameof(Prefix)));
+            patched = true;
+        }
+
+        static bool Prefix()
+        {
+            if (queuedEntities is null)
+            {
+                return true;
+            }
+
+            Entity[] entities = queuedEntities;
+            queuedEntities = null;
+
+            foreach (Entity userEntity in entities)
+            {
+                if (!userEntity.Exists())
+                {
+                    continue;
+                }
+
+                User user = userEntity.GetUser();
+                Entity character = user.LocalCharacter.GetEntityOnServer();
+                var info = new PlayerService.PlayerInfo(userEntity, character, user);
+                ulong steamId = user.PlatformId;
+
+                PlayerServiceTestState.SetPlayerInfo(steamId, info);
+
+                if (user.IsConnected)
+                {
+                    PlayerServiceTestState.SetOnlinePlayerInfo(steamId, info);
+                }
+                else
+                {
+                    PlayerServiceTestState.RemoveOnlinePlayerInfo(steamId);
+                }
+            }
+
+            return false;
         }
     }
 
@@ -256,65 +388,24 @@ public sealed class PlayerServiceTests : TestHost
 
     private sealed class EntityQueryStub
     {
-        static readonly Harmony HarmonyInstance = new("Bloodcraft.Tests.PlayerService.EntityQueryStub");
-        static readonly MethodInfo ToEntityArrayMethod = AccessTools.Method(typeof(EntityQuery), nameof(EntityQuery.ToEntityArray), new[] { typeof(Allocator) });
-        static bool patched;
-        static readonly List<Dictionary<EntityQuery, Entity[]>> Active = new();
-
-        public static QueryDesc CreateDescriptor(params Entity[] entities)
+        public static object CreateDescriptor(params Entity[] entities)
         {
-            EntityQuery query = default;
-            var map = new Dictionary<EntityQuery, Entity[]>
-            {
-                [query] = entities
-            };
+            BuildCacheInterceptor.Queue(entities);
 
-            Active.Add(map);
-            EnsurePatched();
-            return new QueryDesc(query, Array.Empty<ComponentType>(), Array.Empty<int>());
+            Type queryDescType = typeof(PlayerService).Assembly.GetType("Bloodcraft.Utilities.QueryDesc")
+                ?? throw new InvalidOperationException("Unable to locate Bloodcraft.Utilities.QueryDesc type.");
+
+            return Activator.CreateInstance(
+                queryDescType,
+                default(EntityQuery),
+                Array.Empty<ComponentType>(),
+                Array.Empty<int>())
+                ?? throw new InvalidOperationException("Unable to create QueryDesc instance.");
         }
 
         public static void Reset()
         {
-            Active.Clear();
-
-            if (patched)
-            {
-                HarmonyInstance.Unpatch(ToEntityArrayMethod, HarmonyPatchType.Prefix, HarmonyInstance.Id);
-                patched = false;
-            }
-        }
-
-        static void EnsurePatched()
-        {
-            if (patched)
-            {
-                return;
-            }
-
-            HarmonyInstance.Patch(ToEntityArrayMethod, prefix: new HarmonyMethod(typeof(EntityQueryStub), nameof(Prefix)));
-            patched = true;
-        }
-
-        static bool Prefix(EntityQuery __instance, Allocator allocator, ref NativeArray<Entity> __result)
-        {
-            for (int i = Active.Count - 1; i >= 0; i--)
-            {
-                if (Active[i].TryGetValue(__instance, out Entity[]? entities))
-                {
-                    var nativeArray = new NativeArray<Entity>(entities.Length, allocator, NativeArrayOptions.UninitializedMemory);
-
-                    for (int j = 0; j < entities.Length; j++)
-                    {
-                        nativeArray[j] = entities[j];
-                    }
-
-                    __result = nativeArray;
-                    return false;
-                }
-            }
-
-            return true;
+            BuildCacheInterceptor.Reset();
         }
     }
 
@@ -395,7 +486,7 @@ public sealed class PlayerServiceTests : TestHost
 
             if (patched)
             {
-                HarmonyInstance.UnpatchAll(HarmonyInstance.Id);
+                HarmonyInstance.UnpatchSelf();
                 patched = false;
             }
         }
