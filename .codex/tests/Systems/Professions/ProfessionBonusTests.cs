@@ -201,7 +201,8 @@ public sealed class ProfessionBonusTests : TestHost
                 SeedPrefabMap(fishingSpot);
 
                 var handler = new FishingProfession();
-                ProfessionSystem.GiveProfessionBonus(target, fishingSpot, playerCharacter, userEntity, user: null!, steamId, handler, delay: 0f);
+                User user = default;
+                ProfessionSystem.GiveProfessionBonus(target, fishingSpot, playerCharacter, userEntity, user, steamId, handler, delay: 0f);
             }
             finally
             {
@@ -212,8 +213,8 @@ public sealed class ProfessionBonusTests : TestHost
         void SetPlayerState(ulong steamId, int level)
         {
             DataService.PlayerDictionaries._playerFishing[steamId] = new KeyValuePair<int, float>(level, ConvertLevelToXp(level));
-            Misc.SetPlayerBool(steamId, PROFESSION_LOG_KEY, ProfessionLogging);
-            Misc.SetPlayerBool(steamId, SCT_YIELD_KEY, SctYield);
+            SetPlayerBool(steamId, PROFESSION_LOG_KEY, ProfessionLogging);
+            SetPlayerBool(steamId, SCT_YIELD_KEY, SctYield);
         }
 
         void SeedPrefabMap(PrefabGUID fishingSpot)

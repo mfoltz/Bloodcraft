@@ -1,4 +1,7 @@
+using System;
 using System.Runtime.CompilerServices;
+using Bloodcraft.Tests.Stubs;
+using Il2CppInterop.Runtime.Startup;
 
 namespace Bloodcraft.Tests.Support;
 
@@ -13,6 +16,11 @@ public static class TestModuleInitializers
     [ModuleInitializer]
     public static void Initialize()
     {
+        Il2CppInteropRuntime.Create(new RuntimeConfiguration
+        {
+            UnityVersion = new Version(1, 0),
+            DetourProvider = new NullDetourProvider()
+        });
         PrefabGuidTestShim.EnsurePatched();
     }
 }

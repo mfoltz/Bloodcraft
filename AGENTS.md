@@ -4,7 +4,15 @@ This guide provides universal, consistent principles and patterns to master C# c
 
 ## 🧪 Build & Test Workflow
 
-* Use the repository's provisioning script at `.codex/install.sh` for any build or test run. This script installs the required .NET SDK (if necessary) and builds the `Bloodcraft` project in Release mode. Invoke it from the repository root:
+* **Before running any `dotnet` commands**, provision the toolchain by executing the repository's install script at `.codex/install.sh`. This is the canonical way to ensure the .NET SDK is available in fresh environments.
+
+  ```bash
+  bash .codex/install.sh
+  ```
+
+  Run this script the first time you set up the workspace (and whenever the SDK needs to be refreshed) prior to attempting `dotnet build` or `dotnet test`.
+
+* The install script installs the required .NET SDK (if necessary) and builds the `Bloodcraft` project in Release mode. Invoke it from the repository root:
 
   ```bash
   bash .codex/install.sh
