@@ -75,12 +75,21 @@ public sealed class DataServicePersistenceTests : TestHost
     }
 
     [Fact]
-    public void SavePlayerExperience_IgnoresWritesWhileSuppressed()
-    {
-        ConfigDirectoryShim.EnsureInitialized();
-        var dataScope = new DataStateScope();
-        try
-        {
+        using var dataScope = CapturePlayerData();
+        const ulong playerId = 12345;
+        PlayerDictionaries._playerExperience[playerId] = new KeyValuePair<int, float>(15, 23.5f);
+
+        using var directoryScope = new TestDirectoryScope("Experience");
+        var experiencePath = directoryScope.Paths["Experience"];
+        File.WriteAllText(experiencePath, "SENTINEL");
+        var originalTimestamp = File.GetLastWriteTimeUtc(experiencePath);
+
+        using var suppressionScope = DataService.SuppressPersistence();
+        Assert.True(GetIsPersistenceSuppressed());
+        SavePlayerExperience();
+
+        Assert.Equal("SENTINEL", File.ReadAllText(experiencePath));
+        Assert.Equal(originalTimestamp, File.GetLastWriteTimeUtc(experiencePath));
             const ulong playerId = 12345;
             PlayerDictionaries._playerExperience[playerId] = new KeyValuePair<int, float>(15, 23.5f);
 
