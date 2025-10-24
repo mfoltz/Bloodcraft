@@ -23,10 +23,12 @@ Glue that binds configuration, persistence, and player session state. These comp
 | Scenario | Primary Code | Existing / Planned Tests | Status |
 | --- | --- | --- | --- |
 | Config values hydrate from overrides and coerce to correct primitive types | [ConfigService.GetConfigValue<T>](../../Services/ConfigService.cs) | [ConfigServiceTests](../tests/Services/ConfigServiceTests.cs) | ✅ Covered |
-| Persistence suppression scope properly nests and restores writes | [DataService.SuppressPersistence](../../Services/DataService.cs) | [DataServicePersistenceTests](../tests/Services/DataServicePersistenceTests.cs) (covers suppression reference counting, write suppression, and file-map registration) | ✅ Covered |
+| Persistence suppression scope properly nests and restores writes | [DataService.SuppressPersistence](../../Services/DataService.cs) | [DataServicePersistenceTests](../tests/Services/DataServicePersistenceTests.cs) (covers suppression reference counting, write suppression, and file-map registration; still pending concurrency suppression across threads) | ✅ Covered |
 | Player connection/disconnection caches online state and triggers eclipse cleanup | [PlayerService.HandleConnection](../../Services/PlayerService.cs) / [PlayerService.HandleDisconnection](../../Services/PlayerService.cs) | _Gap — add_ `PlayerServiceConnectionTests.cs` | ⛔ Not covered |
 | Query services resolve entities by prefab/category without leaking temporary arrays | [QueryService](../../Services/QueryService.cs) | _Gap — add_ `QueryServiceEntityLookupTests.cs` | ⛔ Not covered |
 | System bootstrap respects config toggles when registering listeners | [SystemService.InitializeSystems](../../Services/SystemService.cs) | _Gap — add_ `SystemServiceInitializationTests.cs` | ⛔ Not covered |
+
+* DataService persistence fixtures run inside a sandboxed temporary directory scope so tests stay isolated from real BepInEx persistence folders.
 
 ## Systems (Leveling, Expertise, Blood, etc.)
 
