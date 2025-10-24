@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Bloodcraft.Interfaces;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
@@ -97,82 +96,49 @@ public sealed class LevelingPrestigeTests : TestHost
         }
     }
 
-    sealed class EntityComponentScope : IDisposable
+    sealed class EntityComponentScope : IEntityComponentOverrides, IDisposable
     {
-        static readonly Harmony HarmonyInstance = new("Bloodcraft.Tests.Systems.Leveling.LevelingPrestigeTests.EntityComponents");
-        static readonly Dictionary<ComponentKey, object> Components = new();
-        static readonly object Sync = new();
-        static bool patched;
-        static int scopeDepth;
+        readonly Dictionary<ComponentKey, object> components = new();
+        readonly IDisposable registration;
 
         public EntityComponentScope()
         {
-            lock (Sync)
-            {
-                if (!patched)
-                {
-                    Patch();
-                    patched = true;
-                }
-
-                scopeDepth++;
-            }
+            registration = VExtensions.OverrideComponents(this);
         }
 
         public void SetComponent<T>(Entity entity, T component) where T : struct
         {
-            lock (Sync)
-            {
-                Components[new ComponentKey(entity, typeof(T))] = component;
-            }
+            components[new ComponentKey(entity, typeof(T))] = component;
         }
 
         public void Dispose()
         {
-            lock (Sync)
-            {
-                Components.Clear();
-                scopeDepth--;
-
-                if (scopeDepth == 0)
-                {
-                    HarmonyInstance.UnpatchSelf();
-                    patched = false;
-                }
-            }
+            components.Clear();
+            registration.Dispose();
         }
 
-        static void Patch()
+        public bool TryRead<T>(Entity entity, out T value) where T : struct
         {
-            MethodInfo read = AccessTools.Method(typeof(VExtensions), nameof(VExtensions.Read));
-            MethodInfo has = AccessTools.Method(typeof(VExtensions), nameof(VExtensions.Has));
-
-            HarmonyInstance.Patch(read, prefix: new HarmonyMethod(typeof(EntityComponentScope), nameof(ReadPrefix)));
-            HarmonyInstance.Patch(has, prefix: new HarmonyMethod(typeof(EntityComponentScope), nameof(HasPrefix)));
-        }
-
-        static bool ReadPrefix<T>(Entity entity, ref T __result) where T : struct
-        {
-            lock (Sync)
+            if (components.TryGetValue(new ComponentKey(entity, typeof(T)), out object stored) && stored is T typed)
             {
-                if (Components.TryGetValue(new ComponentKey(entity, typeof(T)), out object value))
-                {
-                    __result = (T)value;
-                    return false;
-                }
+                value = typed;
+                return true;
             }
 
-            __result = default;
+            value = default;
             return false;
         }
 
-        static bool HasPrefix<T>(Entity entity, ref bool __result) where T : struct
+        public bool TryHas(Entity entity, Type componentType, out bool has)
         {
-            lock (Sync)
+            if (components.ContainsKey(new ComponentKey(entity, componentType)))
             {
-                __result = Components.ContainsKey(new ComponentKey(entity, typeof(T)));
-                return false;
+                has = true;
+                return true;
             }
+
+            has = default;
+            return false;
         }
 
         readonly record struct ComponentKey(int Index, int Version, Type ComponentType)
