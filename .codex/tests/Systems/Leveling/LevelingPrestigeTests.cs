@@ -5,7 +5,6 @@ using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Tests.Support;
 using Bloodcraft.Utilities;
-using HarmonyLib;
 using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;
@@ -28,7 +27,10 @@ public sealed class LevelingPrestigeTests : TestHost
     {
         using var dataScope = CapturePlayerData();
         using var persistence = DataService.SuppressPersistence();
+        using var config = WithConfigOverrides(("RestedXPSystem", true));
         using var componentScope = new EntityComponentScope();
+        using var experienceScope = new ExperienceDataScope();
+        using var restedOverride = LevelingSystem.OverrideRestedXpSystem(true);
         using var notifyScope = new NotifyPlayerScope();
 
         var player = new Entity { Index = 1, Version = 1 };
@@ -49,19 +51,14 @@ public sealed class LevelingPrestigeTests : TestHost
         };
 
         const float maxHealth = 250f;
-        UnitLevel unitLevel = StructConfigurer.Configure(new UnitLevel(), traverse =>
-        {
-            traverse.Field("Level").Field("_Value").SetValue(currentLevel);
-        });
 
-        Health health = StructConfigurer.Configure(new Health(), traverse =>
-        {
-            traverse.Field("MaxHealth").Field("_Value").SetValue(maxHealth);
-            traverse.Field("Value").SetValue(maxHealth);
-        });
-
-        componentScope.SetComponent(target, unitLevel);
-        componentScope.SetComponent(target, health);
+        experienceScope.SetExperience(target, new LevelingSystem.ExperienceData(
+            currentLevel,
+            maxHealth,
+            isVBlood: false,
+            hasWarEventTrash: false,
+            isUnitSpawnerSpawned: false,
+            hasDocileAggroConsumer: false));
 
         const float groupMultiplier = 1.6f;
 
@@ -69,6 +66,7 @@ public sealed class LevelingPrestigeTests : TestHost
 
         KeyValuePair<int, float> storedExperience = DataService.PlayerDictionaries._playerExperience[SteamId];
         KeyValuePair<DateTime, float> storedRested = DataService.PlayerDictionaries._playerRestedXP[SteamId];
+
 
         float baseExperience = currentLevel * ConfigService.UnitLevelingMultiplier;
         float additionalExperience = maxHealth / 2.5f;
@@ -84,21 +82,9 @@ public sealed class LevelingPrestigeTests : TestHost
         Assert.Equal(restedTimestamp, storedRested.Key);
         Assert.Equal(restedPool - restedBonus, storedRested.Value, 5);
     }
-
-    static class StructConfigurer
-    {
-        public static T Configure<T>(T value, Action<Traverse> configure) where T : struct
-        {
-            object boxed = value;
-            var traverse = Traverse.Create(boxed);
-            configure(traverse);
-            return (T)boxed;
-        }
-    }
-
     sealed class EntityComponentScope : IEntityComponentOverrides, IDisposable
     {
-        readonly Dictionary<ComponentKey, object> components = new();
+        readonly Dictionary<ComponentKey, ComponentOverride> components = new();
         readonly IDisposable registration;
 
         public EntityComponentScope()
@@ -108,7 +94,7 @@ public sealed class LevelingPrestigeTests : TestHost
 
         public void SetComponent<T>(Entity entity, T component) where T : struct
         {
-            components[new ComponentKey(entity, typeof(T))] = component;
+            components[new ComponentKey(entity, typeof(T))] = ComponentOverride.Present(component);
         }
 
         public void Dispose()
@@ -119,9 +105,14 @@ public sealed class LevelingPrestigeTests : TestHost
 
         public bool TryRead<T>(Entity entity, out T value) where T : struct
         {
-            if (components.TryGetValue(new ComponentKey(entity, typeof(T)), out object stored) && stored is T typed)
+            if (components.TryGetValue(new ComponentKey(entity, typeof(T)), out ComponentOverride entry))
             {
-                value = typed;
+                if (entry.TryRead(out value))
+                {
+                    return true;
+                }
+
+                value = default;
                 return true;
             }
 
@@ -131,9 +122,9 @@ public sealed class LevelingPrestigeTests : TestHost
 
         public bool TryHas(Entity entity, Type componentType, out bool has)
         {
-            if (components.ContainsKey(new ComponentKey(entity, componentType)))
+            if (components.TryGetValue(new ComponentKey(entity, componentType), out ComponentOverride entry))
             {
-                has = true;
+                has = entry.HasValue;
                 return true;
             }
 
@@ -147,47 +138,83 @@ public sealed class LevelingPrestigeTests : TestHost
             {
             }
         }
-    }
 
-    sealed class NotifyPlayerScope : IDisposable
-    {
-        static readonly Harmony HarmonyInstance = new("Bloodcraft.Tests.Systems.Leveling.LevelingPrestigeTests.NotifyPlayer");
-        static readonly object Sync = new();
-        static int scopeDepth;
-        static bool patched;
-
-        public NotifyPlayerScope()
+        readonly struct ComponentOverride
         {
-            lock (Sync)
+            public bool HasValue { get; }
+            public object? Value { get; }
+
+            ComponentOverride(bool hasValue, object? value)
             {
-                if (!patched)
+                HasValue = hasValue;
+                Value = value;
+            }
+
+            public static ComponentOverride Present<T>(T value) where T : struct
+            {
+                return new ComponentOverride(true, value);
+            }
+
+            public bool TryRead<T>(out T value) where T : struct
+            {
+                if (HasValue && Value is T typed)
                 {
-                    HarmonyInstance.Patch(
-                        AccessTools.Method(typeof(LevelingSystem), nameof(LevelingSystem.NotifyPlayer)),
-                        prefix: new HarmonyMethod(typeof(NotifyPlayerScope), nameof(SkipNotify)));
-                    patched = true;
+                    value = typed;
+                    return true;
                 }
 
-                scopeDepth++;
+                value = default;
+                return false;
             }
+        }
+    }
+
+    sealed class ExperienceDataScope : LevelingSystem.IExperienceDataOverride, IDisposable
+    {
+        readonly Dictionary<EntityKey, LevelingSystem.ExperienceData> overrides = new();
+        readonly IDisposable registration;
+
+        public ExperienceDataScope()
+        {
+            registration = LevelingSystem.OverrideExperienceData(this);
+        }
+
+        public void SetExperience(Entity entity, LevelingSystem.ExperienceData data)
+        {
+            overrides[new EntityKey(entity)] = data;
+        }
+
+        public bool TryGetExperienceData(Entity target, out LevelingSystem.ExperienceData data)
+        {
+            return overrides.TryGetValue(new EntityKey(target), out data);
         }
 
         public void Dispose()
         {
-            lock (Sync)
-            {
-                scopeDepth--;
-                if (scopeDepth == 0)
-                {
-                    HarmonyInstance.UnpatchSelf();
-                    patched = false;
-                }
-            }
+            overrides.Clear();
+            registration.Dispose();
         }
 
-        static bool SkipNotify()
+        readonly record struct EntityKey(int Index, int Version)
         {
-            return false;
+            public EntityKey(Entity entity) : this(entity.Index, entity.Version)
+            {
+            }
+        }
+    }
+
+    sealed class NotifyPlayerScope : IDisposable
+    {
+        readonly IDisposable registration;
+
+        public NotifyPlayerScope()
+        {
+            registration = LevelingSystem.OverrideNotifyPlayer((_, _, _, _, _, _, _) => { });
+        }
+
+        public void Dispose()
+        {
+            registration.Dispose();
         }
     }
 }

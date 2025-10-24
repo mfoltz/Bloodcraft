@@ -103,6 +103,11 @@ internal static class VExtensions
             return value;
         }
 
+        if (!ComponentOverrides.IsEmpty)
+        {
+            return default;
+        }
+
         return EntityManager.GetComponentData<T>(entity);
     }
     public static DynamicBuffer<T> ReadBuffer<T>(this Entity entity) where T : struct
@@ -132,6 +137,11 @@ internal static class VExtensions
             return has;
         }
 
+        if (!ComponentOverrides.IsEmpty)
+        {
+            return false;
+        }
+
         return EntityManager.HasComponent(entity, new(Il2CppType.Of<T>()));
     }
     static bool TryReadOverride<T>(Entity entity, out T value) where T : struct
@@ -149,22 +159,12 @@ internal static class VExtensions
     }
     static bool TryHasOverride(Entity entity, Type componentType, out bool has)
     {
-        bool anyOverride = false;
-
         foreach (IEntityComponentOverrides overrides in ComponentOverrides.ToArray())
         {
-            anyOverride = true;
-
             if (overrides.TryHas(entity, componentType, out has))
             {
                 return true;
             }
-        }
-
-        if (anyOverride)
-        {
-            has = false;
-            return true;
         }
 
         has = default;
