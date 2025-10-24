@@ -13,6 +13,7 @@ public static class TestModuleInitializers
     [ModuleInitializer]
     public static void Initialize()
     {
+        ConfigDirectorySandbox.InstallForAssemblyLifetime();
         PrefabGuidTestShim.EnsurePatched();
     }
 }
