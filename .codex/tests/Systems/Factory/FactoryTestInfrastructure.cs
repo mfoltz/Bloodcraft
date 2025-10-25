@@ -765,6 +765,18 @@ public static class FactoryTestUtilities
     /// </summary>
     /// <typeparam name="TWork">Work type being evaluated.</typeparam>
     public static QueryDescription DescribeQuery<TWork>()
+        where TWork : class, ISystemWork, new()
+    {
+        TWork work = new();
+        return work.CreateDescription(work.RequireForUpdate);
+    }
+
+    /// <summary>
+    /// Describes the query definition produced by the specified legacy struct work type.
+    /// </summary>
+    /// <typeparam name="TWork">Work type being evaluated.</typeparam>
+    [Obsolete("Prefer the class-based overload of DescribeQuery so work definitions can leverage reference semantics.", false)]
+    public static QueryDescription DescribeQuery<TWork>()
         where TWork : struct, ISystemWork
     {
         TWork work = new();
@@ -809,5 +821,65 @@ public static class FactoryTestUtilities
         where TWork : struct, ISystemWork
     {
         return new TWork();
+    }
+
+    /// <summary>
+    /// Invokes <see cref="ISystemWork.OnCreate(SystemContext)"/> on the provided work instance.
+    /// </summary>
+    /// <typeparam name="TWork">Work type being exercised.</typeparam>
+    /// <param name="work">Work instance to invoke.</param>
+    /// <param name="context">Context supplied to the lifecycle method.</param>
+    public static void OnCreate<TWork>(TWork work, SystemContext context)
+        where TWork : ISystemWork
+    {
+        work.OnCreate(context);
+    }
+
+    /// <summary>
+    /// Invokes <see cref="ISystemWork.OnStartRunning(SystemContext)"/> on the provided work instance.
+    /// </summary>
+    /// <typeparam name="TWork">Work type being exercised.</typeparam>
+    /// <param name="work">Work instance to invoke.</param>
+    /// <param name="context">Context supplied to the lifecycle method.</param>
+    public static void OnStartRunning<TWork>(TWork work, SystemContext context)
+        where TWork : ISystemWork
+    {
+        work.OnStartRunning(context);
+    }
+
+    /// <summary>
+    /// Invokes <see cref="ISystemWork.OnUpdate(SystemContext)"/> on the provided work instance.
+    /// </summary>
+    /// <typeparam name="TWork">Work type being exercised.</typeparam>
+    /// <param name="work">Work instance to invoke.</param>
+    /// <param name="context">Context supplied to the lifecycle method.</param>
+    public static void OnUpdate<TWork>(TWork work, SystemContext context)
+        where TWork : ISystemWork
+    {
+        work.OnUpdate(context);
+    }
+
+    /// <summary>
+    /// Invokes <see cref="ISystemWork.OnStopRunning(SystemContext)"/> on the provided work instance.
+    /// </summary>
+    /// <typeparam name="TWork">Work type being exercised.</typeparam>
+    /// <param name="work">Work instance to invoke.</param>
+    /// <param name="context">Context supplied to the lifecycle method.</param>
+    public static void OnStopRunning<TWork>(TWork work, SystemContext context)
+        where TWork : ISystemWork
+    {
+        work.OnStopRunning(context);
+    }
+
+    /// <summary>
+    /// Invokes <see cref="ISystemWork.OnDestroy(SystemContext)"/> on the provided work instance.
+    /// </summary>
+    /// <typeparam name="TWork">Work type being exercised.</typeparam>
+    /// <param name="work">Work instance to invoke.</param>
+    /// <param name="context">Context supplied to the lifecycle method.</param>
+    public static void OnDestroy<TWork>(TWork work, SystemContext context)
+        where TWork : ISystemWork
+    {
+        work.OnDestroy(context);
     }
 }
