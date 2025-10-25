@@ -457,23 +457,65 @@ public readonly struct SystemContext
 public interface ISystemWork : IQuerySpec
 {
     /// <summary>
-    /// Invoked when the owning system is being initialised.
+    /// Invoked when the owning system is created.
     /// </summary>
-    /// <param name="registrar">Registrar used to schedule refresh actions.</param>
     /// <param name="context">The active system context.</param>
-    void Setup(IRegistrar registrar, in SystemContext context);
+    void OnCreate(SystemContext context) { }
 
     /// <summary>
-    /// Invoked during each update tick.
+    /// Invoked when the owning system starts running.
     /// </summary>
     /// <param name="context">The active system context.</param>
-    void Tick(in SystemContext context);
+    void OnStartRunning(SystemContext context) { }
+
+    /// <summary>
+    /// Invoked at the beginning of each update cycle.
+    /// </summary>
+    /// <param name="context">The active system context.</param>
+    void OnUpdate(SystemContext context) { }
+
+    /// <summary>
+    /// Invoked when the owning system stops running.
+    /// </summary>
+    /// <param name="context">The active system context.</param>
+    void OnStopRunning(SystemContext context) { }
 
     /// <summary>
     /// Invoked when the owning system is destroyed.
     /// </summary>
     /// <param name="context">The active system context.</param>
-    void Destroy(in SystemContext context) { }
+    void OnDestroy(SystemContext context) { }
+
+    /// <summary>
+    /// Legacy creation hook that forwards to <see cref="OnCreate"/> while older tests migrate.
+    /// </summary>
+    /// <param name="registrar">Registrar used to schedule refresh actions.</param>
+    /// <param name="context">The active system context.</param>
+    [Obsolete("Override OnCreate instead.", false)]
+    void Setup(IRegistrar registrar, in SystemContext context)
+    {
+        OnCreate(context);
+    }
+
+    /// <summary>
+    /// Legacy update hook that forwards to <see cref="OnUpdate"/> while older tests migrate.
+    /// </summary>
+    /// <param name="context">The active system context.</param>
+    [Obsolete("Override OnUpdate instead.", false)]
+    void Tick(in SystemContext context)
+    {
+        OnUpdate(context);
+    }
+
+    /// <summary>
+    /// Legacy teardown hook that forwards to <see cref="OnDestroy"/> while older tests migrate.
+    /// </summary>
+    /// <param name="context">The active system context.</param>
+    [Obsolete("Override OnDestroy instead.", false)]
+    void Destroy(in SystemContext context)
+    {
+        OnDestroy(context);
+    }
 }
 
 /// <summary>
