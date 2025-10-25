@@ -35,15 +35,16 @@ public sealed class FamiliarBehaviourStateWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersBehaviourLookups()
+    public void OnCreate_RegistersBehaviourLookups()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
-        var work = new FamiliarBehaviourStateWork();
+        var work = FactoryTestUtilities.CreateWork<FamiliarBehaviourStateWork>();
 
-        work.Setup(registrar, in context);
+        FactoryTestUtilities.OnCreate(work, context);
 
-        Assert.Equal(1, registrar.RegistrationCount);
+        Assert.Equal(0, registrar.FacadeRegistrationCount);
+        Assert.Equal(1, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 
@@ -96,7 +97,8 @@ public sealed class FamiliarBehaviourStateWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.BehaviourStateChangedQuery, requestedQueries);
         Assert.Equal(work.BehaviourEventOrder.Count, iterationCount);
@@ -153,7 +155,8 @@ public sealed class FamiliarBehaviourStateWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.BehaviourStateChangedQuery, requestedQueries);
         Assert.Equal(work.BehaviourEventOrder.Count, iterationCount);

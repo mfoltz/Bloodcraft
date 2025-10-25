@@ -8,7 +8,7 @@ namespace Bloodcraft.Tests.Systems.Factory;
 /// <summary>
 /// Provides a test work definition mirroring the familiar imprisonment cleanup patch.
 /// </summary>
-public struct FamiliarImprisonmentWork : ISystemWork
+public sealed class FamiliarImprisonmentWork : ISystemWork
 {
     /// <summary>
     /// Delegate invoked when a component should be removed from the familiar target.
@@ -64,13 +64,21 @@ public struct FamiliarImprisonmentWork : ISystemWork
     List<EntityHandle>? destroyedTargets;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FamiliarImprisonmentWork"/> struct.
+    /// Initializes a new instance of the <see cref="FamiliarImprisonmentWork"/> class.
+    /// </summary>
+    public FamiliarImprisonmentWork()
+        : this(null, null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FamiliarImprisonmentWork"/> class.
     /// </summary>
     /// <param name="componentRemovalHook">Optional hook invoked when a component should be removed.</param>
     /// <param name="destroyHook">Optional hook invoked when the familiar should be destroyed.</param>
     public FamiliarImprisonmentWork(
-        ComponentRemovalAction? componentRemovalHook = null,
-        DestroyAction? destroyHook = null)
+        ComponentRemovalAction? componentRemovalHook,
+        DestroyAction? destroyHook)
     {
         this.componentRemovalHook = componentRemovalHook;
         this.destroyHook = destroyHook;
@@ -114,23 +122,27 @@ public struct FamiliarImprisonmentWork : ISystemWork
     public IReadOnlyList<EntityHandle> DestroyedTargets => DestroyedTargetsList;
 
     /// <inheritdoc />
-    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
+    public void Build(TestEntityQueryBuilder builder)
     {
-        var builder = new TestEntityQueryBuilder();
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
         builder.AddAllReadOnly<Buff>();
         builder.AddAllReadOnly<ImprisonedBuff>();
         builder.WithOptions(EntityQueryOptions.IncludeDisabled);
-        builder.Describe(out all, out any, out none, out options);
     }
 
     /// <inheritdoc />
-    public void Setup(IRegistrar registrar, in SystemContext context)
+    public void OnCreate(SystemContext context)
     {
-        if (registrar == null)
-            throw new ArgumentNullException(nameof(registrar));
+        var registrar = context.Registrar;
 
-        registrar.Register((ISystemFacade facade) =>
+        registrar.Register(static system =>
         {
+            if (system is not IRefreshRegistrationContext refreshContext)
+                throw new InvalidOperationException("The registrar provided a system that does not support refresh facade creation.");
+
+            var facade = refreshContext.CreateFacade();
             _ = facade.GetComponentLookup<Buff>(isReadOnly: true);
             _ = facade.GetComponentLookup<CharmSource>(isReadOnly: true);
             _ = facade.GetComponentLookup<BlockFeedBuff>(isReadOnly: false);
@@ -140,7 +152,7 @@ public struct FamiliarImprisonmentWork : ISystemWork
     }
 
     /// <inheritdoc />
-    public void Tick(in SystemContext context)
+    public void OnUpdate(SystemContext context)
     {
         EnsureTrackingCollections();
         context.ForEachEntity(imprisonedQuery, ProcessImprisonedBuff);

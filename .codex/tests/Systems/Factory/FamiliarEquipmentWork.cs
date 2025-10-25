@@ -7,7 +7,7 @@ namespace Bloodcraft.Tests.Systems.Factory;
 /// <summary>
 /// Provides a test work definition mirroring the familiar equipment and teleport patches.
 /// </summary>
-public struct FamiliarEquipmentWork : ISystemWork
+public sealed class FamiliarEquipmentWork : ISystemWork
 {
     /// <summary>
     /// Delegate used to validate whether an inventory slot should block familiar equipment.
@@ -159,7 +159,15 @@ public struct FamiliarEquipmentWork : ISystemWork
     List<(EntityHandle Familiar, EntityHandle Owner)>? teleportExpectations;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FamiliarEquipmentWork"/> struct.
+    /// Initializes a new instance of the <see cref="FamiliarEquipmentWork"/> class.
+    /// </summary>
+    public FamiliarEquipmentWork()
+        : this(null, null, null, null, null, null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FamiliarEquipmentWork"/> class.
     /// </summary>
     /// <param name="inventoryValidator">Optional validation delegate.</param>
     /// <param name="statRefresher">Optional stat refresh delegate.</param>
@@ -168,12 +176,12 @@ public struct FamiliarEquipmentWork : ISystemWork
     /// <param name="activeFamiliarResolver">Optional active familiar resolver.</param>
     /// <param name="teleportReturn">Optional teleport return delegate.</param>
     public FamiliarEquipmentWork(
-        InventoryValidationDelegate? inventoryValidator = null,
-        StatRefreshDelegate? statRefresher = null,
-        NetworkEntityLookupDelegate? networkLookup = null,
-        FamiliarResolverDelegate? servantFamiliarResolver = null,
-        FamiliarResolverDelegate? activeFamiliarResolver = null,
-        Action<EntityHandle, EntityHandle>? teleportReturn = null)
+        InventoryValidationDelegate? inventoryValidator,
+        StatRefreshDelegate? statRefresher,
+        NetworkEntityLookupDelegate? networkLookup,
+        FamiliarResolverDelegate? servantFamiliarResolver,
+        FamiliarResolverDelegate? activeFamiliarResolver,
+        Action<EntityHandle, EntityHandle>? teleportReturn)
     {
         this.inventoryValidator = inventoryValidator;
         this.statRefresher = statRefresher;
@@ -315,31 +323,35 @@ public struct FamiliarEquipmentWork : ISystemWork
     }
 
     /// <inheritdoc />
-    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
+    public void Build(TestEntityQueryBuilder builder)
     {
-        var builder = new TestEntityQueryBuilder();
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
         builder.AddAny(ComponentRequirements.ReadOnly<EquipServantItemFromInventoryEvent>());
         builder.AddAny(ComponentRequirements.ReadOnly<EquipServantItemEvent>());
         builder.AddAny(ComponentRequirements.ReadOnly<UnequipServantItemEvent>());
         builder.AddAny(ComponentRequirements.ReadOnly<EquipmentToEquipmentTransferEvent>());
         builder.AddAny(ComponentRequirements.ReadOnly<PlayerTeleportDebugEvent>());
-        builder.Describe(out all, out any, out none, out options);
     }
 
     /// <inheritdoc />
-    public void Setup(IRegistrar registrar, in SystemContext context)
+    public void OnCreate(SystemContext context)
     {
-        if (registrar == null)
-            throw new ArgumentNullException(nameof(registrar));
+        var registrar = context.Registrar;
 
-        registrar.Register((ISystemFacade facade) =>
+        registrar.Register(static system =>
         {
+            if (system is not IRefreshRegistrationContext refreshContext)
+                throw new InvalidOperationException("The registrar provided a system that does not support refresh facade creation.");
+
+            var facade = refreshContext.CreateFacade();
             _ = facade.GetComponentLookup<BlockFeedBuff>();
         });
     }
 
     /// <inheritdoc />
-    public void Tick(in SystemContext context)
+    public void OnUpdate(SystemContext context)
     {
         context.WithTempEntities(equipFromInventoryQuery, ProcessEquipFromInventoryEvents);
         context.WithTempEntities(equipServantQuery, ProcessEquipServantEvents);
