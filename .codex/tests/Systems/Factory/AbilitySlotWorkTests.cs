@@ -39,15 +39,16 @@ public sealed class AbilitySlotWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersOwnerDataAndBufferLookups()
+    public void OnCreate_RegistersOwnerDataAndBufferLookups()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
-        var work = new AbilitySlotWork();
+        var work = FactoryTestUtilities.CreateWork<AbilitySlotWork>();
 
-        work.Setup(registrar, in context);
+        FactoryTestUtilities.OnCreate(work, context);
 
         Assert.Equal(1, registrar.RegistrationCount);
+        Assert.Equal(1, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 
@@ -93,8 +94,9 @@ public sealed class AbilitySlotWorkTests
             "Player_Unarmed_FishingPole",
             HasWeaponLevel: true));
 
+        var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(
-            new RecordingRegistrar(),
+            registrar,
             forEachEntity: (query, action) =>
             {
                 requestedQueries.Add(query);
@@ -104,7 +106,8 @@ public sealed class AbilitySlotWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.AbilityQuery, requestedQueries);
 
@@ -153,8 +156,9 @@ public sealed class AbilitySlotWorkTests
             "Weapon_Whip",
             HasWeaponLevel: true));
 
+        var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(
-            new RecordingRegistrar(),
+            registrar,
             forEachEntity: (query, action) =>
             {
                 requestedQueries.Add(query);
@@ -164,7 +168,8 @@ public sealed class AbilitySlotWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.AbilityQuery, requestedQueries);
         Assert.Equal(909, requestedHash);
@@ -231,8 +236,9 @@ public sealed class AbilitySlotWorkTests
             (6, 555),
         });
 
+        var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(
-            new RecordingRegistrar(),
+            registrar,
             forEachEntity: (query, action) =>
             {
                 requestedQueries.Add(query);
@@ -242,7 +248,8 @@ public sealed class AbilitySlotWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.AbilityQuery, requestedQueries);
 

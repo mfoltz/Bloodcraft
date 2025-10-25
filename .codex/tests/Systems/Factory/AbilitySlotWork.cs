@@ -9,7 +9,7 @@ namespace Bloodcraft.Tests.Systems.Factory;
 /// <summary>
 /// Provides a test work definition mirroring the replace-ability-on-slot patch.
 /// </summary>
-public struct AbilitySlotWork : ISystemWork
+public class AbilitySlotWork : ISystemWork
 {
     /// <summary>
     /// Supplies the current spell loadout for a player.
@@ -48,22 +48,6 @@ public struct AbilitySlotWork : ISystemWork
         PrefabGUID Prefab,
         string PrefabName,
         bool HasWeaponLevel);
-
-    static readonly ComponentType[] abilityAll;
-    static readonly ComponentType[] abilityAny;
-    static readonly ComponentType[] abilityNone;
-    static readonly EntityQueryOptions abilityOptions;
-    static readonly QueryDescription abilityQuery;
-
-    static AbilitySlotWork()
-    {
-        var builder = new TestEntityQueryBuilder();
-        builder.AddAllReadOnly<EntityOwner>();
-        builder.AddAllReadOnly<ReplaceAbilityOnSlotData>();
-        builder.AddAllReadWrite<ReplaceAbilityOnSlotBuff>();
-        builder.Describe(out abilityAll, out abilityAny, out abilityNone, out abilityOptions);
-        abilityQuery = new QueryDescription(abilityAll, abilityAny, abilityNone, abilityOptions, true);
-    }
 
     readonly bool enableUnarmedSlots;
     readonly bool enableDuality;
@@ -120,40 +104,59 @@ public struct AbilitySlotWork : ISystemWork
         entityHandles = null;
     }
 
+    static QueryDescription CreateAbilityQuery()
+    {
+        var builder = new TestEntityQueryBuilder();
+        builder.AddAllReadOnly<EntityOwner>();
+        builder.AddAllReadOnly<ReplaceAbilityOnSlotData>();
+        builder.AddAllReadWrite<ReplaceAbilityOnSlotBuff>();
+        return builder.Describe(requireForUpdate: true);
+    }
+
     /// <summary>
     /// Gets the query used to capture replace-ability entities.
     /// </summary>
-    public QueryDescription AbilityQuery => abilityQuery;
+    public QueryDescription AbilityQuery => CreateAbilityQuery();
 
     /// <inheritdoc />
-    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
+    public void Build(TestEntityQueryBuilder builder)
     {
-        all = abilityAll;
-        any = abilityAny;
-        none = abilityNone;
-        options = abilityOptions;
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
+        builder.AddAllReadOnly<EntityOwner>();
+        builder.AddAllReadOnly<ReplaceAbilityOnSlotData>();
+        builder.AddAllReadWrite<ReplaceAbilityOnSlotBuff>();
     }
 
     /// <inheritdoc />
-    public void Setup(IRegistrar registrar, in SystemContext context)
+    public void OnCreate(SystemContext context)
     {
-        if (registrar == null)
-            throw new ArgumentNullException(nameof(registrar));
-
-        registrar.Register((ISystemFacade facade) =>
+        context.Registrar.Register(system =>
         {
-            _ = facade.GetComponentLookup<EntityOwner>(isReadOnly: true);
-            _ = facade.GetComponentLookup<ReplaceAbilityOnSlotData>(isReadOnly: true);
-            _ = facade.GetComponentLookup<WeaponLevel>(isReadOnly: true);
-            _ = facade.GetComponentLookup<PrefabGUID>(isReadOnly: true);
-            _ = facade.GetBufferLookup<ReplaceAbilityOnSlotBuff>();
+            if (system is not IRefreshRegistrationContext refreshContext)
+                return;
+
+            RegisterRefreshLookups(refreshContext.CreateFacade());
         });
     }
 
     /// <inheritdoc />
-    public void Tick(in SystemContext context)
+    public void OnUpdate(SystemContext context)
     {
-        context.ForEachEntity(abilityQuery, ProcessEntity);
+        context.ForEachEntity(AbilityQuery, ProcessEntity);
+    }
+
+    void RegisterRefreshLookups(ISystemFacade facade)
+    {
+        if (facade == null)
+            throw new ArgumentNullException(nameof(facade));
+
+        _ = facade.GetComponentLookup<EntityOwner>(isReadOnly: true);
+        _ = facade.GetComponentLookup<ReplaceAbilityOnSlotData>(isReadOnly: true);
+        _ = facade.GetComponentLookup<WeaponLevel>(isReadOnly: true);
+        _ = facade.GetComponentLookup<PrefabGUID>(isReadOnly: true);
+        _ = facade.GetBufferLookup<ReplaceAbilityOnSlotBuff>();
     }
 
     /// <summary>

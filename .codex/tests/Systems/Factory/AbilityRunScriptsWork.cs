@@ -10,7 +10,7 @@ namespace Bloodcraft.Tests.Systems.Factory;
 /// <summary>
 /// Provides a test work definition mirroring the ability run scripts Harmony patches.
 /// </summary>
-public struct AbilityRunScriptsWork : ISystemWork
+public class AbilityRunScriptsWork : ISystemWork
 {
 
     /// <summary>
@@ -125,9 +125,6 @@ public struct AbilityRunScriptsWork : ISystemWork
         builder.AddAllReadOnly<AbilityCastStartedEvent>();
         return builder.Describe(requireForUpdate: true);
     }
-
-    static readonly QueryDescription postCastEndedQuery = CreatePostCastEndedQuery();
-    static readonly QueryDescription castStartedQuery = CreateCastStartedQuery();
 
     static readonly Dictionary<int, int> classSpells = new();
 
@@ -264,12 +261,12 @@ public struct AbilityRunScriptsWork : ISystemWork
     /// <summary>
     /// Gets the post-cast ended query description.
     /// </summary>
-    public QueryDescription PostCastEndedQuery => postCastEndedQuery;
+    public QueryDescription PostCastEndedQuery => CreatePostCastEndedQuery();
 
     /// <summary>
     /// Gets the cast-started query description.
     /// </summary>
-    public QueryDescription CastStartedQuery => castStartedQuery;
+    public QueryDescription CastStartedQuery => CreateCastStartedQuery();
 
     /// <summary>
     /// Provides a read-only view of the class spell cooldown configuration.
@@ -277,38 +274,47 @@ public struct AbilityRunScriptsWork : ISystemWork
     public static IReadOnlyDictionary<int, int> ClassSpells => classSpells;
 
     /// <inheritdoc />
-    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
+    public void Build(TestEntityQueryBuilder builder)
     {
-        var builder = new TestEntityQueryBuilder();
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
         builder.AddAllReadOnly<AbilityPostCastEndedEvent>();
-        builder.Describe(out all, out any, out none, out options);
     }
 
     /// <inheritdoc />
-    public void Setup(IRegistrar registrar, in SystemContext context)
+    public void OnCreate(SystemContext context)
     {
-        if (registrar == null)
-            throw new ArgumentNullException(nameof(registrar));
-
-        registrar.Register((ISystemFacade facade) =>
+        context.Registrar.Register(system =>
         {
-            _ = facade.GetComponentLookup<AbilityPostCastEndedEvent>(isReadOnly: true);
-            _ = facade.GetComponentLookup<AbilityCastStartedEvent>(isReadOnly: true);
-            _ = facade.GetComponentLookup<User>(isReadOnly: true);
-            _ = facade.GetComponentLookup<FamiliarActivityChecker>(isReadOnly: true);
-            _ = facade.GetComponentLookup<FamiliarDismissalChecker>(isReadOnly: true);
-            _ = facade.GetComponentLookup<FamiliarResolver>(isReadOnly: true);
-            _ = facade.GetComponentLookup<FamiliarBuffChecker>(isReadOnly: true);
-            _ = facade.GetComponentLookup<FamiliarAutoCallRegistrar>();
-            _ = facade.GetComponentLookup<FamiliarDismissalDelegate>();
+            if (system is not IRefreshRegistrationContext refreshContext)
+                return;
+
+            RegisterRefreshLookups(refreshContext.CreateFacade());
         });
     }
 
     /// <inheritdoc />
-    public void Tick(in SystemContext context)
+    public void OnUpdate(SystemContext context)
     {
-        context.ForEachEntity(postCastEndedQuery, ProcessPostCastEndedEvent);
-        context.ForEachEntity(castStartedQuery, ProcessCastStartedEvent);
+        context.ForEachEntity(PostCastEndedQuery, ProcessPostCastEndedEvent);
+        context.ForEachEntity(CastStartedQuery, ProcessCastStartedEvent);
+    }
+
+    void RegisterRefreshLookups(ISystemFacade facade)
+    {
+        if (facade == null)
+            throw new ArgumentNullException(nameof(facade));
+
+        _ = facade.GetComponentLookup<AbilityPostCastEndedEvent>(isReadOnly: true);
+        _ = facade.GetComponentLookup<AbilityCastStartedEvent>(isReadOnly: true);
+        _ = facade.GetComponentLookup<User>(isReadOnly: true);
+        _ = facade.GetComponentLookup<FamiliarActivityChecker>(isReadOnly: true);
+        _ = facade.GetComponentLookup<FamiliarDismissalChecker>(isReadOnly: true);
+        _ = facade.GetComponentLookup<FamiliarResolver>(isReadOnly: true);
+        _ = facade.GetComponentLookup<FamiliarBuffChecker>(isReadOnly: true);
+        _ = facade.GetComponentLookup<FamiliarAutoCallRegistrar>();
+        _ = facade.GetComponentLookup<FamiliarDismissalDelegate>();
     }
 
     /// <summary>
