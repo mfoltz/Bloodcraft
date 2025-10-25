@@ -140,7 +140,7 @@ public struct FamiliarMinionSpawnWork : ISystemWork
         if (registrar == null)
             throw new ArgumentNullException(nameof(registrar));
 
-        registrar.Register(facade =>
+        registrar.Register((ISystemFacade facade) =>
         {
             _ = facade.GetComponentLookup<EntityOwner>(isReadOnly: false);
             _ = facade.GetComponentLookup<Minion>(isReadOnly: true);

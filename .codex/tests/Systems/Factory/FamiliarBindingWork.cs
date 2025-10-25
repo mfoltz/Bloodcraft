@@ -341,7 +341,7 @@ internal struct FamiliarBindingWork : ISystemWork
         if (registrar == null)
             throw new ArgumentNullException(nameof(registrar));
 
-        registrar.Register(facade =>
+        registrar.Register((ISystemFacade facade) =>
         {
             _ = facade.GetComponentLookup<UnitStats>();
             _ = facade.GetComponentLookup<AbilityBar_Shared>();

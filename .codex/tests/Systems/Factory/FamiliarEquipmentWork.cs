@@ -332,7 +332,7 @@ public struct FamiliarEquipmentWork : ISystemWork
         if (registrar == null)
             throw new ArgumentNullException(nameof(registrar));
 
-        registrar.Register(facade =>
+        registrar.Register((ISystemFacade facade) =>
         {
             _ = facade.GetComponentLookup<BlockFeedBuff>();
         });

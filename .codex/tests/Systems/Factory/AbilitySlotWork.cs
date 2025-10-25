@@ -140,7 +140,7 @@ public struct AbilitySlotWork : ISystemWork
         if (registrar == null)
             throw new ArgumentNullException(nameof(registrar));
 
-        registrar.Register(facade =>
+        registrar.Register((ISystemFacade facade) =>
         {
             _ = facade.GetComponentLookup<EntityOwner>(isReadOnly: true);
             _ = facade.GetComponentLookup<ReplaceAbilityOnSlotData>(isReadOnly: true);

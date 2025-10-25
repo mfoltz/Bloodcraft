@@ -129,7 +129,7 @@ public struct FamiliarImprisonmentWork : ISystemWork
         if (registrar == null)
             throw new ArgumentNullException(nameof(registrar));
 
-        registrar.Register(facade =>
+        registrar.Register((ISystemFacade facade) =>
         {
             _ = facade.GetComponentLookup<Buff>(isReadOnly: true);
             _ = facade.GetComponentLookup<CharmSource>(isReadOnly: true);

@@ -93,7 +93,7 @@ public readonly struct QuestTargetWork : ISystemWork
         if (registrar == null)
             throw new ArgumentNullException(nameof(registrar));
 
-        registrar.Register(facade =>
+        registrar.Register((ISystemFacade facade) =>
         {
             _ = facade.GetEntityTypeHandle();
             _ = facade.GetEntityStorageInfoLookup();
