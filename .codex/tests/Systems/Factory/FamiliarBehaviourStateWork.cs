@@ -9,7 +9,7 @@ namespace Bloodcraft.Tests.Systems.Factory;
 /// Provides a test work definition that mirrors the familiar behaviour-state orchestration implemented by
 /// <see cref="Patches.BehaviourStateChangedSystemPatch"/>.
 /// </summary>
-public struct FamiliarBehaviourStateWork : ISystemWork
+public sealed class FamiliarBehaviourStateWork : ISystemWork
 {
     /// <summary>
     /// Delegate invoked when the familiar should command its minions to follow again.
@@ -63,13 +63,21 @@ public struct FamiliarBehaviourStateWork : ISystemWork
     Dictionary<EntityHandle, GenericEnemyState>? behaviourStates;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FamiliarBehaviourStateWork"/> struct.
+    /// Initializes a new instance of the <see cref="FamiliarBehaviourStateWork"/> class.
+    /// </summary>
+    public FamiliarBehaviourStateWork()
+        : this(null, null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FamiliarBehaviourStateWork"/> class.
     /// </summary>
     /// <param name="familiarMinionHandler">Optional delegate invoked for return-to-follow transitions.</param>
     /// <param name="familiarReturner">Optional delegate invoked for idle transitions.</param>
     public FamiliarBehaviourStateWork(
-        FamiliarMinionHandler? familiarMinionHandler = null,
-        FamiliarReturnHandler? familiarReturner = null)
+        FamiliarMinionHandler? familiarMinionHandler,
+        FamiliarReturnHandler? familiarReturner)
     {
         this.familiarMinionHandler = familiarMinionHandler;
         this.familiarReturner = familiarReturner;
@@ -105,22 +113,26 @@ public struct FamiliarBehaviourStateWork : ISystemWork
     public IReadOnlyDictionary<EntityHandle, GenericEnemyState> FamiliarBehaviourStates => StateMap;
 
     /// <inheritdoc />
-    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
+    public void Build(TestEntityQueryBuilder builder)
     {
-        var builder = new TestEntityQueryBuilder();
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
         builder.AddAllReadWrite<BehaviourTreeStateChangedEvent>();
         builder.AddAllReadWrite<BehaviourTreeState>();
-        builder.Describe(out all, out any, out none, out options);
     }
 
     /// <inheritdoc />
-    public void Setup(IRegistrar registrar, in SystemContext context)
+    public void OnCreate(SystemContext context)
     {
-        if (registrar == null)
-            throw new ArgumentNullException(nameof(registrar));
+        var registrar = context.Registrar;
 
-        registrar.Register((ISystemFacade facade) =>
+        registrar.Register(static system =>
         {
+            if (system is not IRefreshRegistrationContext refreshContext)
+                throw new InvalidOperationException("The registrar provided a system that does not support refresh facade creation.");
+
+            var facade = refreshContext.CreateFacade();
             _ = facade.GetComponentLookup<BehaviourTreeStateChangedEvent>(isReadOnly: false);
             _ = facade.GetComponentLookup<BehaviourTreeState>(isReadOnly: false);
             _ = facade.GetComponentLookup<BlockFeedBuff>(isReadOnly: true);
@@ -129,7 +141,7 @@ public struct FamiliarBehaviourStateWork : ISystemWork
     }
 
     /// <inheritdoc />
-    public void Tick(in SystemContext context)
+    public void OnUpdate(SystemContext context)
     {
         EnsureCollections();
         context.ForEachEntity(behaviourStateChangedQuery, ProcessBehaviourEvent);

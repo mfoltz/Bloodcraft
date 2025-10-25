@@ -46,15 +46,16 @@ public sealed class FamiliarEquipmentWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersBlockFeedLookup()
+    public void OnCreate_RegistersBlockFeedLookup()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
-        var work = new FamiliarEquipmentWork();
+        var work = FactoryTestUtilities.CreateWork<FamiliarEquipmentWork>();
 
-        work.Setup(registrar, in context);
+        FactoryTestUtilities.OnCreate(work, context);
 
-        Assert.Equal(1, registrar.RegistrationCount);
+        Assert.Equal(0, registrar.FacadeRegistrationCount);
+        Assert.Equal(1, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 
@@ -166,7 +167,8 @@ public sealed class FamiliarEquipmentWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.EquipFromInventoryQuery, requestedQueries);
         Assert.Contains(work.EquipServantQuery, requestedQueries);

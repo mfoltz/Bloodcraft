@@ -33,15 +33,16 @@ public sealed class FamiliarImprisonmentWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersBuffAndTargetLookups()
+    public void OnCreate_RegistersBuffAndTargetLookups()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
-        var work = new FamiliarImprisonmentWork();
+        var work = FactoryTestUtilities.CreateWork<FamiliarImprisonmentWork>();
 
-        work.Setup(registrar, in context);
+        FactoryTestUtilities.OnCreate(work, context);
 
-        Assert.Equal(1, registrar.RegistrationCount);
+        Assert.Equal(0, registrar.FacadeRegistrationCount);
+        Assert.Equal(1, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 
@@ -111,7 +112,8 @@ public sealed class FamiliarImprisonmentWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.ImprisonedQuery, requestedQueries);
         Assert.Equal(work.ImprisonedOrder.Count, iterationCount);
