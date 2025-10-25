@@ -290,7 +290,7 @@ public struct AbilityRunScriptsWork : ISystemWork
         if (registrar == null)
             throw new ArgumentNullException(nameof(registrar));
 
-        registrar.Register(facade =>
+        registrar.Register((ISystemFacade facade) =>
         {
             _ = facade.GetComponentLookup<AbilityPostCastEndedEvent>(isReadOnly: true);
             _ = facade.GetComponentLookup<AbilityCastStartedEvent>(isReadOnly: true);

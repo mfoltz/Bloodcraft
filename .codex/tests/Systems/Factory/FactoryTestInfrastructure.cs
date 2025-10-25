@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Entities;
 
 namespace Bloodcraft.Tests.Systems.Factory;
 
@@ -314,10 +315,16 @@ public interface ISystemFacade
 public interface IRegistrar
 {
     /// <summary>
-    /// Registers a refresh action that runs at the beginning of each update.
+    /// Registers a refresh action that runs at the beginning of each update using the legacy facade.
     /// </summary>
     /// <param name="refreshAction">Action invoked before the work executes.</param>
     void Register(Action<ISystemFacade> refreshAction);
+
+    /// <summary>
+    /// Registers a refresh action that receives the executing <see cref="SystemBase"/> instance.
+    /// </summary>
+    /// <param name="refreshAction">Action invoked before the work executes.</param>
+    void Register(Action<SystemBase> refreshAction);
 }
 
 /// <summary>
@@ -537,7 +544,8 @@ public readonly record struct TypeHandleRequest(Type ElementType, bool IsReadOnl
 /// </summary>
 public sealed class RecordingRegistrar : IRegistrar
 {
-    readonly List<Action<ISystemFacade>> refreshActions = new();
+    readonly List<Action<ISystemFacade>> facadeRefreshActions = new();
+    readonly List<Action<SystemBase>> systemRefreshActions = new();
     readonly List<LookupRequest> componentLookups = new();
     readonly List<LookupRequest> bufferLookups = new();
     readonly List<TypeHandleRequest> componentTypeHandles = new();
@@ -576,7 +584,7 @@ public sealed class RecordingRegistrar : IRegistrar
     /// <summary>
     /// Gets the number of registered refresh actions.
     /// </summary>
-    public int RegistrationCount => refreshActions.Count;
+    public int RegistrationCount => facadeRefreshActions.Count + systemRefreshActions.Count;
 
     /// <inheritdoc />
     public void Register(Action<ISystemFacade> refreshAction)
@@ -584,7 +592,16 @@ public sealed class RecordingRegistrar : IRegistrar
         if (refreshAction == null)
             throw new ArgumentNullException(nameof(refreshAction));
 
-        refreshActions.Add(refreshAction);
+        facadeRefreshActions.Add(refreshAction);
+    }
+
+    /// <inheritdoc />
+    public void Register(Action<SystemBase> refreshAction)
+    {
+        if (refreshAction == null)
+            throw new ArgumentNullException(nameof(refreshAction));
+
+        systemRefreshActions.Add(refreshAction);
     }
 
     /// <summary>
@@ -592,13 +609,31 @@ public sealed class RecordingRegistrar : IRegistrar
     /// </summary>
     public void InvokeRegistrations()
     {
-        if (refreshActions.Count == 0)
+        if (facadeRefreshActions.Count == 0 && systemRefreshActions.Count == 0)
             return;
 
         var facade = new RecordingSystemFacade(this);
-        foreach (var action in refreshActions)
+        foreach (var action in facadeRefreshActions)
         {
             action(facade);
+        }
+
+        if (systemRefreshActions.Count == 0)
+            return;
+
+        var world = new World("RecordingRegistrar.StubSystemBase");
+        try
+        {
+            var system = world.CreateSystemManaged<StubSystemBase>();
+
+            foreach (var action in systemRefreshActions)
+            {
+                action(system);
+            }
+        }
+        finally
+        {
+            world.Dispose();
         }
     }
 
@@ -675,6 +710,13 @@ public sealed class RecordingRegistrar : IRegistrar
         {
             registrar.RecordBufferTypeHandle(typeof(TBuffer), isReadOnly);
             return new BufferTypeHandle<TBuffer>(isReadOnly);
+        }
+    }
+
+    sealed class StubSystemBase : SystemBase
+    {
+        public override void OnUpdate()
+        {
         }
     }
 }

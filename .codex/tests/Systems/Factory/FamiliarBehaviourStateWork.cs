@@ -119,7 +119,7 @@ public struct FamiliarBehaviourStateWork : ISystemWork
         if (registrar == null)
             throw new ArgumentNullException(nameof(registrar));
 
-        registrar.Register(facade =>
+        registrar.Register((ISystemFacade facade) =>
         {
             _ = facade.GetComponentLookup<BehaviourTreeStateChangedEvent>(isReadOnly: false);
             _ = facade.GetComponentLookup<BehaviourTreeState>(isReadOnly: false);

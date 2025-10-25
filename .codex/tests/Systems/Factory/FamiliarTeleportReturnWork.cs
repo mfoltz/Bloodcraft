@@ -102,7 +102,7 @@ public struct FamiliarTeleportReturnWork : ISystemWork
         if (registrar == null)
             throw new ArgumentNullException(nameof(registrar));
 
-        registrar.Register(facade =>
+        registrar.Register((ISystemFacade facade) =>
         {
             _ = facade.GetComponentLookup<PlayerTeleportDebugEvent>(isReadOnly: true);
             _ = facade.GetComponentLookup<FromCharacter>(isReadOnly: true);
