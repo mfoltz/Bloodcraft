@@ -310,6 +310,17 @@ public interface ISystemFacade
 }
 
 /// <summary>
+/// Provides additional context for refresh registrations that operate on <see cref="SystemBase"/> instances.
+/// </summary>
+public interface IRefreshRegistrationContext
+{
+    /// <summary>
+    /// Creates a facade adapter that exposes lookup and type handle APIs for recording.
+    /// </summary>
+    ISystemFacade CreateFacade();
+}
+
+/// <summary>
 /// Supplies a registration surface for per-update refresh actions.
 /// </summary>
 public interface IRegistrar
@@ -586,6 +597,16 @@ public sealed class RecordingRegistrar : IRegistrar
     /// </summary>
     public int RegistrationCount => facadeRefreshActions.Count + systemRefreshActions.Count;
 
+    /// <summary>
+    /// Gets the number of refresh actions registered using the legacy facade API.
+    /// </summary>
+    public int FacadeRegistrationCount => facadeRefreshActions.Count;
+
+    /// <summary>
+    /// Gets the number of refresh actions registered using the <see cref="SystemBase"/> API.
+    /// </summary>
+    public int SystemRegistrationCount => systemRefreshActions.Count;
+
     /// <inheritdoc />
     public void Register(Action<ISystemFacade> refreshAction)
     {
@@ -625,6 +646,7 @@ public sealed class RecordingRegistrar : IRegistrar
         try
         {
             var system = world.CreateSystemManaged<StubSystemBase>();
+            system.Initialize(this);
 
             foreach (var action in systemRefreshActions)
             {
@@ -713,8 +735,23 @@ public sealed class RecordingRegistrar : IRegistrar
         }
     }
 
-    sealed class StubSystemBase : SystemBase
+    sealed class StubSystemBase : SystemBase, IRefreshRegistrationContext
     {
+        RecordingRegistrar? registrar;
+
+        public void Initialize(RecordingRegistrar owner)
+        {
+            registrar = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
+        public ISystemFacade CreateFacade()
+        {
+            if (registrar == null)
+                throw new InvalidOperationException("The recording registrar must be initialised before use.");
+
+            return new RecordingSystemFacade(registrar);
+        }
+
         public override void OnUpdate()
         {
         }
@@ -765,23 +802,12 @@ public static class FactoryTestUtilities
     /// </summary>
     /// <typeparam name="TWork">Work type being evaluated.</typeparam>
     public static QueryDescription DescribeQuery<TWork>()
-        where TWork : class, ISystemWork, new()
+        where TWork : ISystemWork, new()
     {
         TWork work = new();
-        return work.CreateDescription(work.RequireForUpdate);
-    }
-
-    /// <summary>
-    /// Describes the query definition produced by the specified legacy struct work type.
-    /// </summary>
-    /// <typeparam name="TWork">Work type being evaluated.</typeparam>
-    [Obsolete("Prefer the class-based overload of DescribeQuery so work definitions can leverage reference semantics.", false)]
-    public static QueryDescription DescribeQuery<TWork>()
-        where TWork : struct, ISystemWork
-    {
-        TWork work = new();
-        work.DescribeQuery(out var all, out var any, out var none, out var options);
-        return new QueryDescription(all, any, none, options, work.RequireForUpdate);
+        var builder = new TestEntityQueryBuilder();
+        work.Build(builder);
+        return builder.Describe(work.RequireForUpdate);
     }
 
     /// <summary>
@@ -818,7 +844,7 @@ public static class FactoryTestUtilities
     /// </summary>
     /// <typeparam name="TWork">Work type to instantiate.</typeparam>
     public static TWork CreateWork<TWork>()
-        where TWork : struct, ISystemWork
+        where TWork : ISystemWork, new()
     {
         return new TWork();
     }

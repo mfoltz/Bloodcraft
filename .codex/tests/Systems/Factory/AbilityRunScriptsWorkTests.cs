@@ -31,7 +31,7 @@ public sealed class AbilityRunScriptsWorkTests
     [Fact]
     public void CastStartedQuery_ExposesAbilityCastStartedRequirement()
     {
-        var work = new AbilityRunScriptsWork();
+        var work = FactoryTestUtilities.CreateWork<AbilityRunScriptsWork>();
         var query = work.CastStartedQuery;
 
         Assert.Collection(
@@ -49,15 +49,16 @@ public sealed class AbilityRunScriptsWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersEventUserAndFamiliarLookups()
+    public void OnCreate_RegistersEventUserAndFamiliarLookups()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
-        var work = new AbilityRunScriptsWork();
+        var work = FactoryTestUtilities.CreateWork<AbilityRunScriptsWork>();
 
-        work.Setup(registrar, in context);
+        FactoryTestUtilities.OnCreate(work, context);
 
         Assert.Equal(1, registrar.RegistrationCount);
+        Assert.Equal(1, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 
@@ -114,8 +115,9 @@ public sealed class AbilityRunScriptsWorkTests
             PlayerCharacter: player,
             CharacterIsExoForm: true));
 
+        var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(
-            new RecordingRegistrar(),
+            registrar,
             forEachEntity: (query, action) =>
             {
                 requestedQueries.Add(query);
@@ -125,7 +127,8 @@ public sealed class AbilityRunScriptsWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.PostCastEndedQuery, requestedQueries);
         Assert.Contains(work.CastStartedQuery, requestedQueries);
@@ -172,8 +175,9 @@ public sealed class AbilityRunScriptsWorkTests
             PlayerCharacter: player,
             CharacterIsExoForm: false));
 
+        var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(
-            new RecordingRegistrar(),
+            registrar,
             forEachEntity: (query, action) =>
             {
                 requestedQueries.Add(query);
@@ -183,7 +187,8 @@ public sealed class AbilityRunScriptsWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Equal(0, shapeshiftCalls);
         Assert.Single(appliedCooldowns);
@@ -262,8 +267,9 @@ public sealed class AbilityRunScriptsWorkTests
             SteamId: steamId,
             User: null));
 
+        var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(
-            new RecordingRegistrar(),
+            registrar,
             forEachEntity: (query, action) =>
             {
                 requestedQueries.Add(query);
@@ -273,7 +279,8 @@ public sealed class AbilityRunScriptsWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.PostCastEndedQuery, requestedQueries);
         Assert.Contains(work.CastStartedQuery, requestedQueries);
