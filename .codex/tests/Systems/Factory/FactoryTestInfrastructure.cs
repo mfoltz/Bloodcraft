@@ -236,12 +236,58 @@ public interface IQuerySpec
     /// <param name="any">Components where at least one must be present.</param>
     /// <param name="none">Components that must be absent.</param>
     /// <param name="options">Additional options applied to the query.</param>
+    [Obsolete("DescribeQuery is superseded by Build(TestEntityQueryBuilder). Use Build instead.")]
     void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options);
+
+    /// <summary>
+    /// Populates the provided query builder with the component requirements and options that define the query.
+    /// </summary>
+    /// <param name="builder">Builder receiving the query configuration.</param>
+    void Build(TestEntityQueryBuilder builder)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
+        DescribeQuery(out var all, out var any, out var none, out var options);
+
+        for (var index = 0; index < all.Length; index++)
+            builder.AddAll(all[index]);
+
+        for (var index = 0; index < any.Length; index++)
+            builder.AddAny(any[index]);
+
+        for (var index = 0; index < none.Length; index++)
+            builder.AddNone(none[index]);
+
+        builder.WithOptions(options);
+    }
 
     /// <summary>
     /// Indicates whether the constructed query must be required for update.
     /// </summary>
     bool RequireForUpdate => true;
+}
+
+/// <summary>
+/// Provides helper methods for working with <see cref="IQuerySpec"/> implementations.
+/// </summary>
+internal static class QuerySpecExtensions
+{
+    /// <summary>
+    /// Creates a <see cref="QueryDescription"/> for the specified query specification.
+    /// </summary>
+    /// <param name="spec">Specification describing the query.</param>
+    /// <param name="requireForUpdate">Indicates whether the query should be required for update.</param>
+    /// <returns>A query description representing the specification.</returns>
+    internal static QueryDescription CreateDescription(this IQuerySpec spec, bool requireForUpdate)
+    {
+        if (spec == null)
+            throw new ArgumentNullException(nameof(spec));
+
+        var builder = new TestEntityQueryBuilder();
+        spec.Build(builder);
+        return builder.Describe(requireForUpdate);
+    }
 }
 
 /// <summary>
