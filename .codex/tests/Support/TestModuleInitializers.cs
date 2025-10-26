@@ -16,11 +16,7 @@ public static class TestModuleInitializers
     [ModuleInitializer]
     public static void Initialize()
     {
-        Il2CppInteropRuntime.Create(new RuntimeConfiguration
-        {
-            UnityVersion = new Version(1, 0),
-            DetourProvider = new NullDetourProvider()
-        });
+        ConfigDirectorySandbox.InstallForAssemblyLifetime();
         PrefabGuidTestShim.EnsurePatched();
     }
 }
