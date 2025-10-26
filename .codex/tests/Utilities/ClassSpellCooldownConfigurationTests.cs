@@ -1,77 +1,44 @@
 using System.Reflection;
-using System.Reflection.Emit;
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
-using HarmonyLib;
 using Stunlock.Core;
 
 namespace Bloodcraft.Tests.Utilities;
 
 public sealed class ClassSpellCooldownConfigurationTests : TestHost
 {
-    static readonly FieldInfo ClassSpellsField = typeof(AbilityRunScriptsSystemPatch)
-        .GetField("_classSpells", BindingFlags.Static | BindingFlags.NonPublic)
-        ?? throw new InvalidOperationException("Failed to locate AbilityRunScriptsSystemPatch._classSpells");
+    static readonly Func<IReadOnlyDictionary<ClassManager.PlayerClass, string>> DefaultClassSpellsAccessor = Configuration.ClassSpellsMapAccessor;
+    static readonly FieldInfo PrefabGuidValueField = typeof(PrefabGUID)
+        .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        .First(field => field.FieldType == typeof(int));
 
-    static readonly Dictionary<ClassManager.PlayerClass, string> ClassSpellOverrides = new();
-
-    static ClassSpellCooldownConfigurationTests()
+    protected override void ResetState()
     {
-        Harmony harmony = new("Bloodcraft.Tests.ClassSpellCooldownConfigurationTests");
-        MethodInfo target = AccessTools.Method(typeof(Configuration), nameof(Configuration.GetClassSpellCooldowns))
-            ?? throw new InvalidOperationException("Unable to locate Configuration.GetClassSpellCooldowns");
-        MethodInfo transpiler = typeof(ClassSpellCooldownConfigurationTests)
-            .GetMethod(nameof(ReplaceClassSpellsMapAccess), BindingFlags.Static | BindingFlags.NonPublic)
-            ?? throw new InvalidOperationException("Failed to locate transpiler method.");
-
-        harmony.Patch(target, transpiler: new HarmonyMethod(transpiler));
+        base.ResetState();
+        Configuration.ClassSpellsMapAccessor = GetConfiguredClassSpells;
+        AbilityRunScriptsSystemPatch.ClearClassSpells();
     }
 
-    static Dictionary<ClassManager.PlayerClass, string> GetClassSpellOverrides() => ClassSpellOverrides;
-
-    static IEnumerable<CodeInstruction> ReplaceClassSpellsMapAccess(IEnumerable<CodeInstruction> instructions)
+    public override void Dispose()
     {
-        FieldInfo classSpellsField = typeof(Classes).GetField(nameof(Classes.ClassSpellsMap), BindingFlags.Public | BindingFlags.Static)
-            ?? throw new InvalidOperationException("Unable to locate Classes.ClassSpellsMap");
-        MethodInfo replacement = typeof(ClassSpellCooldownConfigurationTests)
-            .GetMethod(nameof(GetClassSpellOverrides), BindingFlags.Static | BindingFlags.NonPublic)
-            ?? throw new InvalidOperationException("Unable to locate override accessor.");
+        Configuration.ClassSpellsMapAccessor = DefaultClassSpellsAccessor;
+        AbilityRunScriptsSystemPatch.ClearClassSpells();
+        base.Dispose();
+    }
 
-        foreach (CodeInstruction instruction in instructions)
+    static IReadOnlyDictionary<ClassManager.PlayerClass, string> GetConfiguredClassSpells()
+    {
+        return new Dictionary<ClassManager.PlayerClass, string>
         {
-            if (instruction.opcode == OpCodes.Ldsfld && Equals(instruction.operand, classSpellsField))
-            {
-                yield return new CodeInstruction(OpCodes.Call, replacement);
-            }
-            else
-            {
-                yield return instruction;
-            }
-        }
-    }
-
-    static void RefreshClassSpellsMapFromConfig()
-    {
-        ClassSpellOverrides.Clear();
-        ClassSpellOverrides[ClassManager.PlayerClass.BloodKnight] = ConfigService.BloodKnightSpells;
-        ClassSpellOverrides[ClassManager.PlayerClass.DemonHunter] = ConfigService.DemonHunterSpells;
-        ClassSpellOverrides[ClassManager.PlayerClass.VampireLord] = ConfigService.VampireLordSpells;
-        ClassSpellOverrides[ClassManager.PlayerClass.ShadowBlade] = ConfigService.ShadowBladeSpells;
-        ClassSpellOverrides[ClassManager.PlayerClass.ArcaneSorcerer] = ConfigService.ArcaneSorcererSpells;
-        ClassSpellOverrides[ClassManager.PlayerClass.DeathMage] = ConfigService.DeathMageSpells;
-    }
-
-    static void ClearClassSpellCache()
-    {
-        if (ClassSpellsField.GetValue(null) is IDictionary<PrefabGUID, int> cache)
-        {
-            cache.Clear();
-            return;
-        }
-
-        throw new InvalidOperationException("The class spell cache is not an IDictionary instance.");
+            [ClassManager.PlayerClass.BloodKnight] = ResolveSpellList(nameof(ConfigService.BloodKnightSpells)),
+            [ClassManager.PlayerClass.DemonHunter] = ResolveSpellList(nameof(ConfigService.DemonHunterSpells)),
+            [ClassManager.PlayerClass.VampireLord] = ResolveSpellList(nameof(ConfigService.VampireLordSpells)),
+            [ClassManager.PlayerClass.ShadowBlade] = ResolveSpellList(nameof(ConfigService.ShadowBladeSpells)),
+            [ClassManager.PlayerClass.ArcaneSorcerer] = ResolveSpellList(nameof(ConfigService.ArcaneSorcererSpells)),
+            [ClassManager.PlayerClass.DeathMage] = ResolveSpellList(nameof(ConfigService.DeathMageSpells)),
+        };
     }
 
     [Fact]
@@ -85,9 +52,7 @@ public sealed class ClassSpellCooldownConfigurationTests : TestHost
             (nameof(ConfigService.ArcaneSorcererSpells), string.Empty),
             (nameof(ConfigService.DeathMageSpells), string.Empty));
 
-        RefreshClassSpellsMapFromConfig();
-        ClearClassSpellCache();
-
+        AbilityRunScriptsSystemPatch.ClearClassSpells();
         Configuration.GetClassSpellCooldowns();
 
         IReadOnlyDictionary<PrefabGUID, int> spells = AbilityRunScriptsSystemPatch.ClassSpells;
@@ -111,16 +76,18 @@ public sealed class ClassSpellCooldownConfigurationTests : TestHost
             (nameof(ConfigService.ArcaneSorcererSpells), string.Empty),
             (nameof(ConfigService.DeathMageSpells), string.Empty));
 
-        RefreshClassSpellsMapFromConfig();
-        ClearClassSpellCache();
+        AbilityRunScriptsSystemPatch.ClearClassSpells();
         Configuration.GetClassSpellCooldowns();
 
-        Assert.Equal(3, AbilityRunScriptsSystemPatch.ClassSpells.Count);
-        Assert.Contains(new PrefabGUID(6001), AbilityRunScriptsSystemPatch.ClassSpells.Keys);
-        Assert.Contains(new PrefabGUID(6002), AbilityRunScriptsSystemPatch.ClassSpells.Keys);
-        Assert.Contains(new PrefabGUID(7001), AbilityRunScriptsSystemPatch.ClassSpells.Keys);
+        IReadOnlyDictionary<PrefabGUID, int> initialSpells = AbilityRunScriptsSystemPatch.ClassSpells;
+
+        int[] initialExpected = { 6001, 6002, 7001, 7002 };
+        Assert.Equal(initialExpected, initialSpells.Keys.Select(GetPrefabValue).OrderBy(value => value));
 
         initialScope.Dispose();
+
+        Assert.False(ConfigService.ConfigInitialization.FinalConfigValues.TryGetValue(nameof(ConfigService.BloodKnightSpells), out _));
+        Assert.False(ConfigService.ConfigInitialization.FinalConfigValues.TryGetValue(nameof(ConfigService.ShadowBladeSpells), out _));
 
         using var refreshedScope = WithConfigOverrides(
             (nameof(ConfigService.BloodKnightSpells), "8101, , 8102"),
@@ -130,19 +97,35 @@ public sealed class ClassSpellCooldownConfigurationTests : TestHost
             (nameof(ConfigService.ArcaneSorcererSpells), string.Empty),
             (nameof(ConfigService.DeathMageSpells), string.Empty));
 
-        RefreshClassSpellsMapFromConfig();
-        ClearClassSpellCache();
+        AbilityRunScriptsSystemPatch.ClearClassSpells();
         Configuration.GetClassSpellCooldowns();
 
         IReadOnlyDictionary<PrefabGUID, int> spells = AbilityRunScriptsSystemPatch.ClassSpells;
 
-        Assert.Equal(4, spells.Count);
-        Assert.DoesNotContain(new PrefabGUID(6001), spells.Keys);
-        Assert.DoesNotContain(new PrefabGUID(6002), spells.Keys);
-        Assert.DoesNotContain(new PrefabGUID(7001), spells.Keys);
+        int[] expected = { 8101, 8102, 9101, 9102 };
+        Assert.Equal(expected, spells.Keys.Select(GetPrefabValue).OrderBy(value => value));
         Assert.Equal(0, spells[new PrefabGUID(8101)]);
         Assert.Equal(1, spells[new PrefabGUID(8102)]);
         Assert.Equal(0, spells[new PrefabGUID(9101)]);
         Assert.Equal(2, spells[new PrefabGUID(9102)]);
+    }
+
+    static int GetPrefabValue(PrefabGUID prefab)
+    {
+        object? value = PrefabGuidValueField.GetValue(prefab);
+        return value is int intValue
+            ? intValue
+            : throw new InvalidOperationException("Unable to extract prefab GUID value.");
+    }
+
+    static string ResolveSpellList(string key)
+    {
+        if (ConfigService.ConfigInitialization.FinalConfigValues.TryGetValue(key, out var value) && value is not null)
+        {
+            return Convert.ToString(value) ?? string.Empty;
+        }
+
+        var definition = ConfigService.ConfigInitialization.ConfigEntries.First(entry => entry.Key == key);
+        return Convert.ToString(definition.DefaultValue) ?? string.Empty;
     }
 }
