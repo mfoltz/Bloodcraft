@@ -117,12 +117,8 @@ public sealed class SecureChatWork : ISystemWork
     {
         var registrar = context.Registrar;
 
-        registrar.Register(static system =>
+        registrar.Register(static (ISystemFacade facade) =>
         {
-            if (system is not IRefreshRegistrationContext refreshContext)
-                throw new InvalidOperationException("The registrar provided a system that does not support refresh facade creation.");
-
-            var facade = refreshContext.CreateFacade();
             _ = facade.GetEntityTypeHandle();
             _ = facade.GetComponentTypeHandle<ChatMessageEvent>(isReadOnly: true);
         });

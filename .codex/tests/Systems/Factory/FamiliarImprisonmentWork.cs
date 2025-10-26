@@ -137,12 +137,8 @@ public sealed class FamiliarImprisonmentWork : ISystemWork
     {
         var registrar = context.Registrar;
 
-        registrar.Register(static system =>
+        registrar.Register(static (ISystemFacade facade) =>
         {
-            if (system is not IRefreshRegistrationContext refreshContext)
-                throw new InvalidOperationException("The registrar provided a system that does not support refresh facade creation.");
-
-            var facade = refreshContext.CreateFacade();
             _ = facade.GetComponentLookup<Buff>(isReadOnly: true);
             _ = facade.GetComponentLookup<CharmSource>(isReadOnly: true);
             _ = facade.GetComponentLookup<BlockFeedBuff>(isReadOnly: false);
