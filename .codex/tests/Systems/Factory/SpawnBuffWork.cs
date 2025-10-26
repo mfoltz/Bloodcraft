@@ -9,7 +9,7 @@ namespace Bloodcraft.Tests.Systems.Factory;
 /// <summary>
 /// Provides a test double that mirrors the script-spawn and unit-spawn patches.
 /// </summary>
-public struct SpawnBuffWork : ISystemWork
+public sealed class SpawnBuffWork : ISystemWork
 {
     /// <summary>
     /// Describes the categories returned when classifying a spawn buff.
@@ -159,12 +159,20 @@ public struct SpawnBuffWork : ISystemWork
     List<EntityHandle>? minionOrder;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SpawnBuffWork"/> struct.
+    /// Initializes a new instance of the <see cref="SpawnBuffWork"/> class.
+    /// </summary>
+    public SpawnBuffWork()
+        : this(0f, null, null, null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SpawnBuffWork"/> class.
     /// </summary>
     /// <param name="bloodBoltCooldownSeconds">Cooldown applied to the Dracula blood bolt ability group.</param>
     /// <param name="abilityCooldownSetter">Optional delegate invoked when the cooldown should be set.</param>
     /// <param name="statRefreshDelegate">Optional delegate invoked when stats should be refreshed.</param>
-    /// <param name="bloodBoltAbilityGroup">Optional override for the blood bolt ability group.</param>
+    /// <param name="bloodBoltAbilityGroupHash">Optional override for the blood bolt ability group.</param>
     public SpawnBuffWork(
         float bloodBoltCooldownSeconds = 0f,
         AbilityCooldownSetter? abilityCooldownSetter = null,
@@ -235,23 +243,27 @@ public struct SpawnBuffWork : ISystemWork
     public bool RequireForUpdate => true;
 
     /// <inheritdoc />
-    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
+    public void Build(TestEntityQueryBuilder builder)
     {
-        var builder = new TestEntityQueryBuilder();
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
         builder.AddAllReadOnly<PrefabGUID>();
         builder.AddAllReadOnly<Buff>();
         builder.AddAllReadOnly<EntityOwner>();
-        builder.Describe(out all, out any, out none, out options);
     }
 
     /// <inheritdoc />
-    public void Setup(IRegistrar registrar, in SystemContext context)
+    public void OnCreate(SystemContext context)
     {
-        if (registrar == null)
-            throw new ArgumentNullException(nameof(registrar));
+        var registrar = context.Registrar;
 
-        registrar.Register((ISystemFacade facade) =>
+        registrar.Register(static system =>
         {
+            if (system is not IRefreshRegistrationContext refreshContext)
+                throw new InvalidOperationException("The registrar provided a system that does not support refresh facade creation.");
+
+            var facade = refreshContext.CreateFacade();
             _ = facade.GetComponentLookup<PlayerCharacter>(isReadOnly: true);
             _ = facade.GetComponentLookup<BlockFeedBuff>(isReadOnly: true);
             _ = facade.GetComponentLookup<BloodBuff>(isReadOnly: true);
@@ -260,7 +272,7 @@ public struct SpawnBuffWork : ISystemWork
     }
 
     /// <inheritdoc />
-    public void Tick(in SystemContext context)
+    public void OnUpdate(SystemContext context)
     {
         context.ForEachEntity(scriptSpawnQuery, ProcessScriptSpawn);
         context.ForEachEntity(minionSpawnQuery, ProcessMinionSpawn);

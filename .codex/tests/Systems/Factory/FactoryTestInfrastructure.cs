@@ -231,37 +231,10 @@ public sealed record QueryDescription(
 public interface IQuerySpec
 {
     /// <summary>
-    /// Describes the component lists and options that form the entity query definition.
-    /// </summary>
-    /// <param name="all">Components that must be present on matching entities.</param>
-    /// <param name="any">Components where at least one must be present.</param>
-    /// <param name="none">Components that must be absent.</param>
-    /// <param name="options">Additional options applied to the query.</param>
-    [Obsolete("DescribeQuery is superseded by Build(TestEntityQueryBuilder). Use Build instead.")]
-    void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options);
-
-    /// <summary>
     /// Populates the provided query builder with the component requirements and options that define the query.
     /// </summary>
     /// <param name="builder">Builder receiving the query configuration.</param>
-    void Build(TestEntityQueryBuilder builder)
-    {
-        if (builder == null)
-            throw new ArgumentNullException(nameof(builder));
-
-        DescribeQuery(out var all, out var any, out var none, out var options);
-
-        for (var index = 0; index < all.Length; index++)
-            builder.AddAll(all[index]);
-
-        for (var index = 0; index < any.Length; index++)
-            builder.AddAny(any[index]);
-
-        for (var index = 0; index < none.Length; index++)
-            builder.AddNone(none[index]);
-
-        builder.WithOptions(options);
-    }
+    void Build(TestEntityQueryBuilder builder);
 
     /// <summary>
     /// Indicates whether the constructed query must be required for update.
@@ -504,36 +477,6 @@ public interface ISystemWork : IQuerySpec
     /// <param name="context">The active system context.</param>
     void OnDestroy(SystemContext context) { }
 
-    /// <summary>
-    /// Legacy creation hook that forwards to <see cref="OnCreate"/> while older tests migrate.
-    /// </summary>
-    /// <param name="registrar">Registrar used to schedule refresh actions.</param>
-    /// <param name="context">The active system context.</param>
-    [Obsolete("Override OnCreate instead.", false)]
-    void Setup(IRegistrar registrar, in SystemContext context)
-    {
-        OnCreate(context);
-    }
-
-    /// <summary>
-    /// Legacy update hook that forwards to <see cref="OnUpdate"/> while older tests migrate.
-    /// </summary>
-    /// <param name="context">The active system context.</param>
-    [Obsolete("Override OnUpdate instead.", false)]
-    void Tick(in SystemContext context)
-    {
-        OnUpdate(context);
-    }
-
-    /// <summary>
-    /// Legacy teardown hook that forwards to <see cref="OnDestroy"/> while older tests migrate.
-    /// </summary>
-    /// <param name="context">The active system context.</param>
-    [Obsolete("Override OnDestroy instead.", false)]
-    void Destroy(in SystemContext context)
-    {
-        OnDestroy(context);
-    }
 }
 
 /// <summary>

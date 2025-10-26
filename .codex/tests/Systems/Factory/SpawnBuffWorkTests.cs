@@ -53,15 +53,16 @@ public sealed class SpawnBuffWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersRequiredLookups()
+    public void OnCreate_RegistersRequiredLookups()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
-        var work = new SpawnBuffWork();
+        var work = FactoryTestUtilities.CreateWork<SpawnBuffWork>();
 
-        work.Setup(registrar, in context);
+        FactoryTestUtilities.OnCreate(work, context);
 
-        Assert.Equal(1, registrar.RegistrationCount);
+        Assert.Equal(0, registrar.FacadeRegistrationCount);
+        Assert.Equal(1, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 
@@ -72,7 +73,7 @@ public sealed class SpawnBuffWorkTests
     }
 
     [Fact]
-    public void Tick_InvokesInjectedCallbacksAndMarksMinions()
+    public void OnUpdate_InvokesInjectedCallbacksAndMarksMinions()
     {
         var cooldowns = new List<(EntityHandle Source, int Group, float Cooldown)>();
         var statRefreshTargets = new List<EntityHandle>();
@@ -139,7 +140,8 @@ public sealed class SpawnBuffWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.ScriptSpawnQuery, requestedQueries);
         Assert.Contains(work.MinionSpawnQuery, requestedQueries);
