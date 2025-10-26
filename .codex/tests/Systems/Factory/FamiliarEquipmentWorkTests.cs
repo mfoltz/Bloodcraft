@@ -141,29 +141,45 @@ public sealed class FamiliarEquipmentWorkTests
 
         var context = FactoryTestUtilities.CreateContext(
             registrar,
-            withTempEntities: (query, action) =>
+            query: FactoryTestUtilities.DescribeQuery<FamiliarEquipmentWork>(),
+            forEachEntity: (query, action) =>
             {
                 requestedQueries.Add(query);
 
-                if (ReferenceEquals(query, work.EquipFromInventoryQuery))
+                if (query.Equals(work.EquipFromInventoryQuery))
                 {
-                    action(work.GetEquipFromInventoryEventHandles());
+                    foreach (var handle in work.GetEquipFromInventoryEventHandles())
+                    {
+                        action(handle);
+                    }
                 }
-                else if (ReferenceEquals(query, work.EquipServantQuery))
+                else if (query.Equals(work.EquipServantQuery))
                 {
-                    action(work.GetEquipServantEventHandles());
+                    foreach (var handle in work.GetEquipServantEventHandles())
+                    {
+                        action(handle);
+                    }
                 }
-                else if (ReferenceEquals(query, work.UnequipServantQuery))
+                else if (query.Equals(work.UnequipServantQuery))
                 {
-                    action(work.GetUnequipServantEventHandles());
+                    foreach (var handle in work.GetUnequipServantEventHandles())
+                    {
+                        action(handle);
+                    }
                 }
-                else if (ReferenceEquals(query, work.EquipmentTransferQuery))
+                else if (query.Equals(work.EquipmentTransferQuery))
                 {
-                    action(work.GetEquipmentTransferEventHandles());
+                    foreach (var handle in work.GetEquipmentTransferEventHandles())
+                    {
+                        action(handle);
+                    }
                 }
-                else if (ReferenceEquals(query, work.TeleportDebugQuery))
+                else if (query.Equals(work.TeleportDebugQuery))
                 {
-                    action(work.GetTeleportDebugEventHandles());
+                    foreach (var handle in work.GetTeleportDebugEventHandles())
+                    {
+                        action(handle);
+                    }
                 }
             });
 

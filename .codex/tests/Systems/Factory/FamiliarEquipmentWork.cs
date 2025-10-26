@@ -349,135 +349,139 @@ public sealed class FamiliarEquipmentWork : ISystemWork
     /// <inheritdoc />
     public void OnUpdate(SystemContext context)
     {
-        context.WithTempEntities(equipFromInventoryQuery, ProcessEquipFromInventoryEvents);
-        context.WithTempEntities(equipServantQuery, ProcessEquipServantEvents);
-        context.WithTempEntities(unequipServantQuery, ProcessUnequipServantEvents);
-        context.WithTempEntities(equipmentTransferQuery, ProcessEquipmentTransferEvents);
-        context.WithTempEntities(teleportDebugQuery, ProcessTeleportDebugEvents);
+        if (equipFromInventoryEvents != null && equipFromInventoryEvents.Count > 0)
+        {
+            context.ForEachEntity(equipFromInventoryQuery, ProcessEquipFromInventoryEvent);
+        }
+
+        if (equipServantEvents != null && equipServantEvents.Count > 0)
+        {
+            context.ForEachEntity(equipServantQuery, ProcessEquipServantEvent);
+        }
+
+        if (unequipServantEvents != null && unequipServantEvents.Count > 0)
+        {
+            context.ForEachEntity(unequipServantQuery, ProcessUnequipServantEvent);
+        }
+
+        if (equipmentTransferEvents != null && equipmentTransferEvents.Count > 0)
+        {
+            context.ForEachEntity(equipmentTransferQuery, ProcessEquipmentTransferEvent);
+        }
+
+        if (teleportDebugEvents != null && teleportDebugEvents.Count > 0)
+        {
+            context.ForEachEntity(teleportDebugQuery, ProcessTeleportDebugEvent);
+        }
     }
 
-    void ProcessEquipFromInventoryEvents(IReadOnlyList<EntityHandle> handles)
+    void ProcessEquipFromInventoryEvent(EntityHandle handle)
     {
-        if (equipFromInventoryEvents == null || handles == null)
+        if (equipFromInventoryEvents == null)
             return;
 
-        foreach (var handle in handles)
+        if (!equipFromInventoryEvents.TryGetValue(handle, out var eventData))
+            return;
+
+        if (!TryResolveNetworkEntity(eventData.ServantNetworkId, out var servant))
+            return;
+
+        if (!TryResolveNetworkEntity(eventData.InventoryNetworkId, out var inventory))
+            return;
+
+        var familiar = ResolveServantFamiliar(servant);
+        if (!IsValid(familiar))
+            return;
+
+        if (InventoryIsInvalid(inventory, eventData.SlotIndex))
+            return;
+
+        RefreshStats(familiar);
+    }
+
+    void ProcessEquipServantEvent(EntityHandle handle)
+    {
+        if (equipServantEvents == null)
+            return;
+
+        if (!equipServantEvents.TryGetValue(handle, out var eventData))
+            return;
+
+        if (!TryResolveNetworkEntity(eventData.ServantNetworkId, out var servant))
+            return;
+
+        var familiar = ResolveServantFamiliar(servant);
+        if (!IsValid(familiar))
+            return;
+
+        if (IsValid(eventData.Inventory) && InventoryIsInvalid(eventData.Inventory, eventData.SlotIndex))
+            return;
+
+        RefreshStats(familiar);
+    }
+
+    void ProcessUnequipServantEvent(EntityHandle handle)
+    {
+        if (unequipServantEvents == null)
+            return;
+
+        if (!unequipServantEvents.TryGetValue(handle, out var eventData))
+            return;
+
+        if (!TryResolveNetworkEntity(eventData.ServantNetworkId, out var servant))
+            return;
+
+        var familiar = ResolveServantFamiliar(servant);
+        if (!IsValid(familiar))
+            return;
+
+        RefreshStats(familiar);
+    }
+
+    void ProcessEquipmentTransferEvent(EntityHandle handle)
+    {
+        if (equipmentTransferEvents == null)
+            return;
+
+        if (!equipmentTransferEvents.TryGetValue(handle, out var eventData))
+            return;
+
+        if (eventData.ServantToCharacter)
         {
-            if (!equipFromInventoryEvents.TryGetValue(handle, out var eventData))
-                continue;
-
-            if (!TryResolveNetworkEntity(eventData.ServantNetworkId, out var servant))
-                continue;
-
-            if (!TryResolveNetworkEntity(eventData.InventoryNetworkId, out var inventory))
-                continue;
-
-            var familiar = ResolveServantFamiliar(servant);
+            var familiar = ResolveActiveFamiliar(eventData.PlayerCharacter);
             if (!IsValid(familiar))
-                continue;
-
-            if (InventoryIsInvalid(inventory, eventData.SlotIndex))
-                continue;
+                return;
 
             RefreshStats(familiar);
+            return;
         }
-    }
 
-    void ProcessEquipServantEvents(IReadOnlyList<EntityHandle> handles)
-    {
-        if (equipServantEvents == null || handles == null)
+        if (!TryResolveNetworkEntity(eventData.ServantNetworkId, out var servant))
             return;
 
-        foreach (var handle in handles)
-        {
-            if (!equipServantEvents.TryGetValue(handle, out var eventData))
-                continue;
-
-            if (!TryResolveNetworkEntity(eventData.ServantNetworkId, out var servant))
-                continue;
-
-            var familiar = ResolveServantFamiliar(servant);
-            if (!IsValid(familiar))
-                continue;
-
-            if (IsValid(eventData.Inventory) && InventoryIsInvalid(eventData.Inventory, eventData.SlotIndex))
-                continue;
-
-            RefreshStats(familiar);
-        }
-    }
-
-    void ProcessUnequipServantEvents(IReadOnlyList<EntityHandle> handles)
-    {
-        if (unequipServantEvents == null || handles == null)
+        var servantFamiliar = ResolveServantFamiliar(servant);
+        if (!IsValid(servantFamiliar))
             return;
 
-        foreach (var handle in handles)
-        {
-            if (!unequipServantEvents.TryGetValue(handle, out var eventData))
-                continue;
-
-            if (!TryResolveNetworkEntity(eventData.ServantNetworkId, out var servant))
-                continue;
-
-            var familiar = ResolveServantFamiliar(servant);
-            if (!IsValid(familiar))
-                continue;
-
-            RefreshStats(familiar);
-        }
-    }
-
-    void ProcessEquipmentTransferEvents(IReadOnlyList<EntityHandle> handles)
-    {
-        if (equipmentTransferEvents == null || handles == null)
+        if (IsValid(eventData.EquipmentInventory) && InventoryIsInvalid(eventData.EquipmentInventory, eventData.SlotIndex))
             return;
 
-        foreach (var handle in handles)
-        {
-            if (!equipmentTransferEvents.TryGetValue(handle, out var eventData))
-                continue;
-
-            if (eventData.ServantToCharacter)
-            {
-                var familiar = ResolveActiveFamiliar(eventData.PlayerCharacter);
-                if (!IsValid(familiar))
-                    continue;
-
-                RefreshStats(familiar);
-                continue;
-            }
-
-            if (!TryResolveNetworkEntity(eventData.ServantNetworkId, out var servant))
-                continue;
-
-            var servantFamiliar = ResolveServantFamiliar(servant);
-            if (!IsValid(servantFamiliar))
-                continue;
-
-            if (IsValid(eventData.EquipmentInventory) && InventoryIsInvalid(eventData.EquipmentInventory, eventData.SlotIndex))
-                continue;
-
-            RefreshStats(servantFamiliar);
-        }
+        RefreshStats(servantFamiliar);
     }
 
-    void ProcessTeleportDebugEvents(IReadOnlyList<EntityHandle> handles)
+    void ProcessTeleportDebugEvent(EntityHandle handle)
     {
-        if (teleportDebugEvents == null || handles == null)
+        if (teleportDebugEvents == null)
             return;
 
-        foreach (var handle in handles)
-        {
-            if (!teleportDebugEvents.TryGetValue(handle, out var eventData))
-                continue;
+        if (!teleportDebugEvents.TryGetValue(handle, out var eventData))
+            return;
 
-            var familiar = ResolveActiveFamiliar(eventData.OwnerCharacter);
-            if (!IsValid(familiar))
-                continue;
+        var familiar = ResolveActiveFamiliar(eventData.OwnerCharacter);
+        if (!IsValid(familiar))
+            return;
 
-            CaptureTeleportExpectation(familiar, eventData.OwnerCharacter);
-        }
+        CaptureTeleportExpectation(familiar, eventData.OwnerCharacter);
     }
 
     bool TryResolveNetworkEntity(int networkId, out EntityHandle entity)

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ProjectM;
 using Stunlock.Core;
 using Xunit;
@@ -142,5 +143,97 @@ public sealed class QuestTargetWorkTests
         Assert.Equal(1024, QuestTargetWork.TargetUnitsCapacity);
         Assert.Equal(256, QuestTargetWork.BlacklistedUnitsCapacity);
         Assert.Equal(512, QuestTargetWork.ImprisonedUnitsCapacity);
+    }
+
+    [Fact]
+    public void OnUpdate_ProcessesTargetsAndImprisonedUnits()
+    {
+        var processedTargets = new List<EntityHandle>();
+        var blacklistedTargets = new List<EntityHandle>();
+        var imprisonedTargets = new List<EntityHandle>();
+
+        var targetHandles = new[] { new EntityHandle(1), new EntityHandle(2), new EntityHandle(3) };
+        var imprisonedHandles = new[] { new EntityHandle(10) };
+
+        var work = new QuestTargetWork(
+            targetUpdater: processedTargets.Add,
+            blacklistUpdater: blacklistedTargets.Add,
+            imprisonedUpdater: imprisonedTargets.Add,
+            targetFilter: handle => handle.Id != 3,
+            blacklistEvaluator: handle => handle.Id == 2);
+
+        var registrar = new RecordingRegistrar();
+        var enumeratedQueries = new List<QueryDescription>();
+        var targetQuery = FactoryTestUtilities.DescribeQuery<QuestTargetWork>();
+
+        var context = FactoryTestUtilities.CreateContext(
+            registrar,
+            query: targetQuery,
+            forEachEntity: (query, action) =>
+            {
+                enumeratedQueries.Add(query);
+
+                if (query.Equals(targetQuery))
+                {
+                    foreach (var handle in targetHandles)
+                    {
+                        action(handle);
+                    }
+                }
+                else if (query.Equals(work.ImprisonedQuery))
+                {
+                    foreach (var handle in imprisonedHandles)
+                    {
+                        action(handle);
+                    }
+                }
+            });
+
+        FactoryTestUtilities.OnUpdate(work, context);
+
+        Assert.Equal(new[] { targetHandles[0], targetHandles[1] }, processedTargets);
+        Assert.Equal(new[] { targetHandles[1] }, blacklistedTargets);
+        Assert.Equal(imprisonedHandles, imprisonedTargets);
+        Assert.Contains(targetQuery, enumeratedQueries);
+        Assert.Contains(work.ImprisonedQuery, enumeratedQueries);
+    }
+
+    [Fact]
+    public void OnUpdate_SkipsImprisonedQueryWhenNoCallbackProvided()
+    {
+        var processedTargets = new List<EntityHandle>();
+        var targetHandles = new[] { new EntityHandle(5) };
+        var work = new QuestTargetWork(
+            targetUpdater: processedTargets.Add,
+            blacklistUpdater: null,
+            imprisonedUpdater: null,
+            targetFilter: null,
+            blacklistEvaluator: null);
+
+        var registrar = new RecordingRegistrar();
+        var enumeratedQueries = new List<QueryDescription>();
+        var targetQuery = FactoryTestUtilities.DescribeQuery<QuestTargetWork>();
+
+        var context = FactoryTestUtilities.CreateContext(
+            registrar,
+            query: targetQuery,
+            forEachEntity: (query, action) =>
+            {
+                enumeratedQueries.Add(query);
+
+                if (query.Equals(targetQuery))
+                {
+                    foreach (var handle in targetHandles)
+                    {
+                        action(handle);
+                    }
+                }
+            });
+
+        FactoryTestUtilities.OnUpdate(work, context);
+
+        Assert.Equal(targetHandles, processedTargets);
+        Assert.Contains(targetQuery, enumeratedQueries);
+        Assert.DoesNotContain(work.ImprisonedQuery, enumeratedQueries);
     }
 }
