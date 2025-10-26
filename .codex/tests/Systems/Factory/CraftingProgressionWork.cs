@@ -155,6 +155,14 @@ public sealed class CraftingProgressionWork : ISystemWork
     /// <summary>
     /// Initializes a new instance of the <see cref="CraftingProgressionWork"/> class.
     /// </summary>
+    public CraftingProgressionWork()
+        : this(null, null, null, null, null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CraftingProgressionWork"/> class.
+    /// </summary>
     /// <param name="clanMemberSource">Optional clan member source.</param>
     /// <param name="pendingJobsSource">Optional pending job source.</param>
     /// <param name="validatedJobsSource">Optional validated job source.</param>

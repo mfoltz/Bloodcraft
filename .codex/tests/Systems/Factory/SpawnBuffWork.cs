@@ -161,10 +161,18 @@ public sealed class SpawnBuffWork : ISystemWork
     /// <summary>
     /// Initializes a new instance of the <see cref="SpawnBuffWork"/> class.
     /// </summary>
+    public SpawnBuffWork()
+        : this(0f, null, null, null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SpawnBuffWork"/> class.
+    /// </summary>
     /// <param name="bloodBoltCooldownSeconds">Cooldown applied to the Dracula blood bolt ability group.</param>
     /// <param name="abilityCooldownSetter">Optional delegate invoked when the cooldown should be set.</param>
     /// <param name="statRefreshDelegate">Optional delegate invoked when stats should be refreshed.</param>
-    /// <param name="bloodBoltAbilityGroup">Optional override for the blood bolt ability group.</param>
+    /// <param name="bloodBoltAbilityGroupHash">Optional override for the blood bolt ability group.</param>
     public SpawnBuffWork(
         float bloodBoltCooldownSeconds = 0f,
         AbilityCooldownSetter? abilityCooldownSetter = null,
