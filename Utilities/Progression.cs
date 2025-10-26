@@ -215,6 +215,44 @@ internal static class Progression
             return data;
         }
     }
+    /// <summary>
+    /// Determines whether a nearby player qualifies to receive experience from a kill.
+    /// </summary>
+    /// <param name="experienceSharingEnabled">Indicates whether the server configuration allows experience sharing.</param>
+    /// <param name="isPvE">True when the server is operating in PvE mode.</param>
+    /// <param name="targetHasPrestiged">Whether the prospective recipient has prestiges applied.</param>
+    /// <param name="levelDifference">The difference between the killer's level and the candidate's level.</param>
+    /// <param name="shareLevelRange">The configured level difference threshold for sharing experience.</param>
+    /// <param name="areAllied">True if the killer and candidate belong to the same clan or alliance.</param>
+    /// <param name="isIgnored">True when the candidate opted out of experience sharing.</param>
+    /// <returns><c>true</c> when experience should be shared with the candidate; otherwise, <c>false</c>.</returns>
+    internal static bool ShouldShareExperience(
+        bool experienceSharingEnabled,
+        bool isPvE,
+        bool targetHasPrestiged,
+        int levelDifference,
+        int shareLevelRange,
+        bool areAllied,
+        bool isIgnored)
+    {
+        if (!experienceSharingEnabled || isIgnored)
+        {
+            return false;
+        }
+
+        if (isPvE)
+        {
+            if (targetHasPrestiged || shareLevelRange.Equals(0) || areAllied)
+            {
+                return true;
+            }
+
+            return Math.Abs(levelDifference) <= shareLevelRange;
+        }
+
+        return areAllied;
+    }
+
     public static HashSet<Entity> GetDeathParticipants(Entity source)
     {
         float3 position = source.GetPosition();
@@ -240,7 +278,11 @@ internal static class Progression
 
             foreach (int userIndex in usersInRange)
             {
-                if (!userIndexToSteamId.TryGetValue(userIndex, out ulong steamId) || Enumerable.Contains(IgnoreShared, steamId))
+                if (!userIndexToSteamId.TryGetValue(userIndex, out ulong steamId))
+                    continue;
+
+                bool isIgnored = Enumerable.Contains(IgnoreShared, steamId);
+                if (isIgnored)
                     continue;
                 if (!steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
                     continue;
@@ -249,18 +291,17 @@ internal static class Progression
 
                 var targetProgression = GetProgressionCacheData(steamId);
 
-                if (_isPvE)
-                {
-                    if (targetProgression.HasPrestiged || _shareLevelRange.Equals(0) || source.IsAllied(playerInfo.CharEntity))
-                    {
-                        players.Add(playerInfo.CharEntity);
-                    }
-                    else if (Math.Abs(sourceLevel - targetProgression.Level) <= _shareLevelRange)
-                    {
-                        players.Add(playerInfo.CharEntity);
-                    }
-                }
-                else if (source.IsAllied(playerInfo.CharEntity))
+                bool areAllied = source.IsAllied(playerInfo.CharEntity);
+                int levelDifference = sourceLevel - targetProgression.Level;
+
+                if (ShouldShareExperience(
+                        _expShare,
+                        _isPvE,
+                        targetProgression.HasPrestiged,
+                        levelDifference,
+                        _shareLevelRange,
+                        areAllied,
+                        isIgnored))
                 {
                     players.Add(playerInfo.CharEntity);
                 }
