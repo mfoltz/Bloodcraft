@@ -7,7 +7,7 @@ namespace Bloodcraft.Tests.Systems.Factory;
 /// <summary>
 /// Provides a test work definition mirroring the <see cref="Systems.Quests.QuestTargetSystem"/> setup behaviour.
 /// </summary>
-public readonly struct QuestTargetWork : ISystemWork
+public sealed class QuestTargetWork : ISystemWork
 {
     /// <summary>
     /// Initial capacity assigned to the target unit cache.
@@ -68,9 +68,11 @@ public readonly struct QuestTargetWork : ISystemWork
     public QueryDescription ImprisonedQuery => imprisonedQuery;
 
     /// <inheritdoc />
-    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
+    public void Build(TestEntityQueryBuilder builder)
     {
-        var builder = new TestEntityQueryBuilder();
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
         builder.AddAllReadOnly<PrefabGUID>();
         builder.AddAllReadOnly<Health>();
         builder.AddAllReadOnly<UnitLevel>();
@@ -84,17 +86,19 @@ public readonly struct QuestTargetWork : ISystemWork
         builder.AddNone(ComponentRequirements.ReadOnly<BlockFeedBuff>());
 
         builder.WithOptions(EntityQueryOptions.IncludeDisabled);
-        builder.Describe(out all, out any, out none, out options);
     }
 
     /// <inheritdoc />
-    public void Setup(IRegistrar registrar, in SystemContext context)
+    public void OnCreate(SystemContext context)
     {
-        if (registrar == null)
-            throw new ArgumentNullException(nameof(registrar));
+        var registrar = context.Registrar;
 
-        registrar.Register((ISystemFacade facade) =>
+        registrar.Register(static system =>
         {
+            if (system is not IRefreshRegistrationContext refreshContext)
+                throw new InvalidOperationException("The registrar provided a system that does not support refresh facade creation.");
+
+            var facade = refreshContext.CreateFacade();
             _ = facade.GetEntityTypeHandle();
             _ = facade.GetEntityStorageInfoLookup();
             _ = facade.GetComponentTypeHandle<PrefabGUID>(isReadOnly: true);
@@ -103,7 +107,7 @@ public readonly struct QuestTargetWork : ISystemWork
     }
 
     /// <inheritdoc />
-    public void Tick(in SystemContext context)
+    public void OnUpdate(SystemContext context)
     {
     }
 }

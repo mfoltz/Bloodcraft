@@ -9,7 +9,7 @@ namespace Bloodcraft.Tests.Systems.Factory;
 /// <summary>
 /// Provides a test work definition mirroring the crafting progression patches.
 /// </summary>
-public struct CraftingProgressionWork : ISystemWork
+public sealed class CraftingProgressionWork : ISystemWork
 {
     /// <summary>
     /// Supplies clan member details associated with a workstation owner.
@@ -153,7 +153,7 @@ public struct CraftingProgressionWork : ISystemWork
     List<ClanMemberData>? clanBuffer;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CraftingProgressionWork"/> struct.
+    /// Initializes a new instance of the <see cref="CraftingProgressionWork"/> class.
     /// </summary>
     /// <param name="clanMemberSource">Optional clan member source.</param>
     /// <param name="pendingJobsSource">Optional pending job source.</param>
@@ -206,21 +206,25 @@ public struct CraftingProgressionWork : ISystemWork
     public QueryDescription PrisonCraftingQuery => prisonCraftingQuery;
 
     /// <inheritdoc />
-    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
+    public void Build(TestEntityQueryBuilder builder)
     {
-        var builder = new TestEntityQueryBuilder();
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
         builder.AddAllReadOnly<InventoryChangedEvent>();
-        builder.Describe(out all, out any, out none, out options);
     }
 
     /// <inheritdoc />
-    public void Setup(IRegistrar registrar, in SystemContext context)
+    public void OnCreate(SystemContext context)
     {
-        if (registrar == null)
-            throw new ArgumentNullException(nameof(registrar));
+        var registrar = context.Registrar;
 
-        registrar.Register((ISystemFacade facade) =>
+        registrar.Register(static system =>
         {
+            if (system is not IRefreshRegistrationContext refreshContext)
+                throw new InvalidOperationException("The registrar provided a system that does not support refresh facade creation.");
+
+            var facade = refreshContext.CreateFacade();
             _ = facade.GetEntityTypeHandle();
             _ = facade.GetEntityStorageInfoLookup();
             _ = facade.GetComponentLookup<InventoryConnection>(isReadOnly: true);
@@ -234,7 +238,7 @@ public struct CraftingProgressionWork : ISystemWork
     }
 
     /// <inheritdoc />
-    public void Tick(in SystemContext context)
+    public void OnUpdate(SystemContext context)
     {
         context.WithTempEntities(forgeProgressQuery, ProcessForgeEvents);
         context.WithTempEntities(workstationProgressQuery, ProcessWorkstationEvents);

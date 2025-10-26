@@ -9,7 +9,7 @@ namespace Bloodcraft.Tests.Systems.Factory;
 /// <summary>
 /// Provides a test work definition mirroring the secure eclipse chat interception flow.
 /// </summary>
-public readonly struct SecureChatWork : ISystemWork
+public sealed class SecureChatWork : ISystemWork
 {
     /// <summary>
     /// Delegate used to validate a recalculated message authentication code.
@@ -28,7 +28,7 @@ public readonly struct SecureChatWork : ISystemWork
     readonly Action? destructionCallback;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SecureChatWork"/> struct using the default regex and verifier.
+    /// Initializes a new instance of the <see cref="SecureChatWork"/> class using the default regex and verifier.
     /// </summary>
     public SecureChatWork()
     {
@@ -38,7 +38,7 @@ public readonly struct SecureChatWork : ISystemWork
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SecureChatWork"/> struct.
+    /// Initializes a new instance of the <see cref="SecureChatWork"/> class.
     /// </summary>
     /// <param name="macRegex">Optional regex used to extract MAC values from incoming messages.</param>
     /// <param name="macVerifier">Optional delegate used to validate recalculated MAC values.</param>
@@ -67,9 +67,6 @@ public readonly struct SecureChatWork : ISystemWork
     /// Gets the chat message query description.
     /// </summary>
     public QueryDescription ChatMessageQuery => chatMessageQuery;
-
-    /// <inheritdoc />
-    public bool RequireForUpdate => true;
 
     /// <summary>
     /// Attempts to extract the original message guarded by the appended MAC.
@@ -106,34 +103,38 @@ public readonly struct SecureChatWork : ISystemWork
     }
 
     /// <inheritdoc />
-    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
+    public void Build(TestEntityQueryBuilder builder)
     {
-        all = new[] { ComponentRequirements.ReadOnly<ChatMessageEvent>() };
-        any = Array.Empty<ComponentType>();
-        none = Array.Empty<ComponentType>();
-        options = EntityQueryOptions.IncludeDisabled;
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
+        builder.AddAllReadOnly<ChatMessageEvent>();
+        builder.WithOptions(EntityQueryOptions.IncludeDisabled);
     }
 
     /// <inheritdoc />
-    public void Setup(IRegistrar registrar, in SystemContext context)
+    public void OnCreate(SystemContext context)
     {
-        if (registrar == null)
-            throw new ArgumentNullException(nameof(registrar));
+        var registrar = context.Registrar;
 
-        registrar.Register((ISystemFacade facade) =>
+        registrar.Register(static system =>
         {
+            if (system is not IRefreshRegistrationContext refreshContext)
+                throw new InvalidOperationException("The registrar provided a system that does not support refresh facade creation.");
+
+            var facade = refreshContext.CreateFacade();
             _ = facade.GetEntityTypeHandle();
             _ = facade.GetComponentTypeHandle<ChatMessageEvent>(isReadOnly: true);
         });
     }
 
     /// <inheritdoc />
-    public void Tick(in SystemContext context)
+    public void OnUpdate(SystemContext context)
     {
     }
 
     /// <inheritdoc />
-    public void Destroy(in SystemContext context)
+    public void OnDestroy(SystemContext context)
     {
         destructionCallback?.Invoke();
     }

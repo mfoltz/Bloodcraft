@@ -38,16 +38,17 @@ public sealed class SecureChatWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersChatMessageEventHandle()
+    public void OnCreate_RegistersChatMessageEventHandle()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
         var work = FactoryTestUtilities.CreateWork<SecureChatWork>();
 
-        work.Setup(registrar, in context);
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
-        Assert.Equal(1, registrar.RegistrationCount);
+        Assert.Equal(0, registrar.FacadeRegistrationCount);
+        Assert.Equal(1, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 
@@ -98,14 +99,14 @@ public sealed class SecureChatWorkTests
     }
 
     [Fact]
-    public void Destroy_InvokesConfiguredCallback()
+    public void OnDestroy_InvokesConfiguredCallback()
     {
         bool destroyed = false;
         var work = new SecureChatWork(destructionCallback: () => destroyed = true);
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
 
-        work.Destroy(in context);
+        FactoryTestUtilities.OnDestroy(work, context);
 
         Assert.True(destroyed);
     }

@@ -101,16 +101,17 @@ public sealed class QuestTargetWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersHandleRefreshes()
+    public void OnCreate_RegistersHandleRefreshes()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
         var work = FactoryTestUtilities.CreateWork<QuestTargetWork>();
 
-        work.Setup(registrar, in context);
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
-        Assert.Equal(1, registrar.RegistrationCount);
+        Assert.Equal(0, registrar.FacadeRegistrationCount);
+        Assert.Equal(1, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 
