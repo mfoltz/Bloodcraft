@@ -54,8 +54,8 @@ public sealed class FamiliarEquipmentWorkTests
 
         FactoryTestUtilities.OnCreate(work, context);
 
-        Assert.Equal(0, registrar.FacadeRegistrationCount);
-        Assert.Equal(1, registrar.SystemRegistrationCount);
+        Assert.Equal(1, registrar.FacadeRegistrationCount);
+        Assert.Equal(0, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 

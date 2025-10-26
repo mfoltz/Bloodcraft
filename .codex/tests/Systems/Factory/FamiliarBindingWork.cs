@@ -349,12 +349,8 @@ internal sealed class FamiliarBindingWork : ISystemWork
     {
         var registrar = context.Registrar;
 
-        registrar.Register(static system =>
+        registrar.Register(static (ISystemFacade facade) =>
         {
-            if (system is not IRefreshRegistrationContext refreshContext)
-                throw new InvalidOperationException("The registrar provided a system that does not support refresh facade creation.");
-
-            var facade = refreshContext.CreateFacade();
             _ = facade.GetComponentLookup<UnitStats>();
             _ = facade.GetComponentLookup<AbilityBar_Shared>();
             _ = facade.GetComponentLookup<AiMoveSpeeds>();

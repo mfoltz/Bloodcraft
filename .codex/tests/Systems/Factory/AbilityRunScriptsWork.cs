@@ -10,7 +10,7 @@ namespace Bloodcraft.Tests.Systems.Factory;
 /// <summary>
 /// Provides a test work definition mirroring the ability run scripts Harmony patches.
 /// </summary>
-public class AbilityRunScriptsWork : ISystemWork
+public partial class AbilityRunScriptsWork : ISystemWork
 {
 
     /// <summary>
@@ -285,13 +285,7 @@ public class AbilityRunScriptsWork : ISystemWork
     /// <inheritdoc />
     public void OnCreate(SystemContext context)
     {
-        context.Registrar.Register(system =>
-        {
-            if (system is not IRefreshRegistrationContext refreshContext)
-                return;
-
-            RegisterRefreshLookups(refreshContext.CreateFacade());
-        });
+        context.Registrar.Register(RegisterRefreshLookups);
     }
 
     /// <inheritdoc />

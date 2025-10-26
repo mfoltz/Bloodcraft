@@ -132,13 +132,7 @@ public class AbilitySlotWork : ISystemWork
     /// <inheritdoc />
     public void OnCreate(SystemContext context)
     {
-        context.Registrar.Register(system =>
-        {
-            if (system is not IRefreshRegistrationContext refreshContext)
-                return;
-
-            RegisterRefreshLookups(refreshContext.CreateFacade());
-        });
+        context.Registrar.Register(RegisterRefreshLookups);
     }
 
     /// <inheritdoc />

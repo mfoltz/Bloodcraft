@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Unity.Entities;
 
 namespace Bloodcraft.Tests.Systems.Factory;
@@ -223,6 +224,69 @@ public sealed record QueryDescription(
         Array.Empty<ComponentType>(),
         EntityQueryOptions.None,
         true);
+
+    /// <summary>
+    /// Determines whether the specified instance is equal to this description.
+    /// </summary>
+    /// <param name="other">Other description to compare.</param>
+    /// <returns><c>true</c> when the two descriptions represent the same query definition.</returns>
+    public bool Equals(QueryDescription? other)
+    {
+        if (ReferenceEquals(this, other))
+            return true;
+
+        if (other is null)
+            return false;
+
+        return RequireForUpdate == other.RequireForUpdate
+            && Options == other.Options
+            && SequenceEquals(All, other.All)
+            && SequenceEquals(Any, other.Any)
+            && SequenceEquals(None, other.None);
+    }
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+        AddSequenceHash(ref hash, All);
+        AddSequenceHash(ref hash, Any);
+        AddSequenceHash(ref hash, None);
+        hash.Add(Options);
+        hash.Add(RequireForUpdate);
+        return hash.ToHashCode();
+    }
+
+    static bool SequenceEquals(IReadOnlyList<ComponentType> left, IReadOnlyList<ComponentType> right)
+    {
+        if (ReferenceEquals(left, right))
+            return true;
+
+        if (left == null || right == null)
+            return false;
+
+        if (left.Count != right.Count)
+            return false;
+
+        for (int i = 0; i < left.Count; ++i)
+        {
+            if (!left[i].Equals(right[i]))
+                return false;
+        }
+
+        return true;
+    }
+
+    static void AddSequenceHash(ref HashCode hash, IReadOnlyList<ComponentType> sequence)
+    {
+        if (sequence == null)
+            return;
+
+        for (int i = 0; i < sequence.Count; ++i)
+        {
+            hash.Add(sequence[i]);
+        }
+    }
 }
 
 /// <summary>
@@ -500,6 +564,7 @@ public sealed class RecordingRegistrar : IRegistrar
 {
     readonly List<Action<ISystemFacade>> facadeRefreshActions = new();
     readonly List<Action<SystemBase>> systemRefreshActions = new();
+    readonly List<Action<ISystemFacade>> systemFallbackActions = new();
     readonly List<LookupRequest> componentLookups = new();
     readonly List<LookupRequest> bufferLookups = new();
     readonly List<TypeHandleRequest> componentTypeHandles = new();
@@ -566,6 +631,18 @@ public sealed class RecordingRegistrar : IRegistrar
             throw new ArgumentNullException(nameof(refreshAction));
 
         systemRefreshActions.Add(refreshAction);
+        systemFallbackActions.Add(facade =>
+        {
+            if (facade == null)
+                throw new ArgumentNullException(nameof(facade));
+
+            var instance = FormatterServices.GetUninitializedObject(typeof(FacadeBackedSystem));
+            if (instance is not FacadeBackedSystem stub)
+                throw new SerializationException("Failed to create facade-backed stub system.");
+
+            stub.Initialize(facade);
+            refreshAction(stub);
+        });
     }
 
     /// <summary>
@@ -585,9 +662,10 @@ public sealed class RecordingRegistrar : IRegistrar
         if (systemRefreshActions.Count == 0)
             return;
 
-        var world = new World("RecordingRegistrar.StubSystemBase");
+        World? world = null;
         try
         {
+            world = new World("RecordingRegistrar.StubSystemBase");
             var system = world.CreateSystemManaged<StubSystemBase>();
             system.Initialize(this);
 
@@ -596,9 +674,16 @@ public sealed class RecordingRegistrar : IRegistrar
                 action(system);
             }
         }
+        catch (TypeInitializationException exception) when (ContainsDllNotFound(exception))
+        {
+            foreach (var fallback in systemFallbackActions)
+            {
+                fallback(facade);
+            }
+        }
         finally
         {
-            world.Dispose();
+            world?.Dispose();
         }
     }
 
@@ -630,6 +715,17 @@ public sealed class RecordingRegistrar : IRegistrar
     void RecordBufferTypeHandle(Type elementType, bool isReadOnly)
     {
         bufferTypeHandles.Add(new TypeHandleRequest(elementType, isReadOnly));
+    }
+
+    static bool ContainsDllNotFound(Exception exception)
+    {
+        for (Exception? current = exception; current != null; current = current.InnerException)
+        {
+            if (current is DllNotFoundException)
+                return true;
+        }
+
+        return false;
     }
 
     sealed class RecordingSystemFacade : ISystemFacade
@@ -693,6 +789,25 @@ public sealed class RecordingRegistrar : IRegistrar
                 throw new InvalidOperationException("The recording registrar must be initialised before use.");
 
             return new RecordingSystemFacade(registrar);
+        }
+
+        public override void OnUpdate()
+        {
+        }
+    }
+
+    sealed class FacadeBackedSystem : SystemBase, IRefreshRegistrationContext
+    {
+        ISystemFacade? facade;
+
+        public void Initialize(ISystemFacade facade)
+        {
+            this.facade = facade ?? throw new ArgumentNullException(nameof(facade));
+        }
+
+        public ISystemFacade CreateFacade()
+        {
+            return facade ?? throw new InvalidOperationException("The system facade must be initialised before use.");
         }
 
         public override void OnUpdate()

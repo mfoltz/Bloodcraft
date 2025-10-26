@@ -58,7 +58,8 @@ public sealed class AbilityRunScriptsWorkTests
         FactoryTestUtilities.OnCreate(work, context);
 
         Assert.Equal(1, registrar.RegistrationCount);
-        Assert.Equal(1, registrar.SystemRegistrationCount);
+        Assert.Equal(1, registrar.FacadeRegistrationCount);
+        Assert.Equal(0, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 
