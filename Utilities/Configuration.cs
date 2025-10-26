@@ -2,6 +2,7 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using ProjectM;
 using Stunlock.Core;
@@ -9,6 +10,8 @@ using Stunlock.Core;
 namespace Bloodcraft.Utilities;
 internal static class Configuration
 {
+    internal static Func<IReadOnlyDictionary<ClassManager.PlayerClass, string>> ClassSpellsMapAccessor { get; set; } = () => Classes.ClassSpellsMap;
+
     public static void GetExcludedFamiliars()
     {
         List<PrefabGUID> unitBans = [..ParseIntegersFromString(ConfigService.BannedUnits).Select(unit => new PrefabGUID(unit))];
@@ -159,7 +162,7 @@ internal static class Configuration
 
     public static void GetClassSpellCooldowns()
     {
-        foreach (var keyValuePair in Classes.ClassSpellsMap)
+        foreach (var keyValuePair in ClassSpellsMapAccessor())
         {
             List<PrefabGUID> spellPrefabs = [..ParseIntegersFromString(keyValuePair.Value).Select(x => new PrefabGUID(x))];
 

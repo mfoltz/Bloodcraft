@@ -119,6 +119,11 @@ internal static class AbilityRunScriptsSystemPatch
         _classSpells.TryAdd(prefabGuid, spellIndex);
     }
 
+    internal static void ClearClassSpells()
+    {
+        _classSpells.Clear();
+    }
+
     /*
     [HarmonyPatch(typeof(EvaluateCastOptionsSystem), nameof(EvaluateCastOptionsSystem.OnUpdate))]
     [HarmonyPrefix]
