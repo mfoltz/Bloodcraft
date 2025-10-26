@@ -1,4 +1,7 @@
+using System;
 using System.Runtime.CompilerServices;
+using Bloodcraft.Tests.Stubs;
+using Il2CppInterop.Runtime.Startup;
 
 namespace Bloodcraft.Tests.Support;
 

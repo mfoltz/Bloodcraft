@@ -23,10 +23,12 @@ Glue that binds configuration, persistence, and player session state. These comp
 | Scenario | Primary Code | Existing / Planned Tests | Status |
 | --- | --- | --- | --- |
 | Config values hydrate from overrides and coerce to correct primitive types | [ConfigService.GetConfigValue<T>](../../Services/ConfigService.cs) | [ConfigServiceTests](../tests/Services/ConfigServiceTests.cs) | ✅ Covered |
-| Persistence suppression scope properly nests and restores writes | [DataService.SuppressPersistence](../../Services/DataService.cs) | _Gap — add_ `DataServicePersistenceScopeTests.cs` | ⛔ Not covered |
-| Player connection/disconnection caches online state and triggers eclipse cleanup | [PlayerService.HandleConnection](../../Services/PlayerService.cs) / [PlayerService.HandleDisconnection](../../Services/PlayerService.cs) | _Gap — add_ `PlayerServiceConnectionTests.cs` | ⛔ Not covered |
+| Persistence suppression scope properly nests and restores writes | [DataService.SuppressPersistence](../../Services/DataService.cs) | [DataServicePersistenceTests](../tests/Services/DataServicePersistenceTests.cs) (covers suppression reference counting, write suppression, and file-map registration; still pending concurrency suppression across threads) | ✅ Covered |
+| Player connection/disconnection caches online state and triggers eclipse cleanup | [PlayerService.HandleConnection](../../Services/PlayerService.cs) / [PlayerService.HandleDisconnection](../../Services/PlayerService.cs) | [PlayerServiceTests](../tests/Services/PlayerServiceTests.cs) (uses Harmony query stubs to emulate `EntityQuery` results without Unity) | ✅ Covered |
 | Query services resolve entities by prefab/category without leaking temporary arrays | [QueryService](../../Services/QueryService.cs) | _Gap — add_ `QueryServiceEntityLookupTests.cs` | ⛔ Not covered |
 | System bootstrap respects config toggles when registering listeners | [SystemService.InitializeSystems](../../Services/SystemService.cs) | _Gap — add_ `SystemServiceInitializationTests.cs` | ⛔ Not covered |
+
+* DataService persistence fixtures run inside a sandboxed temporary directory scope so tests stay isolated from real BepInEx persistence folders.
 
 ## Systems (Leveling, Expertise, Blood, etc.)
 
@@ -38,8 +40,10 @@ Gameplay systems that apply progression logic or orchestrate combat hooks. These
 | Weapon expertise accumulation respects prestige reducers and max caps | [WeaponSystem.SaveExpertiseExperience](../../Systems/Expertise/WeaponSystem.cs) | [WeaponSystemTests](../tests/Systems/Expertise/WeaponSystemTests.cs) | ✅ Covered |
 | Blood legacy progression respects configured stat choices and clamps at max level | [BloodSystem.SaveBloodExperience](../../Systems/Legacies/BloodSystem.cs) | [BloodSystemTests](../tests/Systems/Legacies/BloodSystemTests.cs) | ✅ Covered |
 | Prestige reducers adjust XP gains when players hit max level in group kills | [LevelingSystem.ProcessExperience](../../Systems/Leveling/LevelingSystem.cs) | _Gap — add_ `LevelingExperienceShareTests.cs` | ⛔ Not covered |
+| Prestige reducers compound with rested XP and group multipliers during XP awards | [LevelingSystem.ProcessExperienceGain](../../Systems/Leveling/LevelingSystem.cs) | [LevelingPrestigeTests](../tests/Systems/Leveling/LevelingPrestigeTests.cs) | ✅ Covered |
 | Familiar leveling shares XP with parties and differentiates VBlood/docile targets | [FamiliarLevelingSystem.ProcessFamiliarExperience](../../Systems/Familiars/FamiliarLevelingSystem.cs) | _Gap — add_ `FamiliarLevelingSystemTests.cs` | ⛔ Not covered |
 | Profession XP gain and cap enforcement across handlers | [ProfessionSystem.SaveProfessionExperience](../../Systems/Professions/ProfessionSystem.cs) | _Gap — add_ `ProfessionSystemExperienceTests.cs` | ⛔ Not covered |
+| Fishing profession bonuses route fish drops, mutant grease, and SCT toggles | [ProfessionSystem.GiveProfessionBonus](../../Systems/Professions/ProfessionSystem.cs) | [ProfessionBonusTests](../tests/Systems/Professions/ProfessionBonusTests.cs) | ✅ Covered |
 
 ### Factory Pattern Sandbox
 

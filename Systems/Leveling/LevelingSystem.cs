@@ -5,7 +5,9 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
+using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -39,6 +41,73 @@ internal static class LevelingSystem
     static readonly float _unitLevelingMultiplier = ConfigService.UnitLevelingMultiplier;
 
     static readonly float _levelingPrestigeReducer = ConfigService.LevelingPrestigeReducer;
+
+    static readonly ConcurrentStack<Action<Entity, ulong, float, bool, int, float, int>> NotifyPlayerOverrides = new();
+    static readonly ConcurrentStack<IExperienceDataOverride> ExperienceDataOverrides = new();
+    static readonly ConcurrentStack<bool> RestedXpOverrides = new();
+
+    internal static IDisposable OverrideNotifyPlayer(Action<Entity, ulong, float, bool, int, float, int> handler)
+    {
+        if (handler is null)
+        {
+            throw new ArgumentNullException(nameof(handler));
+        }
+
+        NotifyPlayerOverrides.Push(handler);
+        return new NotifyPlayerOverrideScope(handler);
+    }
+
+    internal static IDisposable OverrideExperienceData(IExperienceDataOverride overrides)
+    {
+        if (overrides is null)
+        {
+            throw new ArgumentNullException(nameof(overrides));
+        }
+
+        ExperienceDataOverrides.Push(overrides);
+        return new ExperienceDataOverrideScope(overrides);
+    }
+
+    internal static IDisposable OverrideRestedXpSystem(bool enabled)
+    {
+        RestedXpOverrides.Push(enabled);
+        return new RestedXpOverrideScope(enabled);
+    }
+
+    static bool TryGetNotifyPlayerOverride(out Action<Entity, ulong, float, bool, int, float, int> handler)
+    {
+        if (NotifyPlayerOverrides.TryPeek(out handler))
+        {
+            return true;
+        }
+
+        handler = default;
+        return false;
+    }
+
+    static bool TryGetExperienceDataOverride(Entity target, out ExperienceData data)
+    {
+        foreach (IExperienceDataOverride overrides in ExperienceDataOverrides.ToArray())
+        {
+            if (overrides.TryGetExperienceData(target, out data))
+            {
+                return true;
+            }
+        }
+
+        data = default;
+        return false;
+    }
+
+    static bool IsRestedXpEnabled()
+    {
+        if (RestedXpOverrides.TryPeek(out bool overrideValue))
+        {
+            return overrideValue;
+        }
+
+        return _restedXPSystem;
+    }
 
     const float DELAY_ADD = 1f;
 
@@ -105,16 +174,17 @@ internal static class LevelingSystem
     }
     public static void ProcessExperienceGain(Entity playerCharacter, Entity target, ulong steamId, int currentLevel, float delay, float groupMultiplier = 1f)
     {
-        UnitLevel victimLevel = target.Read<UnitLevel>();
-        Health health = target.Read<Health>();
+        ExperienceData experienceData;
+        if (!TryGetExperienceDataOverride(target, out experienceData))
+        {
+            experienceData = ExperienceData.FromEntity(target);
+        }
 
-        bool isVBlood = target.IsVBlood();
-
-        int additionalXP = (int)(health.MaxHealth._Value / 2.5f);
-        float gainedXP = GetBaseExperience(victimLevel.Level._Value, isVBlood);
+        int additionalXP = (int)(experienceData.MaxHealth / 2.5f);
+        float gainedXP = GetBaseExperience(experienceData.VictimLevel, experienceData.IsVBlood);
 
         gainedXP += additionalXP;
-        gainedXP = ApplyScalingFactor(gainedXP, currentLevel, victimLevel.Level._Value);
+        gainedXP = ApplyScalingFactor(gainedXP, currentLevel, experienceData.VictimLevel);
 
         if (steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
         {
@@ -127,7 +197,7 @@ internal static class LevelingSystem
             }
         }
 
-        if (_unitSpawnerMultiplier < 1 && target.IsUnitSpawnerSpawned())
+        if (_unitSpawnerMultiplier < 1 && experienceData.IsUnitSpawnerSpawned)
         {
             // bool inParty = PartiedPlayers.Contains(steamId);
             // if (inParty || gainedXP <= 0) return;
@@ -136,32 +206,20 @@ internal static class LevelingSystem
             if (gainedXP <= 0) return;
         }
 
-        if (_warEventMultiplier < 1 && target.Has<SpawnBuffElement>())
+        if (_warEventMultiplier < 1 && experienceData.HasWarEventTrash)
         {
-            var spawnBuffElement = target.ReadBuffer<SpawnBuffElement>();
-
-            for (int i = 0; i < spawnBuffElement.Length; i++)
-            {
-                if (EnablePrefabEffects && spawnBuffElement[i].Buff.Equals(WarEventTrash))
-                {
-                    gainedXP *= _warEventMultiplier;
-                    break;
-                }
-            }
+            gainedXP *= _warEventMultiplier;
         }
 
-        if (_docileUnitMultiplier < 1f && !isVBlood && target.TryGetComponent(out AggroConsumer aggroConsumer))
+        if (_docileUnitMultiplier < 1f && !experienceData.IsVBlood && experienceData.HasDocileAggroConsumer)
         {
-            if (aggroConsumer.AlertDecayPerSecond == 99f)
-            {
-                gainedXP *= _docileUnitMultiplier;
-            }
+            gainedXP *= _docileUnitMultiplier;
         }
 
         gainedXP *= groupMultiplier;
         int rested = 0;
 
-        if (_restedXPSystem) gainedXP = AddRestedXP(steamId, gainedXP, ref rested);
+        if (IsRestedXpEnabled()) gainedXP = AddRestedXP(steamId, gainedXP, ref rested);
         SaveLevelingExperience(steamId, gainedXP, out bool leveledUp, out int newLevel);
 
         if (leveledUp) HandlePlayerLevelUpEffects(playerCharacter, steamId);
@@ -235,6 +293,12 @@ internal static class LevelingSystem
     }
     public static void NotifyPlayer(Entity playerCharacter, ulong steamId, float gainedXP, bool leveledUp, int newLevel, float delay, int restedXP = 0)
     {
+        if (TryGetNotifyPlayerOverride(out Action<Entity, ulong, float, bool, int, float, int> notifyOverride))
+        {
+            notifyOverride(playerCharacter, steamId, gainedXP, leveledUp, newLevel, delay, restedXP);
+            return;
+        }
+
         int gainedIntXP = (int)gainedXP;
 
         Entity userEntity = playerCharacter.GetUserEntity();
@@ -363,6 +427,152 @@ internal static class LevelingSystem
 
             currentRestedXP = Math.Min(currentRestedXP, restedCap);
             steamId.SetPlayerRestedXP(new KeyValuePair<DateTime, float>(restedData.Key, currentRestedXP));
+        }
+    }
+
+    sealed class NotifyPlayerOverrideScope : IDisposable
+    {
+        readonly Action<Entity, ulong, float, bool, int, float, int> handler;
+        bool disposed;
+
+        public NotifyPlayerOverrideScope(Action<Entity, ulong, float, bool, int, float, int> handler)
+        {
+            this.handler = handler;
+        }
+
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+
+            if (!NotifyPlayerOverrides.TryPop(out Action<Entity, ulong, float, bool, int, float, int> current) || !ReferenceEquals(current, handler))
+            {
+                throw new InvalidOperationException("Notify player override stack is out of sync.");
+            }
+        }
+    }
+
+    sealed class ExperienceDataOverrideScope : IDisposable
+    {
+        readonly IExperienceDataOverride overrides;
+        bool disposed;
+
+        public ExperienceDataOverrideScope(IExperienceDataOverride overrides)
+        {
+            this.overrides = overrides;
+        }
+
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+
+            if (!ExperienceDataOverrides.TryPop(out IExperienceDataOverride current) || !ReferenceEquals(current, overrides))
+            {
+                throw new InvalidOperationException("Experience data override stack is out of sync.");
+            }
+        }
+    }
+
+    sealed class RestedXpOverrideScope : IDisposable
+    {
+        readonly bool overrideValue;
+        bool disposed;
+
+        public RestedXpOverrideScope(bool overrideValue)
+        {
+            this.overrideValue = overrideValue;
+        }
+
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+
+            if (!RestedXpOverrides.TryPop(out bool current) || current != overrideValue)
+            {
+                throw new InvalidOperationException("Rested XP override stack is out of sync.");
+            }
+        }
+    }
+
+    internal interface IExperienceDataOverride
+    {
+        bool TryGetExperienceData(Entity target, out ExperienceData data);
+    }
+
+    internal readonly struct ExperienceData
+    {
+        public ExperienceData(int victimLevel, float maxHealth, bool isVBlood, bool hasWarEventTrash, bool isUnitSpawnerSpawned, bool hasDocileAggroConsumer)
+        {
+            VictimLevel = victimLevel;
+            MaxHealth = maxHealth;
+            IsVBlood = isVBlood;
+            HasWarEventTrash = hasWarEventTrash;
+            IsUnitSpawnerSpawned = isUnitSpawnerSpawned;
+            HasDocileAggroConsumer = hasDocileAggroConsumer;
+        }
+
+        public int VictimLevel { get; }
+        public float MaxHealth { get; }
+        public bool IsVBlood { get; }
+        public bool HasWarEventTrash { get; }
+        public bool IsUnitSpawnerSpawned { get; }
+        public bool HasDocileAggroConsumer { get; }
+
+        public static ExperienceData FromEntity(Entity target)
+        {
+            UnitLevel victimLevel = target.Read<UnitLevel>();
+            Health health = target.Read<Health>();
+            bool isVBlood = target.IsVBlood();
+
+            bool hasWarEventTrash = false;
+
+            if (_warEventMultiplier < 1 && target.Has<SpawnBuffElement>())
+            {
+                var spawnBuffElement = target.ReadBuffer<SpawnBuffElement>();
+
+                for (int i = 0; i < spawnBuffElement.Length; i++)
+                {
+                    if (EnablePrefabEffects && spawnBuffElement[i].Buff.Equals(WarEventTrash))
+                    {
+                        hasWarEventTrash = true;
+                        break;
+                    }
+                }
+            }
+
+            bool isUnitSpawnerSpawned = _unitSpawnerMultiplier < 1 && target.IsUnitSpawnerSpawned();
+
+            bool hasDocileAggroConsumer = false;
+
+            if (_docileUnitMultiplier < 1f && !isVBlood && target.TryGetComponent(out AggroConsumer aggroConsumer))
+            {
+                if (aggroConsumer.AlertDecayPerSecond == 99f)
+                {
+                    hasDocileAggroConsumer = true;
+                }
+            }
+
+            return new ExperienceData(
+                victimLevel.Level._Value,
+                health.MaxHealth._Value,
+                isVBlood,
+                hasWarEventTrash,
+                isUnitSpawnerSpawned,
+                hasDocileAggroConsumer);
         }
     }
 }
