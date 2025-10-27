@@ -25,7 +25,4 @@
   <ItemGroup>
     <ProjectReference Include="../../Bloodcraft.csproj" AdditionalProperties="RunGenerateREADME=false" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Systems\Prestige\PrestigeShareTests.cs" />
-  </ItemGroup>
 </Project>
