@@ -1,4 +1,6 @@
-﻿using Bloodcraft.Services;
+using System;
+using System.Collections.Generic;
+using Bloodcraft.Services;
 using Bloodcraft.Systems;
 using Bloodcraft.Systems.Quests;
 using HarmonyLib;
@@ -7,13 +9,13 @@ using ProjectM;
 using Stunlock.Core;
 using System.Reflection;
 using Unity.Entities;
+#nullable enable
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
 public static class WorldBootstrapPatch
 {
-    static bool ElitePrimalRifts { get; } = ConfigService.ElitePrimalRifts;
     static readonly List<Type> _registerSystems =
     [
         typeof(QuestTargetSystem),
@@ -36,17 +38,32 @@ public static class WorldBootstrapPatch
         {
             if (world.Name.Equals("Server"))
             {
-                var updateGroup = world.GetOrCreateSystemManaged<UpdateGroup>();
+                var updateGroup = TestHooks.CreateUpdateGroup?.Invoke(world)
+                    ?? world.GetOrCreateSystemManaged<UpdateGroup>();
 
                 foreach (Type type in _registerSystems)
                 {
-                    if (!ElitePrimalRifts && type == typeof(PrimalWarEventSystem))
+                    if (!ShouldRegisterPrimalRifts() && type == typeof(PrimalWarEventSystem))
                         continue;
 
-                    RegisterAndAddSystem(world, updateGroup, type);
+                    if (TestHooks.RegisterSystem is { } register)
+                    {
+                        register(world, updateGroup, type);
+                    }
+                    else
+                    {
+                        RegisterAndAddSystem(world, updateGroup, type);
+                    }
                 }
 
-                updateGroup.SortSystems();
+                if (TestHooks.SortSystems is { } sort)
+                {
+                    sort(updateGroup);
+                }
+                else
+                {
+                    updateGroup.SortSystems();
+                }
             }
         }
         catch (Exception e)
@@ -54,6 +71,17 @@ public static class WorldBootstrapPatch
             Plugin.LogInstance.LogError($"[WorldBootstrap_Server.AddSystemsToWorld] Exception: {e}");
         }
     }
+
+    static bool ShouldRegisterPrimalRifts()
+    {
+        if (TestHooks.ElitePrimalRiftsProvider is { } provider)
+        {
+            return provider();
+        }
+
+        return ConfigService.ElitePrimalRifts;
+    }
+
     static void RegisterAndAddSystem(this World world, UpdateGroup group, Type systemType)
     {
         ClassInjector.RegisterTypeInIl2Cpp(systemType);
@@ -62,5 +90,21 @@ public static class WorldBootstrapPatch
         var systemInstance = (ComponentSystemBase)getOrCreate.Invoke(world, null);
 
         group.AddSystemToUpdateList(systemInstance);
+    }
+
+    internal static class TestHooks
+    {
+        internal static Func<World, UpdateGroup>? CreateUpdateGroup;
+        internal static Action<World, UpdateGroup, Type>? RegisterSystem;
+        internal static Action<UpdateGroup>? SortSystems;
+        internal static Func<bool>? ElitePrimalRiftsProvider;
+
+        internal static void Reset()
+        {
+            CreateUpdateGroup = null;
+            RegisterSystem = null;
+            SortSystems = null;
+            ElitePrimalRiftsProvider = null;
+        }
     }
 }
