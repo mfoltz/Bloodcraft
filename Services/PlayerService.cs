@@ -3,6 +3,7 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM.Network;
+using System;
 using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
@@ -17,10 +18,7 @@ internal class PlayerService
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _exoForm = ConfigService.ExoPrestiging;
 
-    static readonly ComponentType[] _userAllComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<User>())
-    ];
+    static readonly ComponentType[] _userAllComponents = InitializeUserComponents();
 
     static QueryDesc _userQueryDesc;
 
@@ -39,6 +37,37 @@ internal class PlayerService
     {
         _userQueryDesc = EntityManager.CreateQueryDesc(_userAllComponents, options: EntityQueryOptions.IncludeDisabled);
         BuildPlayerInfoCache();
+    }
+    static ComponentType[] InitializeUserComponents()
+    {
+        try
+        {
+            return
+            [
+                ComponentType.ReadOnly(Il2CppType.Of<User>())
+            ];
+        }
+        catch (Exception ex) when (IsMissingNativeLibrary(ex))
+        {
+            return Array.Empty<ComponentType>();
+        }
+    }
+    static bool IsMissingNativeLibrary(Exception exception)
+    {
+        for (Exception current = exception; ; )
+        {
+            if (current is DllNotFoundException)
+            {
+                return true;
+            }
+
+            if (current.InnerException is not Exception next)
+            {
+                return false;
+            }
+
+            current = next;
+        }
     }
     static void BuildPlayerInfoCache()
     {
