@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Bloodcraft.Services;
-using Bloodcraft.Systems;
-using Bloodcraft.Systems.Quests;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
 using ProjectM;
@@ -16,12 +14,6 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 public static class WorldBootstrapPatch
 {
-    static readonly List<Type> _registerSystems =
-    [
-        typeof(QuestTargetSystem),
-        typeof(PrimalWarEventSystem)
-    ];
-
     static readonly MethodInfo _getOrCreate = typeof(World)
         .GetMethods(BindingFlags.Instance | BindingFlags.Public)
         .First(m =>
@@ -29,6 +21,9 @@ public static class WorldBootstrapPatch
             m.IsGenericMethodDefinition &&
             m.GetParameters().Length == 0
         );
+
+    const string QuestTargetSystemTypeName = "Bloodcraft.Systems.Quests.QuestTargetSystem, Bloodcraft";
+    const string PrimalWarEventSystemTypeName = "Bloodcraft.Systems.PrimalWarEventSystem, Bloodcraft";
 
     [HarmonyPatch(typeof(WorldBootstrapUtilities), nameof(WorldBootstrapUtilities.AddSystemsToWorld))]
     [HarmonyPrefix]
@@ -38,38 +33,91 @@ public static class WorldBootstrapPatch
         {
             if (world.Name.Equals("Server"))
             {
-                var updateGroup = TestHooks.CreateUpdateGroup?.Invoke(world)
-                    ?? world.GetOrCreateSystemManaged<UpdateGroup>();
-
-                foreach (Type type in _registerSystems)
-                {
-                    if (!ShouldRegisterPrimalRifts() && type == typeof(PrimalWarEventSystem))
-                        continue;
-
-                    if (TestHooks.RegisterSystem is { } register)
-                    {
-                        register(world, updateGroup, type);
-                    }
-                    else
-                    {
-                        RegisterAndAddSystem(world, updateGroup, type);
-                    }
-                }
-
-                if (TestHooks.SortSystems is { } sort)
-                {
-                    sort(updateGroup);
-                }
-                else
-                {
-                    updateGroup.SortSystems();
-                }
+                ExecuteServerBootstrap(world);
             }
         }
         catch (Exception e)
         {
             Plugin.LogInstance.LogError($"[WorldBootstrap_Server.AddSystemsToWorld] Exception: {e}");
         }
+    }
+
+    static void ExecuteServerBootstrap(World world)
+    {
+        var updateGroup = TestHooks.CreateUpdateGroup?.Invoke(world)
+            ?? world.GetOrCreateSystemManaged<UpdateGroup>();
+
+        Type primalSystemType = ResolvePrimalSystemType();
+        bool elitePrimalRiftsEnabled = ShouldRegisterPrimalRifts();
+
+        foreach (Type type in EnumerateSystemTypes(elitePrimalRiftsEnabled, primalSystemType))
+        {
+            if (TestHooks.RegisterSystem is { } register)
+            {
+                register(world, updateGroup, type);
+            }
+            else
+            {
+                RegisterAndAddSystem(world, updateGroup, type);
+            }
+        }
+
+        if (TestHooks.SortSystems is { } sort)
+        {
+            sort(updateGroup);
+        }
+        else
+        {
+            updateGroup.SortSystems();
+        }
+    }
+
+    static IReadOnlyList<Type> EnumerateSystemTypes(bool elitePrimalRiftsEnabled, Type primalSystemType)
+    {
+        var results = new List<Type>();
+
+        foreach (Type type in ResolveSystemTypes())
+        {
+            if (!elitePrimalRiftsEnabled && type == primalSystemType)
+                continue;
+
+            results.Add(type);
+        }
+
+        return results;
+    }
+
+    static IEnumerable<Type> ResolveSystemTypes()
+    {
+        if (TestHooks.GetSystemTypes is { } provider)
+        {
+            var systemTypes = provider();
+            return systemTypes ?? Array.Empty<Type>();
+        }
+
+        return DefaultSystemTypes();
+    }
+
+    static IEnumerable<Type> DefaultSystemTypes()
+    {
+        yield return ResolveType(QuestTargetSystemTypeName);
+        yield return ResolveType(PrimalWarEventSystemTypeName);
+    }
+
+    static Type ResolvePrimalSystemType()
+    {
+        if (TestHooks.PrimalSystemType is { } overrideType)
+        {
+            return overrideType;
+        }
+
+        return ResolveType(PrimalWarEventSystemTypeName);
+    }
+
+    static Type ResolveType(string qualifiedTypeName)
+    {
+        return Type.GetType(qualifiedTypeName, throwOnError: true)
+            ?? throw new InvalidOperationException($"Unable to resolve type '{qualifiedTypeName}'.");
     }
 
     static bool ShouldRegisterPrimalRifts()
@@ -87,7 +135,9 @@ public static class WorldBootstrapPatch
         ClassInjector.RegisterTypeInIl2Cpp(systemType);
 
         var getOrCreate = _getOrCreate.MakeGenericMethod(systemType);
-        var systemInstance = (ComponentSystemBase)getOrCreate.Invoke(world, null);
+        var instance = getOrCreate.Invoke(world, null)
+            ?? throw new InvalidOperationException($"Failed to create system '{systemType}'.");
+        var systemInstance = (ComponentSystemBase)instance;
 
         group.AddSystemToUpdateList(systemInstance);
     }
@@ -98,6 +148,8 @@ public static class WorldBootstrapPatch
         internal static Action<World, UpdateGroup, Type>? RegisterSystem;
         internal static Action<UpdateGroup>? SortSystems;
         internal static Func<bool>? ElitePrimalRiftsProvider;
+        internal static Func<IEnumerable<Type>>? GetSystemTypes;
+        internal static Type? PrimalSystemType;
 
         internal static void Reset()
         {
@@ -105,6 +157,19 @@ public static class WorldBootstrapPatch
             RegisterSystem = null;
             SortSystems = null;
             ElitePrimalRiftsProvider = null;
+            GetSystemTypes = null;
+            PrimalSystemType = null;
+        }
+
+        internal static bool EvaluateElitePrimalRifts()
+        {
+            return ShouldRegisterPrimalRifts();
+        }
+
+        internal static IReadOnlyList<Type> EnumerateSystemsForTests(bool elitePrimalRiftsEnabled)
+        {
+            var primalSystemType = ResolvePrimalSystemType();
+            return EnumerateSystemTypes(elitePrimalRiftsEnabled, primalSystemType);
         }
     }
 }

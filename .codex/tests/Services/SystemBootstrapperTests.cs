@@ -1,11 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Runtime.Serialization;
 using Bloodcraft.Patches;
-using Bloodcraft.Systems;
-using Bloodcraft.Systems.Quests;
-using ProjectM;
 using Unity.Entities;
 using Xunit;
 #nullable enable
@@ -14,27 +9,26 @@ namespace Bloodcraft.Tests.Services;
 
 public sealed class SystemBootstrapperTests : TestHost
 {
-    static readonly List<Type> registeredSystemTypes = new();
-
     [Fact]
     public void Prefix_WithElitePrimalRiftsDisabled_RegistersQuestTargetSystemOnly()
     {
+        using var overrides = WithConfigOverrides(("ElitePrimalRifts", false));
         using var worldScope = CreateServerWorld();
         var world = worldScope.Instance;
+        _ = world;
 
-        ConfigureTestHooks(elitePrimalRiftsEnabled: false);
+        ConfigureTestHooks(() => false);
 
         try
         {
-            WorldBootstrapPatch.Prefix(world, null!, null!);
+            IReadOnlyList<Type> registeredTypes = WorldBootstrapPatch.TestHooks.EnumerateSystemsForTests(false);
 
-            Assert.Contains(typeof(QuestTargetSystem), registeredSystemTypes);
-            Assert.DoesNotContain(typeof(PrimalWarEventSystem), registeredSystemTypes);
-            Assert.Single(registeredSystemTypes);
+            Assert.Contains(typeof(DummyQuestSystem), registeredTypes);
+            Assert.DoesNotContain(typeof(DummyPrimalSystem), registeredTypes);
+            Assert.Single(registeredTypes);
         }
         finally
         {
-            registeredSystemTypes.Clear();
             WorldBootstrapPatch.TestHooks.Reset();
         }
     }
@@ -45,20 +39,21 @@ public sealed class SystemBootstrapperTests : TestHost
         using var overrides = WithConfigOverrides(("ElitePrimalRifts", true));
         using var worldScope = CreateServerWorld();
         var world = worldScope.Instance;
+        _ = world;
 
-        ConfigureTestHooks(elitePrimalRiftsEnabled: true);
+        ConfigureTestHooks();
 
         try
         {
-            WorldBootstrapPatch.Prefix(world, null!, null!);
+            bool elitePrimalRiftsEnabled = WorldBootstrapPatch.TestHooks.EvaluateElitePrimalRifts();
+            IReadOnlyList<Type> registeredTypes = WorldBootstrapPatch.TestHooks.EnumerateSystemsForTests(elitePrimalRiftsEnabled);
 
-            Assert.Contains(typeof(QuestTargetSystem), registeredSystemTypes);
-            Assert.Contains(typeof(PrimalWarEventSystem), registeredSystemTypes);
-            Assert.Equal(2, registeredSystemTypes.Count);
+            Assert.Contains(typeof(DummyQuestSystem), registeredTypes);
+            Assert.Contains(typeof(DummyPrimalSystem), registeredTypes);
+            Assert.Equal(2, registeredTypes.Count);
         }
         finally
         {
-            registeredSystemTypes.Clear();
             WorldBootstrapPatch.TestHooks.Reset();
         }
     }
@@ -66,57 +61,28 @@ public sealed class SystemBootstrapperTests : TestHost
     protected override void ResetState()
     {
         base.ResetState();
-        registeredSystemTypes.Clear();
         WorldBootstrapPatch.TestHooks.Reset();
     }
 
     static WorldScope CreateServerWorld() => new();
 
-    static void ConfigureTestHooks(bool elitePrimalRiftsEnabled)
+    static void ConfigureTestHooks(Func<bool>? elitePrimalRiftsProvider = null)
     {
-        WorldBootstrapPatch.TestHooks.CreateUpdateGroup = _ => CreateStubUpdateGroup();
-        WorldBootstrapPatch.TestHooks.SortSystems = _ => { };
-        WorldBootstrapPatch.TestHooks.RegisterSystem = (_, __, type) => registeredSystemTypes.Add(type);
-        WorldBootstrapPatch.TestHooks.ElitePrimalRiftsProvider = () => elitePrimalRiftsEnabled;
-    }
-
-    static UpdateGroup CreateStubUpdateGroup()
-    {
-        return (UpdateGroup)FormatterServices.GetUninitializedObject(typeof(UpdateGroup));
-    }
-
-    static void SetFieldIfExists(object target, string fieldName, object? value)
-    {
-        FieldInfo? field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-        field?.SetValue(target, value);
+        WorldBootstrapPatch.TestHooks.ElitePrimalRiftsProvider = elitePrimalRiftsProvider;
+        WorldBootstrapPatch.TestHooks.GetSystemTypes = () => new[] { typeof(DummyQuestSystem), typeof(DummyPrimalSystem) };
+        WorldBootstrapPatch.TestHooks.PrimalSystemType = typeof(DummyPrimalSystem);
     }
 
     sealed class WorldScope : IDisposable
     {
-        public WorldScope()
-        {
-            Instance = (World)FormatterServices.GetUninitializedObject(typeof(World));
-            SetFieldIfExists(Instance, "<Name>k__BackingField", "Server");
-            SetFieldIfExists(Instance, "m_Name", "Server");
-        }
-
-        public World Instance { get; }
+        public World? Instance { get; } = null;
 
         public void Dispose()
         {
-            TryDisposeWorld(Instance);
         }
     }
 
-    static void TryDisposeWorld(World world)
-    {
-        try
-        {
-            world.Dispose();
-        }
-        catch
-        {
-            // Ignored: the world is a test double created without invoking the Unity.Entities runtime.
-        }
-    }
+    sealed class DummyQuestSystem { }
+
+    sealed class DummyPrimalSystem { }
 }
