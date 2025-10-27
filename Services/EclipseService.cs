@@ -10,6 +10,7 @@ using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
 using Stunlock.Core;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Globalization;
@@ -40,7 +41,7 @@ internal class EclipseService
     static readonly bool _quests = ConfigService.QuestSystem;
     static readonly bool _elitePrimalRifts = ConfigService.ElitePrimalRifts;
 
-    static readonly WaitForSeconds _delay = new(ConfigService.Eclipsed ? 0.1f : 2.5f);
+    static readonly WaitForSeconds _delay = CreateDelay();
     const string V1_3 = "1.3";
 
     static readonly Regex _regex = new(@"^\[ECLIPSE\]\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
@@ -159,7 +160,10 @@ internal class EclipseService
         {
             if (!RegisteredUsersAndClientVersions.Any())
             {
-                yield return _delay;
+                if (_delay != null)
+                {
+                    yield return _delay;
+                }
 
                 continue;
             }
@@ -218,10 +222,41 @@ internal class EclipseService
                 PrimalWarEventSystem.OnSchedule();
             }
 
-            yield return _delay;
+            if (_delay != null)
+            {
+                yield return _delay;
+            }
         }
     }
     static bool IsVersion1_3(string version) => version.StartsWith("1.3");
+    static WaitForSeconds CreateDelay()
+    {
+        try
+        {
+            return new WaitForSeconds(ConfigService.Eclipsed ? 0.1f : 2.5f);
+        }
+        catch (Exception ex) when (IsMissingNativeLibrary(ex))
+        {
+            return null;
+        }
+    }
+    static bool IsMissingNativeLibrary(Exception exception)
+    {
+        for (Exception current = exception; ; )
+        {
+            if (current is DllNotFoundException)
+            {
+                return true;
+            }
+
+            if (current.InnerException is not Exception next)
+            {
+                return false;
+            }
+
+            current = next;
+        }
+    }
     public static void TryUnregisterUser(ulong steamId)
     {
         _registeredUsersAndClientVersions.TryRemove(steamId, out var _);
