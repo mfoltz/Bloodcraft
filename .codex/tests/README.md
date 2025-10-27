@@ -1,7 +1,7 @@
 # Bloodcraft Test Harness
 
 ## Restoring dependencies
-Run the provisioning script before invoking any `dotnet` commands:
+Run the provisioning script before invoking any `dotnet` commands. It restores the NuGet packages required by both the plugin and the test harness, so contributors are expected to execute it before running tests:
 
 ```bash
 bash .codex/install.sh
@@ -16,4 +16,6 @@ After the install script completes you can execute tests with the SDK it install
 /root/.dotnet/dotnet test .codex/tests/Bloodcraft.Tests.csproj
 ```
 
-This harness avoids loading the game's native `GameAssembly` dependency, so the tests can execute inside a headless CI container.
+### GameAssembly loading strategy
+
+The harness no longer ships a mocked `GameAssembly` binary. Instead, the tests patch the relevant type initializers at runtime so the managed assemblies bootstrap without touching the native dependency. This lets the suite execute inside a headless CI container while keeping coverage over the same startup paths the plugin exercises in-game.
