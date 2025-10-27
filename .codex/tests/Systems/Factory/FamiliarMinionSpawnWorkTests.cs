@@ -36,15 +36,16 @@ public sealed class FamiliarMinionSpawnWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersOwnerAndMinionLookups()
+    public void OnCreate_RegistersOwnerAndMinionLookups()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
-        var work = new FamiliarMinionSpawnWork();
+        var work = FactoryTestUtilities.CreateWork<FamiliarMinionSpawnWork>();
 
-        work.Setup(registrar, in context);
+        FactoryTestUtilities.OnCreate(work, context);
 
-        Assert.Equal(1, registrar.RegistrationCount);
+        Assert.Equal(1, registrar.FacadeRegistrationCount);
+        Assert.Equal(0, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 
@@ -112,7 +113,8 @@ public sealed class FamiliarMinionSpawnWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.SpawnQuery, requestedQueries);
         Assert.Equal(work.SpawnOrder.Count, iterationCount);

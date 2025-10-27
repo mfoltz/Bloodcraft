@@ -8,7 +8,7 @@ namespace Bloodcraft.Tests.Systems.Factory;
 /// <summary>
 /// Provides a test double that mirrors the familiar minion spawn handling patch.
 /// </summary>
-public struct FamiliarMinionSpawnWork : ISystemWork
+public sealed class FamiliarMinionSpawnWork : ISystemWork
 {
     /// <summary>
     /// Delegate used to resolve the active familiar for a followed player.
@@ -67,13 +67,21 @@ public struct FamiliarMinionSpawnWork : ISystemWork
     Dictionary<EntityHandle, EntityHandle>? reassignedOwners;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FamiliarMinionSpawnWork"/> struct.
+    /// Initializes a new instance of the <see cref="FamiliarMinionSpawnWork"/> class.
+    /// </summary>
+    public FamiliarMinionSpawnWork()
+        : this(null, null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FamiliarMinionSpawnWork"/> class.
     /// </summary>
     /// <param name="familiarResolver">Optional resolver used to fetch active familiars.</param>
     /// <param name="lifetimeScheduler">Optional scheduler used to limit minion lifetimes.</param>
     public FamiliarMinionSpawnWork(
-        ActiveFamiliarResolver? familiarResolver = null,
-        LifetimeScheduler? lifetimeScheduler = null)
+        ActiveFamiliarResolver? familiarResolver,
+        LifetimeScheduler? lifetimeScheduler)
     {
         this.familiarResolver = familiarResolver;
         this.lifetimeScheduler = lifetimeScheduler;
@@ -125,22 +133,22 @@ public struct FamiliarMinionSpawnWork : ISystemWork
     public IReadOnlyDictionary<EntityHandle, EntityHandle> ReassignedOwners => OwnerMap;
 
     /// <inheritdoc />
-    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
+    public void Build(TestEntityQueryBuilder builder)
     {
-        var builder = new TestEntityQueryBuilder();
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
         builder.AddAllReadOnly<EntityOwner>();
         builder.AddAllReadOnly<Minion>();
         builder.AddAllReadOnly<SpawnTag>();
-        builder.Describe(out all, out any, out none, out options);
     }
 
     /// <inheritdoc />
-    public void Setup(IRegistrar registrar, in SystemContext context)
+    public void OnCreate(SystemContext context)
     {
-        if (registrar == null)
-            throw new ArgumentNullException(nameof(registrar));
+        var registrar = context.Registrar;
 
-        registrar.Register(facade =>
+        registrar.Register(static (ISystemFacade facade) =>
         {
             _ = facade.GetComponentLookup<EntityOwner>(isReadOnly: false);
             _ = facade.GetComponentLookup<Minion>(isReadOnly: true);
@@ -149,7 +157,7 @@ public struct FamiliarMinionSpawnWork : ISystemWork
     }
 
     /// <inheritdoc />
-    public void Tick(in SystemContext context)
+    public void OnUpdate(SystemContext context)
     {
         EnsureTrackingCollections();
         context.ForEachEntity(spawnQuery, ProcessSpawn);

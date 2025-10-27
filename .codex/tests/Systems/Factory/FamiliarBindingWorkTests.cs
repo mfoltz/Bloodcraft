@@ -41,7 +41,7 @@ public sealed class FamiliarBindingWorkTests
     [Fact]
     public void Queries_ExposeGateAndBindingDescriptors()
     {
-        var work = new FamiliarBindingWork();
+        var work = FactoryTestUtilities.CreateWork<FamiliarBindingWork>();
 
         var gateQuery = work.GateQuery;
         Assert.True(gateQuery.RequireForUpdate);
@@ -84,13 +84,17 @@ public sealed class FamiliarBindingWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersRequiredLookups()
+    public void OnCreate_RegistersRequiredLookups()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
-        var work = new FamiliarBindingWork();
+        var work = FactoryTestUtilities.CreateWork<FamiliarBindingWork>();
 
-        work.Setup(registrar, in context);
+        FactoryTestUtilities.OnCreate(work, context);
+
+        Assert.Equal(1, registrar.FacadeRegistrationCount);
+        Assert.Equal(0, registrar.SystemRegistrationCount);
+
         registrar.InvokeRegistrations();
 
         Assert.Contains(registrar.ComponentLookups, lookup => lookup.ElementType == typeof(UnitStats) && !lookup.IsReadOnly);
@@ -273,7 +277,8 @@ public sealed class FamiliarBindingWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.GateQuery, requestedQueries);
         Assert.Contains(work.BindingQuery, requestedQueries);

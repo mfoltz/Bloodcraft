@@ -35,15 +35,16 @@ public sealed class FamiliarTeleportReturnWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersTeleportLookups()
+    public void OnCreate_RegistersTeleportLookups()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
-        var work = new FamiliarTeleportReturnWork();
+        var work = FactoryTestUtilities.CreateWork<FamiliarTeleportReturnWork>();
 
-        work.Setup(registrar, in context);
+        FactoryTestUtilities.OnCreate(work, context);
 
-        Assert.Equal(1, registrar.RegistrationCount);
+        Assert.Equal(1, registrar.FacadeRegistrationCount);
+        Assert.Equal(0, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 
@@ -98,7 +99,8 @@ public sealed class FamiliarTeleportReturnWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.TeleportQuery, requestedQueries);
         Assert.Equal(work.TeleportOrder.Count, iterationCount);

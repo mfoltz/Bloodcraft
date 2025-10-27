@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
+using Unity.Entities;
 
 namespace Bloodcraft.Tests.Systems.Factory;
 
@@ -222,6 +224,69 @@ public sealed record QueryDescription(
         Array.Empty<ComponentType>(),
         EntityQueryOptions.None,
         true);
+
+    /// <summary>
+    /// Determines whether the specified instance is equal to this description.
+    /// </summary>
+    /// <param name="other">Other description to compare.</param>
+    /// <returns><c>true</c> when the two descriptions represent the same query definition.</returns>
+    public bool Equals(QueryDescription? other)
+    {
+        if (ReferenceEquals(this, other))
+            return true;
+
+        if (other is null)
+            return false;
+
+        return RequireForUpdate == other.RequireForUpdate
+            && Options == other.Options
+            && SequenceEquals(All, other.All)
+            && SequenceEquals(Any, other.Any)
+            && SequenceEquals(None, other.None);
+    }
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+        AddSequenceHash(ref hash, All);
+        AddSequenceHash(ref hash, Any);
+        AddSequenceHash(ref hash, None);
+        hash.Add(Options);
+        hash.Add(RequireForUpdate);
+        return hash.ToHashCode();
+    }
+
+    static bool SequenceEquals(IReadOnlyList<ComponentType> left, IReadOnlyList<ComponentType> right)
+    {
+        if (ReferenceEquals(left, right))
+            return true;
+
+        if (left == null || right == null)
+            return false;
+
+        if (left.Count != right.Count)
+            return false;
+
+        for (int i = 0; i < left.Count; ++i)
+        {
+            if (!left[i].Equals(right[i]))
+                return false;
+        }
+
+        return true;
+    }
+
+    static void AddSequenceHash(ref HashCode hash, IReadOnlyList<ComponentType> sequence)
+    {
+        if (sequence == null)
+            return;
+
+        for (int i = 0; i < sequence.Count; ++i)
+        {
+            hash.Add(sequence[i]);
+        }
+    }
 }
 
 /// <summary>
@@ -230,18 +295,37 @@ public sealed record QueryDescription(
 public interface IQuerySpec
 {
     /// <summary>
-    /// Describes the component lists and options that form the entity query definition.
+    /// Populates the provided query builder with the component requirements and options that define the query.
     /// </summary>
-    /// <param name="all">Components that must be present on matching entities.</param>
-    /// <param name="any">Components where at least one must be present.</param>
-    /// <param name="none">Components that must be absent.</param>
-    /// <param name="options">Additional options applied to the query.</param>
-    void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options);
+    /// <param name="builder">Builder receiving the query configuration.</param>
+    void Build(TestEntityQueryBuilder builder);
 
     /// <summary>
     /// Indicates whether the constructed query must be required for update.
     /// </summary>
     bool RequireForUpdate => true;
+}
+
+/// <summary>
+/// Provides helper methods for working with <see cref="IQuerySpec"/> implementations.
+/// </summary>
+internal static class QuerySpecExtensions
+{
+    /// <summary>
+    /// Creates a <see cref="QueryDescription"/> for the specified query specification.
+    /// </summary>
+    /// <param name="spec">Specification describing the query.</param>
+    /// <param name="requireForUpdate">Indicates whether the query should be required for update.</param>
+    /// <returns>A query description representing the specification.</returns>
+    internal static QueryDescription CreateDescription(this IQuerySpec spec, bool requireForUpdate)
+    {
+        if (spec == null)
+            throw new ArgumentNullException(nameof(spec));
+
+        var builder = new TestEntityQueryBuilder();
+        spec.Build(builder);
+        return builder.Describe(requireForUpdate);
+    }
 }
 
 /// <summary>
@@ -263,15 +347,32 @@ public interface ISystemFacade
 }
 
 /// <summary>
+/// Provides additional context for refresh registrations that operate on <see cref="SystemBase"/> instances.
+/// </summary>
+public interface IRefreshRegistrationContext
+{
+    /// <summary>
+    /// Creates a facade adapter that exposes lookup and type handle APIs for recording.
+    /// </summary>
+    ISystemFacade CreateFacade();
+}
+
+/// <summary>
 /// Supplies a registration surface for per-update refresh actions.
 /// </summary>
 public interface IRegistrar
 {
     /// <summary>
-    /// Registers a refresh action that runs at the beginning of each update.
+    /// Registers a refresh action that runs at the beginning of each update using the legacy facade.
     /// </summary>
     /// <param name="refreshAction">Action invoked before the work executes.</param>
     void Register(Action<ISystemFacade> refreshAction);
+
+    /// <summary>
+    /// Registers a refresh action that receives the executing <see cref="SystemBase"/> instance.
+    /// </summary>
+    /// <param name="refreshAction">Action invoked before the work executes.</param>
+    void Register(Action<SystemBase> refreshAction);
 }
 
 /// <summary>
@@ -411,23 +512,35 @@ public readonly struct SystemContext
 public interface ISystemWork : IQuerySpec
 {
     /// <summary>
-    /// Invoked when the owning system is being initialised.
+    /// Invoked when the owning system is created.
     /// </summary>
-    /// <param name="registrar">Registrar used to schedule refresh actions.</param>
     /// <param name="context">The active system context.</param>
-    void Setup(IRegistrar registrar, in SystemContext context);
+    void OnCreate(SystemContext context) { }
 
     /// <summary>
-    /// Invoked during each update tick.
+    /// Invoked when the owning system starts running.
     /// </summary>
     /// <param name="context">The active system context.</param>
-    void Tick(in SystemContext context);
+    void OnStartRunning(SystemContext context) { }
+
+    /// <summary>
+    /// Invoked at the beginning of each update cycle.
+    /// </summary>
+    /// <param name="context">The active system context.</param>
+    void OnUpdate(SystemContext context) { }
+
+    /// <summary>
+    /// Invoked when the owning system stops running.
+    /// </summary>
+    /// <param name="context">The active system context.</param>
+    void OnStopRunning(SystemContext context) { }
 
     /// <summary>
     /// Invoked when the owning system is destroyed.
     /// </summary>
     /// <param name="context">The active system context.</param>
-    void Destroy(in SystemContext context) { }
+    void OnDestroy(SystemContext context) { }
+
 }
 
 /// <summary>
@@ -449,7 +562,9 @@ public readonly record struct TypeHandleRequest(Type ElementType, bool IsReadOnl
 /// </summary>
 public sealed class RecordingRegistrar : IRegistrar
 {
-    readonly List<Action<ISystemFacade>> refreshActions = new();
+    readonly List<Action<ISystemFacade>> facadeRefreshActions = new();
+    readonly List<Action<SystemBase>> systemRefreshActions = new();
+    readonly List<Action<ISystemFacade>> systemFallbackActions = new();
     readonly List<LookupRequest> componentLookups = new();
     readonly List<LookupRequest> bufferLookups = new();
     readonly List<TypeHandleRequest> componentTypeHandles = new();
@@ -488,7 +603,17 @@ public sealed class RecordingRegistrar : IRegistrar
     /// <summary>
     /// Gets the number of registered refresh actions.
     /// </summary>
-    public int RegistrationCount => refreshActions.Count;
+    public int RegistrationCount => facadeRefreshActions.Count + systemRefreshActions.Count;
+
+    /// <summary>
+    /// Gets the number of refresh actions registered using the legacy facade API.
+    /// </summary>
+    public int FacadeRegistrationCount => facadeRefreshActions.Count;
+
+    /// <summary>
+    /// Gets the number of refresh actions registered using the <see cref="SystemBase"/> API.
+    /// </summary>
+    public int SystemRegistrationCount => systemRefreshActions.Count;
 
     /// <inheritdoc />
     public void Register(Action<ISystemFacade> refreshAction)
@@ -496,7 +621,28 @@ public sealed class RecordingRegistrar : IRegistrar
         if (refreshAction == null)
             throw new ArgumentNullException(nameof(refreshAction));
 
-        refreshActions.Add(refreshAction);
+        facadeRefreshActions.Add(refreshAction);
+    }
+
+    /// <inheritdoc />
+    public void Register(Action<SystemBase> refreshAction)
+    {
+        if (refreshAction == null)
+            throw new ArgumentNullException(nameof(refreshAction));
+
+        systemRefreshActions.Add(refreshAction);
+        systemFallbackActions.Add(facade =>
+        {
+            if (facade == null)
+                throw new ArgumentNullException(nameof(facade));
+
+            var instance = FormatterServices.GetUninitializedObject(typeof(FacadeBackedSystem));
+            if (instance is not FacadeBackedSystem stub)
+                throw new SerializationException("Failed to create facade-backed stub system.");
+
+            stub.Initialize(facade);
+            refreshAction(stub);
+        });
     }
 
     /// <summary>
@@ -504,13 +650,40 @@ public sealed class RecordingRegistrar : IRegistrar
     /// </summary>
     public void InvokeRegistrations()
     {
-        if (refreshActions.Count == 0)
+        if (facadeRefreshActions.Count == 0 && systemRefreshActions.Count == 0)
             return;
 
         var facade = new RecordingSystemFacade(this);
-        foreach (var action in refreshActions)
+        foreach (var action in facadeRefreshActions)
         {
             action(facade);
+        }
+
+        if (systemRefreshActions.Count == 0)
+            return;
+
+        World? world = null;
+        try
+        {
+            world = new World("RecordingRegistrar.StubSystemBase");
+            var system = world.CreateSystemManaged<StubSystemBase>();
+            system.Initialize(this);
+
+            foreach (var action in systemRefreshActions)
+            {
+                action(system);
+            }
+        }
+        catch (TypeInitializationException exception) when (ContainsDllNotFound(exception))
+        {
+            foreach (var fallback in systemFallbackActions)
+            {
+                fallback(facade);
+            }
+        }
+        finally
+        {
+            world?.Dispose();
         }
     }
 
@@ -542,6 +715,17 @@ public sealed class RecordingRegistrar : IRegistrar
     void RecordBufferTypeHandle(Type elementType, bool isReadOnly)
     {
         bufferTypeHandles.Add(new TypeHandleRequest(elementType, isReadOnly));
+    }
+
+    static bool ContainsDllNotFound(Exception exception)
+    {
+        for (Exception? current = exception; current != null; current = current.InnerException)
+        {
+            if (current is DllNotFoundException)
+                return true;
+        }
+
+        return false;
     }
 
     sealed class RecordingSystemFacade : ISystemFacade
@@ -587,6 +771,47 @@ public sealed class RecordingRegistrar : IRegistrar
         {
             registrar.RecordBufferTypeHandle(typeof(TBuffer), isReadOnly);
             return new BufferTypeHandle<TBuffer>(isReadOnly);
+        }
+    }
+
+    sealed class StubSystemBase : SystemBase, IRefreshRegistrationContext
+    {
+        RecordingRegistrar? registrar;
+
+        public void Initialize(RecordingRegistrar owner)
+        {
+            registrar = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
+        public ISystemFacade CreateFacade()
+        {
+            if (registrar == null)
+                throw new InvalidOperationException("The recording registrar must be initialised before use.");
+
+            return new RecordingSystemFacade(registrar);
+        }
+
+        public override void OnUpdate()
+        {
+        }
+    }
+
+    sealed class FacadeBackedSystem : SystemBase, IRefreshRegistrationContext
+    {
+        ISystemFacade? facade;
+
+        public void Initialize(ISystemFacade facade)
+        {
+            this.facade = facade ?? throw new ArgumentNullException(nameof(facade));
+        }
+
+        public ISystemFacade CreateFacade()
+        {
+            return facade ?? throw new InvalidOperationException("The system facade must be initialised before use.");
+        }
+
+        public override void OnUpdate()
+        {
         }
     }
 }
@@ -635,11 +860,12 @@ public static class FactoryTestUtilities
     /// </summary>
     /// <typeparam name="TWork">Work type being evaluated.</typeparam>
     public static QueryDescription DescribeQuery<TWork>()
-        where TWork : struct, ISystemWork
+        where TWork : ISystemWork, new()
     {
         TWork work = new();
-        work.DescribeQuery(out var all, out var any, out var none, out var options);
-        return new QueryDescription(all, any, none, options, work.RequireForUpdate);
+        var builder = new TestEntityQueryBuilder();
+        work.Build(builder);
+        return builder.Describe(work.RequireForUpdate);
     }
 
     /// <summary>
@@ -676,8 +902,68 @@ public static class FactoryTestUtilities
     /// </summary>
     /// <typeparam name="TWork">Work type to instantiate.</typeparam>
     public static TWork CreateWork<TWork>()
-        where TWork : struct, ISystemWork
+        where TWork : ISystemWork, new()
     {
         return new TWork();
+    }
+
+    /// <summary>
+    /// Invokes <see cref="ISystemWork.OnCreate(SystemContext)"/> on the provided work instance.
+    /// </summary>
+    /// <typeparam name="TWork">Work type being exercised.</typeparam>
+    /// <param name="work">Work instance to invoke.</param>
+    /// <param name="context">Context supplied to the lifecycle method.</param>
+    public static void OnCreate<TWork>(TWork work, SystemContext context)
+        where TWork : ISystemWork
+    {
+        work.OnCreate(context);
+    }
+
+    /// <summary>
+    /// Invokes <see cref="ISystemWork.OnStartRunning(SystemContext)"/> on the provided work instance.
+    /// </summary>
+    /// <typeparam name="TWork">Work type being exercised.</typeparam>
+    /// <param name="work">Work instance to invoke.</param>
+    /// <param name="context">Context supplied to the lifecycle method.</param>
+    public static void OnStartRunning<TWork>(TWork work, SystemContext context)
+        where TWork : ISystemWork
+    {
+        work.OnStartRunning(context);
+    }
+
+    /// <summary>
+    /// Invokes <see cref="ISystemWork.OnUpdate(SystemContext)"/> on the provided work instance.
+    /// </summary>
+    /// <typeparam name="TWork">Work type being exercised.</typeparam>
+    /// <param name="work">Work instance to invoke.</param>
+    /// <param name="context">Context supplied to the lifecycle method.</param>
+    public static void OnUpdate<TWork>(TWork work, SystemContext context)
+        where TWork : ISystemWork
+    {
+        work.OnUpdate(context);
+    }
+
+    /// <summary>
+    /// Invokes <see cref="ISystemWork.OnStopRunning(SystemContext)"/> on the provided work instance.
+    /// </summary>
+    /// <typeparam name="TWork">Work type being exercised.</typeparam>
+    /// <param name="work">Work instance to invoke.</param>
+    /// <param name="context">Context supplied to the lifecycle method.</param>
+    public static void OnStopRunning<TWork>(TWork work, SystemContext context)
+        where TWork : ISystemWork
+    {
+        work.OnStopRunning(context);
+    }
+
+    /// <summary>
+    /// Invokes <see cref="ISystemWork.OnDestroy(SystemContext)"/> on the provided work instance.
+    /// </summary>
+    /// <typeparam name="TWork">Work type being exercised.</typeparam>
+    /// <param name="work">Work instance to invoke.</param>
+    /// <param name="context">Context supplied to the lifecycle method.</param>
+    public static void OnDestroy<TWork>(TWork work, SystemContext context)
+        where TWork : ISystemWork
+    {
+        work.OnDestroy(context);
     }
 }

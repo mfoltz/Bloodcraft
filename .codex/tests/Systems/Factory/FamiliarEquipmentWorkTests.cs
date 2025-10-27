@@ -46,15 +46,16 @@ public sealed class FamiliarEquipmentWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersBlockFeedLookup()
+    public void OnCreate_RegistersBlockFeedLookup()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
-        var work = new FamiliarEquipmentWork();
+        var work = FactoryTestUtilities.CreateWork<FamiliarEquipmentWork>();
 
-        work.Setup(registrar, in context);
+        FactoryTestUtilities.OnCreate(work, context);
 
-        Assert.Equal(1, registrar.RegistrationCount);
+        Assert.Equal(1, registrar.FacadeRegistrationCount);
+        Assert.Equal(0, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 
@@ -140,33 +141,50 @@ public sealed class FamiliarEquipmentWorkTests
 
         var context = FactoryTestUtilities.CreateContext(
             registrar,
-            withTempEntities: (query, action) =>
+            query: FactoryTestUtilities.DescribeQuery<FamiliarEquipmentWork>(),
+            forEachEntity: (query, action) =>
             {
                 requestedQueries.Add(query);
 
-                if (ReferenceEquals(query, work.EquipFromInventoryQuery))
+                if (query.Equals(work.EquipFromInventoryQuery))
                 {
-                    action(work.GetEquipFromInventoryEventHandles());
+                    foreach (var handle in work.GetEquipFromInventoryEventHandles())
+                    {
+                        action(handle);
+                    }
                 }
-                else if (ReferenceEquals(query, work.EquipServantQuery))
+                else if (query.Equals(work.EquipServantQuery))
                 {
-                    action(work.GetEquipServantEventHandles());
+                    foreach (var handle in work.GetEquipServantEventHandles())
+                    {
+                        action(handle);
+                    }
                 }
-                else if (ReferenceEquals(query, work.UnequipServantQuery))
+                else if (query.Equals(work.UnequipServantQuery))
                 {
-                    action(work.GetUnequipServantEventHandles());
+                    foreach (var handle in work.GetUnequipServantEventHandles())
+                    {
+                        action(handle);
+                    }
                 }
-                else if (ReferenceEquals(query, work.EquipmentTransferQuery))
+                else if (query.Equals(work.EquipmentTransferQuery))
                 {
-                    action(work.GetEquipmentTransferEventHandles());
+                    foreach (var handle in work.GetEquipmentTransferEventHandles())
+                    {
+                        action(handle);
+                    }
                 }
-                else if (ReferenceEquals(query, work.TeleportDebugQuery))
+                else if (query.Equals(work.TeleportDebugQuery))
                 {
-                    action(work.GetTeleportDebugEventHandles());
+                    foreach (var handle in work.GetTeleportDebugEventHandles())
+                    {
+                        action(handle);
+                    }
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.EquipFromInventoryQuery, requestedQueries);
         Assert.Contains(work.EquipServantQuery, requestedQueries);

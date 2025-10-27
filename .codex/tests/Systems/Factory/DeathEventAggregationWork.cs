@@ -6,7 +6,7 @@ namespace Bloodcraft.Tests.Systems.Factory;
 /// <summary>
 /// Provides a test work definition mirroring the <see cref="Patches.DeathEventListenerSystemPatch"/> setup behaviour.
 /// </summary>
-public readonly struct DeathEventAggregationWork : ISystemWork
+public sealed class DeathEventAggregationWork : ISystemWork
 {
     static QueryDescription CreateDeathEventQuery()
     {
@@ -23,20 +23,20 @@ public readonly struct DeathEventAggregationWork : ISystemWork
     public QueryDescription DeathEventQuery => deathEventQuery;
 
     /// <inheritdoc />
-    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
+    public void Build(TestEntityQueryBuilder builder)
     {
-        var builder = new TestEntityQueryBuilder();
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
         builder.AddAllReadOnly<DeathEvent>();
-        builder.Describe(out all, out any, out none, out options);
     }
 
     /// <inheritdoc />
-    public void Setup(IRegistrar registrar, in SystemContext context)
+    public void OnCreate(SystemContext context)
     {
-        if (registrar == null)
-            throw new ArgumentNullException(nameof(registrar));
+        var registrar = context.Registrar;
 
-        registrar.Register(facade =>
+        registrar.Register(static (ISystemFacade facade) =>
         {
             _ = facade.GetEntityTypeHandle();
             _ = facade.GetEntityStorageInfoLookup();
@@ -50,7 +50,7 @@ public readonly struct DeathEventAggregationWork : ISystemWork
     }
 
     /// <inheritdoc />
-    public void Tick(in SystemContext context)
+    public void OnUpdate(SystemContext context)
     {
     }
 

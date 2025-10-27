@@ -25,16 +25,17 @@ public sealed class DeathEventAggregationWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersDeathEventLookups()
+    public void OnCreate_RegistersDeathEventLookups()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
         var work = FactoryTestUtilities.CreateWork<DeathEventAggregationWork>();
 
-        work.Setup(registrar, in context);
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
-        Assert.Equal(1, registrar.RegistrationCount);
+        Assert.Equal(1, registrar.FacadeRegistrationCount);
+        Assert.Equal(0, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 

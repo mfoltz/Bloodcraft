@@ -93,15 +93,16 @@ public sealed class CraftingProgressionWorkTests
     }
 
     [Fact]
-    public void Setup_RegistersLookups()
+    public void OnCreate_RegistersLookups()
     {
         var registrar = new RecordingRegistrar();
         var context = FactoryTestUtilities.CreateContext(registrar);
-        var work = new CraftingProgressionWork();
+        var work = FactoryTestUtilities.CreateWork<CraftingProgressionWork>();
 
-        work.Setup(registrar, in context);
+        FactoryTestUtilities.OnCreate(work, context);
 
-        Assert.Equal(1, registrar.RegistrationCount);
+        Assert.Equal(1, registrar.FacadeRegistrationCount);
+        Assert.Equal(0, registrar.SystemRegistrationCount);
 
         registrar.InvokeRegistrations();
 
@@ -154,7 +155,7 @@ public sealed class CraftingProgressionWorkTests
     }
 
     [Fact]
-    public void Tick_PropagatesValidatedJobsToDelegates()
+    public void OnUpdate_PropagatesValidatedJobsToDelegates()
     {
         var stationHandle = new EntityHandle(50);
         var clanEntity = new EntityHandle(60);
@@ -258,7 +259,8 @@ public sealed class CraftingProgressionWorkTests
                 }
             });
 
-        work.Tick(in context);
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
 
         Assert.Contains(work.ForgeProgressQuery, requestedQueries);
         Assert.Contains(work.WorkstationProgressQuery, requestedQueries);

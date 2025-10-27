@@ -8,7 +8,7 @@ namespace Bloodcraft.Tests.Systems.Factory;
 /// <summary>
 /// Provides a test work definition that mirrors the familiar return logic executed during teleport debug events.
 /// </summary>
-public struct FamiliarTeleportReturnWork : ISystemWork
+public sealed class FamiliarTeleportReturnWork : ISystemWork
 {
     /// <summary>
     /// Delegate used to resolve the active familiar for a teleporting character.
@@ -54,13 +54,21 @@ public struct FamiliarTeleportReturnWork : ISystemWork
     List<EntityHandle>? teleportOrder;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FamiliarTeleportReturnWork"/> struct.
+    /// Initializes a new instance of the <see cref="FamiliarTeleportReturnWork"/> class.
+    /// </summary>
+    public FamiliarTeleportReturnWork()
+        : this(null, null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FamiliarTeleportReturnWork"/> class.
     /// </summary>
     /// <param name="familiarResolver">Optional resolver used to fetch active familiars.</param>
     /// <param name="familiarReturner">Optional delegate invoked when a familiar should be returned.</param>
     public FamiliarTeleportReturnWork(
-        ActiveFamiliarResolver? familiarResolver = null,
-        FamiliarReturnDelegate? familiarReturner = null)
+        ActiveFamiliarResolver? familiarResolver,
+        FamiliarReturnDelegate? familiarReturner)
     {
         this.familiarResolver = familiarResolver;
         this.familiarReturner = familiarReturner;
@@ -88,21 +96,21 @@ public struct FamiliarTeleportReturnWork : ISystemWork
     public IReadOnlyList<EntityHandle> TeleportOrder => EventOrder;
 
     /// <inheritdoc />
-    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
+    public void Build(TestEntityQueryBuilder builder)
     {
-        var builder = new TestEntityQueryBuilder();
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
         builder.AddAllReadOnly<PlayerTeleportDebugEvent>();
         builder.AddAllReadOnly<FromCharacter>();
-        builder.Describe(out all, out any, out none, out options);
     }
 
     /// <inheritdoc />
-    public void Setup(IRegistrar registrar, in SystemContext context)
+    public void OnCreate(SystemContext context)
     {
-        if (registrar == null)
-            throw new ArgumentNullException(nameof(registrar));
+        var registrar = context.Registrar;
 
-        registrar.Register(facade =>
+        registrar.Register(static (ISystemFacade facade) =>
         {
             _ = facade.GetComponentLookup<PlayerTeleportDebugEvent>(isReadOnly: true);
             _ = facade.GetComponentLookup<FromCharacter>(isReadOnly: true);
@@ -110,7 +118,7 @@ public struct FamiliarTeleportReturnWork : ISystemWork
     }
 
     /// <inheritdoc />
-    public void Tick(in SystemContext context)
+    public void OnUpdate(SystemContext context)
     {
         EnsureTrackingCollections();
         context.ForEachEntity(teleportQuery, ProcessTeleportEvent);

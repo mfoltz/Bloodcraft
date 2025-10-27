@@ -21,7 +21,7 @@ internal struct DropTableBuffer
 /// <summary>
 /// Provides a test work definition that mirrors the familiar binding orchestration flow.
 /// </summary>
-internal struct FamiliarBindingWork : ISystemWork
+internal sealed class FamiliarBindingWork : ISystemWork
 {
     /// <summary>
     /// Delegate used to load familiar experience data for a player.
@@ -174,7 +174,15 @@ internal struct FamiliarBindingWork : ISystemWork
     readonly Dictionary<ulong, List<EntityHandle>> playerBattleFamiliars;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FamiliarBindingWork"/> struct.
+    /// Initializes a new instance of the <see cref="FamiliarBindingWork"/> class.
+    /// </summary>
+    public FamiliarBindingWork()
+        : this(null, null, null, null, null, null, null, null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FamiliarBindingWork"/> class.
     /// </summary>
     /// <param name="experienceLoader">Optional experience loader delegate.</param>
     /// <param name="experienceSaver">Optional experience saver delegate.</param>
@@ -185,14 +193,14 @@ internal struct FamiliarBindingWork : ISystemWork
     /// <param name="battleCountdown">Optional battle countdown delegate.</param>
     /// <param name="buffApplicator">Optional shiny buff applicator delegate.</param>
     public FamiliarBindingWork(
-        ExperienceLoader? experienceLoader = null,
-        ExperienceSaver? experienceSaver = null,
-        BuffLoader? buffLoader = null,
-        EquipmentBinder? equipmentBinder = null,
-        StatRefreshDelegate? statRefresher = null,
-        BattleMatchResolver? matchResolver = null,
-        BattleCountdownDelegate? battleCountdown = null,
-        BuffApplicator? buffApplicator = null)
+        ExperienceLoader? experienceLoader,
+        ExperienceSaver? experienceSaver,
+        BuffLoader? buffLoader,
+        EquipmentBinder? equipmentBinder,
+        StatRefreshDelegate? statRefresher,
+        BattleMatchResolver? matchResolver,
+        BattleCountdownDelegate? battleCountdown,
+        BuffApplicator? buffApplicator)
     {
         this.experienceLoader = experienceLoader;
         this.experienceSaver = experienceSaver;
@@ -326,22 +334,22 @@ internal struct FamiliarBindingWork : ISystemWork
     }
 
     /// <inheritdoc />
-    public void DescribeQuery(out ComponentType[] all, out ComponentType[] any, out ComponentType[] none, out EntityQueryOptions options)
+    public void Build(TestEntityQueryBuilder builder)
     {
-        var builder = new TestEntityQueryBuilder();
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+
         builder.AddAllReadOnly<ProjectM.Network.FromCharacter>();
         builder.AddAny(ComponentRequirements.ReadOnly<FamiliarBindingGate>());
         builder.AddAny(ComponentRequirements.ReadOnly<FamiliarBindingRequest>());
-        builder.Describe(out all, out any, out none, out options);
     }
 
     /// <inheritdoc />
-    public void Setup(IRegistrar registrar, in SystemContext context)
+    public void OnCreate(SystemContext context)
     {
-        if (registrar == null)
-            throw new ArgumentNullException(nameof(registrar));
+        var registrar = context.Registrar;
 
-        registrar.Register(facade =>
+        registrar.Register(static (ISystemFacade facade) =>
         {
             _ = facade.GetComponentLookup<UnitStats>();
             _ = facade.GetComponentLookup<AbilityBar_Shared>();
@@ -373,7 +381,7 @@ internal struct FamiliarBindingWork : ISystemWork
     }
 
     /// <inheritdoc />
-    public void Tick(in SystemContext context)
+    public void OnUpdate(SystemContext context)
     {
         context.WithTempEntities(gateQuery, ProcessGateEvents);
         context.WithTempEntities(bindingQuery, ProcessBindingEvents);
