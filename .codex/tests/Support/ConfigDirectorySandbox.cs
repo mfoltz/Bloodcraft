@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using Bloodcraft;
 using Bloodcraft.Services;
+using BepInEx;
 
 namespace Bloodcraft.Tests.Support;
 
@@ -12,54 +12,26 @@ namespace Bloodcraft.Tests.Support;
 /// </summary>
 public sealed class ConfigDirectorySandbox : IDisposable
 {
-    static readonly FieldInfo DirectoryPathsField = typeof(ConfigService)
-        .GetNestedType("ConfigInitialization", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
-        ?.GetField("_directoryPaths", BindingFlags.Static | BindingFlags.NonPublic)
-        ?? throw new InvalidOperationException("Failed to locate ConfigInitialization._directoryPaths");
-
     static readonly object SyncRoot = new();
+    static readonly Stack<string> ConfigPathHistory = new();
+    static readonly string DefaultConfigRoot = Paths.ConfigPath;
+
     static ConfigDirectorySandbox? assemblyScope;
     static bool processExitRegistered;
-    static readonly FieldInfo? FieldAttributesField = typeof(FieldInfo)
-        .GetField("m_fieldAttributes", BindingFlags.Instance | BindingFlags.NonPublic);
 
-    readonly Lazy<List<string>> originalLazy;
     readonly DirectoryInfo sandboxRoot;
-    readonly Lazy<List<string>> sandboxLazy;
     bool disposed;
 
     ConfigDirectorySandbox()
     {
-        if (DirectoryPathsField.GetValue(null) is not Lazy<List<string>> capturedLazy)
-        {
-            throw new InvalidOperationException("ConfigInitialization._directoryPaths did not expose a Lazy<List<string>> value.");
-        }
-
-        originalLazy = capturedLazy;
         sandboxRoot = CreateSandboxRoot();
-        var rootPath = sandboxRoot.FullName;
+        InitializeDirectoryLayout(sandboxRoot.FullName);
 
-        sandboxLazy = new Lazy<List<string>>(() =>
+        lock (SyncRoot)
         {
-            string pluginRoot = EnsureDirectory(rootPath, MyPluginInfo.PLUGIN_NAME);
-            return new List<string>
-            {
-                pluginRoot,
-                EnsureDirectory(pluginRoot, "PlayerLeveling"),
-                EnsureDirectory(pluginRoot, "Quests"),
-                EnsureDirectory(pluginRoot, "WeaponExpertise"),
-                EnsureDirectory(pluginRoot, "BloodLegacies"),
-                EnsureDirectory(pluginRoot, "Professions"),
-                EnsureDirectory(pluginRoot, "Familiars"),
-                EnsureDirectory(pluginRoot, "Familiars", "FamiliarLeveling"),
-                EnsureDirectory(pluginRoot, "Familiars", "FamiliarUnlocks"),
-                EnsureDirectory(pluginRoot, "PlayerBools"),
-                EnsureDirectory(pluginRoot, "Familiars", "FamiliarEquipment"),
-                EnsureDirectory(pluginRoot, "Familiars", "FamiliarBattleGroups")
-            };
-        });
-
-        AssignDirectoryPaths(sandboxLazy);
+            ConfigPathHistory.Push(Paths.ConfigPath);
+            Paths.ConfigPath = sandboxRoot.FullName;
+        }
     }
 
     /// <summary>
@@ -98,7 +70,8 @@ public sealed class ConfigDirectorySandbox : IDisposable
                 return;
             }
 
-            AssignDirectoryPaths(originalLazy);
+            string restorePath = ConfigPathHistory.Count > 0 ? ConfigPathHistory.Pop() : DefaultConfigRoot;
+            Paths.ConfigPath = restorePath;
 
             if (ReferenceEquals(assemblyScope, this))
             {
@@ -109,6 +82,78 @@ public sealed class ConfigDirectorySandbox : IDisposable
         }
 
         TryDeleteSandboxRoot();
+    }
+
+    static void EnsureProcessExitHandlers()
+    {
+        if (processExitRegistered)
+        {
+            return;
+        }
+
+        AppDomain.CurrentDomain.ProcessExit += OnDomainShutdown;
+        AppDomain.CurrentDomain.DomainUnload += OnDomainShutdown;
+        processExitRegistered = true;
+    }
+
+    static void OnDomainShutdown(object? sender, EventArgs e)
+    {
+        lock (SyncRoot)
+        {
+            assemblyScope = null;
+            ConfigPathHistory.Clear();
+            Paths.ConfigPath = DefaultConfigRoot;
+        }
+    }
+
+    static DirectoryInfo CreateSandboxRoot()
+    {
+        var directoryType = typeof(Directory);
+
+        var prefixFactory = directoryType.GetMethod(
+            "CreateTempSubdirectory",
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
+            binder: null,
+            types: new[] { typeof(string), typeof(string) },
+            modifiers: null);
+
+        if (prefixFactory != null
+            && prefixFactory.Invoke(null, new object?[] { "bloodcraft_config_", null }) is DirectoryInfo prefixed)
+        {
+            return prefixed;
+        }
+
+        var parameterlessFactory = directoryType.GetMethod(
+            "CreateTempSubdirectory",
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
+            binder: null,
+            types: Type.EmptyTypes,
+            modifiers: null);
+
+        if (parameterlessFactory != null
+            && parameterlessFactory.Invoke(null, Array.Empty<object?>()) is DirectoryInfo unprefixed)
+        {
+            return unprefixed;
+        }
+
+        string fallbackPath = Path.Combine(Path.GetTempPath(), $"bloodcraft_config_{Guid.NewGuid():N}");
+        return Directory.CreateDirectory(fallbackPath);
+    }
+
+    static void InitializeDirectoryLayout(string rootPath)
+    {
+        string pluginRoot = EnsureDirectory(rootPath, MyPluginInfo.PLUGIN_NAME);
+        _ = EnsureDirectory(pluginRoot, "PlayerLeveling");
+        _ = EnsureDirectory(pluginRoot, "Quests");
+        _ = EnsureDirectory(pluginRoot, "WeaponExpertise");
+        _ = EnsureDirectory(pluginRoot, "BloodLegacies");
+        _ = EnsureDirectory(pluginRoot, "Professions");
+        _ = EnsureDirectory(pluginRoot, "Familiars");
+        _ = EnsureDirectory(pluginRoot, "Familiars", "FamiliarLeveling");
+        _ = EnsureDirectory(pluginRoot, "Familiars", "FamiliarUnlocks");
+        _ = EnsureDirectory(pluginRoot, "PlayerBools");
+        _ = EnsureDirectory(pluginRoot, "Familiars", "FamiliarEquipment");
+        _ = EnsureDirectory(pluginRoot, "Familiars", "FamiliarBattleGroups");
     }
 
     static string EnsureDirectory(string root, params string[] segments)
@@ -134,87 +179,5 @@ public sealed class ConfigDirectorySandbox : IDisposable
         catch (UnauthorizedAccessException)
         {
         }
-    }
-
-    static void EnsureProcessExitHandlers()
-    {
-        if (processExitRegistered)
-        {
-            return;
-        }
-
-        AppDomain.CurrentDomain.ProcessExit += OnDomainShutdown;
-        AppDomain.CurrentDomain.DomainUnload += OnDomainShutdown;
-        processExitRegistered = true;
-    }
-
-    static DirectoryInfo CreateSandboxRoot()
-    {
-        var directoryType = typeof(Directory);
-
-        var prefixFactory = directoryType.GetMethod(
-            "CreateTempSubdirectory",
-            BindingFlags.Public | BindingFlags.Static,
-            binder: null,
-            types: new[] { typeof(string), typeof(string) },
-            modifiers: null);
-
-        if (prefixFactory != null
-            && prefixFactory.Invoke(null, new object?[] { "bloodcraft_config_", null }) is DirectoryInfo prefixed)
-        {
-            return prefixed;
-        }
-
-        var parameterlessFactory = directoryType.GetMethod(
-            "CreateTempSubdirectory",
-            BindingFlags.Public | BindingFlags.Static,
-            binder: null,
-            types: Type.EmptyTypes,
-            modifiers: null);
-
-        if (parameterlessFactory != null
-            && parameterlessFactory.Invoke(null, Array.Empty<object?>()) is DirectoryInfo unprefixed)
-        {
-            return unprefixed;
-        }
-
-        string fallbackPath = Path.Combine(Path.GetTempPath(), $"bloodcraft_config_{Guid.NewGuid():N}");
-        return Directory.CreateDirectory(fallbackPath);
-    }
-
-    static void OnDomainShutdown(object? sender, EventArgs e)
-    {
-        ConfigDirectorySandbox? scope;
-        lock (SyncRoot)
-        {
-            scope = assemblyScope;
-            assemblyScope = null;
-        }
-
-        scope?.Dispose();
-    }
-
-    static void AssignDirectoryPaths(Lazy<List<string>> value)
-    {
-        if (FieldAttributesField != null)
-        {
-            var attributes = (FieldAttributes)FieldAttributesField.GetValue(DirectoryPathsField)!;
-            if ((attributes & FieldAttributes.InitOnly) != 0)
-            {
-                try
-                {
-                    FieldAttributesField.SetValue(DirectoryPathsField, attributes & ~FieldAttributes.InitOnly);
-                    DirectoryPathsField.SetValue(null, value);
-                }
-                finally
-                {
-                    FieldAttributesField.SetValue(DirectoryPathsField, attributes);
-                }
-
-                return;
-            }
-        }
-
-        DirectoryPathsField.SetValue(null, value);
     }
 }

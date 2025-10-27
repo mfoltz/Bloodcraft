@@ -4,6 +4,8 @@
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
     <IsTestProject>true</IsTestProject>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
   </PropertyGroup>
   <PropertyGroup>
     <RestoreSources>https://api.nuget.org/v3/index.json;https://nuget.bepinex.dev/v3/index.json;</RestoreSources>
@@ -24,5 +26,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../Bloodcraft.csproj" AdditionalProperties="RunGenerateREADME=false" />
+    <ProjectReference Include="Stubs/BepInEx.CoreStub/BepInEx.CoreStub.csproj" ReferenceOutputAssembly="true" />
   </ItemGroup>
 </Project>

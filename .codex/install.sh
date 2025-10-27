@@ -6,11 +6,11 @@ REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 PROJECT_PATH="$REPO_ROOT/Bloodcraft.csproj"
 TEST_PROJECT_PATH="$REPO_ROOT/.codex/tests/Bloodcraft.Tests.csproj"
 INSTALL_DIR="${DOTNET_INSTALL_DIR:-$HOME/.dotnet}"
-CHANNEL="${DOTNET_INSTALL_CHANNEL:-6.0}"
+CHANNEL="${DOTNET_INSTALL_CHANNEL:-8.0}"
+REQUIRED_SDK_PREFIX="${DOTNET_REQUIRED_SDK_PREFIX:-8.0}"
+RUNTIME_CHANNEL="${DOTNET_RUNTIME_CHANNEL:-6.0}"
 BEPINEX_PLUGIN_DIR="${BEPINEX_PLUGIN_DIR:-}"
 DOTNET_INSTALLED=0
-REQUIRED_RUNTIME="Microsoft.NETCore.App 6.0"
-
 install_dotnet() {
     mkdir -p "$INSTALL_DIR"
     local install_script
@@ -37,18 +37,39 @@ install_dotnet() {
     fi
 }
 
+ensure_runtime() {
+    if dotnet --list-runtimes 2>/dev/null | grep -q "^Microsoft.NETCore.App ${RUNTIME_CHANNEL}\\."; then
+        return
+    fi
+
+    mkdir -p "$INSTALL_DIR"
+    local install_script
+    install_script="$(mktemp)"
+
+    curl -sSL https://dot.net/v1/dotnet-install.sh -o "$install_script"
+
+    bash "$install_script" --install-dir "$INSTALL_DIR" --channel "$RUNTIME_CHANNEL" --runtime dotnet
+
+    rm -f "$install_script"
+
+    export DOTNET_ROOT="$INSTALL_DIR"
+    export PATH="$INSTALL_DIR:$INSTALL_DIR/tools:$PATH"
+    hash -r
+}
+
 if command -v dotnet >/dev/null 2>&1; then
     echo ".NET SDK already installed: $(dotnet --version)"
-    # Inspect the installed runtimes to ensure the required Microsoft.NETCore.App 6.0 runtime is available.
-    if dotnet --list-runtimes 2>/dev/null | grep -q "^Microsoft.NETCore.App 6\\.0"; then
+    if dotnet --list-sdks 2>/dev/null | grep -q "^${REQUIRED_SDK_PREFIX}"; then
         DOTNET_INSTALLED=1
     else
-        echo "Microsoft.NETCore.App 6.0 runtime not found; installing local runtime into $INSTALL_DIR"
+        echo ".NET SDK ${REQUIRED_SDK_PREFIX}.x not found; installing into $INSTALL_DIR"
         install_dotnet
     fi
 else
     install_dotnet
 fi
+
+ensure_runtime
 
 if [ ! -f "$PROJECT_PATH" ]; then
     echo "Project file not found at $PROJECT_PATH" >&2
