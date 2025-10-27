@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Concurrent;
 using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using Il2CppInterop.Runtime;
@@ -15,12 +17,21 @@ using static Bloodcraft.Services.LocalizationService;
 using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft;
+internal interface IEntityComponentOverrides
+{
+    bool TryRead<T>(Entity entity, out T value) where T : struct;
+
+    bool TryHas(Entity entity, Type componentType, out bool has);
+}
+
 internal static class VExtensions
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
+
+    static readonly ConcurrentStack<IEntityComponentOverrides> ComponentOverrides = new();
 
     const string EMPTY_KEY = "LocalizationKey.Empty";
     const string PREFIX = "Entity(";
@@ -75,8 +86,28 @@ internal static class VExtensions
     {
         EntityManager.SetComponentData(entity, componentData);
     }
+    internal static IDisposable OverrideComponents(IEntityComponentOverrides overrides)
+    {
+        if (overrides is null)
+        {
+            throw new ArgumentNullException(nameof(overrides));
+        }
+
+        ComponentOverrides.Push(overrides);
+        return new ComponentOverrideScope(overrides);
+    }
     public static T Read<T>(this Entity entity) where T : struct
     {
+        if (TryReadOverride(entity, out T value))
+        {
+            return value;
+        }
+
+        if (!ComponentOverrides.IsEmpty)
+        {
+            return default;
+        }
+
         return EntityManager.GetComponentData<T>(entity);
     }
     public static DynamicBuffer<T> ReadBuffer<T>(this Entity entity) where T : struct
@@ -101,7 +132,69 @@ internal static class VExtensions
     }
     public static bool Has<T>(this Entity entity) where T : struct
     {
+        if (TryHasOverride(entity, typeof(T), out bool has))
+        {
+            return has;
+        }
+
+        if (!ComponentOverrides.IsEmpty)
+        {
+            return false;
+        }
+
         return EntityManager.HasComponent(entity, new(Il2CppType.Of<T>()));
+    }
+    static bool TryReadOverride<T>(Entity entity, out T value) where T : struct
+    {
+        foreach (IEntityComponentOverrides overrides in ComponentOverrides.ToArray())
+        {
+            if (overrides.TryRead(entity, out value))
+            {
+                return true;
+            }
+        }
+
+        value = default;
+        return false;
+    }
+    static bool TryHasOverride(Entity entity, Type componentType, out bool has)
+    {
+        foreach (IEntityComponentOverrides overrides in ComponentOverrides.ToArray())
+        {
+            if (overrides.TryHas(entity, componentType, out has))
+            {
+                return true;
+            }
+        }
+
+        has = default;
+        return false;
+    }
+
+    sealed class ComponentOverrideScope : IDisposable
+    {
+        readonly IEntityComponentOverrides overrides;
+        bool disposed;
+
+        public ComponentOverrideScope(IEntityComponentOverrides overrides)
+        {
+            this.overrides = overrides;
+        }
+
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+
+            if (!ComponentOverrides.TryPop(out IEntityComponentOverrides current) || !ReferenceEquals(current, overrides))
+            {
+                throw new InvalidOperationException("Component override stack is out of sync.");
+            }
+        }
     }
     public static bool IsCharacter(this PrefabGUID prefabGuid)
     {

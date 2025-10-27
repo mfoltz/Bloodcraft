@@ -30,6 +30,8 @@ Glue that binds configuration, persistence, and player session state. These comp
 | Query services resolve entities by prefab/category without leaking temporary arrays | [QueryService](../../Services/QueryService.cs) | [QueryServiceLookupTests](../tests/Services/QueryServiceLookupTests.cs) (patches constructors to assert query modifiers; end-to-end validation against the full Unity activity grid is still pending) | ✅ Covered |
 | System bootstrap respects config toggles when registering listeners | [SystemService.InitializeSystems](../../Services/SystemService.cs) | [SystemBootstrapperTests](../tests/Services/SystemBootstrapperTests.cs) (verifies the registration toggles; requires future coverage that instantiates a real `WorldBootstrap` pipeline) | ✅ Covered |
 
+* DataService persistence fixtures run inside a sandboxed temporary directory scope so tests stay isolated from real BepInEx persistence folders.
+
 ## Systems (Leveling, Expertise, Blood, etc.)
 
 Gameplay systems that apply progression logic or orchestrate combat hooks. These scenarios often require seeded dictionaries and Harmony patches to emulate the runtime environment.
@@ -40,8 +42,10 @@ Gameplay systems that apply progression logic or orchestrate combat hooks. These
 | Weapon expertise accumulation respects prestige reducers and max caps | [WeaponSystem.SaveExpertiseExperience](../../Systems/Expertise/WeaponSystem.cs) | [WeaponSystemTests](../tests/Systems/Expertise/WeaponSystemTests.cs) | ✅ Covered |
 | Blood legacy progression respects configured stat choices and clamps at max level | [BloodSystem.SaveBloodExperience](../../Systems/Legacies/BloodSystem.cs) | [BloodSystemTests](../tests/Systems/Legacies/BloodSystemTests.cs) | ✅ Covered |
 | Prestige reducers adjust XP gains when players hit max level in group kills | [LevelingSystem.ProcessExperience](../../Systems/Leveling/LevelingSystem.cs) | _Gap — add_ `LevelingExperienceShareTests.cs` | ⛔ Not covered |
+| Prestige reducers compound with rested XP and group multipliers during XP awards | [LevelingSystem.ProcessExperienceGain](../../Systems/Leveling/LevelingSystem.cs) | [LevelingPrestigeTests](../tests/Systems/Leveling/LevelingPrestigeTests.cs) | ✅ Covered |
 | Familiar leveling shares XP with parties and differentiates VBlood/docile targets | [FamiliarLevelingSystem.ProcessFamiliarExperience](../../Systems/Familiars/FamiliarLevelingSystem.cs) | _Gap — add_ `FamiliarLevelingSystemTests.cs` | ⛔ Not covered |
 | Profession XP gain and cap enforcement across handlers | [ProfessionSystem.SaveProfessionExperience](../../Systems/Professions/ProfessionSystem.cs) | _Gap — add_ `ProfessionSystemExperienceTests.cs` | ⛔ Not covered |
+| Fishing profession bonuses route fish drops, mutant grease, and SCT toggles | [ProfessionSystem.GiveProfessionBonus](../../Systems/Professions/ProfessionSystem.cs) | [ProfessionBonusTests](../tests/Systems/Professions/ProfessionBonusTests.cs) | ✅ Covered |
 
 ### Factory Pattern Sandbox
 
