@@ -90,6 +90,42 @@ public sealed class QueryServiceLookupTests : IDisposable
     }
 
     [Fact]
+    public void ModifyEntityQuery_WithEmptyAllAndIncludes_AppendsIncludeComponents()
+    {
+        ComponentType includeAllA = TestQueryInterceptors.CreateComponentType(21);
+        ComponentType includeAllB = TestQueryInterceptors.CreateComponentType(22);
+
+        EntityQueryDesc baselineDescriptor = new()
+        {
+            All = Array.Empty<ComponentType>(),
+            Any = Array.Empty<ComponentType>(),
+            None = Array.Empty<ComponentType>(),
+            Options = EntityQueryOptions.FilterWriteGroup
+        };
+
+        var context = new EntityQueryTestContext(baselineDescriptor);
+        context.ClearRecorded();
+        TestQueryInterceptors.CurrentContext = context;
+
+        ComponentType[] includeComponents =
+        {
+            includeAllA,
+            includeAllB,
+            includeAllA
+        };
+
+        EntityQuery modifiedQuery = QueryService.ModifyEntityQuery(context.BaselineQuery, includeComponents, null);
+        EntityQueryDesc modifiedDescriptor = modifiedQuery.GetEntityQueryDesc();
+
+        AssertComponentSetsEqual(includeComponents, modifiedDescriptor.All);
+        Assert.Empty(modifiedDescriptor.Any);
+        Assert.Empty(modifiedDescriptor.None);
+        Assert.Equal(baselineDescriptor.Options, modifiedDescriptor.Options);
+
+        TestQueryInterceptors.CurrentContext = null;
+    }
+
+    [Fact]
     public void ModifyEntityQuery_WithEmptyIncludeAndExclude_ReturnsEquivalentDescriptor()
     {
         ComponentType baselineAllA = TestQueryInterceptors.CreateComponentType(11);

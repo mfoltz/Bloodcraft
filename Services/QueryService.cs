@@ -1,4 +1,5 @@
-﻿using Il2CppInterop.Runtime;
+﻿using System.Collections.Generic;
+using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using ProjectM;
 using Stunlock.Core;
@@ -63,16 +64,24 @@ internal static class QueryService
         EntityQueryDesc queryDesc = originalQuery.GetEntityQueryDesc();
         EntityQueryBuilder entityQueryBuilder = new(Allocator.Temp);
 
+        HashSet<ComponentType> allComponents = new();
+
         if (queryDesc.All.Any())
         {
             foreach (var componentType in queryDesc.All)
             {
-                entityQueryBuilder.AddAll(componentType);
+                if (allComponents.Add(componentType))
+                {
+                    entityQueryBuilder.AddAll(componentType);
+                }
             }
+        }
 
-            if (includeComponents != null && includeComponents.Any())
+        if (includeComponents != null && includeComponents.Any())
+        {
+            foreach (var componentType in includeComponents)
             {
-                foreach (var componentType in includeComponents)
+                if (allComponents.Add(componentType))
                 {
                     entityQueryBuilder.AddAll(componentType);
                 }
