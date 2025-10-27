@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using ProjectM;
 using Stunlock.Core;
-using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft.Services;
@@ -12,116 +12,161 @@ internal static class QueryService
     static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;
 
-    static readonly EntityQuery _updateBuffsBufferDestroyQuery;
-    static readonly EntityQuery _buffSpawnServerQuery;
-    static readonly EntityQuery _scriptSpawnServerQuery;
-    static QueryService()
-    {
-        _updateBuffsBufferDestroyQuery = ModifyEntityQuery(
+    static readonly Lazy<EntityQuery> UpdateBuffsBufferDestroyQueryLazy = new(() =>
+        ModifyEntityQuery(
             SystemService.UpdateBuffsBuffer_Destroy.EntityQueries[0],
             [ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>())]
-        );
+        ));
 
-        _buffSpawnServerQuery = ModifyEntityQuery(
+    static readonly Lazy<EntityQuery> BuffSpawnServerQueryLazy = new(() =>
+        ModifyEntityQuery(
             SystemService.BuffSystem_Spawn_Server.EntityQueries[0],
             [ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>())]
-        );
+        ));
 
-        _scriptSpawnServerQuery = ModifyEntityQuery(
+    static readonly Lazy<EntityQuery> ScriptSpawnServerQueryLazy = new(() =>
+        ModifyEntityQuery(
             SystemService.ScriptSpawnServer.EntityQueries[0],
             [ComponentType.ReadOnly(Il2CppType.Of<Buff>()), ComponentType.ReadOnly(Il2CppType.Of<EntityOwner>())]
-        );
+        ));
+
+    internal static Func<EntityQuery, QueryDescriptorData> QueryDescriptorProviderOverride { get; set; }
+    internal static Func<QueryDescriptorData, EntityQuery> EntityQueryFactoryOverride { get; set; }
+    internal static Func<ComponentType, int> ComponentTypeKeySelector { get; set; } = component => component.GetHashCode();
+
+    public static EntityQuery UpdateBuffsBufferDestroyQuery => UpdateBuffsBufferDestroyQueryLazy.Value;
+    public static EntityQuery BuffSpawnServerQuery => BuffSpawnServerQueryLazy.Value;
+    public static EntityQuery ScriptSpawnServerQuery => ScriptSpawnServerQueryLazy.Value;
+
+    internal static EntityQueryDesc BuildModifiedDescriptor(
+        EntityQueryDesc baseline,
+        ComponentType[] includeComponents,
+        ComponentType[] excludeComponents)
+    {
+        QueryDescriptorData baselineData = ExtractDescriptorData(baseline);
+        QueryDescriptorData modifiedData = BuildModifiedDescriptorData(baselineData, includeComponents, excludeComponents);
+        return CreateEntityQueryDesc(modifiedData);
     }
-    public static EntityQuery UpdateBuffsBufferDestroyQuery => _updateBuffsBufferDestroyQuery;
-    public static EntityQuery BuffSpawnServerQuery => _buffSpawnServerQuery;
-    public static EntityQuery ScriptSpawnServerQuery => _scriptSpawnServerQuery;
+
+    internal static QueryDescriptorData BuildModifiedDescriptorData(
+        QueryDescriptorData baseline,
+        ComponentType[] includeComponents,
+        ComponentType[] excludeComponents)
+    {
+        ComponentType[] allComponents = MergeComponentSets(baseline.All, includeComponents);
+        ComponentType[] anyComponents = CloneDistinct(baseline.Any);
+        ComponentType[] noneComponents = MergeComponentSets(baseline.None, excludeComponents);
+        ComponentType[] disabledComponents = CloneDistinct(baseline.Disabled);
+        ComponentType[] absentComponents = CloneDistinct(baseline.Absent);
+
+        return new QueryDescriptorData(allComponents, anyComponents, noneComponents, disabledComponents, absentComponents, baseline.Options);
+    }
+
     public static EntityQuery ModifyEntityQuery(EntityQuery originalQuery, ComponentType[] includeComponents = null, ComponentType[] excludeComponents = null)
     {
-        /*
-        EntityQueryDesc queryDesc = originalQuery.GetEntityQueryDesc();
+        QueryDescriptorData baselineData = QueryDescriptorProviderOverride?.Invoke(originalQuery) ?? ExtractDescriptorData(originalQuery.GetEntityQueryDesc());
+        QueryDescriptorData modifiedData = BuildModifiedDescriptorData(baselineData, includeComponents, excludeComponents);
 
-        EntityQueryDesc modifiedQueryDesc = new()
+        if (EntityQueryFactoryOverride is { } factory)
         {
-            All = (includeComponents != null && includeComponents.Any())
-                ? queryDesc.All.Concat(includeComponents).ToArray()
-                : queryDesc.All,
+            return factory(modifiedData);
+        }
 
-            Any = queryDesc.Any,
-
-            None = (excludeComponents != null && excludeComponents.Any())
-                ? queryDesc.None.Concat(excludeComponents).ToArray()
-                : queryDesc.None,
-
-            Options = queryDesc.Options
-        };
-
+        EntityQueryDesc modifiedDescriptor = CreateEntityQueryDesc(modifiedData);
         Il2CppReferenceArray<EntityQueryDesc> queryDescArray = new(1);
-        queryDescArray[0] = modifiedQueryDesc;
+        queryDescArray[0] = modifiedDescriptor;
 
         return EntityManager.CreateEntityQuery(queryDescArray);
-        */
-
-        EntityQueryDesc queryDesc = originalQuery.GetEntityQueryDesc();
-        EntityQueryBuilder entityQueryBuilder = new(Allocator.Temp);
-
-        HashSet<ComponentType> allComponents = new();
-
-        if (queryDesc.All.Any())
-        {
-            foreach (var componentType in queryDesc.All)
-            {
-                if (allComponents.Add(componentType))
-                {
-                    entityQueryBuilder.AddAll(componentType);
-                }
-            }
-        }
-
-        if (includeComponents != null && includeComponents.Any())
-        {
-            foreach (var componentType in includeComponents)
-            {
-                if (allComponents.Add(componentType))
-                {
-                    entityQueryBuilder.AddAll(componentType);
-                }
-            }
-        }
-
-        if (queryDesc.Any.Any())
-        {
-            foreach (var componentType in queryDesc.Any)
-            {
-                entityQueryBuilder.AddAny(componentType);
-            }
-        }
-
-        if (queryDesc.Absent.Any())
-        {
-            foreach (var componentType in queryDesc.Absent)
-            {
-                entityQueryBuilder.AddAny(componentType);
-            }
-        }
-
-        if (queryDesc.None.Any())
-        {
-            foreach (var componentType in queryDesc.None)
-            {
-                entityQueryBuilder.AddNone(componentType);
-            }
-
-            if (excludeComponents != null && excludeComponents.Any())
-            {
-                foreach (var componentType in excludeComponents)
-                {
-                    entityQueryBuilder.AddNone(componentType);
-                }
-            }
-        }
-
-        entityQueryBuilder.WithOptions(queryDesc.Options);
-        return EntityManager.CreateEntityQuery(ref entityQueryBuilder);
     }
+
+    static ComponentType[] MergeComponentSets(IReadOnlyList<ComponentType> baseline, ComponentType[] supplemental)
+    {
+        if ((baseline == null || baseline.Count == 0) && (supplemental == null || supplemental.Length == 0))
+        {
+            return Array.Empty<ComponentType>();
+        }
+
+        HashSet<int> seen = new();
+        List<ComponentType> merged = new();
+
+        if (baseline != null)
+        {
+            foreach (ComponentType component in baseline)
+            {
+                if (seen.Add(ComponentTypeKeySelector(component)))
+                {
+                    merged.Add(component);
+                }
+            }
+        }
+
+        if (supplemental != null)
+        {
+            foreach (ComponentType component in supplemental)
+            {
+                if (seen.Add(ComponentTypeKeySelector(component)))
+                {
+                    merged.Add(component);
+                }
+            }
+        }
+
+        return merged.ToArray();
+    }
+
+    static ComponentType[] CloneDistinct(IReadOnlyList<ComponentType> source)
+    {
+        if (source == null || source.Count == 0)
+        {
+            return Array.Empty<ComponentType>();
+        }
+
+        HashSet<int> seen = new();
+        List<ComponentType> components = new(source.Count);
+
+        foreach (ComponentType component in source)
+        {
+            if (seen.Add(ComponentTypeKeySelector(component)))
+            {
+                components.Add(component);
+            }
+        }
+
+        return components.ToArray();
+    }
+
+    static QueryDescriptorData ExtractDescriptorData(EntityQueryDesc descriptor)
+    {
+        ComponentType[] all = CloneDistinct(descriptor.All);
+        ComponentType[] any = CloneDistinct(descriptor.Any);
+        ComponentType[] none = CloneDistinct(descriptor.None);
+        ComponentType[] disabled = CloneDistinct(descriptor.Disabled);
+        ComponentType[] absent = CloneDistinct(descriptor.Absent);
+
+        return new QueryDescriptorData(all, any, none, disabled, absent, descriptor.Options);
+    }
+
+    static EntityQueryDesc CreateEntityQueryDesc(QueryDescriptorData data)
+    {
+        EntityQueryDesc descriptor = new()
+        {
+            All = data.All,
+            Any = data.Any,
+            None = data.None,
+            Disabled = data.Disabled,
+            Absent = data.Absent,
+            Options = data.Options
+        };
+
+        return descriptor;
+    }
+
+    internal readonly record struct QueryDescriptorData(
+        ComponentType[] All,
+        ComponentType[] Any,
+        ComponentType[] None,
+        ComponentType[] Disabled,
+        ComponentType[] Absent,
+        EntityQueryOptions Options);
 }
 

@@ -41,7 +41,7 @@ public sealed class SystemBootstrapperTests : TestHost
         var world = worldScope.Instance;
         _ = world;
 
-        ConfigureTestHooks();
+        ConfigureTestHooks(() => true);
 
         try
         {
