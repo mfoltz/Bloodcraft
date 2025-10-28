@@ -7,23 +7,23 @@ using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using Stunlock.Core;
+using Bloodcraft.Tests.Support;
 using Xunit;
 
 namespace Bloodcraft.Tests.Systems.Legacies;
 
+[Collection(UnityRuntimeTestCollection.CollectionName)]
 public class BloodSystemTests
 {
     const ulong TestSteamId = 76561198000000042UL;
 
     static readonly Harmony harmony;
-    static bool bloodSystemPatched;
 
     static BloodSystemTests()
     {
         harmony = new Harmony("Bloodcraft.Tests.Systems.Legacies");
         PatchAssetGuid();
         PatchPrefabGuid();
-        PatchBloodSystemCctor();
     }
 
     sealed class InMemoryBloodLegacy : IBloodLegacy
@@ -106,54 +106,6 @@ public class BloodSystemTests
     static bool SkipOriginal()
     {
         return false;
-    }
-
-    static void PatchBloodSystemCctor()
-    {
-        if (bloodSystemPatched)
-        {
-            return;
-        }
-
-        MethodBase? cctor = typeof(BloodSystem).TypeInitializer;
-        if (cctor != null)
-        {
-            MethodInfo prefix = typeof(BloodSystemTests).GetMethod(nameof(BloodSystemCctorPrefix), BindingFlags.NonPublic | BindingFlags.Static)!;
-            var processor = harmony.CreateProcessor(cctor);
-            processor.AddPrefix(new HarmonyMethod(prefix));
-            processor.Patch();
-            bloodSystemPatched = true;
-        }
-    }
-
-    static bool BloodSystemCctorPrefix()
-    {
-        SetStaticFieldValue("_maxBloodLevel", ConfigService.MaxBloodLevel);
-        SetStaticFieldValue("_legacyStatChoices", ConfigService.LegacyStatChoices);
-        SetStaticFieldValue("_vBloodLegacyMultiplier", ConfigService.VBloodLegacyMultiplier);
-        SetStaticFieldValue("_unitLegacyMultiplier", ConfigService.UnitLegacyMultiplier);
-        SetStaticFieldValue("_prestigeRatesReducer", ConfigService.PrestigeRatesReducer);
-        SetStaticFieldValue("_prestigeRateMultiplier", ConfigService.PrestigeRateMultiplier);
-        SetStaticFieldToNewDictionary("_tryGetExtensions");
-        SetStaticFieldToNewDictionary("_setExtensions");
-        SetStaticFieldToNewDictionary("_bloodPrestigeTypes");
-        SetStaticFieldToNewDictionary("_bloodBuffToBloodType");
-        SetStaticFieldToNewDictionary("_bloodTypeToBloodBuff");
-        SetStaticFieldToNewDictionary("_bloodTypeToConsumeSource");
-        return false;
-    }
-
-    static void SetStaticFieldValue(string fieldName, object value)
-    {
-        FieldInfo field = typeof(BloodSystem).GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic)!;
-        field.SetValue(null, value);
-    }
-
-    static void SetStaticFieldToNewDictionary(string fieldName)
-    {
-        FieldInfo field = typeof(BloodSystem).GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic)!;
-        object instance = Activator.CreateInstance(field.FieldType)!;
-        field.SetValue(null, instance);
     }
 
     [Fact]

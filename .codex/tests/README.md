@@ -26,4 +26,4 @@ dotnet test .codex/tests/Bloodcraft.Tests.csproj
 
 ### Native bootstrap strategy
 
-The harness patches the relevant type initializers at runtime so the managed assemblies bootstrap without touching Unity's native binaries. This lets the suite execute inside a headless CI container while keeping coverage over the same startup paths the plugin exercises in-game.
+Most production systems reach for Unity DOTS singletons during static initialization. The `UnityRuntimeScope` helper under `Support/` provisions a stub `World` named `Server`, injects lightweight stand-ins for `Core.SystemService` and `Core.ServerGameManager`, and ensures Unity's global world registry contains the shim before any static constructors run. Tests opt into the shim by decorating their classes with `[Collection(UnityRuntimeTestCollection.CollectionName)]` (or by instantiating `UnityRuntimeScope` directly) instead of maintaining bespoke Harmony prefixes for each type initializer.

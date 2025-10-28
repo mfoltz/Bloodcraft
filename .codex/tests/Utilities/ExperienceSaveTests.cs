@@ -1,62 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Bloodcraft.Interfaces;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
-using HarmonyLib;
+using Bloodcraft.Tests.Support;
 using Xunit;
 
 namespace Bloodcraft.Tests.Utilities;
 
+[Collection(UnityRuntimeTestCollection.CollectionName)]
 public sealed class ExperienceSaveTests
 {
     const ulong SteamId = 76561198000012345UL;
-    static readonly Harmony Harmony = new("Bloodcraft.Tests.Utilities.ExperienceSaveTests");
-
-    static ExperienceSaveTests()
-    {
-        PatchWeaponSystem();
-        PatchBloodSystem();
-    }
-
-    static void PatchWeaponSystem()
-    {
-        MethodBase? cctor = typeof(WeaponSystem).TypeInitializer;
-        if (cctor != null)
-        {
-            MethodInfo prefix = typeof(ExperienceSaveTests).GetMethod(nameof(WeaponSystemCctorPrefix), BindingFlags.NonPublic | BindingFlags.Static)!;
-            var processor = Harmony.CreateProcessor(cctor);
-            processor.AddPrefix(new HarmonyMethod(prefix));
-            processor.Patch();
-        }
-
-        MethodBase? progressionCctor = typeof(Progression).TypeInitializer;
-        if (progressionCctor != null)
-        {
-            MethodInfo skip = typeof(ExperienceSaveTests).GetMethod(nameof(SkipOriginal), BindingFlags.NonPublic | BindingFlags.Static)!;
-            var processor = Harmony.CreateProcessor(progressionCctor);
-            processor.AddPrefix(new HarmonyMethod(skip));
-            processor.Patch();
-        }
-    }
-
-    static void PatchBloodSystem()
-    {
-        MethodBase? cctor = typeof(BloodSystem).TypeInitializer;
-        if (cctor == null)
-        {
-            return;
-        }
-
-        MethodInfo prefix = typeof(ExperienceSaveTests).GetMethod(nameof(BloodSystemCctorPrefix), BindingFlags.NonPublic | BindingFlags.Static)!;
-        var processor = Harmony.CreateProcessor(cctor);
-        processor.AddPrefix(new HarmonyMethod(prefix));
-        processor.Patch();
-    }
 
     public static IEnumerable<object[]> LevelingScenarios()
     {
@@ -424,73 +382,5 @@ public sealed class ExperienceSaveTests
         };
     }
 
-    static bool BloodSystemCctorPrefix()
-    {
-        SetStaticField("_maxBloodLevel", ConfigService.MaxBloodLevel);
-        SetStaticField("_legacyStatChoices", ConfigService.LegacyStatChoices);
-        SetStaticField("_vBloodLegacyMultiplier", ConfigService.VBloodLegacyMultiplier);
-        SetStaticField("_unitLegacyMultiplier", ConfigService.UnitLegacyMultiplier);
-        SetStaticField("_prestigeRatesReducer", ConfigService.PrestigeRatesReducer);
-        SetStaticField("_prestigeRateMultiplier", ConfigService.PrestigeRateMultiplier);
 
-        var prestigeMap = new Dictionary<BloodType, PrestigeType>
-        {
-            [BloodType.Worker] = PrestigeType.WorkerLegacy,
-            [BloodType.Warrior] = PrestigeType.WarriorLegacy,
-            [BloodType.Scholar] = PrestigeType.ScholarLegacy,
-            [BloodType.Rogue] = PrestigeType.RogueLegacy,
-            [BloodType.Mutant] = PrestigeType.MutantLegacy,
-            [BloodType.Draculin] = PrestigeType.DraculinLegacy,
-            [BloodType.Immortal] = PrestigeType.ImmortalLegacy,
-            [BloodType.Creature] = PrestigeType.CreatureLegacy,
-            [BloodType.Brute] = PrestigeType.BruteLegacy,
-            [BloodType.Corruption] = PrestigeType.CorruptionLegacy
-        };
-        SetStaticField("_bloodPrestigeTypes", prestigeMap);
-        SetStaticField("_tryGetExtensions", new Dictionary<BloodType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>>());
-        SetStaticField("_setExtensions", new Dictionary<BloodType, Action<ulong, KeyValuePair<int, float>>>());
-
-        return false;
-    }
-
-    static void SetStaticField(string fieldName, object value)
-    {
-        FieldInfo field = typeof(BloodSystem).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Static)!;
-        field.SetValue(null, value);
-    }
-
-    static bool WeaponSystemCctorPrefix()
-    {
-        Type weaponSystemType = typeof(WeaponSystem);
-
-        SetReadonlyField(weaponSystemType, "_maxExpertiseLevel", ConfigService.MaxExpertiseLevel);
-        SetReadonlyField(weaponSystemType, "_expertiseStatChoices", ConfigService.ExpertiseStatChoices);
-        SetReadonlyField(weaponSystemType, "_unitExpertiseMultiplier", ConfigService.UnitExpertiseMultiplier);
-        SetReadonlyField(weaponSystemType, "_vBloodExpertiseMultiplier", ConfigService.VBloodExpertiseMultiplier);
-        SetReadonlyField(weaponSystemType, "_prestigeRatesReducer", ConfigService.PrestigeRatesReducer);
-        SetReadonlyField(weaponSystemType, "_prestigeRateMultiplier", ConfigService.PrestigeRateMultiplier);
-        SetReadonlyField(weaponSystemType, "_unitSpawnerExpertiseFactor", ConfigService.UnitSpawnerExpertiseFactor);
-        SetReadonlyField(weaponSystemType, "TryGetExtensionMap", new Dictionary<WeaponType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>>());
-        SetReadonlyField(weaponSystemType, "SetExtensionMap", new Dictionary<WeaponType, Action<ulong, KeyValuePair<int, float>>>());
-        SetReadonlyField(weaponSystemType, "_delay", null);
-
-        return false;
-    }
-
-    static void SetReadonlyField(Type type, string fieldName, object? value)
-    {
-        FieldInfo field = type.GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)!;
-        if (field.IsInitOnly)
-        {
-            FieldInfo? attributesField = typeof(FieldInfo).GetField("m_fieldAttributes", BindingFlags.Instance | BindingFlags.NonPublic);
-            attributesField?.SetValue(field, field.Attributes & ~FieldAttributes.InitOnly);
-        }
-
-        field.SetValue(null, value);
-    }
-
-    static bool SkipOriginal()
-    {
-        return false;
-    }
 }

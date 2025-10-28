@@ -10,5 +10,30 @@ namespace ProjectM;
 /// </summary>
 public class ServerGameManager
 {
+    public double ServerTime { get; set; }
+
+    public double DeltaTime { get; set; }
+
+    public Entity InstantiateEntityImmediate(Entity character, PrefabGUID prefabGuid)
+    {
+        return new Entity { Index = 0, Version = 1 };
+    }
+
+    public Entity InstantiateBuffEntityImmediate(
+        Entity instigator,
+        Entity target,
+        PrefabGUID buffPrefabGuid,
+        object? unused,
+        int stacks)
+    {
+        return new Entity { Index = 0, Version = 1 };
+    }
+
     public static bool TryAddInventoryItem(Entity character, PrefabGUID itemPrefabGuid, int amount) => false;
+
+    public bool TryGetBuff(Entity entity, PrefabGUID prefabGuid, out Entity buffEntity)
+    {
+        buffEntity = Entity.Null;
+        return false;
+    }
 }
