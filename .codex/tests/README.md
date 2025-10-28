@@ -7,7 +7,7 @@ Run the provisioning script before invoking any `dotnet` commands. It restores t
 bash .codex/install.sh
 ```
 
-The script installs the pinned .NET SDK, restores both the main plugin and the test project, and produces a Release build artifact. This restoration step is the fix for missing dependencies—there is no need to chase `GameAssembly` binaries when the NuGet feed supplies the managed assemblies the suite relies on.
+The script installs the pinned .NET SDK, restores both the main plugin and the test project, and produces a Release build artifact. NuGet restore is the supported way to hydrate every dependency required by the tests—no manual downloads or native shims are necessary.
 
 For day-to-day development, use the helper script that performs the install/restore flow automatically before executing tests:
 
@@ -24,6 +24,6 @@ After the install script completes you can execute tests with the SDK it install
 dotnet test .codex/tests/Bloodcraft.Tests.csproj
 ```
 
-### GameAssembly loading strategy
+### Native bootstrap strategy
 
-The harness no longer ships a mocked `GameAssembly` binary. Instead, the tests patch the relevant type initializers at runtime so the managed assemblies bootstrap without touching the native dependency. This lets the suite execute inside a headless CI container while keeping coverage over the same startup paths the plugin exercises in-game.
+The harness patches the relevant type initializers at runtime so the managed assemblies bootstrap without touching Unity's native binaries. This lets the suite execute inside a headless CI container while keeping coverage over the same startup paths the plugin exercises in-game.
