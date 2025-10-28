@@ -75,12 +75,27 @@ public sealed class UnityRuntimeScope : IDisposable
 
     static void InitializeRuntime()
     {
-        world = new World("Server");
+        if (world == null)
+        {
+            world = new World("Server");
+        }
+
         RegisterWorld(world);
 
-        systemService = new SystemService(world);
-        serverGameManager = new ServerGameManager();
-        serverGameSettingsSystem = CreateServerGameSettingsSystem();
+        if (systemService == null)
+        {
+            systemService = new SystemService(world);
+        }
+
+        if (serverGameManager == null)
+        {
+            serverGameManager = new ServerGameManager();
+        }
+
+        if (serverGameSettingsSystem == null)
+        {
+            serverGameSettingsSystem = CreateServerGameSettingsSystem();
+        }
 
         ApplySystemServiceOverrides(systemService, serverGameSettingsSystem);
         ApplyPatches();
@@ -88,24 +103,11 @@ public sealed class UnityRuntimeScope : IDisposable
 
     static void TeardownRuntime()
     {
-        HarmonyInstance.UnpatchSelf();
-        patched = false;
-
-        if (systemService != null)
-        {
-            ResetSystemServiceOverrides(systemService);
-            systemService = null;
-        }
-
-        serverGameManager = null;
-        serverGameSettingsSystem = null;
-
-        if (world != null)
-        {
-            UnregisterWorld(world);
-            world.Dispose();
-            world = null;
-        }
+        // The runtime scope intentionally keeps its shims alive for the remainder of the
+        // process lifetime so that any subsequent accesses to Core continue to receive the
+        // patched instances. Disposing these resources would leave Core pointing at disposed
+        // objects via its cached static backing fields, so teardown simply stops registering
+        // additional scopes without touching the active runtime.
     }
 
     static void ApplyPatches()
