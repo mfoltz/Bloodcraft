@@ -17,6 +17,11 @@ public class FamiliarLevelingTests : TestHost
     const ulong SteamId = 76561198000052020UL;
     static readonly PrefabGUID FamiliarPrefab = new(987654321);
 
+    public FamiliarLevelingTests(FamiliarSystemFixture _)
+    {
+        FamiliarSystemFixture.ClearLogs();
+    }
+
     [Fact]
     public void ProcessFamiliarExperience_StoresExperienceForUnitDefeats()
     {
@@ -96,6 +101,6 @@ public static class FamiliarSystemTestCollection
 }
 
 [CollectionDefinition(FamiliarSystemTestCollection.CollectionName, DisableParallelization = true)]
-public sealed class FamiliarSystemTestCollectionDefinition
+public sealed class FamiliarSystemTestCollectionDefinition : ICollectionFixture<FamiliarSystemFixture>
 {
 }
