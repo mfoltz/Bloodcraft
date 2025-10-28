@@ -25,7 +25,7 @@ public sealed class LevelingPrestigeTests : TestHost
     [Fact]
     public void ProcessExperienceGain_AppliesPrestigeRestedAndGroupAdjustments()
     {
-        using var dataScope = CapturePlayerData();
+        using var _ = CapturePlayerData();
         using var persistence = DataService.SuppressPersistence();
         using var config = WithConfigOverrides(("RestedXPSystem", true));
         using var componentScope = new EntityComponentScope();

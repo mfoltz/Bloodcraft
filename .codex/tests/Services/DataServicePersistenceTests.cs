@@ -8,6 +8,7 @@ using Bloodcraft.Tests.Support;
 using Xunit;
 using PlayerDictionaries = Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.DataService.PlayerPersistence;
+using static Bloodcraft.Services.DataService.PlayerPersistence.JsonFilePaths;
 
 namespace Bloodcraft.Tests.Services;
 
@@ -79,16 +80,16 @@ public sealed class DataServicePersistenceTests : TestHost
     {
         ConfigDirectoryShim.EnsureInitialized();
 
-        using var dataScope = CapturePlayerData();
+        using var _ = CapturePlayerData();
         const ulong playerId = 12345;
         PlayerDictionaries._playerExperience[playerId] = new KeyValuePair<int, float>(15, 23.5f);
 
-        using var directoryScope = new TestDirectoryScope("Experience");
-        var experiencePath = directoryScope.Paths["Experience"];
+        using var directoryScope = new TestDirectoryScope(PlayerExperienceJson);
+        var experiencePath = directoryScope.Paths[PlayerExperienceJson];
         File.WriteAllText(experiencePath, "SENTINEL");
         var originalTimestamp = File.GetLastWriteTimeUtc(experiencePath);
 
-        using var suppressionScope = DataService.SuppressPersistence();
+        using var persistence = DataService.SuppressPersistence();
         Assert.True(GetIsPersistenceSuppressed());
         SavePlayerExperience();
 

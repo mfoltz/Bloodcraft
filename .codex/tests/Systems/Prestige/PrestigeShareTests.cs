@@ -65,6 +65,9 @@ public sealed class PrestigeShareTests : TestHost
     [Fact]
     public void ProcessExperience_HeterogeneousPrestigeSplitsExperience()
     {
+        using var _ = CapturePlayerData();
+        using var persistence = DataService.SuppressPersistence();
+
         const int victimLevel = 34;
         const float victimMaxHealth = 500f;
 
@@ -113,6 +116,9 @@ public sealed class PrestigeShareTests : TestHost
     [Fact]
     public void ProcessExperience_MaxLevelParticipantRoutesExpertiseAwards()
     {
+        using var _ = CapturePlayerData();
+        using var persistence = DataService.SuppressPersistence();
+
         const int victimLevel = 48;
         const float victimMaxHealth = 620f;
 
@@ -155,6 +161,9 @@ public sealed class PrestigeShareTests : TestHost
     [Fact]
     public void ProcessExperience_RestedPoolsAndGroupMultiplierCompoundGains()
     {
+        using var _ = CapturePlayerData();
+        using var persistence = DataService.SuppressPersistence();
+
         const int victimLevel = 36;
         const float victimMaxHealth = 540f;
 
@@ -243,26 +252,20 @@ public sealed class PrestigeShareTests : TestHost
 
     PrestigeShareHarness CreateHarness(params (string Key, object Value)[] overrides)
     {
-        IDisposable dataScope = CapturePlayerData();
-        IDisposable persistenceScope = DataService.SuppressPersistence();
         var configScope = WithConfigOverrides(overrides);
-        return new PrestigeShareHarness(dataScope, persistenceScope, configScope);
+        return new PrestigeShareHarness(configScope);
     }
 
     sealed class PrestigeShareHarness : IDisposable
     {
-        readonly IDisposable dataScope;
-        readonly IDisposable persistenceScope;
         readonly ConfigOverrideScope configScope;
         readonly ExperienceDataScope experienceScope = new();
         readonly NotifyPlayerScope notifyScope = new();
         readonly PlayerIdentityScope identityScope = new();
         bool disposed;
 
-        public PrestigeShareHarness(IDisposable dataScope, IDisposable persistenceScope, ConfigOverrideScope configScope)
+        public PrestigeShareHarness(ConfigOverrideScope configScope)
         {
-            this.dataScope = dataScope;
-            this.persistenceScope = persistenceScope;
             this.configScope = configScope;
         }
 
@@ -343,8 +346,6 @@ public sealed class PrestigeShareTests : TestHost
             notifyScope.Dispose();
             experienceScope.Dispose();
             configScope.Dispose();
-            persistenceScope.Dispose();
-            dataScope.Dispose();
             disposed = true;
         }
     }
