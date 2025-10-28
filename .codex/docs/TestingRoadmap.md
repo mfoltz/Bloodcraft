@@ -1,6 +1,6 @@
 # Testing Roadmap
 
-This living roadmap groups verification targets by architectural bucket and tracks which scenarios already have regression coverage versus those still requiring focused tests. Update this document whenever gameplay systems evolve or new failure patterns emerge.
+This living roadmap groups verification targets by architectural bucket and tracks which scenarios already have regression coverage versus those still requiring focused tests. Update this document whenever gameplay systems evolve or new failure patterns emerge. When running the suites locally, prefer the `.codex/tests/run-tests.sh` wrapper so the NuGet restore step happens automatically before `dotnet test` executes.
 
 ## Utilities (Pure Helpers)
 
@@ -26,7 +26,7 @@ Glue that binds configuration, persistence, and player session state. These comp
 | --- | --- | --- | --- |
 | Config values hydrate from overrides and coerce to correct primitive types | [ConfigService.GetConfigValue<T>](../../Services/ConfigService.cs) | [ConfigServiceTests](../tests/Services/ConfigServiceTests.cs) | ✅ Covered |
 | Persistence suppression scope properly nests and restores writes | [DataService.SuppressPersistence](../../Services/DataService.cs) | [DataServicePersistenceScopeTests](../tests/Services/DataServicePersistenceScopeTests.cs) (confirms depth/locking semantics; still need host-level verification that background saves stay paused) | ✅ Covered |
-| Player connection/disconnection caches online state and triggers eclipse cleanup | [PlayerService.HandleConnection](../../Services/PlayerService.cs) / [PlayerService.HandleDisconnection](../../Services/PlayerService.cs) | [PlayerServiceConnectionTests](../tests/Services/PlayerServiceConnectionTests.cs) (exercises cache resets and eclipse cleanup; matchmaking hooks that depend on live GameAssembly are still integration-only) | ✅ Covered |
+| Player connection/disconnection caches online state and triggers eclipse cleanup | [PlayerService.HandleConnection](../../Services/PlayerService.cs) / [PlayerService.HandleDisconnection](../../Services/PlayerService.cs) | [PlayerServiceConnectionTests](../tests/Services/PlayerServiceConnectionTests.cs) (exercises cache resets and eclipse cleanup; matchmaking hooks that depend on live server binaries are still integration-only) | ✅ Covered |
 | Query services resolve entities by prefab/category without leaking temporary arrays | [QueryService](../../Services/QueryService.cs) | [QueryServiceLookupTests](../tests/Services/QueryServiceLookupTests.cs) (patches constructors to assert query modifiers; end-to-end validation against the full Unity activity grid is still pending) | ✅ Covered |
 | System bootstrap respects config toggles when registering listeners | [SystemService.InitializeSystems](../../Services/SystemService.cs) | [SystemBootstrapperTests](../tests/Services/SystemBootstrapperTests.cs) (verifies the registration toggles; requires future coverage that instantiates a real `WorldBootstrap` pipeline) | ✅ Covered |
 
@@ -43,7 +43,7 @@ Gameplay systems that apply progression logic or orchestrate combat hooks. These
 | Blood legacy progression respects configured stat choices and clamps at max level | [BloodSystem.SaveBloodExperience](../../Systems/Legacies/BloodSystem.cs) | [BloodSystemTests](../tests/Systems/Legacies/BloodSystemTests.cs) | ✅ Covered |
 | Prestige reducers adjust XP gains when players hit max level in group kills | [LevelingSystem.ProcessExperience](../../Systems/Leveling/LevelingSystem.cs) | _Gap — add_ `LevelingExperienceShareTests.cs` | ⛔ Not covered |
 | Prestige reducers compound with rested XP and group multipliers during XP awards | [LevelingSystem.ProcessExperienceGain](../../Systems/Leveling/LevelingSystem.cs) | [LevelingPrestigeTests](../tests/Systems/Leveling/LevelingPrestigeTests.cs) | ✅ Covered |
-| Familiar leveling shares XP with parties and differentiates VBlood/docile targets | [FamiliarLevelingSystem.ProcessFamiliarExperience](../../Systems/Familiars/FamiliarLevelingSystem.cs) | _Gap — add_ `FamiliarLevelingSystemTests.cs` | ⛔ Not covered |
+| Familiar leveling shares XP with parties and differentiates VBlood/docile targets | [FamiliarLevelingSystem.ProcessFamiliarExperience](../../Systems/Familiars/FamiliarLevelingSystem.cs) | [FamiliarLevelingTests](../tests/Systems/Familiars/FamiliarLevelingTests.cs) (seeds active familiars, runs experience awards, and verifies standard vs. VBlood multipliers) | ✅ Covered |
 | Profession XP gain and cap enforcement across handlers | [ProfessionSystem.SaveProfessionExperience](../../Systems/Professions/ProfessionSystem.cs) | _Gap — add_ `ProfessionSystemExperienceTests.cs` | ⛔ Not covered |
 | Fishing profession bonuses route fish drops, mutant grease, and SCT toggles | [ProfessionSystem.GiveProfessionBonus](../../Systems/Professions/ProfessionSystem.cs) | [ProfessionBonusTests](../tests/Systems/Professions/ProfessionBonusTests.cs) | ✅ Covered |
 
