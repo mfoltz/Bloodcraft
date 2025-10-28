@@ -10,5 +10,15 @@ namespace ProjectM;
 /// </summary>
 public class ServerGameManager
 {
+    /// <summary>
+    /// Gets or sets the simulated server time surfaced to consumers.
+    /// </summary>
+    public double ServerTime { get; set; }
+
+    /// <summary>
+    /// Gets or sets the simulated frame delta time returned to callers.
+    /// </summary>
+    public double DeltaTime { get; set; }
+
     public static bool TryAddInventoryItem(Entity character, PrefabGUID itemPrefabGuid, int amount) => false;
 }
