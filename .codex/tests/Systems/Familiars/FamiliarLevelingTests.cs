@@ -35,6 +35,8 @@ public class FamiliarLevelingTests : TestHost
             ("UnitSpawnerMultiplier", 1f));
         using var playerData = CapturePlayerData();
 
+        Assert.NotNull(FamiliarBindingSystem.PlayerBattleGroups);
+
         const int targetLevel = 25;
 
         var player = entityScope.CreateEntity(index: 1, steamId: SteamId);
@@ -92,6 +94,54 @@ public class FamiliarLevelingTests : TestHost
 
         Assert.Equal(FamiliarBindingSystem.BASE_LEVEL, stored.Key);
         Assert.Equal(expectedXp, stored.Value, 5);
+    }
+
+    [Fact]
+    public void ProcessFamiliarExperience_RespondsToConfigOverrides()
+    {
+        using var experienceScope = new FamiliarExperienceDataScope(SteamId);
+        using var entityScope = new EntityTestScope();
+        using var familiarScope = new ActiveFamiliarResetScope(SteamId);
+        using var config = WithConfigOverrides(
+            ("FamiliarPrestige", false),
+            ("UnitFamiliarMultiplier", 2.5f),
+            ("VBloodFamiliarMultiplier", 7f),
+            ("UnitSpawnerMultiplier", 1f));
+        using var playerData = CapturePlayerData();
+
+        Assert.NotNull(FamiliarBindingSystem.PlayerBattleGroups);
+
+        const int unitLevel = 18;
+        const int vBloodLevel = 22;
+
+        var player = entityScope.CreateEntity(index: 20, steamId: SteamId);
+        var familiar = entityScope.CreateEntity(index: 21, eligibleForCombat: true);
+        var unitTarget = entityScope.CreateEntity(index: 22, unitLevel: unitLevel);
+        var vBloodTarget = entityScope.CreateEntity(index: 23, unitLevel: vBloodLevel, isVBlood: true);
+
+        entityScope.SetComponent(familiar, FamiliarPrefab);
+
+        UpdateActiveFamiliarData(SteamId, familiar, Entity.Null, FamiliarPrefab.GuidHash);
+
+        FamiliarLevelingSystem.ProcessFamiliarExperience(player, unitTarget, SteamId, groupMultiplier: 1f);
+
+        FamiliarExperienceData data = LoadFamiliarExperienceData(SteamId);
+        KeyValuePair<int, float> stored = data.FamiliarExperience[FamiliarPrefab.GuidHash];
+
+        float baseXp = ConvertLevelToXp(FamiliarBindingSystem.BASE_LEVEL);
+        float expectedAfterUnit = baseXp + unitLevel * 2.5f;
+
+        Assert.Equal(FamiliarBindingSystem.BASE_LEVEL, stored.Key);
+        Assert.Equal(expectedAfterUnit, stored.Value, 5);
+
+        FamiliarLevelingSystem.ProcessFamiliarExperience(player, vBloodTarget, SteamId, groupMultiplier: 1f);
+
+        data = LoadFamiliarExperienceData(SteamId);
+        stored = data.FamiliarExperience[FamiliarPrefab.GuidHash];
+
+        float expectedAfterVBlood = expectedAfterUnit + vBloodLevel * 7f;
+
+        Assert.Equal(expectedAfterVBlood, stored.Value, 5);
     }
 }
 
