@@ -1,6 +1,6 @@
 # Testing Roadmap
 
-This living roadmap groups verification targets by architectural bucket and tracks which scenarios already have regression coverage versus those still requiring focused tests. Update this document whenever gameplay systems evolve or new failure patterns emerge.
+This living roadmap groups verification targets by architectural bucket and tracks which scenarios already have regression coverage versus those still requiring focused tests. Update this document whenever gameplay systems evolve or new failure patterns emerge. When running the suites locally, prefer the `.codex/tests/run-tests.sh` wrapper so the NuGet restore step happens automatically before `dotnet test` executes.
 
 ## Utilities (Pure Helpers)
 
@@ -43,7 +43,7 @@ Gameplay systems that apply progression logic or orchestrate combat hooks. These
 | Blood legacy progression respects configured stat choices and clamps at max level | [BloodSystem.SaveBloodExperience](../../Systems/Legacies/BloodSystem.cs) | [BloodSystemTests](../tests/Systems/Legacies/BloodSystemTests.cs) | ✅ Covered |
 | Prestige reducers adjust XP gains when players hit max level in group kills | [LevelingSystem.ProcessExperience](../../Systems/Leveling/LevelingSystem.cs) | _Gap — add_ `LevelingExperienceShareTests.cs` | ⛔ Not covered |
 | Prestige reducers compound with rested XP and group multipliers during XP awards | [LevelingSystem.ProcessExperienceGain](../../Systems/Leveling/LevelingSystem.cs) | [LevelingPrestigeTests](../tests/Systems/Leveling/LevelingPrestigeTests.cs) | ✅ Covered |
-| Familiar leveling shares XP with parties and differentiates VBlood/docile targets | [FamiliarLevelingSystem.ProcessFamiliarExperience](../../Systems/Familiars/FamiliarLevelingSystem.cs) | _Gap — add_ `FamiliarLevelingSystemTests.cs` | ⛔ Not covered |
+| Familiar leveling shares XP with parties and differentiates VBlood/docile targets | [FamiliarLevelingSystem.ProcessFamiliarExperience](../../Systems/Familiars/FamiliarLevelingSystem.cs) | [FamiliarLevelingTests](../tests/Systems/Familiars/FamiliarLevelingTests.cs) (seeds active familiars, runs experience awards, and verifies standard vs. VBlood multipliers) | ✅ Covered |
 | Profession XP gain and cap enforcement across handlers | [ProfessionSystem.SaveProfessionExperience](../../Systems/Professions/ProfessionSystem.cs) | _Gap — add_ `ProfessionSystemExperienceTests.cs` | ⛔ Not covered |
 | Fishing profession bonuses route fish drops, mutant grease, and SCT toggles | [ProfessionSystem.GiveProfessionBonus](../../Systems/Professions/ProfessionSystem.cs) | [ProfessionBonusTests](../tests/Systems/Professions/ProfessionBonusTests.cs) | ✅ Covered |
 

@@ -18,7 +18,7 @@ This guide provides universal, consistent principles and patterns to master C# c
   bash .codex/install.sh
   ```
 
-* After the SDK is available, execute tests (for example, within `.codex/tests`) with the `dotnet` CLI that the script installs/exposes.
+* After the SDK is available, execute tests (for example, within `.codex/tests`) with the `dotnet` CLI that the script installs/exposes. The `.codex/tests/run-tests.sh` helper wraps this flow by running the install script—and therefore NuGet restore—automatically before delegating to `dotnet test`.
 
 ## 🗂️ Codex Tooling Structure
 
