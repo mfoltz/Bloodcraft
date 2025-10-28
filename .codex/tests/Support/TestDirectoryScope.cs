@@ -43,29 +43,73 @@ public sealed class TestDirectoryScope : IDisposable
         remappedPaths = new Dictionary<string, string>(StringComparer.Ordinal);
         tempDirectory = CreateTemporaryDirectory();
 
-        foreach (var key in keys)
+        foreach (var identifier in keys)
         {
-            if (!filePaths.TryGetValue(key, out var path))
-            {
-                throw new KeyNotFoundException($"The persistence map does not contain the key '{key}'.");
-            }
-
-            var replacement = Path.Combine(tempDirectory.FullName, Path.GetFileName(path));
-            originalPaths[key] = path;
-            remappedPaths[key] = replacement;
-            filePaths[key] = replacement;
+            (string dictionaryKey, string originalPath) = ResolveMapping(identifier, filePaths);
+            var replacement = Path.Combine(tempDirectory.FullName, Path.GetFileName(originalPath));
+            originalPaths[dictionaryKey] = originalPath;
+            remappedPaths[identifier] = replacement;
+            filePaths[dictionaryKey] = replacement;
         }
+    }
+
+    static (string DictionaryKey, string OriginalPath) ResolveMapping(string identifier, Dictionary<string, string> filePaths)
+    {
+        if (filePaths.TryGetValue(identifier, out var directPath))
+        {
+            return (identifier, directPath);
+        }
+
+        string? resolvedValue = TryResolveJsonFilePath(identifier);
+        if (!string.IsNullOrEmpty(resolvedValue))
+        {
+            return ResolveMapping(resolvedValue, filePaths);
+        }
+
+        foreach (var entry in filePaths)
+        {
+            if (string.Equals(entry.Value, identifier, StringComparison.Ordinal))
+            {
+                return (entry.Key, entry.Value);
+            }
+        }
+
+        throw new KeyNotFoundException($"The persistence map does not contain the key or path '{identifier}'.");
     }
 
     static Dictionary<string, string> GetFilePathsDictionary()
     {
         ConfigDirectoryShim.EnsureInitialized();
 
-        var persistenceType = typeof(DataService).GetNestedType("PlayerPersistence", BindingFlags.Public | BindingFlags.NonPublic)
-            ?? throw new InvalidOperationException("PlayerPersistence type could not be located.");
-        var field = persistenceType.GetField("_filePaths", BindingFlags.NonPublic | BindingFlags.Static)
+        var field = GetPlayerPersistenceType().GetField("_filePaths", BindingFlags.NonPublic | BindingFlags.Static)
             ?? throw new InvalidOperationException("PlayerPersistence._filePaths field could not be located.");
         return (Dictionary<string, string>)field.GetValue(null)!;
+    }
+
+    static string? TryResolveJsonFilePath(string identifier)
+    {
+        var jsonFilePathsType = GetPlayerPersistenceType().GetNestedType("JsonFilePaths", BindingFlags.Public | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("PlayerPersistence.JsonFilePaths type could not be located.");
+
+        var field = jsonFilePathsType.GetField(identifier, BindingFlags.Public | BindingFlags.Static);
+        if (field is not null)
+        {
+            return (string)field.GetValue(null)!;
+        }
+
+        var property = jsonFilePathsType.GetProperty(identifier, BindingFlags.Public | BindingFlags.Static);
+        if (property is not null)
+        {
+            return (string)property.GetValue(null)!;
+        }
+
+        return null;
+    }
+
+    static Type GetPlayerPersistenceType()
+    {
+        return typeof(DataService).GetNestedType("PlayerPersistence", BindingFlags.Public | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("PlayerPersistence type could not be located.");
     }
 
     static DirectoryInfo CreateTemporaryDirectory()
