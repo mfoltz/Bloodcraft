@@ -16,7 +16,7 @@ namespace Bloodcraft.Tests.Stubs;
 public sealed class FakeVBloodEntityContext : IVBloodEntityContext
 {
     readonly IReadOnlyList<FakeVBloodEntityRow> rows;
-    readonly IReadOnlyDictionary<Entity, FakeVBloodEntityRow> lookup;
+    readonly IReadOnlyDictionary<long, FakeVBloodEntityRow> lookup;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FakeVBloodEntityContext"/> class.
@@ -39,7 +39,7 @@ public sealed class FakeVBloodEntityContext : IVBloodEntityContext
             return row;
         }).ToList());
 
-        lookup = this.rows.ToDictionary(row => row.Entity);
+        lookup = this.rows.ToDictionary(row => GetKey(row.Entity));
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public sealed class FakeVBloodEntityContext : IVBloodEntityContext
     /// <inheritdoc />
     public bool TryGetPrefabGuid(Entity entity, out PrefabGUID prefabGuid)
     {
-        if (lookup.TryGetValue(entity, out FakeVBloodEntityRow? row))
+        if (lookup.TryGetValue(GetKey(entity), out FakeVBloodEntityRow? row))
         {
             if (row?.PrefabGuid is PrefabGUID prefab)
             {
@@ -85,7 +85,7 @@ public sealed class FakeVBloodEntityContext : IVBloodEntityContext
     /// <inheritdoc />
     public void Destroy(Entity entity)
     {
-        if (lookup.TryGetValue(entity, out FakeVBloodEntityRow? row))
+        if (lookup.TryGetValue(GetKey(entity), out FakeVBloodEntityRow? row))
         {
             row?.MarkDestroyed();
         }
@@ -105,6 +105,10 @@ public sealed class FakeVBloodEntityContext : IVBloodEntityContext
 
         FakeVBloodEntityRow[] rows = prefabs.Select(FakeVBloodEntityRow.FromPrefab).ToArray();
         return new FakeVBloodEntityContext(rows);
+    }
+    static long GetKey(Entity entity)
+    {
+        return ((long)entity.Index << 32) | (uint)entity.Version;
     }
 }
 
