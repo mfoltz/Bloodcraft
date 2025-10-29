@@ -151,7 +151,12 @@ internal static class Core
             Log.LogWarning($"Error getting attribute soft caps: {e}");
         }
 
-        if (_resetShardBearers) ResetShardBearers();
+        if (_resetShardBearers)
+        {
+            IVBloodEntityContext vBloodContext = new VBloodEntityContext(EntityManager);
+            var shardBearerResetService = new ShardBearerResetService(vBloodContext, message => Log.LogWarning(message));
+            shardBearerResetService.ResetShardBearers();
+        }
 
         _initialized = true;
     }
@@ -378,43 +383,6 @@ internal static class Core
         }
     }
 
-    static readonly HashSet<PrefabGUID> _shardBearers =
-    [
-        PrefabGUIDs.CHAR_Manticore_VBlood,
-        PrefabGUIDs.CHAR_ChurchOfLight_Paladin_VBlood,
-        PrefabGUIDs.CHAR_Gloomrot_Monster_VBlood,
-        PrefabGUIDs.CHAR_Vampire_Dracula_VBlood,
-        PrefabGUIDs.CHAR_Blackfang_Morgana_VBlood
-    ];
-    static void ResetShardBearers()
-    {
-        ComponentType[] vBloodAllComponents =
-        [
-            ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
-            ComponentType.ReadOnly(Il2CppType.Of<VBloodConsumeSource>()),
-            ComponentType.ReadOnly(Il2CppType.Of<VBloodUnit>())
-        ];
-
-        EntityQuery vBloodQuery = EntityManager.BuildEntityQuery(all: vBloodAllComponents, options: EntityQueryOptions.IncludeDisabled);
-        using NativeAccessor<Entity> entities = vBloodQuery.ToEntityArrayAccessor();
-
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (!entity.TryGetComponent(out PrefabGUID prefabGuid)) continue;
-                else if (_shardBearers.Contains(prefabGuid))
-                {
-                    // Log.LogWarning($"[ResetShardBearers] ({prefabGuid.GetPrefabName()})");
-                    entity.Destroy();
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.LogWarning($"[ResetShardBearers] error: {ex}");
-        }
-    }
     static IEnumerator BleedingEdgePrimaryProjectileRoutine(QueryDesc projectileQueryDesc)
     {
         bool pistols = BleedingEdge.Contains(WeaponType.Pistols);
