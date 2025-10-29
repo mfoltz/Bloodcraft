@@ -74,7 +74,6 @@ internal static class Core
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
-    static readonly bool _resetShardBearers = ConfigService.EliteShardBearers;
     static readonly bool _shouldApplyBonusStats = _legacies || _expertise || _classes || _familiars;
     public static bool Eclipsed { get; } = _leveling || _legacies || _expertise || _classes || _familiars;
     public static IReadOnlySet<WeaponType> BleedingEdge => _bleedingEdge;
@@ -151,12 +150,11 @@ internal static class Core
             Log.LogWarning($"Error getting attribute soft caps: {e}");
         }
 
-        if (_resetShardBearers)
-        {
-            IVBloodEntityContext vBloodContext = new VBloodEntityContext(EntityManager);
-            var shardBearerResetService = new ShardBearerResetService(vBloodContext, message => Log.LogWarning(message));
-            shardBearerResetService.ResetShardBearers();
-        }
+        EliteShardBearerBootstrapper.Initialize(
+            ConfigService.EliteShardBearers,
+            () => new VBloodEntityContext(EntityManager),
+            (context, logger) => new ShardBearerResetService(context, logger),
+            message => Log.LogWarning(message));
 
         _initialized = true;
     }

@@ -58,6 +58,16 @@ public static class PrefabGuidTestShim
             processor.AddPrefix(new HarmonyMethod(prefix));
             processor.Patch();
         }
+
+        MethodInfo? equality = AccessTools.Method(typeof(PrefabGUID), "op_Equality", new[] { typeof(PrefabGUID), typeof(PrefabGUID) });
+        if (equality != null)
+        {
+            MethodInfo prefix = typeof(PrefabGuidTestShim)
+                .GetMethod(nameof(PrefabGuidEqualityPrefix), BindingFlags.NonPublic | BindingFlags.Static)!;
+            var processor = harmony.CreateProcessor(equality);
+            processor.AddPrefix(new HarmonyMethod(prefix));
+            processor.Patch();
+        }
     }
 
     static bool SkipOriginal()
@@ -74,6 +84,12 @@ public static class PrefabGuidTestShim
     static bool PrefabGuidCtorPrefix(ref PrefabGUID __instance, int guidHash)
     {
         Unsafe.As<PrefabGUID, int>(ref __instance) = guidHash;
+        return false;
+    }
+
+    static bool PrefabGuidEqualityPrefix(ref bool __result, PrefabGUID guid1, PrefabGUID guid2)
+    {
+        __result = Unsafe.As<PrefabGUID, int>(ref guid1) == Unsafe.As<PrefabGUID, int>(ref guid2);
         return false;
     }
 }
