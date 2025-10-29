@@ -24,6 +24,12 @@ After the install script completes you can execute tests with the SDK it install
 dotnet test .codex/tests/Bloodcraft.Tests.csproj
 ```
 
+## Fixture guidelines
+
+Service and system fixtures must inherit from [`TestHost`](TestHost.cs) so the module initializer and configuration sandbox stay active for the lifetime of the test case. The base host wires the module bootstrap defined in [`Support/TestModuleInitializers.cs`](Support/TestModuleInitializers.cs), keeping the Unity shims and content overrides engaged without each fixture needing to repeat the setup logic.
+
+When exercising shard reset behavior, use the seam provided by [`EliteShardBearerBootstrapper`](Services/EliteShardBearerBootstrapperTests.cs) and [`ShardBearerResetService`](Services/ShardBearerResetServiceTests.cs). Supply fakes or scoped contexts to those entry points instead of calling `Core.Initialize()`, which still spins up the live DOTS runtime and bypasses the harness' safety rails.
+
 ### Native bootstrap strategy
 
 The harness patches the relevant type initializers at runtime so the managed assemblies bootstrap without touching Unity's native binaries. This lets the suite execute inside a headless CI container while keeping coverage over the same startup paths the plugin exercises in-game.
