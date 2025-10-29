@@ -522,14 +522,111 @@ internal static class FamiliarCommands
             PrefabGUID familiarId = new(familiarSet[choice - 1]);
 
             familiarSet.RemoveAt(choice - 1);
+            data.OverflowFamiliars.Add(familiarId.GuidHash);
             SaveFamiliarUnlocksData(steamId, data);
 
-            LocalizationService.HandleReply(ctx, $"<color=green>{familiarId.GetLocalizedName()}</color> removed from <color=white>{activeBox}</color>.");
+            LocalizationService.HandleReply(ctx, $"<color=green>{familiarId.GetLocalizedName()}</color> moved to overflow from <color=white>{activeBox}</color>.");
         }
         else
         {
             LocalizationService.HandleReply(ctx, "Couldn't find active familiar box to remove from...");
         }
+    }
+
+    [Command(name: "overflow", shortHand: "of", adminOnly: false, usage: ".fam of", description: "Lists familiars stored in overflow.")]
+    public static void ListOverflowFamiliars(ChatCommandContext ctx)
+    {
+        if (!ConfigService.FamiliarSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
+            return;
+        }
+
+        ulong steamId = ctx.User.PlatformId;
+
+        FamiliarUnlocksData familiarUnlocksData = LoadFamiliarUnlocksData(steamId);
+
+        if (familiarUnlocksData.OverflowFamiliars.Count == 0)
+        {
+            LocalizationService.HandleReply(ctx, "Overflow storage is empty.");
+            return;
+        }
+
+        FamiliarBuffsData familiarBuffsData = LoadFamiliarBuffsData(steamId);
+        FamiliarExperienceData familiarExperienceData = LoadFamiliarExperienceData(steamId);
+        FamiliarPrestigeData familiarPrestigeData_V2 = LoadFamiliarPrestigeData(steamId);
+
+        LocalizationService.HandleReply(ctx, "Overflow Familiars:");
+
+        int count = 1;
+
+        foreach (int familiarKey in familiarUnlocksData.OverflowFamiliars)
+        {
+            PrefabGUID familiarPrefab = new(familiarKey);
+            string familiarName = familiarPrefab.GetLocalizedName();
+            string colorCode = "<color=#FF69B4>";
+
+            if (familiarBuffsData.FamiliarBuffs.ContainsKey(familiarKey))
+            {
+                if (ShinyBuffColorHexes.TryGetValue(new(familiarBuffsData.FamiliarBuffs[familiarKey][0]), out var hexColor))
+                {
+                    colorCode = $"<color={hexColor}>";
+                }
+            }
+
+            int level = familiarExperienceData.FamiliarExperience.TryGetValue(familiarKey, out var experienceData) ? experienceData.Key : 1;
+            int prestiges = familiarPrestigeData_V2.FamiliarPrestige.TryGetValue(familiarKey, out var prestigeData) ? prestigeData : 0;
+
+            string levelAndPrestiges = prestiges > 0 ? $"[<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]" : $"[<color=white>{level}</color>]";
+            LocalizationService.HandleReply(ctx, $"<color=yellow>{count}</color>| <color=green>{familiarName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(familiarKey) ? $"{colorCode}*</color> {levelAndPrestiges}" : $" {levelAndPrestiges}")}");
+            count++;
+        }
+    }
+
+    [Command(name: "overflowmove", shortHand: "om", adminOnly: false, usage: ".fam om [#] [BoxName]", description: "Moves familiar from overflow to specified box.")]
+    public static void MoveOverflowFamiliar(ChatCommandContext ctx, int choice, string boxName)
+    {
+        if (!ConfigService.FamiliarSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
+            return;
+        }
+
+        ulong steamId = ctx.User.PlatformId;
+        FamiliarUnlocksData data = LoadFamiliarUnlocksData(steamId);
+
+        if (data.OverflowFamiliars.Count == 0)
+        {
+            LocalizationService.HandleReply(ctx, "Overflow storage is empty.");
+            return;
+        }
+
+        if (choice < 1 || choice > data.OverflowFamiliars.Count)
+        {
+            LocalizationService.HandleReply(ctx, $"Invalid choice, please use <color=white>1</color> to <color=white>{data.OverflowFamiliars.Count}</color> (Overflow List)");
+            return;
+        }
+
+        if (!data.FamiliarUnlocks.TryGetValue(boxName, out var familiarSet))
+        {
+            LocalizationService.HandleReply(ctx, "Couldn't find box!");
+            return;
+        }
+
+        if (familiarSet.Count >= BOX_SIZE)
+        {
+            LocalizationService.HandleReply(ctx, "Box is full!");
+            return;
+        }
+
+        int familiarKey = data.OverflowFamiliars[choice - 1];
+        data.OverflowFamiliars.RemoveAt(choice - 1);
+        familiarSet.Add(familiarKey);
+
+        SaveFamiliarUnlocksData(steamId, data);
+
+        PrefabGUID familiarId = new(familiarKey);
+        LocalizationService.HandleReply(ctx, $"<color=green>{familiarId.GetLocalizedName()}</color> moved to <color=white>{boxName}</color>.");
     }
 
     [Command(name: "toggle", shortHand: "t", usage: ".fam t", description: "Calls or dismisses familar.", adminOnly: false)]
