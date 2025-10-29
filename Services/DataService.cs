@@ -1078,6 +1078,7 @@ internal static class DataService
             public class FamiliarUnlocksData
             {
                 public Dictionary<string, List<int>> FamiliarUnlocks { get; set; } = [];
+                public List<int> OverflowFamiliars { get; set; } = [];
             }
             static string GetFilePath(ulong steamId) => Path.Combine(DirectoryPaths[8], $"{steamId}_familiar_unlocks.json");
             public static void SaveFamiliarUnlocksData(ulong steamId, FamiliarUnlocksData data)
@@ -1094,7 +1095,12 @@ internal static class DataService
                     return new FamiliarUnlocksData();
 
                 string jsonString = File.ReadAllText(filePath);
-                return JsonSerializer.Deserialize<FamiliarUnlocksData>(jsonString);
+                FamiliarUnlocksData data = JsonSerializer.Deserialize<FamiliarUnlocksData>(jsonString) ?? new FamiliarUnlocksData();
+
+                data.FamiliarUnlocks ??= [];
+                data.OverflowFamiliars ??= [];
+
+                return data;
             }
         }
         public static class FamiliarExperienceManager
