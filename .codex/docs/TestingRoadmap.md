@@ -83,3 +83,4 @@ The sandbox now includes `DeathEventAggregationWork`, which mirrors the live `De
 * Revisit this roadmap after introducing new systems (e.g., Eclipse events, Primal War tweaks) to capture regression hotspots early.
 * When a bug fix is implemented without coverage, record the failing scenario here before writing the test to prevent forgetting the regression.
 * Align planned test filenames with the `.codex/tests` layout shown above to keep discovery tooling consistent.
+* Ensure any new suites that interact with BepInEx configuration, prefab GUID resolution, or other host-sensitive services derive from `TestHost` so the module initializer and configuration sandbox stay active—see [`TestHost`](../tests/TestHost.cs) and the [`ConfigDirectorySandbox`](../tests/Support/ConfigDirectorySandbox.cs) helper for reference.
