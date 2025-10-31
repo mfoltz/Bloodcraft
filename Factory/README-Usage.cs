@@ -35,3 +35,37 @@
 //         }
 //     }
 // }
+
+// Example using the fluent builder:
+//
+// public sealed class BuilderDrivenSystem : VSystemBase<ISystemWork>
+// {
+//     readonly SystemWorkBuilder.ComponentLookupHandle<Movement> _movementLookup;
+//
+//     public BuilderDrivenSystem()
+//         : base(CreateWork(out _movementLookup))
+//     {
+//     }
+//
+//     static ISystemWork CreateWork(out SystemWorkBuilder.ComponentLookupHandle<Movement> movementLookup)
+//     {
+//         var builder = new SystemWorkBuilder()
+//             .WithQuery((ref EntityQueryBuilder q) =>
+//             {
+//                 q.AddAll(ComponentType.ReadOnly(Il2CppType.Of<Movement>()));
+//             });
+//
+//         movementLookup = builder.WithLookup<Movement>(true);
+//
+//         builder.OnUpdate(context =>
+//         {
+//             context.ForEachEntity(context.Query, entity =>
+//             {
+//                 var movement = movementLookup.Lookup[entity];
+//                 // Perform work here.
+//             });
+//         });
+//
+//         return builder.Build();
+//     }
+// }
