@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft.Factory;
@@ -134,16 +135,7 @@ public sealed class SystemWorkBuilder
     {
         var handle = new ComponentLookupHandle<T>();
 
-        _resourceInitializers.Add(context =>
-        {
-            handle.Current = context.System.GetComponentLookup<T>(isReadOnly);
-            context.Registrar.Register(system =>
-            {
-                var lookup = handle.Current;
-                lookup.Update(system);
-                handle.Current = lookup;
-            });
-        });
+        _resourceInitializers.Add(context => InitializeLookupHandle(context, handle, isReadOnly));
 
         return handle;
     }
@@ -158,16 +150,39 @@ public sealed class SystemWorkBuilder
     {
         var handle = new BufferLookupHandle<T>();
 
-        _resourceInitializers.Add(context =>
-        {
-            handle.Current = context.System.GetBufferLookup<T>(isReadOnly);
-            context.Registrar.Register(system =>
-            {
-                var lookup = handle.Current;
-                lookup.Update(system);
-                handle.Current = lookup;
-            });
-        });
+        _resourceInitializers.Add(context => InitializeBufferLookupHandle(context, handle, isReadOnly));
+
+        return handle;
+    }
+
+    /// <summary>
+    /// Registers and exposes a <see cref="ComponentTypeHandle{T}"/> refreshed each update.
+    /// </summary>
+    /// <typeparam name="T">Component type for the handle.</typeparam>
+    /// <param name="isReadOnly">Whether the handle operates in read-only mode.</param>
+    /// <returns>A handle that surfaces the refreshed type handle.</returns>
+    public ComponentTypeHandleHandle<T> WithComponentTypeHandle<T>(bool isReadOnly = false)
+        where T : unmanaged
+    {
+        var handle = new ComponentTypeHandleHandle<T>();
+
+        _resourceInitializers.Add(context => InitializeComponentTypeHandle(context, handle, isReadOnly));
+
+        return handle;
+    }
+
+    /// <summary>
+    /// Registers and exposes a <see cref="BufferTypeHandle{T}"/> refreshed each update.
+    /// </summary>
+    /// <typeparam name="T">Buffer element type for the handle.</typeparam>
+    /// <param name="isReadOnly">Whether the handle operates in read-only mode.</param>
+    /// <returns>A handle that surfaces the refreshed type handle.</returns>
+    public BufferTypeHandleHandle<T> WithBufferTypeHandle<T>(bool isReadOnly = false)
+        where T : unmanaged
+    {
+        var handle = new BufferTypeHandleHandle<T>();
+
+        _resourceInitializers.Add(context => InitializeBufferTypeHandle(context, handle, isReadOnly));
 
         return handle;
     }
@@ -227,6 +242,310 @@ public sealed class SystemWorkBuilder
         /// Gets the latest buffer lookup instance.
         /// </summary>
         public BufferLookup<T> Lookup => _lookup;
+    }
+
+    /// <summary>
+    /// Exposes a refreshed component type handle to the caller.
+    /// </summary>
+    /// <typeparam name="T">Component type being accessed.</typeparam>
+    public sealed class ComponentTypeHandleHandle<T>
+        where T : unmanaged
+    {
+        ComponentTypeHandle<T> _handle;
+
+        internal ComponentTypeHandle<T> Current
+        {
+            get => _handle;
+            set => _handle = value;
+        }
+
+        /// <summary>
+        /// Gets the latest component type handle instance.
+        /// </summary>
+        public ComponentTypeHandle<T> Handle => _handle;
+    }
+
+    /// <summary>
+    /// Exposes a refreshed buffer type handle to the caller.
+    /// </summary>
+    /// <typeparam name="T">Buffer element type being accessed.</typeparam>
+    public sealed class BufferTypeHandleHandle<T>
+        where T : unmanaged
+    {
+        BufferTypeHandle<T> _handle;
+
+        internal BufferTypeHandle<T> Current
+        {
+            get => _handle;
+            set => _handle = value;
+        }
+
+        /// <summary>
+        /// Gets the latest buffer type handle instance.
+        /// </summary>
+        public BufferTypeHandle<T> Handle => _handle;
+    }
+
+    /// <summary>
+    /// Represents the context provided to chunk iteration callbacks.
+    /// </summary>
+    public readonly struct ChunkIterationContext
+    {
+        /// <summary>
+        /// Initialises a new instance of the <see cref="ChunkIterationContext"/> struct.
+        /// </summary>
+        /// <param name="context">Active system context.</param>
+        /// <param name="chunk">Chunk being processed.</param>
+        /// <param name="entities">Entity array backing the chunk.</param>
+        public ChunkIterationContext(SystemContext context, ArchetypeChunk chunk, NativeArray<Entity> entities)
+        {
+            Context = context;
+            Chunk = chunk;
+            Entities = entities;
+        }
+
+        /// <summary>
+        /// Gets the active system context.
+        /// </summary>
+        public SystemContext Context { get; }
+
+        /// <summary>
+        /// Gets the chunk currently being processed.
+        /// </summary>
+        public ArchetypeChunk Chunk { get; }
+
+        /// <summary>
+        /// Gets the number of entities contained within the chunk.
+        /// </summary>
+        public int Count => Chunk.Count;
+
+        /// <summary>
+        /// Gets the native array of entities contained in the chunk.
+        /// </summary>
+        public NativeArray<Entity> Entities { get; }
+
+        /// <summary>
+        /// Gets a <see cref="NativeArray{T}"/> for the supplied component handle.
+        /// </summary>
+        public NativeArray<T> GetNativeArray<T>(ComponentTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            Chunk.GetNativeArray(handle.Handle);
+
+        /// <summary>
+        /// Gets a <see cref="BufferAccessor{T}"/> for the supplied buffer handle.
+        /// </summary>
+        public BufferAccessor<T> GetBufferAccessor<T>(BufferTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            Chunk.GetBufferAccessor(handle.Handle);
+
+        /// <summary>
+        /// Gets the latest <see cref="ComponentLookup{T}"/> for the supplied handle.
+        /// </summary>
+        public ComponentLookup<T> GetLookup<T>(ComponentLookupHandle<T> handle) => handle.Lookup;
+
+        /// <summary>
+        /// Gets the latest <see cref="BufferLookup{T}"/> for the supplied handle.
+        /// </summary>
+        public BufferLookup<T> GetLookup<T>(BufferLookupHandle<T> handle) => handle.Lookup;
+    }
+
+    /// <summary>
+    /// Represents the context provided to entity iteration callbacks.
+    /// </summary>
+    public readonly struct EntityIterationContext
+    {
+        /// <summary>
+        /// Initialises a new instance of the <see cref="EntityIterationContext"/> struct.
+        /// </summary>
+        /// <param name="context">Active system context.</param>
+        /// <param name="entity">Entity being processed.</param>
+        public EntityIterationContext(SystemContext context, Entity entity)
+        {
+            Context = context;
+            Entity = entity;
+        }
+
+        /// <summary>
+        /// Gets the active system context.
+        /// </summary>
+        public SystemContext Context { get; }
+
+        /// <summary>
+        /// Gets the entity currently being processed.
+        /// </summary>
+        public Entity Entity { get; }
+
+        /// <summary>
+        /// Gets the latest <see cref="ComponentLookup{T}"/> for the supplied handle.
+        /// </summary>
+        public ComponentLookup<T> GetLookup<T>(ComponentLookupHandle<T> handle) => handle.Lookup;
+
+        /// <summary>
+        /// Gets the latest <see cref="BufferLookup{T}"/> for the supplied handle.
+        /// </summary>
+        public BufferLookup<T> GetLookup<T>(BufferLookupHandle<T> handle) => handle.Lookup;
+    }
+
+    /// <summary>
+    /// Iterates each chunk in the supplied query while exposing strongly typed accessors.
+    /// </summary>
+    /// <param name="context">Active system context.</param>
+    /// <param name="queryHandle">Query being iterated.</param>
+    /// <param name="action">Action invoked per chunk.</param>
+    public static void ForEachChunk(SystemContext context, QueryHandle queryHandle, Action<ChunkIterationContext> action)
+    {
+        if (context.System == null)
+            throw new ArgumentNullException(nameof(context));
+        if (queryHandle == null)
+            throw new ArgumentNullException(nameof(queryHandle));
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        queryHandle.WithTempChunks(chunks =>
+        {
+            for (int i = 0; i < chunks.Length; ++i)
+            {
+                var chunk = chunks[i];
+                var entities = chunk.GetNativeArray(context.EntityTypeHandle);
+                action(new ChunkIterationContext(context, chunk, entities));
+            }
+        });
+    }
+
+    /// <summary>
+    /// Iterates each entity in the supplied query while exposing strongly typed accessors.
+    /// </summary>
+    /// <param name="context">Active system context.</param>
+    /// <param name="queryHandle">Query being iterated.</param>
+    /// <param name="action">Action invoked per entity.</param>
+    public static void ForEachEntity(SystemContext context, QueryHandle queryHandle, Action<EntityIterationContext> action)
+    {
+        if (context.System == null)
+            throw new ArgumentNullException(nameof(context));
+        if (queryHandle == null)
+            throw new ArgumentNullException(nameof(queryHandle));
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        queryHandle.WithTempEntities(entities =>
+        {
+            for (int i = 0; i < entities.Length; ++i)
+            {
+                action(new EntityIterationContext(context, entities[i]));
+            }
+        });
+    }
+
+    /// <summary>
+    /// Creates a lookup handle that is automatically refreshed for the supplied context.
+    /// </summary>
+    /// <typeparam name="T">Component type being accessed.</typeparam>
+    /// <param name="context">Active system context.</param>
+    /// <param name="isReadOnly">Whether the lookup operates in read-only mode.</param>
+    /// <returns>The hydrated lookup handle.</returns>
+    public static ComponentLookupHandle<T> CreateLookup<T>(SystemContext context, bool isReadOnly = false)
+    {
+        if (context.System == null)
+            throw new ArgumentNullException(nameof(context));
+
+        var handle = new ComponentLookupHandle<T>();
+        InitializeLookupHandle(context, handle, isReadOnly);
+        return handle;
+    }
+
+    /// <summary>
+    /// Creates a buffer lookup handle that is automatically refreshed for the supplied context.
+    /// </summary>
+    /// <typeparam name="T">Buffer element type being accessed.</typeparam>
+    /// <param name="context">Active system context.</param>
+    /// <param name="isReadOnly">Whether the lookup operates in read-only mode.</param>
+    /// <returns>The hydrated buffer lookup handle.</returns>
+    public static BufferLookupHandle<T> CreateBufferLookup<T>(SystemContext context, bool isReadOnly = false)
+    {
+        if (context.System == null)
+            throw new ArgumentNullException(nameof(context));
+
+        var handle = new BufferLookupHandle<T>();
+        InitializeBufferLookupHandle(context, handle, isReadOnly);
+        return handle;
+    }
+
+    /// <summary>
+    /// Creates a component type handle that is automatically refreshed for the supplied context.
+    /// </summary>
+    /// <typeparam name="T">Component type being accessed.</typeparam>
+    /// <param name="context">Active system context.</param>
+    /// <param name="isReadOnly">Whether the handle operates in read-only mode.</param>
+    /// <returns>The hydrated component type handle.</returns>
+    public static ComponentTypeHandleHandle<T> CreateComponentTypeHandle<T>(SystemContext context, bool isReadOnly = false)
+        where T : unmanaged
+    {
+        if (context.System == null)
+            throw new ArgumentNullException(nameof(context));
+
+        var handle = new ComponentTypeHandleHandle<T>();
+        InitializeComponentTypeHandle(context, handle, isReadOnly);
+        return handle;
+    }
+
+    /// <summary>
+    /// Creates a buffer type handle that is automatically refreshed for the supplied context.
+    /// </summary>
+    /// <typeparam name="T">Buffer element type being accessed.</typeparam>
+    /// <param name="context">Active system context.</param>
+    /// <param name="isReadOnly">Whether the handle operates in read-only mode.</param>
+    /// <returns>The hydrated buffer type handle.</returns>
+    public static BufferTypeHandleHandle<T> CreateBufferTypeHandle<T>(SystemContext context, bool isReadOnly = false)
+        where T : unmanaged
+    {
+        if (context.System == null)
+            throw new ArgumentNullException(nameof(context));
+
+        var handle = new BufferTypeHandleHandle<T>();
+        InitializeBufferTypeHandle(context, handle, isReadOnly);
+        return handle;
+    }
+
+    static void InitializeLookupHandle<T>(SystemContext context, ComponentLookupHandle<T> handle, bool isReadOnly)
+    {
+        handle.Current = context.System.GetComponentLookup<T>(isReadOnly);
+        context.Registrar.Register(system =>
+        {
+            var lookup = handle.Current;
+            lookup.Update(system);
+            handle.Current = lookup;
+        });
+    }
+
+    static void InitializeBufferLookupHandle<T>(SystemContext context, BufferLookupHandle<T> handle, bool isReadOnly)
+    {
+        handle.Current = context.System.GetBufferLookup<T>(isReadOnly);
+        context.Registrar.Register(system =>
+        {
+            var lookup = handle.Current;
+            lookup.Update(system);
+            handle.Current = lookup;
+        });
+    }
+
+    static void InitializeComponentTypeHandle<T>(SystemContext context, ComponentTypeHandleHandle<T> handle, bool isReadOnly)
+        where T : unmanaged
+    {
+        handle.Current = context.System.GetComponentTypeHandle<T>(isReadOnly);
+        context.Registrar.Register(system =>
+        {
+            handle.Current = system.GetComponentTypeHandle<T>(isReadOnly);
+        });
+    }
+
+    static void InitializeBufferTypeHandle<T>(SystemContext context, BufferTypeHandleHandle<T> handle, bool isReadOnly)
+        where T : unmanaged
+    {
+        handle.Current = context.System.GetBufferTypeHandle<T>(isReadOnly);
+        context.Registrar.Register(system =>
+        {
+            handle.Current = system.GetBufferTypeHandle<T>(isReadOnly);
+        });
     }
 
     sealed class DelegateSystemWork : ISystemWork

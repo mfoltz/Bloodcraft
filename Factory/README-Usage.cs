@@ -6,7 +6,7 @@
 // {
 //     public sealed class Work : ISystemWork
 //     {
-//         ComponentLookup<Movement> _movementLookup;
+//         SystemWorkBuilder.ComponentLookupHandle<Movement> _movementLookup;
 //         QueryHandle _trackedMinions;
 //
 //         public void Build(ref EntityQueryBuilder builder)
@@ -19,20 +19,17 @@
 //         {
 //             _trackedMinions = context.WithQuery(context.Query);
 //
-//             context.Registrar.Register(system =>
-//             {
-//                 _movementLookup = system.GetComponentLookup<Movement>(true);
-//             });
+//             _movementLookup = SystemWorkBuilder.CreateLookup<Movement>(context, isReadOnly: true);
 //         }
 //
 //         public void OnUpdate(SystemContext context)
 //         {
-//             _trackedMinions.ForEachEntity(entity =>
+//             SystemWorkBuilder.ForEachEntity(context, _trackedMinions, iterator =>
 //             {
-//                 if (!context.Exists(entity))
+//                 if (!context.Exists(iterator.Entity))
 //                     return;
 //
-//                 var movement = _movementLookup[entity];
+//                 var movement = iterator.GetLookup(_movementLookup)[iterator.Entity];
 //                 // Perform work here.
 //             });
 //         }
@@ -49,13 +46,16 @@
 // public sealed class BuilderDrivenSystem : VSystemBase<ISystemWork>
 // {
 //     readonly SystemWorkBuilder.ComponentLookupHandle<Movement> _movementLookup;
+//     readonly SystemWorkBuilder.ComponentTypeHandleHandle<Movement> _movementHandle;
 //
 //     public BuilderDrivenSystem()
-//         : base(CreateWork(out _movementLookup))
+//         : base(CreateWork(out _movementLookup, out _movementHandle))
 //     {
 //     }
 //
-//     static ISystemWork CreateWork(out SystemWorkBuilder.ComponentLookupHandle<Movement> movementLookup)
+//     static ISystemWork CreateWork(
+//         out SystemWorkBuilder.ComponentLookupHandle<Movement> movementLookup,
+//         out SystemWorkBuilder.ComponentTypeHandleHandle<Movement> movementHandle)
 //     {
 //         var builder = new SystemWorkBuilder()
 //             .WithQuery((ref EntityQueryBuilder q) =>
@@ -64,14 +64,22 @@
 //             });
 //
 //         movementLookup = builder.WithLookup<Movement>(true);
+//         movementHandle = builder.WithComponentTypeHandle<Movement>(true);
 //
 //         builder.OnUpdate(context =>
 //         {
 //             var query = context.WithQuery(context.Query);
-//             query.ForEachEntity(entity =>
+//             SystemWorkBuilder.ForEachChunk(context, query, chunk =>
 //             {
-//                 var movement = movementLookup.Lookup[entity];
-//                 // Perform work here.
+//                 var movementArray = chunk.GetNativeArray(movementHandle);
+//                 var entities = chunk.Entities;
+//
+//                 for (int i = 0; i < chunk.Count; ++i)
+//                 {
+//                     var entity = entities[i];
+//                     var movement = movementArray[i];
+//                     // Perform work here.
+//                 }
 //             });
 //         });
 //
