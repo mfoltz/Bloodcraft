@@ -7,6 +7,7 @@
 //     public sealed class Work : ISystemWork
 //     {
 //         ComponentLookup<Movement> _movementLookup;
+//         QueryHandle _trackedMinions;
 //
 //         public void Build(ref EntityQueryBuilder builder)
 //         {
@@ -16,6 +17,8 @@
 //
 //         public void OnCreate(SystemContext context)
 //         {
+//             _trackedMinions = context.WithQuery(context.Query);
+//
 //             context.Registrar.Register(system =>
 //             {
 //                 _movementLookup = system.GetComponentLookup<Movement>(true);
@@ -24,7 +27,7 @@
 //
 //         public void OnUpdate(SystemContext context)
 //         {
-//             context.ForEachEntity(context.Query, entity =>
+//             _trackedMinions.ForEachEntity(entity =>
 //             {
 //                 if (!context.Exists(entity))
 //                     return;
@@ -32,6 +35,11 @@
 //                 var movement = _movementLookup[entity];
 //                 // Perform work here.
 //             });
+//         }
+//
+//         public void OnDestroy(SystemContext context)
+//         {
+//             _trackedMinions = null;
 //         }
 //     }
 // }
@@ -59,7 +67,8 @@
 //
 //         builder.OnUpdate(context =>
 //         {
-//             context.ForEachEntity(context.Query, entity =>
+//             var query = context.WithQuery(context.Query);
+//             query.ForEachEntity(entity =>
 //             {
 //                 var movement = movementLookup.Lookup[entity];
 //                 // Perform work here.
