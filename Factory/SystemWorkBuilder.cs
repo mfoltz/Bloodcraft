@@ -43,23 +43,6 @@ public sealed class SystemWorkBuilder
     }
 
     /// <summary>
-    /// Registers a query configuration callback executed during <see cref="ISystemWork.Build"/>.
-    /// </summary>
-    /// <param name="configurator">Callback that mutates the builder.</param>
-    /// <returns>The current builder instance.</returns>
-    public SystemWorkBuilder WithQuery(Action<EntityQueryBuilder> configurator)
-    {
-        if (configurator == null)
-            throw new ArgumentNullException(nameof(configurator));
-
-        return WithQuery((ref EntityQueryBuilder builder) =>
-        {
-            var local = builder;
-            configurator(local);
-            builder = local;
-        });
-    }
-
     /// <summary>
     /// Sets whether the constructed query should be required for update.
     /// </summary>
@@ -154,7 +137,12 @@ public sealed class SystemWorkBuilder
         _resourceInitializers.Add(context =>
         {
             handle.Current = context.System.GetComponentLookup<T>(isReadOnly);
-            context.Registrar.Register(system => handle.Current.Update(system));
+            context.Registrar.Register(system =>
+            {
+                var lookup = handle.Current;
+                lookup.Update(system);
+                handle.Current = lookup;
+            });
         });
 
         return handle;
@@ -173,7 +161,12 @@ public sealed class SystemWorkBuilder
         _resourceInitializers.Add(context =>
         {
             handle.Current = context.System.GetBufferLookup<T>(isReadOnly);
-            context.Registrar.Register(system => handle.Current.Update(system));
+            context.Registrar.Register(system =>
+            {
+                var lookup = handle.Current;
+                lookup.Update(system);
+                handle.Current = lookup;
+            });
         });
 
         return handle;

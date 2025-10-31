@@ -50,7 +50,7 @@
 //     static ISystemWork CreateWork(out SystemWorkBuilder.ComponentLookupHandle<Movement> movementLookup)
 //     {
 //         var builder = new SystemWorkBuilder()
-//             .WithQuery(q =>
+//             .WithQuery((ref EntityQueryBuilder q) =>
 //             {
 //                 q.AddAll(ComponentType.ReadOnly(Il2CppType.Of<Movement>()));
 //             });
