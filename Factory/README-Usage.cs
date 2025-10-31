@@ -86,3 +86,17 @@
 //         return builder.Build();
 //     }
 // }
+
+// -----------------------------------------------------------------------------
+// System work generator helper
+// -----------------------------------------------------------------------------
+// The repository ships with an interactive generator that scaffolds builder-based
+// or work-class implementations. Execute it from the repository root:
+//
+//     dotnet run --project Bloodcraft.csproj -- --system-work
+//
+// The tool prompts for the system name, primary components, and any optional
+// lookup/handle requirements. It then prints either a fluent builder snippet or
+// a partial work class skeleton that follows the patterns demonstrated above.
+// Copy the emitted code into your system and tailor the TODO sections to your
+// specific logic.

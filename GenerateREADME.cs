@@ -27,6 +27,12 @@ internal static class GenerateREADME
         = [];
     public static void Main(string[] args)
     {
+        if (args.Length > 0 && args[0].Equals("--system-work", StringComparison.OrdinalIgnoreCase))
+        {
+            SystemWorkGenerator.RunInteractive();
+            return;
+        }
+
         // Check if we're running in a GitHub Actions environment and skip
         if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
         {
