@@ -14,6 +14,7 @@ public abstract class VSystemBase<TWork> : SystemBase, IRegistrar
     where TWork : class, ISystemWork
 {
     readonly List<Action<SystemBase>> _refreshActions = new();
+    readonly List<IDisposable> _managedDisposables = new();
 
     EntityTypeHandle _entityTypeHandle;
     EntityStorageInfoLookup _entityStorageInfoLookup;
@@ -81,6 +82,7 @@ public abstract class VSystemBase<TWork> : SystemBase, IRegistrar
     {
         Work.OnDestroy(CreateContext());
         _refreshActions.Clear();
+        DisposeManagedResources();
         base.OnDestroy();
     }
 
@@ -182,6 +184,14 @@ public abstract class VSystemBase<TWork> : SystemBase, IRegistrar
         _refreshActions.Add(refreshAction);
     }
 
+    void RegisterDisposable(IDisposable disposable)
+    {
+        if (disposable == null)
+            throw new ArgumentNullException(nameof(disposable));
+
+        _managedDisposables.Add(disposable);
+    }
+
     void BuildQuery()
     {
         var builder = new EntityQueryBuilder(Allocator.Temp);
@@ -224,7 +234,21 @@ public abstract class VSystemBase<TWork> : SystemBase, IRegistrar
         ForEachEntity,
         WithTempChunks,
         ForEachChunk,
-        Exists);
+        Exists,
+        RegisterDisposable);
+
+    void DisposeManagedResources()
+    {
+        if (_managedDisposables.Count == 0)
+            return;
+
+        for (int i = 0; i < _managedDisposables.Count; ++i)
+        {
+            _managedDisposables[i]?.Dispose();
+        }
+
+        _managedDisposables.Clear();
+    }
 
     static TWork CreateDefaultWork()
     {

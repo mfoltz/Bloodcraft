@@ -43,6 +43,7 @@ public readonly struct SystemContext
     readonly Action<EntityQuery, Action<NativeArray<ArchetypeChunk>>> _withTempChunks;
     readonly Action<EntityQuery, Action<ArchetypeChunk>> _forEachChunk;
     readonly Func<Entity, bool> _exists;
+    readonly Action<IDisposable> _registerDisposable;
 
     public SystemContext(
         SystemBase system,
@@ -55,7 +56,8 @@ public readonly struct SystemContext
         Action<EntityQuery, Action<Entity>> forEachEntity,
         Action<EntityQuery, Action<NativeArray<ArchetypeChunk>>> withTempChunks,
         Action<EntityQuery, Action<ArchetypeChunk>> forEachChunk,
-        Func<Entity, bool> exists)
+        Func<Entity, bool> exists,
+        Action<IDisposable> registerDisposable)
     {
         System = system ?? throw new ArgumentNullException(nameof(system));
         EntityManager = entityManager;
@@ -68,7 +70,14 @@ public readonly struct SystemContext
         _withTempChunks = withTempChunks ?? throw new ArgumentNullException(nameof(withTempChunks));
         _forEachChunk = forEachChunk ?? throw new ArgumentNullException(nameof(forEachChunk));
         _exists = exists ?? throw new ArgumentNullException(nameof(exists));
+        _registerDisposable = registerDisposable ?? throw new ArgumentNullException(nameof(registerDisposable));
     }
+
+    /// <summary>
+    /// Represents a callback used to configure an <see cref="EntityQueryBuilder"/> when creating queries.
+    /// </summary>
+    /// <param name="builder">The builder receiving the configuration.</param>
+    public delegate void QueryBuilderAction(ref EntityQueryBuilder builder);
 
     /// <summary>
     /// Gets the executing <see cref="SystemBase"/> instance.
@@ -128,6 +137,79 @@ public readonly struct SystemContext
     /// Determines whether the entity currently exists.
     /// </summary>
     public bool Exists(Entity entity) => _exists(entity);
+
+    /// <summary>
+    /// Creates a new <see cref="QueryHandle"/> using the supplied builder configuration.
+    /// </summary>
+    /// <param name="configure">Callback that configures the query builder.</param>
+    /// <param name="requireForUpdate">Whether to require the resulting query for update.</param>
+    /// <returns>A handle representing the created query.</returns>
+    public QueryHandle CreateQuery(QueryBuilderAction configure, bool requireForUpdate = false)
+    {
+        if (configure == null)
+            throw new ArgumentNullException(nameof(configure));
+
+        var builder = new EntityQueryBuilder(Allocator.Temp);
+
+        try
+        {
+            configure(ref builder);
+            var query = EntityManager.CreateEntityQuery(ref builder);
+
+            if (requireForUpdate)
+            {
+                System.RequireForUpdate(query);
+            }
+
+            var handle = new QueryHandle(
+                query,
+                true,
+                _withTempEntities,
+                _forEachEntity,
+                _withTempChunks,
+                _forEachChunk);
+
+            _registerDisposable(handle);
+            return handle;
+        }
+        finally
+        {
+            builder.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Wraps an existing <see cref="EntityQuery"/> in a <see cref="QueryHandle"/>.
+    /// </summary>
+    /// <param name="query">The query being wrapped.</param>
+    /// <param name="requireForUpdate">Whether to require the query for update.</param>
+    /// <param name="disposeOnDestroy">Whether to dispose the query automatically during system destruction.</param>
+    /// <returns>A handle representing the provided query.</returns>
+    public QueryHandle WithQuery(EntityQuery query, bool requireForUpdate = false, bool disposeOnDestroy = false)
+    {
+        if (query == default)
+            throw new ArgumentNullException(nameof(query));
+
+        if (requireForUpdate)
+        {
+            System.RequireForUpdate(query);
+        }
+
+        var handle = new QueryHandle(
+            query,
+            disposeOnDestroy,
+            _withTempEntities,
+            _forEachEntity,
+            _withTempChunks,
+            _forEachChunk);
+
+        if (disposeOnDestroy)
+        {
+            _registerDisposable(handle);
+        }
+
+        return handle;
+    }
 }
 
 /// <summary>
