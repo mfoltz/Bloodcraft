@@ -59,29 +59,42 @@
 //     readonly SystemWorkBuilder.ComponentTypeHandleHandle<Movement> _movementHandle;
 //
 //     public BuilderDrivenSystem()
-//         : base(CreateWork(out _movementLookup, out _movementHandle))
+//         : base(CreateWork(out var artifacts))
 //     {
+//         _movementLookup = artifacts.MovementLookup;
+//         _movementHandle = artifacts.MovementHandle;
 //     }
 //
-//     static ISystemWork CreateWork(
-//         out SystemWorkBuilder.ComponentLookupHandle<Movement> movementLookup,
-//         out SystemWorkBuilder.ComponentTypeHandleHandle<Movement> movementHandle)
+//     static ISystemWork CreateWork(out BuilderArtifacts artifacts)
 //     {
 //         var builder = new SystemWorkBuilder()
-//             .WithQuery((ref EntityQueryBuilder q) =>
+//             .WithQuery(static (ref EntityQueryBuilder queryBuilder) =>
 //             {
-//                 q.AddAll(ComponentType.ReadOnly(Il2CppType.Of<Movement>()));
-//             });
+//                 queryBuilder.AddAll(ComponentType.ReadOnly(Il2CppType.Of<Movement>()));
+//             })
+//             .RequireForUpdate(true);
 //
-//         movementLookup = builder.WithLookup<Movement>(true);
-//         movementHandle = builder.WithComponentTypeHandle<Movement>(true);
+//         var movementLookup = builder.WithLookup<Movement>(isReadOnly: true);
+//         var movementHandle = builder.WithComponentTypeHandle<Movement>(isReadOnly: true);
+//         QueryHandle movementQuery = null;
+//
+//         builder.OnCreate(context =>
+//         {
+//             movementQuery = context.WithQuery(context.Query, requireForUpdate: true);
+//         });
 //
 //         builder.OnUpdate(context =>
 //         {
-//             var query = context.WithQuery(context.Query);
-//             SystemWorkBuilder.ForEachChunk(context, query, chunk =>
+//             if (movementQuery == null)
 //             {
-//                 var movementArray = chunk.GetNativeArray(movementHandle);
+//                 return;
+//             }
+//
+//             var system = (BuilderDrivenSystem)context.System;
+//
+//             SystemWorkBuilder.ForEachChunk(context, movementQuery, chunk =>
+//             {
+//                 var movementArray = chunk.GetNativeArray(system._movementHandle);
 //                 var entities = chunk.Entities;
 //
 //                 for (int i = 0; i < chunk.Count; ++i)
@@ -93,7 +106,27 @@
 //             });
 //         });
 //
+//         builder.OnDestroy(context =>
+//         {
+//             movementQuery = null;
+//         });
+//
+//         artifacts = new BuilderArtifacts(movementLookup, movementHandle);
 //         return builder.Build();
+//     }
+//
+//     sealed class BuilderArtifacts
+//     {
+//         public BuilderArtifacts(
+//             SystemWorkBuilder.ComponentLookupHandle<Movement> movementLookup,
+//             SystemWorkBuilder.ComponentTypeHandleHandle<Movement> movementHandle)
+//         {
+//             MovementLookup = movementLookup;
+//             MovementHandle = movementHandle;
+//         }
+//
+//         public SystemWorkBuilder.ComponentLookupHandle<Movement> MovementLookup { get; }
+//         public SystemWorkBuilder.ComponentTypeHandleHandle<Movement> MovementHandle { get; }
 //     }
 // }
 
