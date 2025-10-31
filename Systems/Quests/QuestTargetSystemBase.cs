@@ -16,7 +16,21 @@ public class QuestTargetSystem : SystemBase
     static readonly HashSet<string> _filteredStrings = QuestService.FilteredTargetUnits;
     static readonly HashSet<PrefabGUID> _shardBearers = [..QuestService.ShardBearers];
     public static NativeParallelMultiHashMap<PrefabGUID, Entity>.ReadOnly TargetCache
-        => Instance?._targetUnits.IsCreated == true ? Instance._targetUnits.AsReadOnly() : default;
+    {
+        get
+        {
+            var instance = Instance;
+
+            if (instance == null)
+            {
+                return default;
+            }
+
+            return instance._targetUnits.IsCreated
+                ? instance._targetUnits.AsReadOnly()
+                : default;
+        }
+    }
 
     NativeParallelMultiHashMap<PrefabGUID, Entity> _targetUnits;
     NativeParallelHashSet<Entity> _imprisonedUnits;
@@ -180,5 +194,41 @@ public class QuestTargetSystem : SystemBase
                 sequenceRequest.Scale,
                 sequenceRequest.Secondary);
         }
+    }
+
+    protected override void OnDestroy()
+    {
+        if (_targetUnits.IsCreated)
+        {
+            _targetUnits.Clear();
+            _targetUnits.Dispose();
+            _targetUnits = default;
+        }
+
+        if (_blacklistedUnits.IsCreated)
+        {
+            _blacklistedUnits.Clear();
+            _blacklistedUnits.Dispose();
+            _blacklistedUnits = default;
+        }
+
+        if (_imprisonedUnits.IsCreated)
+        {
+            _imprisonedUnits.Clear();
+            _imprisonedUnits.Dispose();
+            _imprisonedUnits = default;
+        }
+
+        _targetQuery = default;
+        _imprisonedQuery = default;
+        _prefabGuidHandle = default;
+        _buffHandle = default;
+        _entityHandle = default;
+        _entityStorageInfoLookup = default;
+        _serverGameManager = null;
+
+        Instance = null;
+
+        base.OnDestroy();
     }
 }
