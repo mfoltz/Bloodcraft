@@ -10,6 +10,10 @@ namespace Bloodcraft.Factory;
 /// <summary>
 /// Provides a fluent builder for constructing lightweight <see cref="ISystemWork"/> implementations.
 /// </summary>
+/// <remarks>
+/// When allocating persistent native containers inside lifecycle callbacks, use
+/// <see cref="SystemContext.RegisterDisposable(System.IDisposable)"/> to ensure the resources are automatically disposed.
+/// </remarks>
 public sealed class SystemWorkBuilder
 {
     /// <summary>

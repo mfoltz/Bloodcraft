@@ -56,6 +56,10 @@ public partial class QuestTargetSystem
             _imprisonedUnits = new NativeParallelHashSet<Entity>(512, Allocator.Persistent);
             _blacklistedUnits = new NativeParallelHashSet<PrefabGUID>(256, Allocator.Persistent);
 
+            context.RegisterDisposable(_targetUnits);
+            context.RegisterDisposable(_imprisonedUnits);
+            context.RegisterDisposable(_blacklistedUnits);
+
             _targetQuery = context.WithQuery(context.Query, requireForUpdate: true);
             _imprisonedQuery = context.CreateQuery(ConfigureImprisonedQuery);
 
@@ -160,21 +164,18 @@ public partial class QuestTargetSystem
             if (_targetUnits.IsCreated)
             {
                 _targetUnits.Clear();
-                _targetUnits.Dispose();
                 _targetUnits = default;
             }
 
             if (_imprisonedUnits.IsCreated)
             {
                 _imprisonedUnits.Clear();
-                _imprisonedUnits.Dispose();
                 _imprisonedUnits = default;
             }
 
             if (_blacklistedUnits.IsCreated)
             {
                 _blacklistedUnits.Clear();
-                _blacklistedUnits.Dispose();
                 _blacklistedUnits = default;
             }
 
