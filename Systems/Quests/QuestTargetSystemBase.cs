@@ -1,6 +1,8 @@
-﻿using Bloodcraft.Services;
+using System;
+using System.Collections.Generic;
+using Bloodcraft.Factory;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
-using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -8,187 +10,42 @@ using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft.Systems.Quests;
-public class QuestTargetSystem : SystemBase
+public partial class QuestTargetSystem : VSystemBase<QuestTargetSystem.Work>
 {
-    ServerGameManager _serverGameManager;
-    public static QuestTargetSystem Instance { get; set; }
+    public static QuestTargetSystem Instance { get; private set; }
 
     static readonly HashSet<string> _filteredStrings = QuestService.FilteredTargetUnits;
-    static readonly HashSet<PrefabGUID> _shardBearers = [..QuestService.ShardBearers];
+    static readonly HashSet<PrefabGUID> _shardBearers = [.. QuestService.ShardBearers];
+
     public static NativeParallelMultiHashMap<PrefabGUID, Entity>.ReadOnly TargetCache
     {
         get
         {
-            var instance = Instance;
+            var work = Instance?.GetActiveWork();
 
-            if (instance == null)
+            if (work == null)
             {
                 return default;
             }
 
-            return instance._targetUnits.IsCreated
-                ? instance._targetUnits.AsReadOnly()
-                : default;
+            return work.TargetCache;
         }
     }
 
-    NativeParallelMultiHashMap<PrefabGUID, Entity> _targetUnits;
-    NativeParallelHashSet<Entity> _imprisonedUnits;
-    NativeParallelHashSet<PrefabGUID> _blacklistedUnits;
+    internal static IReadOnlyCollection<string> FilteredStrings => _filteredStrings;
 
-    EntityQuery _targetQuery;
-    EntityQuery _imprisonedQuery;
+    internal static IReadOnlyCollection<PrefabGUID> ShardBearers => _shardBearers;
 
-    ComponentTypeHandle<PrefabGUID> _prefabGuidHandle;
-    ComponentTypeHandle<Buff> _buffHandle;
-
-    EntityTypeHandle _entityHandle;
-    EntityStorageInfoLookup _entityStorageInfoLookup;
-    public override void OnCreate()
+    internal void PlayQueuedSequences(ServerGameManager serverGameManager)
     {
-        Instance = this;
-
-        _targetQuery = GetEntityQuery(new EntityQueryDesc
+        if (EqualityComparer<ServerGameManager>.Default.Equals(serverGameManager, default))
         {
-            All = new[]
-            {
-                ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
-                ComponentType.ReadOnly(Il2CppType.Of<Health>()),
-                ComponentType.ReadOnly(Il2CppType.Of<UnitLevel>()),
-                ComponentType.ReadOnly(Il2CppType.Of<UnitStats>()),
-                ComponentType.ReadOnly(Il2CppType.Of<Movement>()),
-                ComponentType.ReadOnly(Il2CppType.Of<AggroConsumer>())
-            },
-            None = new[]
-            {
-                ComponentType.ReadOnly(Il2CppType.Of<Minion>()),
-                ComponentType.ReadOnly(Il2CppType.Of<DestroyOnSpawn>()),
-                ComponentType.ReadOnly(Il2CppType.Of<Trader>()),
-                ComponentType.ReadOnly(Il2CppType.Of<BlockFeedBuff>())
-            },
-            Options = EntityQueryOptions.IncludeDisabled
-        });
-
-        _imprisonedQuery = GetEntityQuery(new EntityQueryDesc
-        {
-            All = new[]
-            {
-                ComponentType.ReadOnly(Il2CppType.Of<Buff>()),
-                ComponentType.ReadOnly(Il2CppType.Of<ImprisonedBuff>())
-            },
-            Options = EntityQueryOptions.IncludeDisabled
-        });
-
-        _targetUnits = new NativeParallelMultiHashMap<PrefabGUID, Entity>(1024, Allocator.Persistent);
-        _blacklistedUnits = new NativeParallelHashSet<PrefabGUID>(256, Allocator.Persistent);
-        _imprisonedUnits = new NativeParallelHashSet<Entity>(512, Allocator.Persistent);
-
-        _prefabGuidHandle = GetComponentTypeHandle<PrefabGUID>(true);
-        _buffHandle = GetComponentTypeHandle<Buff>(true);
-
-        _entityHandle = GetEntityTypeHandle();
-        _entityStorageInfoLookup = GetEntityStorageInfoLookup();
-
-        RequireForUpdate(_targetQuery);
-        Enabled = true;
-    }
-    public override void OnStartRunning()
-    {
-        _serverGameManager = World.GetExistingSystemManaged<ServerScriptMapper>().GetServerGameManager();
-        var lookup = World.GetExistingSystemManaged<PrefabCollectionSystem>()._SpawnableNameToPrefabGuidDictionary;
-
-        foreach (var kvp in lookup)
-        {
-            PrefabGUID prefabGuid = kvp.Value;
-            string prefabName = kvp.Key;
-
-            foreach (var filter in _filteredStrings)
-            {
-                if (prefabName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    _blacklistedUnits.Add(prefabGuid);
-                    break;
-                }
-            }
-        }
-
-        foreach (var prefabGuid in _shardBearers)
-        {
-            _blacklistedUnits.Add(prefabGuid);
-        }
-    }
-    public override void OnUpdate()
-    {
-        _imprisonedUnits.Clear();
-        _targetUnits.Clear();
-
-        _buffHandle.Update(this);
-        _prefabGuidHandle.Update(this);
-
-        _entityHandle.Update(this);
-        _entityStorageInfoLookup.Update(this);
-
-        var imprisonedChunks = _imprisonedQuery.ToArchetypeChunkArray(Allocator.Temp);
-        int imprisonedCount = 0;
-
-        try
-        {
-            foreach (var chunk in imprisonedChunks)
-            {
-                var buffs = chunk.GetNativeArray(_buffHandle);
-
-                for (int i = 0; i < chunk.Count; ++i)
-                {
-                    Entity entity = buffs[i].Target;
-
-                    if (_entityStorageInfoLookup.Exists(entity))
-                    {
-                        _imprisonedUnits.Add(buffs[i].Target);
-                        imprisonedCount++;
-                    }
-                }
-            }
-        }
-        finally
-        {
-            imprisonedChunks.Dispose();
-        }
-
-        var targetChunks = _targetQuery.ToArchetypeChunkArray(Allocator.Temp);
-        int targetCount = 0;
-
-        try
-        {
-            foreach (var chunk in targetChunks)
-            {
-                var prefabGuids = chunk.GetNativeArray(_prefabGuidHandle);
-                var entities = chunk.GetNativeArray(_entityHandle);
-
-                for (int i = 0; i < chunk.Count; ++i)
-                {
-                    PrefabGUID prefabGuid = prefabGuids[i];
-                    Entity entity = entities[i];
-
-                    if (!_entityStorageInfoLookup.Exists(entity))
-                        continue;
-                    else if (_blacklistedUnits.Contains(prefabGuid)
-                        || _imprisonedUnits.Contains(entity))
-                        continue;
-                    else
-                        _targetUnits.Add(prefabGuid, entity);
-                        targetCount++;
-                }
-            }
-        }
-        finally
-        {
-            targetChunks.Dispose();
+            return;
         }
 
         while (Sequences.TryDequeue(out var sequenceRequest))
         {
-            // Core.Log.LogWarning($"{sequenceRequest.SequenceName} = {sequenceRequest.SequenceGuid.GuidHash}");
-            _serverGameManager.PlaySequenceOnTarget(
+            serverGameManager.PlaySequenceOnTarget(
                 sequenceRequest.Target,
                 sequenceRequest.SequenceGuid,
                 sequenceRequest.Scale,
@@ -196,39 +53,9 @@ public class QuestTargetSystem : SystemBase
         }
     }
 
-    protected override void OnDestroy()
-    {
-        if (_targetUnits.IsCreated)
-        {
-            _targetUnits.Clear();
-            _targetUnits.Dispose();
-            _targetUnits = default;
-        }
+    internal void SetInstance() => Instance = this;
 
-        if (_blacklistedUnits.IsCreated)
-        {
-            _blacklistedUnits.Clear();
-            _blacklistedUnits.Dispose();
-            _blacklistedUnits = default;
-        }
+    internal static void ClearInstance() => Instance = null;
 
-        if (_imprisonedUnits.IsCreated)
-        {
-            _imprisonedUnits.Clear();
-            _imprisonedUnits.Dispose();
-            _imprisonedUnits = default;
-        }
-
-        _targetQuery = default;
-        _imprisonedQuery = default;
-        _prefabGuidHandle = default;
-        _buffHandle = default;
-        _entityHandle = default;
-        _entityStorageInfoLookup = default;
-        _serverGameManager = null;
-
-        Instance = null;
-
-        base.OnDestroy();
-    }
+    internal Work GetActiveWork() => base.Work;
 }

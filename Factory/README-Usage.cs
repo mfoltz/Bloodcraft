@@ -100,3 +100,9 @@
 // a partial work class skeleton that follows the patterns demonstrated above.
 // Copy the emitted code into your system and tailor the TODO sections to your
 // specific logic.
+// -----------------------------------------------------------------------------
+// Additional examples
+// -----------------------------------------------------------------------------
+// The quest target system (Systems/Quests/QuestTargetSystemBase.cs paired with
+// Factory/Quests/QuestTargetSystem.Work.cs) showcases coordinating multiple
+// query handles while maintaining native container caches across updates.
