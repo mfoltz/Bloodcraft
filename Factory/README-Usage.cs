@@ -8,6 +8,7 @@
 //     {
 //         SystemWorkBuilder.ComponentLookupHandle<Movement> _movementLookup;
 //         QueryHandle _trackedMinions;
+//         NativeParallelHashSet<Entity> _trackedEntities;
 //
 //         public void Build(ref EntityQueryBuilder builder)
 //         {
@@ -20,6 +21,9 @@
 //             _trackedMinions = context.WithQuery(context.Query);
 //
 //             _movementLookup = SystemWorkBuilder.CreateLookup<Movement>(context, isReadOnly: true);
+//
+//             _trackedEntities = new NativeParallelHashSet<Entity>(256, Allocator.Persistent);
+//             context.RegisterDisposable(_trackedEntities);
 //         }
 //
 //         public void OnUpdate(SystemContext context)
@@ -37,6 +41,12 @@
 //         public void OnDestroy(SystemContext context)
 //         {
 //             _trackedMinions = null;
+//
+//             if (_trackedEntities.IsCreated)
+//             {
+//                 _trackedEntities.Clear();
+//                 _trackedEntities = default;
+//             }
 //         }
 //     }
 // }

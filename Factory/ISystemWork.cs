@@ -139,6 +139,18 @@ public readonly struct SystemContext
     public bool Exists(Entity entity) => _exists(entity);
 
     /// <summary>
+    /// Registers a disposable resource to be released when the system is destroyed.
+    /// </summary>
+    /// <param name="disposable">The disposable resource to register.</param>
+    public void RegisterDisposable(IDisposable disposable)
+    {
+        if (disposable == null)
+            throw new ArgumentNullException(nameof(disposable));
+
+        _registerDisposable(disposable);
+    }
+
+    /// <summary>
     /// Creates a new <see cref="QueryHandle"/> using the supplied builder configuration.
     /// </summary>
     /// <param name="configure">Callback that configures the query builder.</param>
