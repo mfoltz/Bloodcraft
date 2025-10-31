@@ -11,7 +11,7 @@ namespace Bloodcraft.Factory;
 /// </summary>
 /// <typeparam name="TWork">Work definition executed by the system.</typeparam>
 public abstract class VSystemBase<TWork> : SystemBase, IRegistrar
-    where TWork : class, ISystemWork, new()
+    where TWork : class, ISystemWork
 {
     readonly List<Action<SystemBase>> _refreshActions = new();
 
@@ -19,7 +19,22 @@ public abstract class VSystemBase<TWork> : SystemBase, IRegistrar
     EntityStorageInfoLookup _entityStorageInfoLookup;
     EntityQuery _query;
 
-    protected TWork Work { get; private set; } = new();
+    protected TWork Work { get; }
+
+    protected VSystemBase()
+        : this(CreateDefaultWork())
+    {
+    }
+
+    protected VSystemBase(TWork work)
+    {
+        Work = work ?? throw new ArgumentNullException(nameof(work));
+    }
+
+    protected VSystemBase(Func<TWork> workFactory)
+        : this(CreateFromFactory(workFactory))
+    {
+    }
 
     /// <summary>
     /// Gets the entity type handle refreshed each update.
@@ -210,4 +225,25 @@ public abstract class VSystemBase<TWork> : SystemBase, IRegistrar
         WithTempChunks,
         ForEachChunk,
         Exists);
+
+    static TWork CreateDefaultWork()
+    {
+        var work = Activator.CreateInstance<TWork>();
+        if (work == null)
+            throw new InvalidOperationException($"Unable to create an instance of {typeof(TWork)}.");
+
+        return work;
+    }
+
+    static TWork CreateFromFactory(Func<TWork> workFactory)
+    {
+        if (workFactory == null)
+            throw new ArgumentNullException(nameof(workFactory));
+
+        var work = workFactory();
+        if (work == null)
+            throw new InvalidOperationException("Work factory produced a null instance.");
+
+        return work;
+    }
 }
