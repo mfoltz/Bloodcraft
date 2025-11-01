@@ -1136,6 +1136,94 @@ public sealed class SystemWorkBuilder
         ForEachChunk(context, queryHandle).ForEach(action);
 
     /// <summary>
+    /// Iterates each entity that is still tagged with <see cref="SpawnTag"/> using a temporary query scoped to the call.
+    /// </summary>
+    /// <param name="context">Active system context.</param>
+    /// <param name="configure">Optional descriptor configuration applied before executing the query.</param>
+    /// <param name="action">Action invoked for each matching entity.</param>
+    public static void ForEachSpawned(
+        SystemContext context,
+        Action<QueryDescriptor>? configure,
+        Action<EntityIterationContext> action)
+    {
+        if (context.System == null)
+            throw new ArgumentNullException(nameof(context));
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        var descriptor = CreateSpawnDescriptor(configure);
+
+        using var queryHandle = CreateScopedQuery(context, descriptor);
+        ForEachEntity(context, queryHandle, action);
+    }
+
+    /// <summary>
+    /// Iterates each entity marked with <see cref="SpawnTag"/> by constructing a temporary query against the provided manager.
+    /// </summary>
+    /// <param name="entityManager">Entity manager used to construct the query.</param>
+    /// <param name="configure">Optional descriptor configuration applied before executing the query.</param>
+    /// <param name="action">Action invoked for each matching entity.</param>
+    public static void ForEachSpawned(
+        EntityManager entityManager,
+        Action<QueryDescriptor>? configure,
+        Action<Entity> action)
+    {
+        if (entityManager == default)
+            throw new ArgumentNullException(nameof(entityManager));
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        var descriptor = CreateSpawnDescriptor(configure);
+
+        using var queryHandle = CreateScopedQuery(entityManager, descriptor);
+        queryHandle.ForEachEntity(action);
+    }
+
+    /// <summary>
+    /// Iterates each entity that is pending destruction via <see cref="DestroyTag"/> using a temporary query scoped to the call.
+    /// </summary>
+    /// <param name="context">Active system context.</param>
+    /// <param name="configure">Optional descriptor configuration applied before executing the query.</param>
+    /// <param name="action">Action invoked for each matching entity.</param>
+    public static void ForEachDestroyed(
+        SystemContext context,
+        Action<QueryDescriptor>? configure,
+        Action<EntityIterationContext> action)
+    {
+        if (context.System == null)
+            throw new ArgumentNullException(nameof(context));
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        var descriptor = CreateDestroyedDescriptor(configure);
+
+        using var queryHandle = CreateScopedQuery(context, descriptor);
+        ForEachEntity(context, queryHandle, action);
+    }
+
+    /// <summary>
+    /// Iterates each entity tagged for destruction using a temporary query built against the provided manager.
+    /// </summary>
+    /// <param name="entityManager">Entity manager used to construct the query.</param>
+    /// <param name="configure">Optional descriptor configuration applied before executing the query.</param>
+    /// <param name="action">Action invoked for each matching entity.</param>
+    public static void ForEachDestroyed(
+        EntityManager entityManager,
+        Action<QueryDescriptor>? configure,
+        Action<Entity> action)
+    {
+        if (entityManager == default)
+            throw new ArgumentNullException(nameof(entityManager));
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        var descriptor = CreateDestroyedDescriptor(configure);
+
+        using var queryHandle = CreateScopedQuery(entityManager, descriptor);
+        queryHandle.ForEachEntity(action);
+    }
+
+    /// <summary>
     /// Iterates each entity in the supplied query while exposing strongly typed accessors.
     /// </summary>
     /// <param name="context">Active system context.</param>
@@ -1282,6 +1370,144 @@ public sealed class SystemWorkBuilder
             for (int i = 0; i < entities.Length; ++i)
             {
                 action(new EntityIterationContext(context, entities[i]));
+            }
+        });
+    }
+
+    static QueryHandle CreateScopedQuery(SystemContext context, QueryDescriptor descriptor)
+    {
+        if (descriptor == null)
+            throw new ArgumentNullException(nameof(descriptor));
+
+        var builder = new EntityQueryBuilder(Allocator.Temp);
+
+        try
+        {
+            descriptor.Configure(ref builder);
+            var query = context.EntityManager.CreateEntityQuery(ref builder);
+
+            return new QueryHandle(
+                query,
+                ownsQuery: true,
+                (entityQuery, action) => context.WithTempEntities(entityQuery, action),
+                (entityQuery, action) => context.ForEachEntity(entityQuery, action),
+                (entityQuery, action) => context.WithTempChunks(entityQuery, action),
+                (entityQuery, action) => context.ForEachChunk(entityQuery, action));
+        }
+        finally
+        {
+            builder.Dispose();
+        }
+    }
+
+    static QueryHandle CreateScopedQuery(EntityManager entityManager, QueryDescriptor descriptor)
+    {
+        if (descriptor == null)
+            throw new ArgumentNullException(nameof(descriptor));
+
+        var builder = new EntityQueryBuilder(Allocator.Temp);
+
+        try
+        {
+            descriptor.Configure(ref builder);
+            var query = entityManager.CreateEntityQuery(ref builder);
+
+            return new QueryHandle(
+                query,
+                ownsQuery: true,
+                WithTempEntitiesScoped,
+                ForEachEntityScoped,
+                WithTempChunksScoped,
+                ForEachChunkScoped);
+        }
+        finally
+        {
+            builder.Dispose();
+        }
+    }
+
+    static QueryDescriptor CreateSpawnDescriptor(Action<QueryDescriptor>? configure)
+    {
+        var descriptor = QueryDescriptor.Create()
+            .WithAll<SpawnTag>()
+            .IncludeSpawnTag();
+
+        configure?.Invoke(descriptor);
+        return descriptor;
+    }
+
+    static QueryDescriptor CreateDestroyedDescriptor(Action<QueryDescriptor>? configure)
+    {
+        var descriptor = QueryDescriptor.Create()
+            .WithAll<DestroyTag>()
+            .IncludeDisabled();
+
+        configure?.Invoke(descriptor);
+        return descriptor;
+    }
+
+    static void WithTempEntitiesScoped(EntityQuery query, Action<NativeArray<Entity>> action)
+    {
+        if (query == default)
+            throw new ArgumentNullException(nameof(query));
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        var entities = query.ToEntityArray(Allocator.Temp);
+        try
+        {
+            action(entities);
+        }
+        finally
+        {
+            if (entities.IsCreated)
+                entities.Dispose();
+        }
+    }
+
+    static void ForEachEntityScoped(EntityQuery query, Action<Entity> action)
+    {
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        WithTempEntitiesScoped(query, entities =>
+        {
+            for (int i = 0; i < entities.Length; ++i)
+            {
+                action(entities[i]);
+            }
+        });
+    }
+
+    static void WithTempChunksScoped(EntityQuery query, Action<NativeArray<ArchetypeChunk>> action)
+    {
+        if (query == default)
+            throw new ArgumentNullException(nameof(query));
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        var chunks = query.ToArchetypeChunkArray(Allocator.Temp);
+        try
+        {
+            action(chunks);
+        }
+        finally
+        {
+            if (chunks.IsCreated)
+                chunks.Dispose();
+        }
+    }
+
+    static void ForEachChunkScoped(EntityQuery query, Action<ArchetypeChunk> action)
+    {
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        WithTempChunksScoped(query, chunks =>
+        {
+            for (int i = 0; i < chunks.Length; ++i)
+            {
+                action(chunks[i]);
             }
         });
     }

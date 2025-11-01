@@ -15,10 +15,13 @@ public abstract class VSystemBase<TWork> : SystemBase, IRegistrar
 {
     readonly List<Action<SystemBase>> _refreshActions = new();
     readonly List<IDisposable> _managedDisposables = new();
+    readonly List<Action<EntityCommandBuffer>> _destroyTagCleanupActions = new();
 
     EntityTypeHandle _entityTypeHandle;
     EntityStorageInfoLookup _entityStorageInfoLookup;
     EntityQuery _query;
+
+    EndSimulationEntityCommandBufferSystem? _destroyTagEcbSystem;
 
     protected TWork Work { get; }
 
@@ -82,6 +85,7 @@ public abstract class VSystemBase<TWork> : SystemBase, IRegistrar
     {
         Work.OnDestroy(CreateContext());
         _refreshActions.Clear();
+        _destroyTagCleanupActions.Clear();
         DisposeManagedResources();
         base.OnDestroy();
     }
@@ -91,6 +95,7 @@ public abstract class VSystemBase<TWork> : SystemBase, IRegistrar
         RefreshEntityHandles();
         RunRefreshActions();
         Work.OnUpdate(CreateContext());
+        RunDestroyTagCleanup();
     }
 
     /// <summary>
@@ -235,7 +240,40 @@ public abstract class VSystemBase<TWork> : SystemBase, IRegistrar
         WithTempChunks,
         ForEachChunk,
         Exists,
+        EnqueueDestroyTagCleanup,
         RegisterDisposable);
+
+    void EnqueueDestroyTagCleanup(Action<EntityCommandBuffer> action)
+    {
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        _destroyTagCleanupActions.Add(action);
+    }
+
+    void RunDestroyTagCleanup()
+    {
+        if (_destroyTagCleanupActions.Count == 0)
+            return;
+
+        var ecbSystem = GetDestroyTagEcbSystem();
+        var commandBuffer = ecbSystem.CreateCommandBuffer();
+
+        for (int i = 0; i < _destroyTagCleanupActions.Count; ++i)
+        {
+            _destroyTagCleanupActions[i]?.Invoke(commandBuffer);
+        }
+
+        _destroyTagCleanupActions.Clear();
+    }
+
+    EndSimulationEntityCommandBufferSystem GetDestroyTagEcbSystem()
+    {
+        _destroyTagEcbSystem ??= World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>()
+            ?? World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
+
+        return _destroyTagEcbSystem;
+    }
 
     void DisposeManagedResources()
     {

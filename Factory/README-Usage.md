@@ -176,6 +176,43 @@ var builder = new SystemWorkBuilder()
     .WithQuery(spawnDescriptor);
 ```
 
+## Responding to spawn and destroy tags
+
+`SystemWorkBuilder.ForEachSpawned` and `SystemWorkBuilder.ForEachDestroyed` construct
+temporary queries that already include the necessary DOTS options to observe spawn- and
+destroy-tagged entities. They execute actions through the builder's disposal-safe
+iteration pipeline, ensuring native arrays are disposed automatically.
+
+```csharp
+builder.OnUpdate(context =>
+{
+    SystemWorkBuilder.ForEachSpawned(
+        context,
+        descriptor => descriptor
+            .WithAll<Minion>()
+            .WithAll<EntityOwner>(),
+        iterator =>
+        {
+            var entity = iterator.Entity;
+            // Inspect freshly spawned minions here.
+        });
+
+    SystemWorkBuilder.ForEachDestroyed(
+        context,
+        descriptor => descriptor.WithAll<MyComponent>(),
+        iterator =>
+        {
+            // Schedule cleanup that must run during ECB playback.
+            context.EnqueueDestroyTagCleanup(ecb =>
+                ecb.RemoveComponent<DestroyTag>(iterator.Entity));
+        });
+});
+```
+
+Harmony patches or other consumers that only have access to an `EntityManager` can use
+the overloads that accept a descriptor configuration delegate instead of a
+`SystemContext` instance.
+
 ## Singleton gating
 
 Systems that should only run when a DOTS singleton exists can register a dedicated query using
