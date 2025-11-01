@@ -53,8 +53,8 @@
         </ItemGroup>
 
         <ItemGroup>
-                <Compile Remove="Factory/README-Usage.cs" />
-                <None Include="Factory/README-Usage.cs" />
+                <Compile Remove="Factory/README-Usage.md" />
+                <None Include="Factory/README-Usage.md" />
         </ItemGroup>
 	
 	<Target Name="BuildToServer" AfterTargets="Build">
