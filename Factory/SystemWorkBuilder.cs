@@ -48,6 +48,26 @@ public sealed class SystemWorkBuilder
     }
 
     /// <summary>
+    /// Registers a descriptor executed during <see cref="ISystemWork.Build"/>.
+    /// </summary>
+    /// <param name="descriptor">Descriptor describing the query requirements.</param>
+    /// <returns>The current builder instance.</returns>
+    public SystemWorkBuilder WithQuery(QueryDescriptor descriptor)
+    {
+        if (descriptor == null)
+            throw new ArgumentNullException(nameof(descriptor));
+
+        _queryConfigurators.Add(descriptor.Configure);
+
+        if (descriptor.TryGetRequireForUpdate(out bool requireForUpdate))
+        {
+            _requireForUpdate = requireForUpdate;
+        }
+
+        return this;
+    }
+
+    /// <summary>
     /// <summary>
     /// Sets whether the constructed query should be required for update.
     /// </summary>

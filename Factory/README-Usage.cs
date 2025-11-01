@@ -10,10 +10,13 @@
 //         QueryHandle _trackedMinions;
 //         NativeParallelHashSet<Entity> _trackedEntities;
 //
+//         static readonly QueryDescriptor TrackedMinionsQuery = QueryDescriptor.Create()
+//             .WithAll<Movement>()
+//             .IncludeDisabled();
+//
 //         public void Build(ref EntityQueryBuilder builder)
 //         {
-//             builder.AddAll(ComponentType.ReadOnly(Il2CppType.Of<Movement>()));
-//             builder.WithOptions(EntityQueryOptions.IncludeDisabled);
+//             TrackedMinionsQuery.Configure(ref builder);
 //         }
 //
 //         public void OnCreate(SystemContext context)
@@ -67,12 +70,11 @@
 //
 //     static ISystemWork CreateWork(out BuilderArtifacts artifacts)
 //     {
+//         var descriptor = QueryDescriptor.Create()
+//             .WithAll<Movement>();
+//
 //         var builder = new SystemWorkBuilder()
-//             .WithQuery(static (ref EntityQueryBuilder queryBuilder) =>
-//             {
-//                 queryBuilder.AddAll(ComponentType.ReadOnly(Il2CppType.Of<Movement>()));
-//             })
-//             .RequireForUpdate(true);
+//             .WithQuery(descriptor);
 //
 //         var movementLookup = builder.WithLookup<Movement>(isReadOnly: true);
 //         var movementHandle = builder.WithComponentTypeHandle<Movement>(isReadOnly: true);

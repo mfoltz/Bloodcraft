@@ -161,7 +161,6 @@ internal static class SystemWorkGenerator
     {
         StringBuilder sb = new();
         sb.AppendLine("using Bloodcraft.Factory;");
-        sb.AppendLine("using Il2CppInterop.Runtime;");
         sb.AppendLine("using Unity.Entities;");
         sb.AppendLine();
 
@@ -181,38 +180,18 @@ internal static class SystemWorkGenerator
         sb.AppendLine("QueryHandle query;");
         sb.AppendLine();
 
+        List<string> descriptorLines = BuildDescriptorLines(
+            components,
+            anyComponents,
+            noneComponents,
+            includeDisabled,
+            requireForUpdateOverride: requireForUpdate ? null : false);
+
+        AppendDescriptorDeclaration(sb, "var descriptor", descriptorLines, string.Empty);
+        sb.AppendLine();
+
         sb.AppendLine("var builder = new SystemWorkBuilder()");
-        sb.AppendLine("    .WithQuery(static (ref EntityQueryBuilder queryBuilder) =>");
-        sb.AppendLine("    {");
-
-        foreach (ComponentRequest component in components)
-        {
-            sb.AppendLine($"        queryBuilder.AddAll(ComponentType.{GetAccessMode(component)}(Il2CppType.Of<{component.TypeName}>()));");
-        }
-
-        foreach (string anyComponent in anyComponents)
-        {
-            sb.AppendLine($"        queryBuilder.AddAny(ComponentType.ReadOnly(Il2CppType.Of<{anyComponent}>()));");
-        }
-
-        foreach (string noneComponent in noneComponents)
-        {
-            sb.AppendLine($"        queryBuilder.AddNone(ComponentType.ReadOnly(Il2CppType.Of<{noneComponent}>()));");
-        }
-
-        if (includeDisabled)
-        {
-            sb.AppendLine("        queryBuilder.WithOptions(EntityQueryOptions.IncludeDisabled);");
-        }
-
-        sb.AppendLine("    })");
-
-        if (!requireForUpdate)
-        {
-            sb.AppendLine("    .RequireForUpdate(false)");
-        }
-
-        sb.AppendLine(";");
+        sb.AppendLine("    .WithQuery(descriptor);");
         sb.AppendLine();
 
         foreach (ComponentRequest component in components)
@@ -301,7 +280,6 @@ internal static class SystemWorkGenerator
     {
         StringBuilder sb = new();
         sb.AppendLine("using Bloodcraft.Factory;");
-        sb.AppendLine("using Il2CppInterop.Runtime;");
         sb.AppendLine("using Unity.Entities;");
         sb.AppendLine();
         sb.AppendLine("namespace Bloodcraft.Systems;");
@@ -326,6 +304,19 @@ internal static class SystemWorkGenerator
             }
         }
 
+        sb.AppendLine();
+
+        List<string> descriptorLines = BuildDescriptorLines(
+            components,
+            anyComponents,
+            noneComponents,
+            includeDisabled,
+            requireForUpdateOverride: requireForUpdate ? null : false);
+
+        AppendDescriptorDeclaration(sb, "static readonly QueryDescriptor PrimaryQuery", descriptorLines, "        ");
+
+        sb.AppendLine();
+
         sb.AppendLine("        QueryHandle _query;");
 
         if (!requireForUpdate)
@@ -337,26 +328,7 @@ internal static class SystemWorkGenerator
         sb.AppendLine();
         sb.AppendLine("        public void Build(ref EntityQueryBuilder builder)");
         sb.AppendLine("        {");
-        foreach (ComponentRequest component in components)
-        {
-            sb.AppendLine($"            builder.AddAll(ComponentType.{GetAccessMode(component)}(Il2CppType.Of<{component.TypeName}>()));");
-        }
-
-        foreach (string anyComponent in anyComponents)
-        {
-            sb.AppendLine($"            builder.AddAny(ComponentType.ReadOnly(Il2CppType.Of<{anyComponent}>()));");
-        }
-
-        foreach (string noneComponent in noneComponents)
-        {
-            sb.AppendLine($"            builder.AddNone(ComponentType.ReadOnly(Il2CppType.Of<{noneComponent}>()));");
-        }
-
-        if (includeDisabled)
-        {
-            sb.AppendLine("            builder.WithOptions(EntityQueryOptions.IncludeDisabled);");
-        }
-
+        sb.AppendLine("            PrimaryQuery.Configure(ref builder);");
         sb.AppendLine("        }");
         sb.AppendLine();
         sb.AppendLine("        public void OnCreate(SystemContext context)");
@@ -440,8 +412,69 @@ internal static class SystemWorkGenerator
         return sb.ToString();
     }
 
-    static string GetAccessMode(ComponentRequest component) =>
-        component.IsReadOnly ? "ReadOnly" : "ReadWrite";
+
+    static List<string> BuildDescriptorLines(
+        IReadOnlyList<ComponentRequest> components,
+        IReadOnlyCollection<string> anyComponents,
+        IReadOnlyCollection<string> noneComponents,
+        bool includeDisabled,
+        bool? requireForUpdateOverride)
+    {
+        List<string> lines = new();
+
+        foreach (ComponentRequest component in components)
+        {
+            lines.Add(GetWithAllInvocation(component));
+        }
+
+        foreach (string anyComponent in anyComponents)
+        {
+            lines.Add($".WithAny<{anyComponent}>()");
+        }
+
+        foreach (string noneComponent in noneComponents)
+        {
+            lines.Add($".WithNone<{noneComponent}>()");
+        }
+
+        if (includeDisabled)
+        {
+            lines.Add(".IncludeDisabled()");
+        }
+
+        if (requireForUpdateOverride.HasValue)
+        {
+            lines.Add($".RequireForUpdate({requireForUpdateOverride.Value.ToString().ToLowerInvariant()})");
+        }
+
+        return lines;
+    }
+
+    static void AppendDescriptorDeclaration(StringBuilder sb, string declaration, IReadOnlyList<string> lines, string indent)
+    {
+        if (lines.Count > 0)
+        {
+            sb.AppendLine($"{indent}{declaration} = QueryDescriptor.Create()");
+
+            for (int i = 0; i < lines.Count; ++i)
+            {
+                bool isLast = i == lines.Count - 1;
+                sb.AppendLine($"{indent}    {lines[i]}{(isLast ? ";" : string.Empty)}");
+            }
+
+            return;
+        }
+
+        sb.AppendLine($"{indent}{declaration} = QueryDescriptor.Create();");
+    }
+
+    static string GetWithAllInvocation(ComponentRequest component)
+    {
+        if (component.IsReadOnly)
+            return $".WithAll<{component.TypeName}>()";
+
+        return $".WithAll<{component.TypeName}>(QueryDescriptor.AccessMode.ReadWrite)";
+    }
 
     static string ToIdentifier(string typeName)
     {

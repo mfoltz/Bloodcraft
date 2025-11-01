@@ -191,6 +191,23 @@ public readonly struct SystemContext
     }
 
     /// <summary>
+    /// Creates a new <see cref="QueryHandle"/> using the supplied descriptor configuration.
+    /// </summary>
+    /// <param name="descriptor">Descriptor describing the query requirements.</param>
+    /// <returns>A handle representing the created query.</returns>
+    public QueryHandle CreateQuery(QueryDescriptor descriptor)
+    {
+        if (descriptor == null)
+            throw new ArgumentNullException(nameof(descriptor));
+
+        bool requireForUpdate = descriptor.TryGetRequireForUpdate(out bool require)
+            ? require
+            : false;
+
+        return CreateQuery(descriptor.Configure, requireForUpdate);
+    }
+
+    /// <summary>
     /// Wraps an existing <see cref="EntityQuery"/> in a <see cref="QueryHandle"/>.
     /// </summary>
     /// <param name="query">The query being wrapped.</param>
@@ -222,6 +239,7 @@ public readonly struct SystemContext
 
         return handle;
     }
+
 }
 
 /// <summary>
