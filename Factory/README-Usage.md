@@ -162,6 +162,41 @@ public sealed class BuilderDrivenSystem : VSystemBase<ISystemWork>
 }
 ```
 
+## Spawn-tag queries
+
+Use <code>IncludeSpawnTag()</code> when a query should target entities that are still marked with the spawn tag. This is useful
+for systems that need to process freshly spawned prefabs before other conversions strip the marker.
+
+```csharp
+var spawnDescriptor = QueryDescriptor.Create()
+    .WithAll<HarvestableResource>()
+    .IncludeSpawnTag();
+
+var builder = new SystemWorkBuilder()
+    .WithQuery(spawnDescriptor);
+```
+
+## Singleton gating
+
+Systems that should only run when a DOTS singleton exists can register a dedicated query using
+<code>RequireSingleton&lt;TSingleton&gt;()</code>. The builder automatically marks the query as required for update and includes the
+necessary <code>EntityQueryOptions.IncludeSystems</code> flag.
+
+```csharp
+var singletonQuery = builder.RequireSingleton<GameSettingsSystem.Singleton>();
+
+builder.OnUpdate(context =>
+{
+    var handle = singletonQuery.Handle;
+    if (handle == null || handle.IsDisposed)
+    {
+        return;
+    }
+
+    // Access the singleton components safely here.
+});
+```
+
 ## Migration notes
 
 * Replace direct calls to `context.WithQuery`/`context.CreateQuery` with the new builder

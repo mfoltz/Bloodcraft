@@ -2,6 +2,7 @@ using System;
 using Bloodcraft.Factory;
 using Bloodcraft.Services;
 using ProjectM;
+using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
@@ -34,6 +35,7 @@ public partial class QuestTargetSystem
         readonly ISystemWork _implementation;
         readonly SystemWorkBuilder.QueryHandleHolder _targetQuery;
         readonly SystemWorkBuilder.QueryHandleHolder _imprisonedQuery;
+        readonly SystemWorkBuilder.QueryHandleHolder _networkSingleton;
         readonly SystemWorkBuilder.ComponentTypeHandleHandle<PrefabGUID> _prefabGuidHandle;
         readonly SystemWorkBuilder.ComponentTypeHandleHandle<Buff> _buffHandle;
 
@@ -60,6 +62,7 @@ public partial class QuestTargetSystem
 
             var imprisonedDescriptor = ImprisonedQueryDescriptor;
             _imprisonedQuery = builder.WithQuery(ref imprisonedDescriptor);
+            _networkSingleton = builder.RequireSingleton<NetworkIdSystem.Singleton>();
 
             _prefabGuidHandle = builder.WithComponentTypeHandle<PrefabGUID>(isReadOnly: true);
             _buffHandle = builder.WithComponentTypeHandle<Buff>(isReadOnly: true);
@@ -111,6 +114,12 @@ public partial class QuestTargetSystem
 
             builder.OnUpdate(context =>
             {
+                var networkSingleton = _networkSingleton.Handle;
+                if (networkSingleton == null || networkSingleton.IsDisposed)
+                {
+                    return;
+                }
+
                 var targetQuery = _targetQuery.Handle;
                 var imprisonedQuery = _imprisonedQuery.Handle;
 
