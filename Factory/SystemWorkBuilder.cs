@@ -24,6 +24,7 @@ public sealed class SystemWorkBuilder
 
     readonly List<QueryConfigurator> _queryConfigurators = new();
     readonly List<Action<SystemContext>> _resourceInitializers = new();
+    readonly List<Action<SystemContext>> _resourceTeardowns = new();
 
     Action<SystemContext>? _onCreate;
     Action<SystemContext>? _onStartRunning;
@@ -65,6 +66,98 @@ public sealed class SystemWorkBuilder
         }
 
         return this;
+    }
+
+    /// <summary>
+    /// Registers a handle that exposes the system's primary query.
+    /// </summary>
+    /// <param name="requireForUpdate">Whether to mark the primary query as required for update.</param>
+    /// <returns>A holder exposing the wrapped query handle.</returns>
+    public QueryHandleHolder WithPrimaryQuery(bool requireForUpdate = true)
+    {
+        var holder = new QueryHandleHolder();
+
+        _requireForUpdate = requireForUpdate;
+
+        _resourceInitializers.Add(context =>
+        {
+            if (context.System == null)
+                throw new ArgumentNullException(nameof(context));
+
+            holder.Current = new QueryHandle(
+                context.Query,
+                ownsQuery: false,
+                (query, action) => context.WithTempEntities(query, action),
+                (query, action) => context.ForEachEntity(query, action),
+                (query, action) => context.WithTempChunks(query, action),
+                (query, action) => context.ForEachChunk(query, action));
+
+            if (requireForUpdate)
+            {
+                context.System.RequireForUpdate(context.Query);
+            }
+        });
+
+        _resourceTeardowns.Add(_ => holder.Current = null);
+
+        return holder;
+    }
+
+    /// <summary>
+    /// Registers a holder that creates a new query from the supplied descriptor during <see cref="ISystemWork.OnCreate"/>.
+    /// </summary>
+    /// <param name="descriptor">Descriptor describing the query requirements.</param>
+    /// <param name="disposeOnDestroy">Whether the created query should be disposed when the system is destroyed.</param>
+    /// <returns>A holder exposing the wrapped query handle.</returns>
+    public QueryHandleHolder WithQuery(ref QueryDescriptor descriptor, bool disposeOnDestroy = true)
+    {
+        if (descriptor == null)
+            throw new ArgumentNullException(nameof(descriptor));
+
+        var holder = new QueryHandleHolder();
+        var descriptorCopy = descriptor;
+
+        _resourceInitializers.Add(context =>
+        {
+            if (context.System == null)
+                throw new ArgumentNullException(nameof(context));
+
+            var builder = new EntityQueryBuilder(Allocator.Temp);
+
+            try
+            {
+                descriptorCopy.Configure(ref builder);
+                var query = context.EntityManager.CreateEntityQuery(ref builder);
+
+                if (descriptorCopy.TryGetRequireForUpdate(out bool requireForUpdate) && requireForUpdate)
+                {
+                    context.System.RequireForUpdate(query);
+                }
+
+                var handle = new QueryHandle(
+                    query,
+                    disposeOnDestroy,
+                    (entityQuery, action) => context.WithTempEntities(entityQuery, action),
+                    (entityQuery, action) => context.ForEachEntity(entityQuery, action),
+                    (entityQuery, action) => context.WithTempChunks(entityQuery, action),
+                    (entityQuery, action) => context.ForEachChunk(entityQuery, action));
+
+                if (disposeOnDestroy)
+                {
+                    context.RegisterDisposable(handle);
+                }
+
+                holder.Current = handle;
+            }
+            finally
+            {
+                builder.Dispose();
+            }
+        });
+
+        _resourceTeardowns.Add(_ => holder.Current = null);
+
+        return holder;
     }
 
     /// <summary>
@@ -150,6 +243,25 @@ public sealed class SystemWorkBuilder
     }
 
     /// <summary>
+    /// Exposes a managed <see cref="QueryHandle"/> instance to the caller.
+    /// </summary>
+    public sealed class QueryHandleHolder
+    {
+        QueryHandle? _handle;
+
+        internal QueryHandle? Current
+        {
+            get => _handle;
+            set => _handle = value;
+        }
+
+        /// <summary>
+        /// Gets the current query handle, if available.
+        /// </summary>
+        public QueryHandle? Handle => _handle;
+    }
+
+    /// <summary>
     /// Registers and exposes a <see cref="ComponentLookup{T}"/> refreshed each update.
     /// </summary>
     /// <typeparam name="T">Component type to lookup.</typeparam>
@@ -220,6 +332,7 @@ public sealed class SystemWorkBuilder
         return new DelegateSystemWork(
             _queryConfigurators.ToArray(),
             _resourceInitializers.ToArray(),
+            _resourceTeardowns.ToArray(),
             _requireForUpdate,
             _onCreate,
             _onStartRunning,
@@ -576,6 +689,7 @@ public sealed class SystemWorkBuilder
     {
         readonly QueryConfigurator[] _queryConfigurators;
         readonly Action<SystemContext>[] _resourceInitializers;
+        readonly Action<SystemContext>[] _resourceTeardowns;
         readonly bool _requireForUpdate;
         readonly Action<SystemContext>? _onCreate;
         readonly Action<SystemContext>? _onStartRunning;
@@ -586,6 +700,7 @@ public sealed class SystemWorkBuilder
         public DelegateSystemWork(
             QueryConfigurator[] queryConfigurators,
             Action<SystemContext>[] resourceInitializers,
+            Action<SystemContext>[] resourceTeardowns,
             bool requireForUpdate,
             Action<SystemContext>? onCreate,
             Action<SystemContext>? onStartRunning,
@@ -595,6 +710,7 @@ public sealed class SystemWorkBuilder
         {
             _queryConfigurators = queryConfigurators ?? Array.Empty<QueryConfigurator>();
             _resourceInitializers = resourceInitializers ?? Array.Empty<Action<SystemContext>>();
+            _resourceTeardowns = resourceTeardowns ?? Array.Empty<Action<SystemContext>>();
             _requireForUpdate = requireForUpdate;
             _onCreate = onCreate;
             _onStartRunning = onStartRunning;
@@ -632,7 +748,14 @@ public sealed class SystemWorkBuilder
         public void OnStopRunning(SystemContext context) =>
             _onStopRunning?.Invoke(context);
 
-        public void OnDestroy(SystemContext context) =>
+        public void OnDestroy(SystemContext context)
+        {
+            for (int i = 0; i < _resourceTeardowns.Length; ++i)
+            {
+                _resourceTeardowns[i](context);
+            }
+
             _onDestroy?.Invoke(context);
+        }
     }
 }
