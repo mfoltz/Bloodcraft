@@ -490,6 +490,58 @@ public sealed class SystemWorkBuilder
         public bool IsReadOnly => _isReadOnly;
     }
 
+    internal sealed class LookupCache
+    {
+        readonly Dictionary<object, object> _componentLookups = new();
+        readonly Dictionary<object, object> _bufferLookups = new();
+
+        public void RegisterComponent<T>(ComponentLookupHandle<T> handle)
+        {
+            if (handle == null)
+                throw new ArgumentNullException(nameof(handle));
+
+            _componentLookups[handle] = handle.Lookup;
+        }
+
+        public void RegisterBuffer<T>(BufferLookupHandle<T> handle)
+        {
+            if (handle == null)
+                throw new ArgumentNullException(nameof(handle));
+
+            _bufferLookups[handle] = handle.Lookup;
+        }
+
+        public bool TryGetComponent<T>(ComponentLookupHandle<T> handle, out ComponentLookup<T> lookup)
+        {
+            if (handle == null)
+                throw new ArgumentNullException(nameof(handle));
+
+            if (_componentLookups.TryGetValue(handle, out var value) && value is ComponentLookup<T> typedLookup)
+            {
+                lookup = typedLookup;
+                return true;
+            }
+
+            lookup = default;
+            return false;
+        }
+
+        public bool TryGetBuffer<T>(BufferLookupHandle<T> handle, out BufferLookup<T> lookup)
+        {
+            if (handle == null)
+                throw new ArgumentNullException(nameof(handle));
+
+            if (_bufferLookups.TryGetValue(handle, out var value) && value is BufferLookup<T> typedLookup)
+            {
+                lookup = typedLookup;
+                return true;
+            }
+
+            lookup = default;
+            return false;
+        }
+    }
+
     /// <summary>
     /// Represents the context provided to chunk iteration callbacks.
     /// </summary>
@@ -501,17 +553,25 @@ public sealed class SystemWorkBuilder
         /// <param name="context">Active system context.</param>
         /// <param name="chunk">Chunk being processed.</param>
         /// <param name="entities">Entity array backing the chunk.</param>
-        public ChunkIterationContext(SystemContext context, ArchetypeChunk chunk, NativeArray<Entity> entities)
+        /// <param name="lookupCache">Cache that stores refreshed lookup instances.</param>
+        internal ChunkIterationContext(
+            SystemContext context,
+            ArchetypeChunk chunk,
+            NativeArray<Entity> entities,
+            LookupCache? lookupCache = null)
         {
             Context = context;
             Chunk = chunk;
             Entities = entities;
+            _lookupCache = lookupCache;
         }
 
         /// <summary>
         /// Gets the active system context.
         /// </summary>
         public SystemContext Context { get; }
+
+        readonly LookupCache? _lookupCache;
 
         /// <summary>
         /// Gets the chunk currently being processed.
@@ -527,6 +587,13 @@ public sealed class SystemWorkBuilder
         /// Gets the native array of entities contained in the chunk.
         /// </summary>
         public NativeArray<Entity> Entities { get; }
+
+        /// <summary>
+        /// Determines whether the supplied entity currently exists.
+        /// </summary>
+        /// <param name="entity">Entity to validate.</param>
+        /// <returns><see langword="true"/> when the entity exists; otherwise, <see langword="false"/>.</returns>
+        public bool Exists(Entity entity) => Context.Exists(entity);
 
         /// <summary>
         /// Gets a <see cref="NativeArray{T}"/> for the supplied component handle.
@@ -545,12 +612,138 @@ public sealed class SystemWorkBuilder
         /// <summary>
         /// Gets the latest <see cref="ComponentLookup{T}"/> for the supplied handle.
         /// </summary>
-        public ComponentLookup<T> GetLookup<T>(ComponentLookupHandle<T> handle) => handle.Lookup;
+        public ComponentLookup<T> GetLookup<T>(ComponentLookupHandle<T> handle) =>
+            ResolveComponentLookup(handle);
 
         /// <summary>
         /// Gets the latest <see cref="BufferLookup{T}"/> for the supplied handle.
         /// </summary>
-        public BufferLookup<T> GetLookup<T>(BufferLookupHandle<T> handle) => handle.Lookup;
+        public BufferLookup<T> GetLookup<T>(BufferLookupHandle<T> handle) =>
+            ResolveBufferLookup(handle);
+
+        /// <summary>
+        /// Determines whether the specified entity has the requested component.
+        /// </summary>
+        /// <typeparam name="T">Component type to verify.</typeparam>
+        /// <param name="handle">Lookup handle used to access the component.</param>
+        /// <param name="entity">Entity being inspected.</param>
+        /// <returns><see langword="true"/> if the component is present; otherwise, <see langword="false"/>.</returns>
+        public bool HasComponent<T>(ComponentLookupHandle<T> handle, Entity entity)
+        {
+            if (handle == null)
+                throw new ArgumentNullException(nameof(handle));
+
+            if (!Exists(entity))
+                return false;
+
+            var lookup = ResolveComponentLookup(handle);
+            return lookup.HasComponent(entity);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the specified component for the entity.
+        /// </summary>
+        /// <typeparam name="T">Component type to retrieve.</typeparam>
+        /// <param name="handle">Lookup handle used to access the component.</param>
+        /// <param name="entity">Entity being inspected.</param>
+        /// <param name="component">When this method returns, contains the component value if found.</param>
+        /// <returns><see langword="true"/> when the component is available; otherwise, <see langword="false"/>.</returns>
+        public bool TryGetComponent<T>(ComponentLookupHandle<T> handle, Entity entity, out T component)
+        {
+            if (handle == null)
+                throw new ArgumentNullException(nameof(handle));
+
+            if (!HasComponent(handle, entity))
+            {
+                component = default!;
+                return false;
+            }
+
+            var lookup = ResolveComponentLookup(handle);
+            component = lookup[entity];
+            return true;
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the specified buffer for the entity.
+        /// </summary>
+        /// <typeparam name="T">Buffer element type to retrieve.</typeparam>
+        /// <param name="handle">Lookup handle used to access the buffer.</param>
+        /// <param name="entity">Entity being inspected.</param>
+        /// <param name="buffer">When this method returns, contains the buffer if found.</param>
+        /// <returns><see langword="true"/> when the buffer is available; otherwise, <see langword="false"/>.</returns>
+        public bool TryGetBuffer<T>(BufferLookupHandle<T> handle, Entity entity, out DynamicBuffer<T> buffer)
+        {
+            if (handle == null)
+                throw new ArgumentNullException(nameof(handle));
+
+            if (!Exists(entity))
+            {
+                buffer = default;
+                return false;
+            }
+
+            var lookup = ResolveBufferLookup(handle);
+
+            if (!lookup.HasBuffer(entity))
+            {
+                buffer = default;
+                return false;
+            }
+
+            buffer = lookup[entity];
+            return true;
+        }
+
+        internal void RegisterComponentLookup<T>(ComponentLookupHandle<T> handle)
+        {
+            _lookupCache?.RegisterComponent(handle);
+        }
+
+        internal void RegisterBufferLookup<T>(BufferLookupHandle<T> handle)
+        {
+            _lookupCache?.RegisterBuffer(handle);
+        }
+
+        ComponentLookup<T> ResolveComponentLookup<T>(ComponentLookupHandle<T> handle)
+        {
+            if (_lookupCache != null)
+            {
+                if (_lookupCache.TryGetComponent(handle, out ComponentLookup<T> cachedLookup))
+                {
+                    return cachedLookup;
+                }
+
+                _lookupCache.RegisterComponent(handle);
+
+                if (_lookupCache.TryGetComponent(handle, out cachedLookup))
+                {
+                    return cachedLookup;
+                }
+            }
+
+            return handle.Lookup;
+        }
+
+        BufferLookup<T> ResolveBufferLookup<T>(BufferLookupHandle<T> handle)
+        {
+            if (_lookupCache != null)
+            {
+                if (_lookupCache.TryGetBuffer(handle, out BufferLookup<T> cachedLookup))
+                {
+                    return cachedLookup;
+                }
+
+                _lookupCache.RegisterBuffer(handle);
+
+                if (_lookupCache.TryGetBuffer(handle, out cachedLookup))
+                {
+                    return cachedLookup;
+                }
+            }
+
+            return handle.Lookup;
+        }
     }
 
     /// <summary>
@@ -833,10 +1026,12 @@ public sealed class SystemWorkBuilder
         /// </summary>
         /// <param name="context">Active system context.</param>
         /// <param name="entity">Entity being processed.</param>
-        public EntityIterationContext(SystemContext context, Entity entity)
+        /// <param name="lookupCache">Cache that stores refreshed lookup instances.</param>
+        internal EntityIterationContext(SystemContext context, Entity entity, LookupCache? lookupCache = null)
         {
             Context = context;
             Entity = entity;
+            _lookupCache = lookupCache;
         }
 
         /// <summary>
@@ -849,15 +1044,145 @@ public sealed class SystemWorkBuilder
         /// </summary>
         public Entity Entity { get; }
 
+        readonly LookupCache? _lookupCache;
+
+        /// <summary>
+        /// Gets a value indicating whether the entity exists.
+        /// </summary>
+        public bool Exists => Context.Exists(Entity);
+
         /// <summary>
         /// Gets the latest <see cref="ComponentLookup{T}"/> for the supplied handle.
         /// </summary>
-        public ComponentLookup<T> GetLookup<T>(ComponentLookupHandle<T> handle) => handle.Lookup;
+        public ComponentLookup<T> GetLookup<T>(ComponentLookupHandle<T> handle) =>
+            ResolveComponentLookup(handle);
 
         /// <summary>
         /// Gets the latest <see cref="BufferLookup{T}"/> for the supplied handle.
         /// </summary>
-        public BufferLookup<T> GetLookup<T>(BufferLookupHandle<T> handle) => handle.Lookup;
+        public BufferLookup<T> GetLookup<T>(BufferLookupHandle<T> handle) =>
+            ResolveBufferLookup(handle);
+
+        /// <summary>
+        /// Determines whether the entity has the specified component.
+        /// </summary>
+        /// <typeparam name="T">Component type to verify.</typeparam>
+        /// <param name="handle">Lookup handle used to access the component.</param>
+        /// <returns><see langword="true"/> if the component is present; otherwise, <see langword="false"/>.</returns>
+        public bool HasComponent<T>(ComponentLookupHandle<T> handle)
+        {
+            if (handle == null)
+                throw new ArgumentNullException(nameof(handle));
+
+            if (!Exists)
+                return false;
+
+            var lookup = ResolveComponentLookup(handle);
+            return lookup.HasComponent(Entity);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the specified component for the entity.
+        /// </summary>
+        /// <typeparam name="T">Component type to retrieve.</typeparam>
+        /// <param name="handle">Lookup handle used to access the component.</param>
+        /// <param name="component">When this method returns, contains the component value if found.</param>
+        /// <returns><see langword="true"/> when the component is available; otherwise, <see langword="false"/>.</returns>
+        public bool TryGetComponent<T>(ComponentLookupHandle<T> handle, out T component)
+        {
+            if (handle == null)
+                throw new ArgumentNullException(nameof(handle));
+
+            if (!HasComponent(handle))
+            {
+                component = default!;
+                return false;
+            }
+
+            var lookup = ResolveComponentLookup(handle);
+            component = lookup[Entity];
+            return true;
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the specified buffer for the entity.
+        /// </summary>
+        /// <typeparam name="T">Buffer element type to retrieve.</typeparam>
+        /// <param name="handle">Lookup handle used to access the buffer.</param>
+        /// <param name="buffer">When this method returns, contains the buffer if found.</param>
+        /// <returns><see langword="true"/> when the buffer is available; otherwise, <see langword="false"/>.</returns>
+        public bool TryGetBuffer<T>(BufferLookupHandle<T> handle, out DynamicBuffer<T> buffer)
+        {
+            if (handle == null)
+                throw new ArgumentNullException(nameof(handle));
+
+            if (!Exists)
+            {
+                buffer = default;
+                return false;
+            }
+
+            var lookup = ResolveBufferLookup(handle);
+
+            if (!lookup.HasBuffer(Entity))
+            {
+                buffer = default;
+                return false;
+            }
+
+            buffer = lookup[Entity];
+            return true;
+        }
+
+        internal void RegisterComponentLookup<T>(ComponentLookupHandle<T> handle)
+        {
+            _lookupCache?.RegisterComponent(handle);
+        }
+
+        internal void RegisterBufferLookup<T>(BufferLookupHandle<T> handle)
+        {
+            _lookupCache?.RegisterBuffer(handle);
+        }
+
+        ComponentLookup<T> ResolveComponentLookup<T>(ComponentLookupHandle<T> handle)
+        {
+            if (_lookupCache != null)
+            {
+                if (_lookupCache.TryGetComponent(handle, out ComponentLookup<T> cachedLookup))
+                {
+                    return cachedLookup;
+                }
+
+                _lookupCache.RegisterComponent(handle);
+
+                if (_lookupCache.TryGetComponent(handle, out cachedLookup))
+                {
+                    return cachedLookup;
+                }
+            }
+
+            return handle.Lookup;
+        }
+
+        BufferLookup<T> ResolveBufferLookup<T>(BufferLookupHandle<T> handle)
+        {
+            if (_lookupCache != null)
+            {
+                if (_lookupCache.TryGetBuffer(handle, out BufferLookup<T> cachedLookup))
+                {
+                    return cachedLookup;
+                }
+
+                _lookupCache.RegisterBuffer(handle);
+
+                if (_lookupCache.TryGetBuffer(handle, out cachedLookup))
+                {
+                    return cachedLookup;
+                }
+            }
+
+            return handle.Lookup;
+        }
     }
 
     /// <summary>
@@ -1317,11 +1642,17 @@ public sealed class SystemWorkBuilder
         }
 
         public RefRW<T> Resolve(in EntityIterationContext context) =>
-            _handle.Lookup.GetRefRW(context.Entity);
+            ResolveRef(context);
+
+        RefRW<T> ResolveRef(in EntityIterationContext context)
+        {
+            context.RegisterComponentLookup(_handle);
+            return _handle.Lookup.GetRefRW(context.Entity);
+        }
     }
 
     sealed class ReadOnlyComponentEntityAccessorProvider<T> : IEntityAccessorProvider<RefRO<T>>
-       
+
     {
         readonly ComponentLookupHandle<T> _handle;
 
@@ -1333,7 +1664,13 @@ public sealed class SystemWorkBuilder
         }
 
         public RefRO<T> Resolve(in EntityIterationContext context) =>
-            _handle.Lookup.GetRefRO(context.Entity);
+            ResolveRef(context);
+
+        RefRO<T> ResolveRef(in EntityIterationContext context)
+        {
+            context.RegisterComponentLookup(_handle);
+            return _handle.Lookup.GetRefRO(context.Entity);
+        }
     }
 
     static void ValidateIterationInputs(SystemContext context, QueryHandle queryHandle)
@@ -1349,13 +1686,14 @@ public sealed class SystemWorkBuilder
         if (action == null)
             throw new ArgumentNullException(nameof(action));
 
+        var lookupCache = new LookupCache();
         queryHandle.WithTempChunks(chunks =>
         {
             for (int i = 0; i < chunks.Length; ++i)
             {
                 var chunk = chunks[i];
                 var entities = chunk.GetNativeArray(context.EntityTypeHandle);
-                action(new ChunkIterationContext(context, chunk, entities));
+                action(new ChunkIterationContext(context, chunk, entities, lookupCache));
             }
         });
     }
@@ -1365,11 +1703,12 @@ public sealed class SystemWorkBuilder
         if (action == null)
             throw new ArgumentNullException(nameof(action));
 
+        var lookupCache = new LookupCache();
         queryHandle.WithTempEntities(entities =>
         {
             for (int i = 0; i < entities.Length; ++i)
             {
-                action(new EntityIterationContext(context, entities[i]));
+                action(new EntityIterationContext(context, entities[i], lookupCache));
             }
         });
     }
