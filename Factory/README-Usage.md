@@ -63,10 +63,9 @@ public sealed class TrackMinionsSystem : VSystemBase<TrackMinionsSystem.Work>
 
                 SystemWorkBuilder.ForEachEntity(context, queryHandle, iterator =>
                 {
-                    if (!context.Exists(iterator.Entity))
+                    if (!iterator.TryGetComponent(_movementLookup, out var movement))
                         return;
 
-                    var movement = iterator.GetLookup(_movementLookup)[iterator.Entity];
                     // Perform work here.
                 });
             });
@@ -85,6 +84,10 @@ public sealed class TrackMinionsSystem : VSystemBase<TrackMinionsSystem.Work>
     }
 }
 ```
+
+The `TryGetComponent` helper automatically verifies that the entity still exists before
+returning the requested component, eliminating the need for explicit
+`context.Exists` checks inside the iteration loop.
 
 ## Builder-driven systems
 
@@ -136,8 +139,13 @@ public sealed class BuilderDrivenSystem : VSystemBase<ISystemWork>
                     for (int i = 0; i < chunkContext.Count; ++i)
                     {
                         var entity = entities[i];
-                        var movement = movementArray[i];
-                        // Perform work here.
+
+                        if (!chunkContext.TryGetComponent(system._movementLookup, entity, out var movement))
+                        {
+                            continue;
+                        }
+
+                        // Perform work here with the validated movement component.
                     }
                 });
         });
@@ -161,6 +169,9 @@ public sealed class BuilderDrivenSystem : VSystemBase<ISystemWork>
     }
 }
 ```
+
+Within chunk iteration the same helper guarantees that the component is available for
+the current entity index before the loop processes it further.
 
 ## Spawn-tag queries
 

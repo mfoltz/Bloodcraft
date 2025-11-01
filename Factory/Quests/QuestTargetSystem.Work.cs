@@ -36,8 +36,8 @@ public partial class QuestTargetSystem
         readonly SystemWorkBuilder.QueryHandleHolder _targetQuery;
         readonly SystemWorkBuilder.QueryHandleHolder _imprisonedQuery;
         readonly SystemWorkBuilder.QueryHandleHolder _networkSingleton;
-        readonly SystemWorkBuilder.ComponentTypeHandleHandle<PrefabGUID> _prefabGuidHandle;
-        readonly SystemWorkBuilder.ComponentTypeHandleHandle<Buff> _buffHandle;
+        readonly SystemWorkBuilder.ComponentLookupHandle<PrefabGUID> _prefabGuidLookup;
+        readonly SystemWorkBuilder.ComponentLookupHandle<Buff> _buffLookup;
 
         QuestTargetSystem _system;
         ServerGameManager _serverGameManager;
@@ -64,8 +64,8 @@ public partial class QuestTargetSystem
             _imprisonedQuery = builder.WithQuery(ref imprisonedDescriptor);
             _networkSingleton = builder.RequireSingleton<NetworkIdSystem.Singleton>();
 
-            _prefabGuidHandle = builder.WithComponentTypeHandle<PrefabGUID>(isReadOnly: true);
-            _buffHandle = builder.WithComponentTypeHandle<Buff>(isReadOnly: true);
+            _prefabGuidLookup = builder.WithLookup<PrefabGUID>(isReadOnly: true);
+            _buffLookup = builder.WithLookup<Buff>(isReadOnly: true);
 
             builder.OnCreate(context =>
             {
@@ -137,14 +137,22 @@ public partial class QuestTargetSystem
                 _targetUnits.Clear();
 
                 SystemWorkBuilder.ForEachChunk(context, imprisonedQuery)
-                    .WithReadOnlyComponent(_buffHandle)
-                    .ForEach((chunkContext, buffs) =>
+                    .ForEach(chunkContext =>
                     {
+                        var entities = chunkContext.Entities;
+
                         for (int i = 0; i < chunkContext.Count; ++i)
                         {
-                            var target = buffs[i].Target;
+                            var entity = entities[i];
 
-                            if (context.Exists(target))
+                            if (!chunkContext.TryGetComponent(_buffLookup, entity, out var buff))
+                            {
+                                continue;
+                            }
+
+                            var target = buff.Target;
+
+                            if (chunkContext.Exists(target))
                             {
                                 _imprisonedUnits.Add(target);
                             }
@@ -152,17 +160,15 @@ public partial class QuestTargetSystem
                     });
 
                 SystemWorkBuilder.ForEachChunk(context, targetQuery)
-                    .WithReadOnlyComponent(_prefabGuidHandle)
-                    .ForEach((chunkContext, prefabGuids) =>
+                    .ForEach(chunkContext =>
                     {
                         var entities = chunkContext.Entities;
 
                         for (int i = 0; i < chunkContext.Count; ++i)
                         {
-                            var prefabGuid = prefabGuids[i];
                             var entity = entities[i];
 
-                            if (!context.Exists(entity))
+                            if (!chunkContext.TryGetComponent(_prefabGuidLookup, entity, out var prefabGuid))
                             {
                                 continue;
                             }
