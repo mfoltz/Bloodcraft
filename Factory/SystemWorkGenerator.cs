@@ -177,7 +177,7 @@ internal static class SystemWorkGenerator
             }
         }
 
-        sb.AppendLine("QueryHandle query;");
+        sb.AppendLine("SystemWorkBuilder.QueryHandleHolder query;");
         sb.AppendLine();
 
         List<string> descriptorLines = BuildDescriptorLines(
@@ -193,6 +193,8 @@ internal static class SystemWorkGenerator
         sb.AppendLine("var builder = new SystemWorkBuilder()");
         sb.AppendLine("    .WithQuery(descriptor);");
         sb.AppendLine();
+
+        sb.AppendLine($"query = builder.WithPrimaryQuery(requireForUpdate: {requireForUpdate.ToString().ToLowerInvariant()});");
 
         foreach (ComponentRequest component in components)
         {
@@ -210,17 +212,18 @@ internal static class SystemWorkGenerator
         }
 
         sb.AppendLine();
-        sb.AppendLine("builder.OnCreate(context =>");
-        sb.AppendLine("{");
-        sb.AppendLine($"    query = context.WithQuery(context.Query, requireForUpdate: {requireForUpdate.ToString().ToLowerInvariant()});");
-        sb.AppendLine("});");
-        sb.AppendLine();
         sb.AppendLine("builder.OnUpdate(context =>");
         sb.AppendLine("{");
+        sb.AppendLine("    var queryHandle = query.Handle;");
+        sb.AppendLine("    if (queryHandle == null || queryHandle.IsDisposed)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        return;");
+        sb.AppendLine("    }");
+        sb.AppendLine();
 
         if (components.Any(component => component.NeedsTypeHandle))
         {
-            sb.AppendLine("    SystemWorkBuilder.ForEachChunk(context, query, chunk =>");
+            sb.AppendLine("    SystemWorkBuilder.ForEachChunk(context, queryHandle, chunk =>");
             sb.AppendLine("    {");
             sb.AppendLine("        var entities = chunk.Entities;");
 
@@ -249,7 +252,7 @@ internal static class SystemWorkGenerator
         }
         else
         {
-            sb.AppendLine("    SystemWorkBuilder.ForEachEntity(context, query, iterator =>");
+            sb.AppendLine("    SystemWorkBuilder.ForEachEntity(context, queryHandle, iterator =>");
             sb.AppendLine("    {");
             sb.AppendLine("        var entity = iterator.Entity;");
 
@@ -289,18 +292,21 @@ internal static class SystemWorkGenerator
         sb.AppendLine("    public sealed class Work : ISystemWork");
         sb.AppendLine("    {");
 
+        sb.AppendLine("        readonly ISystemWork _implementation;");
+        sb.AppendLine("        readonly SystemWorkBuilder.QueryHandleHolder _query;");
+
         foreach (ComponentRequest component in components)
         {
             if (component.NeedsLookup)
             {
                 string lookupType = component.IsBuffer ? "BufferLookupHandle" : "ComponentLookupHandle";
-                sb.AppendLine($"        SystemWorkBuilder.{lookupType}<{component.TypeName}> {GetLookupFieldName(component)};");
+                sb.AppendLine($"        readonly SystemWorkBuilder.{lookupType}<{component.TypeName}> {GetLookupFieldName(component)};");
             }
 
             if (component.NeedsTypeHandle)
             {
                 string handleType = component.IsBuffer ? "BufferTypeHandleHandle" : "ComponentTypeHandleHandle";
-                sb.AppendLine($"        SystemWorkBuilder.{handleType}<{component.TypeName}> {GetHandleFieldName(component)};");
+                sb.AppendLine($"        readonly SystemWorkBuilder.{handleType}<{component.TypeName}> {GetHandleFieldName(component)};");
             }
         }
 
@@ -317,7 +323,91 @@ internal static class SystemWorkGenerator
 
         sb.AppendLine();
 
-        sb.AppendLine("        QueryHandle _query;");
+        sb.AppendLine("        public Work()");
+        sb.AppendLine("        {");
+        sb.AppendLine("            var descriptor = PrimaryQuery;");
+        sb.AppendLine();
+        sb.AppendLine("            var builder = new SystemWorkBuilder()");
+        sb.AppendLine("                .WithQuery(descriptor);");
+        sb.AppendLine();
+        sb.AppendLine($"            _query = builder.WithPrimaryQuery(requireForUpdate: {requireForUpdate.ToString().ToLowerInvariant()});");
+        sb.AppendLine();
+
+        foreach (ComponentRequest component in components)
+        {
+            if (component.NeedsLookup)
+            {
+                string method = component.IsBuffer ? "WithBuffer" : "WithLookup";
+                sb.AppendLine($"            {GetLookupFieldName(component)} = builder.{method}<{component.TypeName}>(isReadOnly: {component.IsReadOnly.ToString().ToLowerInvariant()});");
+            }
+
+            if (component.NeedsTypeHandle)
+            {
+                string method = component.IsBuffer ? "WithBufferTypeHandle" : "WithComponentTypeHandle";
+                sb.AppendLine($"            {GetHandleFieldName(component)} = builder.{method}<{component.TypeName}>(isReadOnly: {component.IsReadOnly.ToString().ToLowerInvariant()});");
+            }
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("            builder.OnUpdate(context =>");
+        sb.AppendLine("            {");
+        sb.AppendLine("                var queryHandle = _query.Handle;");
+        sb.AppendLine("                if (queryHandle == null || queryHandle.IsDisposed)");
+        sb.AppendLine("                {");
+        sb.AppendLine("                    return;");
+        sb.AppendLine("                }");
+        sb.AppendLine();
+
+        if (components.Any(component => component.NeedsTypeHandle))
+        {
+            sb.AppendLine("                SystemWorkBuilder.ForEachChunk(context, queryHandle, chunk =>");
+            sb.AppendLine("                {");
+            sb.AppendLine("                    var entities = chunk.Entities;");
+
+            foreach (ComponentRequest component in components.Where(c => c.NeedsTypeHandle))
+            {
+                string handleField = GetHandleFieldName(component);
+                string accessorName = GetChunkAccessorIdentifier(component);
+                if (component.IsBuffer)
+                {
+                    sb.AppendLine($"                    var {accessorName} = chunk.GetBufferAccessor({handleField});");
+                }
+                else
+                {
+                    sb.AppendLine($"                    var {accessorName} = chunk.GetNativeArray({handleField});");
+                }
+            }
+
+            foreach (ComponentRequest component in components.Where(c => c.NeedsLookup))
+            {
+                string accessorName = GetLookupAccessorIdentifier(component);
+                sb.AppendLine($"                    var {accessorName} = chunk.GetLookup({GetLookupFieldName(component)});");
+            }
+
+            sb.AppendLine("                    // TODO: Implement behaviour.");
+            sb.AppendLine("                });");
+        }
+        else
+        {
+            sb.AppendLine("                SystemWorkBuilder.ForEachEntity(context, queryHandle, iterator =>");
+            sb.AppendLine("                {");
+            sb.AppendLine("                    var entity = iterator.Entity;");
+
+            foreach (ComponentRequest component in components.Where(c => c.NeedsLookup))
+            {
+                string accessorName = GetLookupAccessorIdentifier(component);
+                sb.AppendLine($"                    var {accessorName} = iterator.GetLookup({GetLookupFieldName(component)});");
+            }
+
+            sb.AppendLine("                    // TODO: Implement behaviour.");
+            sb.AppendLine("                });");
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("            });");
+        sb.AppendLine();
+        sb.AppendLine("            _implementation = builder.Build();");
+        sb.AppendLine("        }");
 
         if (!requireForUpdate)
         {
@@ -326,86 +416,23 @@ internal static class SystemWorkGenerator
         }
 
         sb.AppendLine();
-        sb.AppendLine("        public void Build(ref EntityQueryBuilder builder)");
-        sb.AppendLine("        {");
-        sb.AppendLine("            PrimaryQuery.Configure(ref builder);");
-        sb.AppendLine("        }");
+        sb.AppendLine("        public void Build(ref EntityQueryBuilder builder) =>");
+        sb.AppendLine("            _implementation.Build(ref builder);");
         sb.AppendLine();
-        sb.AppendLine("        public void OnCreate(SystemContext context)");
-        sb.AppendLine("        {");
-        sb.AppendLine($"            _query = context.WithQuery(context.Query, requireForUpdate: {requireForUpdate.ToString().ToLowerInvariant()});");
-
-        foreach (ComponentRequest component in components)
-        {
-            if (component.NeedsLookup)
-            {
-                string method = component.IsBuffer ? "CreateBufferLookup" : "CreateLookup";
-                sb.AppendLine($"            {GetLookupFieldName(component)} = SystemWorkBuilder.{method}<{component.TypeName}>(context, isReadOnly: {component.IsReadOnly.ToString().ToLowerInvariant()});");
-            }
-
-            if (component.NeedsTypeHandle)
-            {
-                string method = component.IsBuffer ? "CreateBufferTypeHandle" : "CreateComponentTypeHandle";
-                sb.AppendLine($"            {GetHandleFieldName(component)} = SystemWorkBuilder.{method}<{component.TypeName}>(context, isReadOnly: {component.IsReadOnly.ToString().ToLowerInvariant()});");
-            }
-        }
-
-        sb.AppendLine("        }");
+        sb.AppendLine("        public void OnCreate(SystemContext context) =>");
+        sb.AppendLine("            _implementation.OnCreate(context);");
         sb.AppendLine();
-        sb.AppendLine("        public void OnUpdate(SystemContext context)");
-        sb.AppendLine("        {");
-
-        if (components.Any(component => component.NeedsTypeHandle))
-        {
-            sb.AppendLine("            SystemWorkBuilder.ForEachChunk(context, _query, chunk =>");
-            sb.AppendLine("            {");
-            sb.AppendLine("                var entities = chunk.Entities;");
-
-            foreach (ComponentRequest component in components.Where(c => c.NeedsTypeHandle))
-            {
-                string handleField = GetHandleFieldName(component);
-                string accessorName = GetChunkAccessorIdentifier(component);
-                if (component.IsBuffer)
-                {
-                    sb.AppendLine($"                var {accessorName} = chunk.GetBufferAccessor({handleField});");
-                }
-                else
-                {
-                    sb.AppendLine($"                var {accessorName} = chunk.GetNativeArray({handleField});");
-                }
-            }
-
-            foreach (ComponentRequest component in components.Where(c => c.NeedsLookup))
-            {
-                string accessorName = GetLookupAccessorIdentifier(component);
-                sb.AppendLine($"                var {accessorName} = chunk.GetLookup({GetLookupFieldName(component)});");
-            }
-
-            sb.AppendLine("                // TODO: Implement behaviour.");
-            sb.AppendLine("            });");
-        }
-        else
-        {
-            sb.AppendLine("            SystemWorkBuilder.ForEachEntity(context, _query, iterator =>");
-            sb.AppendLine("            {");
-            sb.AppendLine("                var entity = iterator.Entity;");
-
-            foreach (ComponentRequest component in components.Where(c => c.NeedsLookup))
-            {
-                string accessorName = GetLookupAccessorIdentifier(component);
-                sb.AppendLine($"                var {accessorName} = iterator.GetLookup({GetLookupFieldName(component)});");
-            }
-
-            sb.AppendLine("                // TODO: Implement behaviour.");
-            sb.AppendLine("            });");
-        }
-
-        sb.AppendLine("        }");
+        sb.AppendLine("        public void OnStartRunning(SystemContext context) =>");
+        sb.AppendLine("            _implementation.OnStartRunning(context);");
         sb.AppendLine();
-        sb.AppendLine("        public void OnDestroy(SystemContext context)");
-        sb.AppendLine("        {");
-        sb.AppendLine("            _query = null;");
-        sb.AppendLine("        }");
+        sb.AppendLine("        public void OnUpdate(SystemContext context) =>");
+        sb.AppendLine("            _implementation.OnUpdate(context);");
+        sb.AppendLine();
+        sb.AppendLine("        public void OnStopRunning(SystemContext context) =>");
+        sb.AppendLine("            _implementation.OnStopRunning(context);");
+        sb.AppendLine();
+        sb.AppendLine("        public void OnDestroy(SystemContext context) =>");
+        sb.AppendLine("            _implementation.OnDestroy(context);");
         sb.AppendLine("    }");
         sb.AppendLine("}");
 

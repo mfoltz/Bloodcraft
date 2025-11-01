@@ -1,61 +1,88 @@
 // This file documents the intended usage for the system factory helpers. It is excluded from compilation.
 //
-// Example:
+// -----------------------------------------------------------------------------
+// Query holders and resource initialisers
+// -----------------------------------------------------------------------------
+// The SystemWorkBuilder now exposes query helpers that return lightweight holder
+// objects. These holders are initialised during the builder's resource
+// initialiser pass and cleared automatically during OnDestroy:
 //
+//     var descriptor = QueryDescriptor.Create()
+//         .WithAll<Movement>()
+//         .IncludeDisabled();
+//
+//     var builder = new SystemWorkBuilder()
+//         .WithQuery(descriptor);
+//
+//     SystemWorkBuilder.QueryHandleHolder primaryQuery =
+//         builder.WithPrimaryQuery(requireForUpdate: true);
+//     SystemWorkBuilder.QueryHandleHolder secondaryQuery =
+//         builder.WithQuery(ref descriptor);
+//
+// The holders surface the underlying QueryHandle through the Handle property.
+// When the system shuts down the builder-managed OnDestroy sets the holder back
+// to null, ensuring callers never interact with a disposed handle. Additional
+// native allocations should still be registered via
+// SystemContext.RegisterDisposable where appropriate.
+//
+// -----------------------------------------------------------------------------
+// Example work class
+// -----------------------------------------------------------------------------
 // public sealed class TrackMinionsSystem : VSystemBase<TrackMinionsSystem.Work>
 // {
 //     public sealed class Work : ISystemWork
 //     {
-//         SystemWorkBuilder.ComponentLookupHandle<Movement> _movementLookup;
-//         QueryHandle _trackedMinions;
-//         NativeParallelHashSet<Entity> _trackedEntities;
+//         readonly ISystemWork _implementation;
+//         readonly SystemWorkBuilder.QueryHandleHolder _trackedMinions;
+//         readonly SystemWorkBuilder.ComponentLookupHandle<Movement> _movementLookup;
 //
-//         static readonly QueryDescriptor TrackedMinionsQuery = QueryDescriptor.Create()
-//             .WithAll<Movement>()
-//             .IncludeDisabled();
-//
-//         public void Build(ref EntityQueryBuilder builder)
+//         public Work()
 //         {
-//             TrackedMinionsQuery.Configure(ref builder);
-//         }
+//             var descriptor = QueryDescriptor.Create()
+//                 .WithAll<Movement>()
+//                 .IncludeDisabled();
 //
-//         public void OnCreate(SystemContext context)
-//         {
-//             _trackedMinions = context.WithQuery(context.Query);
+//             var builder = new SystemWorkBuilder()
+//                 .WithQuery(descriptor);
 //
-//             _movementLookup = SystemWorkBuilder.CreateLookup<Movement>(context, isReadOnly: true);
+//             _trackedMinions = builder.WithPrimaryQuery(requireForUpdate: true);
+//             _movementLookup = builder.WithLookup<Movement>(isReadOnly: true);
 //
-//             _trackedEntities = new NativeParallelHashSet<Entity>(256, Allocator.Persistent);
-//             context.RegisterDisposable(_trackedEntities);
-//         }
-//
-//         public void OnUpdate(SystemContext context)
-//         {
-//             SystemWorkBuilder.ForEachEntity(context, _trackedMinions, iterator =>
+//             builder.OnUpdate(context =>
 //             {
-//                 if (!context.Exists(iterator.Entity))
+//                 var queryHandle = _trackedMinions.Handle;
+//                 if (queryHandle == null || queryHandle.IsDisposed)
+//                 {
 //                     return;
+//                 }
 //
-//                 var movement = iterator.GetLookup(_movementLookup)[iterator.Entity];
-//                 // Perform work here.
+//                 SystemWorkBuilder.ForEachEntity(context, queryHandle, iterator =>
+//                 {
+//                     if (!context.Exists(iterator.Entity))
+//                         return;
+//
+//                     var movement = iterator.GetLookup(_movementLookup)[iterator.Entity];
+//                     // Perform work here.
+//                 });
 //             });
+//
+//             _implementation = builder.Build();
 //         }
 //
-//         public void OnDestroy(SystemContext context)
-//         {
-//             _trackedMinions = null;
-//
-//             if (_trackedEntities.IsCreated)
-//             {
-//                 _trackedEntities.Clear();
-//                 _trackedEntities = default;
-//             }
-//         }
+//         public void Build(ref EntityQueryBuilder builder) =>
+//             _implementation.Build(ref builder);
+//         public void OnCreate(SystemContext context) =>
+//             _implementation.OnCreate(context);
+//         public void OnUpdate(SystemContext context) =>
+//             _implementation.OnUpdate(context);
+//         public void OnDestroy(SystemContext context) =>
+//             _implementation.OnDestroy(context);
 //     }
 // }
-
-// Example using the fluent builder:
 //
+// -----------------------------------------------------------------------------
+// Builder-driven systems
+// -----------------------------------------------------------------------------
 // public sealed class BuilderDrivenSystem : VSystemBase<ISystemWork>
 // {
 //     readonly SystemWorkBuilder.ComponentLookupHandle<Movement> _movementLookup;
@@ -76,25 +103,21 @@
 //         var builder = new SystemWorkBuilder()
 //             .WithQuery(descriptor);
 //
+//         var primaryQuery = builder.WithPrimaryQuery();
 //         var movementLookup = builder.WithLookup<Movement>(isReadOnly: true);
 //         var movementHandle = builder.WithComponentTypeHandle<Movement>(isReadOnly: true);
-//         QueryHandle movementQuery = null;
-//
-//         builder.OnCreate(context =>
-//         {
-//             movementQuery = context.WithQuery(context.Query, requireForUpdate: true);
-//         });
 //
 //         builder.OnUpdate(context =>
 //         {
-//             if (movementQuery == null)
+//             var queryHandle = primaryQuery.Handle;
+//             if (queryHandle == null || queryHandle.IsDisposed)
 //             {
 //                 return;
 //             }
 //
 //             var system = (BuilderDrivenSystem)context.System;
 //
-//             SystemWorkBuilder.ForEachChunk(context, movementQuery, chunk =>
+//             SystemWorkBuilder.ForEachChunk(context, queryHandle, chunk =>
 //             {
 //                 var movementArray = chunk.GetNativeArray(system._movementHandle);
 //                 var entities = chunk.Entities;
@@ -106,11 +129,6 @@
 //                     // Perform work here.
 //                 }
 //             });
-//         });
-//
-//         builder.OnDestroy(context =>
-//         {
-//             movementQuery = null;
 //         });
 //
 //         artifacts = new BuilderArtifacts(movementLookup, movementHandle);
@@ -131,23 +149,16 @@
 //         public SystemWorkBuilder.ComponentTypeHandleHandle<Movement> MovementHandle { get; }
 //     }
 // }
-
-// -----------------------------------------------------------------------------
-// System work generator helper
-// -----------------------------------------------------------------------------
-// The repository ships with an interactive generator that scaffolds builder-based
-// or work-class implementations. Execute it from the repository root:
 //
-//     dotnet run --project Bloodcraft.csproj -- --system-work
-//
-// The tool prompts for the system name, primary components, and any optional
-// lookup/handle requirements. It then prints either a fluent builder snippet or
-// a partial work class skeleton that follows the patterns demonstrated above.
-// Copy the emitted code into your system and tailor the TODO sections to your
-// specific logic.
 // -----------------------------------------------------------------------------
-// Additional examples
+// Migration notes
 // -----------------------------------------------------------------------------
-// The quest target system (Systems/Quests/QuestTargetSystemBase.cs paired with
-// Factory/Quests/QuestTargetSystem.Work.cs) showcases coordinating multiple
-// query handles while maintaining native container caches across updates.
+// * Replace direct calls to context.WithQuery/context.CreateQuery with the new
+//   builder helpers. The holders automatically reset during OnDestroy, so manual
+//   `_query = null;` assignments are no longer necessary.
+// * The descriptor-based WithQuery overload accepts a disposeOnDestroy flag that
+//   determines whether the created query is registered with
+//   SystemContext.RegisterDisposable. Pass false only when another owner will
+//   handle the lifecycle.
+// * Existing lookup and handle helpers continue to work unchanged. They should
+//   still be created through the builder to participate in the refresh pipeline.

@@ -11,7 +11,7 @@ namespace Bloodcraft.Systems.Quests;
 
 public partial class QuestTargetSystem
 {
-    public sealed class Work : ISystemWork
+    public new sealed class Work : ISystemWork
     {
         static readonly QueryDescriptor TargetQueryDescriptor = QueryDescriptor.Create()
             .WithAll<PrefabGUID>()
@@ -31,14 +31,14 @@ public partial class QuestTargetSystem
             .WithAll<ImprisonedBuff>()
             .IncludeDisabled();
 
+        readonly ISystemWork _implementation;
+        readonly SystemWorkBuilder.QueryHandleHolder _targetQuery;
+        readonly SystemWorkBuilder.QueryHandleHolder _imprisonedQuery;
+        readonly SystemWorkBuilder.ComponentTypeHandleHandle<PrefabGUID> _prefabGuidHandle;
+        readonly SystemWorkBuilder.ComponentTypeHandleHandle<Buff> _buffHandle;
+
         QuestTargetSystem _system;
         ServerGameManager _serverGameManager;
-
-        QueryHandle _targetQuery;
-        QueryHandle _imprisonedQuery;
-
-        SystemWorkBuilder.ComponentTypeHandleHandle<PrefabGUID> _prefabGuidHandle;
-        SystemWorkBuilder.ComponentTypeHandleHandle<Buff> _buffHandle;
 
         NativeParallelMultiHashMap<PrefabGUID, Entity> _targetUnits;
         NativeParallelHashSet<Entity> _imprisonedUnits;
@@ -49,148 +49,172 @@ public partial class QuestTargetSystem
                 ? _targetUnits.AsReadOnly()
                 : default;
 
+        public Work()
+        {
+            var primaryDescriptor = TargetQueryDescriptor;
+
+            var builder = new SystemWorkBuilder()
+                .WithQuery(primaryDescriptor);
+
+            _targetQuery = builder.WithPrimaryQuery(requireForUpdate: true);
+
+            var imprisonedDescriptor = ImprisonedQueryDescriptor;
+            _imprisonedQuery = builder.WithQuery(ref imprisonedDescriptor);
+
+            _prefabGuidHandle = builder.WithComponentTypeHandle<PrefabGUID>(isReadOnly: true);
+            _buffHandle = builder.WithComponentTypeHandle<Buff>(isReadOnly: true);
+
+            builder.OnCreate(context =>
+            {
+                _system = (QuestTargetSystem)context.System;
+                _system.SetInstance();
+
+                _targetUnits = new NativeParallelMultiHashMap<PrefabGUID, Entity>(1024, Allocator.Persistent);
+                _imprisonedUnits = new NativeParallelHashSet<Entity>(512, Allocator.Persistent);
+                _blacklistedUnits = new NativeParallelHashSet<PrefabGUID>(256, Allocator.Persistent);
+            });
+
+            builder.OnStartRunning(context =>
+            {
+                _serverGameManager = context.System.World.GetExistingSystemManaged<ServerScriptMapper>().GetServerGameManager();
+
+                if (!_blacklistedUnits.IsCreated)
+                {
+                    return;
+                }
+
+                _blacklistedUnits.Clear();
+
+                var prefabCollection = context.System.World.GetExistingSystemManaged<PrefabCollectionSystem>();
+                var lookup = prefabCollection._SpawnableNameToPrefabGuidDictionary;
+
+                foreach (var kvp in lookup)
+                {
+                    var prefabGuid = kvp.Value;
+                    var prefabName = kvp.Key;
+
+                    foreach (var filter in FilteredStrings)
+                    {
+                        if (prefabName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            _blacklistedUnits.Add(prefabGuid);
+                            break;
+                        }
+                    }
+                }
+
+                foreach (var prefabGuid in ShardBearers)
+                {
+                    _blacklistedUnits.Add(prefabGuid);
+                }
+            });
+
+            builder.OnUpdate(context =>
+            {
+                var targetQuery = _targetQuery.Handle;
+                var imprisonedQuery = _imprisonedQuery.Handle;
+
+                if (targetQuery == null || targetQuery.IsDisposed || imprisonedQuery == null || imprisonedQuery.IsDisposed)
+                {
+                    return;
+                }
+
+                if (!_targetUnits.IsCreated || !_imprisonedUnits.IsCreated || !_blacklistedUnits.IsCreated)
+                {
+                    return;
+                }
+
+                _imprisonedUnits.Clear();
+                _targetUnits.Clear();
+
+                SystemWorkBuilder.ForEachChunk(context, imprisonedQuery, chunk =>
+                {
+                    var buffs = chunk.GetNativeArray(_buffHandle);
+
+                    for (int i = 0; i < chunk.Count; ++i)
+                    {
+                        var target = buffs[i].Target;
+
+                        if (context.Exists(target))
+                        {
+                            _imprisonedUnits.Add(target);
+                        }
+                    }
+                });
+
+                SystemWorkBuilder.ForEachChunk(context, targetQuery, chunk =>
+                {
+                    var prefabGuids = chunk.GetNativeArray(_prefabGuidHandle);
+                    var entities = chunk.Entities;
+
+                    for (int i = 0; i < chunk.Count; ++i)
+                    {
+                        var prefabGuid = prefabGuids[i];
+                        var entity = entities[i];
+
+                        if (!context.Exists(entity))
+                        {
+                            continue;
+                        }
+
+                        if (_blacklistedUnits.Contains(prefabGuid) || _imprisonedUnits.Contains(entity))
+                        {
+                            continue;
+                        }
+
+                        _targetUnits.Add(prefabGuid, entity);
+                    }
+                });
+
+                _system.PlayQueuedSequences(_serverGameManager);
+            });
+
+            builder.OnDestroy(context =>
+            {
+                if (_targetUnits.IsCreated)
+                {
+                    _targetUnits.Dispose();
+                    _targetUnits = default;
+                }
+
+                if (_imprisonedUnits.IsCreated)
+                {
+                    _imprisonedUnits.Dispose();
+                    _imprisonedUnits = default;
+                }
+
+                if (_blacklistedUnits.IsCreated)
+                {
+                    _blacklistedUnits.Dispose();
+                    _blacklistedUnits = default;
+                }
+
+                _serverGameManager = default;
+
+                ClearInstance();
+                _system = null;
+            });
+
+            _implementation = builder.Build();
+        }
+
         public void Build(ref EntityQueryBuilder builder) =>
-            TargetQueryDescriptor.Configure(ref builder);
+            _implementation.Build(ref builder);
 
-        public void OnCreate(SystemContext context)
-        {
-            _system = (QuestTargetSystem)context.System;
-            _system.SetInstance();
+        public void OnCreate(SystemContext context) =>
+            _implementation.OnCreate(context);
 
-            _targetUnits = new NativeParallelMultiHashMap<PrefabGUID, Entity>(1024, Allocator.Persistent);
-            _imprisonedUnits = new NativeParallelHashSet<Entity>(512, Allocator.Persistent);
-            _blacklistedUnits = new NativeParallelHashSet<PrefabGUID>(256, Allocator.Persistent);
+        public void OnStartRunning(SystemContext context) =>
+            _implementation.OnStartRunning(context);
 
-            _targetQuery = context.WithQuery(context.Query, requireForUpdate: true);
-            _imprisonedQuery = context.CreateQuery(ImprisonedQueryDescriptor);
+        public void OnUpdate(SystemContext context) =>
+            _implementation.OnUpdate(context);
 
-            _prefabGuidHandle = SystemWorkBuilder.CreateComponentTypeHandle<PrefabGUID>(context, isReadOnly: true);
-            _buffHandle = SystemWorkBuilder.CreateComponentTypeHandle<Buff>(context, isReadOnly: true);
-        }
+        public void OnStopRunning(SystemContext context) =>
+            _implementation.OnStopRunning(context);
 
-        public void OnStartRunning(SystemContext context)
-        {
-            _serverGameManager = context.System.World.GetExistingSystemManaged<ServerScriptMapper>().GetServerGameManager();
-
-            if (!_blacklistedUnits.IsCreated)
-            {
-                return;
-            }
-
-            _blacklistedUnits.Clear();
-
-            var prefabCollection = context.System.World.GetExistingSystemManaged<PrefabCollectionSystem>();
-            var lookup = prefabCollection._SpawnableNameToPrefabGuidDictionary;
-
-            foreach (var kvp in lookup)
-            {
-                var prefabGuid = kvp.Value;
-                var prefabName = kvp.Key;
-
-                foreach (var filter in FilteredStrings)
-                {
-                    if (prefabName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        _blacklistedUnits.Add(prefabGuid);
-                        break;
-                    }
-                }
-            }
-
-            foreach (var prefabGuid in ShardBearers)
-            {
-                _blacklistedUnits.Add(prefabGuid);
-            }
-        }
-
-        public void OnUpdate(SystemContext context)
-        {
-            if (_targetQuery == null || _imprisonedQuery == null)
-            {
-                return;
-            }
-
-            if (!_targetUnits.IsCreated || !_imprisonedUnits.IsCreated || !_blacklistedUnits.IsCreated)
-            {
-                return;
-            }
-
-            _imprisonedUnits.Clear();
-            _targetUnits.Clear();
-
-            SystemWorkBuilder.ForEachChunk(context, _imprisonedQuery, chunk =>
-            {
-                var buffs = chunk.GetNativeArray(_buffHandle);
-
-                for (int i = 0; i < chunk.Count; ++i)
-                {
-                    var target = buffs[i].Target;
-
-                    if (context.Exists(target))
-                    {
-                        _imprisonedUnits.Add(target);
-                    }
-                }
-            });
-
-            SystemWorkBuilder.ForEachChunk(context, _targetQuery, chunk =>
-            {
-                var prefabGuids = chunk.GetNativeArray(_prefabGuidHandle);
-                var entities = chunk.Entities;
-
-                for (int i = 0; i < chunk.Count; ++i)
-                {
-                    var prefabGuid = prefabGuids[i];
-                    var entity = entities[i];
-
-                    if (!context.Exists(entity))
-                    {
-                        continue;
-                    }
-
-                    if (_blacklistedUnits.Contains(prefabGuid) || _imprisonedUnits.Contains(entity))
-                    {
-                        continue;
-                    }
-
-                    _targetUnits.Add(prefabGuid, entity);
-                }
-            });
-
-            _system.PlayQueuedSequences(_serverGameManager);
-        }
-
-        public void OnDestroy(SystemContext context)
-        {
-            if (_targetUnits.IsCreated)
-            {
-                _targetUnits.Dispose();
-                _targetUnits = default;
-            }
-
-            if (_imprisonedUnits.IsCreated)
-            {
-                _imprisonedUnits.Dispose();
-                _imprisonedUnits = default;
-            }
-
-            if (_blacklistedUnits.IsCreated)
-            {
-                _blacklistedUnits.Dispose();
-                _blacklistedUnits = default;
-            }
-
-            _targetQuery = null;
-            _imprisonedQuery = null;
-
-            _prefabGuidHandle = null;
-            _buffHandle = null;
-
-            _serverGameManager = default;
-
-            ClearInstance();
-            _system = null;
-        }
+        public void OnDestroy(SystemContext context) =>
+            _implementation.OnDestroy(context);
 
     }
 }
