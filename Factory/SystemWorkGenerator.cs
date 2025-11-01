@@ -223,32 +223,30 @@ internal static class SystemWorkGenerator
 
         if (components.Any(component => component.NeedsTypeHandle))
         {
-            sb.AppendLine("    SystemWorkBuilder.ForEachChunk(context, queryHandle, chunk =>");
-            sb.AppendLine("    {");
-            sb.AppendLine("        var entities = chunk.Entities;");
-
-            foreach (ComponentRequest component in components.Where(c => c.NeedsTypeHandle))
+            List<ComponentRequest> handleRequests = components.Where(c => c.NeedsTypeHandle).ToList();
+            sb.AppendLine("    SystemWorkBuilder.ForEachChunk(context, queryHandle)");
+            foreach (ComponentRequest component in handleRequests)
             {
-                string handleName = GetHandleIdentifier(component);
-                string accessorName = GetChunkAccessorIdentifier(component);
-                if (component.IsBuffer)
-                {
-                    sb.AppendLine($"        var {accessorName} = chunk.GetBufferAccessor({handleName});");
-                }
-                else
-                {
-                    sb.AppendLine($"        var {accessorName} = chunk.GetNativeArray({handleName});");
-                }
+                string methodName = component.IsBuffer
+                    ? "WithBuffer"
+                    : component.IsReadOnly ? "WithReadOnlyComponent" : "WithComponent";
+                sb.AppendLine($"        .{methodName}({GetHandleIdentifier(component)})");
             }
+
+            string parameterList = string.Join(", ",
+                new[] { "chunkContext" }.Concat(handleRequests.Select(GetChunkAccessorIdentifier)));
+            sb.AppendLine($"        .ForEach(({parameterList}) =>");
+            sb.AppendLine("        {");
+            sb.AppendLine("            var entities = chunkContext.Entities;");
 
             foreach (ComponentRequest component in components.Where(c => c.NeedsLookup))
             {
                 string accessorName = GetLookupAccessorIdentifier(component);
-                sb.AppendLine($"        var {accessorName} = chunk.GetLookup({GetLookupIdentifier(component)});");
+                sb.AppendLine($"            var {accessorName} = chunkContext.GetLookup({GetLookupIdentifier(component)});");
             }
 
-            sb.AppendLine("        // TODO: Implement behaviour.");
-            sb.AppendLine("    });");
+            sb.AppendLine("            // TODO: Implement behaviour.");
+            sb.AppendLine("        });");
         }
         else
         {
@@ -360,28 +358,26 @@ internal static class SystemWorkGenerator
 
         if (components.Any(component => component.NeedsTypeHandle))
         {
-            sb.AppendLine("                SystemWorkBuilder.ForEachChunk(context, queryHandle, chunk =>");
-            sb.AppendLine("                {");
-            sb.AppendLine("                    var entities = chunk.Entities;");
-
-            foreach (ComponentRequest component in components.Where(c => c.NeedsTypeHandle))
+            List<ComponentRequest> handleRequests = components.Where(c => c.NeedsTypeHandle).ToList();
+            sb.AppendLine("                SystemWorkBuilder.ForEachChunk(context, queryHandle)");
+            foreach (ComponentRequest component in handleRequests)
             {
-                string handleField = GetHandleFieldName(component);
-                string accessorName = GetChunkAccessorIdentifier(component);
-                if (component.IsBuffer)
-                {
-                    sb.AppendLine($"                    var {accessorName} = chunk.GetBufferAccessor({handleField});");
-                }
-                else
-                {
-                    sb.AppendLine($"                    var {accessorName} = chunk.GetNativeArray({handleField});");
-                }
+                string methodName = component.IsBuffer
+                    ? "WithBuffer"
+                    : component.IsReadOnly ? "WithReadOnlyComponent" : "WithComponent";
+                sb.AppendLine($"                    .{methodName}({GetHandleFieldName(component)})");
             }
+
+            string parameterList = string.Join(", ",
+                new[] { "chunkContext" }.Concat(handleRequests.Select(GetChunkAccessorIdentifier)));
+            sb.AppendLine($"                    .ForEach(({parameterList}) =>");
+            sb.AppendLine("                {");
+            sb.AppendLine("                    var entities = chunkContext.Entities;");
 
             foreach (ComponentRequest component in components.Where(c => c.NeedsLookup))
             {
                 string accessorName = GetLookupAccessorIdentifier(component);
-                sb.AppendLine($"                    var {accessorName} = chunk.GetLookup({GetLookupFieldName(component)});");
+                sb.AppendLine($"                    var {accessorName} = chunkContext.GetLookup({GetLookupFieldName(component)});");
             }
 
             sb.AppendLine("                    // TODO: Implement behaviour.");

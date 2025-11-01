@@ -127,44 +127,45 @@ public partial class QuestTargetSystem
                 _imprisonedUnits.Clear();
                 _targetUnits.Clear();
 
-                SystemWorkBuilder.ForEachChunk(context, imprisonedQuery, chunk =>
-                {
-                    var buffs = chunk.GetNativeArray(_buffHandle);
-
-                    for (int i = 0; i < chunk.Count; ++i)
+                SystemWorkBuilder.ForEachChunk(context, imprisonedQuery)
+                    .WithReadOnlyComponent(_buffHandle)
+                    .ForEach((chunkContext, buffs) =>
                     {
-                        var target = buffs[i].Target;
-
-                        if (context.Exists(target))
+                        for (int i = 0; i < chunkContext.Count; ++i)
                         {
-                            _imprisonedUnits.Add(target);
+                            var target = buffs[i].Target;
+
+                            if (context.Exists(target))
+                            {
+                                _imprisonedUnits.Add(target);
+                            }
                         }
-                    }
-                });
+                    });
 
-                SystemWorkBuilder.ForEachChunk(context, targetQuery, chunk =>
-                {
-                    var prefabGuids = chunk.GetNativeArray(_prefabGuidHandle);
-                    var entities = chunk.Entities;
-
-                    for (int i = 0; i < chunk.Count; ++i)
+                SystemWorkBuilder.ForEachChunk(context, targetQuery)
+                    .WithReadOnlyComponent(_prefabGuidHandle)
+                    .ForEach((chunkContext, prefabGuids) =>
                     {
-                        var prefabGuid = prefabGuids[i];
-                        var entity = entities[i];
+                        var entities = chunkContext.Entities;
 
-                        if (!context.Exists(entity))
+                        for (int i = 0; i < chunkContext.Count; ++i)
                         {
-                            continue;
-                        }
+                            var prefabGuid = prefabGuids[i];
+                            var entity = entities[i];
 
-                        if (_blacklistedUnits.Contains(prefabGuid) || _imprisonedUnits.Contains(entity))
-                        {
-                            continue;
-                        }
+                            if (!context.Exists(entity))
+                            {
+                                continue;
+                            }
 
-                        _targetUnits.Add(prefabGuid, entity);
-                    }
-                });
+                            if (_blacklistedUnits.Contains(prefabGuid) || _imprisonedUnits.Contains(entity))
+                            {
+                                continue;
+                            }
+
+                            _targetUnits.Add(prefabGuid, entity);
+                        }
+                    });
 
                 _system.PlayQueuedSequences(_serverGameManager);
             });
