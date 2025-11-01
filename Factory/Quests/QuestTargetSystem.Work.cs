@@ -1,7 +1,6 @@
 using System;
 using Bloodcraft.Factory;
 using Bloodcraft.Services;
-using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -14,6 +13,24 @@ public partial class QuestTargetSystem
 {
     public sealed class Work : ISystemWork
     {
+        static readonly QueryDescriptor TargetQueryDescriptor = QueryDescriptor.Create()
+            .WithAll<PrefabGUID>()
+            .WithAll<Health>()
+            .WithAll<UnitLevel>()
+            .WithAll<UnitStats>()
+            .WithAll<Movement>()
+            .WithAll<AggroConsumer>()
+            .WithNone<Minion>()
+            .WithNone<DestroyOnSpawn>()
+            .WithNone<Trader>()
+            .WithNone<BlockFeedBuff>()
+            .IncludeDisabled();
+
+        static readonly QueryDescriptor ImprisonedQueryDescriptor = QueryDescriptor.Create()
+            .WithAll<Buff>()
+            .WithAll<ImprisonedBuff>()
+            .IncludeDisabled();
+
         QuestTargetSystem _system;
         ServerGameManager _serverGameManager;
 
@@ -32,20 +49,8 @@ public partial class QuestTargetSystem
                 ? _targetUnits.AsReadOnly()
                 : default;
 
-        public void Build(ref EntityQueryBuilder builder)
-        {
-            builder.AddAll(ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()));
-            builder.AddAll(ComponentType.ReadOnly(Il2CppType.Of<Health>()));
-            builder.AddAll(ComponentType.ReadOnly(Il2CppType.Of<UnitLevel>()));
-            builder.AddAll(ComponentType.ReadOnly(Il2CppType.Of<UnitStats>()));
-            builder.AddAll(ComponentType.ReadOnly(Il2CppType.Of<Movement>()));
-            builder.AddAll(ComponentType.ReadOnly(Il2CppType.Of<AggroConsumer>()));
-            builder.AddNone(ComponentType.ReadOnly(Il2CppType.Of<Minion>()));
-            builder.AddNone(ComponentType.ReadOnly(Il2CppType.Of<DestroyOnSpawn>()));
-            builder.AddNone(ComponentType.ReadOnly(Il2CppType.Of<Trader>()));
-            builder.AddNone(ComponentType.ReadOnly(Il2CppType.Of<BlockFeedBuff>()));
-            builder.WithOptions(EntityQueryOptions.IncludeDisabled);
-        }
+        public void Build(ref EntityQueryBuilder builder) =>
+            TargetQueryDescriptor.Configure(ref builder);
 
         public void OnCreate(SystemContext context)
         {
@@ -56,12 +61,8 @@ public partial class QuestTargetSystem
             _imprisonedUnits = new NativeParallelHashSet<Entity>(512, Allocator.Persistent);
             _blacklistedUnits = new NativeParallelHashSet<PrefabGUID>(256, Allocator.Persistent);
 
-            context.RegisterDisposable(_targetUnits);
-            context.RegisterDisposable(_imprisonedUnits);
-            context.RegisterDisposable(_blacklistedUnits);
-
             _targetQuery = context.WithQuery(context.Query, requireForUpdate: true);
-            _imprisonedQuery = context.CreateQuery(ConfigureImprisonedQuery);
+            _imprisonedQuery = context.CreateQuery(ImprisonedQueryDescriptor);
 
             _prefabGuidHandle = SystemWorkBuilder.CreateComponentTypeHandle<PrefabGUID>(context, isReadOnly: true);
             _buffHandle = SystemWorkBuilder.CreateComponentTypeHandle<Buff>(context, isReadOnly: true);
@@ -163,19 +164,19 @@ public partial class QuestTargetSystem
         {
             if (_targetUnits.IsCreated)
             {
-                _targetUnits.Clear();
+                _targetUnits.Dispose();
                 _targetUnits = default;
             }
 
             if (_imprisonedUnits.IsCreated)
             {
-                _imprisonedUnits.Clear();
+                _imprisonedUnits.Dispose();
                 _imprisonedUnits = default;
             }
 
             if (_blacklistedUnits.IsCreated)
             {
-                _blacklistedUnits.Clear();
+                _blacklistedUnits.Dispose();
                 _blacklistedUnits = default;
             }
 
@@ -191,11 +192,5 @@ public partial class QuestTargetSystem
             _system = null;
         }
 
-        static void ConfigureImprisonedQuery(ref EntityQueryBuilder builder)
-        {
-            builder.AddAll(ComponentType.ReadOnly(Il2CppType.Of<Buff>()));
-            builder.AddAll(ComponentType.ReadOnly(Il2CppType.Of<ImprisonedBuff>()));
-            builder.WithOptions(EntityQueryOptions.IncludeDisabled);
-        }
     }
 }
