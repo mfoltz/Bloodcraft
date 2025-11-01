@@ -43,6 +43,7 @@ public readonly struct SystemContext
     readonly Action<EntityQuery, Action<NativeArray<ArchetypeChunk>>> _withTempChunks;
     readonly Action<EntityQuery, Action<ArchetypeChunk>> _forEachChunk;
     readonly Func<Entity, bool> _exists;
+    readonly Action<Action<EntityCommandBuffer>> _enqueueDestroyTagCleanup;
     readonly Action<IDisposable> _registerDisposable;
 
     public SystemContext(
@@ -57,6 +58,7 @@ public readonly struct SystemContext
         Action<EntityQuery, Action<NativeArray<ArchetypeChunk>>> withTempChunks,
         Action<EntityQuery, Action<ArchetypeChunk>> forEachChunk,
         Func<Entity, bool> exists,
+        Action<Action<EntityCommandBuffer>> enqueueDestroyTagCleanup,
         Action<IDisposable> registerDisposable)
     {
         System = system ?? throw new ArgumentNullException(nameof(system));
@@ -70,6 +72,7 @@ public readonly struct SystemContext
         _withTempChunks = withTempChunks ?? throw new ArgumentNullException(nameof(withTempChunks));
         _forEachChunk = forEachChunk ?? throw new ArgumentNullException(nameof(forEachChunk));
         _exists = exists ?? throw new ArgumentNullException(nameof(exists));
+        _enqueueDestroyTagCleanup = enqueueDestroyTagCleanup ?? throw new ArgumentNullException(nameof(enqueueDestroyTagCleanup));
         _registerDisposable = registerDisposable ?? throw new ArgumentNullException(nameof(registerDisposable));
     }
 
@@ -137,6 +140,18 @@ public readonly struct SystemContext
     /// Determines whether the entity currently exists.
     /// </summary>
     public bool Exists(Entity entity) => _exists(entity);
+
+    /// <summary>
+    /// Enqueues a destroy-tag cleanup action executed during the end-simulation playback phase.
+    /// </summary>
+    /// <param name="action">Action that receives the command buffer used for cleanup.</param>
+    public void EnqueueDestroyTagCleanup(Action<EntityCommandBuffer> action)
+    {
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        _enqueueDestroyTagCleanup(action);
+    }
 
     /// <summary>
     /// Registers a disposable resource to be released when the system is destroyed.

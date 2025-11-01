@@ -1,10 +1,11 @@
-﻿using Bloodcraft.Services;
+using Bloodcraft.Factory;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Scripting;
 using System.Collections.Concurrent;
-using Unity.Collections;
+using System.Collections.Generic;
 using Unity.Entities;
 
 namespace Bloodcraft.Patches;
@@ -31,14 +32,19 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
         if (!Core.IsReady) return;
         else if (!_familiars) return;
 
-        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp); // All Components: ProjectM.EntityOwner [ReadOnly], ProjectM.Minion [ReadOnly], Unity.Entities.SpawnTag [ReadOnly]
-
-        try
-        {
-            foreach (Entity entity in entities)
+        SystemWorkBuilder.ForEachSpawned(
+            EntityManager,
+            descriptor => descriptor
+                .WithAll<EntityOwner>()
+                .WithAll<Minion>(),
+            entity =>
             {
-                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
-                else if (entityOwner.Owner.TryGetFollowedPlayer(out Entity player))
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists())
+                {
+                    return;
+                }
+
+                if (entityOwner.Owner.TryGetFollowedPlayer(out Entity player))
                 {
                     Entity familiar = Familiars.GetActiveFamiliar(player);
 
@@ -57,13 +63,9 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
                 {
                     entity.Destroy(); // kinda forgot what this is for but scared to touch it >_>
                 }
-            }
-        }
-        finally
-        {
-            entities.Dispose();
-        }
+            });
     }
+
     static void HandleFamiliarMinionSpawn(Entity familiar, Entity minion)
     {
         if (!FamiliarMinions.ContainsKey(familiar))
