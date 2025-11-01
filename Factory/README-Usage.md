@@ -1,7 +1,6 @@
 # System Factory Usage Guide
 
-This document describes how to work with the system factory helpers. It replaces the
-previous C# comment file and remains excluded from compilation.
+This document describes how to work with the system factory helpers.
 
 ## Query holders and resource initialisers
 
