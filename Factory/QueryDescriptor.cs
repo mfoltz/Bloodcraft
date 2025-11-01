@@ -30,7 +30,7 @@ public sealed class QueryDescriptor
     readonly List<Il2CppSystem.Type> _anyComponents = new();
     readonly List<Il2CppSystem.Type> _noneComponents = new();
 
-    bool _includeDisabled;
+    EntityQueryOptions _options;
     bool? _requireForUpdate;
 
     /// <summary>
@@ -73,9 +73,48 @@ public sealed class QueryDescriptor
     /// Marks the query to include disabled entities.
     /// </summary>
     /// <param name="include">Whether disabled entities should be included.</param>
-    public QueryDescriptor IncludeDisabled(bool include = true)
+    public QueryDescriptor IncludeDisabled(bool include = true) =>
+        include
+            ? WithOptions(EntityQueryOptions.IncludeDisabled)
+            : WithoutOptions(EntityQueryOptions.IncludeDisabled);
+
+    /// <summary>
+    /// Marks the query to include entities tagged as spawned.
+    /// </summary>
+    /// <param name="include">Whether spawn-tagged entities should be included.</param>
+    public QueryDescriptor IncludeSpawnTag(bool include = true) =>
+        include
+            ? WithOptions(EntityQueryOptions.IncludeSpawnTag)
+            : WithoutOptions(EntityQueryOptions.IncludeSpawnTag);
+
+    /// <summary>
+    /// Marks the query to include system entities.
+    /// </summary>
+    /// <param name="include">Whether system entities should be included.</param>
+    public QueryDescriptor IncludeSystems(bool include = true) =>
+        include
+            ? WithOptions(EntityQueryOptions.IncludeSystems)
+            : WithoutOptions(EntityQueryOptions.IncludeSystems);
+
+    /// <summary>
+    /// Adds the supplied <see cref="EntityQueryOptions"/> flags to the descriptor.
+    /// </summary>
+    /// <param name="options">Flags to merge into the descriptor.</param>
+    public QueryDescriptor WithOptions(EntityQueryOptions options)
     {
-        _includeDisabled = include;
+        if (options == 0)
+            return this;
+
+        _options |= options;
+        return this;
+    }
+
+    private QueryDescriptor WithoutOptions(EntityQueryOptions options)
+    {
+        if (options == 0)
+            return this;
+
+        _options &= ~options;
         return this;
     }
 
@@ -110,9 +149,9 @@ public sealed class QueryDescriptor
             builder.AddNone(ComponentType.ReadOnly(_noneComponents[i]));
         }
 
-        if (_includeDisabled)
+        if (_options != 0)
         {
-            builder.WithOptions(EntityQueryOptions.IncludeDisabled);
+            builder.WithOptions(_options);
         }
     }
 

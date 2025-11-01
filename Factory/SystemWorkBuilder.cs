@@ -69,6 +69,25 @@ public sealed class SystemWorkBuilder
     }
 
     /// <summary>
+    /// Creates a query that targets a singleton component and marks it as required for update.
+    /// </summary>
+    /// <typeparam name="TSingleton">Singleton component type to track.</typeparam>
+    /// <param name="accessMode">Desired access mode for the singleton component.</param>
+    /// <param name="disposeOnDestroy">Whether the created query should be disposed automatically.</param>
+    /// <returns>A holder exposing the wrapped query handle.</returns>
+    public QueryHandleHolder RequireSingleton<TSingleton>(
+        QueryDescriptor.AccessMode accessMode = QueryDescriptor.AccessMode.ReadOnly,
+        bool disposeOnDestroy = true)
+    {
+        var descriptor = QueryDescriptor.Create()
+            .WithAll<TSingleton>(accessMode)
+            .IncludeSystems()
+            .RequireForUpdate();
+
+        return WithQuery(ref descriptor, disposeOnDestroy);
+    }
+
+    /// <summary>
     /// Registers a handle that exposes the system's primary query.
     /// </summary>
     /// <param name="requireForUpdate">Whether to mark the primary query as required for update.</param>

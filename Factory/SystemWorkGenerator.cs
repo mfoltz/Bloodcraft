@@ -25,13 +25,15 @@ internal static class SystemWorkGenerator
         List<string> anyComponents = PromptOptionalList("Components that can satisfy AddAny (comma separated, optional): ");
         List<string> noneComponents = PromptOptionalList("Components that should be excluded with AddNone (comma separated, optional): ");
         bool includeDisabled = PromptBoolean("Include disabled entities in the query? (y/N): ", defaultValue: false);
+        bool includeSpawnTag = PromptBoolean("Include spawn-tagged entities in the query? (y/N): ", defaultValue: false);
+        bool includeSystems = PromptBoolean("Include system entities in the query? (y/N): ", defaultValue: false);
         bool requireForUpdate = PromptBoolean("Require the query for update? (Y/n): ", defaultValue: true);
 
         Console.WriteLine();
 
         string snippet = style == OutputStyle.BuilderInvocation
-            ? BuildBuilderSnippet(systemName, primaryComponents, anyComponents, noneComponents, includeDisabled, requireForUpdate)
-            : BuildWorkClassSnippet(systemName, primaryComponents, anyComponents, noneComponents, includeDisabled, requireForUpdate);
+            ? BuildBuilderSnippet(systemName, primaryComponents, anyComponents, noneComponents, includeDisabled, includeSpawnTag, includeSystems, requireForUpdate)
+            : BuildWorkClassSnippet(systemName, primaryComponents, anyComponents, noneComponents, includeDisabled, includeSpawnTag, includeSystems, requireForUpdate);
 
         Console.WriteLine("Generated snippet:\n");
         Console.WriteLine(snippet);
@@ -157,6 +159,8 @@ internal static class SystemWorkGenerator
         IReadOnlyCollection<string> anyComponents,
         IReadOnlyCollection<string> noneComponents,
         bool includeDisabled,
+        bool includeSpawnTag,
+        bool includeSystems,
         bool requireForUpdate)
     {
         StringBuilder sb = new();
@@ -185,6 +189,8 @@ internal static class SystemWorkGenerator
             anyComponents,
             noneComponents,
             includeDisabled,
+            includeSpawnTag,
+            includeSystems,
             requireForUpdateOverride: requireForUpdate ? null : false);
 
         AppendDescriptorDeclaration(sb, "var descriptor", descriptorLines, string.Empty);
@@ -277,6 +283,8 @@ internal static class SystemWorkGenerator
         IReadOnlyCollection<string> anyComponents,
         IReadOnlyCollection<string> noneComponents,
         bool includeDisabled,
+        bool includeSpawnTag,
+        bool includeSystems,
         bool requireForUpdate)
     {
         StringBuilder sb = new();
@@ -315,6 +323,8 @@ internal static class SystemWorkGenerator
             anyComponents,
             noneComponents,
             includeDisabled,
+            includeSpawnTag,
+            includeSystems,
             requireForUpdateOverride: requireForUpdate ? null : false);
 
         AppendDescriptorDeclaration(sb, "static readonly QueryDescriptor PrimaryQuery", descriptorLines, "        ");
@@ -441,6 +451,8 @@ internal static class SystemWorkGenerator
         IReadOnlyCollection<string> anyComponents,
         IReadOnlyCollection<string> noneComponents,
         bool includeDisabled,
+        bool includeSpawnTag,
+        bool includeSystems,
         bool? requireForUpdateOverride)
     {
         List<string> lines = new();
@@ -463,6 +475,16 @@ internal static class SystemWorkGenerator
         if (includeDisabled)
         {
             lines.Add(".IncludeDisabled()");
+        }
+
+        if (includeSpawnTag)
+        {
+            lines.Add(".IncludeSpawnTag()");
+        }
+
+        if (includeSystems)
+        {
+            lines.Add(".IncludeSystems()");
         }
 
         if (requireForUpdateOverride.HasValue)
