@@ -264,6 +264,7 @@ public abstract class VSystemBase<TWork> : SystemBase, IRegistrar
             _destroyTagCleanupActions[i]?.Invoke(commandBuffer);
         }
 
+        ecbSystem.AddJobHandleForProducer(Dependency);
         _destroyTagCleanupActions.Clear();
     }
 
