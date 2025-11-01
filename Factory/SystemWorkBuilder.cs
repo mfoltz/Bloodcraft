@@ -348,6 +348,7 @@ public sealed class SystemWorkBuilder
     public sealed class ComponentLookupHandle<T>
     {
         ComponentLookup<T> _lookup;
+        bool _isReadOnly;
 
         internal ComponentLookup<T> Current
         {
@@ -355,10 +356,21 @@ public sealed class SystemWorkBuilder
             set => _lookup = value;
         }
 
+        internal bool IsReadOnlyInternal
+        {
+            get => _isReadOnly;
+            set => _isReadOnly = value;
+        }
+
         /// <summary>
         /// Gets the latest component lookup instance.
         /// </summary>
         public ComponentLookup<T> Lookup => _lookup;
+
+        /// <summary>
+        /// Gets a value indicating whether the lookup is read-only.
+        /// </summary>
+        public bool IsReadOnly => _isReadOnly;
     }
 
     /// <summary>
@@ -368,6 +380,7 @@ public sealed class SystemWorkBuilder
     public sealed class BufferLookupHandle<T>
     {
         BufferLookup<T> _lookup;
+        bool _isReadOnly;
 
         internal BufferLookup<T> Current
         {
@@ -375,10 +388,21 @@ public sealed class SystemWorkBuilder
             set => _lookup = value;
         }
 
+        internal bool IsReadOnlyInternal
+        {
+            get => _isReadOnly;
+            set => _isReadOnly = value;
+        }
+
         /// <summary>
         /// Gets the latest buffer lookup instance.
         /// </summary>
         public BufferLookup<T> Lookup => _lookup;
+
+        /// <summary>
+        /// Gets a value indicating whether the lookup is read-only.
+        /// </summary>
+        public bool IsReadOnly => _isReadOnly;
     }
 
     /// <summary>
@@ -389,6 +413,7 @@ public sealed class SystemWorkBuilder
         where T : unmanaged
     {
         ComponentTypeHandle<T> _handle;
+        bool _isReadOnly;
 
         internal ComponentTypeHandle<T> Current
         {
@@ -396,10 +421,21 @@ public sealed class SystemWorkBuilder
             set => _handle = value;
         }
 
+        internal bool IsReadOnlyInternal
+        {
+            get => _isReadOnly;
+            set => _isReadOnly = value;
+        }
+
         /// <summary>
         /// Gets the latest component type handle instance.
         /// </summary>
         public ComponentTypeHandle<T> Handle => _handle;
+
+        /// <summary>
+        /// Gets a value indicating whether the handle is read-only.
+        /// </summary>
+        public bool IsReadOnly => _isReadOnly;
     }
 
     /// <summary>
@@ -410,6 +446,7 @@ public sealed class SystemWorkBuilder
         where T : unmanaged
     {
         BufferTypeHandle<T> _handle;
+        bool _isReadOnly;
 
         internal BufferTypeHandle<T> Current
         {
@@ -417,10 +454,21 @@ public sealed class SystemWorkBuilder
             set => _handle = value;
         }
 
+        internal bool IsReadOnlyInternal
+        {
+            get => _isReadOnly;
+            set => _isReadOnly = value;
+        }
+
         /// <summary>
         /// Gets the latest buffer type handle instance.
         /// </summary>
         public BufferTypeHandle<T> Handle => _handle;
+
+        /// <summary>
+        /// Gets a value indicating whether the handle is read-only.
+        /// </summary>
+        public bool IsReadOnly => _isReadOnly;
     }
 
     /// <summary>
@@ -487,6 +535,276 @@ public sealed class SystemWorkBuilder
     }
 
     /// <summary>
+    /// Provides a fluent configuration surface for chunk iteration.
+    /// </summary>
+    public readonly struct ChunkIterationBuilder
+    {
+        readonly SystemContext _context;
+        readonly QueryHandle _queryHandle;
+
+        internal ChunkIterationBuilder(SystemContext context, QueryHandle queryHandle)
+        {
+            _context = context;
+            _queryHandle = queryHandle;
+        }
+
+        /// <summary>
+        /// Executes the supplied action for each chunk.
+        /// </summary>
+        public void ForEach(Action<ChunkIterationContext> action)
+        {
+            var context = _context;
+            var queryHandle = _queryHandle;
+            IterateChunks(context, queryHandle, action);
+        }
+
+        /// <summary>
+        /// Adds a writable component array to the iteration context.
+        /// </summary>
+        public ChunkIterationBuilder<NativeArray<T>> WithComponent<T>(ComponentTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            new(_context, _queryHandle, new WritableComponentChunkAccessorProvider<T>(handle));
+
+        /// <summary>
+        /// Adds a read-only component array to the iteration context.
+        /// </summary>
+        public ChunkIterationBuilder<NativeArray<T>.ReadOnly> WithReadOnlyComponent<T>(ComponentTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            new(_context, _queryHandle, new ReadOnlyComponentChunkAccessorProvider<T>(handle));
+
+        /// <summary>
+        /// Adds a buffer accessor to the iteration context.
+        /// </summary>
+        public ChunkIterationBuilder<BufferAccessor<T>> WithBuffer<T>(BufferTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            new(_context, _queryHandle, new BufferChunkAccessorProvider<T>(handle));
+    }
+
+    /// <summary>
+    /// Provides a fluent configuration surface for chunk iteration with a single accessor.
+    /// </summary>
+    public readonly struct ChunkIterationBuilder<T1>
+    {
+        readonly SystemContext _context;
+        readonly QueryHandle _queryHandle;
+        readonly IChunkAccessorProvider<T1> _provider1;
+
+        internal ChunkIterationBuilder(SystemContext context, QueryHandle queryHandle, IChunkAccessorProvider<T1> provider1)
+        {
+            _context = context;
+            _queryHandle = queryHandle;
+            _provider1 = provider1 ?? throw new ArgumentNullException(nameof(provider1));
+        }
+
+        /// <summary>
+        /// Executes the supplied action for each chunk.
+        /// </summary>
+        public void ForEach(Action<ChunkIterationContext, T1> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            var context = _context;
+            var queryHandle = _queryHandle;
+            var provider1 = _provider1;
+            IterateChunks(context, queryHandle, chunkContext =>
+            {
+                var accessor1 = provider1.Resolve(chunkContext);
+                action(chunkContext, accessor1);
+            });
+        }
+
+        /// <summary>
+        /// Adds a writable component array to the iteration context.
+        /// </summary>
+        public ChunkIterationBuilder<T1, NativeArray<T>> WithComponent<T>(ComponentTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            new(_context, _queryHandle, _provider1, new WritableComponentChunkAccessorProvider<T>(handle));
+
+        /// <summary>
+        /// Adds a read-only component array to the iteration context.
+        /// </summary>
+        public ChunkIterationBuilder<T1, NativeArray<T>.ReadOnly> WithReadOnlyComponent<T>(ComponentTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            new(_context, _queryHandle, _provider1, new ReadOnlyComponentChunkAccessorProvider<T>(handle));
+
+        /// <summary>
+        /// Adds a buffer accessor to the iteration context.
+        /// </summary>
+        public ChunkIterationBuilder<T1, BufferAccessor<T>> WithBuffer<T>(BufferTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            new(_context, _queryHandle, _provider1, new BufferChunkAccessorProvider<T>(handle));
+    }
+
+    /// <summary>
+    /// Provides a fluent configuration surface for chunk iteration with two accessors.
+    /// </summary>
+    public readonly struct ChunkIterationBuilder<T1, T2>
+    {
+        readonly SystemContext _context;
+        readonly QueryHandle _queryHandle;
+        readonly IChunkAccessorProvider<T1> _provider1;
+        readonly IChunkAccessorProvider<T2> _provider2;
+
+        internal ChunkIterationBuilder(
+            SystemContext context,
+            QueryHandle queryHandle,
+            IChunkAccessorProvider<T1> provider1,
+            IChunkAccessorProvider<T2> provider2)
+        {
+            _context = context;
+            _queryHandle = queryHandle;
+            _provider1 = provider1 ?? throw new ArgumentNullException(nameof(provider1));
+            _provider2 = provider2 ?? throw new ArgumentNullException(nameof(provider2));
+        }
+
+        /// <summary>
+        /// Executes the supplied action for each chunk.
+        /// </summary>
+        public void ForEach(Action<ChunkIterationContext, T1, T2> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            var context = _context;
+            var queryHandle = _queryHandle;
+            var provider1 = _provider1;
+            var provider2 = _provider2;
+            IterateChunks(context, queryHandle, chunkContext =>
+            {
+                var accessor1 = provider1.Resolve(chunkContext);
+                var accessor2 = provider2.Resolve(chunkContext);
+                action(chunkContext, accessor1, accessor2);
+            });
+        }
+
+        public ChunkIterationBuilder<T1, T2, NativeArray<T>> WithComponent<T>(ComponentTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            new(_context, _queryHandle, _provider1, _provider2, new WritableComponentChunkAccessorProvider<T>(handle));
+
+        public ChunkIterationBuilder<T1, T2, NativeArray<T>.ReadOnly> WithReadOnlyComponent<T>(ComponentTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            new(_context, _queryHandle, _provider1, _provider2, new ReadOnlyComponentChunkAccessorProvider<T>(handle));
+
+        public ChunkIterationBuilder<T1, T2, BufferAccessor<T>> WithBuffer<T>(BufferTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            new(_context, _queryHandle, _provider1, _provider2, new BufferChunkAccessorProvider<T>(handle));
+    }
+
+    /// <summary>
+    /// Provides a fluent configuration surface for chunk iteration with three accessors.
+    /// </summary>
+    public readonly struct ChunkIterationBuilder<T1, T2, T3>
+    {
+        readonly SystemContext _context;
+        readonly QueryHandle _queryHandle;
+        readonly IChunkAccessorProvider<T1> _provider1;
+        readonly IChunkAccessorProvider<T2> _provider2;
+        readonly IChunkAccessorProvider<T3> _provider3;
+
+        internal ChunkIterationBuilder(
+            SystemContext context,
+            QueryHandle queryHandle,
+            IChunkAccessorProvider<T1> provider1,
+            IChunkAccessorProvider<T2> provider2,
+            IChunkAccessorProvider<T3> provider3)
+        {
+            _context = context;
+            _queryHandle = queryHandle;
+            _provider1 = provider1 ?? throw new ArgumentNullException(nameof(provider1));
+            _provider2 = provider2 ?? throw new ArgumentNullException(nameof(provider2));
+            _provider3 = provider3 ?? throw new ArgumentNullException(nameof(provider3));
+        }
+
+        /// <summary>
+        /// Executes the supplied action for each chunk.
+        /// </summary>
+        public void ForEach(Action<ChunkIterationContext, T1, T2, T3> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            var context = _context;
+            var queryHandle = _queryHandle;
+            var provider1 = _provider1;
+            var provider2 = _provider2;
+            var provider3 = _provider3;
+            IterateChunks(context, queryHandle, chunkContext =>
+            {
+                var accessor1 = provider1.Resolve(chunkContext);
+                var accessor2 = provider2.Resolve(chunkContext);
+                var accessor3 = provider3.Resolve(chunkContext);
+                action(chunkContext, accessor1, accessor2, accessor3);
+            });
+        }
+
+        public ChunkIterationBuilder<T1, T2, T3, NativeArray<T>> WithComponent<T>(ComponentTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            new(_context, _queryHandle, _provider1, _provider2, _provider3, new WritableComponentChunkAccessorProvider<T>(handle));
+
+        public ChunkIterationBuilder<T1, T2, T3, NativeArray<T>.ReadOnly> WithReadOnlyComponent<T>(ComponentTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            new(_context, _queryHandle, _provider1, _provider2, _provider3, new ReadOnlyComponentChunkAccessorProvider<T>(handle));
+
+        public ChunkIterationBuilder<T1, T2, T3, BufferAccessor<T>> WithBuffer<T>(BufferTypeHandleHandle<T> handle)
+            where T : unmanaged =>
+            new(_context, _queryHandle, _provider1, _provider2, _provider3, new BufferChunkAccessorProvider<T>(handle));
+    }
+
+    /// <summary>
+    /// Provides a fluent configuration surface for chunk iteration with four accessors.
+    /// </summary>
+    public readonly struct ChunkIterationBuilder<T1, T2, T3, T4>
+    {
+        readonly SystemContext _context;
+        readonly QueryHandle _queryHandle;
+        readonly IChunkAccessorProvider<T1> _provider1;
+        readonly IChunkAccessorProvider<T2> _provider2;
+        readonly IChunkAccessorProvider<T3> _provider3;
+        readonly IChunkAccessorProvider<T4> _provider4;
+
+        internal ChunkIterationBuilder(
+            SystemContext context,
+            QueryHandle queryHandle,
+            IChunkAccessorProvider<T1> provider1,
+            IChunkAccessorProvider<T2> provider2,
+            IChunkAccessorProvider<T3> provider3,
+            IChunkAccessorProvider<T4> provider4)
+        {
+            _context = context;
+            _queryHandle = queryHandle;
+            _provider1 = provider1 ?? throw new ArgumentNullException(nameof(provider1));
+            _provider2 = provider2 ?? throw new ArgumentNullException(nameof(provider2));
+            _provider3 = provider3 ?? throw new ArgumentNullException(nameof(provider3));
+            _provider4 = provider4 ?? throw new ArgumentNullException(nameof(provider4));
+        }
+
+        /// <summary>
+        /// Executes the supplied action for each chunk.
+        /// </summary>
+        public void ForEach(Action<ChunkIterationContext, T1, T2, T3, T4> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            var context = _context;
+            var queryHandle = _queryHandle;
+            var provider1 = _provider1;
+            var provider2 = _provider2;
+            var provider3 = _provider3;
+            var provider4 = _provider4;
+            IterateChunks(context, queryHandle, chunkContext =>
+            {
+                var accessor1 = provider1.Resolve(chunkContext);
+                var accessor2 = provider2.Resolve(chunkContext);
+                var accessor3 = provider3.Resolve(chunkContext);
+                var accessor4 = provider4.Resolve(chunkContext);
+                action(chunkContext, accessor1, accessor2, accessor3, accessor4);
+            });
+        }
+    }
+
+    /// <summary>
     /// Represents the context provided to entity iteration callbacks.
     /// </summary>
     public readonly struct EntityIterationContext
@@ -524,17 +842,403 @@ public sealed class SystemWorkBuilder
     }
 
     /// <summary>
+    /// Provides a fluent configuration surface for entity iteration.
+    /// </summary>
+    public readonly struct EntityIterationBuilder
+    {
+        readonly SystemContext _context;
+        readonly QueryHandle _queryHandle;
+
+        internal EntityIterationBuilder(SystemContext context, QueryHandle queryHandle)
+        {
+            _context = context;
+            _queryHandle = queryHandle;
+        }
+
+        /// <summary>
+        /// Executes the supplied action for each entity.
+        /// </summary>
+        public void ForEach(Action<EntityIterationContext> action)
+        {
+            var context = _context;
+            var queryHandle = _queryHandle;
+            IterateEntities(context, queryHandle, action);
+        }
+
+        /// <summary>
+        /// Adds a writable component reference to the iteration context.
+        /// </summary>
+        public EntityIterationBuilder<RefRW<T>> WithComponent<T>(ComponentLookupHandle<T> handle)
+            =>
+            new(_context, _queryHandle, new WritableComponentEntityAccessorProvider<T>(handle));
+
+        /// <summary>
+        /// Adds a read-only component reference to the iteration context.
+        /// </summary>
+        public EntityIterationBuilder<RefRO<T>> WithReadOnlyComponent<T>(ComponentLookupHandle<T> handle)
+            =>
+            new(_context, _queryHandle, new ReadOnlyComponentEntityAccessorProvider<T>(handle));
+    }
+
+    /// <summary>
+    /// Provides a fluent configuration surface for entity iteration with a single accessor.
+    /// </summary>
+    public readonly struct EntityIterationBuilder<T1>
+    {
+        readonly SystemContext _context;
+        readonly QueryHandle _queryHandle;
+        readonly IEntityAccessorProvider<T1> _provider1;
+
+        internal EntityIterationBuilder(SystemContext context, QueryHandle queryHandle, IEntityAccessorProvider<T1> provider1)
+        {
+            _context = context;
+            _queryHandle = queryHandle;
+            _provider1 = provider1 ?? throw new ArgumentNullException(nameof(provider1));
+        }
+
+        /// <summary>
+        /// Executes the supplied action for each entity.
+        /// </summary>
+        public void ForEach(Action<EntityIterationContext, T1> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            var context = _context;
+            var queryHandle = _queryHandle;
+            var provider1 = _provider1;
+            IterateEntities(context, queryHandle, entityContext =>
+            {
+                var accessor1 = provider1.Resolve(entityContext);
+                action(entityContext, accessor1);
+            });
+        }
+
+        /// <summary>
+        /// Adds a writable component reference to the iteration context.
+        /// </summary>
+        public EntityIterationBuilder<T1, RefRW<T>> WithComponent<T>(ComponentLookupHandle<T> handle)
+            =>
+            new(_context, _queryHandle, _provider1, new WritableComponentEntityAccessorProvider<T>(handle));
+
+        /// <summary>
+        /// Adds a read-only component reference to the iteration context.
+        /// </summary>
+        public EntityIterationBuilder<T1, RefRO<T>> WithReadOnlyComponent<T>(ComponentLookupHandle<T> handle)
+            =>
+            new(_context, _queryHandle, _provider1, new ReadOnlyComponentEntityAccessorProvider<T>(handle));
+    }
+
+    /// <summary>
+    /// Provides a fluent configuration surface for entity iteration with two accessors.
+    /// </summary>
+    public readonly struct EntityIterationBuilder<T1, T2>
+    {
+        readonly SystemContext _context;
+        readonly QueryHandle _queryHandle;
+        readonly IEntityAccessorProvider<T1> _provider1;
+        readonly IEntityAccessorProvider<T2> _provider2;
+
+        internal EntityIterationBuilder(
+            SystemContext context,
+            QueryHandle queryHandle,
+            IEntityAccessorProvider<T1> provider1,
+            IEntityAccessorProvider<T2> provider2)
+        {
+            _context = context;
+            _queryHandle = queryHandle;
+            _provider1 = provider1 ?? throw new ArgumentNullException(nameof(provider1));
+            _provider2 = provider2 ?? throw new ArgumentNullException(nameof(provider2));
+        }
+
+        /// <summary>
+        /// Executes the supplied action for each entity.
+        /// </summary>
+        public void ForEach(Action<EntityIterationContext, T1, T2> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            var context = _context;
+            var queryHandle = _queryHandle;
+            var provider1 = _provider1;
+            var provider2 = _provider2;
+            IterateEntities(context, queryHandle, entityContext =>
+            {
+                var accessor1 = provider1.Resolve(entityContext);
+                var accessor2 = provider2.Resolve(entityContext);
+                action(entityContext, accessor1, accessor2);
+            });
+        }
+
+        public EntityIterationBuilder<T1, T2, RefRW<T>> WithComponent<T>(ComponentLookupHandle<T> handle)
+            =>
+            new(_context, _queryHandle, _provider1, _provider2, new WritableComponentEntityAccessorProvider<T>(handle));
+
+        public EntityIterationBuilder<T1, T2, RefRO<T>> WithReadOnlyComponent<T>(ComponentLookupHandle<T> handle)
+            =>
+            new(_context, _queryHandle, _provider1, _provider2, new ReadOnlyComponentEntityAccessorProvider<T>(handle));
+    }
+
+    /// <summary>
+    /// Provides a fluent configuration surface for entity iteration with three accessors.
+    /// </summary>
+    public readonly struct EntityIterationBuilder<T1, T2, T3>
+    {
+        readonly SystemContext _context;
+        readonly QueryHandle _queryHandle;
+        readonly IEntityAccessorProvider<T1> _provider1;
+        readonly IEntityAccessorProvider<T2> _provider2;
+        readonly IEntityAccessorProvider<T3> _provider3;
+
+        internal EntityIterationBuilder(
+            SystemContext context,
+            QueryHandle queryHandle,
+            IEntityAccessorProvider<T1> provider1,
+            IEntityAccessorProvider<T2> provider2,
+            IEntityAccessorProvider<T3> provider3)
+        {
+            _context = context;
+            _queryHandle = queryHandle;
+            _provider1 = provider1 ?? throw new ArgumentNullException(nameof(provider1));
+            _provider2 = provider2 ?? throw new ArgumentNullException(nameof(provider2));
+            _provider3 = provider3 ?? throw new ArgumentNullException(nameof(provider3));
+        }
+
+        /// <summary>
+        /// Executes the supplied action for each entity.
+        /// </summary>
+        public void ForEach(Action<EntityIterationContext, T1, T2, T3> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            var context = _context;
+            var queryHandle = _queryHandle;
+            var provider1 = _provider1;
+            var provider2 = _provider2;
+            var provider3 = _provider3;
+            IterateEntities(context, queryHandle, entityContext =>
+            {
+                var accessor1 = provider1.Resolve(entityContext);
+                var accessor2 = provider2.Resolve(entityContext);
+                var accessor3 = provider3.Resolve(entityContext);
+                action(entityContext, accessor1, accessor2, accessor3);
+            });
+        }
+
+        public EntityIterationBuilder<T1, T2, T3, RefRW<T>> WithComponent<T>(ComponentLookupHandle<T> handle)
+            =>
+            new(_context, _queryHandle, _provider1, _provider2, _provider3, new WritableComponentEntityAccessorProvider<T>(handle));
+
+        public EntityIterationBuilder<T1, T2, T3, RefRO<T>> WithReadOnlyComponent<T>(ComponentLookupHandle<T> handle)
+            =>
+            new(_context, _queryHandle, _provider1, _provider2, _provider3, new ReadOnlyComponentEntityAccessorProvider<T>(handle));
+    }
+
+    /// <summary>
+    /// Provides a fluent configuration surface for entity iteration with four accessors.
+    /// </summary>
+    public readonly struct EntityIterationBuilder<T1, T2, T3, T4>
+    {
+        readonly SystemContext _context;
+        readonly QueryHandle _queryHandle;
+        readonly IEntityAccessorProvider<T1> _provider1;
+        readonly IEntityAccessorProvider<T2> _provider2;
+        readonly IEntityAccessorProvider<T3> _provider3;
+        readonly IEntityAccessorProvider<T4> _provider4;
+
+        internal EntityIterationBuilder(
+            SystemContext context,
+            QueryHandle queryHandle,
+            IEntityAccessorProvider<T1> provider1,
+            IEntityAccessorProvider<T2> provider2,
+            IEntityAccessorProvider<T3> provider3,
+            IEntityAccessorProvider<T4> provider4)
+        {
+            _context = context;
+            _queryHandle = queryHandle;
+            _provider1 = provider1 ?? throw new ArgumentNullException(nameof(provider1));
+            _provider2 = provider2 ?? throw new ArgumentNullException(nameof(provider2));
+            _provider3 = provider3 ?? throw new ArgumentNullException(nameof(provider3));
+            _provider4 = provider4 ?? throw new ArgumentNullException(nameof(provider4));
+        }
+
+        /// <summary>
+        /// Executes the supplied action for each entity.
+        /// </summary>
+        public void ForEach(Action<EntityIterationContext, T1, T2, T3, T4> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            var context = _context;
+            var queryHandle = _queryHandle;
+            var provider1 = _provider1;
+            var provider2 = _provider2;
+            var provider3 = _provider3;
+            var provider4 = _provider4;
+            IterateEntities(context, queryHandle, entityContext =>
+            {
+                var accessor1 = provider1.Resolve(entityContext);
+                var accessor2 = provider2.Resolve(entityContext);
+                var accessor3 = provider3.Resolve(entityContext);
+                var accessor4 = provider4.Resolve(entityContext);
+                action(entityContext, accessor1, accessor2, accessor3, accessor4);
+            });
+        }
+    }
+
+    /// <summary>
     /// Iterates each chunk in the supplied query while exposing strongly typed accessors.
     /// </summary>
     /// <param name="context">Active system context.</param>
     /// <param name="queryHandle">Query being iterated.</param>
     /// <param name="action">Action invoked per chunk.</param>
-    public static void ForEachChunk(SystemContext context, QueryHandle queryHandle, Action<ChunkIterationContext> action)
+    /// <summary>
+    /// Creates a fluent builder for chunk iteration using strongly typed accessors.
+    /// </summary>
+    /// <param name="context">Active system context.</param>
+    /// <param name="queryHandle">Query being iterated.</param>
+    /// <returns>A builder that configures the iteration.</returns>
+    public static ChunkIterationBuilder ForEachChunk(SystemContext context, QueryHandle queryHandle)
+    {
+        ValidateIterationInputs(context, queryHandle);
+        return new ChunkIterationBuilder(context, queryHandle);
+    }
+
+    /// <summary>
+    /// Iterates each chunk in the supplied query while exposing strongly typed accessors.
+    /// </summary>
+    /// <param name="context">Active system context.</param>
+    /// <param name="queryHandle">Query being iterated.</param>
+    /// <param name="action">Action invoked per chunk.</param>
+    public static void ForEachChunk(SystemContext context, QueryHandle queryHandle, Action<ChunkIterationContext> action) =>
+        ForEachChunk(context, queryHandle).ForEach(action);
+
+    /// <summary>
+    /// Iterates each entity in the supplied query while exposing strongly typed accessors.
+    /// </summary>
+    /// <param name="context">Active system context.</param>
+    /// <param name="queryHandle">Query being iterated.</param>
+    /// <param name="action">Action invoked per entity.</param>
+    /// <summary>
+    /// Creates a fluent builder for entity iteration using strongly typed accessors.
+    /// </summary>
+    /// <param name="context">Active system context.</param>
+    /// <param name="queryHandle">Query being iterated.</param>
+    /// <returns>A builder that configures the iteration.</returns>
+    public static EntityIterationBuilder ForEachEntity(SystemContext context, QueryHandle queryHandle)
+    {
+        ValidateIterationInputs(context, queryHandle);
+        return new EntityIterationBuilder(context, queryHandle);
+    }
+
+    /// <summary>
+    /// Iterates each entity in the supplied query while exposing strongly typed accessors.
+    /// </summary>
+    /// <param name="context">Active system context.</param>
+    /// <param name="queryHandle">Query being iterated.</param>
+    /// <param name="action">Action invoked per entity.</param>
+    public static void ForEachEntity(SystemContext context, QueryHandle queryHandle, Action<EntityIterationContext> action) =>
+        ForEachEntity(context, queryHandle).ForEach(action);
+
+    internal interface IChunkAccessorProvider<TAccessor>
+    {
+        TAccessor Resolve(in ChunkIterationContext context);
+    }
+
+    internal interface IEntityAccessorProvider<TAccessor>
+    {
+        TAccessor Resolve(in EntityIterationContext context);
+    }
+
+    sealed class WritableComponentChunkAccessorProvider<T> : IChunkAccessorProvider<NativeArray<T>>
+        where T : unmanaged
+    {
+        readonly ComponentTypeHandleHandle<T> _handle;
+
+        public WritableComponentChunkAccessorProvider(ComponentTypeHandleHandle<T> handle)
+        {
+            _handle = handle ?? throw new ArgumentNullException(nameof(handle));
+            if (_handle.IsReadOnly)
+                throw new InvalidOperationException("Component handle is read-only; use WithReadOnlyComponent.");
+        }
+
+        public NativeArray<T> Resolve(in ChunkIterationContext context) =>
+            context.Chunk.GetNativeArray(_handle.Handle);
+    }
+
+    sealed class ReadOnlyComponentChunkAccessorProvider<T> : IChunkAccessorProvider<NativeArray<T>.ReadOnly>
+        where T : unmanaged
+    {
+        readonly ComponentTypeHandleHandle<T> _handle;
+
+        public ReadOnlyComponentChunkAccessorProvider(ComponentTypeHandleHandle<T> handle)
+        {
+            _handle = handle ?? throw new ArgumentNullException(nameof(handle));
+            if (!_handle.IsReadOnly)
+                throw new InvalidOperationException("Component handle must be created in read-only mode.");
+        }
+
+        public NativeArray<T>.ReadOnly Resolve(in ChunkIterationContext context) =>
+            context.Chunk.GetNativeArray(_handle.Handle).AsReadOnly();
+    }
+
+    sealed class BufferChunkAccessorProvider<T> : IChunkAccessorProvider<BufferAccessor<T>>
+        where T : unmanaged
+    {
+        readonly BufferTypeHandleHandle<T> _handle;
+
+        public BufferChunkAccessorProvider(BufferTypeHandleHandle<T> handle) =>
+            _handle = handle ?? throw new ArgumentNullException(nameof(handle));
+
+        public BufferAccessor<T> Resolve(in ChunkIterationContext context) =>
+            context.Chunk.GetBufferAccessor(_handle.Handle);
+    }
+
+    sealed class WritableComponentEntityAccessorProvider<T> : IEntityAccessorProvider<RefRW<T>>
+       
+    {
+        readonly ComponentLookupHandle<T> _handle;
+
+        public WritableComponentEntityAccessorProvider(ComponentLookupHandle<T> handle)
+        {
+            _handle = handle ?? throw new ArgumentNullException(nameof(handle));
+            if (_handle.IsReadOnly)
+                throw new InvalidOperationException("Component lookup is read-only; use WithReadOnlyComponent.");
+        }
+
+        public RefRW<T> Resolve(in EntityIterationContext context) =>
+            _handle.Lookup.GetRefRW(context.Entity);
+    }
+
+    sealed class ReadOnlyComponentEntityAccessorProvider<T> : IEntityAccessorProvider<RefRO<T>>
+       
+    {
+        readonly ComponentLookupHandle<T> _handle;
+
+        public ReadOnlyComponentEntityAccessorProvider(ComponentLookupHandle<T> handle)
+        {
+            _handle = handle ?? throw new ArgumentNullException(nameof(handle));
+            if (!_handle.IsReadOnly)
+                throw new InvalidOperationException("Component lookup must be created in read-only mode.");
+        }
+
+        public RefRO<T> Resolve(in EntityIterationContext context) =>
+            _handle.Lookup.GetRefRO(context.Entity);
+    }
+
+    static void ValidateIterationInputs(SystemContext context, QueryHandle queryHandle)
     {
         if (context.System == null)
             throw new ArgumentNullException(nameof(context));
         if (queryHandle == null)
             throw new ArgumentNullException(nameof(queryHandle));
+    }
+
+    static void IterateChunks(SystemContext context, QueryHandle queryHandle, Action<ChunkIterationContext> action)
+    {
         if (action == null)
             throw new ArgumentNullException(nameof(action));
 
@@ -549,18 +1253,8 @@ public sealed class SystemWorkBuilder
         });
     }
 
-    /// <summary>
-    /// Iterates each entity in the supplied query while exposing strongly typed accessors.
-    /// </summary>
-    /// <param name="context">Active system context.</param>
-    /// <param name="queryHandle">Query being iterated.</param>
-    /// <param name="action">Action invoked per entity.</param>
-    public static void ForEachEntity(SystemContext context, QueryHandle queryHandle, Action<EntityIterationContext> action)
+    static void IterateEntities(SystemContext context, QueryHandle queryHandle, Action<EntityIterationContext> action)
     {
-        if (context.System == null)
-            throw new ArgumentNullException(nameof(context));
-        if (queryHandle == null)
-            throw new ArgumentNullException(nameof(queryHandle));
         if (action == null)
             throw new ArgumentNullException(nameof(action));
 
@@ -645,6 +1339,7 @@ public sealed class SystemWorkBuilder
 
     static void InitializeLookupHandle<T>(SystemContext context, ComponentLookupHandle<T> handle, bool isReadOnly)
     {
+        handle.IsReadOnlyInternal = isReadOnly;
         handle.Current = context.System.GetComponentLookup<T>(isReadOnly);
         context.Registrar.Register(system =>
         {
@@ -656,6 +1351,7 @@ public sealed class SystemWorkBuilder
 
     static void InitializeBufferLookupHandle<T>(SystemContext context, BufferLookupHandle<T> handle, bool isReadOnly)
     {
+        handle.IsReadOnlyInternal = isReadOnly;
         handle.Current = context.System.GetBufferLookup<T>(isReadOnly);
         context.Registrar.Register(system =>
         {
@@ -668,6 +1364,7 @@ public sealed class SystemWorkBuilder
     static void InitializeComponentTypeHandle<T>(SystemContext context, ComponentTypeHandleHandle<T> handle, bool isReadOnly)
         where T : unmanaged
     {
+        handle.IsReadOnlyInternal = isReadOnly;
         handle.Current = context.System.GetComponentTypeHandle<T>(isReadOnly);
         context.Registrar.Register(system =>
         {
@@ -678,6 +1375,7 @@ public sealed class SystemWorkBuilder
     static void InitializeBufferTypeHandle<T>(SystemContext context, BufferTypeHandleHandle<T> handle, bool isReadOnly)
         where T : unmanaged
     {
+        handle.IsReadOnlyInternal = isReadOnly;
         handle.Current = context.System.GetBufferTypeHandle<T>(isReadOnly);
         context.Registrar.Register(system =>
         {

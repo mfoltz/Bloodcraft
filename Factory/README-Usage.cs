@@ -117,18 +117,19 @@
 //
 //             var system = (BuilderDrivenSystem)context.System;
 //
-//             SystemWorkBuilder.ForEachChunk(context, queryHandle, chunk =>
-//             {
-//                 var movementArray = chunk.GetNativeArray(system._movementHandle);
-//                 var entities = chunk.Entities;
-//
-//                 for (int i = 0; i < chunk.Count; ++i)
+//             SystemWorkBuilder.ForEachChunk(context, queryHandle)
+//                 .WithReadOnlyComponent(system._movementHandle)
+//                 .ForEach((chunkContext, movementArray) =>
 //                 {
-//                     var entity = entities[i];
-//                     var movement = movementArray[i];
-//                     // Perform work here.
-//                 }
-//             });
+//                     var entities = chunkContext.Entities;
+//
+//                     for (int i = 0; i < chunkContext.Count; ++i)
+//                     {
+//                         var entity = entities[i];
+//                         var movement = movementArray[i];
+//                         // Perform work here.
+//                     }
+//                 });
 //         });
 //
 //         artifacts = new BuilderArtifacts(movementLookup, movementHandle);
