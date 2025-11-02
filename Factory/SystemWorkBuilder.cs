@@ -472,7 +472,7 @@ public sealed class SystemWorkBuilder
                     continue;
                 }
 
-                for (int decoratorIndex = 0; decoratorIndex < bucket.Count; ++decoratorIndex)
+                for (int decoratorIndex = bucket.Count - 1; decoratorIndex >= 0; --decoratorIndex)
                 {
                     tail = bucket[decoratorIndex](tail);
 
