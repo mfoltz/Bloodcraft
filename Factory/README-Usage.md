@@ -173,6 +173,41 @@ public sealed class BuilderDrivenSystem : VSystemBase<ISystemWork>
 Within chunk iteration the same helper guarantees that the component is available for
 the current entity index before the loop processes it further.
 
+## Throttling expensive updates
+
+`SystemWorkBuilder` can gate `OnUpdate` delegates so they only run on a desired cadence.
+Use `WithUpdateInterval` to supply a custom time provider, or lean on the convenience
+wrappers when sampling server time or the fixed tick counter.
+
+```csharp
+var builder = new SystemWorkBuilder()
+    .WithQuery(descriptor)
+    .WithServerTimeInterval(TimeSpan.FromSeconds(15))
+    .WithFixedServerTickInterval(20);
+
+var expensiveQuery = builder.WithPrimaryQuery(requireForUpdate: true);
+
+builder.OnUpdate(context =>
+{
+    // This block runs at most once every 15 seconds and every twentieth tick.
+    var queryHandle = expensiveQuery.Handle;
+    if (queryHandle == null || queryHandle.IsDisposed)
+    {
+        return;
+    }
+
+    SystemWorkBuilder.ForEachEntity(context, queryHandle, iterator =>
+    {
+        // Perform throttled work here.
+    });
+});
+```
+
+The helper registers its internal state with `SystemContext.Registrar.Register`, ensuring
+the gate refreshes alongside lookups and other builder-managed resources. The fixed
+tick overload leverages the same refresh pass to count server ticks, letting you express
+cadence in either seconds or discrete updates.
+
 ## Spawn-tag queries
 
 Use <code>IncludeSpawnTag()</code> when a query should target entities that are still marked with the spawn tag. This is useful
