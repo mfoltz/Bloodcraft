@@ -25,6 +25,7 @@ public sealed class SystemWorkBuilder
     readonly List<QueryConfigurator> _queryConfigurators = new();
     readonly List<Action<SystemContext>> _resourceInitializers = new();
     readonly List<Action<SystemContext>> _resourceTeardowns = new();
+    readonly List<Func<Action<SystemContext>?, Action<SystemContext>?>> _onUpdateDecorators = new();
 
     Action<SystemContext>? _onCreate;
     Action<SystemContext>? _onStartRunning;
@@ -234,6 +235,85 @@ public sealed class SystemWorkBuilder
     }
 
     /// <summary>
+    /// Applies a gating interval to subsequent <see cref="OnUpdate(Action{SystemContext})"/> delegates.
+    /// </summary>
+    /// <param name="interval">Minimum time that must elapse between executions.</param>
+    /// <param name="timeProvider">Provider supplying the current time for the gate.</param>
+    /// <returns>The current builder instance.</returns>
+    public SystemWorkBuilder WithUpdateInterval(TimeSpan interval, Func<SystemContext, double> timeProvider)
+    {
+        if (interval <= TimeSpan.Zero)
+            throw new ArgumentOutOfRangeException(nameof(interval));
+        if (timeProvider == null)
+            throw new ArgumentNullException(nameof(timeProvider));
+
+        var gate = new ScalarUpdateGate(interval.TotalSeconds, timeProvider);
+
+        _resourceInitializers.Add(context => gate.Initialize(context));
+        _resourceTeardowns.Add(_ => gate.Reset());
+
+        _onUpdateDecorators.Add(next =>
+        {
+            if (next == null)
+                return null;
+
+            return context =>
+            {
+                if (!gate.ShouldExecute())
+                {
+                    return;
+                }
+
+                next(context);
+            };
+        });
+
+        return this;
+    }
+
+    /// <summary>
+    /// Applies a gating interval sourced from the global server time.
+    /// </summary>
+    /// <param name="interval">Minimum real-time duration between executions.</param>
+    /// <returns>The current builder instance.</returns>
+    public SystemWorkBuilder WithServerTimeInterval(TimeSpan interval) =>
+        WithUpdateInterval(interval, static _ => global::Bloodcraft.Core.ServerTime);
+
+    /// <summary>
+    /// Applies a gating interval based on fixed server ticks.
+    /// </summary>
+    /// <param name="tickInterval">Number of fixed ticks to wait between executions.</param>
+    /// <returns>The current builder instance.</returns>
+    public SystemWorkBuilder WithFixedServerTickInterval(uint tickInterval)
+    {
+        if (tickInterval == 0)
+            throw new ArgumentOutOfRangeException(nameof(tickInterval));
+
+        var gate = new FixedTickUpdateGate(tickInterval);
+
+        _resourceInitializers.Add(context => gate.Initialize(context));
+        _resourceTeardowns.Add(_ => gate.Reset());
+
+        _onUpdateDecorators.Add(next =>
+        {
+            if (next == null)
+                return null;
+
+            return context =>
+            {
+                if (!gate.ShouldExecute())
+                {
+                    return;
+                }
+
+                next(context);
+            };
+        });
+
+        return this;
+    }
+
+    /// <summary>
     /// Registers an <see cref="ISystemWork.OnStopRunning"/> delegate.
     /// </summary>
     /// <param name="action">Delegate invoked when the system stops running.</param>
@@ -348,6 +428,13 @@ public sealed class SystemWorkBuilder
     /// <returns>The constructed work instance.</returns>
     public ISystemWork Build()
     {
+        var onUpdate = _onUpdate;
+
+        for (int i = 0; i < _onUpdateDecorators.Count; ++i)
+        {
+            onUpdate = _onUpdateDecorators[i](onUpdate);
+        }
+
         return new DelegateSystemWork(
             _queryConfigurators.ToArray(),
             _resourceInitializers.ToArray(),
@@ -355,7 +442,7 @@ public sealed class SystemWorkBuilder
             _requireForUpdate,
             _onCreate,
             _onStartRunning,
-            _onUpdate,
+            onUpdate,
             _onStopRunning,
             _onDestroy);
     }
@@ -1965,6 +2052,114 @@ public sealed class SystemWorkBuilder
         {
             handle.Current = system.GetBufferTypeHandle<T>(isReadOnly);
         });
+    }
+
+    sealed class ScalarUpdateGate
+    {
+        readonly double _interval;
+        readonly Func<SystemContext, double> _valueProvider;
+
+        double _currentValue;
+        double _nextValue;
+        bool _isInitialized;
+
+        public ScalarUpdateGate(double interval, Func<SystemContext, double> valueProvider)
+        {
+            if (interval <= 0d)
+                throw new ArgumentOutOfRangeException(nameof(interval));
+            _valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
+            _interval = interval;
+        }
+
+        public void Initialize(SystemContext context)
+        {
+            _currentValue = _valueProvider(context);
+            _nextValue = _currentValue;
+            _isInitialized = true;
+
+            context.Registrar.Register(_ =>
+            {
+                _currentValue = _valueProvider(context);
+            });
+        }
+
+        public bool ShouldExecute()
+        {
+            if (!_isInitialized)
+            {
+                return true;
+            }
+
+            if (_currentValue < _nextValue)
+            {
+                return false;
+            }
+
+            _nextValue = _currentValue + _interval;
+            return true;
+        }
+
+        public void Reset()
+        {
+            _currentValue = 0d;
+            _nextValue = 0d;
+            _isInitialized = false;
+        }
+    }
+
+    sealed class FixedTickUpdateGate
+    {
+        readonly uint _interval;
+
+        ulong _currentTick;
+        ulong _nextTick;
+        bool _isInitialized;
+
+        public FixedTickUpdateGate(uint interval)
+        {
+            if (interval == 0)
+                throw new ArgumentOutOfRangeException(nameof(interval));
+
+            _interval = interval;
+        }
+
+        public void Initialize(SystemContext context)
+        {
+            _currentTick = 0UL;
+            _nextTick = 0UL;
+            _isInitialized = true;
+
+            context.Registrar.Register(_ =>
+            {
+                unchecked
+                {
+                    ++_currentTick;
+                }
+            });
+        }
+
+        public bool ShouldExecute()
+        {
+            if (!_isInitialized)
+            {
+                return true;
+            }
+
+            if (_currentTick < _nextTick)
+            {
+                return false;
+            }
+
+            _nextTick = _currentTick + _interval;
+            return true;
+        }
+
+        public void Reset()
+        {
+            _currentTick = 0UL;
+            _nextTick = 0UL;
+            _isInitialized = false;
+        }
     }
 
     sealed class DelegateSystemWork : ISystemWork
