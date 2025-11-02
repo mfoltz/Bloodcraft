@@ -25,11 +25,11 @@ public sealed class SystemWorkBuilder
     readonly List<QueryConfigurator> _queryConfigurators = new();
     readonly List<Action<SystemContext>> _resourceInitializers = new();
     readonly List<Action<SystemContext>> _resourceTeardowns = new();
-    readonly List<Func<Action<SystemContext>?, Action<SystemContext>?>> _onUpdateDecorators = new();
+    readonly List<Action<SystemContext>> _onUpdateActions = new();
+    readonly List<OnUpdateDecoratorScope> _onUpdateDecoratorScopes = new();
 
     Action<SystemContext>? _onCreate;
     Action<SystemContext>? _onStartRunning;
-    Action<SystemContext>? _onUpdate;
     Action<SystemContext>? _onStopRunning;
     Action<SystemContext>? _onDestroy;
 
@@ -230,7 +230,7 @@ public sealed class SystemWorkBuilder
         if (action == null)
             throw new ArgumentNullException(nameof(action));
 
-        _onUpdate += action;
+        _onUpdateActions.Add(action);
         return this;
     }
 
@@ -252,7 +252,7 @@ public sealed class SystemWorkBuilder
         _resourceInitializers.Add(context => gate.Initialize(context));
         _resourceTeardowns.Add(_ => gate.Reset());
 
-        _onUpdateDecorators.Add(next =>
+        Func<Action<SystemContext>?, Action<SystemContext>?> decorator = next =>
         {
             if (next == null)
                 return null;
@@ -266,7 +266,9 @@ public sealed class SystemWorkBuilder
 
                 next(context);
             };
-        });
+        };
+
+        _onUpdateDecoratorScopes.Add(new OnUpdateDecoratorScope(_onUpdateActions.Count, decorator));
 
         return this;
     }
@@ -294,7 +296,7 @@ public sealed class SystemWorkBuilder
         _resourceInitializers.Add(context => gate.Initialize(context));
         _resourceTeardowns.Add(_ => gate.Reset());
 
-        _onUpdateDecorators.Add(next =>
+        Func<Action<SystemContext>?, Action<SystemContext>?> decorator = next =>
         {
             if (next == null)
                 return null;
@@ -308,7 +310,9 @@ public sealed class SystemWorkBuilder
 
                 next(context);
             };
-        });
+        };
+
+        _onUpdateDecoratorScopes.Add(new OnUpdateDecoratorScope(_onUpdateActions.Count, decorator));
 
         return this;
     }
@@ -428,11 +432,58 @@ public sealed class SystemWorkBuilder
     /// <returns>The constructed work instance.</returns>
     public ISystemWork Build()
     {
-        var onUpdate = _onUpdate;
+        Action<SystemContext>? onUpdate = null;
 
-        for (int i = 0; i < _onUpdateDecorators.Count; ++i)
+        if (_onUpdateActions.Count > 0)
         {
-            onUpdate = _onUpdateDecorators[i](onUpdate);
+            var decoratorBuckets = new List<Func<Action<SystemContext>?, Action<SystemContext>?>>[_onUpdateActions.Count + 1];
+
+            for (int i = 0; i < _onUpdateDecoratorScopes.Count; ++i)
+            {
+                var scope = _onUpdateDecoratorScopes[i];
+                var index = scope.StartIndex;
+
+                if (index >= decoratorBuckets.Length)
+                {
+                    continue;
+                }
+
+                var bucket = decoratorBuckets[index];
+
+                if (bucket == null)
+                {
+                    bucket = new List<Func<Action<SystemContext>?, Action<SystemContext>?>>();
+                    decoratorBuckets[index] = bucket;
+                }
+
+                bucket.Add(scope.Decorator);
+            }
+
+            Action<SystemContext>? tail = null;
+
+            for (int actionIndex = _onUpdateActions.Count - 1; actionIndex >= 0; --actionIndex)
+            {
+                tail = (Action<SystemContext>?)Delegate.Combine(_onUpdateActions[actionIndex], tail);
+
+                var bucket = decoratorBuckets[actionIndex];
+
+                if (bucket == null)
+                {
+                    continue;
+                }
+
+                for (int decoratorIndex = 0; decoratorIndex < bucket.Count; ++decoratorIndex)
+                {
+                    tail = bucket[decoratorIndex](tail);
+
+                    if (tail == null)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            onUpdate = tail;
         }
 
         return new DelegateSystemWork(
@@ -445,6 +496,22 @@ public sealed class SystemWorkBuilder
             onUpdate,
             _onStopRunning,
             _onDestroy);
+    }
+
+    readonly struct OnUpdateDecoratorScope
+    {
+        public OnUpdateDecoratorScope(int startIndex, Func<Action<SystemContext>?, Action<SystemContext>?> decorator)
+        {
+            if (decorator == null)
+                throw new ArgumentNullException(nameof(decorator));
+
+            StartIndex = startIndex;
+            Decorator = decorator;
+        }
+
+        public int StartIndex { get; }
+
+        public Func<Action<SystemContext>?, Action<SystemContext>?> Decorator { get; }
     }
 
     /// <summary>
