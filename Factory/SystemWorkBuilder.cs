@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -11,8 +13,10 @@ namespace Bloodcraft.Factory;
 /// Provides a fluent builder for constructing lightweight <see cref="ISystemWork"/> implementations.
 /// </summary>
 /// <remarks>
-/// When allocating persistent native containers inside lifecycle callbacks, use
-/// <see cref="SystemContext.RegisterDisposable(System.IDisposable)"/> to ensure the resources are automatically disposed.
+/// When allocating persistent native containers inside lifecycle callbacks, prefer
+/// <see cref="WithNativeContainer{T}(System.Func{SystemContext, T})"/> or
+/// <see cref="WithDisposable{T}(System.Func{SystemContext, T})"/> to ensure resources are automatically disposed.
+/// Legacy code can still call <see cref="SystemContext.RegisterDisposable(System.IDisposable)"/> when necessary.
 /// </remarks>
 public sealed class SystemWorkBuilder
 {
@@ -365,6 +369,166 @@ public sealed class SystemWorkBuilder
     }
 
     /// <summary>
+    /// Exposes a managed <typeparamref name="T"/> native container allocated by the builder.
+    /// </summary>
+    /// <typeparam name="T">Native container type exposing a parameterless <c>Dispose()</c> method.</typeparam>
+    public sealed class NativeContainerHolder<T> : IDisposable
+        where T : struct
+    {
+        T _container;
+        bool _hasValue;
+        bool _disposed;
+
+        internal void SetValue(T container)
+        {
+            _container = container;
+            _hasValue = true;
+            _disposed = false;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the holder currently exposes a live container.
+        /// </summary>
+        public bool HasValue => _hasValue && !_disposed;
+
+        /// <summary>
+        /// Gets the managed container instance by reference.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown when the container has not been initialised.</exception>
+        public ref T Container
+        {
+            get
+            {
+                if (!HasValue)
+                    throw new InvalidOperationException("The native container has not been initialised.");
+
+                return ref _container;
+            }
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the current container value.
+        /// </summary>
+        /// <param name="container">When this method returns, contains the current container value or <c>default</c>.</param>
+        /// <returns><see langword="true"/> when the container is available; otherwise, <see langword="false"/>.</returns>
+        public bool TryGetValue(out T container)
+        {
+            if (!HasValue)
+            {
+                container = default;
+                return false;
+            }
+
+            container = _container;
+            return true;
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            if (!HasValue)
+                return;
+
+            NativeContainerDisposer<T>.Dispose(ref _container);
+            _container = default;
+            _hasValue = false;
+            _disposed = true;
+        }
+    }
+
+    /// <summary>
+    /// Exposes a managed <typeparamref name="T"/> disposable allocated by the builder.
+    /// </summary>
+    /// <typeparam name="T">Managed disposable type.</typeparam>
+    public sealed class DisposableHolder<T> : IDisposable
+        where T : class, IDisposable
+    {
+        T? _instance;
+        bool _disposed;
+
+        internal void SetInstance(T instance)
+        {
+            _instance = instance ?? throw new ArgumentNullException(nameof(instance));
+            _disposed = false;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the holder currently exposes a live instance.
+        /// </summary>
+        public bool HasInstance => _instance != null && !_disposed;
+
+        /// <summary>
+        /// Gets the current disposable instance.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown when the disposable has not been initialised.</exception>
+        public T Instance => _instance ?? throw new InvalidOperationException("The disposable has not been initialised.");
+
+        /// <summary>
+        /// Attempts to retrieve the current disposable instance.
+        /// </summary>
+        /// <param name="instance">When this method returns, contains the current instance or <see langword="null"/>.</param>
+        /// <returns><see langword="true"/> when the instance is available; otherwise, <see langword="false"/>.</returns>
+        public bool TryGetInstance([NotNullWhen(true)] out T? instance)
+        {
+            if (!HasInstance)
+            {
+                instance = null;
+                return false;
+            }
+
+            instance = _instance;
+            return true;
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            try
+            {
+                _instance?.Dispose();
+            }
+            finally
+            {
+                _instance = null;
+                _disposed = true;
+            }
+        }
+    }
+
+    static class NativeContainerDisposer<T>
+        where T : struct
+    {
+        static readonly Action<T> DisposeAction = CreateDisposeAction();
+
+        public static void Dispose(ref T container)
+        {
+            DisposeAction(container);
+        }
+
+        static Action<T> CreateDisposeAction()
+        {
+            var disposeMethod = typeof(T).GetMethod(nameof(IDisposable.Dispose), Type.EmptyTypes);
+
+            if (disposeMethod == null)
+            {
+                throw new InvalidOperationException($"Type '{typeof(T)}' must expose a parameterless Dispose() method.");
+            }
+
+            if (disposeMethod.ReturnType != typeof(void))
+            {
+                throw new InvalidOperationException($"Type '{typeof(T)}' must expose a Dispose() method returning void.");
+            }
+
+            var instance = Expression.Parameter(typeof(T), "instance");
+            var call = Expression.Call(instance, disposeMethod);
+            return Expression.Lambda<Action<T>>(call, instance).Compile();
+        }
+    }
+
+    /// <summary>
     /// Registers and exposes a <see cref="ComponentLookup{T}"/> refreshed each update.
     /// </summary>
     /// <typeparam name="T">Component type to lookup.</typeparam>
@@ -424,6 +588,88 @@ public sealed class SystemWorkBuilder
         _resourceInitializers.Add(context => InitializeBufferTypeHandle(context, handle, isReadOnly));
 
         return handle;
+    }
+
+    /// <summary>
+    /// Registers and exposes a persistent native container allocated during <see cref="ISystemWork.OnCreate"/>.
+    /// </summary>
+    /// <typeparam name="T">Native container type implementing <see cref="IDisposable"/>.</typeparam>
+    /// <param name="factory">Factory that creates the container during the resource initialization pass.</param>
+    /// <returns>A holder that surfaces the allocated container instance.</returns>
+    public NativeContainerHolder<T> WithNativeContainer<T>(Func<SystemContext, T> factory)
+        where T : struct
+    {
+        if (factory == null)
+            throw new ArgumentNullException(nameof(factory));
+
+        var holder = new NativeContainerHolder<T>();
+
+        _resourceInitializers.Add(context =>
+        {
+            var container = factory(context);
+            holder.SetValue(container);
+            context.RegisterDisposable(holder);
+        });
+
+        _resourceTeardowns.Add(_ => holder.Dispose());
+
+        return holder;
+    }
+
+    /// <summary>
+    /// Registers and exposes a persistent native container allocated during <see cref="ISystemWork.OnCreate"/>.
+    /// </summary>
+    /// <typeparam name="T">Native container type implementing <see cref="IDisposable"/>.</typeparam>
+    /// <param name="factory">Factory that creates the container during the resource initialization pass.</param>
+    /// <returns>A holder that surfaces the allocated container instance.</returns>
+    public NativeContainerHolder<T> WithNativeContainer<T>(Func<T> factory)
+        where T : struct
+    {
+        if (factory == null)
+            throw new ArgumentNullException(nameof(factory));
+
+        return WithNativeContainer(_ => factory());
+    }
+
+    /// <summary>
+    /// Registers and exposes a managed disposable allocated during <see cref="ISystemWork.OnCreate"/>.
+    /// </summary>
+    /// <typeparam name="T">Managed disposable type.</typeparam>
+    /// <param name="factory">Factory that creates the disposable during the resource initialization pass.</param>
+    /// <returns>A holder that surfaces the allocated disposable instance.</returns>
+    public DisposableHolder<T> WithDisposable<T>(Func<SystemContext, T> factory)
+        where T : class, IDisposable
+    {
+        if (factory == null)
+            throw new ArgumentNullException(nameof(factory));
+
+        var holder = new DisposableHolder<T>();
+
+        _resourceInitializers.Add(context =>
+        {
+            var instance = factory(context) ?? throw new InvalidOperationException("The disposable factory returned null.");
+            holder.SetInstance(instance);
+            context.RegisterDisposable(holder);
+        });
+
+        _resourceTeardowns.Add(_ => holder.Dispose());
+
+        return holder;
+    }
+
+    /// <summary>
+    /// Registers and exposes a managed disposable allocated during <see cref="ISystemWork.OnCreate"/>.
+    /// </summary>
+    /// <typeparam name="T">Managed disposable type.</typeparam>
+    /// <param name="factory">Factory that creates the disposable during the resource initialization pass.</param>
+    /// <returns>A holder that surfaces the allocated disposable instance.</returns>
+    public DisposableHolder<T> WithDisposable<T>(Func<T> factory)
+        where T : class, IDisposable
+    {
+        if (factory == null)
+            throw new ArgumentNullException(nameof(factory));
+
+        return WithDisposable(_ => factory());
     }
 
     /// <summary>

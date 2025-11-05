@@ -38,17 +38,16 @@ public partial class QuestTargetSystem
         readonly SystemWorkBuilder.QueryHandleHolder _networkSingleton;
         readonly SystemWorkBuilder.ComponentLookupHandle<PrefabGUID> _prefabGuidLookup;
         readonly SystemWorkBuilder.ComponentLookupHandle<Buff> _buffLookup;
+        readonly SystemWorkBuilder.NativeContainerHolder<NativeParallelMultiHashMap<PrefabGUID, Entity>> _targetUnits;
+        readonly SystemWorkBuilder.NativeContainerHolder<NativeParallelHashSet<Entity>> _imprisonedUnits;
+        readonly SystemWorkBuilder.NativeContainerHolder<NativeParallelHashSet<PrefabGUID>> _blacklistedUnits;
 
         QuestTargetSystem _system;
         ServerGameManager _serverGameManager;
 
-        NativeParallelMultiHashMap<PrefabGUID, Entity> _targetUnits;
-        NativeParallelHashSet<Entity> _imprisonedUnits;
-        NativeParallelHashSet<PrefabGUID> _blacklistedUnits;
-
         internal NativeParallelMultiHashMap<PrefabGUID, Entity>.ReadOnly TargetCache =>
-            _targetUnits.IsCreated
-                ? _targetUnits.AsReadOnly()
+            _targetUnits.TryGetValue(out var targetUnits) && targetUnits.IsCreated
+                ? targetUnits.AsReadOnly()
                 : default;
 
         public Work()
@@ -67,26 +66,29 @@ public partial class QuestTargetSystem
             _prefabGuidLookup = builder.WithLookup<PrefabGUID>(isReadOnly: true);
             _buffLookup = builder.WithLookup<Buff>(isReadOnly: true);
 
+            _targetUnits = builder.WithNativeContainer(_ =>
+                new NativeParallelMultiHashMap<PrefabGUID, Entity>(1024, Allocator.Persistent));
+            _imprisonedUnits = builder.WithNativeContainer(_ =>
+                new NativeParallelHashSet<Entity>(512, Allocator.Persistent));
+            _blacklistedUnits = builder.WithNativeContainer(_ =>
+                new NativeParallelHashSet<PrefabGUID>(256, Allocator.Persistent));
+
             builder.OnCreate(context =>
             {
                 _system = (QuestTargetSystem)context.System;
                 _system.SetInstance();
-
-                _targetUnits = new NativeParallelMultiHashMap<PrefabGUID, Entity>(1024, Allocator.Persistent);
-                _imprisonedUnits = new NativeParallelHashSet<Entity>(512, Allocator.Persistent);
-                _blacklistedUnits = new NativeParallelHashSet<PrefabGUID>(256, Allocator.Persistent);
             });
 
             builder.OnStartRunning(context =>
             {
                 _serverGameManager = context.System.World.GetExistingSystemManaged<ServerScriptMapper>().GetServerGameManager();
 
-                if (!_blacklistedUnits.IsCreated)
+                if (!_blacklistedUnits.TryGetValue(out var blacklistedUnits))
                 {
                     return;
                 }
 
-                _blacklistedUnits.Clear();
+                blacklistedUnits.Clear();
 
                 var prefabCollection = context.System.World.GetExistingSystemManaged<PrefabCollectionSystem>();
                 var lookup = prefabCollection._SpawnableNameToPrefabGuidDictionary;
@@ -100,7 +102,7 @@ public partial class QuestTargetSystem
                     {
                         if (prefabName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                         {
-                            _blacklistedUnits.Add(prefabGuid);
+                            blacklistedUnits.Add(prefabGuid);
                             break;
                         }
                     }
@@ -108,7 +110,7 @@ public partial class QuestTargetSystem
 
                 foreach (var prefabGuid in ShardBearers)
                 {
-                    _blacklistedUnits.Add(prefabGuid);
+                    blacklistedUnits.Add(prefabGuid);
                 }
             });
 
@@ -128,13 +130,15 @@ public partial class QuestTargetSystem
                     return;
                 }
 
-                if (!_targetUnits.IsCreated || !_imprisonedUnits.IsCreated || !_blacklistedUnits.IsCreated)
+                if (!_targetUnits.TryGetValue(out var targetUnits)
+                    || !_imprisonedUnits.TryGetValue(out var imprisonedUnits)
+                    || !_blacklistedUnits.TryGetValue(out var blacklistedUnits))
                 {
                     return;
                 }
 
-                _imprisonedUnits.Clear();
-                _targetUnits.Clear();
+                imprisonedUnits.Clear();
+                targetUnits.Clear();
 
                 SystemWorkBuilder.ForEachChunk(context, imprisonedQuery)
                     .ForEach(chunkContext =>
@@ -154,7 +158,7 @@ public partial class QuestTargetSystem
 
                             if (chunkContext.Exists(target))
                             {
-                                _imprisonedUnits.Add(target);
+                                imprisonedUnits.Add(target);
                             }
                         }
                     });
@@ -173,12 +177,12 @@ public partial class QuestTargetSystem
                                 continue;
                             }
 
-                            if (_blacklistedUnits.Contains(prefabGuid) || _imprisonedUnits.Contains(entity))
+                            if (blacklistedUnits.Contains(prefabGuid) || imprisonedUnits.Contains(entity))
                             {
                                 continue;
                             }
 
-                            _targetUnits.Add(prefabGuid, entity);
+                            targetUnits.Add(prefabGuid, entity);
                         }
                     });
 
@@ -187,24 +191,6 @@ public partial class QuestTargetSystem
 
             builder.OnDestroy(context =>
             {
-                if (_targetUnits.IsCreated)
-                {
-                    _targetUnits.Dispose();
-                    _targetUnits = default;
-                }
-
-                if (_imprisonedUnits.IsCreated)
-                {
-                    _imprisonedUnits.Dispose();
-                    _imprisonedUnits = default;
-                }
-
-                if (_blacklistedUnits.IsCreated)
-                {
-                    _blacklistedUnits.Dispose();
-                    _blacklistedUnits = default;
-                }
-
                 _serverGameManager = default;
 
                 ClearInstance();
