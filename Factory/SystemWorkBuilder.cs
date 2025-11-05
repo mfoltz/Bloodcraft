@@ -501,14 +501,16 @@ public sealed class SystemWorkBuilder
     static class NativeContainerDisposer<T>
         where T : struct
     {
-        static readonly Action<T> DisposeAction = CreateDisposeAction();
+        delegate void DisposeDelegate(ref T instance);
+
+        static readonly DisposeDelegate DisposeAction = CreateDisposeAction();
 
         public static void Dispose(ref T container)
         {
-            DisposeAction(container);
+            DisposeAction(ref container);
         }
 
-        static Action<T> CreateDisposeAction()
+        static DisposeDelegate CreateDisposeAction()
         {
             var disposeMethod = typeof(T).GetMethod(nameof(IDisposable.Dispose), Type.EmptyTypes);
 
@@ -522,9 +524,9 @@ public sealed class SystemWorkBuilder
                 throw new InvalidOperationException($"Type '{typeof(T)}' must expose a Dispose() method returning void.");
             }
 
-            var instance = Expression.Parameter(typeof(T), "instance");
+            var instance = Expression.Parameter(typeof(T).MakeByRefType(), "instance");
             var call = Expression.Call(instance, disposeMethod);
-            return Expression.Lambda<Action<T>>(call, instance).Compile();
+            return Expression.Lambda<DisposeDelegate>(call, instance).Compile();
         }
     }
 
