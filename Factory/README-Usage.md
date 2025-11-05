@@ -27,6 +27,36 @@ system shuts down the builder-managed `OnDestroy` sets the holder back to `null`
 ensuring callers never interact with a disposed handle. Additional native allocations
 should still be registered via `SystemContext.RegisterDisposable` where appropriate.
 
+## Persistent native containers
+
+Systems built on `VSystemBase` tend to retain caches across multiple updates, making them ideal candidates for persistent `Native*` containers instead of managed collections. The quest target system demonstrates this pattern by storing per-prefab caches inside `NativeParallelMultiHashMap` and `NativeParallelHashSet` fields that survive between frames without hitting the GC.【F:Factory/Quests/QuestTargetSystem.Work.cs†L45-L138】 Because `VSystemBase` automatically disposes every `IDisposable` registered through the system context during teardown, these native containers can be kept alive for the full lifetime of the system without bespoke cleanup code.【F:Factory/VSystemBase.cs†L84-L90】【F:Factory/VSystemBase.cs†L192-L199】【F:Factory/VSystemBase.cs†L279-L289】 Persistent containers also remain burst-friendly and safe to use from jobs, whereas managed collections would be off-limits during DOTS execution.
+
+Allocate persistent containers inside [`SystemWorkBuilder.OnCreate`](SystemWorkBuilder.cs#L200-L235) and immediately hand them to [`SystemContext.RegisterDisposable`](ISystemWork.cs#L156-L165). The builder keeps the context alive for the rest of the system lifecycle, allowing the `VSystemBase` disposal pass to run automatically.
+
+```csharp
+NativeParallelHashSet<Entity> _handled;
+
+public Work()
+{
+    var builder = new SystemWorkBuilder();
+
+    builder.OnCreate(context =>
+    {
+        _handled = new NativeParallelHashSet<Entity>(512, Allocator.Persistent);
+        context.RegisterDisposable(_handled);
+    });
+
+    builder.OnUpdate(context =>
+    {
+        // Use _handled across updates without re-allocating.
+    });
+
+    _implementation = builder.Build();
+}
+```
+
+With the disposable registered, no explicit `builder.OnDestroy` block is required—the container is released automatically when the system shuts down. This keeps resource management aligned with the builder workflow introduced for native allocations and avoids sprinkling manual `Dispose()` calls throughout the lifecycle hooks.
+
 ## Example work class
 
 The following example demonstrates how to create a system that tracks minions while
