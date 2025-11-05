@@ -16,6 +16,7 @@ internal static class SystemWorkGenerator
     {
         Console.WriteLine("Bloodcraft System Work Generator");
         Console.WriteLine("This helper scaffolds code that targets the builder/pipeline APIs.");
+        Console.WriteLine("For persistent state across updates, prefer SystemWorkBuilder.WithNativeContainer over managed collections.");
         Console.WriteLine();
 
         string systemName = PromptSystemName();
@@ -31,13 +32,24 @@ internal static class SystemWorkGenerator
 
         Console.WriteLine();
 
+        bool needsPersistentState = PromptBoolean("Should the scaffold include persistent native container state? (y/N): ", defaultValue: false);
+        List<NativeContainerRequest> nativeContainers = needsPersistentState
+            ? PromptNativeContainers()
+            : new List<NativeContainerRequest>();
+
+        Console.WriteLine();
+
         string snippet = style == OutputStyle.BuilderInvocation
-            ? BuildBuilderSnippet(systemName, primaryComponents, anyComponents, noneComponents, includeDisabled, includeSpawnTag, includeSystems, requireForUpdate)
-            : BuildWorkClassSnippet(systemName, primaryComponents, anyComponents, noneComponents, includeDisabled, includeSpawnTag, includeSystems, requireForUpdate);
+            ? BuildBuilderSnippet(systemName, primaryComponents, anyComponents, noneComponents, includeDisabled, includeSpawnTag, includeSystems, requireForUpdate, nativeContainers)
+            : BuildWorkClassSnippet(systemName, primaryComponents, anyComponents, noneComponents, includeDisabled, includeSpawnTag, includeSystems, requireForUpdate, nativeContainers);
 
         Console.WriteLine("Generated snippet:\n");
         Console.WriteLine(snippet);
         Console.WriteLine("\nCopy the snippet into your system and adjust as required.");
+        if (nativeContainers.Count > 0)
+        {
+            Console.WriteLine("The native container allocation blocks include placeholders—swap in the correct capacities and element types.");
+        }
     }
 
     static string PromptSystemName()
@@ -153,6 +165,49 @@ internal static class SystemWorkGenerator
         }
     }
 
+    static List<NativeContainerRequest> PromptNativeContainers()
+    {
+        List<NativeContainerRequest> containers = new();
+
+        Console.WriteLine("Persistent native containers avoid GC pressure and are disposed automatically by the builder.");
+        Console.WriteLine("Specify each container you need. Leave the type blank once you're done.");
+
+        while (true)
+        {
+            Console.Write("Native container type (blank to finish): ");
+            string? typeInput = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(typeInput))
+            {
+                if (containers.Count == 0)
+                {
+                    Console.WriteLine("At least one native container is required when persistent state is enabled.");
+                    continue;
+                }
+
+                break;
+            }
+
+            string typeName = typeInput.Trim();
+
+            while (true)
+            {
+                Console.Write($"Allocation expression for {typeName} (executed during OnCreate): ");
+                string? allocationInput = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(allocationInput))
+                {
+                    Console.WriteLine("An allocation expression is required to demonstrate the helper usage.");
+                    continue;
+                }
+
+                containers.Add(new NativeContainerRequest(typeName, allocationInput.Trim()));
+                Console.WriteLine("Native container added. Configure another or press enter to finish.");
+                break;
+            }
+        }
+
+        return containers;
+    }
+
     static string BuildBuilderSnippet(
         string systemName,
         IReadOnlyList<ComponentRequest> components,
@@ -161,11 +216,14 @@ internal static class SystemWorkGenerator
         bool includeDisabled,
         bool includeSpawnTag,
         bool includeSystems,
-        bool requireForUpdate)
+        bool requireForUpdate,
+        IReadOnlyList<NativeContainerRequest> nativeContainers)
     {
         StringBuilder sb = new();
         sb.AppendLine("using Bloodcraft.Factory;");
         sb.AppendLine("using Unity.Entities;");
+        if (nativeContainers.Count > 0)
+            sb.AppendLine("using Unity.Collections;");
         sb.AppendLine();
 
         foreach (ComponentRequest component in components)
@@ -179,6 +237,16 @@ internal static class SystemWorkGenerator
             {
                 sb.AppendLine($"SystemWorkBuilder.{(component.IsBuffer ? "BufferTypeHandleHandle" : "ComponentTypeHandleHandle")}<{component.TypeName}> {GetHandleIdentifier(component)};");
             }
+        }
+
+        if (nativeContainers.Count > 0)
+        {
+            sb.AppendLine("// Persistent native containers managed by the builder. These are disposed automatically.");
+            foreach (NativeContainerRequest container in nativeContainers)
+            {
+                sb.AppendLine($"SystemWorkBuilder.NativeContainerHolder<{container.TypeName}> {GetNativeContainerIdentifier(container)};");
+            }
+            sb.AppendLine();
         }
 
         sb.AppendLine("SystemWorkBuilder.QueryHandleHolder query;");
@@ -201,6 +269,20 @@ internal static class SystemWorkGenerator
         sb.AppendLine();
 
         sb.AppendLine($"query = builder.WithPrimaryQuery(requireForUpdate: {requireForUpdate.ToString().ToLowerInvariant()});");
+
+        if (nativeContainers.Count > 0)
+        {
+            sb.AppendLine();
+            foreach (NativeContainerRequest container in nativeContainers)
+            {
+                sb.AppendLine($"{GetNativeContainerIdentifier(container)} = builder.WithNativeContainer(_ =>");
+                sb.AppendLine("{");
+                sb.AppendLine("    // Allocate the persistent native container once during OnCreate.");
+                sb.AppendLine($"    return {container.AllocationExpression};");
+                sb.AppendLine("});");
+                sb.AppendLine();
+            }
+        }
 
         foreach (ComponentRequest component in components)
         {
@@ -226,6 +308,17 @@ internal static class SystemWorkGenerator
         sb.AppendLine("        return;");
         sb.AppendLine("    }");
         sb.AppendLine();
+
+        if (nativeContainers.Count > 0)
+        {
+            sb.AppendLine("    // Native containers are allocated during OnCreate and exposed via the holders above.");
+            foreach (NativeContainerRequest container in nativeContainers)
+            {
+                sb.AppendLine($"    ref var {GetNativeContainerLocalIdentifier(container)} = ref {GetNativeContainerIdentifier(container)}.Container;");
+            }
+            sb.AppendLine("    // Refresh or clear persistent caches here before iterating.");
+            sb.AppendLine();
+        }
 
         if (components.Any(component => component.NeedsTypeHandle))
         {
@@ -272,6 +365,8 @@ internal static class SystemWorkGenerator
 
         sb.AppendLine("});");
         sb.AppendLine();
+        if (nativeContainers.Count > 0)
+            sb.AppendLine("// Native containers registered with the builder are disposed automatically during teardown.");
         sb.AppendLine("return builder.Build();");
 
         return sb.ToString();
@@ -285,11 +380,14 @@ internal static class SystemWorkGenerator
         bool includeDisabled,
         bool includeSpawnTag,
         bool includeSystems,
-        bool requireForUpdate)
+        bool requireForUpdate,
+        IReadOnlyList<NativeContainerRequest> nativeContainers)
     {
         StringBuilder sb = new();
         sb.AppendLine("using Bloodcraft.Factory;");
         sb.AppendLine("using Unity.Entities;");
+        if (nativeContainers.Count > 0)
+            sb.AppendLine("using Unity.Collections;");
         sb.AppendLine();
         sb.AppendLine("namespace Bloodcraft.Systems;");
         sb.AppendLine();
@@ -300,6 +398,16 @@ internal static class SystemWorkGenerator
 
         sb.AppendLine("        readonly ISystemWork _implementation;");
         sb.AppendLine("        readonly SystemWorkBuilder.QueryHandleHolder _query;");
+
+        if (nativeContainers.Count > 0)
+        {
+            sb.AppendLine("        // Persistent native containers managed by the builder. These are disposed automatically.");
+            foreach (NativeContainerRequest container in nativeContainers)
+            {
+                sb.AppendLine($"        readonly SystemWorkBuilder.NativeContainerHolder<{container.TypeName}> {GetNativeContainerFieldName(container)};");
+            }
+            sb.AppendLine();
+        }
 
         foreach (ComponentRequest component in components)
         {
@@ -341,6 +449,19 @@ internal static class SystemWorkGenerator
         sb.AppendLine($"            _query = builder.WithPrimaryQuery(requireForUpdate: {requireForUpdate.ToString().ToLowerInvariant()});");
         sb.AppendLine();
 
+        if (nativeContainers.Count > 0)
+        {
+            foreach (NativeContainerRequest container in nativeContainers)
+            {
+                sb.AppendLine($"            {GetNativeContainerFieldName(container)} = builder.WithNativeContainer(_ =>");
+                sb.AppendLine("            {");
+                sb.AppendLine("                // Allocate the persistent native container once during OnCreate.");
+                sb.AppendLine($"                return {container.AllocationExpression};");
+                sb.AppendLine("            });");
+                sb.AppendLine();
+            }
+        }
+
         foreach (ComponentRequest component in components)
         {
             if (component.NeedsLookup)
@@ -365,6 +486,17 @@ internal static class SystemWorkGenerator
         sb.AppendLine("                    return;");
         sb.AppendLine("                }");
         sb.AppendLine();
+
+        if (nativeContainers.Count > 0)
+        {
+            sb.AppendLine("                // Native containers are allocated during OnCreate and exposed via the holders above.");
+            foreach (NativeContainerRequest container in nativeContainers)
+            {
+                sb.AppendLine($"                ref var {GetNativeContainerLocalIdentifier(container)} = ref {GetNativeContainerFieldName(container)}.Container;");
+            }
+            sb.AppendLine("                // Refresh or clear persistent caches here before iterating.");
+            sb.AppendLine();
+        }
 
         if (components.Any(component => component.NeedsTypeHandle))
         {
@@ -413,6 +545,8 @@ internal static class SystemWorkGenerator
         sb.AppendLine("            });");
         sb.AppendLine();
         sb.AppendLine("            _implementation = builder.Build();");
+        if (nativeContainers.Count > 0)
+            sb.AppendLine("            // Native containers registered with the builder are disposed automatically during teardown.");
         sb.AppendLine("        }");
 
         if (!requireForUpdate)
@@ -582,6 +716,25 @@ internal static class SystemWorkGenerator
         return baseName + (component.IsBuffer ? "BufferLookupAccessor" : "LookupAccessor");
     }
 
+    static string GetNativeContainerIdentifier(NativeContainerRequest container)
+    {
+        string baseName = ToIdentifier(container.TypeName);
+        if (string.IsNullOrEmpty(baseName))
+            baseName = "nativeContainer";
+        return baseName + "Holder";
+    }
+
+    static string GetNativeContainerFieldName(NativeContainerRequest container) =>
+        "_" + GetNativeContainerIdentifier(container);
+
+    static string GetNativeContainerLocalIdentifier(NativeContainerRequest container)
+    {
+        string baseName = ToIdentifier(container.TypeName);
+        if (string.IsNullOrEmpty(baseName))
+            baseName = "nativeContainer";
+        return baseName + "Container";
+    }
+
     static string RemoveWhitespace(string value)
     {
         StringBuilder sb = new(value.Length);
@@ -606,6 +759,14 @@ internal static class SystemWorkGenerator
         public bool IsReadOnly { get; } = isReadOnly;
         public bool NeedsLookup { get; } = needsLookup;
         public bool NeedsTypeHandle { get; } = needsTypeHandle;
+    }
+
+    readonly struct NativeContainerRequest(
+        string typeName,
+        string allocationExpression)
+    {
+        public string TypeName { get; } = typeName;
+        public string AllocationExpression { get; } = allocationExpression;
     }
 
     enum OutputStyle
