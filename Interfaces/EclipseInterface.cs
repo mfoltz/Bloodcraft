@@ -108,10 +108,10 @@ internal class VersionHandler_1_3 : IVersionHandler<ProgressDataV1_3>
             .AppendFormat(CultureInfo.InvariantCulture, "{0:F2},{1:F2},{2},{3},{4},{5},{6},{7},{8},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel,
             maxExpertiseLevel, maxFamiliarLevel, maxProfessionLevel, extraRecipes, primalCost);
 
-        sb.Append(string.Join(",", weaponStatValues.Select(val => val.ToString("F2"))))
+        sb.Append(string.Join(",", weaponStatValues.Select(val => val.ToString("F2", CultureInfo.InvariantCulture))))
             .Append(',');
 
-        sb.Append(string.Join(",", bloodStatValues.Select(val => val.ToString("F2"))))
+        sb.Append(string.Join(",", bloodStatValues.Select(val => val.ToString("F2", CultureInfo.InvariantCulture))))
             .Append(',');
 
         foreach (var classEntry in Classes.ClassWeaponBloodEnumMap)
@@ -120,10 +120,10 @@ internal class VersionHandler_1_3 : IVersionHandler<ProgressDataV1_3>
             var (weaponSynergies, bloodSynergies) = classEntry.Value;
 
             sb.AppendFormat(CultureInfo.InvariantCulture, "{0:D2},", (int)playerClass + 1);
-            sb.Append(string.Join("", weaponSynergies.Select(s => (s + 1).ToString("D2"))));
+            sb.Append(string.Join("", weaponSynergies.Select(s => (s + 1).ToString("D2", CultureInfo.InvariantCulture))));
             sb.Append(',');
 
-            sb.Append(string.Join("", bloodSynergies.Select(s => (s + 1).ToString("D2"))));
+            sb.Append(string.Join("", bloodSynergies.Select(s => (s + 1).ToString("D2", CultureInfo.InvariantCulture))));
             sb.Append(',');
         }
 
