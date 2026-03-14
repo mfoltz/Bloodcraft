@@ -78,6 +78,7 @@ public sealed class AbilitySlotWorkTests
             enableUnarmedSlots: true,
             enableDuality: true,
             enableShiftSlot: false,
+            treatFishingPoleAsUnarmed: true,
             spellSource: (ulong id, out AbilitySlotWork.SpellLoadout spells) =>
             {
                 spells = new AbilitySlotWork.SpellLoadout(101, 202, 303);
@@ -92,7 +93,7 @@ public sealed class AbilitySlotWorkTests
             new EntityHandle(6),
             steamId,
             default,
-            "Player_Unarmed_FishingPole",
+            "Player_FishingPole_Ability",
             HasWeaponLevel: true));
 
         var registrar = new RecordingRegistrar();
@@ -125,6 +126,58 @@ public sealed class AbilitySlotWorkTests
     }
 
     [Fact]
+    public void Tick_FishingPoleUnarmedHandlingIsConfigurable()
+    {
+        var requestedQueries = new List<QueryDescription>();
+        var steamId = 321UL;
+        var entity = new EntityHandle(8);
+        var work = new AbilitySlotWork(
+            enableUnarmedSlots: true,
+            enableDuality: true,
+            enableShiftSlot: false,
+            treatFishingPoleAsUnarmed: false,
+            spellSource: (ulong id, out AbilitySlotWork.SpellLoadout spells) =>
+            {
+                spells = new AbilitySlotWork.SpellLoadout(111, 222, 333);
+                return id == steamId;
+            },
+            spellPersistence: null,
+            flagSource: (_, _) => false,
+            prefabLookup: (_, _) => false);
+
+        work.AddAbilityEntity(new AbilitySlotWork.AbilityEntityData(
+            entity,
+            new EntityHandle(9),
+            steamId,
+            default,
+            "Player_FishingPole_Ability",
+            HasWeaponLevel: true));
+
+        var registrar = new RecordingRegistrar();
+        var context = FactoryTestUtilities.CreateContext(
+            registrar,
+            forEachEntity: (query, action) =>
+            {
+                requestedQueries.Add(query);
+                foreach (var handle in work.GetAbilityHandles())
+                {
+                    action(handle);
+                }
+            });
+
+        FactoryTestUtilities.OnCreate(work, context);
+        FactoryTestUtilities.OnUpdate(work, context);
+
+        Assert.Contains(work.AbilityQuery, requestedQueries);
+
+        var buffer = work.GetAbilityBuffer(entity);
+        Assert.Empty(buffer);
+
+        var metadata = work.GetAbilityBufferMetadata(entity);
+        Assert.Empty(metadata);
+    }
+
+    [Fact]
     public void Tick_ShiftOnlyAddsReplacementWhenEnabled()
     {
         var requestedQueries = new List<QueryDescription>();
@@ -135,6 +188,7 @@ public sealed class AbilitySlotWorkTests
             enableUnarmedSlots: false,
             enableDuality: false,
             enableShiftSlot: true,
+            treatFishingPoleAsUnarmed: true,
             spellSource: (ulong id, out AbilitySlotWork.SpellLoadout spells) =>
             {
                 spells = new AbilitySlotWork.SpellLoadout(0, 0, 909);
@@ -194,6 +248,7 @@ public sealed class AbilitySlotWorkTests
             enableUnarmedSlots: false,
             enableDuality: false,
             enableShiftSlot: false,
+            treatFishingPoleAsUnarmed: true,
             spellSource: (ulong id, out AbilitySlotWork.SpellLoadout spells) =>
             {
                 spells = new AbilitySlotWork.SpellLoadout(11, 22, 33);

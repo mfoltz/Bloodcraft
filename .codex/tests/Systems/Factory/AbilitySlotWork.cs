@@ -52,6 +52,7 @@ public class AbilitySlotWork : ISystemWork
     readonly bool enableUnarmedSlots;
     readonly bool enableDuality;
     readonly bool enableShiftSlot;
+    readonly bool treatFishingPoleAsUnarmed;
     PlayerSpellSource? spellSource;
     PlayerSpellPersistence? spellPersistence;
     PlayerFlagSource? flagSource;
@@ -68,6 +69,7 @@ public class AbilitySlotWork : ISystemWork
         bool enableUnarmedSlots,
         bool enableDuality,
         bool enableShiftSlot,
+        bool treatFishingPoleAsUnarmed,
         PlayerSpellSource? spellSource,
         PlayerSpellPersistence? spellPersistence,
         PlayerFlagSource? flagSource,
@@ -76,6 +78,7 @@ public class AbilitySlotWork : ISystemWork
         this.enableUnarmedSlots = enableUnarmedSlots;
         this.enableDuality = enableDuality;
         this.enableShiftSlot = enableShiftSlot;
+        this.treatFishingPoleAsUnarmed = treatFishingPoleAsUnarmed;
         this.spellSource = spellSource;
         this.spellPersistence = spellPersistence;
         this.flagSource = flagSource;
@@ -94,6 +97,7 @@ public class AbilitySlotWork : ISystemWork
         enableUnarmedSlots = false;
         enableDuality = false;
         enableShiftSlot = false;
+        treatFishingPoleAsUnarmed = true;
         spellSource = null;
         spellPersistence = null;
         flagSource = null;
@@ -266,13 +270,15 @@ public class AbilitySlotWork : ISystemWork
         }
     }
 
-    static bool IsUnarmedPrefab(string prefabName)
+    bool IsUnarmedPrefab(string prefabName)
     {
         if (string.IsNullOrEmpty(prefabName))
             return false;
 
-        return prefabName.Contains("unarmed", StringComparison.CurrentCultureIgnoreCase)
-            || prefabName.Contains("fishingpole", StringComparison.CurrentCultureIgnoreCase);
+        bool matchesUnarmed = prefabName.Contains("unarmed", StringComparison.CurrentCultureIgnoreCase);
+        bool matchesFishingPole = treatFishingPoleAsUnarmed && prefabName.Contains("fishingpole", StringComparison.CurrentCultureIgnoreCase);
+
+        return matchesUnarmed || matchesFishingPole;
     }
 
     static bool IsWeaponPrefab(string prefabName)
