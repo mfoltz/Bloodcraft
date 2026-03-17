@@ -21,6 +21,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
 
     static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _unarmedSlots = ConfigService.UnarmedSlots;
+    static readonly bool _fishingPoleUnarmed = ConfigService.FishingPoleUnarmed;
     static readonly bool _duality = ConfigService.Duality;
     static readonly bool _shiftSlot = ConfigService.ShiftSlot;
     static readonly bool _shapeshiftAbilities = ConfigService.BearFormDash;
@@ -45,7 +46,8 @@ internal static class ReplaceAbilityOnSlotSystemPatch
                     PrefabGUID prefabGuid = entity.GetPrefabGuid();
                     string prefabName = prefabGuid.GetPrefabName();
 
-                    bool slotSpells = prefabName.Contains("unarmed", StringComparison.CurrentCultureIgnoreCase) || prefabName.Contains("fishingpole", StringComparison.CurrentCultureIgnoreCase);
+                    bool fishingPoleUnarmed = _fishingPoleUnarmed && prefabName.Contains("fishingpole", StringComparison.CurrentCultureIgnoreCase);
+                    bool slotSpells = prefabName.Contains("unarmed", StringComparison.CurrentCultureIgnoreCase) || fishingPoleUnarmed;
                     bool shiftSpell = prefabName.Contains("weapon", StringComparison.CurrentCultureIgnoreCase);
 
                     if (_unarmedSlots && slotSpells && steamId.TryGetPlayerSpells(out (int FirstUnarmed, int SecondUnarmed, int ClassSpell) spells))

@@ -30,7 +30,7 @@ internal static class Core
     public static ServerGameManager ServerGameManager => SystemService.ServerScriptMapper.GetServerGameManager();
     public static SystemService SystemService { get; } = new(Server);
     public static ServerGameBalanceSettings ServerGameBalanceSettings { get; set; }
-    public static bool IsPvP => ServerGameBalanceSettings.GameModeType == GameModeType.PvP;
+    public static bool IsPvP => ServerGameBalanceSettings?.GameModeType == GameModeType.PvP;
     public static double ServerTime => ServerGameManager.ServerTime;
     public static double DeltaTime => ServerGameManager.DeltaTime;
     public static ManualLogSource Log => Plugin.LogInstance;
@@ -154,12 +154,12 @@ internal static class Core
             GetDisabledProfessions();
 
         GetBleedingEdgeWeapons();
+        TryInitializeServerGameBalanceSettings();
         ModifyPrefabs();
         Buffs.GetStackableBuffs();
 
         try
         {
-            ServerGameBalanceSettings = ServerGameBalanceSettings.Get(SystemService.ServerGameSettingsSystem._ServerBalanceSettings);
             Progression.GetAttributeCaps();
         }
         catch (Exception e)
@@ -229,6 +229,17 @@ internal static class Core
         };
 
         return addItemSettings;
+    }
+    static void TryInitializeServerGameBalanceSettings()
+    {
+        try
+        {
+            ServerGameBalanceSettings = ServerGameBalanceSettings.Get(SystemService.ServerGameSettingsSystem._ServerBalanceSettings);
+        }
+        catch (Exception e)
+        {
+            Log.LogWarning($"Error getting server game mode settings: {e}");
+        }
     }
     static void GetBleedingEdgeWeapons()
     {

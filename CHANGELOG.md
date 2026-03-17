@@ -3,6 +3,7 @@
 
 `1.12.18`
 - fixed Eclipse integration for servers using locales with comma decimal separators so weapon/blood stats and synergies display correctly
+- added config toggle to treat fishing poles as unarmed for extra slots (or not) so servers can lock loadouts without disabling fishing
 
 `1.12.17`
 - removed `ConsumeBloodDebugEvent` from component registry for compatability with V Rising `v1.1.10.1-r94466-b2` update.

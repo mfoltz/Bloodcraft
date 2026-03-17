@@ -592,6 +592,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   The maximum number of prestiges a player can reach in expertise.
 - **Unarmed Slots**: `UnarmedSlots` (bool, default: False)
   Enable or disable the ability to use extra unarmed spell slots.
+- **Fishing Pole Unarmed**: `FishingPoleUnarmed` (bool, default: True)
+  Treat the fishing pole as unarmed when applying extra spell slots; disable to keep fishing from triggering unarmed/class replacements.
 - **Duality**: `Duality` (bool, default: True)
   True for both unarmed slots, false for one unarmed slot. Does nothing without UnarmedSlots enabled.
 - **Shift Slot**: `ShiftSlot` (bool, default: False)
