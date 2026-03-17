@@ -29,8 +29,18 @@ internal static class Core
     public static EntityManager EntityManager => Server.EntityManager;
     public static ServerGameManager ServerGameManager => SystemService.ServerScriptMapper.GetServerGameManager();
     public static SystemService SystemService { get; } = new(Server);
-    public static ServerGameBalanceSettings ServerGameBalanceSettings { get; set; }
-    public static bool IsPvP => ServerGameBalanceSettings?.GameModeType == GameModeType.PvP;
+    static ServerGameBalanceSettings _serverGameBalanceSettings;
+    static bool _hasServerGameBalanceSettings;
+    public static ServerGameBalanceSettings ServerGameBalanceSettings
+    {
+        get => _serverGameBalanceSettings;
+        set
+        {
+            _serverGameBalanceSettings = value;
+            _hasServerGameBalanceSettings = true;
+        }
+    }
+    public static bool IsPvP => _hasServerGameBalanceSettings && _serverGameBalanceSettings.GameModeType == GameModeType.PvP;
     public static double ServerTime => ServerGameManager.ServerTime;
     public static double DeltaTime => ServerGameManager.DeltaTime;
     public static ManualLogSource Log => Plugin.LogInstance;
