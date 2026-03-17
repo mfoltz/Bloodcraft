@@ -30,7 +30,7 @@ internal static class Core
     public static ServerGameManager ServerGameManager => SystemService.ServerScriptMapper.GetServerGameManager();
     public static SystemService SystemService { get; } = new(Server);
     public static ServerGameBalanceSettings ServerGameBalanceSettings { get; set; }
-    public static bool IsPvP => ServerGameBalanceSettings.GameModeType == GameModeType.PvP;
+    public static bool IsPvP => ServerGameBalanceSettings?.GameModeType == GameModeType.PvP;
     public static double ServerTime => ServerGameManager.ServerTime;
     public static double DeltaTime => ServerGameManager.DeltaTime;
     public static ManualLogSource Log => Plugin.LogInstance;
@@ -68,12 +68,24 @@ internal static class Core
         PrefabGUIDs.DT_Unit_Relic_Dracula_Unique,
         PrefabGUIDs.DT_Unit_Relic_Morgana_Unique
     ];
+    static readonly ComponentType[] _nightmareUnitAllComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+        ComponentType.ReadOnly(Il2CppType.Of<Health>()),
+        ComponentType.ReadOnly(Il2CppType.Of<UnitStats>()),
+        ComponentType.ReadOnly(Il2CppType.Of<AbilityBar_Shared>()),
+        ComponentType.ReadOnly(Il2CppType.Of<AiMoveSpeeds>()),
+        ComponentType.ReadOnly(Il2CppType.Of<UnitLevel>()),
+        ComponentType.ReadOnly(Il2CppType.Of<AggroConsumer>())
+    ];
+    static QueryDesc _nightmareUnitQueryDesc;
 
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _legacies = ConfigService.LegacySystem;
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
+    static readonly bool _nightmareMode = ConfigService.NightmareMode;
     static readonly bool _resetShardBearers = ConfigService.EliteShardBearers;
     static readonly bool _shouldApplyBonusStats = _legacies || _expertise || _classes || _familiars;
     public static bool Eclipsed { get; } = _leveling || _legacies || _expertise || _classes || _familiars;
@@ -84,6 +96,10 @@ internal static class Core
 
     const int SECONDARY_SKILL_SLOT = 4;
     const int BLEED_STACKS = 3;
+    const float NIGHTMARE_HEALTH_MULTIPLIER = 5f;
+    const float NIGHTMARE_POWER_MULTIPLIER = 1.5f;
+    const float NIGHTMARE_ATTACK_SPEED_MULTIPLIER = 1.5f;
+    const float NIGHTMARE_MOVE_SPEED_MULTIPLIER = 1.25f;
     public static byte[] NEW_SHARED_KEY { get; set; }
     public static bool IsReady => _initialized;
     static bool _initialized;
@@ -138,12 +154,12 @@ internal static class Core
             GetDisabledProfessions();
 
         GetBleedingEdgeWeapons();
+        TryInitializeServerGameBalanceSettings();
         ModifyPrefabs();
         Buffs.GetStackableBuffs();
 
         try
         {
-            ServerGameBalanceSettings = ServerGameBalanceSettings.Get(SystemService.ServerGameSettingsSystem._ServerBalanceSettings);
             Progression.GetAttributeCaps();
         }
         catch (Exception e)
@@ -213,6 +229,17 @@ internal static class Core
         };
 
         return addItemSettings;
+    }
+    static void TryInitializeServerGameBalanceSettings()
+    {
+        try
+        {
+            ServerGameBalanceSettings = ServerGameBalanceSettings.Get(SystemService.ServerGameSettingsSystem._ServerBalanceSettings);
+        }
+        catch (Exception e)
+        {
+            Log.LogWarning($"Error getting server game mode settings: {e}");
+        }
     }
     static void GetBleedingEdgeWeapons()
     {
@@ -306,6 +333,12 @@ internal static class Core
             }
         }
 
+        if (_nightmareMode && !IsPvP)
+        {
+            _nightmareUnitQueryDesc = EntityManager.CreateQueryDesc(_nightmareUnitAllComponents, typeIndices: [0], options: EntityQueryOptions.IncludeAll);
+            ApplyNightmareMode();
+        }
+
         if (BleedingEdge.Any())
         {
             if (BleedingEdge.Contains(WeaponType.Slashers))
@@ -376,6 +409,76 @@ internal static class Core
             }
             */
         }
+    }
+
+    static void ApplyNightmareMode()
+    {
+        NightmareModeRoutine().Run();
+    }
+    static IEnumerator NightmareModeRoutine()
+    {
+        yield return QueryResultStreamAsync(
+            _nightmareUnitQueryDesc,
+            stream =>
+            {
+                try
+                {
+                    using (stream)
+                    {
+                        foreach (QueryResult result in stream.GetResults())
+                        {
+                            PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
+                            string prefabName = prefabGuid.GetPrefabName();
+
+                            if (ShouldSkipNightmareTarget(prefabGuid, prefabName)) continue;
+
+                            ApplyNightmareStats(result.Entity);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogWarning($"[NightmareMode] error: {ex}");
+                }
+            }
+        );
+    }
+    static bool ShouldSkipNightmareTarget(PrefabGUID prefabGuid, string prefabName)
+    {
+        if (!prefabGuid.HasValue()) return true;
+        else if (QuestService.FilteredTargetUnits.Any(filter => prefabName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))) return true;
+        else if (prefabName.Contains("Servant", StringComparison.CurrentCultureIgnoreCase)) return true;
+        else if (prefabName.Contains("Player", StringComparison.CurrentCultureIgnoreCase)) return true;
+
+        return false;
+    }
+    static void ApplyNightmareStats(Entity entity)
+    {
+        entity.Remove<DynamicallyWeakenAttackers>();
+
+        entity.HasWith((ref AbilityBar_Shared abilityBarShared) =>
+        {
+            abilityBarShared.AbilityAttackSpeed._Value *= NIGHTMARE_ATTACK_SPEED_MULTIPLIER;
+            abilityBarShared.PrimaryAttackSpeed._Value *= NIGHTMARE_ATTACK_SPEED_MULTIPLIER;
+        });
+
+        entity.With((ref Health health) =>
+        {
+            health.MaxHealth._Value *= NIGHTMARE_HEALTH_MULTIPLIER;
+            health.Value = health.MaxHealth._Value;
+        });
+
+        entity.With((ref UnitStats unitStats) =>
+        {
+            unitStats.PhysicalPower._Value *= NIGHTMARE_POWER_MULTIPLIER;
+            unitStats.SpellPower._Value *= NIGHTMARE_POWER_MULTIPLIER;
+        });
+
+        entity.HasWith((ref AiMoveSpeeds aiMoveSpeeds) =>
+        {
+            aiMoveSpeeds.Walk._Value *= NIGHTMARE_MOVE_SPEED_MULTIPLIER;
+            aiMoveSpeeds.Run._Value *= NIGHTMARE_MOVE_SPEED_MULTIPLIER;
+        });
     }
 
     static readonly HashSet<PrefabGUID> _shardBearers =

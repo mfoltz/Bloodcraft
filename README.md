@@ -474,6 +474,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Enable or disable elite primal rifts.
 - **Rift Frequency**: `RiftFrequency` (int, default: 6)
   Number of primal rifts to start per day when they are enabled (24 max).
+- **Nightmare Mode**: `NightmareMode` (bool, default: False)
+  Apply elite-style stat tuning to combat units globally; can be enabled with or without EliteShardBearers.
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
   Enable or disable elite shard bearers.
 - **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)
