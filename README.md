@@ -24,9 +24,9 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 ## Development setup
 
-Run `.codex/install.sh` once to install the .NET SDK (8.0+) with preview features enabled, the .NET 6 runtime, and Argos Translate dependencies. The script installs Argos Translate 1.9.6 or later to support CTranslate2 model binary v6. After running the script, verify the runtime with `dotnet --list-runtimes` and ensure `Microsoft.NETCore.App 6.0.x` is listed. See
+Run `.codex/install.sh` once to install the .NET SDK (8.0+) with preview features enabled and the .NET 6 runtime. After running the script, verify the runtime with `dotnet --list-runtimes` and ensure `Microsoft.NETCore.App 6.0.x` is listed. See
 [AGENTS.md](AGENTS.md) for the full workflow. For instructions on customizing
-`FROM_LANG` and `TO_LANG`, jump to the [Localization](#localization-wip) section.
+`FROM_LANG` and `TO_LANG` for the legacy Argos fallback, see [Docs/Localization-Argos-Legacy.md](Docs/Localization-Argos-Legacy.md).
 
 ## Features
 
@@ -788,8 +788,7 @@ Run `.codex/install.sh` once to install the .NET SDK (8.0+) with preview feature
   
 ## Development Setup
 
-Run `.codex/install.sh` once to install the .NET SDK, the .NET 6 runtime, and Argos Translate. The script installs Argos Translate 1.9.6 or later for CTranslate2 v6 model support and adds
-`~/.local/bin` to your `PATH` so the `argos-translate` CLI is available in future sessions. Confirm the runtime with `dotnet --list-runtimes` and look for `Microsoft.NETCore.App 6.0.x`.
+Run `.codex/install.sh` once to install the .NET SDK and the .NET 6 runtime. Confirm the runtime with `dotnet --list-runtimes` and look for `Microsoft.NETCore.App 6.0.x`.
 
 ## Localization (WIP)
 
@@ -813,7 +812,7 @@ This process applies only to files under `Resources/Localization/Messages`.
 
    Every language file must stay structurally aligned with `Resources/Localization/Messages/English.json` by hash.
 3. **Translate entries (backend-agnostic).**
-   Use an approved source such as manual translation, Codex-assisted drafting, or a machine translation backend (Argos or equivalent). If using Argos specifically, follow the optional Argos backend instructions in [Docs/Localization.md](Docs/Localization.md#automated-translation-with-argos-optional-backend).
+   Use an approved source such as manual translation, Codex-assisted drafting, or a machine translation backend (Argos or equivalent). Argos is optional and legacy-only; see [Docs/Localization-Argos-Legacy.md](Docs/Localization-Argos-Legacy.md) if you intentionally use that fallback path.
 4. **Token verification.**
    ```bash
    python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
@@ -841,47 +840,7 @@ Quality expectations:
 
 `Tools/language_utils.py` flags untranslated strings by searching for common English stop words.
 To ignore project-specific terms like "Bloodcraft", add them to `Tools/english_allowlist.txt`, one per line.
-If using the Argos backend, each language model resides under `Resources/Localization/Models/<DIR>`. Reassemble the split archives from module zip parts each session, inspect `metadata.json` to confirm the language pair, and then install:
-
-```bash
-cd Resources/Localization/Models/<DIR>
-cat translate-*.z[0-9][0-9] translate-*.zip > model.zip
-unzip -o model.zip
-unzip -p translate-*.argosmodel */metadata.json | jq '.from_code, .to_code'
-argos-translate install translate-*.argosmodel
-```
-
-When using Argos, rebuild and install models at the start of every session; they are not persisted. `metadata.json` must report `from_code` = `en` and the expected `to_code`. Re-run this verification whenever models are added or updated so Argos scripts reference the correct language pair.
-
-#### Model directories
-
-| Directory | Target language | Notes |
-|-----------|-----------------|------|
-| EN_DE | German (`de`) |
-| EN_ES | Spanish (`es`) |
-| EN_FR | French (`fr`) |
-| EN_HU | Hungarian (`hu`) |
-| EN_IT | Italian (`it`) |
-| EN_JA | Japanese (`ja`) |
-| EN_KO | Korean (`ko`) |
-| EN_PB | Brazilian Portuguese (`pt-BR`) — non‑ISO `pb` |
-| EN_PL | Polish (`pl`) |
-| EN_RU | Russian (`ru`) |
-| EN_TH | Thai (`th`) |
-| EN_TR | Turkish (`tr`) |
-| EN_UK | Ukrainian (`uk`) |
-| EN_ZH | Simplified Chinese (`zh`) |
-| EN_ZT | Traditional Chinese — non‑ISO `zt` |
-
-`Tools/translate_argos.py` uses the `argostranslate` Python API and protects `<...>` tags and `{...}` variables by replacing them with `[[TOKEN_n]]`. Tokens must be preserved, but they may be reordered when grammar requires; the script logs a warning if their order changes. Lines made entirely of tokens receive a `TRANSLATE` suffix so Argos does not skip them. Set `--log-level INFO` to display each entry as it is processed or `DEBUG` for more detail. Translation logs (`translate.log`), skip reports (`skipped.csv`), and metrics (`metrics.json`) are written to the run directory (`translations/<lang>/<timestamp>` by default). Each run also appends a record to `translations/run_index.json` with a terminal `status` value (`success`, `failed`, or `interrupted`) for later inspection. Run directories are committed to git so logs remain available for QA. If `--log-file` or `--report-file` are omitted, the script constructs these defaults under the run directory and prints the resolved paths at startup. `translate_argos.py` accepts `--batch-size`, `--max-retries`, `--timeout`, and `--run-dir` options. Re-run it on a clean copy of `Spanish.json` to restart translations from scratch. `Tools/translate.py` remains for backward compatibility but prints a deprecation warning.
-
-Run `Tools/fix_tokens.py` after translating to restore `<...>` tags and `{...}` placeholders if any `[[TOKEN_n]]` markers remain. Use `--check-only` to report discrepancies without modifying files.
-
-The `.codex/install.sh` setup script also supports downloading Argos language models automatically. Set `FROM_LANG` and `TO_LANG` (or `ARGOS_LANGUAGE_PAIR` as `from:to`) before invoking the script. Example:
-
-```bash
-FROM_LANG=en TO_LANG=es .codex/install.sh
-```
+Argos reconstruction/install steps and `Tools/ensure_argos_model.py` + `Tools/translate_argos.py` are retained as an optional legacy fallback and are unsupported in the default CI localization path. Translation QA does **not** require Argos model installation. See [Docs/Localization-Argos-Legacy.md](Docs/Localization-Argos-Legacy.md) for backend-specific details.
 
 ### Protecting Tags During Translation
 
