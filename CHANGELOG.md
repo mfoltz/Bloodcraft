@@ -1,3 +1,8 @@
+`1.12.0`
+- documented `Tools/fix_tokens.py --check-only` as a required post-edit localization gate after manual, Codex-assisted, and machine translation updates
+- clarified that `<...>`, `{...}`, and `[[TOKEN_n]]` placeholders must remain intact across all translation workflows
+- added/expanded localization QA coverage in `Tools/tests/` for placeholder pattern extraction and edited-translation mismatch detection
+
 `1.11.0`
 - redefined localization canonical flow in docs to: generate messages -> propagate hashes -> backend-agnostic translation -> token verification -> check-translations
 - documented hash propagation as a required structural contract so language files stay aligned with `Resources/Localization/Messages/English.json`
