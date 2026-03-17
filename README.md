@@ -808,47 +808,40 @@ This process applies only to files under `Resources/Localization/Messages`.
 
 1. **Refresh the English source.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages`
-2. **Propagate new hashes.** Copy the refreshed `English.json` entries into each `Resources/Localization/Messages/<Language>.json` while keeping numeric hashes intact.
-   Use `--overwrite` when translating after propagating hashes so English text is replaced by its translation.
-3. **Translate missing entries.**
-   Reassemble the split Argos model and install it before running the translator (see [Docs/Localization.md](Docs/Localization.md#automated-translation-for-messages) or [model directories](#model-directories)).
-   `python Tools/translate_argos.py Resources/Localization/Messages/<Language>.json --to <iso-code> --batch-size 100 --max-retries 3 --log-level INFO --overwrite`
-   Outputs are saved under `translations/<iso-code>/<timestamp>/` (override with `--run-dir`). Verify the model is installed: `argos-translate --from en --to tr - < /dev/null` (replace `tr` with the target code). Any hashes listed in `skipped.csv` within the run directory must be manually translated and the script re-run to confirm they are handled.
-   Record token mismatch details alongside the skip report:
+2. **Propagate new hashes (required contract).**
+   `python Tools/propagate_hashes.py Resources/Localization/Messages/<Language>.json`
 
-   ```bash
-   python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json --mismatches-file translations/<iso-code>/<timestamp>/token_mismatches.json
-   ```
-
-   Summarise skip categories and recurring placeholder mismatch patterns to prioritise fixes:
-
-   ```bash
-   python Tools/analyze_skip_report.py translations/<iso-code>/<timestamp>/skipped.csv --mismatches translations/<iso-code>/<timestamp>/token_mismatches.json
-   ```
-4. **Check and fix tokens.**
+   Every language file must stay structurally aligned with `Resources/Localization/Messages/English.json` by hash.
+3. **Translate entries (backend-agnostic).**
+   Use an approved source such as manual translation, Codex-assisted drafting, or a machine translation backend (Argos or equivalent). If using Argos specifically, follow the optional Argos backend instructions in [Docs/Localization.md](Docs/Localization.md#automated-translation-with-argos-optional-backend).
+4. **Token verification.**
    ```bash
    python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
    python Tools/fix_tokens.py Resources/Localization/Messages/<Language>.json
    ```
-   Running with `--check-only` fails fast if tokens were altered.
-   After manually editing any `Resources/Localization/Messages/*.json` file, run `make fix-tokens` to reorder placeholder tokens across all languages.
-   See the [placeholder rules](Docs/Localization.md#placeholder-rules) for guidance on handling `[[TOKEN_n]]` tokens.
+   Run `--check-only` first; apply fixes only when mismatches are reported.
 5. **Verify translations.**
    `dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text --summary-json summary.json`
-   This command confirms every hash exists and no English text remains. Use `--summary-json <path>` to write aggregate counts for each language.
 
-   The CI pipeline also enforces this by running:
+   This command confirms every hash exists and no English text remains.
 
-   ```bash
-   python Tools/fix_tokens.py --check-only Resources/Localization/Messages/*.json
-   dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations
-   ```
+### Approved translation sources
+
+- Manual human translation by fluent speakers.
+- Codex-assisted draft translation with human review.
+- Machine translation backends (Argos or other providers) with human review.
+
+Quality expectations:
+
+- Preserve placeholders/tokens exactly (`<...>`, `{...}`, `[[TOKEN_n]]`).
+- Maintain meaning, tone, and gameplay terminology.
+- Ensure final files pass token checks and `check-translations`.
 
 ### English detection allowlist
 
 `Tools/language_utils.py` flags untranslated strings by searching for common English stop words.
 To ignore project-specific terms like "Bloodcraft", add them to `Tools/english_allowlist.txt`, one per line.
-Each language model resides under `Resources/Localization/Models/<DIR>`. Reassemble the split archives from module zip parts each session, inspect `metadata.json` to confirm the language pair, and then install:
+If using the Argos backend, each language model resides under `Resources/Localization/Models/<DIR>`. Reassemble the split archives from module zip parts each session, inspect `metadata.json` to confirm the language pair, and then install:
 
 ```bash
 cd Resources/Localization/Models/<DIR>
@@ -858,7 +851,7 @@ unzip -p translate-*.argosmodel */metadata.json | jq '.from_code, .to_code'
 argos-translate install translate-*.argosmodel
 ```
 
-Rebuild and install models at the start of every session; they are not persisted. `metadata.json` must report `from_code` = `en` and the expected `to_code`. Re-run this verification whenever models are added or updated so scripts reference the correct language pair.
+When using Argos, rebuild and install models at the start of every session; they are not persisted. `metadata.json` must report `from_code` = `en` and the expected `to_code`. Re-run this verification whenever models are added or updated so Argos scripts reference the correct language pair.
 
 #### Model directories
 

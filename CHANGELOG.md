@@ -1,3 +1,9 @@
+`1.11.0`
+- redefined localization canonical flow in docs to: generate messages -> propagate hashes -> backend-agnostic translation -> token verification -> check-translations
+- documented hash propagation as a required structural contract so language files stay aligned with `Resources/Localization/Messages/English.json`
+- added an explicit "Approved translation sources" section (manual, Codex-assisted drafts, and machine translation with human review) and clarified quality expectations
+- updated localization wording to make Argos an optional backend rather than a prerequisite for all translation-related tasks
+
 `1.10.13`
 - if shiny chance for familiars is 0 they will no longer be guaranteed on second unlock
 - can restrict unarmed to one slot (set Duality in config to false, leave at true for two slots)

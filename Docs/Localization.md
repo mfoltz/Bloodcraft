@@ -6,13 +6,13 @@ Bloodcraft uses hash-based localization. Follow these steps when adding or editi
 
 Install the .NET 8 SDK and the .NET 6 runtime. Verify with `dotnet --list-runtimes` that `Microsoft.NETCore.App 6.0.x` is installed before running any `dotnet run` commands.
 
-Argos translation models are not persisted across sessions. At the start of every session—and before running any command that relies on them (`translate_argos.py`, `fix_tokens.py`, or `check-translations`)—reconstruct and install the appropriate model for each language using the preflight utility:
+Argos translation models are not persisted across sessions. Reconstruct and install the appropriate model only when using the Argos backend (for example, when running `translate_argos.py`) using the preflight utility:
 
 ```bash
 python Tools/ensure_argos_model.py <iso-code>
 ```
 
-Run this once per language per session. The script rebuilds the split archives under `Resources/Localization/Models/<iso-code>` and installs the Argos package if it is missing.
+Run this once per language per session when Argos is part of your workflow. The script rebuilds the split archives under `Resources/Localization/Models/<iso-code>` and installs the Argos package if it is missing.
 
 Before introducing a new message, check the catalog in
 `Docs/MessageKeys.md` to avoid creating duplicate entries. Run
@@ -50,11 +50,61 @@ python Tools/generate_glossary.py
 
 Run `make check-glossary` during QA to flag translations that diverge from the glossary. Translators should consult this file and expand `glossary_terms.txt` during reviews.
 
-## Automated Translation for Messages
+## Translation Workflow for Messages
 
-Only the JSON files in `Resources/Localization/Messages` contain user-facing messages. Use Argos Translate to automate translating these files.
+Only the JSON files in `Resources/Localization/Messages` contain user-facing messages.
 
-Argos models are stored under `Resources/Localization/Models/<LANG>` as split archives and must be reconstructed and installed at the start of each session before running the translator, token fixer, or `check-translations`:
+### Canonical flow
+
+1. **Refresh the English source.**
+
+   ```bash
+   dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- generate-messages
+   ```
+
+2. **Propagate hashes into each language file (required).**
+
+   ```bash
+   python Tools/propagate_hashes.py Resources/Localization/Messages/<Language>.json
+   ```
+
+   Hash propagation is the structural contract for localization in this repository: every language file must remain hash-aligned with `Resources/Localization/Messages/English.json` before and after translation.
+
+3. **Translate entries with your approved source (manual or assisted).**
+
+   Translation is backend-agnostic. You may translate manually, use Codex-assisted drafting, or use a machine translation backend (including Argos).
+
+4. **Verify placeholder tokens.**
+
+   ```bash
+   python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
+   ```
+
+   If mismatches are reported, run `fix_tokens.py` without `--check-only` and then re-verify.
+
+5. **Run translation integrity checks.**
+
+   ```bash
+   dotnet run --project Bloodcraft.csproj -p:RunGenerateREADME=false -- check-translations --show-text
+   ```
+
+### Approved translation sources
+
+- **Manual human translation** by fluent speakers.
+- **Codex-assisted drafts** followed by human review and correction.
+- **Machine translation backends** (such as Argos or other providers) followed by review.
+
+Quality expectations apply regardless of source:
+
+- Preserve placeholders/tokens (`<...>`, `{...}`, and `[[TOKEN_n]]`) exactly.
+- Keep meaning, tone, and gameplay terminology accurate for the target language.
+- Ensure final files pass `fix_tokens.py --check-only` and `check-translations` with no missing hashes or lingering English text.
+
+## Automated Translation with Argos (Optional Backend)
+
+Use this section only when Argos Translate is your chosen translation backend.
+
+Argos models are stored under `Resources/Localization/Models/<LANG>` as split archives and must be reconstructed and installed at the start of each session before running the Argos translator:
 
 1. **Prepare the model**
 
