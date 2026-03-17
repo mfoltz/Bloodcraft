@@ -5,6 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import fix_tokens
 import translate_argos
+import pytest
 
 
 def test_replace_placeholders_drops_unexpected_tokens():
@@ -104,3 +105,38 @@ def test_normalize_tokens_drops_stray_closing_tags():
 
 def test_normalize_tokens_removes_unmatched_openings():
     assert translate_argos.normalize_tokens("<b>{0}") == "{0}"
+
+
+def test_check_only_reports_mismatch_for_edited_translation(tmp_path, monkeypatch):
+    root = tmp_path
+    messages_dir = root / "Resources" / "Localization" / "Messages"
+    messages_dir.mkdir(parents=True)
+    (messages_dir / "English.json").write_text(json.dumps({"Messages": {"hash": "Hello <color=red>{0}</color>"}}))
+    (root / "Resources" / "Localization" / "English.json").write_text(json.dumps({}))
+    target = messages_dir / "Test.json"
+    # Edited translation dropped a required placeholder token.
+    target.write_text(json.dumps({"Messages": {"hash": "Hola <color=red></color>"}}))
+    mismatches = root / "token_mismatches.json"
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "fix_tokens.py",
+            "--root",
+            str(root),
+            "--check-only",
+            "--mismatches-file",
+            str(mismatches),
+            str(target),
+        ],
+    )
+
+    with pytest.raises(SystemExit, match="token mismatches detected"):
+        fix_tokens.main()
+
+    details = json.loads(mismatches.read_text())
+    assert details
+    first = details[0]
+    assert first["key"] == "hash"
+    assert "{0}" in first["missing"]

@@ -80,7 +80,7 @@ Only the JSON files in `Resources/Localization/Messages` contain user-facing mes
    python Tools/fix_tokens.py --check-only Resources/Localization/Messages/<Language>.json
    ```
 
-   If mismatches are reported, run `fix_tokens.py` without `--check-only` and then re-verify.
+   This `--check-only` validation is required after **any** manual, Codex-assisted, or machine-generated translation edits. If mismatches are reported, run `fix_tokens.py` without `--check-only` and then re-verify.
 
 5. **Run translation integrity checks.**
 
@@ -99,6 +99,14 @@ Quality expectations apply regardless of source:
 - Preserve placeholders/tokens (`<...>`, `{...}`, and `[[TOKEN_n]]`) exactly.
 - Keep meaning, tone, and gameplay terminology accurate for the target language.
 - Ensure final files pass `fix_tokens.py --check-only` and `check-translations` with no missing hashes or lingering English text.
+
+### Localization QA tooling (required)
+
+Treat `Tools/fix_tokens.py` and `Tools/token_patterns.py` as first-class QA tooling for localization safety.
+
+- `fix_tokens.py --check-only` is a required gate after every translation edit (manual, Codex, or any MT backend).
+- `token_patterns.py` defines the canonical placeholder matching rules used by translation tooling and tests.
+- Keep and expand tests under `Tools/tests/` that verify placeholder round-tripping and mismatch detection for edited JSON translations.
 
 ## Automated Translation with Argos (Optional Backend)
 
