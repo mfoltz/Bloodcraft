@@ -1,3 +1,9 @@
+`1.12.19`
+- added `NightmareMode` config to globally amp non-player combat units with elite-style health, power, attack speed, and move speed (disabled on PvP servers)
+
+`1.12.18`
+- fixed Eclipse integration for servers using locales with comma decimal separators so weapon/blood stats and synergies display correctly
+
 `1.12.17`
 - removed `ConsumeBloodDebugEvent` from component registry for compatability with V Rising `v1.1.10.1-r94466-b2` update.
 - let's all join hands and pray the ill-timed `Recipes.cs` refactor is fine >_>. (`#yolo`)
