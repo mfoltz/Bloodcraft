@@ -61,3 +61,56 @@ def test_token_metrics_collected(tmp_path, monkeypatch):
     totals = metrics["steps"]["token_fix"]["totals"]
     assert totals["tokens_restored"] == 1
     assert totals["tokens_reordered"] == 2
+
+
+def test_validate_only_skips_argos_and_records_metrics(tmp_path, monkeypatch):
+    root, messages_dir, english_path = _setup_repo(tmp_path)
+    monkeypatch.setattr(localization_pipeline, "ROOT", root)
+    monkeypatch.setattr(localization_pipeline, "MESSAGES_DIR", messages_dir)
+    monkeypatch.setattr(localization_pipeline, "ENGLISH_PATH", english_path)
+    monkeypatch.setattr(localization_pipeline, "LANGUAGE_CODES", {"French": "fr"})
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["localization_pipeline.py", "--validate-only", "--skipped-file", "combined.csv"],
+    )
+
+    calls = []
+
+    def fake_run(cmd, *, check=True, logger):
+        calls.append(cmd)
+        if any("translate_argos.py" in c for c in cmd):
+            raise AssertionError("translate_argos.py should not be called in --validate-only mode")
+        if any("fix_tokens.py" in c for c in cmd) and "--metrics-file" in cmd:
+            metrics_file = Path(cmd[cmd.index("--metrics-file") + 1])
+            metrics_file.write_text(
+                json.dumps(
+                    {
+                        "tokens_restored": 0,
+                        "tokens_reordered": 0,
+                        "token_mismatches": 0,
+                        "tokens_normalized": 0,
+                    }
+                )
+            )
+        return SimpleNamespace(returncode=0), 0.0
+
+    monkeypatch.setattr(localization_pipeline, "run", fake_run)
+
+    localization_pipeline.main()
+
+    metrics = json.loads((root / "localization_metrics.json").read_text())
+    lang = metrics["languages"]["French"]
+    assert lang["translation"]["skipped"] is True
+    assert lang["token_autofix"]["skipped"] is True
+    assert lang["validation"]["skipped"] is True
+    assert lang["success"] is True
+    assert metrics["steps"]["translation"]["skipped"] is True
+    assert metrics["steps"]["token_fix"]["skipped"] is True
+    assert metrics["steps"]["strict_retry"]["skipped"] is True
+
+    combined = root / "combined.csv"
+    assert combined.exists()
+    assert combined.read_text(encoding="utf-8").splitlines() == ["hash,english,reason,category"]
+
+    assert not any(any("translate_argos.py" in c for c in cmd) for cmd in calls)

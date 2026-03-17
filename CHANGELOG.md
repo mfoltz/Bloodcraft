@@ -1,3 +1,9 @@
+`1.13.0`
+- split `Tools/localization_pipeline.py` into distinct translation-generation and post-translation validation phases
+- added `--validate-only` mode to validate already-edited language files (hash propagation, token checks, and translation verification) without invoking Argos translation
+- updated localization pipeline metrics/report behavior so validation runs no longer depend on Argos artifacts like per-run `skipped.csv`
+- expanded localization pipeline tests to cover the no-Argos validation path
+
 `1.12.0`
 - documented `Tools/fix_tokens.py --check-only` as a required post-edit localization gate after manual, Codex-assisted, and machine translation updates
 - clarified that `<...>`, `{...}`, and `[[TOKEN_n]]` placeholders must remain intact across all translation workflows
