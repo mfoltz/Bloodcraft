@@ -368,6 +368,235 @@ def process_language(name: str, path: Path, logger: logging.Logger) -> dict:
         "run_dir": run_dir,
     }
 
+
+def generate_translations(
+    targets: dict[str, Path],
+    metrics: Dict[str, Dict],
+    logger: logging.Logger,
+) -> tuple[list[Path], list[Path]]:
+    """Translate target files and merge per-language metrics."""
+    run_dirs: list[Path] = []
+    report_paths: list[Path] = []
+    results = []
+
+    metrics["steps"]["translation"] = {"start": timestamp()}
+    metrics["steps"]["token_fix"] = {
+        "start": timestamp(),
+        "totals": {
+            "tokens_restored": 0,
+            "tokens_reordered": 0,
+            "tokens_removed": 0,
+            "token_mismatches": 0,
+            "tokens_normalized": 0,
+        },
+    }
+    metrics["steps"]["strict_retry"] = {"retried": 0, "manual_review": 0}
+
+    with ThreadPoolExecutor() as executor:
+        future_map = {
+            executor.submit(process_language, name, path, logger): name
+            for name, path in targets.items()
+        }
+        for future in as_completed(future_map):
+            results.append(future.result())
+
+    for res in results:
+        name = res["name"]
+        lang_metrics = {**metrics["languages"].get(name, {}), **res["lang_metrics"]}
+        metrics["languages"][name] = lang_metrics
+        report = res.get("report")
+        if report:
+            report_paths.append(report)
+        run_dir = res.get("run_dir")
+        if run_dir:
+            run_dirs.append(run_dir)
+        token_data = lang_metrics.get("token_autofix", {})
+        totals = metrics["steps"]["token_fix"]["totals"]
+        totals["tokens_restored"] += token_data.get("tokens_restored", 0)
+        totals["tokens_reordered"] += token_data.get("tokens_reordered", 0)
+        totals["tokens_removed"] += token_data.get("tokens_removed", 0)
+        totals["token_mismatches"] += token_data.get("token_mismatches", 0)
+        totals["tokens_normalized"] += token_data.get("tokens_normalized", 0)
+        retry_data = lang_metrics.get("strict_retry", {})
+        metrics["steps"]["strict_retry"]["retried"] += retry_data.get("retried", 0)
+        metrics["steps"]["strict_retry"]["manual_review"] += retry_data.get(
+            "manual_review", 0
+        )
+
+    metrics["steps"]["translation"]["end"] = timestamp()
+    metrics["steps"]["token_fix"]["end"] = timestamp()
+
+    return run_dirs, report_paths
+
+
+def run_post_translation_validation(
+    *,
+    metrics: Dict[str, Dict],
+    targets: dict[str, Path],
+    run_dirs: list[Path],
+    report_paths: list[Path],
+    combined_report: Path,
+    logger: logging.Logger,
+    include_log_checks: bool,
+) -> bool:
+    """Run language validation checks after translation or manual edits."""
+    overall_ok = True
+
+    with combined_report.open("w", newline="", encoding="utf-8") as out_fp:
+        writer = csv.writer(out_fp)
+        writer.writerow(["hash", "english", "reason", "category"])
+        for report in report_paths:
+            if not report.is_file():
+                continue
+            with report.open("r", encoding="utf-8") as in_fp:
+                reader = csv.reader(in_fp)
+                next(reader, None)
+                for row in reader:
+                    writer.writerow(row)
+
+    if report_paths:
+        logger.info("Analyzing skipped translations")
+        run(
+            [
+                sys.executable,
+                "Tools/analyze_skip_report.py",
+                str(combined_report.relative_to(ROOT)),
+            ],
+            check=False,
+            logger=logger,
+        )
+
+    logger.info("Verifying tokens")
+    for name, path in targets.items():
+        logger.info("Verifying tokens for %s", name)
+        t_fix_start = timestamp()
+        metrics_file = ROOT / f"fix_tokens_{name}.json"
+        fix_proc, _ = run(
+            [
+                sys.executable,
+                "Tools/fix_tokens.py",
+                str(path.relative_to(ROOT)),
+                "--check-only",
+                "--metrics-file",
+                str(metrics_file),
+            ],
+            check=False,
+            logger=logger,
+        )
+        t_fix_end = timestamp()
+        token_data = {
+            "tokens_restored": 0,
+            "tokens_reordered": 0,
+            "token_mismatches": 0,
+            "tokens_normalized": 0,
+        }
+        if metrics_file.is_file():
+            with metrics_file.open("r", encoding="utf-8") as fp:
+                token_data.update(json.load(fp))
+            metrics_file.unlink()
+
+        lang_metrics = metrics["languages"].setdefault(name, {})
+        lang_metrics["token_fix"] = {
+            "start": t_fix_start,
+            "end": t_fix_end,
+            "returncode": fix_proc.returncode,
+            **token_data,
+        }
+
+        code = LANGUAGE_CODES.get(name)
+        mismatches = 0
+        with path.open("r", encoding="utf-8") as fp:
+            messages = json.load(fp).get("Messages", {})
+        for txt in messages.values():
+            if language_utils.has_words(txt) and code and not language_utils.contains_language_code(
+                txt, code
+            ):
+                mismatches += 1
+        lang_metrics["language_mismatches"] = mismatches
+
+    if include_log_checks:
+        logger.info("Summarizing token statistics")
+        for run_dir in run_dirs:
+            run(
+                [
+                    sys.executable,
+                    "Tools/summarize_token_stats.py",
+                    "--run-dir",
+                    str(run_dir),
+                ],
+                check=False,
+                logger=logger,
+            )
+
+        logger.info("Analyzing translation logs")
+        analysis_proc, _ = run(
+            [sys.executable, "Tools/analyze_translation_logs.py"],
+            check=False,
+            logger=logger,
+        )
+        if analysis_proc.returncode != 0:
+            logger.error(
+                "Translation log analysis found unresolved mismatches or placeholder-only rows"
+            )
+            overall_ok = False
+
+    for lang_metrics in metrics["languages"].values():
+        if lang_metrics.get("skipped"):
+            continue
+        translation_ok = lang_metrics.get("translation", {}).get("returncode", 0) == 0
+        autofix_ok = lang_metrics.get("token_autofix", {}).get("returncode", 0) == 0
+        token_ok = lang_metrics["token_fix"]["returncode"] == 0
+        mismatch_ok = lang_metrics["token_fix"]["token_mismatches"] == 0
+        validation_ok = lang_metrics.get("validation", {}).get("returncode", 0) == 0
+        language_ok = lang_metrics.get("language_mismatches", 0) == 0
+        skipped_total = sum(lang_metrics.get("skipped_hashes", {}).values())
+        lang_metrics["skipped_hash_count"] = skipped_total
+        success = (
+            translation_ok
+            and autofix_ok
+            and token_ok
+            and mismatch_ok
+            and language_ok
+            and skipped_total == 0
+            and validation_ok
+        )
+        lang_metrics["success"] = success
+        overall_ok &= success
+
+    logger.info("Verifying translations")
+    metrics["steps"]["verification"] = {"start": timestamp()}
+    verify_proc, duration = run(
+        [
+            "dotnet",
+            "run",
+            "--project",
+            "Bloodcraft.csproj",
+            "-p:RunGenerateREADME=false",
+            "--",
+            "check-translations",
+        ],
+        check=False,
+        logger=logger,
+    )
+    metrics["steps"]["verification"].update(
+        {"end": timestamp(), "duration": duration, "returncode": verify_proc.returncode}
+    )
+    overall_ok &= verify_proc.returncode == 0
+
+    proc, duration = run(
+        [sys.executable, "Tools/check_fix_tokens_metrics.py"],
+        check=False,
+        logger=logger,
+    )
+    metrics["steps"]["token_metrics"] = {
+        "end": timestamp(),
+        "duration": duration,
+        "returncode": proc.returncode,
+    }
+    overall_ok &= proc.returncode == 0
+
+    return overall_ok
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description="Run the full localization pipeline",
@@ -393,6 +622,11 @@ def main() -> None:
         "languages",
         nargs="*",
         help="Languages to process (e.g. French German). Default: all",
+    )
+    ap.add_argument(
+        "--validate-only",
+        action="store_true",
+        help="Skip translate_argos and validate existing language files only",
     )
     args = ap.parse_args()
 
@@ -478,159 +712,56 @@ def main() -> None:
             )
             raise SystemExit(1)
 
-        logger.info("Translating messages")
-        metrics["steps"]["translation"] = {"start": timestamp()}
-        metrics["steps"]["token_fix"] = {
-            "start": timestamp(),
-            "totals": {
-                "tokens_restored": 0,
-                "tokens_reordered": 0,
-                "tokens_removed": 0,
-                "token_mismatches": 0,
-                "tokens_normalized": 0,
-            },
-        }
-        metrics["steps"]["strict_retry"] = {"retried": 0, "manual_review": 0}
         report_paths: list[Path] = []
-        results = []
-        with ThreadPoolExecutor() as executor:
-            future_map = {
-                executor.submit(process_language, name, path, logger): name
-                for name, path in targets.items()
+        include_log_checks = False
+        if args.validate_only:
+            logger.info("Skipping translation generation (--validate-only)")
+            metrics["steps"]["translation"] = {
+                "start": timestamp(),
+                "end": timestamp(),
+                "skipped": True,
             }
-            for future in as_completed(future_map):
-                results.append(future.result())
+            metrics["steps"]["token_fix"] = {
+                "start": timestamp(),
+                "end": timestamp(),
+                "totals": {
+                    "tokens_restored": 0,
+                    "tokens_reordered": 0,
+                    "tokens_removed": 0,
+                    "token_mismatches": 0,
+                    "tokens_normalized": 0,
+                },
+                "skipped": True,
+            }
+            metrics["steps"]["strict_retry"] = {
+                "retried": 0,
+                "manual_review": 0,
+                "skipped": True,
+            }
+            for name in targets:
+                metrics["languages"].setdefault(name, {}).update(
+                    {
+                        "translation": {"returncode": 0, "skipped": True},
+                        "token_autofix": {"returncode": 0, "skipped": True},
+                        "validation": {"returncode": 0, "skipped": True},
+                        "skipped_hashes": {},
+                        "strict_retry": {"retried": 0, "manual_review": 0},
+                    }
+                )
+        else:
+            logger.info("Translating messages")
+            run_dirs, report_paths = generate_translations(targets, metrics, logger)
+            include_log_checks = True
 
-        for res in results:
-            name = res["name"]
-            lang_metrics = {**metrics["languages"].get(name, {}), **res["lang_metrics"]}
-            metrics["languages"][name] = lang_metrics
-            report = res.get("report")
-            if report:
-                report_paths.append(report)
-            run_dir = res.get("run_dir")
-            if run_dir:
-                run_dirs.append(run_dir)
-            token_data = lang_metrics.get("token_autofix", {})
-            totals = metrics["steps"]["token_fix"]["totals"]
-            totals["tokens_restored"] += token_data.get("tokens_restored", 0)
-            totals["tokens_reordered"] += token_data.get("tokens_reordered", 0)
-            totals["tokens_removed"] += token_data.get("tokens_removed", 0)
-            totals["token_mismatches"] += token_data.get("token_mismatches", 0)
-            totals["tokens_normalized"] += token_data.get("tokens_normalized", 0)
-            retry_data = lang_metrics.get("strict_retry", {})
-            metrics["steps"]["strict_retry"]["retried"] += retry_data.get(
-                "retried", 0
-            )
-            metrics["steps"]["strict_retry"]["manual_review"] += retry_data.get(
-                "manual_review", 0
-            )
-        metrics["steps"]["translation"]["end"] = timestamp()
-        metrics["steps"]["token_fix"]["end"] = timestamp()
-
-        with combined_report.open("w", newline="", encoding="utf-8") as out_fp:
-            writer = csv.writer(out_fp)
-            writer.writerow(["hash", "english", "reason", "category"])
-            for report in report_paths:
-                if not report.is_file():
-                    continue
-                with report.open("r", encoding="utf-8") as in_fp:
-                    reader = csv.reader(in_fp)
-                    next(reader, None)
-                    for row in reader:
-                        writer.writerow(row)
-
-        logger.info("Analyzing skipped translations")
-        run(
-            [
-                sys.executable,
-                "Tools/analyze_skip_report.py",
-                str(combined_report.relative_to(ROOT)),
-            ],
-            check=False,
+        overall_ok = run_post_translation_validation(
+            metrics=metrics,
+            targets=targets,
+            run_dirs=run_dirs,
+            report_paths=report_paths,
+            combined_report=combined_report,
             logger=logger,
+            include_log_checks=include_log_checks,
         )
-
-        logger.info("Summarizing token statistics")
-        for run_dir in run_dirs:
-            run(
-                [
-                    sys.executable,
-                    "Tools/summarize_token_stats.py",
-                    "--run-dir",
-                    str(run_dir),
-                ],
-                check=False,
-                logger=logger,
-            )
-
-        overall_ok = True
-        for lang_metrics in metrics["languages"].values():
-            if lang_metrics.get("skipped"):
-                continue
-            translation_ok = lang_metrics["translation"]["returncode"] == 0
-            autofix_ok = lang_metrics["token_autofix"]["returncode"] == 0
-            token_ok = lang_metrics["token_fix"]["returncode"] == 0
-            mismatch_ok = lang_metrics["token_fix"]["token_mismatches"] == 0
-            validation_ok = lang_metrics.get("validation", {}).get("returncode", 0) == 0
-            language_ok = lang_metrics.get("language_mismatches", 0) == 0
-            skipped_total = sum(lang_metrics["skipped_hashes"].values())
-            lang_metrics["skipped_hash_count"] = skipped_total
-            success = (
-                translation_ok
-                and autofix_ok
-                and token_ok
-                and mismatch_ok
-                and language_ok
-                and skipped_total == 0
-                and validation_ok
-            )
-            lang_metrics["success"] = success
-            overall_ok &= success
-
-        logger.info("Analyzing translation logs")
-        analysis_proc, _ = run(
-            [sys.executable, "Tools/analyze_translation_logs.py"],
-            check=False,
-            logger=logger,
-        )
-        if analysis_proc.returncode != 0:
-            logger.error(
-                "Translation log analysis found unresolved mismatches or placeholder-only rows"
-            )
-            overall_ok = False
-
-        logger.info("Verifying translations")
-        metrics["steps"]["verification"] = {"start": timestamp()}
-        verify_proc, duration = run(
-            [
-                "dotnet",
-                "run",
-                "--project",
-                "Bloodcraft.csproj",
-                "-p:RunGenerateREADME=false",
-                "--",
-                "check-translations",
-            ],
-            check=False,
-            logger=logger,
-        )
-        metrics["steps"]["verification"].update(
-            {"end": timestamp(), "duration": duration, "returncode": verify_proc.returncode}
-        )
-        overall_ok &= verify_proc.returncode == 0
-
-        proc, duration = run(
-            [sys.executable, "Tools/check_fix_tokens_metrics.py"],
-            check=False,
-            logger=logger,
-        )
-        metrics["steps"]["token_metrics"] = {
-            "end": timestamp(),
-            "duration": duration,
-            "returncode": proc.returncode,
-        }
-        overall_ok &= proc.returncode == 0
 
         with metrics_path.open("w", encoding="utf-8") as f:
             json.dump(metrics, f, indent=2, ensure_ascii=False)
