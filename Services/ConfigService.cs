@@ -188,6 +188,9 @@ internal static class ConfigService
     static readonly Lazy<bool> _unarmedSlots = new(() => GetConfigValue<bool>("UnarmedSlots"));
     public static bool UnarmedSlots => _unarmedSlots.Value;
 
+    static readonly Lazy<bool> _fishingPoleUnarmed = new(() => GetConfigValue<bool>("FishingPoleUnarmed"));
+    public static bool FishingPoleUnarmed => _fishingPoleUnarmed.Value;
+
     static readonly Lazy<bool> _duality = new(() => GetConfigValue<bool>("Duality"));
     public static bool Duality => _duality.Value;
 
@@ -582,6 +585,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Expertise", "ExpertiseSystem", false, "Enable or disable the expertise system."),
             new ConfigEntryDefinition("Expertise", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise."),
             new ConfigEntryDefinition("Expertise", "UnarmedSlots", false, "Enable or disable the ability to use extra unarmed spell slots."),
+            new ConfigEntryDefinition("Expertise", "FishingPoleUnarmed", true, "Treat the fishing pole as unarmed for extra spell slots; disable to keep fishing separate from unarmed abilities."),
             new ConfigEntryDefinition("Expertise", "Duality", true, "True for both unarmed slots, false for one unarmed slot. Does nothing without UnarmedSlots enabled."),
             new ConfigEntryDefinition("Expertise", "ShiftSlot", false, "Enable or disable using class spell on shift."),
             new ConfigEntryDefinition("Expertise", "MaxExpertiseLevel", 100, "The maximum level a player can reach in weapon expertise."),
