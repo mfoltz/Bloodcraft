@@ -20,6 +20,9 @@ internal static class ConfigService
     static readonly Lazy<int> _riftFrequency = new(() => GetConfigValue<int>("RiftFrequency"));
     public static int RiftFrequency => _riftFrequency.Value;
 
+    static readonly Lazy<bool> _nightmareMode = new(() => GetConfigValue<bool>("NightmareMode"));
+    public static bool NightmareMode => _nightmareMode.Value;
+
     static readonly Lazy<bool> _eliteShardBearers = new(() => GetConfigValue<bool>("EliteShardBearers"));
     public static bool EliteShardBearers => _eliteShardBearers.Value;
 
@@ -524,6 +527,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("General", "Eclipsed", false, "Eclipse will be active if any features that sync with the client are enabled. Instead, this now controls the frequency; true for faster (0.1s), false for slower (2.5s)."),
             new ConfigEntryDefinition("General", "ElitePrimalRifts", false, "Enable or disable elite primal rifts."),
             new ConfigEntryDefinition("General", "RiftFrequency", 6, "Number of primal rifts to start per day when they are enabled (24 max)."),
+            new ConfigEntryDefinition("General", "NightmareMode", false, "Enable or disable global elite-style stat tuning for enemy units."),
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
             new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01/t02 effects at the same time)."),
