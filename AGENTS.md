@@ -18,11 +18,11 @@ This guide provides universal, consistent principles and patterns to master C# c
   bash .codex/install.sh
   ```
 
-* After the SDK is available, execute tests (for example, within `.codex/tests`) with the `dotnet` CLI that the script installs/exposes.
+* After the SDK is available, execute any repository tests with the `dotnet` CLI that the script installs/exposes.
 
 ## 🗂️ Codex Tooling Structure
 
-* Place all Codex tooling and new tests under the `.codex/` directory (e.g., `.codex/tests/...`).
+* Place all Codex tooling assets under the `.codex/` directory.
 * Ensure future Codex-related assets respect this directory structure, and reference or inherit this guidance in any additional `AGENTS.md` files that may be introduced.
 
 ## 🧠 Structured Reasoning
