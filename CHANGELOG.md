@@ -1,3 +1,6 @@
+`1.12.18`
+- added config toggle to treat fishing poles as unarmed for extra slots (or not) so servers can lock loadouts without disabling fishing
+
 `1.12.17`
 - removed `ConsumeBloodDebugEvent` from component registry for compatability with V Rising `v1.1.10.1-r94466-b2` update.
 - let's all join hands and pray the ill-timed `Recipes.cs` refactor is fine >_>. (`#yolo`)
