@@ -1,8 +1,8 @@
 `1.12.19`
-- added user-facing notes for `NightmareMode`: when enabled on PvE servers, combat units are globally tuned to be much deadlier (5x health, 1.5x power/attack speed, 1.25x move speed) while players/servants and filtered quest targets are excluded
-- fixed startup ordering so enabling `NightmareMode` no longer risks early initialization failures before game mode settings are ready
+- added `NightmareMode` config to globally amp non-player combat units with elite-style health, power, attack speed, and move speed (disabled on PvP servers)
 
 `1.12.18`
+- fixed Eclipse integration for servers using locales with comma decimal separators so weapon/blood stats and synergies display correctly
 - added config toggle to treat fishing poles as unarmed for extra slots (or not) so servers can lock loadouts without disabling fishing
 
 `1.12.17`
