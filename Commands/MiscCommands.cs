@@ -155,15 +155,16 @@ internal static class MiscCommands
             return StarterKitGrantResult.InventoryFull;
         }
 
+        SetPlayerBool(steamId, STARTER_KIT_KEY, true);
+
         foreach (var item in StarterKitItemPrefabGUIDs)
         {
             if (!ServerGameManager.TryAddInventoryItem(character, item.Key, item.Value))
             {
+                Core.Log.LogWarning($"Starter kit delivery partially failed for {steamId}; preserving entitlement to avoid duplicate grants.");
                 return StarterKitGrantResult.InventoryFull;
             }
         }
-
-        SetPlayerBool(steamId, STARTER_KIT_KEY, true);
 
         PrefabGUID familiarPrefabGuid = new(ConfigService.KitFamiliar);
 
