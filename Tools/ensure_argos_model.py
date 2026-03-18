@@ -14,8 +14,17 @@ import json
 from pathlib import Path
 import zipfile
 
-from argostranslate import translate as argos_translate
-import argostranslate.package as argos_package
+try:
+    from argostranslate import translate as argos_translate
+    import argostranslate.package as argos_package
+except ImportError:  # Argos is optional; defer errors to runtime use.
+    class _MissingArgos:
+        def __getattr__(self, name):
+            raise RuntimeError(
+                "argostranslate is not installed; install it to use ensure_argos_model."
+            )
+    argos_translate = _MissingArgos()  # type: ignore
+    argos_package = _MissingArgos()  # type: ignore
 
 
 def _combine_segments(model_dir: Path) -> Path:

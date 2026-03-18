@@ -12,18 +12,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from ensure_argos_model import ensure_model
-from language_utils import CODE_TO_LANG
-
-LANG_NAME_TO_CODE = {v: k for k, v in CODE_TO_LANG.items()}
-
-from translate_argos import normalize_tokens
 from token_patterns import (
     TOKEN_PATTERN,
     TOKEN_PLACEHOLDER,
     TOKEN_RE,
     extract_tokens,
 )
+from token_normalization import normalize_tokens
 
 logger = logging.getLogger(__name__)
 
@@ -438,16 +433,6 @@ def main() -> None:
         files = list((root / "Resources" / "Localization" / "Messages").glob("*.json"))
         files = [p for p in files if p.name != "English.json"]
         files += [p for p in (root / "Resources" / "Localization").glob("*.json") if p.name != "English.json"]
-
-    for path in files:
-        lang_code = LANG_NAME_TO_CODE.get(path.stem.lower())
-        if lang_code:
-            try:
-                ensure_model(lang_code, root)
-            except Exception as e:
-                logger.warning(
-                    "Argos model for en→%s not installed: %s", lang_code, e
-                )
 
     totals = Counters()
     all_mismatches: List[Dict[str, List[str]]] = []
