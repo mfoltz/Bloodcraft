@@ -1,3 +1,8 @@
+`1.14.0`
+- updated localization docs so routine updates/QA no longer require reconstructing `Resources/Localization/Models/*`
+- moved Argos backend setup/usage to `Docs/Localization-Argos-Legacy.md` and marked `Tools/ensure_argos_model.py` + `Tools/translate_argos.py` as optional legacy fallback tooling
+- updated contributor onboarding docs to clarify translation QA relies on hash propagation, token checks, and `check-translations` (default CI path), not Argos installation
+
 `1.13.0`
 - split `Tools/localization_pipeline.py` into distinct translation-generation and post-translation validation phases
 - added `--validate-only` mode to validate already-edited language files (hash propagation, token checks, and translation verification) without invoking Argos translation
