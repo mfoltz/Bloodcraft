@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Interfaces;
+﻿using Bloodcraft.Commands;
+using Bloodcraft.Interfaces;
 using Bloodcraft.Patches;
 using Bloodcraft.Systems;
 using Bloodcraft.Systems.Expertise;
@@ -134,6 +135,17 @@ internal class EclipseService
                             IVersionHandler<ProgressDataV1_3> versionHandler13X = VersionHandler.GetHandler<ProgressDataV1_3>(V1_3);
                             versionHandler13X?.SendClientConfig(playerInfo.User);
                             versionHandler13X?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+
+                            if (MiscCommands.TryGrantStarterKit(playerInfo.CharEntity, steamId, out _, out var kitFamiliarName, includeItemDetails: false))
+                            {
+                                LocalizationService.HandleServerReply(Core.EntityManager, playerInfo.User, "You've received a <color=yellow>starter kit</color>.");
+
+                                if (!string.IsNullOrEmpty(kitFamiliarName))
+                                {
+                                    LocalizationService.HandleServerReply(Core.EntityManager, playerInfo.User, $"<color=green>{kitFamiliarName}</color>");
+                                }
+                            }
+
                             _pendingRegistration.TryRemove(steamId, out var _);
                             return true;
                         }

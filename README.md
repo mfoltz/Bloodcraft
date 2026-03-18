@@ -351,7 +351,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Resets stuck combat music if needed.
   - Shortcut: *.misc silence*
 - `.miscellaneous starterkit`
-  - Provides starting kit.
+  - Provides starting kit (also auto-granted during Eclipse registration when enabled).
   - Shortcut: *.misc kitme*
 - `.miscellaneous userstats`
   - Shows neat information about the player.
@@ -493,7 +493,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 ### StarterKit
 - **Starter Kit**: `StarterKit` (bool, default: False)
-  Enable or disable the starter kit.
+  Enable or disable the starter kit (auto-granted at Eclipse registration, can still be claimed with `.misc kitme`).
 - **Kit Prefabs**: `KitPrefabs` (string, default: "862477668,-1531666018,-1593377811,1821405450")
   Item prefabGuids for starting kit.
 - **Kit Quantities**: `KitQuantities` (string, default: "500,1000,1000,250")

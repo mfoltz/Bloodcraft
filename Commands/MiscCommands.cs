@@ -102,54 +102,8 @@ internal static class MiscCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (!GetPlayerBool(steamId, STARTER_KIT_KEY)) // if true give kit, if not no
+        if (TryGrantStarterKit(ctx.Event.SenderCharacterEntity, steamId, out var kitItems, out var kitFamiliarName))
         {
-            SetPlayerBool(steamId, STARTER_KIT_KEY, true);
-            Entity character = ctx.Event.SenderCharacterEntity;
-
-            foreach (var item in StarterKitItemPrefabGUIDs)
-            {
-                ServerGameManager.TryAddInventoryItem(character, item.Key, item.Value);
-            }
-
-            string kitFamiliarName = string.Empty;
-            PrefabGUID familiarPrefabGuid = new(ConfigService.KitFamiliar);
-
-            if (familiarPrefabGuid.HasValue()
-                && familiarPrefabGuid.IsCharacter())
-            {
-                FamiliarUnlocksData unlocksData = LoadFamiliarUnlocksData(steamId);
-                string boxName = steamId.TryGetFamiliarBox(out var currentBox) ? currentBox : string.Empty;
-
-                if (string.IsNullOrEmpty(boxName) || !unlocksData.FamiliarUnlocks.ContainsKey(boxName))
-                {
-                    boxName = unlocksData.FamiliarUnlocks.Count == 0 ? "box1" : unlocksData.FamiliarUnlocks.Keys.First();
-                    if (!unlocksData.FamiliarUnlocks.ContainsKey(boxName))
-                    {
-                        unlocksData.FamiliarUnlocks[boxName] = [];
-                    }
-
-                    steamId.SetFamiliarBox(boxName);
-                }
-
-                if (!unlocksData.FamiliarUnlocks.TryGetValue(boxName, out var familiars))
-                {
-                    familiars = [];
-                    unlocksData.FamiliarUnlocks[boxName] = familiars;
-                }
-
-                int familiarGuid = familiarPrefabGuid.GuidHash;
-
-                if (!familiars.Contains(familiarGuid))
-                {
-                    familiars.Add(familiarGuid);
-                    SaveFamiliarUnlocksData(steamId, unlocksData);
-                    kitFamiliarName = new PrefabGUID(familiarGuid).GetLocalizedName();
-                }
-            }
-
-            List<string> kitItems = [..StarterKitItemPrefabGUIDs.Select(x => $"<color=#ffd9eb>{x.Key.GetLocalizedName()}</color>x<color=white>{x.Value}</color>")];
-
             LocalizationService.HandleReply(ctx, "You've received a <color=yellow>starter kit</color>:");
             foreach (var batch in kitItems.Batch(MAX_PER_MESSAGE))
             {
@@ -166,6 +120,66 @@ internal static class MiscCommands
         {
             ctx.Reply("You've already used the <color=white>starter kit</color>!");
         }
+    }
+
+    public static bool TryGrantStarterKit(Entity character, ulong steamId, out List<string> kitItems, out string kitFamiliarName, bool includeItemDetails = true)
+    {
+        kitItems = [];
+        kitFamiliarName = string.Empty;
+
+        if (!ConfigService.StarterKit || GetPlayerBool(steamId, STARTER_KIT_KEY))
+        {
+            return false;
+        }
+
+        SetPlayerBool(steamId, STARTER_KIT_KEY, true);
+
+        foreach (var item in StarterKitItemPrefabGUIDs)
+        {
+            ServerGameManager.TryAddInventoryItem(character, item.Key, item.Value);
+        }
+
+        PrefabGUID familiarPrefabGuid = new(ConfigService.KitFamiliar);
+
+        if (familiarPrefabGuid.HasValue()
+            && familiarPrefabGuid.IsCharacter())
+        {
+            FamiliarUnlocksData unlocksData = LoadFamiliarUnlocksData(steamId);
+            string boxName = steamId.TryGetFamiliarBox(out var currentBox) ? currentBox : string.Empty;
+
+            if (string.IsNullOrEmpty(boxName) || !unlocksData.FamiliarUnlocks.ContainsKey(boxName))
+            {
+                boxName = unlocksData.FamiliarUnlocks.Count == 0 ? "box1" : unlocksData.FamiliarUnlocks.Keys.First();
+                if (!unlocksData.FamiliarUnlocks.ContainsKey(boxName))
+                {
+                    unlocksData.FamiliarUnlocks[boxName] = [];
+                }
+
+                steamId.SetFamiliarBox(boxName);
+            }
+
+            if (!unlocksData.FamiliarUnlocks.TryGetValue(boxName, out var familiars))
+            {
+                familiars = [];
+                unlocksData.FamiliarUnlocks[boxName] = familiars;
+            }
+
+            int familiarGuid = familiarPrefabGuid.GuidHash;
+
+            if (!familiars.Contains(familiarGuid))
+            {
+                familiars.Add(familiarGuid);
+                SaveFamiliarUnlocksData(steamId, unlocksData);
+                kitFamiliarName = new PrefabGUID(familiarGuid).GetLocalizedName();
+            }
+        }
+
+        if (includeItemDetails)
+        {
+            kitItems = [.. StarterKitItemPrefabGUIDs.Select(x => $"<color=#ffd9eb>{x.Key.GetLocalizedName()}</color>x<color=white>{x.Value}</color>")];
+        }
+
+        return true;
     }
 
     [Command(name: "prepareforthehunt", shortHand: "prepare", adminOnly: false, usage: ".misc prepare", description: "Completes GettingReadyForTheHunt if not already completed.")]
