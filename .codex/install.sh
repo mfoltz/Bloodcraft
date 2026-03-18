@@ -5,10 +5,28 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 PROJECT_PATH="$REPO_ROOT/Bloodcraft.csproj"
 INSTALL_DIR="${DOTNET_INSTALL_DIR:-$HOME/.dotnet}"
-CHANNEL="${DOTNET_INSTALL_CHANNEL:-6.0}"
+CHANNEL="${DOTNET_INSTALL_CHANNEL:-8.0}"
 BEPINEX_PLUGIN_DIR="${BEPINEX_PLUGIN_DIR:-}"
 DOTNET_INSTALLED=0
-REQUIRED_RUNTIME="Microsoft.NETCore.App 6.0"
+REQUIRED_SDK_MAJOR="${CHANNEL%%.*}"
+
+sdk_meets_minimum_version() {
+    if ! command -v dotnet >/dev/null 2>&1; then
+        return 1
+    fi
+
+    local sdk_version
+    sdk_version="$(dotnet --version 2>/dev/null || true)"
+
+    if [ -z "$sdk_version" ]; then
+        return 1
+    fi
+
+    local sdk_major
+    sdk_major="${sdk_version%%.*}"
+
+    [ "$sdk_major" -ge "$REQUIRED_SDK_MAJOR" ]
+}
 
 install_dotnet() {
     mkdir -p "$INSTALL_DIR"
@@ -38,11 +56,10 @@ install_dotnet() {
 
 if command -v dotnet >/dev/null 2>&1; then
     echo ".NET SDK already installed: $(dotnet --version)"
-    # Inspect the installed runtimes to ensure the required Microsoft.NETCore.App 6.0 runtime is available.
-    if dotnet --list-runtimes 2>/dev/null | grep -q "^Microsoft.NETCore.App 6\\.0"; then
+    if sdk_meets_minimum_version; then
         DOTNET_INSTALLED=1
     else
-        echo "Microsoft.NETCore.App 6.0 runtime not found; installing local runtime into $INSTALL_DIR"
+        echo ".NET SDK $(dotnet --version) is older than the required major version $REQUIRED_SDK_MAJOR; installing channel $CHANNEL into $INSTALL_DIR"
         install_dotnet
     fi
 else
