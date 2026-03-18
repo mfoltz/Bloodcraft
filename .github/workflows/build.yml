@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - codex/feature-testing
   workflow_dispatch:
 
 jobs:
@@ -14,10 +15,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
+          fetch-depth: 1
+          fetch-tags: false
 
       - name: Discover .csproj
         id: discover_csproj
