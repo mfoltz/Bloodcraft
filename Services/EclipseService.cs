@@ -136,7 +136,8 @@ internal class EclipseService
                             versionHandler13X?.SendClientConfig(playerInfo.User);
                             versionHandler13X?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
 
-                            if (MiscCommands.TryGrantStarterKit(playerInfo.CharEntity, steamId, out _, out var kitFamiliarName, includeItemDetails: false))
+                            MiscCommands.StarterKitGrantResult starterKitResult = MiscCommands.TryGrantStarterKit(playerInfo.CharEntity, steamId, out _, out var kitFamiliarName, includeItemDetails: false);
+                            if (starterKitResult == MiscCommands.StarterKitGrantResult.Granted)
                             {
                                 LocalizationService.HandleServerReply(Core.EntityManager, playerInfo.User, "You've received a <color=yellow>starter kit</color>.");
 

@@ -28,6 +28,13 @@ internal static class MiscCommands
 
     private const int MAX_PER_MESSAGE = 6;
 
+    public enum StarterKitGrantResult
+    {
+        Granted,
+        AlreadyUsed,
+        InventoryFull,
+    }
+
     [Command(name: "reminders", shortHand: "remindme", adminOnly: false, usage: ".misc remindme", description: "Toggles general reminders for various mod features.")]
     public static void LogExperienceCommand(ChatCommandContext ctx)
     {
@@ -102,7 +109,9 @@ internal static class MiscCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (TryGrantStarterKit(ctx.Event.SenderCharacterEntity, steamId, out var kitItems, out var kitFamiliarName))
+        StarterKitGrantResult grantResult = TryGrantStarterKit(ctx.Event.SenderCharacterEntity, steamId, out var kitItems, out var kitFamiliarName);
+
+        if (grantResult == StarterKitGrantResult.Granted)
         {
             LocalizationService.HandleReply(ctx, "You've received a <color=yellow>starter kit</color>:");
             foreach (var batch in kitItems.Batch(MAX_PER_MESSAGE))
@@ -115,29 +124,46 @@ internal static class MiscCommands
             {
                 LocalizationService.HandleReply(ctx, $"<color=green>{kitFamiliarName}</color>");
             }
+
+            return;
         }
-        else
+
+        if (grantResult == StarterKitGrantResult.InventoryFull)
         {
-            ctx.Reply("You've already used the <color=white>starter kit</color>!");
+            LocalizationService.HandleReply(ctx, "Make room in your inventory before claiming the <color=white>starter kit</color>.");
+            return;
         }
+
+        ctx.Reply("You've already used the <color=white>starter kit</color>!");
     }
 
-    public static bool TryGrantStarterKit(Entity character, ulong steamId, out List<string> kitItems, out string kitFamiliarName, bool includeItemDetails = true)
+    public static StarterKitGrantResult TryGrantStarterKit(Entity character, ulong steamId, out List<string> kitItems, out string kitFamiliarName, bool includeItemDetails = true)
     {
         kitItems = [];
         kitFamiliarName = string.Empty;
 
         if (!ConfigService.StarterKit || GetPlayerBool(steamId, STARTER_KIT_KEY))
         {
-            return false;
+            return StarterKitGrantResult.AlreadyUsed;
         }
 
-        SetPlayerBool(steamId, STARTER_KIT_KEY, true);
+        var itemDataHashMap = SystemService.GameDataSystem.ItemHashLookupMap;
+        bool canReceiveAllItems = StarterKitItemPrefabGUIDs.All(item => InventoryUtilities.HasFreeStackSpaceOfType(Core.EntityManager, character, itemDataHashMap, item.Key, item.Value));
+
+        if (!canReceiveAllItems)
+        {
+            return StarterKitGrantResult.InventoryFull;
+        }
 
         foreach (var item in StarterKitItemPrefabGUIDs)
         {
-            ServerGameManager.TryAddInventoryItem(character, item.Key, item.Value);
+            if (!ServerGameManager.TryAddInventoryItem(character, item.Key, item.Value))
+            {
+                return StarterKitGrantResult.InventoryFull;
+            }
         }
+
+        SetPlayerBool(steamId, STARTER_KIT_KEY, true);
 
         PrefabGUID familiarPrefabGuid = new(ConfigService.KitFamiliar);
 
@@ -179,7 +205,7 @@ internal static class MiscCommands
             kitItems = [.. StarterKitItemPrefabGUIDs.Select(x => $"<color=#ffd9eb>{x.Key.GetLocalizedName()}</color>x<color=white>{x.Value}</color>")];
         }
 
-        return true;
+        return StarterKitGrantResult.Granted;
     }
 
     [Command(name: "prepareforthehunt", shortHand: "prepare", adminOnly: false, usage: ".misc prepare", description: "Completes GettingReadyForTheHunt if not already completed.")]
