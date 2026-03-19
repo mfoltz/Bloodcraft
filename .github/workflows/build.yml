@@ -103,7 +103,7 @@ jobs:
         if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: 8.0.x
 
       - name: Restore dependencies
         if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
