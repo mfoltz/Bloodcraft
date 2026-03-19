@@ -7,11 +7,21 @@ on:
       - codex/feature-testing
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  preflight:
     permissions:
-      contents: write
+      contents: read
     runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.check_release.outputs.should_build }}
+      reason: ${{ steps.check_release.outputs.reason }}
+      version: ${{ steps.read_version.outputs.version }}
+      matched_tag: ${{ steps.check_release.outputs.matched_tag }}
+      csproj_file: ${{ steps.discover_csproj.outputs.csproj_file }}
 
     steps:
       - name: Checkout
@@ -23,134 +33,171 @@ jobs:
       - name: Discover .csproj
         id: discover_csproj
         run: |
-          # Find the first .csproj outside bin/obj directories.
-          # Adjust if you have multiple .csproj files.
           csproj_file=$(find . -type f -name '*.csproj' \
             -not -path '*/bin/*' \
             -not -path '*/obj/*' \
             -not -path '*/.codex/*' | head -n 1)
-          
-          echo "csproj_file=$csproj_file" >> $GITHUB_OUTPUT
-        
+
+          if [ -z "$csproj_file" ]; then
+            echo "Unable to locate a .csproj file." >&2
+            exit 1
+          fi
+
+          echo "csproj_file=$csproj_file" >> "$GITHUB_OUTPUT"
+
+      - name: Read version from .csproj
+        id: read_version
+        shell: bash
+        run: |
+          csproj='${{ steps.discover_csproj.outputs.csproj_file }}'
+          version=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' "$csproj" | head -n 1 | tr -d '[:space:]')
+
+          if [ -z "$version" ]; then
+            echo "Unable to determine current version from $csproj." >&2
+            exit 1
+          fi
+
+          echo "Current .csproj version: $version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Check release tags for current version
+        id: check_release
+        uses: actions/github-script@v7
+        env:
+          CURRENT_VERSION: ${{ steps.read_version.outputs.version }}
+        with:
+          script: |
+            const currentVersion = process.env.CURRENT_VERSION;
+
+            if (!currentVersion) {
+              core.setFailed('CURRENT_VERSION was not provided.');
+              return;
+            }
+
+            if (context.eventName === 'workflow_dispatch') {
+              const reason = `Manual dispatch for version ${currentVersion}; allowing build.`;
+              core.info(reason);
+              core.setOutput('should_build', 'true');
+              core.setOutput('reason', reason);
+              core.setOutput('matched_tag', '');
+              return;
+            }
+
+            // Skip push builds when the current package version already exists in repository releases, including prereleases.
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            });
+
+            const normalizeTag = (tag) => tag.replace(/^v/, '').trim();
+            const normalizeReleaseVersion = (tag) => normalizeTag(tag).replace(/-pre$/, '');
+            const matchedRelease = releases.find((release) => !release.draft && normalizeReleaseVersion(release.tag_name) === currentVersion);
+            const matchedTag = matchedRelease?.tag_name ?? '';
+
+            core.info(`Normalized current version: ${currentVersion}`);
+            core.info(`Matched release tag: ${matchedTag || 'none'}`);
+
+            if (matchedRelease) {
+              const reason = `Skipping build because version ${currentVersion} already exists as release tag ${matchedTag}.`;
+              core.info(reason);
+              core.setOutput('should_build', 'false');
+              core.setOutput('reason', reason);
+              core.setOutput('matched_tag', matchedTag);
+              return;
+            }
+
+            const reason = `Proceeding with build because version ${currentVersion} does not exist in repository releases.`;
+            core.info(reason);
+            core.setOutput('should_build', 'true');
+            core.setOutput('reason', reason);
+            core.setOutput('matched_tag', '');
+
+  build:
+    needs: preflight
+    if: needs.preflight.outputs.should_build == 'true'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Log preflight decision
+        run: |
+          echo "Preflight decision: ${{ needs.preflight.outputs.should_build }}"
+          echo "Reason: ${{ needs.preflight.outputs.reason }}"
+          echo "Version: ${{ needs.preflight.outputs.version }}"
+          echo "Matched release tag: ${{ needs.preflight.outputs.matched_tag || 'none' }}"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          fetch-tags: false
+
+      - name: Discover .csproj
+        id: discover_csproj
+        run: |
+          echo "csproj_file=${{ needs.preflight.outputs.csproj_file }}" >> "$GITHUB_OUTPUT"
+
       - name: Get DLL name
         id: get_dll_name
         run: |
           csproj="${{ steps.discover_csproj.outputs.csproj_file }}"
           dll_name=$(basename "$csproj" .csproj)
-          echo "dll_name=$dll_name" >> $GITHUB_OUTPUT
-
-      - name: Install xmllint
-        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
-
-      - name: Extract version from .csproj
-        id: extract_version
-        run: |
-          version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" "${{ steps.discover_csproj.outputs.csproj_file }}")
-          echo "version=$version" >> $GITHUB_ENV
-
-      - name: Determine build eligibility
-        id: version_guard
-        run: |
-          if [ -z "${{ env.version }}" ]; then
-            echo "Unable to determine current version; continuing build to avoid false negative."
-            echo "should_build=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "Manual dispatch detected; proceeding with build regardless of version guard."
-            echo "should_build=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          git fetch --force --tags
-          latest_tag=$(git tag -l 'v*' --sort=-v:refname | head -n 1)
-          latest_version=${latest_tag#v}
-
-          current_version="${{ env.version }}"
-
-          if [ -z "$latest_version" ]; then
-            echo "No previous tagged release detected; proceeding with build."
-            echo "should_build=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          if [ "$current_version" = "$latest_version" ]; then
-            pre_release_tag="v${current_version}-pre"
-
-            if git tag -l "$pre_release_tag" | grep -q .; then
-              echo "Current .csproj version $current_version matches latest release and pre-release tag $pre_release_tag already exists; skipping build because the pre-release is already published."
-              echo "should_build=false" >> $GITHUB_OUTPUT
-              exit 0
-            fi
-
-            echo "Current .csproj version $current_version matches latest release but no pre-release tag $pre_release_tag is present; enabling build so the pre-release can be published automatically."
-            echo "should_build=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          highest_version=$(printf '%s\n' "$latest_version" "$current_version" | sort -V | tail -n 1)
-
-          if [ "$highest_version" = "$current_version" ]; then
-            echo "Current .csproj version $current_version is ahead of latest release $latest_version; proceeding with build."
-            echo "should_build=true" >> $GITHUB_OUTPUT
-          else
-            echo "Current .csproj version $current_version is behind the latest release $latest_version; skipping build on push to main."
-            echo "should_build=false" >> $GITHUB_OUTPUT
-          fi
+          echo "dll_name=$dll_name" >> "$GITHUB_OUTPUT"
 
       - name: Setup .NET
-        if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 7.0.x
 
       - name: Restore dependencies
-        if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
         run: dotnet restore
 
       - name: Update thunderstore.toml
-        if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
         run: |
-          if [ -z "${{ env.version }}" ]; then
+          version='${{ needs.preflight.outputs.version }}'
+
+          if [ -z "$version" ]; then
             echo "Version is empty; skipping thunderstore.toml update."
             exit 0
           fi
 
-          sed -i "s/versionNumber = \".*\"/versionNumber = \"${{ env.version }}\"/" thunderstore.toml
+          sed -i "s/versionNumber = \".*\"/versionNumber = \"$version\"/" thunderstore.toml
 
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
           if [ -n "$(git status --porcelain thunderstore.toml)" ]; then
             git add thunderstore.toml
-            git commit -m "chore: Update thunderstore.toml version to ${{ env.version }}"
+            git commit -m "chore: Update thunderstore.toml version to $version"
             git push origin HEAD:${{ github.ref }}
           else
             echo "No changes to commit in thunderstore.toml"
           fi
 
       - name: Build (Release)
-        if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
         run: |
-          if [ -n "${{ env.version }}" ]; then
-            dotnet build . --configuration Release -p:Version=${{ env.version }} -p:RunGenerateREADME=false
+          version='${{ needs.preflight.outputs.version }}'
+
+          if [ -n "$version" ]; then
+            dotnet build . --configuration Release -p:Version=$version -p:RunGenerateREADME=false
           else
             dotnet build . --configuration Release -p:RunGenerateREADME=false
           fi
 
       - name: GH Release (pre-release)
         uses: softprops/action-gh-release@v1
-        if: (steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch') && env.version != ''
+        if: needs.preflight.outputs.version != ''
         with:
           body: |
-            Automated pre-release for version ${{ env.version }} generated from this GitHub Actions build.
+            Automated pre-release for version ${{ needs.preflight.outputs.version }} generated from this GitHub Actions build.
             - Commit: ${{ github.sha }}
             - Run: ${{ github.run_id }}
-          name: Pre-release v${{ env.version }}
+          name: Pre-release v${{ needs.preflight.outputs.version }}
           fail_on_unmatched_files: true
           prerelease: true
-          tag_name: v${{ env.version }}-pre
+          tag_name: v${{ needs.preflight.outputs.version }}-pre
           files: |
             ./bin/Release/net6.0/${{ steps.get_dll_name.outputs.dll_name }}.dll
             CHANGELOG.md
