@@ -4,6 +4,15 @@
 ## Why
 - 
 
+## `minor-feature` label guidance
+Use the `minor-feature` label for PRs that are intentionally narrow in scope. These PRs should usually:
+- Touch only a few focused files.
+- Avoid workflow, release, or config churn unless that churn is part of the intended feature.
+- Include a short acceptance checklist.
+- Avoid unrelated refactors while the feature is in flight.
+
+If the repository adopts label automation later, this guidance can serve as the starting point for a scope-check allowlist.
+
 ## Invariants protected
 - State what still remains true if this change partially fails or is retried.
 - Call out protections against data loss or duplication in relevant flows.
@@ -28,6 +37,7 @@ Applies especially to changes in areas such as:
 
 ## Acceptance checks
 - List 3-6 concrete scenarios you verified.
+- Keep the checklist short and focused for `minor-feature` PRs.
 - Prefer specific end-to-end or behavioral checks over generic statements like "tested locally".
 
 ## AI usage
