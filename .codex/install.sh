@@ -72,11 +72,26 @@ install_python_dependency() {
 
     echo "Ensuring $PYTHON_DEPENDENCY is available for $python_command..."
 
+    # Try to make sure pip is available; treat ensurepip as best-effort.
     if ! "$python_command" -m pip --version >/dev/null 2>&1; then
         "$python_command" -m ensurepip --upgrade >/dev/null 2>&1 || true
     fi
 
-    "$python_command" -m pip install --user --upgrade "$PYTHON_DEPENDENCY"
+    # Re-check pip availability after ensurepip.
+    if ! "$python_command" -m pip --version >/dev/null 2>&1; then
+        echo "pip is not available for $python_command, so $PYTHON_DEPENDENCY cannot be installed automatically." >&2
+        echo "Please install $PYTHON_DEPENDENCY manually for this Python, for example:" >&2
+        echo "  $python_command -m pip install --user $PYTHON_DEPENDENCY" >&2
+        return 1
+    fi
+
+    # Install the dependency with explicit error handling so set -e does not hide the cause.
+    if ! "$python_command" -m pip install --user --upgrade "$PYTHON_DEPENDENCY"; then
+        echo "Failed to install $PYTHON_DEPENDENCY for $python_command." >&2
+        echo "You may need to check your network connection, permissions, or install it manually, e.g.:" >&2
+        echo "  $python_command -m pip install --user $PYTHON_DEPENDENCY" >&2
+        return 1
+    fi
 }
 
 ensure_python_dependency() {
