@@ -2,8 +2,21 @@
 set -euo pipefail
 
 WORKFLOW_PREFIX=".github/workflows/"
-LOCALIZATION_PREFIX="Resources/Localization/"
+LOCALIZATION_PREFIXES=("Resources/Localization/" "Localization/" "i18n/" "lang/" "locale/")
 RELEASE_FILES=("Bloodcraft.csproj" "CHANGELOG.md" "thunderstore.toml")
+CONFIG_PATTERNS=(
+    ".editorconfig"
+    ".gitattributes"
+    ".gitignore"
+    ".github/"
+    ".vscode/"
+    ".codex/"
+    "Directory.Build.props"
+    "Directory.Build.targets"
+    "NuGet.config"
+)
+TEST_PATH_HINTS=("test" "tests" "spec" "specs")
+TEST_FILE_HINTS=("*Test*.cs" "*Tests*.cs" "*.spec.*" "*.test.*")
 
 append_summary() {
     local message="$1"
@@ -34,12 +47,71 @@ emit_group() {
     done
 }
 
+matches_prefixes() {
+    local path="$1"
+    shift
+    local prefix
+
+    for prefix in "$@"; do
+        if [[ "$path" == "$prefix"* ]]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 is_release_file() {
     local path="$1"
     local release_file
 
     for release_file in "${RELEASE_FILES[@]}"; do
         if [[ "$path" == "$release_file" ]]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+is_config_file() {
+    local path="$1"
+    local pattern
+
+    for pattern in "${CONFIG_PATTERNS[@]}"; do
+        if [[ "$pattern" == */ ]]; then
+            if [[ "$path" == "$pattern"* ]]; then
+                return 0
+            fi
+            continue
+        fi
+
+        if [[ "$path" == "$pattern" ]]; then
+            return 0
+        fi
+    done
+
+    case "$path" in
+        *.json|*.jsonc|*.yml|*.yaml|*.toml|*.props|*.targets|*.config)
+            return 0
+            ;;
+    esac
+
+    return 1
+}
+
+is_test_file() {
+    local path="$1"
+    local hint
+
+    for hint in "${TEST_PATH_HINTS[@]}"; do
+        if [[ "$path" == *"/$hint/"* ]] || [[ "$path" == "$hint/"* ]] || [[ "$path" == *".$hint."* ]]; then
+            return 0
+        fi
+    done
+
+    for hint in "${TEST_FILE_HINTS[@]}"; do
+        if [[ "$path" == $hint ]]; then
             return 0
         fi
     done
@@ -62,16 +134,17 @@ mapfile -t CHANGED_PATHS < <(printf '%s\n' "$changed_output")
 
 if [[ ${#CHANGED_PATHS[@]} -eq 0 || ( ${#CHANGED_PATHS[@]} -eq 1 && -z "${CHANGED_PATHS[0]}" ) ]]; then
     echo "No changed tracked files detected in $RANGE."
-    append_summary "## PR scope check"
+    append_summary "## PR changed-files summary"
     append_summary "No changed tracked files detected in \`$RANGE\`."
     exit 0
 fi
 
 WORKFLOW_FILES=()
+CONFIG_FILES=()
 LOCALIZATION_FILES=()
 RELEASE_CHANGED=()
+TEST_FILES=()
 OTHER_FILES=()
-HIGH_RISK_GROUPS=()
 
 for path in "${CHANGED_PATHS[@]}"; do
     if [[ "$path" == "$WORKFLOW_PREFIX"* ]]; then
@@ -79,7 +152,7 @@ for path in "${CHANGED_PATHS[@]}"; do
         continue
     fi
 
-    if [[ "$path" == "$LOCALIZATION_PREFIX"* ]]; then
+    if matches_prefixes "$path" "${LOCALIZATION_PREFIXES[@]}"; then
         LOCALIZATION_FILES+=("$path")
         continue
     fi
@@ -89,69 +162,60 @@ for path in "${CHANGED_PATHS[@]}"; do
         continue
     fi
 
+    if is_test_file "$path"; then
+        TEST_FILES+=("$path")
+        continue
+    fi
+
+    if is_config_file "$path"; then
+        CONFIG_FILES+=("$path")
+        continue
+    fi
+
     OTHER_FILES+=("$path")
 done
 
+TOTAL_CHANGED=${#CHANGED_PATHS[@]}
+TEST_SIGNAL="No obvious test files were touched."
+if [[ ${#TEST_FILES[@]} -gt 0 ]]; then
+    TEST_SIGNAL="Yes — test-related files appear to be touched (${#TEST_FILES[@]})."
+fi
+
+append_summary "## PR changed-files summary"
+append_summary "Changed files inspected: **$TOTAL_CHANGED**"
+append_summary "Tests touched: **$TEST_SIGNAL**"
+append_summary ""
+
+echo "Changed files inspected: $TOTAL_CHANGED"
+echo "Tests touched: $TEST_SIGNAL"
+emit_group "### Workflow changes" "${WORKFLOW_FILES[@]}"
+emit_group "### Config changes" "${CONFIG_FILES[@]}"
+emit_group "### Release/versioning changes" "${RELEASE_CHANGED[@]}"
+emit_group "### Localization changes" "${LOCALIZATION_FILES[@]}"
+emit_group "### Test-related changes" "${TEST_FILES[@]}"
+emit_group "### Other changed files" "${OTHER_FILES[@]}"
+
 if [[ ${#WORKFLOW_FILES[@]} -gt 0 ]]; then
-    HIGH_RISK_GROUPS+=("workflow")
+    echo "::notice title=Workflow files changed::Workflow definitions changed in this PR."
+fi
+
+if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
+    echo "::notice title=Config files changed::Configuration-oriented files changed in this PR."
 fi
 
 if [[ ${#LOCALIZATION_FILES[@]} -gt 0 ]]; then
-    HIGH_RISK_GROUPS+=("localization")
+    echo "::notice title=Localization files changed::Localization resources changed in this PR."
 fi
 
 if [[ ${#RELEASE_CHANGED[@]} -gt 0 ]]; then
-    HIGH_RISK_GROUPS+=("release/versioning")
+    echo "::notice title=Release/versioning files changed::Release metadata changed in this PR."
 fi
 
-TOTAL_CHANGED=${#CHANGED_PATHS[@]}
-HIGH_RISK_COUNT=${#HIGH_RISK_GROUPS[@]}
-
-append_summary "## PR scope check"
-append_summary "Changed files inspected: **$TOTAL_CHANGED**"
-
-echo "Changed files inspected: $TOTAL_CHANGED"
-emit_group "### Workflow changes" "${WORKFLOW_FILES[@]}"
-emit_group "### Localization changes" "${LOCALIZATION_FILES[@]}"
-emit_group "### Release/versioning changes" "${RELEASE_CHANGED[@]}"
-emit_group "### Other changed files" "${OTHER_FILES[@]}"
-
-STATUS="pass"
-REASON="No broad-scope path combination detected."
-
-if [[ $HIGH_RISK_COUNT -gt 1 ]]; then
-    STATUS="fail"
-    REASON="Multiple high-risk path groups were modified together: ${HIGH_RISK_GROUPS[*]}."
-elif [[ $HIGH_RISK_COUNT -eq 1 && ${#OTHER_FILES[@]} -gt 0 ]]; then
-    STATUS="warn"
-    REASON="A high-risk path group was modified alongside other files: ${HIGH_RISK_GROUPS[0]}."
+if [[ ${#TEST_FILES[@]} -eq 0 ]]; then
+    echo "::notice title=Tests not obviously touched::No obvious test files were detected in the PR diff."
+else
+    echo "::notice title=Tests appear touched::Detected ${#TEST_FILES[@]} test-related file(s) in the PR diff."
 fi
 
 append_summary ""
-append_summary "**Status:** $STATUS"
-append_summary "$REASON"
-
-echo "Status: $STATUS"
-echo "$REASON"
-
-if [[ ${#WORKFLOW_FILES[@]} -gt 0 ]]; then
-    echo "::warning title=Workflow files changed::Workflow definitions changed in this PR. Review CI/CD impact carefully."
-fi
-
-if [[ ${#LOCALIZATION_FILES[@]} -gt 0 ]]; then
-    echo "::warning title=Localization files changed::Localization resources changed in this PR. Confirm translation and fallback coverage."
-fi
-
-if [[ ${#RELEASE_CHANGED[@]} -gt 0 ]]; then
-    echo "::warning title=Release/versioning files changed::Release metadata changed in this PR. Confirm versioning and changelog intent."
-fi
-
-if [[ "$STATUS" == "warn" ]]; then
-    echo "::warning title=Potentially broad PR scope::$REASON"
-    exit 0
-fi
-
-if [[ "$STATUS" == "fail" ]]; then
-    echo "::error title=Unexpectedly broad PR scope::$REASON"
-    exit 1
-fi
+append_summary "_This workflow is informational only and does not block the pull request._"
