@@ -1,0 +1,70 @@
+name: Artifact Sanity
+
+'on':
+  pull_request:
+  push:
+
+jobs:
+  artifact-sanity:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fail on obvious generated artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            base_ref="origin/${GITHUB_BASE_REF}"
+            git fetch --no-tags origin "${GITHUB_BASE_REF}"
+            range="$(git merge-base HEAD "${base_ref}")..HEAD"
+          elif [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+            before_sha="${{ github.event.before }}"
+
+            if [[ "$before_sha" == "0000000000000000000000000000000000000000" ]]; then
+              # Initial push to a new branch: diff against the root so all introduced changes are inspected.
+              range="--root HEAD"
+            else
+              range="${before_sha}..${GITHUB_SHA}"
+            fi
+          else
+            echo "Unsupported event: ${GITHUB_EVENT_NAME}" >&2
+            exit 1
+          fi
+
+          echo "Inspecting tracked changes in range: ${range}"
+
+          mapfile -t changed_paths < <(git diff --name-only --diff-filter=ACMR "$range")
+
+          if [[ ${#changed_paths[@]} -eq 0 ]]; then
+            echo "No added or modified tracked files to inspect."
+            exit 0
+          fi
+
+          blocked_paths=()
+
+          for path in "${changed_paths[@]}"; do
+            case "$path" in
+              bin/*|*/bin/*|obj/*|*/obj/*|BepInEx/plugins/*|*/BepInEx/plugins/*)
+                blocked_paths+=("$path")
+                ;;
+              *.dll|*.exe|*.zip|*.7z|*.rar|*.tar|*.tar.gz|*.tgz)
+                blocked_paths+=("$path")
+                ;;
+            esac
+          done
+
+          if [[ ${#blocked_paths[@]} -gt 0 ]]; then
+            echo "Found obvious generated artifacts or install-path files in tracked changes:" >&2
+            printf ' - %s\n' "${blocked_paths[@]}" >&2
+            echo >&2
+            echo "This check is intended to catch accidental commits such as plugin binaries under BepInEx/plugins/." >&2
+            exit 1
+          fi
+
+          echo "Artifact sanity check passed."
