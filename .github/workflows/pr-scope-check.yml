@@ -1,11 +1,11 @@
-name: PR Changed Files Summary
+name: PR Scope and Release Metadata Summary
 
 'on':
   pull_request:
 
 jobs:
   pr-scope-check:
-    name: Summarize changed files
+    name: Summarize changed files and release metadata coverage
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,7 +30,7 @@ jobs:
           echo "range=${range}" >> "$GITHUB_OUTPUT"
           echo "Using diff range: ${range}"
 
-      - name: Summarize PR changes (informational)
+      - name: Summarize PR changes and release metadata coverage (informational)
         shell: bash
         run: |
           set -euo pipefail

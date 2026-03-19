@@ -17,6 +17,7 @@ CONFIG_PATTERNS=(
 )
 TEST_PATH_HINTS=("test" "tests" "spec" "specs")
 TEST_FILE_HINTS=("*Test*.cs" "*Tests*.cs" "*.spec.*" "*.test.*")
+PRODUCTION_CODE_EXTENSIONS=("*.cs")
 
 append_summary() {
     local message="$1"
@@ -119,6 +120,23 @@ is_test_file() {
     return 1
 }
 
+is_production_code_file() {
+    local path="$1"
+    local extension_pattern
+
+    if is_test_file "$path"; then
+        return 1
+    fi
+
+    for extension_pattern in "${PRODUCTION_CODE_EXTENSIONS[@]}"; do
+        if [[ "$path" == $extension_pattern ]]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 RANGE="${1:-}"
 if [[ -z "$RANGE" ]]; then
     echo "Usage: $0 <git-diff-range>" >&2
@@ -144,6 +162,7 @@ CONFIG_FILES=()
 LOCALIZATION_FILES=()
 RELEASE_CHANGED=()
 TEST_FILES=()
+PRODUCTION_CODE_FILES=()
 OTHER_FILES=()
 
 for path in "${CHANGED_PATHS[@]}"; do
@@ -167,6 +186,11 @@ for path in "${CHANGED_PATHS[@]}"; do
         continue
     fi
 
+    if is_production_code_file "$path"; then
+        PRODUCTION_CODE_FILES+=("$path")
+        continue
+    fi
+
     if is_config_file "$path"; then
         CONFIG_FILES+=("$path")
         continue
@@ -177,22 +201,34 @@ done
 
 TOTAL_CHANGED=${#CHANGED_PATHS[@]}
 TEST_SIGNAL="No obvious test files were touched."
+RELEASE_METADATA_SIGNAL="No production C# files were touched, so no release-metadata expectation is implied."
 if [[ ${#TEST_FILES[@]} -gt 0 ]]; then
     TEST_SIGNAL="Yes — test-related files appear to be touched (${#TEST_FILES[@]})."
+fi
+
+if [[ ${#PRODUCTION_CODE_FILES[@]} -gt 0 ]]; then
+    if [[ ${#RELEASE_CHANGED[@]} -gt 0 ]]; then
+        RELEASE_METADATA_SIGNAL="Yes — production C# files changed and release-facing metadata was updated (${#RELEASE_CHANGED[@]} file(s))."
+    else
+        RELEASE_METADATA_SIGNAL="No — production C# files changed without touching release-facing metadata. Reviewers should confirm that any version/changelog update is intentionally deferred."
+    fi
 fi
 
 append_summary "## PR changed-files summary"
 append_summary "Changed files inspected: **$TOTAL_CHANGED**"
 append_summary "Tests touched: **$TEST_SIGNAL**"
+append_summary "Release metadata updated alongside production C# changes: **$RELEASE_METADATA_SIGNAL**"
 append_summary ""
 
 echo "Changed files inspected: $TOTAL_CHANGED"
 echo "Tests touched: $TEST_SIGNAL"
+echo "Release metadata updated alongside production C# changes: $RELEASE_METADATA_SIGNAL"
 emit_group "### Workflow changes" "${WORKFLOW_FILES[@]}"
 emit_group "### Config changes" "${CONFIG_FILES[@]}"
 emit_group "### Release/versioning changes" "${RELEASE_CHANGED[@]}"
 emit_group "### Localization changes" "${LOCALIZATION_FILES[@]}"
 emit_group "### Test-related changes" "${TEST_FILES[@]}"
+emit_group "### Production C# changes" "${PRODUCTION_CODE_FILES[@]}"
 emit_group "### Other changed files" "${OTHER_FILES[@]}"
 
 if [[ ${#WORKFLOW_FILES[@]} -gt 0 ]]; then
@@ -211,11 +247,24 @@ if [[ ${#RELEASE_CHANGED[@]} -gt 0 ]]; then
     echo "::notice title=Release/versioning files changed::Release metadata changed in this PR."
 fi
 
+if [[ ${#PRODUCTION_CODE_FILES[@]} -gt 0 ]]; then
+    if [[ ${#RELEASE_CHANGED[@]} -gt 0 ]]; then
+        echo "::notice title=Production C# changes include release metadata::Production C# files changed and release-facing metadata files were updated in the same PR."
+    else
+        echo "::notice title=Production C# changes without release metadata::Production C# files changed without updates to CHANGELOG.md, Bloodcraft.csproj, or thunderstore.toml. Reviewers should confirm whether release metadata is intentionally deferred."
+    fi
+fi
+
 if [[ ${#TEST_FILES[@]} -eq 0 ]]; then
     echo "::notice title=Tests not obviously touched::No obvious test files were detected in the PR diff."
 else
     echo "::notice title=Tests appear touched::Detected ${#TEST_FILES[@]} test-related file(s) in the PR diff."
 fi
 
+append_summary ""
+append_summary "### Release metadata review cue"
+append_summary "- Production C# files changed: **${#PRODUCTION_CODE_FILES[@]}**"
+append_summary "- Release-facing metadata files changed: **${#RELEASE_CHANGED[@]}**"
+append_summary "- Reviewer prompt: confirm whether release metadata updates are intentionally included or intentionally deferred."
 append_summary ""
 append_summary "_This workflow is informational only and does not block the pull request._"
