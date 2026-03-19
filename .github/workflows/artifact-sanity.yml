@@ -27,14 +27,8 @@ jobs:
             before_sha="${{ github.event.before }}"
 
             if [[ "$before_sha" == "0000000000000000000000000000000000000000" ]]; then
-              parent_commit=$(git rev-list --max-count=1 --skip=1 HEAD || true)
-
-              if [[ -z "$parent_commit" ]]; then
-                echo "No parent commit available for initial push; skipping artifact sanity diff."
-                exit 0
-              fi
-
-              range="${parent_commit}..HEAD"
+              # Initial push to a new branch: diff against the root so all introduced changes are inspected.
+              range="--root HEAD"
             else
               range="${before_sha}..${GITHUB_SHA}"
             fi
