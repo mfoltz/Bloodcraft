@@ -1,10 +1,11 @@
-name: PR Scope Check
+name: PR Changed Files Summary
 
 'on':
   pull_request:
 
 jobs:
   pr-scope-check:
+    name: Summarize changed files
     runs-on: ubuntu-latest
 
     steps:
@@ -27,7 +28,7 @@ jobs:
           echo "range=${range}" >> "$GITHUB_OUTPUT"
           echo "Using diff range: ${range}"
 
-      - name: Summarize PR scope
+      - name: Summarize PR changes (informational)
         shell: bash
         run: |
           set -euo pipefail
