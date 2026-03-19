@@ -9,7 +9,7 @@ append_summary() {
     local message="$1"
 
     if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
-        printf '%b\n' "$message" >> "$GITHUB_STEP_SUMMARY"
+        printf '%s\n' "$message" >> "$GITHUB_STEP_SUMMARY"
     fi
 }
 
