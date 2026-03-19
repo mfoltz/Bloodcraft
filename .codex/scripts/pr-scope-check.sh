@@ -53,7 +53,7 @@ if [[ -z "$RANGE" ]]; then
     exit 1
 fi
 
-if ! changed_output="$(git diff --name-only --diff-filter=ACMR "$RANGE")"; then
+if ! changed_output="$(git diff --name-only --diff-filter=ACMRDT "$RANGE")"; then
     echo "Unable to inspect changed files for range: $RANGE" >&2
     exit 1
 fi
@@ -61,9 +61,9 @@ fi
 mapfile -t CHANGED_PATHS < <(printf '%s\n' "$changed_output")
 
 if [[ ${#CHANGED_PATHS[@]} -eq 0 || ( ${#CHANGED_PATHS[@]} -eq 1 && -z "${CHANGED_PATHS[0]}" ) ]]; then
-    echo "No added or modified tracked files detected in $RANGE."
+    echo "No changed tracked files detected in $RANGE."
     append_summary "## PR scope check"
-    append_summary "No added or modified tracked files detected in \`$RANGE\`."
+    append_summary "No changed tracked files detected in \`$RANGE\`."
     exit 0
 fi
 
