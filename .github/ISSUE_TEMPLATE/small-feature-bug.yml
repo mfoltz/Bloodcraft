@@ -1,0 +1,63 @@
+name: Small feature / bug
+description: Fast template for routine small fixes and low-risk feature requests.
+title: "[small] "
+labels:
+  - triage
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: Short summary of the bug or feature.
+      placeholder: Fix starter-kit follow-up grant after reconnect
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: Current behavior
+      description: What happens now?
+      placeholder: Players keep the Eclipse registration but do not receive the starter-kit entitlement after a partial retry.
+    validations:
+      required: true
+
+  - type: textarea
+    id: desired_behavior
+    attributes:
+      label: Desired behavior
+      description: What should happen instead?
+      placeholder: Registration completes once, starter-kit delivery stays consistent, and the player sees the expected result.
+    validations:
+      required: true
+
+  - type: textarea
+    id: invariants
+    attributes:
+      label: Invariants
+      description: >-
+        State integrity must remain intact. Call out rules that cannot regress, such as starter-kit entitlement staying accurate,
+        familiar or progression data persisting across saves/restarts, Eclipse registration not duplicating side effects,
+        and config-driven behavior still respecting server settings.
+      placeholder: Existing familiar/progression state must persist; config-disabled starter-kit grants must remain disabled.
+    validations:
+      required: true
+
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+      description: What is explicitly out of scope for this small change?
+      placeholder: No rebalance work, no migration of existing player data, no Eclipse UI redesign.
+
+  - type: textarea
+    id: acceptance_checks
+    attributes:
+      label: Acceptance checks
+      description: Brief checks that prove the work is done.
+      placeholder: |-
+        - Repro no longer occurs.
+        - Save/load keeps the expected familiar or progression state.
+        - Config toggles still change behavior correctly.
+    validations:
+      required: true

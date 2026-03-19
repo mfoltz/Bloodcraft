@@ -1,3 +1,6 @@
+`1.12.21`
+- added a low-friction GitHub issue template for small bugs/features with explicit state-integrity prompts
+
 `1.12.20`
 - automatically grants the starter kit during Eclipse registration when the feature is enabled
 - preserves starter-kit entitlement on partial delivery failure and treats mid-delivery issues as non-retryable
