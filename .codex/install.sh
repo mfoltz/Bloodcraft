@@ -59,11 +59,11 @@ install_dotnet() {
 
 python_dependency_is_available() {
     local python_command="$1"
-    "$python_command" - <<'PY' >/dev/null 2>&1
+    "$python_command" - <<PY >/dev/null 2>&1
 import importlib.util
 import sys
 
-sys.exit(0 if importlib.util.find_spec("yaml") else 1)
+sys.exit(0 if importlib.util.find_spec("${PYTHON_DEPENDENCY_IMPORT}") else 1)
 PY
 }
 
