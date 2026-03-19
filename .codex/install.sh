@@ -9,6 +9,9 @@ CHANNEL="${DOTNET_INSTALL_CHANNEL:-8.0}"
 BEPINEX_PLUGIN_DIR="${BEPINEX_PLUGIN_DIR:-}"
 DOTNET_INSTALLED=0
 REQUIRED_SDK_MAJOR="${CHANNEL%%.*}"
+PYTHON_COMMANDS=(python3 python)
+PYTHON_DEPENDENCY="PyYAML"
+PYTHON_DEPENDENCY_IMPORT="yaml"
 
 sdk_meets_minimum_version() {
     if ! command -v dotnet >/dev/null 2>&1; then
@@ -54,6 +57,57 @@ install_dotnet() {
     fi
 }
 
+python_dependency_is_available() {
+    local python_command="$1"
+    "$python_command" - <<'PY' >/dev/null 2>&1
+import importlib.util
+import sys
+
+sys.exit(0 if importlib.util.find_spec("yaml") else 1)
+PY
+}
+
+install_python_dependency() {
+    local python_command="$1"
+
+    echo "Ensuring $PYTHON_DEPENDENCY is available for $python_command..."
+
+    if ! "$python_command" -m pip --version >/dev/null 2>&1; then
+        "$python_command" -m ensurepip --upgrade >/dev/null 2>&1 || true
+    fi
+
+    "$python_command" -m pip install --user --upgrade "$PYTHON_DEPENDENCY"
+}
+
+ensure_python_dependency() {
+    local available_python=0
+    local python_command
+
+    for python_command in "${PYTHON_COMMANDS[@]}"; do
+        if ! command -v "$python_command" >/dev/null 2>&1; then
+            continue
+        fi
+
+        available_python=1
+
+        if python_dependency_is_available "$python_command"; then
+            echo "$PYTHON_DEPENDENCY already available for $python_command"
+            continue
+        fi
+
+        install_python_dependency "$python_command"
+
+        if ! python_dependency_is_available "$python_command"; then
+            echo "Failed to make $PYTHON_DEPENDENCY_IMPORT importable for $python_command" >&2
+            exit 1
+        fi
+    done
+
+    if [ "$available_python" -eq 0 ]; then
+        echo "Python not found; skipping $PYTHON_DEPENDENCY setup." >&2
+    fi
+}
+
 if command -v dotnet >/dev/null 2>&1; then
     echo ".NET SDK already installed: $(dotnet --version)"
     if sdk_meets_minimum_version; then
@@ -65,6 +119,8 @@ if command -v dotnet >/dev/null 2>&1; then
 else
     install_dotnet
 fi
+
+ensure_python_dependency
 
 if [ ! -f "$PROJECT_PATH" ]; then
     echo "Project file not found at $PROJECT_PATH" >&2
