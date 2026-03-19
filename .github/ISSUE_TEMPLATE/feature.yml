@@ -1,6 +1,5 @@
-name: Small feature / bug
-description: Fast template for routine small fixes and low-risk feature requests.
-title: "[small] "
+name: feature
+description: Light template for small fixes and low-risk feature requests.
 labels:
   - triage
 body:
