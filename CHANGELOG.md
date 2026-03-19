@@ -1,6 +1,3 @@
-`1.12.21`
-- added a pull request template covering change summary, rationale, invariants, concrete acceptance checks, and low-friction AI usage disclosure
-
 `1.12.20`
 - automatically grants the starter kit during Eclipse registration when the feature is enabled
 - preserves starter-kit entitlement on partial delivery failure and treats mid-delivery issues as non-retryable
