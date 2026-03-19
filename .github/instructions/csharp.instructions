@@ -1,0 +1,12 @@
+---
+applyTo: "**/*.cs"
+---
+
+When reviewing C# changes in this repository:
+
+- Prioritize behavior, state integrity, persistence safety, and edge cases over style.
+- In small feature PRs, avoid suggesting unrelated refactors or architecture rewrites.
+- Flag duplicate-trigger risks, partial-success bugs, retry hazards, nullability issues, and hidden behavior changes.
+- Prefer comments about correctness, data loss risk, entitlement preservation, and diagnosability in logs.
+- For gameplay or progression logic, preserving saved state and preventing accidental duplicate grants is higher priority than immediate happy-path completion.
+- For Harmony patches or V Rising server-side code, prefer minimal patches that follow existing repository patterns and avoid comments that assume stock Unity behavior when repository conventions differ.
