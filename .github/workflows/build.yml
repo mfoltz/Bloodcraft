@@ -147,7 +147,7 @@ jobs:
           echo "dll_name=$dll_name" >> "$GITHUB_OUTPUT"
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 7.0.x
 
