@@ -1,6 +1,9 @@
 name: Build
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
@@ -9,8 +12,9 @@ on:
 
 jobs:
   build:
+    name: build-validation
     permissions:
-      contents: write
+      contents: read
     runs-on: ubuntu-latest
 
     steps:
@@ -40,15 +44,18 @@ jobs:
           echo "dll_name=$dll_name" >> $GITHUB_OUTPUT
 
       - name: Install xmllint
+        if: github.event_name != 'pull_request'
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
       - name: Extract version from .csproj
+        if: github.event_name != 'pull_request'
         id: extract_version
         run: |
           version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" "${{ steps.discover_csproj.outputs.csproj_file }}")
           echo "version=$version" >> $GITHUB_ENV
 
       - name: Determine build eligibility
+        if: github.event_name != 'pull_request'
         id: version_guard
         run: |
           if [ -z "${{ env.version }}" ]; then
@@ -100,17 +107,15 @@ jobs:
           fi
 
       - name: Setup .NET
-        if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
       - name: Restore dependencies
-        if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
         run: dotnet restore
 
       - name: Update thunderstore.toml
-        if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
+        if: github.event_name != 'pull_request' && (steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch')
         run: |
           if [ -z "${{ env.version }}" ]; then
             echo "Version is empty; skipping thunderstore.toml update."
@@ -131,9 +136,11 @@ jobs:
           fi
 
       - name: Build (Release)
-        if: steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'pull_request' || steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
         run: |
-          if [ -n "${{ env.version }}" ]; then
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            dotnet build . --configuration Release -p:RunGenerateREADME=false
+          elif [ -n "${{ env.version }}" ]; then
             dotnet build . --configuration Release -p:Version=${{ env.version }} -p:RunGenerateREADME=false
           else
             dotnet build . --configuration Release -p:RunGenerateREADME=false
@@ -141,7 +148,7 @@ jobs:
 
       - name: GH Release (pre-release)
         uses: softprops/action-gh-release@v1
-        if: (steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch') && env.version != ''
+        if: github.event_name != 'pull_request' && (steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch') && env.version != ''
         with:
           body: |
             Automated pre-release for version ${{ env.version }} generated from this GitHub Actions build.
