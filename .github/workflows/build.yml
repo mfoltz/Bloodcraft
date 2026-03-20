@@ -1,6 +1,9 @@
 name: Build
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
@@ -155,6 +158,7 @@ jobs:
         run: dotnet restore
 
       - name: Update thunderstore.toml
+        if: github.event_name != 'pull_request'
         run: |
           version='${{ needs.preflight.outputs.version }}'
 
@@ -188,7 +192,7 @@ jobs:
 
       - name: GH Release (pre-release)
         uses: softprops/action-gh-release@v1
-        if: needs.preflight.outputs.version != ''
+        if: github.event_name != 'pull_request' && needs.preflight.outputs.version != ''
         with:
           body: |
             Automated pre-release for version ${{ needs.preflight.outputs.version }} generated from this GitHub Actions build.
