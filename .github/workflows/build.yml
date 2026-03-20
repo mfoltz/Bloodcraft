@@ -114,27 +114,6 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Update thunderstore.toml
-        if: github.event_name != 'pull_request' && (steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch')
-        run: |
-          if [ -z "${{ env.version }}" ]; then
-            echo "Version is empty; skipping thunderstore.toml update."
-            exit 0
-          fi
-
-          sed -i "s/versionNumber = \".*\"/versionNumber = \"${{ env.version }}\"/" thunderstore.toml
-
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-          if [ -n "$(git status --porcelain thunderstore.toml)" ]; then
-            git add thunderstore.toml
-            git commit -m "chore: Update thunderstore.toml version to ${{ env.version }}"
-            git push origin HEAD:${{ github.ref }}
-          else
-            echo "No changes to commit in thunderstore.toml"
-          fi
-
       - name: Build (Release)
         if: github.event_name == 'pull_request' || steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
         run: |
