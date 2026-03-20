@@ -3,41 +3,52 @@ name: Release
 on:
   workflow_dispatch:
 
+env:
+  DOTNET_SDK_VERSION: 8.0.x
+
 jobs:
   release_on_thunderstore:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '6.0.x'
-          dotnet-quality: 'preview'
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Extract Latest Tag
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
+          cache: true
+          cache-dependency-path: Bloodcraft.csproj
+
+      - name: Extract latest tag
         id: extract_tag
-        run: |
-          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
         shell: bash
-
-      - name: Set Release Tag
-        run: echo "RELEASE_TAG=${{ env.latest_tag }}" >> $GITHUB_ENV
-
-      - name: Download Release
         run: |
-          gh release download ${{ env.RELEASE_TAG }} -D ./dist
+          latest_tag=$(git tag -l 'v*' --sort=-v:refname | head -n 1)
+
+          if [ -z "$latest_tag" ]; then
+            echo "Unable to locate a release tag." >&2
+            exit 1
+          fi
+
+          echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
+          echo "RELEASE_TAG=$latest_tag" >> "$GITHUB_ENV"
+
+      - name: Download release assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release download "${{ steps.extract_tag.outputs.latest_tag }}" --dir ./dist
 
       - name: Install Thunderstore CLI (tcli)
         run: dotnet tool install --global tcli
 
       - name: Publish build to Thunderstore
+        env:
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
         run: |
           sanitized_tag=${RELEASE_TAG#v}
           sanitized_tag=${sanitized_tag%%-*}
@@ -47,6 +58,4 @@ jobs:
             exit 1
           fi
 
-          tcli publish --token ${{ secrets.THUNDERSTORE_KEY }} --package-version "$sanitized_tag"
-        env:
-          RELEASE_TAG: ${{ env.RELEASE_TAG }}
+          tcli publish --token "${{ secrets.THUNDERSTORE_KEY }}" --package-version "$sanitized_tag"

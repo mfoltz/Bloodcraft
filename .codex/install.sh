@@ -5,13 +5,19 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 PROJECT_PATH="$REPO_ROOT/Bloodcraft.csproj"
 INSTALL_DIR="${DOTNET_INSTALL_DIR:-$HOME/.dotnet}"
-CHANNEL="${DOTNET_INSTALL_CHANNEL:-8.0}"
+SDK_CHANNEL="${DOTNET_INSTALL_CHANNEL:-8.0}"
+TARGET_FRAMEWORK="net6.0"
 BEPINEX_PLUGIN_DIR="${BEPINEX_PLUGIN_DIR:-}"
 DOTNET_INSTALLED=0
-REQUIRED_SDK_MAJOR="${CHANNEL%%.*}"
+MINIMUM_SDK_MAJOR="${SDK_CHANNEL%%.*}"
 PYTHON_COMMANDS=(python3 python)
 PYTHON_DEPENDENCY="PyYAML"
 PYTHON_DEPENDENCY_IMPORT="yaml"
+
+print_sdk_policy() {
+    echo "Using .NET SDK channel $SDK_CHANNEL or newer to build target framework $TARGET_FRAMEWORK."
+    echo "This repository targets $TARGET_FRAMEWORK for BepInEx compatibility, but requires SDK major $MINIMUM_SDK_MAJOR+ because it uses modern preview C# features."
+}
 
 sdk_meets_minimum_version() {
     if ! command -v dotnet >/dev/null 2>&1; then
@@ -28,7 +34,7 @@ sdk_meets_minimum_version() {
     local sdk_major
     sdk_major="${sdk_version%%.*}"
 
-    [ "$sdk_major" -ge "$REQUIRED_SDK_MAJOR" ]
+    [ "$sdk_major" -ge "$MINIMUM_SDK_MAJOR" ]
 }
 
 install_dotnet() {
@@ -37,9 +43,7 @@ install_dotnet() {
     install_script="$(mktemp)"
 
     curl -sSL https://dot.net/v1/dotnet-install.sh -o "$install_script"
-
-    bash "$install_script" --install-dir "$INSTALL_DIR" --channel "$CHANNEL"
-
+    bash "$install_script" --install-dir "$INSTALL_DIR" --channel "$SDK_CHANNEL"
     rm -f "$install_script"
 
     export DOTNET_ROOT="$INSTALL_DIR"
@@ -59,12 +63,12 @@ install_dotnet() {
 
 python_dependency_is_available() {
     local python_command="$1"
-    "$python_command" - <<PY >/dev/null 2>&1
+    "$python_command" - <<PYTHON_CHECK >/dev/null 2>&1
 import importlib.util
 import sys
 
 sys.exit(0 if importlib.util.find_spec("${PYTHON_DEPENDENCY_IMPORT}") else 1)
-PY
+PYTHON_CHECK
 }
 
 install_python_dependency() {
@@ -72,12 +76,10 @@ install_python_dependency() {
 
     echo "Ensuring $PYTHON_DEPENDENCY is available for $python_command..."
 
-    # Try to make sure pip is available; treat ensurepip as best-effort.
     if ! "$python_command" -m pip --version >/dev/null 2>&1; then
         "$python_command" -m ensurepip --upgrade >/dev/null 2>&1 || true
     fi
 
-    # Re-check pip availability after ensurepip.
     if ! "$python_command" -m pip --version >/dev/null 2>&1; then
         echo "pip is not available for $python_command, so $PYTHON_DEPENDENCY cannot be installed automatically." >&2
         echo "Please install $PYTHON_DEPENDENCY manually for this Python, for example:" >&2
@@ -85,7 +87,6 @@ install_python_dependency() {
         return 1
     fi
 
-    # Install the dependency with explicit error handling so set -e does not hide the cause.
     if ! "$python_command" -m pip install --user --upgrade "$PYTHON_DEPENDENCY"; then
         echo "Failed to install $PYTHON_DEPENDENCY for $python_command." >&2
         echo "You may need to check your network connection, permissions, or install it manually, e.g.:" >&2
@@ -123,12 +124,14 @@ ensure_python_dependency() {
     fi
 }
 
+print_sdk_policy
+
 if command -v dotnet >/dev/null 2>&1; then
     echo ".NET SDK already installed: $(dotnet --version)"
     if sdk_meets_minimum_version; then
         DOTNET_INSTALLED=1
     else
-        echo ".NET SDK $(dotnet --version) is older than the required major version $REQUIRED_SDK_MAJOR; installing channel $CHANNEL into $INSTALL_DIR"
+        echo ".NET SDK $(dotnet --version) is older than the required major version $MINIMUM_SDK_MAJOR; installing channel $SDK_CHANNEL into $INSTALL_DIR"
         install_dotnet
     fi
 else
@@ -148,7 +151,7 @@ dotnet restore "$PROJECT_PATH"
 echo "Building Bloodcraft project..."
 dotnet build "$PROJECT_PATH" --configuration Release --no-restore -p:RunGenerateREADME=false
 
-DLL_PATH="$REPO_ROOT/bin/Release/net6.0/Bloodcraft.dll"
+DLL_PATH="$REPO_ROOT/bin/Release/$TARGET_FRAMEWORK/Bloodcraft.dll"
 if [ ! -f "$DLL_PATH" ]; then
     echo "Build failed: $DLL_PATH not found." >&2
     exit 1
