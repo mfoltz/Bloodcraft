@@ -16,7 +16,7 @@ env:
   RELEASE_ASSET_NAME: prerelease-package
 
 jobs:
-  build:
+  build_validation:
     name: build-validation
     permissions:
       contents: read
@@ -24,8 +24,6 @@ jobs:
     outputs:
       csproj_file: ${{ steps.discover_csproj.outputs.csproj_file }}
       dll_name: ${{ steps.get_dll_name.outputs.dll_name }}
-      version: ${{ steps.extract_version.outputs.version }}
-      should_publish: ${{ steps.version_guard.outputs.should_build }}
 
     steps:
       - name: Checkout
@@ -63,42 +61,62 @@ jobs:
           dll_name=$(basename "$csproj" .csproj)
           echo "dll_name=$dll_name" >> "$GITHUB_OUTPUT"
 
+      - name: Restore dependencies
+        run: dotnet restore "${{ steps.discover_csproj.outputs.csproj_file }}"
+
+      - name: Build (Release)
+        run: dotnet build "${{ steps.discover_csproj.outputs.csproj_file }}" --configuration Release --no-restore -p:RunGenerateREADME=false
+
+  prepare_prerelease:
+    name: prepare-prerelease
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build_validation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.extract_version.outputs.version }}
+      should_publish: ${{ steps.version_guard.outputs.should_publish }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
+          cache: true
+          cache-dependency-path: Bloodcraft.csproj
+
       - name: Install xmllint
-        if: github.event_name != 'pull_request'
         run: sudo apt-get update && sudo apt-get install --yes libxml2-utils
 
       - name: Extract version from .csproj
-        if: github.event_name != 'pull_request'
         id: extract_version
         run: |
-          version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" "${{ steps.discover_csproj.outputs.csproj_file }}")
-          echo "version=$version" >> "$GITHUB_ENV"
+          version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" "${{ needs.build_validation.outputs.csproj_file }}")
+
+          if [ -z "$version" ]; then
+            echo "Unable to determine current version from ${{ needs.build_validation.outputs.csproj_file }}." >&2
+            exit 1
+          fi
+
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Determine build eligibility
-        if: github.event_name != 'pull_request'
+      - name: Determine publish eligibility
         id: version_guard
         run: |
-          if [ -z "${{ steps.extract_version.outputs.version }}" ]; then
-            echo "Unable to determine current version; continuing build to avoid false negative."
-            echo "should_build=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "Manual dispatch detected; proceeding with build regardless of version guard."
-            echo "should_build=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          git fetch --force --tags
           latest_tag=$(git tag -l 'v*' --sort=-v:refname | grep -Ev '-' | head -n 1)
           latest_version=${latest_tag#v}
           current_version="${{ steps.extract_version.outputs.version }}"
 
           if [ -z "$latest_version" ]; then
-            echo "No previous tagged release detected; proceeding with build."
-            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            echo "No previous tagged release detected; proceeding with prerelease publication."
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -106,54 +124,60 @@ jobs:
             pre_release_tag="v${current_version}-pre"
 
             if git tag -l "$pre_release_tag" | grep -q .; then
-              echo "Current .csproj version $current_version matches latest release and pre-release tag $pre_release_tag already exists; skipping build because the pre-release is already published."
-              echo "should_build=false" >> "$GITHUB_OUTPUT"
+              echo "Current .csproj version $current_version matches latest release and prerelease tag $pre_release_tag already exists; skipping publication."
+              echo "should_publish=false" >> "$GITHUB_OUTPUT"
               exit 0
             fi
 
-            echo "Current .csproj version $current_version matches latest release but no pre-release tag $pre_release_tag is present; enabling build so the pre-release can be published automatically."
-            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            echo "Current .csproj version $current_version matches latest release but no prerelease tag $pre_release_tag is present; proceeding with publication."
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           highest_version=$(printf '%s\n' "$latest_version" "$current_version" | sort -V | tail -n 1)
 
           if [ "$highest_version" = "$current_version" ]; then
-            echo "Current .csproj version $current_version is ahead of latest release $latest_version; proceeding with build."
-            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            echo "Current .csproj version $current_version is ahead of latest release $latest_version; proceeding with publication."
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Current .csproj version $current_version is behind the latest release $latest_version; skipping build on push to main."
-            echo "should_build=false" >> "$GITHUB_OUTPUT"
+            echo "Current .csproj version $current_version is behind latest release $latest_version; skipping publication."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Restore dependencies
-        run: dotnet restore "${{ steps.discover_csproj.outputs.csproj_file }}"
+        if: steps.version_guard.outputs.should_publish == 'true'
+        run: dotnet restore "${{ needs.build_validation.outputs.csproj_file }}"
 
-      - name: Build (Release)
-        if: github.event_name == 'pull_request' || steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch'
+      - name: Build publish assets (Release)
+        if: steps.version_guard.outputs.should_publish == 'true'
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            dotnet build "${{ steps.discover_csproj.outputs.csproj_file }}" --configuration Release --no-restore -p:RunGenerateREADME=false
-          elif [ -n "${{ steps.extract_version.outputs.version }}" ]; then
-            dotnet build "${{ steps.discover_csproj.outputs.csproj_file }}" --configuration Release --no-restore -p:Version=${{ steps.extract_version.outputs.version }} -p:RunGenerateREADME=false
-          else
-            dotnet build "${{ steps.discover_csproj.outputs.csproj_file }}" --configuration Release --no-restore -p:RunGenerateREADME=false
-          fi
+          dotnet build "${{ needs.build_validation.outputs.csproj_file }}" \
+            --configuration Release \
+            --no-restore \
+            -p:Version=${{ steps.extract_version.outputs.version }} \
+            -p:RunGenerateREADME=false
+
+      - name: Stage pre-release assets
+        if: steps.version_guard.outputs.should_publish == 'true'
+        run: |
+          mkdir -p ./release-assets
+          cp "./bin/Release/${{ env.TARGET_FRAMEWORK }}/${{ needs.build_validation.outputs.dll_name }}.dll" "./release-assets/${{ needs.build_validation.outputs.dll_name }}.dll"
+          cp ./CHANGELOG.md ./release-assets/CHANGELOG.md
 
       - name: Upload pre-release assets
-        if: github.event_name != 'pull_request' && (steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch') && steps.extract_version.outputs.version != ''
+        if: steps.version_guard.outputs.should_publish == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.RELEASE_ASSET_NAME }}
           if-no-files-found: error
-          path: |
-            ./bin/Release/${{ env.TARGET_FRAMEWORK }}/${{ steps.get_dll_name.outputs.dll_name }}.dll
-            ./CHANGELOG.md
+          path: ./release-assets/*
 
   publish_prerelease:
     name: publish-prerelease
-    if: github.event_name != 'pull_request' && (needs.build.outputs.should_publish == 'true' || github.event_name == 'workflow_dispatch') && needs.build.outputs.version != ''
-    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.prepare_prerelease.outputs.should_publish == 'true' && needs.prepare_prerelease.outputs.version != ''
+    needs:
+      - build_validation
+      - prepare_prerelease
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -169,15 +193,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body: |
-            Automated pre-release for version ${{ needs.build.outputs.version }} generated from this GitHub Actions build.
+            Automated pre-release for version ${{ needs.prepare_prerelease.outputs.version }} generated from this GitHub Actions build.
             - Commit: ${{ github.sha }}
             - Run: ${{ github.run_id }}
-          name: Pre-release v${{ needs.build.outputs.version }}
+          name: Pre-release v${{ needs.prepare_prerelease.outputs.version }}
           fail_on_unmatched_files: true
           prerelease: true
-          tag_name: v${{ needs.build.outputs.version }}-pre
+          tag_name: v${{ needs.prepare_prerelease.outputs.version }}-pre
           files: |
-            ./release-assets/${{ needs.build.outputs.dll_name }}.dll
+            ./release-assets/${{ needs.build_validation.outputs.dll_name }}.dll
             ./release-assets/CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
