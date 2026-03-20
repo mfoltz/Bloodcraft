@@ -157,15 +157,20 @@ jobs:
             -p:Version=${{ steps.extract_version.outputs.version }} \
             -p:RunGenerateREADME=false
 
+      - name: Stage pre-release assets
+        if: steps.version_guard.outputs.should_publish == 'true'
+        run: |
+          mkdir -p ./release-assets
+          cp "./bin/Release/${{ env.TARGET_FRAMEWORK }}/${{ needs.build_validation.outputs.dll_name }}.dll" "./release-assets/${{ needs.build_validation.outputs.dll_name }}.dll"
+          cp ./CHANGELOG.md ./release-assets/CHANGELOG.md
+
       - name: Upload pre-release assets
         if: steps.version_guard.outputs.should_publish == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.RELEASE_ASSET_NAME }}
           if-no-files-found: error
-          path: |
-            ./bin/Release/${{ env.TARGET_FRAMEWORK }}/${{ needs.build_validation.outputs.dll_name }}.dll
-            ./CHANGELOG.md
+          path: ./release-assets/*
 
   publish_prerelease:
     name: publish-prerelease
