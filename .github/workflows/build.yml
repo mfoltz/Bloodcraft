@@ -157,29 +157,6 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Update thunderstore.toml
-        if: github.event_name != 'pull_request'
-        run: |
-          version='${{ needs.preflight.outputs.version }}'
-
-          if [ -z "$version" ]; then
-            echo "Version is empty; skipping thunderstore.toml update."
-            exit 0
-          fi
-
-          sed -i "s/versionNumber = \".*\"/versionNumber = \"$version\"/" thunderstore.toml
-
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-          if [ -n "$(git status --porcelain thunderstore.toml)" ]; then
-            git add thunderstore.toml
-            git commit -m "chore: Update thunderstore.toml version to $version"
-            git push origin HEAD:${{ github.ref }}
-          else
-            echo "No changes to commit in thunderstore.toml"
-          fi
-
       - name: Build (Release)
         run: |
           version='${{ needs.preflight.outputs.version }}'
