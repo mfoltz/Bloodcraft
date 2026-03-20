@@ -1,12 +1,12 @@
 ﻿using Bloodcraft.Utilities;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace Bloodcraft;
 internal static class IExtensions
 {
-    public static Dictionary<TValue, TKey> Reverse<TKey, TValue>(
-        this IDictionary<TKey, TValue> source)
+    public static Dictionary<TValue, TKey> Reverse<TKey, TValue>(this IDictionary<TKey, TValue> source)
     {
         var reversed = new Dictionary<TValue, TKey>();
 
@@ -17,19 +17,17 @@ internal static class IExtensions
 
         return reversed;
     }
-    public static Dictionary<TValue, TKey> ReverseIl2CppDictionary<TKey, TValue>(
-        this Il2CppSystem.Collections.Generic.Dictionary<TKey, TValue> source)
+    public static Dictionary<TValue, TKey> ReverseIl2CppDictionary<TKey, TValue>(this Il2CppSystem.Collections.Generic.Dictionary<TKey, TValue> source)
     {
         var reversed = new Dictionary<TValue, TKey>();
 
-        if (source == null) return reversed;
+        if (source == null)
+            return reversed;
 
         foreach (var kvp in source)
         {
             if (reversed.ContainsKey(kvp.Value))
-            {
                 continue;
-            }
 
             reversed[kvp.Value] = kvp.Key;
         }
@@ -52,9 +50,7 @@ internal static class IExtensions
         foreach (string str in strings)
         {
             if (!stringChars.Contains(str, StringComparison.CurrentCultureIgnoreCase))
-            {
                 return false;
-            }
         }
 
         return true;
@@ -111,7 +107,8 @@ internal static class IExtensions
     {
         foreach (var option in options)
         {
-            if (value.Equals(option)) return true;
+            if (value.Equals(option))
+                return true;
         }
 
         return false;
@@ -120,7 +117,8 @@ internal static class IExtensions
     {
         foreach (var value in values)
         {
-            if (Enumerable.Contains(source, value)) return true;
+            if (Enumerable.Contains(source, value))
+                return true;
         }
 
         return false;
@@ -145,4 +143,6 @@ internal static class IExtensions
     {
         Core.StopCoroutine(coroutine);
     }
+    public static bool AsBool(this byte b)
+        => b != 0;
 }

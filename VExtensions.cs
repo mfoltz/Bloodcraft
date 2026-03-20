@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Concurrent;
 using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using Il2CppInterop.Runtime;
@@ -17,108 +15,132 @@ using static Bloodcraft.Services.LocalizationService;
 using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft;
-internal interface IEntityComponentOverrides
-{
-    bool TryRead<T>(Entity entity, out T value) where T : struct;
-
-    bool TryHas(Entity entity, Type componentType, out bool has);
-}
-
 internal static class VExtensions
 {
-    static EntityManager EntityManager => Core.EntityManager;
-    static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;
-    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
-
-    static readonly ConcurrentStack<IEntityComponentOverrides> ComponentOverrides = new();
+    static EntityManager EntityManager
+        => Core.EntityManager;
+    static ServerGameManager ServerGameManager
+        => Core.ServerGameManager;
+    static SystemService SystemService
+        => Core.SystemService;
+    static DebugEventsSystem DebugEventsSystem
+        => SystemService.DebugEventsSystem;
 
     const string EMPTY_KEY = "LocalizationKey.Empty";
-    const string PREFIX = "Entity(";
+    const string ENTITY_PREFIX = "Entity(";
     const string CHAR = "CHAR_";
-
     const int LENGTH = 7;
 
     public delegate void WithRefHandler<T>(ref T item);
-    public static void With<T>(this Entity entity, WithRefHandler<T> action) where T : struct
+
+    public static void With<T>(this Entity entity, WithRefHandler<T> action)where T : struct
     {
+        if (!entity.Has<T>())
+            return;
+
         T item = entity.Read<T>();
         action(ref item);
 
         EntityManager.SetComponentData(entity, item);
     }
-    public static void With<T>(this Entity entity, int index, WithRefHandler<T> action) where T : struct
+    public static void WithEdit<T>(this Entity entity, int index, WithRefHandler<T> action)where T : struct
     {
         if (!entity.TryGetBuffer<T>(out var buffer))
         {
-            Core.Log.LogWarning($"Entity doesn't have DynamicBuffer<{typeof(T)}>!");
+            Core.Log.LogWarning($"Entity is missing DynamicBuffer<{typeof(T)}>!");
             return;
         }
 
         if (!buffer.IsIndexWithinRange(index))
         {
-            Core.Log.LogWarning($"Index {index} out of range for DynamicBuffer<{typeof(T)}>! Length: {buffer.Length}");
+            Core.Log.LogWarning($"Index ({index}) OoR ({index}/{buffer.Length}) for DynamicBuffer<{typeof(T)}>!");
             return;
         }
 
         var element = buffer[index];
         action(ref element);
-
         buffer[index] = element;
     }
-    public static void AddWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct
+    public static void WithInsert<T>(this Entity entity, int index, T element)where T : struct
+    {
+        if (!entity.TryGetBuffer<T>(out var buffer))
+        {
+            Core.Log.LogWarning($"Entity is missing DynamicBuffer<{typeof(T)}>!");
+            return;
+        }
+
+        if (!buffer.IsIndexWithinRange(index))
+        {
+            Core.Log.LogWarning($"Index ({index}) OoR ({index}/{buffer.Length}) for DynamicBuffer<{typeof(T)}>!");
+            return;
+        }
+
+        buffer.Insert(index, element);
+    }
+    public static void WithAdd<T>(this Entity entity, T element)where T : struct
+    {
+        if (!entity.TryGetBuffer<T>(out var buffer))
+        {
+            Core.Log.LogWarning($"Entity is missing DynamicBuffer<{typeof(T)}>!");
+            return;
+        }
+
+        buffer.Add(element);
+    }
+    public static void WithClear<T>(this Entity entity)where T : struct
+    {
+        if (!entity.TryGetBuffer<T>(out var buffer))
+        {
+            Core.Log.LogWarning($"Entity is missing DynamicBuffer<{typeof(T)}>!");
+            return;
+        }
+
+        buffer.Clear();
+    }
+    public static void AddWith<T>(this Entity entity, WithRefHandler<T> action)where T : struct
     {
         if (!entity.Has<T>())
-        {
             entity.Add<T>();
-        }
 
         entity.With(action);
     }
-    public static void HasWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct
+    public static void Write<T>(this Entity entity, T componentData)where T : struct
     {
-        if (entity.Has<T>())
-        {
-            entity.With(action);
-        }
-    }
-    public unsafe static void Write<T>(this Entity entity, T componentData) where T : struct
-    {
+        if (!entity.Has<T>())
+            return;
+
         EntityManager.SetComponentData(entity, componentData);
     }
-    internal static IDisposable OverrideComponents(IEntityComponentOverrides overrides)
+    public static T Read<T>(this Entity entity)where T : struct
     {
-        if (overrides is null)
-        {
-            throw new ArgumentNullException(nameof(overrides));
-        }
-
-        ComponentOverrides.Push(overrides);
-        return new ComponentOverrideScope(overrides);
+        return EntityManager.TryGetComponentData<T>(entity, out T componentData)
+            ? componentData : default;
     }
-    public static T Read<T>(this Entity entity) where T : struct
+    public static bool TryLookup<T>(this Entity entity, ref ComponentLookup<T> componentLookup, out T component)
     {
-        if (TryReadOverride(entity, out T value))
-        {
-            return value;
-        }
-
-        if (!ComponentOverrides.IsEmpty)
-        {
-            return default;
-        }
-
-        return EntityManager.GetComponentData<T>(entity);
+        return componentLookup.TryGetComponent(entity, out component);
     }
-    public static DynamicBuffer<T> ReadBuffer<T>(this Entity entity) where T : struct
+    public static T Lookup<T>(this Entity entity, ref ComponentLookup<T> componentLookup)
     {
-        return EntityManager.GetBuffer<T>(entity);
+        return componentLookup.TryGetComponent(entity, out T component)
+            ? component : default;
     }
-    public static DynamicBuffer<T> AddBuffer<T>(this Entity entity) where T : struct
+    public static bool Has<T>(this Entity entity, ref ComponentLookup<T> componentLookup)
+    {
+        return componentLookup.HasComponent(entity);
+    }
+    public static DynamicBuffer<T> ReadBuffer<T>(this Entity entity)where T : struct
+    {
+        if (entity.TryGetBuffer<T>(out var buffer))
+            return buffer;
+
+        return default;
+    }
+    public static DynamicBuffer<T> AddBuffer<T>(this Entity entity)where T : struct
     {
         return EntityManager.AddBuffer<T>(entity);
     }
-    public static bool TryGetComponent<T>(this Entity entity, out T componentData) where T : struct
+    public static bool TryGetComponent<T>(this Entity entity, out T componentData)where T : struct
     {
         componentData = default;
 
@@ -129,72 +151,6 @@ internal static class VExtensions
         }
 
         return false;
-    }
-    public static bool Has<T>(this Entity entity) where T : struct
-    {
-        if (TryHasOverride(entity, typeof(T), out bool has))
-        {
-            return has;
-        }
-
-        if (!ComponentOverrides.IsEmpty)
-        {
-            return false;
-        }
-
-        return EntityManager.HasComponent(entity, new(Il2CppType.Of<T>()));
-    }
-    static bool TryReadOverride<T>(Entity entity, out T value) where T : struct
-    {
-        foreach (IEntityComponentOverrides overrides in ComponentOverrides.ToArray())
-        {
-            if (overrides.TryRead(entity, out value))
-            {
-                return true;
-            }
-        }
-
-        value = default;
-        return false;
-    }
-    static bool TryHasOverride(Entity entity, Type componentType, out bool has)
-    {
-        foreach (IEntityComponentOverrides overrides in ComponentOverrides.ToArray())
-        {
-            if (overrides.TryHas(entity, componentType, out has))
-            {
-                return true;
-            }
-        }
-
-        has = default;
-        return false;
-    }
-
-    sealed class ComponentOverrideScope : IDisposable
-    {
-        readonly IEntityComponentOverrides overrides;
-        bool disposed;
-
-        public ComponentOverrideScope(IEntityComponentOverrides overrides)
-        {
-            this.overrides = overrides;
-        }
-
-        public void Dispose()
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            disposed = true;
-
-            if (!ComponentOverrides.TryPop(out IEntityComponentOverrides current) || !ReferenceEquals(current, overrides))
-            {
-                throw new InvalidOperationException("Component override stack is out of sync.");
-            }
-        }
     }
     public static bool IsCharacter(this PrefabGUID prefabGuid)
     {
@@ -231,11 +187,17 @@ internal static class VExtensions
     }
     public static void Add<T>(this Entity entity) where T : struct
     {
-        if (!entity.Has<T>()) EntityManager.AddComponent(entity, new(Il2CppType.Of<T>()));
+        if (!entity.Has<T>())
+            EntityManager.AddComponent<T>(entity);
+    }
+    public static bool Has<T>(this Entity entity) where T : struct
+    {
+        return EntityManager.HasComponent<T>(entity);
     }
     public static void Remove<T>(this Entity entity) where T : struct
     {
-        if (entity.Has<T>()) EntityManager.RemoveComponent(entity, new(Il2CppType.Of<T>()));
+        if (entity.Has<T>())
+            EntityManager.RemoveComponent<T>(entity);
     }
     public static bool TryGetFollowedPlayer(this Entity entity, out Entity player)
     {
@@ -258,7 +220,6 @@ internal static class VExtensions
         if (entity.Has<PlayerCharacter>())
         {
             player = entity;
-
             return true;
         }
 
@@ -266,21 +227,11 @@ internal static class VExtensions
     }
     public static bool IsPlayer(this Entity entity)
     {
-        if (entity.Has<PlayerCharacter>())
-        {
-            return true;
-        }
-
-        return false;
+        return entity.Has<PlayerCharacter>();
     }
     public static bool IsFamiliar(this Entity entity)
     {
-        if (entity.Has<BlockFeedBuff>())
-        {
-            return true;
-        }
-
-        return false;
+        return entity.Has<BlockFeedBuff>();
     }
     public static bool IsFollowingPlayer(this Entity entity)
     {
@@ -316,7 +267,6 @@ internal static class VExtensions
     }
     public static Entity GetPrefabEntity(this Entity entity)
     {
-        // return ServerGameManager.GetPrefabEntity(entity.GetPrefabGuid());
         return entity.Exists() ? ServerGameManager.GetPrefabEntity(entity.GetPrefabGuid()) : Entity.Null;
     }
     public static Entity GetPrefabEntity(this PrefabGUID prefabGuid)
@@ -348,6 +298,46 @@ internal static class VExtensions
     {
         return entity.HasValue() && entity.IndexWithinCapacity() && EntityManager.Exists(entity);
     }
+    public static void ResolveLookup<T>(this ref ComponentLookup<T> componentLookup, SystemBase systemBase, bool isReadOnly = false) where T : struct
+    {
+        if (componentLookup.IsEmpty())
+            componentLookup = systemBase.GetComponentLookup<T>(isReadOnly);
+
+        componentLookup.Update(systemBase);
+    }
+    public static void ResolveLookup<T>(this ref BufferLookup<T> bufferLookup, SystemBase systemBase, bool isReadOnly = false) where T : struct
+    {
+        if (bufferLookup.IsEmpty())
+            bufferLookup = systemBase.GetBufferLookup<T>(isReadOnly);
+
+        bufferLookup.Update(systemBase);
+    }
+    public static void ResolveHandle<T>(this ref ComponentTypeHandle<T> componentTypeHandle, SystemBase systemBase, bool isReadOnly = false) where T : struct
+    {
+        if (componentTypeHandle.IsZeroSized)
+            componentTypeHandle = systemBase.GetComponentTypeHandle<T>(isReadOnly);
+
+        componentTypeHandle.Update(systemBase);
+    }
+    public static void ResolveHandle<T>(this ref BufferTypeHandle<T> bufferTypeHandle, SystemBase systemBase, bool isReadOnly = false) where T : struct
+    {
+        if (bufferTypeHandle.IsEmpty())
+            bufferTypeHandle = systemBase.GetBufferTypeHandle<T>(isReadOnly);
+
+        bufferTypeHandle.Update(systemBase);
+    }
+    public static bool IsEmpty<T>(this ref ComponentLookup<T> componentLookup) where T : struct
+    {
+        return componentLookup.m_IsZeroSized.AsBool();
+    }
+    public static bool IsEmpty<T>(this ref BufferLookup<T> bufferLookup) where T : struct
+    {
+        return bufferLookup.m_InternalCapacity == 0;
+    }
+    public static bool IsEmpty<T>(this ref BufferTypeHandle<T> bufferTypeHandle) where T : struct
+    {
+        return bufferTypeHandle.m_Length == 0;
+    }
     public static bool HasValue(this Entity entity)
     {
         return entity != Entity.Null;
@@ -357,7 +347,7 @@ internal static class VExtensions
         string entityStr = entity.ToString();
         ReadOnlySpan<char> span = entityStr.AsSpan();
 
-        if (!span.StartsWith(PREFIX)) return false;
+        if (!span.StartsWith(ENTITY_PREFIX)) return false;
         span = span[LENGTH..];
 
         int colon = span.IndexOf(':');
@@ -369,17 +359,22 @@ internal static class VExtensions
         if (closeRel <= 0) return false;
 
         // Parse numbers
-        if (!int.TryParse(span[..colon], out int index)) return false;
-        if (!int.TryParse(tail[..closeRel], out _)) return false;
+        if (!int.TryParse(span[..colon], out int index))
+            return false;
+
+        if (!int.TryParse(tail[..closeRel], out _))
+            return false;
 
         // Single unsigned capacity check
         int capacity = EntityManager.EntityCapacity;
         bool isValid = (uint)index < (uint)capacity;
 
+        /*
         if (!isValid)
         {
-            // Core.Log.LogWarning($"Entity index out of range! ({index}>{capacity})");
+            Core.Log.LogWarning($"Entity index out of range! ({index}>{capacity})");
         }
+        */
 
         return isValid;
     }
@@ -387,9 +382,23 @@ internal static class VExtensions
     {
         return entity.Has<Disabled>();
     }
+    public static void Enable(this Entity entity)
+    {
+        if (entity.IsDisabled())
+            entity.Remove<Disabled>();
+    }
+    public static void Disable(this Entity entity)
+    {
+        if (!entity.IsDisabled())
+            entity.Add<Disabled>();
+    }
     public static bool IsVBlood(this Entity entity)
     {
         return entity.Has<VBloodConsumeSource>();
+    }
+    public static bool IsDuelChallenger(this Entity entity)
+    {
+        return entity.Has<VBloodDuelChallenger>();
     }
     public static bool IsGateBoss(this Entity entity)
     {
@@ -434,7 +443,7 @@ internal static class VExtensions
             return user.PlatformId;
         }
 
-        return 0;
+        return default;
     }
     public static NetworkId GetNetworkId(this Entity entity)
     {
@@ -454,31 +463,45 @@ internal static class VExtensions
     }
     public static PrefabGUID GetPrefabGuid(this Entity entity)
     {
-        if (entity.TryGetComponent(out PrefabGUID prefabGuid)) return prefabGuid;
+        if (entity.TryGetComponent(out PrefabGUID prefabGuid))
+            return prefabGuid;
 
         return PrefabGUID.Empty;
     }
     public static int GetGuidHash(this Entity entity)
     {
-        if (entity.TryGetComponent(out PrefabGUID prefabGUID)) return prefabGUID.GuidHash;
+        if (entity.TryGetComponent(out PrefabGUID prefabGUID))
+            return prefabGUID.GuidHash;
 
         return PrefabGUID.Empty.GuidHash;
     }
     public static Entity GetUserEntity(this Entity entity)
     {
-        if (entity.TryGetComponent(out PlayerCharacter playerCharacter)) return playerCharacter.UserEntity;
-        else if (entity.Has<User>()) return entity;
+        if (entity.TryGetComponent(out PlayerCharacter playerCharacter))
+        {
+            return playerCharacter.UserEntity;
+        }
+        else if (entity.IsUser())
+        {
+            return entity;
+        }
 
         return Entity.Null;
     }
     public static Entity GetOwner(this Entity entity, bool trueOwner = false)
     {
         if (!entity.Exists())
+        {
             return Entity.Null;
+        }
         else if (trueOwner && VampireDownedServerEventSystem.TryFindRootOwner(entity, 1, EntityManager, out Entity result))
+        {
             return result;
+        }
         else
-            return ServerGameManager.GetOwner(entity);
+        {
+            return ServerGameManager.TryGetOwner(entity, out result) ? result : Entity.Null;
+        }
     }
     public static User GetUser(this Entity entity)
     {
@@ -486,6 +509,10 @@ internal static class VExtensions
         else if (entity.TryGetComponent(out PlayerCharacter playerCharacter) && playerCharacter.UserEntity.TryGetComponent(out user)) return user;
 
         return User.Empty;
+    }
+    public static bool IsUser(this Entity entity)
+    {
+        return entity.Has<User>();
     }
     public static bool HasBuff(this Entity entity, PrefabGUID buffPrefabGuid)
     {
@@ -495,7 +522,7 @@ internal static class VExtensions
     {
         return BuffUtility.HasBuff<T>(EntityManager, entity);
     }
-    public static unsafe bool TryGetBuffer<T>(this Entity entity, out DynamicBuffer<T> dynamicBuffer) where T : struct
+    public static bool TryGetBuffer<T>(this Entity entity, out DynamicBuffer<T> dynamicBuffer) where T : struct
     {
         if (ServerGameManager.TryGetBuffer(entity, out dynamicBuffer))
         {
@@ -548,7 +575,7 @@ internal static class VExtensions
             return durability.MaxDurability;
         }
 
-        return 0;
+        return 0f;
     }
     public static float GetDurability(this Entity entity)
     {
@@ -557,7 +584,7 @@ internal static class VExtensions
             return durability.Value;
         }
 
-        return 0;
+        return 0f;
     }
     public static float GetMaxHealth(this Entity entity)
     {
@@ -566,7 +593,7 @@ internal static class VExtensions
             return health.MaxHealth._Value;
         }
 
-        return 0;
+        return 0f;
     }
     public static Blood GetBlood(this Entity entity)
     {
@@ -575,7 +602,7 @@ internal static class VExtensions
             return blood;
         }
 
-        throw new InvalidOperationException("Entity does not have Blood!");
+        return default;
     }
     public static AiMoveSpeeds GetMoveSpeeds(this Entity entity)
     {
@@ -584,11 +611,32 @@ internal static class VExtensions
             return aiMoveSpeeds;
         }
 
-        throw new InvalidOperationException("Entity does not have Blood!");
+        return default;
     }
     public static EntityInput GetInput(this Entity entity)
     {
         return ServerGameManager.GetInput(entity);
+    }
+    public static PrefabGUID GetEquipBuff(this Entity entity)
+    {
+        if (entity.TryGetComponent(out EquippableData equippableData))
+        {
+            return equippableData.BuffGuid;
+        }
+
+        return default;
+    }
+    public static PrefabGUID GetWeaponAttack(this PrefabGUID itemWeapon)
+    {
+        Entity weapon = itemWeapon.GetPrefabEntity();
+        Entity equipBuff = weapon.GetEquipBuff().GetPrefabEntity();
+
+        if (equipBuff.TryGetBuffer<ReplaceAbilityOnSlotBuff>(out var buffer))
+        {
+            return buffer.FirstOrDefault().NewGroupId;
+        }
+
+        return default;
     }
     public static (float physicalPower, float spellPower) GetPowerTuple(this Entity entity)
     {
@@ -601,14 +649,9 @@ internal static class VExtensions
     }
     public static bool IsUnitSpawnerSpawned(this Entity entity) // only works paired with UnitSpawnerSystem patch which sets IsMinion to true in prefix
     {
-        if (entity.TryGetComponent(out IsMinion isMinion) && isMinion.Value)
-        {
-            return true;
-        }
-
-        return false;
+        return entity.TryGetComponent(out IsMinion isMinion) && isMinion.Value;
     }
-    public static bool IsStackableBuff(this Entity entity, out int maxStacks)
+    public static bool IsStackable(this Entity entity, out int maxStacks)
     {
         maxStacks = 1;
 
@@ -626,16 +669,24 @@ internal static class VExtensions
     }
     public static void Destroy(this Entity entity, bool immediate = false)
     {
-        if (!entity.Exists()) return;
+        if (!entity.Exists())
+            return;
 
-        bool isBuff = entity.IsBuff(); // should probably check if this actually matters or not but like... later >_>
+        bool isBuff = entity.IsBuff();  // Buffs are dramatic.
+        entity.Enable();                // Disabled entities moreso.
 
         if (immediate && !isBuff)
+        {
             EntityManager.DestroyEntity(entity);
+        }
         else if (isBuff)
+        {
             DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
+        }
         else
+        {
             DestroyUtility.Destroy(EntityManager, entity);
+        }
     }
     public static bool IsBuff(this Entity entity)
     {
@@ -681,6 +732,10 @@ internal static class VExtensions
         return entity.GetPrefabGuid().Equals(PrefabGUIDs.CHAR_Legion_DreadHorn_Lesser,
             PrefabGUIDs.CHAR_Legion_Dreadhorn);
     }
+    public static bool IsEnchanted(this Entity entity)
+    {
+        return entity.GetPrefabGuid().Equals(PrefabGUIDs.CHAR_ChurchOfLight_EnchantedCross);
+    }
     public static bool IsPlayerOwned(this Entity entity)
     {
         if (entity.TryGetComponent(out EntityOwner entityOwner))
@@ -709,18 +764,32 @@ internal static class VExtensions
         int userIndex = isPlayer ? entity.GetUser().Index : 0;
         DebugEventsSystem.CastAbilityServerDebugEvent(userIndex, ref castAbilityServerDebugEvent, ref fromCharacter);
     }
-    public static bool IsIndexWithinRange<T>(this DynamicBuffer<T> buffer, int index) where T : struct
+    public static bool IsIndexWithinRange<T>(this DynamicBuffer<T> buffer, int index)where T : struct
     {
-        return index >= 0 && index < buffer.Length;
+        return buffer.IsCreated
+            && index >= 0
+            && index < buffer.Length;
+    }
+    public static T FirstOrDefault<T>(this DynamicBuffer<T> buffer)where T : struct
+    {
+        if (buffer.IsIndexWithinRange(0))
+        {
+            return buffer[0];
+        }
+
+        return default;
     }
     public static NativeAccessor<Entity> ToEntityArrayAccessor(this EntityQuery entityQuery, Allocator allocator = Allocator.Temp)
     {
         NativeArray<Entity> entities = entityQuery.ToEntityArray(allocator);
         return new(entities);
     }
-    public static NativeAccessor<T> ToComponentDataArrayAccessor<T>(this EntityQuery entityQuery, Allocator allocator = Allocator.Temp) where T : unmanaged
+    public static NativeAccessor<T> ToComponentDataArrayAccessor<T>(this EntityQuery entityQuery, Allocator allocator = Allocator.Temp)where T : unmanaged
     {
         NativeArray<T> components = entityQuery.ToComponentDataArray<T>(allocator);
         return new(components);
     }
+    public static Il2CppSystem.Type Il2CppTypeOf<T>() where T : struct
+        => Il2CppType.Of<T>();
+
 }

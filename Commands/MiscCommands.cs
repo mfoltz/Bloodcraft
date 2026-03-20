@@ -228,4 +228,10 @@ internal static class MiscCommands
         CombatMusicSystemServer.OnUpdate();
         ctx.Reply($"Combat music cleared!");
     }
+
+    [Command(name: "health", adminOnly: true, usage: ".misc health", description: "Shows startup readiness state summary.")]
+    public static void HealthCommand(ChatCommandContext ctx)
+    {
+        LocalizationService.HandleReply(ctx, StartupStateService.BuildSummary());
+    }
 }

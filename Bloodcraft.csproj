@@ -1,10 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>	
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AssemblyName>Bloodcraft</AssemblyName>
-		<Version>1.12.17</Version>
+		<Version>1.13.17</Version>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<RestoreSources>
 			https://api.nuget.org/v3/index.json;
@@ -15,12 +14,8 @@
 		<LangVersion>12.0</LangVersion>
 		<OutputType>Exe</OutputType>
 		<UseAppHost>false</UseAppHost>
-		<NuGetAudit>False</NuGetAudit>
+		<NuGetAudit>false</NuGetAudit>
 		<RunGenerateREADME>true</RunGenerateREADME>
-	</PropertyGroup>
-	
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<Optimize>True</Optimize>
 	</PropertyGroup>
 	
 	<ItemGroup>
@@ -43,18 +38,14 @@
 		<EmbeddedResource Include="Resources\Localization\Vietnamese.json" />
 		<EmbeddedResource Include="Resources\secrets.json" />
 	</ItemGroup>
-
-        <ItemGroup>
-                <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
-                <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.733" IncludeAssets="compile" />
-                <PackageReference Include="VRising.Unhollowed.Client" Version="1.1.9.9219901" />
-                <PackageReference Include="VRising.VampireCommandFramework" Version="0.10.4" />
-        </ItemGroup>
-
-        <ItemGroup>
-                <Compile Remove="Factory/README-Usage.cs" />
-                <None Include="Factory/README-Usage.cs" />
-        </ItemGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
+		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.733" IncludeAssets="compile" />
+        <PackageReference Include="ScarletRCON.SourceSupport" Version="1.2.2" />
+        <PackageReference Include="VampireReferenceAssemblies" Version="1.1.11-r96495-b8" />
+		<PackageReference Include="VRising.VampireCommandFramework" Version="0.10.4" />
+	</ItemGroup>
 	
 	<Target Name="BuildToServer" AfterTargets="Build">
 		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRisingDedicatedServer\BepInEx\plugins" />
@@ -63,5 +54,4 @@
 	<Target Name="GenerateREADME" Condition="'$(RunGenerateREADME)' == 'true'" AfterTargets="Build">
 		<Exec Command="dotnet &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;$(ProjectDir)Commands&quot; &quot;$(ProjectDir)README.md&quot;" />
 	</Target>
-	
 </Project>

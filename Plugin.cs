@@ -1,8 +1,9 @@
 using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
+using Bloodcraft.Services;
 using HarmonyLib;
-using System.Reflection;
+using ScarletRCON.Shared;
 using UnityEngine;
 using VampireCommandFramework;
 using static Bloodcraft.Services.ConfigService.ConfigInitialization;
@@ -11,38 +12,85 @@ using static Bloodcraft.Services.DataService.PlayerDataInitialization;
 namespace Bloodcraft;
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+[BepInDependency("markvaaz.ScarletRCON", BepInDependency.DependencyFlags.SoftDependency)]
+
 internal class Plugin : BasePlugin
 {
-    Harmony _harmony;
-    internal static Plugin Instance { get; set; }
-    public static Harmony Harmony => Instance._harmony;
-    internal static ManualLogSource LogInstance => Instance.Log;
-    public override void Load()
+    internal static Harmony Harmony { get; set; }
+    internal static Harmony BootstrapHarmony { get; set; }
+
+    internal static class MiniBehaviour
     {
-        Instance = this;
+        internal static Plugin Instance { get; set; }
 
-        if (Application.productName != "VRisingServer")
+        internal static ManualLogSource LogSource { get; set; }
+
+        internal static void OnLoad()
         {
-            LogInstance.LogInfo("Bloodcraft is a server mod and will not continue loading on the client; this is not an error, and likely just means you're using ServerLaunchFix in which case you may disregard this");
+            StartupStateService.Reset();
 
-            return;
+            if (!IsVRisingServer())
+                return;
+
+            Bootstrap.Initialize(BootstrapHarmony, LogSource); // init
+            StartupStateService.Mark(StartupState.BootstrapPatched);
+
+            Harmony?.PatchAll();                                // other
+            StartupStateService.Mark(StartupState.MainHarmonyPatched);
+
+            OnLoadInternal();                                   // configs, command registration, mod-specific player data, etc.
+
+            if (StartupStateService.IsReady())
+                LogSource.LogInfo($"Startup checks passed. {StartupStateService.BuildSummary()}");
+            else
+                LogSource.LogWarning($"Startup checks failed. {StartupStateService.BuildSummary()}");
         }
 
-        // Console.OutputEncoding = System.Text.Encoding.UTF8;
-        _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
+        static void OnLoadInternal()
+        {
+            InitializeConfig();
+            StartupStateService.Mark(StartupState.ConfigLoaded);
 
-        InitializeConfig();
-        LoadPlayerData();
-        CommandRegistry.RegisterAll();
+            LoadPlayerData();
+            StartupStateService.Mark(StartupState.PlayerDataLoaded);
 
-        Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] loaded!");
+            CommandRegistry.RegisterAll();
+            StartupStateService.Mark(StartupState.CommandsRegistered);
+
+            RconCommandRegistrar.RegisterAll();
+            StartupStateService.Mark(StartupState.RconRegistered);
+
+            LogSource.LogInfo($"Loaded [{MyPluginInfo.PLUGIN_VERSION}]");
+        }
+
+        internal static bool OnUnload()
+        {
+            Harmony?.UnpatchSelf();
+            BootstrapHarmony?.UnpatchSelf();
+
+            CommandRegistry.UnregisterAssembly();
+            RconCommandRegistrar.UnregisterAssembly();
+            StartupStateService.Reset();
+
+            return true;
+        }
     }
-    public override bool Unload()
-    {
-        Config.Clear();
-        _harmony.UnpatchSelf();
 
-        return true;
+    static bool IsVRisingServer()
+        => Application.productName == "VRisingServer";
+
+    public override void Load()
+        => MiniBehaviour.OnLoad();
+
+    public override bool Unload()
+        => MiniBehaviour.OnUnload();
+
+    public Plugin()
+    {
+        Harmony = new(MyPluginInfo.PLUGIN_GUID);
+        BootstrapHarmony = new($"{MyPluginInfo.PLUGIN_GUID}.bootstrap");
+        MiniBehaviour.Instance = this;
+        MiniBehaviour.LogSource = Log;
     }
 }
 

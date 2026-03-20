@@ -14,14 +14,19 @@ namespace Bloodcraft.Patches;
 internal static class ChatMessageSystemPatch
 {
     static readonly Regex _regexMAC = new(";mac([^;]+)$");
+    static readonly Queue<string> _pendingEclipseMessages = [];
 
     [HarmonyBefore("CrimsonChatFilter")]
     [HarmonyPatch(typeof(ChatMessageSystem), nameof(ChatMessageSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ChatMessageSystem __instance)
     {
-        if (!Core.IsReady) return;
-        else if (!Core.Eclipsed) return;
+        if (!Core.Eclipsed) return;
+
+        if (Core.IsReady)
+        {
+            ProcessPendingEclipseMessages();
+        }
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         NativeArray<ChatMessageEvent> chatMessageEvents = __instance.EntityQueries[0].ToComponentDataArray<ChatMessageEvent>(Allocator.Temp);
@@ -32,11 +37,28 @@ internal static class ChatMessageSystemPatch
             {
                 Entity entity = entities[i];
                 ChatMessageEvent chatMessageEvent = chatMessageEvents[i];
+                string receivedMessage = chatMessageEvent.MessageText.Value;
+                bool isEclipseMessage = receivedMessage.Contains("[ECLIPSE]", StringComparison.Ordinal);
 
-                if (CheckMAC(chatMessageEvent.MessageText.Value, out string originalMessage))
+                if (!Core.IsReady)
+                {
+                    if (isEclipseMessage)
+                    {
+                        _pendingEclipseMessages.Enqueue(receivedMessage);
+                        entity.Destroy(true);
+                    }
+
+                    continue;
+                }
+
+                if (CheckMAC(receivedMessage, out string originalMessage))
                 {
                     EclipseService.HandleClientMessage(originalMessage);
                     entity.Destroy(true);
+                }
+                else if (isEclipseMessage)
+                {
+                    Core.Log.LogWarning("Failed to verify MAC for Eclipse client message.");
                 }
             }
         }
@@ -44,6 +66,20 @@ internal static class ChatMessageSystemPatch
         {
             entities.Dispose();
             chatMessageEvents.Dispose();
+        }
+    }
+    static void ProcessPendingEclipseMessages()
+    {
+        while (_pendingEclipseMessages.TryDequeue(out string pendingMessage))
+        {
+            if (CheckMAC(pendingMessage, out string originalMessage))
+            {
+                EclipseService.HandleClientMessage(originalMessage);
+            }
+            else
+            {
+                Core.Log.LogWarning("Failed to verify MAC for queued Eclipse client message.");
+            }
         }
     }
     public static bool CheckMAC(string receivedMessage, out string originalMessage)

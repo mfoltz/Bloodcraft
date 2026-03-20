@@ -4,25 +4,17 @@ This guide provides universal, consistent principles and patterns to master C# c
 
 ## 🧪 Build & Test Workflow
 
-* **Before running any `dotnet` commands**, provision the toolchain by executing the repository's install script at `.codex/install.sh`. This is the canonical way to ensure the .NET SDK is available in fresh environments.
+* Use the repository's provisioning script at `.codex/install.sh` for any build or test run. This script installs the required .NET SDK (if necessary) and builds the `Bloodcraft` project in Release mode. Invoke it from the repository root:
 
   ```bash
   bash .codex/install.sh
   ```
 
-  Run this script the first time you set up the workspace (and whenever the SDK needs to be refreshed) prior to attempting `dotnet build` or `dotnet test`.
-
-* The install script installs the required .NET SDK (if necessary) and builds the `Bloodcraft` project in Release mode. Invoke it from the repository root:
-
-  ```bash
-  bash .codex/install.sh
-  ```
-
-* After the SDK is available, execute any repository tests with the `dotnet` CLI that the script installs/exposes.
+* After the SDK is available, execute tests (for example, within `.codex/tests`) with the `dotnet` CLI that the script installs/exposes.
 
 ## 🗂️ Codex Tooling Structure
 
-* Place all Codex tooling assets under the `.codex/` directory.
+* Place all Codex tooling and new tests under the `.codex/` directory (e.g., `.codex/tests/...`).
 * Ensure future Codex-related assets respect this directory structure, and reference or inherit this guidance in any additional `AGENTS.md` files that may be introduced.
 
 ## 🧠 Structured Reasoning

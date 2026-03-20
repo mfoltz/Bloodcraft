@@ -552,7 +552,7 @@ internal static class DataService
             Entity playerCharacter = playerInfo.CharEntity;
             int index = familiarBoxes.FamiliarUnlocks.Keys.ToList().IndexOf(data);
 
-            playerCharacter.HasWith((ref BagHolder bagHolder) => bagHolder.BagInstance1.InventoryIndex = index);
+            playerCharacter.With((ref BagHolder bagHolder) => bagHolder.BagInstance1.InventoryIndex = index);
         }
 
         _playerFamiliarBox[steamId] = data;
@@ -563,7 +563,7 @@ internal static class DataService
         {
             Entity playerCharacter = playerInfo.CharEntity;
 
-            playerCharacter.HasWith((ref BagHolder bagHolder) => bagHolder.BagInstance0.InventoryIndex = index);
+            playerCharacter.With((ref BagHolder bagHolder) => bagHolder.BagInstance0.InventoryIndex = index);
         }
 
         _playerBindingIndex[steamId] = index;
@@ -584,7 +584,7 @@ internal static class DataService
         {
             Entity playerCharacter = playerInfo.CharEntity;
 
-            playerCharacter.HasWith((ref BagHolder bagHolder) => bagHolder.BagInstance2.InventoryIndex = shapeshiftBuff.GuidHash);
+            playerCharacter.With((ref BagHolder bagHolder) => bagHolder.BagInstance2.InventoryIndex = shapeshiftBuff.GuidHash);
 
             ShapeshiftCache.SetShapeshiftBuff(steamId, shapeshiftType);
         }
@@ -1078,7 +1078,6 @@ internal static class DataService
             public class FamiliarUnlocksData
             {
                 public Dictionary<string, List<int>> FamiliarUnlocks { get; set; } = [];
-                public List<int> OverflowFamiliars { get; set; } = [];
             }
             static string GetFilePath(ulong steamId) => Path.Combine(DirectoryPaths[8], $"{steamId}_familiar_unlocks.json");
             public static void SaveFamiliarUnlocksData(ulong steamId, FamiliarUnlocksData data)
@@ -1095,12 +1094,7 @@ internal static class DataService
                     return new FamiliarUnlocksData();
 
                 string jsonString = File.ReadAllText(filePath);
-                FamiliarUnlocksData data = JsonSerializer.Deserialize<FamiliarUnlocksData>(jsonString) ?? new FamiliarUnlocksData();
-
-                data.FamiliarUnlocks ??= [];
-                data.OverflowFamiliars ??= [];
-
-                return data;
+                return JsonSerializer.Deserialize<FamiliarUnlocksData>(jsonString);
             }
         }
         public static class FamiliarExperienceManager

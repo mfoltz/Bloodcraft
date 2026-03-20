@@ -265,16 +265,16 @@ internal static class Buffs
     {
         if (entity.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity))
         {
-            buffEntity.HasWith((ref Buff buff) =>
+            buffEntity.With((ref Buff buff) =>
             {
                 buff.MaxStacks = 3;
                 buff.IncreaseStacks = true;
                 buff.Stacks = 1;
             });
 
-            buffEntity.HasWith((ref BuffCategory buffCategory) => buffCategory.Groups = BuffCategoryFlag.None);
+            buffEntity.With((ref BuffCategory buffCategory) => buffCategory.Groups = BuffCategoryFlag.None);
 
-            buffEntity.HasWith((ref LifeTime lifeTime) =>
+            buffEntity.With((ref LifeTime lifeTime) =>
             {
                 lifeTime.Duration = 0f;
                 lifeTime.EndAction = LifeTimeEndAction.None;
@@ -327,10 +327,8 @@ internal static class Buffs
                 PrefabGUID prefabGuid = prefabGuids[i];
                 Entity entity = entities[i];
 
-                if (entity.IsStackableBuff(out int maxStacks))
-                {
+                if (entity.IsStackable(out int maxStacks))
                     _buffMaxStacks[prefabGuid] = maxStacks;
-                }
             }
         }
         finally

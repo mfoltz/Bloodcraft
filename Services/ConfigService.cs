@@ -2,10 +2,12 @@
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using static Bloodcraft.Plugin;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 
 namespace Bloodcraft.Services;
+
 internal static class ConfigService
 {
     static readonly Lazy<string> _languageLocalization = new(() => GetConfigValue<string>("LanguageLocalization"));
@@ -38,8 +40,8 @@ internal static class ConfigService
     static readonly Lazy<string> _bleedingEdge = new(() => GetConfigValue<string>("BleedingEdge"));
     public static string BleedingEdge => _bleedingEdge.Value;
 
-    static readonly Lazy<bool> _twilightArsenal = new(() => GetConfigValue<bool>("TwilightArsenal"));
-    public static bool TwilightArsenal => _twilightArsenal.Value;
+    static readonly Lazy<bool> _primalArsenal = new(() => GetConfigValue<bool>("PrimalArsenal"));
+    public static bool PrimalArsenal => _primalArsenal.Value;
 
     static readonly Lazy<bool> _starterKit = new(() => GetConfigValue<bool>("StarterKit"));
     public static bool StarterKit => _starterKit.Value;
@@ -187,6 +189,9 @@ internal static class ConfigService
 
     static readonly Lazy<bool> _unarmedSlots = new(() => GetConfigValue<bool>("UnarmedSlots"));
     public static bool UnarmedSlots => _unarmedSlots.Value;
+
+    static readonly Lazy<bool> _fishingSlots = new(() => GetConfigValue<bool>("FishingSlots"));
+    public static bool FishingSlots => _fishingSlots.Value;
 
     static readonly Lazy<bool> _duality = new(() => GetConfigValue<bool>("Duality"));
     public static bool Duality => _duality.Value;
@@ -404,9 +409,6 @@ internal static class ConfigService
     static readonly Lazy<bool> _classSystem = new(() => GetConfigValue<bool>("ClassSystem"));
     public static bool ClassSystem => _classSystem.Value;
 
-    // static readonly Lazy<bool> _lockedSynergies = new(() => GetConfigValue<bool>("LockedSynergies"));
-    // public static bool LockedSynergies => _lockedSynergies.Value;
-
     static readonly Lazy<bool> _classOnHitEffects = new(() => GetConfigValue<bool>("ClassOnHitEffects"));
     public static bool ClassOnHitEffects => _classOnHitEffects.Value;
 
@@ -523,19 +525,19 @@ internal static class ConfigService
             new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
             new ConfigEntryDefinition("General", "Eclipsed", false, "Eclipse will be active if any features that sync with the client are enabled. Instead, this now controls the frequency; true for faster (0.1s), false for slower (2.5s)."),
             new ConfigEntryDefinition("General", "ElitePrimalRifts", false, "Enable or disable elite primal rifts."),
-            new ConfigEntryDefinition("General", "RiftFrequency", 6, "Number of primal rifts to start per day when they are enabled (24 max)."),
+            new ConfigEntryDefinition("General", "RiftFrequency", 0, "Number of primal rifts to start per day when they are enabled (24 max)."),
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
             new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01/t02 effects at the same time)."),
             new ConfigEntryDefinition("General", "BearFormDash", false, "Enable or disable bear form dash."),
             new ConfigEntryDefinition("General", "BleedingEdge", "", "Enable various weapon-specific changes; some are more experimental than others, see README for details. (Slashers, Crossbow, Pistols, TwinBlades, Daggers)"),
-            new ConfigEntryDefinition("General", "TwilightArsenal", false, "Enable or disable experimental ability replacements on shadow weapons (currently just axes but like cosplaying as Thor with two mjolnirs)."),
+            new ConfigEntryDefinition("General", "PrimalArsenal", false, "Experimental weapons with different models and abilities."),
             new ConfigEntryDefinition("General", "PrimalJewelCost", -77477508, "If extra recipes is enabled with a valid item prefab here (default demon fragments), it can be refined via gemcutter for random enhanced tier 4 jewels (better rolls, more modifiers)."),
 
             new ConfigEntryDefinition("StarterKit", "StarterKit", false, "Enable or disable the starter kit."),
             new ConfigEntryDefinition("StarterKit", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "Item prefabGuids for starting kit."),
             new ConfigEntryDefinition("StarterKit", "KitQuantities", "500,1000,1000,250", "The quantity of each item in the starter kit."),
-            new ConfigEntryDefinition("StarterKit", "KitFamiliar", 1107541186, "Character Prefab GUID for a familiar to grant with the starter kit (CHAR_CopperGolem default, 0 for none)."),
+            new ConfigEntryDefinition("StarterKit", "KitFamiliar", 0, "Character Prefab GUID for a familiar to grant with the starter kit (0 disables)."),
 
             new ConfigEntryDefinition("Quests", "QuestSystem", false, "Enable or disable quests (kill, gather, and crafting)."),
             new ConfigEntryDefinition("Quests", "InfiniteDailies", false, "Enable or disable infinite dailies."),
@@ -581,14 +583,15 @@ internal static class ConfigService
 
             new ConfigEntryDefinition("Expertise", "ExpertiseSystem", false, "Enable or disable the expertise system."),
             new ConfigEntryDefinition("Expertise", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise."),
-            new ConfigEntryDefinition("Expertise", "UnarmedSlots", false, "Enable or disable the ability to use extra unarmed spell slots."),
-            new ConfigEntryDefinition("Expertise", "Duality", true, "True for both unarmed slots, false for one unarmed slot. Does nothing without UnarmedSlots enabled."),
+            new ConfigEntryDefinition("Expertise", "UnarmedSlots", false, "Enable or disable extra spells while unarmed."),
+            new ConfigEntryDefinition("Expertise", "FishingSlots", false, "Enable or disable extra spells while fishing."),
+            new ConfigEntryDefinition("Expertise", "Duality", true, "True for both unarmed slots, false for one unarmed slot. Does nothing without UnarmedSlots enabled (doesn't apply to fishing pole)."),
             new ConfigEntryDefinition("Expertise", "ShiftSlot", false, "Enable or disable using class spell on shift."),
             new ConfigEntryDefinition("Expertise", "MaxExpertiseLevel", 100, "The maximum level a player can reach in weapon expertise."),
             new ConfigEntryDefinition("Expertise", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units."),
             new ConfigEntryDefinition("Expertise", "VBloodExpertiseMultiplier", 5f, "The multiplier for expertise gained from VBloods."),
             new ConfigEntryDefinition("Expertise", "UnitSpawnerExpertiseFactor", 1f, "The multiplier for experience gained from unit spawners (vermin nests, tombs)."),
-            new ConfigEntryDefinition("Expertise", "ExpertiseStatChoices", 3, "The maximum number of stat specializations players can pick for expertise. (Clamping to 3 max as of >1.12.15)"),
+            new ConfigEntryDefinition("Expertise", "ExpertiseStatChoices", 3, "The maximum number of stat choices a player can pick for a weapon expertise. Max of 3 will be sent to client UI for display."),
             new ConfigEntryDefinition("Expertise", "ResetExpertiseItem", 576389135, "Item PrefabGUID cost for resetting weapon stats."),
             new ConfigEntryDefinition("Expertise", "ResetExpertiseItemQuantity", 500, "Quantity of item required for resetting stats."),
             new ConfigEntryDefinition("Expertise", "MaxHealth", 250f, "The base cap for maximum health."),
@@ -609,7 +612,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Legacies", "MaxBloodLevel", 100, "The maximum level a player can reach in blood legacies."),
             new ConfigEntryDefinition("Legacies", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units."),
             new ConfigEntryDefinition("Legacies", "VBloodLegacyMultiplier", 5f, "The multiplier for lineage gained from VBloods."),
-            new ConfigEntryDefinition("Legacies", "LegacyStatChoices", 3, "Number of specializations players can pick for legacies. (Clamping to 3 max as of >1.12.15)"),
+            new ConfigEntryDefinition("Legacies", "LegacyStatChoices", 3, "The maximum number of stat choices a player can pick for a blood legacy. Max of 3 will be sent to client UI for display."),
             new ConfigEntryDefinition("Legacies", "ResetLegacyItem", 576389135, "Item PrefabGUID cost for resetting blood stats."),
             new ConfigEntryDefinition("Legacies", "ResetLegacyItemQuantity", 500, "Quantity of item required for resetting blood stats."),
             new ConfigEntryDefinition("Legacies", "HealingReceived", 0.15f, "The base cap for healing received."),
@@ -788,12 +791,12 @@ internal static class ConfigService
                         }
                         else
                         {
-                            Core.Log.LogError($"Failed to get value property for {entry.Key}");
+                            MiniBehaviour.LogSource.LogError($"Failed to get value property for {entry.Key}");
                         }
                     }
                     catch (Exception ex)
                     {
-                        Plugin.LogInstance.LogError($"Failed to convert old config value for {entry.Key}: {ex.Message}");
+                        MiniBehaviour.LogSource.LogError($"Failed to convert old config value for {entry.Key}: {ex.Message}");
                     }
                 }
                 else
@@ -837,7 +840,7 @@ internal static class ConfigService
         static ConfigEntry<T> InitConfigEntry<T>(string section, string key, T defaultValue, string description)
         {
             // Bind the configuration entry with the default value in the new section
-            var entry = Plugin.Instance.Config.Bind(section, key, defaultValue, description);
+            var entry = Plugin.MiniBehaviour.Instance.Config.Bind(section, key, defaultValue, description);
 
             // Define the path to the configuration file
             var configFile = Path.Combine(BepInEx.Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
@@ -924,7 +927,7 @@ internal static class ConfigService
                             }
                             catch (Exception ex)
                             {
-                                Plugin.LogInstance.LogError($"Failed to convert config value for {key}: {ex.Message}");
+                                Plugin.MiniBehaviour.LogSource.LogError($"Failed to convert config value for {key}: {ex.Message}");
                             }
 
                             break;

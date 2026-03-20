@@ -350,7 +350,12 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Sets player level.
   - Shortcut: *.lvl set [Player] [Level]*
 
+### Misc Commands
+
 ### Miscellaneous Commands
+- `.miscellaneous health` 🔒
+  - Shows startup readiness state summary.
+  - Shortcut: *.misc health*
 - `.miscellaneous prepareforthehunt`
   - Completes GettingReadyForTheHunt if not already completed.
   - Shortcut: *.misc prepare*
@@ -471,10 +476,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).
   - Shortcut: *.wep spell [Name] [Slot] [PrefabGuid] [Radius]*
 
-</details>
-
-<details>
-<summary><strong>Configuration</strong></summary>
 
 ## Configuration
 
@@ -485,7 +486,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Eclipse will be active if any features that sync with the client are enabled. Instead, this now controls the frequency; true for faster (0.1s), false for slower (2.5s).
 - **Elite Primal Rifts**: `ElitePrimalRifts` (bool, default: False)
   Enable or disable elite primal rifts.
-- **Rift Frequency**: `RiftFrequency` (int, default: 6)
+- **Rift Frequency**: `RiftFrequency` (int, default: 0)
   Number of primal rifts to start per day when they are enabled (24 max).
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
   Enable or disable elite shard bearers.
@@ -497,8 +498,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Enable or disable bear form dash.
 - **Bleeding Edge**: `BleedingEdge` (string, default: "")
   Enable various weapon-specific changes; some are more experimental than others, see README for details. (Slashers, Crossbow, Pistols, TwinBlades, Daggers)
-- **Twilight Arsenal**: `TwilightArsenal` (bool, default: False)
-  Enable or disable experimental ability replacements on shadow weapons (currently just axes but like cosplaying as Thor with two mjolnirs).
+- **Primal Arsenal**: `PrimalArsenal` (bool, default: False)
+  Experimental weapons with different models and abilities.
 - **Primal Jewel Cost**: `PrimalJewelCost` (int, default: -77477508)
   If extra recipes is enabled with a valid item prefab here (default demon fragments), it can be refined via gemcutter for random enhanced tier 4 jewels (better rolls, more modifiers).
 
@@ -509,8 +510,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Item prefabGuids for starting kit.
 - **Kit Quantities**: `KitQuantities` (string, default: "500,1000,1000,250")
   The quantity of each item in the starter kit.
-- **Kit Familiar**: `KitFamiliar` (int, default: 1107541186)
-  Character Prefab GUID for a familiar to grant with the starter kit (CHAR_CopperGolem default, 0 for none).
+- **Kit Familiar**: `KitFamiliar` (int, default: 0)
+  Character Prefab GUID for a familiar to grant with the starter kit (0 disables).
 
 ### Quests
 - **Quest System**: `QuestSystem` (bool, default: False)
@@ -616,7 +617,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Unit Spawner Expertise Factor**: `UnitSpawnerExpertiseFactor` (float, default: 1)
   The multiplier for experience gained from unit spawners (vermin nests, tombs).
 - **Expertise Stat Choices**: `ExpertiseStatChoices` (int, default: 3)
-  The maximum number of stat specializations players can pick for expertise. (Clamping to 3 max as of >1.12.15)
+  The maximum number of stat choices a player can pick for a weapon expertise. Max of 3 will be sent to client UI for display.
 - **Reset Expertise Item**: `ResetExpertiseItem` (int, default: 576389135)
   Item PrefabGUID cost for resetting weapon stats.
 - **Reset Expertise Item Quantity**: `ResetExpertiseItemQuantity` (int, default: 500)
@@ -658,7 +659,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **V Blood Legacy Multiplier**: `VBloodLegacyMultiplier` (float, default: 5)
   The multiplier for lineage gained from VBloods.
 - **Legacy Stat Choices**: `LegacyStatChoices` (int, default: 3)
-  Number of specializations players can pick for legacies. (Clamping to 3 max as of >1.12.15)
+  The maximum number of stat choices a player can pick for a blood legacy. Max of 3 will be sent to client UI for display.
 - **Reset Legacy Item**: `ResetLegacyItem` (int, default: 576389135)
   Item PrefabGUID cost for resetting blood stats.
 - **Reset Legacy Item Quantity**: `ResetLegacyItemQuantity` (int, default: 500)
@@ -797,8 +798,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Arcane Sorcerer shift spells, granted at levels of prestige.
 - **Death Mage Spells**: `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
   Death Mage shift spells, granted at levels of prestige.
-
-</details>
 
 ## Recommended Mods
 

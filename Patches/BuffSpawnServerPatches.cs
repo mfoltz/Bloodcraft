@@ -492,7 +492,7 @@ internal static class BuffSystemSpawnPatches
         {
             if (buff.BuffTarget.TryApplyAndGetBuff(_holyBeamPowerBuff, out Entity buffEntity))
             {
-                buffEntity.HasWith((ref LifeTime lifeTime) =>
+                buffEntity.With((ref LifeTime lifeTime) =>
                 {
                     lifeTime.Duration = 0f;
                     lifeTime.EndAction = LifeTimeEndAction.None;

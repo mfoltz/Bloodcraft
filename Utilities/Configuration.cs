@@ -2,7 +2,6 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Familiars;
-using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using ProjectM;
 using Stunlock.Core;
@@ -10,8 +9,6 @@ using Stunlock.Core;
 namespace Bloodcraft.Utilities;
 internal static class Configuration
 {
-    internal static Func<IReadOnlyDictionary<ClassManager.PlayerClass, string>> ClassSpellsMapAccessor { get; set; } = () => Classes.ClassSpellsMap;
-
     public static void GetExcludedFamiliars()
     {
         List<PrefabGUID> unitBans = [..ParseIntegersFromString(ConfigService.BannedUnits).Select(unit => new PrefabGUID(unit))];
@@ -74,95 +71,39 @@ internal static class Configuration
 
         return result;
     }
-
     public static void GetQuestRewardItems()
     {
-        GetQuestRewardItems(
-            ConfigService.QuestRewards,
-            ConfigService.QuestRewardAmounts,
-            QuestSystem.QuestRewards,
-            LogConfigurationWarning);
-    }
-
-    internal static void GetQuestRewardItems(
-        string questRewardsConfig,
-        string questRewardAmountsConfig,
-        IDictionary<PrefabGUID, int> destination,
-        Action<string> logWarning = null)
-    {
-        ArgumentNullException.ThrowIfNull(destination);
-
-        logWarning ??= LogConfigurationWarning;
-
-        List<int> rewardAmounts = ParseIntegersFromString(questRewardAmountsConfig);
-        List<PrefabGUID> questRewards = [..ParseIntegersFromString(questRewardsConfig).Select(itemPrefab => new PrefabGUID(itemPrefab))];
+        List<int> rewardAmounts = [..ParseIntegersFromString(ConfigService.QuestRewardAmounts)];
+        List<PrefabGUID> questRewards = [..ParseIntegersFromString(ConfigService.QuestRewards).Select(itemPrefab => new PrefabGUID(itemPrefab))];
 
         if (questRewards.Count != rewardAmounts.Count)
         {
-            logWarning?.Invoke("QuestRewards and QuestRewardAmounts are not the same length, please correct this for predictable behavior when receiving quest rewards!");
+            Core.Log.LogWarning("QuestRewards and QuestRewardAmounts are not the same length, please correct this for predictable behavior when receiving quest rewards!");
         }
 
-        int pairCount = Math.Min(questRewards.Count, rewardAmounts.Count);
-
-        for (int i = 0; i < pairCount; i++)
+        for (int i = 0; i < questRewards.Count; i++)
         {
-            PrefabGUID reward = questRewards[i];
-
-            if (!destination.ContainsKey(reward))
-            {
-                destination[reward] = rewardAmounts[i];
-            }
+            QuestSystem.QuestRewards.TryAdd(questRewards[i], rewardAmounts[i]);
         }
     }
-
     public static void GetStarterKitItems()
     {
-        GetStarterKitItems(
-            ConfigService.KitPrefabs,
-            ConfigService.KitQuantities,
-            MiscCommands.StarterKitItemPrefabGUIDs,
-            LogConfigurationWarning);
-    }
-
-    internal static void GetStarterKitItems(
-        string kitPrefabsConfig,
-        string kitQuantitiesConfig,
-        IDictionary<PrefabGUID, int> destination,
-        Action<string> logWarning = null)
-    {
-        ArgumentNullException.ThrowIfNull(destination);
-
-        logWarning ??= LogConfigurationWarning;
-
-        List<int> kitAmounts = ParseIntegersFromString(kitQuantitiesConfig);
-        List<PrefabGUID> kitPrefabs = [..ParseIntegersFromString(kitPrefabsConfig).Select(itemPrefab => new PrefabGUID(itemPrefab))];
+        List<int> kitAmounts = [..ParseIntegersFromString(ConfigService.KitQuantities)];
+        List<PrefabGUID> kitPrefabs = [..ParseIntegersFromString(ConfigService.KitPrefabs).Select(itemPrefab => new PrefabGUID(itemPrefab))];
 
         if (kitPrefabs.Count != kitAmounts.Count)
         {
-            logWarning?.Invoke("KitPrefabs and KitQuantities are not the same length, please correct this for predictable behavior when using the kit command!");
+            Core.Log.LogWarning("KitPrefabs and KitQuantities are not the same length, please correct this for predictable behavior when using the kit command!");
         }
 
-        int pairCount = Math.Min(kitPrefabs.Count, kitAmounts.Count);
-
-        for (int i = 0; i < pairCount; i++)
+        for (int i = 0; i < kitPrefabs.Count; i++)
         {
-            PrefabGUID prefab = kitPrefabs[i];
-
-            if (!destination.ContainsKey(prefab))
-            {
-                destination[prefab] = kitAmounts[i];
-            }
+            MiscCommands.StarterKitItemPrefabGUIDs.TryAdd(kitPrefabs[i], kitAmounts[i]);
         }
     }
-
-    private static void LogConfigurationWarning(string message)
-    {
-        global::Bloodcraft.Plugin.Instance?.Log?.LogWarning(message);
-    }
-
     public static void GetClassSpellCooldowns()
     {
-        foreach (var keyValuePair in ClassSpellsMapAccessor())
+        foreach (var keyValuePair in Classes.ClassSpellsMap)
         {
             List<PrefabGUID> spellPrefabs = [..ParseIntegersFromString(keyValuePair.Value).Select(x => new PrefabGUID(x))];
 

@@ -419,6 +419,59 @@ internal static class Familiars
             LocalizationService.HandleReply(ctx, "Invalid prefab (not an integer) or name (does not start with CHAR/char).");
         }
     }
+    public static void ParseAddedFamiliar(PlayerInfo playerInfo, ulong steamId, string prefabGuid, string activeBox = "")
+    {
+        FamiliarUnlocksData data = LoadFamiliarUnlocksData(steamId);
+
+        if (int.TryParse(prefabGuid, out int guid)
+            && PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(guid), out Entity prefabEntity))
+        {
+            if (!prefabEntity.GetPrefabGuid().GetPrefabName().StartsWith("CHAR"))
+            {
+                Core.Log.LogWarning($"[RCON] Unable to convert prefabGuid string ({prefabGuid}) to valid familiar character!");
+                return;
+            }
+
+            data.FamiliarUnlocks[activeBox].Add(guid);
+            SaveFamiliarUnlocksData(steamId, data);
+            LocalizationService.HandleReply(playerInfo, $"<color=green>{new PrefabGUID(guid).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.");
+        }
+        else if (prefabGuid.StartsWith("char", StringComparison.CurrentCultureIgnoreCase))
+        {
+            if (!PrefabCollectionSystem.SpawnableNameToPrefabGuidDictionary.TryGetValue(prefabGuid, out PrefabGUID match))
+            {
+                foreach (var kvp in LocalizationService.PrefabGuidNames)
+                {
+                    if (kvp.Value.Equals(prefabGuid, StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        match = kvp.Key;
+                        break;
+                    }
+                }
+            }
+
+            if (!match.IsEmpty() && PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(match, out prefabEntity))
+            {
+                if (!prefabEntity.GetPrefabGuid().GetPrefabName().StartsWith("CHAR"))
+                {
+                    Core.Log.LogWarning($"[RCON] Unable to convert prefabGuid string ({prefabGuid}) to valid familiar character!");
+                    return;
+                }
+
+                data.FamiliarUnlocks[activeBox].Add(match.GuidHash);
+                SaveFamiliarUnlocksData(steamId, data);
+                LocalizationService.HandleReply(playerInfo, $"<color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.");
+            }
+            else
+            {
+                Core.Log.LogWarning($"[RCON] Unable to convert prefabGuid string ({prefabGuid}) to valid familiar character!");
+            }
+        }
+        else
+        {
+            Core.Log.LogWarning($"[RCON] Unable to convert prefabGuid string ({prefabGuid}) to valid familiar character!");
+        }
+    }
     public static void TryReturnFamiliar(Entity playerCharacter, Entity familiar)
     {
         float3 playerPosition = playerCharacter.GetPosition();
@@ -426,7 +479,7 @@ internal static class Familiars
 
         if (distance >= 25f)
         {
-            PreventDisabled(familiar);
+            PreventDisableFamiliar(familiar);
             ReturnFamiliar(playerPosition, familiar);
         }
 
@@ -490,7 +543,7 @@ internal static class Familiars
     public static void CallFamiliar(Entity playerCharacter, Entity familiar, User user, ulong steamId)
     {
         familiar.Remove<Disabled>();
-        PreventDisabled(familiar);
+        PreventDisableFamiliar(familiar);
 
         float3 position = playerCharacter.GetPosition();
         ReturnFamiliar(position, familiar);
@@ -533,7 +586,7 @@ internal static class Familiars
             }
         }
 
-        PreventDisabled(familiar);
+        PreventDisableFamiliar(familiar);
         familiar.Add<Disabled>();
 
         UpdateActiveFamiliarDismissed(steamId, true);

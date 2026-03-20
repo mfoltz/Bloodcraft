@@ -144,7 +144,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                 if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
                 else if (entityOwner.Owner.IsPlayer())
                 {
-                    entity.HasWith((ref ArmorLevel armorLevel) => armorLevel.Level = 0f);
+                    entity.With((ref ArmorLevel armorLevel) => armorLevel.Level = 0f);
                 }
             }
         }

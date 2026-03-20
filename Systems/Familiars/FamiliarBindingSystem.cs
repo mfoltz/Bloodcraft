@@ -18,6 +18,7 @@ using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsMa
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarEquipmentManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarExperienceManager;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Familiars.ActiveFamiliarManager;
 using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Systems.Familiars;
@@ -242,7 +243,7 @@ internal static class FamiliarBindingSystem
                 else
                 {
                     familiar.Destroy();
-                    LocalizationService.HandleServerReply(EntityManager, user, "Binding failed...");
+                    LocalizationService.HandleServerReply(EntityManager, user, $"Binding failed...");
 
                     return false;
                 }
@@ -279,12 +280,26 @@ internal static class FamiliarBindingSystem
 
             if (battle)
             {
-                return ModifyFamiliar(user, steamId, famKey, playerCharacter, familiar, level, battle, teamIndex, allies);
+                if (ModifyFamiliar(user, steamId, famKey, playerCharacter, familiar, level, battle, teamIndex, allies))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
 
             }
             else
             {
-                return ModifyFamiliar(user, steamId, famKey, playerCharacter, familiar, level);
+                if (ModifyFamiliar(user, steamId, famKey, playerCharacter, familiar, level))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
         catch (Exception ex)
@@ -307,7 +322,7 @@ internal static class FamiliarBindingSystem
                 HandleBloodSource(familiar, level);
                 ModifyCollision(familiar);
                 RemoveDropTable(familiar);
-                PreventDisabled(familiar);
+                PreventDisableFamiliar(familiar);
                 // HandleMountedUnit(playerCharacter, familiar, battle);
 
                 if (BattleService.Matchmaker.MatchPairs.TryGetMatch(steamId, out var matchPair))
@@ -351,7 +366,7 @@ internal static class FamiliarBindingSystem
                 HandleBloodSource(familiar, level);
                 ModifyCollision(familiar);
                 RemoveDropTable(familiar);
-                PreventDisabled(familiar);
+                PreventDisableFamiliar(familiar);
                 // HandleMountedUnit(playerCharacter, familiar);
 
                 return true;
@@ -491,7 +506,7 @@ internal static class FamiliarBindingSystem
 
         // so from gear ~750 health, 30-40 physical power, 30-40 spell power
         // traits should be % added bonus on top of whatever their normal scaled stats are? still need to think about equipment but yeah that should mostly work
-        // for the love of god don't touch anything related to saving/persistence without then immediately testing to see if it does anything bad ;_;
+        // for the love of god don't touch anything related to saving persistence without then immediately testing to see if it does anything bad ;_;
 
         PrefabGUID familiarId = familiar.GetPrefabGuid();
         Entity original = PrefabCollectionSystem._PrefabGuidToEntityMap[familiarId];
@@ -582,7 +597,7 @@ internal static class FamiliarBindingSystem
             bloodConsumeSource.CanBeConsumed = false;
         });
     }
-    public static void PreventDisabled(Entity familiar)
+    public static void PreventDisableFamiliar(Entity familiar)
     {
         familiar.AddWith((ref CanPreventDisableWhenNoPlayersInRange canPreventDisable) => canPreventDisable.CanDisable = new ModifiableBool(false));
     }

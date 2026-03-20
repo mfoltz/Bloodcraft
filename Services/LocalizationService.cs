@@ -9,6 +9,7 @@ using Unity.Collections;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Resources.PrefabNames;
+using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft.Services;
 internal class LocalizationService // the bones are from KindredCommands, ty Odjit c:
@@ -148,7 +149,7 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
 
         if (stream == null)
         {
-            Plugin.LogInstance.LogError($"[Localization] Failed to load resource - {resourceName}");
+            Plugin.MiniBehaviour.LogSource.LogError($"[Localization] Failed to load resource - {resourceName}");
         }
 
         using StreamReader localizationReader = new(stream);
@@ -157,7 +158,7 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
 
         if (string.IsNullOrWhiteSpace(jsonContent))
         {
-            Plugin.LogInstance.LogError($"[Localization] No JSON content!");
+            Plugin.MiniBehaviour.LogSource.LogError($"[Localization] No JSON content!");
         }
 
         var localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent, new JsonSerializerOptions
@@ -167,7 +168,7 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
 
         if (localizationFile.Nodes == null)
         {
-            Plugin.LogInstance.LogError($"[Localization] Deserialized file is null or missing Nodes!");
+            Plugin.MiniBehaviour.LogSource.LogError($"[Localization] Deserialized file is null or missing Nodes!");
         }
 
         localizationFile.Nodes
@@ -209,6 +210,10 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
     public static void HandleReply(ChatCommandContext ctx, string message)
     {
         ctx.Reply(message);
+    }
+    public static void HandleReply(PlayerInfo playerInfo, string message)
+    {
+        HandleServerReply(Core.EntityManager, playerInfo.User, message);
     }
 
     static readonly ComponentType[] _networkEventComponents =

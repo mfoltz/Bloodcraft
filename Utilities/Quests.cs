@@ -1,6 +1,6 @@
 ﻿using Bloodcraft.Resources;
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Quests;
+using Bloodcraft.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;

@@ -25,8 +25,11 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class ServerBootstrapSystemPatches
 {
-    static EntityManager EntityManager => Core.EntityManager;
-    static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static EntityManager EntityManager
+        => Core.EntityManager;
+
+    static ServerGameManager ServerGameManager
+        => Core.ServerGameManager;
 
     static readonly WaitForSeconds _delay = new(1f);
     static readonly WaitForSeconds _newCharacterDelay = new(2.5f);
@@ -61,12 +64,14 @@ internal static class ServerBootstrapSystemPatches
     [HarmonyPostfix]
     static void OnUserConnectedPostfix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
     {
-        if (!__instance._NetEndPointToApprovedUserIndex.TryGetValue(netConnectionId, out int userIndex)) return;
+        if (!__instance._NetEndPointToApprovedUserIndex.TryGetValue(netConnectionId, out int userIndex))
+            return;
+
         ServerBootstrapSystem.ServerClient serverClient = __instance._ApprovedUsersLookup[userIndex];
 
         Entity userEntity = serverClient.UserEntity;
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
-        ulong steamId = user.PlatformId;
+        ulong steamId = userEntity.GetSteamId();
 
         Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
         bool exists = playerCharacter.Exists();
@@ -446,6 +451,13 @@ internal static class ServerBootstrapSystemPatches
 
             HandleConnection(steamId, playerInfo);
 
+            if (Core.Eclipsed
+                && !EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)
+                && EclipseService.PendingRegistration.TryGetValue(steamId, out string pendingVersion))
+            {
+                EclipseService.HandleRegistration(playerInfo, steamId, pendingVersion);
+            }
+
             if (!playerCharacter.HasBuff(_bonusStatsBuff))
             {
                 Buffs.RefreshStats(playerInfo.CharEntity);
@@ -456,19 +468,18 @@ internal static class ServerBootstrapSystemPatches
             EclipseService.HandlePreRegistration(steamId);
         }
     }
+
     public static void UnbindFamiliarOnUserDisconnected(User user, Entity playerCharacter)
     {
         ulong steamId = user.PlatformId;
-
         bool hasActive = steamId.HasActiveFamiliar();
         bool hasDismissed = steamId.HasDismissedFamiliar();
 
         if (hasActive && hasDismissed)
         {
             Entity familiar = GetActiveFamiliar(playerCharacter);
-
             CallFamiliar(playerCharacter, familiar, user, user.PlatformId);
-            UnbindFamiliar(user, playerCharacter); // maybe also statChangeUtility?
+            UnbindFamiliar(user, playerCharacter);
         }
         else if (hasActive && !hasDismissed)
         {
@@ -480,9 +491,10 @@ internal static class ServerBootstrapSystemPatches
     [HarmonyPrefix]
     static void OnUserDisconnectedPrefix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
     {
-        if (!__instance._NetEndPointToApprovedUserIndex.ContainsKey(netConnectionId)) return;
-        int userIndex = __instance._NetEndPointToApprovedUserIndex[netConnectionId];
+        if (!__instance._NetEndPointToApprovedUserIndex.ContainsKey(netConnectionId))
+            return;
 
+        int userIndex = __instance._NetEndPointToApprovedUserIndex[netConnectionId];
         ServerBootstrapSystem.ServerClient serverClient = __instance._ApprovedUsersLookup[userIndex];
         Entity userEntity = serverClient.UserEntity;
 
@@ -490,38 +502,28 @@ internal static class ServerBootstrapSystemPatches
         Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
         ulong steamId = user.PlatformId;
 
-        if (_leveling)
+        if (_leveling
+            && _restedXP
+            && steamId.TryGetPlayerRestedXP(out var restedData))
         {
-            if (_restedXP && steamId.TryGetPlayerRestedXP(out var restedData))
-            {
-                restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
-                steamId.SetPlayerRestedXP(restedData);
-            }
+            restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
+            steamId.SetPlayerRestedXP(restedData);
         }
-
-        /*
-        if (_eclipse)
-        {
-            if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.TryUnregisterUser(steamId);
-        }
-        */
 
         if (_prestige && playerCharacter.Exists())
         {
             SetPlayerBool(steamId, SHROUD_KEY, false);
-
-            if (playerCharacter.HasBuff(_shroudBuff) && playerCharacter.TryGetComponent(out Equipment equipment))
+            if (playerCharacter.HasBuff(_shroudBuff)
+                && playerCharacter.TryGetComponent(out Equipment equipment)
+                && !equipment.IsEquipped(_shroudCloak, out var _))
             {
-                if (!equipment.IsEquipped(_shroudCloak, out var _)) playerCharacter.TryRemoveBuff(buffPrefabGuid: _shroudBuff);
+                playerCharacter.TryRemoveBuff(buffPrefabGuid: _shroudBuff);
             }
         }
 
         if (_familiars && playerCharacter.Exists())
-        {
-            UnbindFamiliarOnUserDisconnected(user, playerCharacter); // need to yeet immediately to account for server restarts where no time after everyone 'logs out'
-        }
+            UnbindFamiliarOnUserDisconnected(user, playerCharacter);
 
-        // if (SteamIdOnlinePlayerInfoCache.ContainsKey(steamId)) HandleDisconnection(steamId, userIndex);
         HandleDisconnection(steamId);
     }
 
@@ -540,38 +542,28 @@ internal static class ServerBootstrapSystemPatches
 
                 if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
                 {
-                    if (_leveling)
+                    if (_leveling
+                        && _restedXP
+                        && steamId.TryGetPlayerRestedXP(out var restedData))
                     {
-                        if (_restedXP && steamId.TryGetPlayerRestedXP(out var restedData))
-                        {
-                            restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
-                            steamId.SetPlayerRestedXP(restedData);
-                        }
+                        restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
+                        steamId.SetPlayerRestedXP(restedData);
                     }
-
-                    /*
-                    if (_eclipse)
-                    {
-                        if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.TryUnregisterUser(steamId);
-                    }
-                    */
 
                     if (_prestige)
                     {
                         SetPlayerBool(steamId, SHROUD_KEY, false);
-
-                        if (playerInfo.CharEntity.HasBuff(_shroudBuff) && playerInfo.CharEntity.TryGetComponent(out Equipment equipment))
+                        if (playerInfo.CharEntity.HasBuff(_shroudBuff)
+                            && playerInfo.CharEntity.TryGetComponent(out Equipment equipment)
+                            && !equipment.IsEquipped(_shroudCloak, out var _))
                         {
-                            if (!equipment.IsEquipped(_shroudCloak, out var _)) playerInfo.CharEntity.TryRemoveBuff(buffPrefabGuid: _shroudBuff);
+                            playerInfo.CharEntity.TryRemoveBuff(buffPrefabGuid: _shroudBuff);
                         }
                     }
 
                     if (_familiars && playerInfo.CharEntity.Exists())
-                    {
                         UnbindFamiliarOnUserDisconnected(playerInfo.User, playerInfo.CharEntity);
-                    }
 
-                    // if (SteamIdOnlinePlayerInfoCache.ContainsKey(steamId)) HandleDisconnection(steamId); 
                     HandleDisconnection(steamId);
                 }
 
@@ -579,7 +571,7 @@ internal static class ServerBootstrapSystemPatches
         }
         catch (Exception ex)
         {
-            Core.Log.LogError($"Error in KickBanSystem_Server: {ex}");
+            Core.Log.LogError($"{ex}");
         }
     }
 
@@ -595,23 +587,20 @@ internal static class ServerBootstrapSystemPatches
             {
                 FromCharacter fromCharacter = fromCharacterEvents[i];
                 Entity userEntity = fromCharacter.User;
-
-                // Core.Log.LogWarning($"[HandleCreateCharacterEventSystem] PreRegistration for new character...");
                 HandleCharacterCreatedRoutine(userEntity).Start();
             }
         }
         catch (Exception ex)
         {
-            Core.Log.LogError($"Error in HandleCreateCharacterEventSystem: {ex}");
+            Core.Log.LogError($"{ex}");
         }
     }
+
     static IEnumerator HandleCharacterCreatedRoutine(Entity userEntity)
     {
         yield return _newCharacterDelay;
 
         User user = userEntity.GetUser();
-        // Core.Log.LogWarning($"New character created - {user.PlatformId} | {user.LocalCharacter.GetEntityOnServer().Exists()}");
-
         PlayerInfo playerInfo = new()
         {
             CharEntity = user.LocalCharacter.GetEntityOnServer(),
@@ -620,11 +609,7 @@ internal static class ServerBootstrapSystemPatches
         };
 
         HandleConnection(user.PlatformId, playerInfo);
-
         if (!playerInfo.CharEntity.HasBuff(_bonusStatsBuff))
-        {
-            // playerInfo.CharEntity.TryApplyBuff(_bonusStatsBuff);
             Buffs.RefreshStats(playerInfo.CharEntity);
-        }
     }
 }

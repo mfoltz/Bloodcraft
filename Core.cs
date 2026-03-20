@@ -25,15 +25,48 @@ using WeaponType = Bloodcraft.Interfaces.WeaponType;
 namespace Bloodcraft;
 internal static class Core
 {
-    public static World Server { get; } = GetServerWorld() ?? throw new Exception("There is no Server world!");
-    public static EntityManager EntityManager => Server.EntityManager;
-    public static ServerGameManager ServerGameManager => SystemService.ServerScriptMapper.GetServerGameManager();
-    public static SystemService SystemService { get; } = new(Server);
+    static World _server;
+    static bool _serverNotReadyLogged;
+    static World Server
+    {
+        get
+        {
+            if (_server != null && _server.IsCreated)
+                return _server;
+
+            _server = WorldUtility.FindServerWorld();
+
+            if (_server == null || !_server.IsCreated)
+            {
+                if (!_serverNotReadyLogged)
+                {
+                    _serverNotReadyLogged = true;
+                    Log.LogWarning("Server world requested before it is ready.");
+                }
+
+                throw new InvalidOperationException("Server world is not ready yet.");
+            }
+
+            _serverNotReadyLogged = false;
+            return _server;
+        }
+    }
+    public static EntityManager EntityManager
+        => Server.EntityManager;
+    public static ServerGameManager ServerGameManager
+        => SystemService.ServerScriptMapper.GetServerGameManager();
+
+    //public static SystemService SystemService { get; } = new(Server);
+    public static SystemService SystemService { get; set; }
     public static ServerGameBalanceSettings ServerGameBalanceSettings { get; set; }
-    public static bool IsPvP => ServerGameBalanceSettings.GameModeType == GameModeType.PvP;
-    public static double ServerTime => ServerGameManager.ServerTime;
-    public static double DeltaTime => ServerGameManager.DeltaTime;
-    public static ManualLogSource Log => Plugin.LogInstance;
+    public static bool IsPvP
+        => ServerGameBalanceSettings.GameModeType == GameModeType.PvP;
+    public static double ServerTime
+        => ServerGameManager.ServerTime;
+    public static double DeltaTime
+        => ServerGameManager.DeltaTime;
+    public static ManualLogSource Log
+        => Plugin.MiniBehaviour.LogSource;
 
     static MonoBehaviour _monoBehaviour;
 
@@ -69,14 +102,9 @@ internal static class Core
         PrefabGUIDs.DT_Unit_Relic_Morgana_Unique
     ];
 
-    static readonly bool _leveling = ConfigService.LevelingSystem;
-    static readonly bool _legacies = ConfigService.LegacySystem;
-    static readonly bool _expertise = ConfigService.ExpertiseSystem;
-    static readonly bool _classes = ConfigService.ClassSystem;
-    static readonly bool _familiars = ConfigService.FamiliarSystem;
-    static readonly bool _resetShardBearers = ConfigService.EliteShardBearers;
-    static readonly bool _shouldApplyBonusStats = _legacies || _expertise || _classes || _familiars;
-    public static bool Eclipsed { get; } = _leveling || _legacies || _expertise || _classes || _familiars;
+    static bool ShouldResetShardBearers => ConfigService.EliteShardBearers;
+    static bool ShouldApplyBonusStats => ConfigService.LegacySystem || ConfigService.ExpertiseSystem || ConfigService.ClassSystem || ConfigService.FamiliarSystem;
+    public static bool Eclipsed => ConfigService.LevelingSystem || ConfigService.LegacySystem || ConfigService.ExpertiseSystem || ConfigService.ClassSystem || ConfigService.FamiliarSystem;
     public static IReadOnlySet<WeaponType> BleedingEdge => _bleedingEdge;
     static HashSet<WeaponType> _bleedingEdge = [];
     public static IReadOnlySet<Profession> DisabledProfessions => _disabledProfessions;
@@ -85,27 +113,35 @@ internal static class Core
     const int SECONDARY_SKILL_SLOT = 4;
     const int BLEED_STACKS = 3;
     public static byte[] NEW_SHARED_KEY { get; set; }
-    public static bool IsReady => _initialized;
+    public static bool IsReady
+        => _initialized;
+
     static bool _initialized;
-    public static void Initialize()
+    internal static void OnInitialize()
     {
-        if (_initialized) return;
+        if (_initialized)
+            return;
 
         NEW_SHARED_KEY = Convert.FromBase64String(SecretManager.GetNewSharedKey());
-        // string hexString = SecretManager.GetNewSharedKey();
-        // NEW_SHARED_KEY = [..Enumerable.Range(0, hexString.Length / 2).Select(i => Convert.ToByte(hexString.Substring(i * 2, 2), 16))];
+        SystemService = new(Server);
 
-        if (!ComponentRegistry._initialized) ComponentRegistry.Initialize();
+        if (!ComponentRegistry._initialized)
+            ComponentRegistry.Initialize();
 
         _ = new PlayerService();
         _ = new LocalizationService();
-        if (Eclipsed) _ = new EclipseService();
 
-        if (ConfigService.ExtraRecipes) Recipes.ModifyRecipes();
+        if (Eclipsed)
+            _ = new EclipseService();
 
-        if (ConfigService.StarterKit) Configuration.GetStarterKitItems();
+        if (ConfigService.ExtraRecipes)
+            Recipes.ModifyRecipes();
 
-        if (ConfigService.PrestigeSystem) Buffs.GetPrestigeBuffs();
+        if (ConfigService.StarterKit)
+            Configuration.GetStarterKitItems();
+
+        if (ConfigService.PrestigeSystem)
+            Buffs.GetPrestigeBuffs();
 
         if (ConfigService.ClassSystem)
         {
@@ -114,9 +150,11 @@ internal static class Core
             Classes.GetAbilityJewels();
         }
 
-        if (ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEventHandler += LevelingSystem.OnUpdate;
+        if (ConfigService.LevelingSystem)
+            DeathEventListenerSystemPatch.OnDeathEventHandler += LevelingSystem.OnUpdate;
 
-        if (ConfigService.ExpertiseSystem) DeathEventListenerSystemPatch.OnDeathEventHandler += WeaponSystem.OnUpdate;
+        if (ConfigService.ExpertiseSystem)
+            DeathEventListenerSystemPatch.OnDeathEventHandler += WeaponSystem.OnUpdate;
 
         if (ConfigService.QuestSystem)
         {
@@ -127,7 +165,10 @@ internal static class Core
         if (ConfigService.FamiliarSystem)
         {
             Configuration.GetExcludedFamiliars();
-            if (!ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarLevelingSystem.OnUpdate;
+
+            if (!ConfigService.LevelingSystem)
+                DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarLevelingSystem.OnUpdate;
+
             DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarUnlockSystem.OnUpdate;
 
             _ = new BattleService();
@@ -151,13 +192,11 @@ internal static class Core
             Log.LogWarning($"Error getting attribute soft caps: {e}");
         }
 
-        if (_resetShardBearers) ResetShardBearers();
+        if (ShouldResetShardBearers)
+            ResetShardBearers();
 
         _initialized = true;
-    }
-    static World GetServerWorld()
-    {
-        return World.s_AllWorlds.ToArray().FirstOrDefault(world => world.Name == "Server");
+        StartupStateService.Mark(StartupState.CoreInitialized);
     }
     static MonoBehaviour GetOrCreateMonoBehaviour()
     {
@@ -186,22 +225,6 @@ internal static class Core
         yield return new WaitForSeconds(delay);
         action?.Invoke();
     }
-
-    /*
-    public static void DelayCall(float delay, Delegate method, params object[] args)
-    {
-        DelayedRoutine(delay, method, args).Run();
-    }
-    static IEnumerator DelayedRoutine(float delay, Delegate method, object[] args)
-    {
-        if (delay > 0f)
-            yield return new WaitForSeconds(delay);
-        else
-            yield return null;
-
-        method.DynamicInvoke(args);
-    }
-    */
     public static AddItemSettings GetAddItemSettings()
     {
         AddItemSettings addItemSettings = new()
@@ -255,7 +278,7 @@ internal static class Core
             }
         }
 
-        if (_shouldApplyBonusStats)
+        if (ShouldApplyBonusStats)
         {
             if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Buffs.BonusStatsBuff, out Entity prefabEntity))
             {
@@ -338,16 +361,25 @@ internal static class Core
             {
                 if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(PrefabGUIDs.EquipBuff_Weapon_Daggers_Ability03, out Entity prefabEntity))
                 {
-                    prefabEntity.With(0, (ref RemoveBuffOnGameplayEventEntry removeBuffOnGameplayEventEntry) => removeBuffOnGameplayEventEntry.Buff = PrefabIdentifier.Empty);
+                    prefabEntity.WithEdit(0, (ref RemoveBuffOnGameplayEventEntry removeBuffOnGameplayEventEntry) => removeBuffOnGameplayEventEntry.Buff = PrefabIdentifier.Empty);
                 }
             }
         }
 
-        if (ConfigService.TwilightArsenal)
+        if (ConfigService.PrimalArsenal)
         {
             if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(PrefabGUIDs.Item_Weapon_Axe_T09_ShadowMatter, out Entity prefabEntity))
             {
                 prefabEntity.With((ref EquippableData equippableData) => equippableData.BuffGuid = PrefabGUIDs.EquipBuff_Weapon_DualHammers_Ability03);
+            }
+
+            try
+            {
+                ShadowMatter.GatherShadows();
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"{ex}");
             }
 
             /*
@@ -438,7 +470,7 @@ internal static class Core
                             {
                                 // Log.LogWarning($"[BleedingEdgePrimaryProjectileRoutine] - editing {prefabName}");
                                 entity.With((ref Projectile projectile) => projectile.Range *= 1.25f);
-                                entity.HasWith((ref LifeTime lifeTime) => lifeTime.Duration *= 1.25f);
+                                entity.With((ref LifeTime lifeTime) => lifeTime.Duration *= 1.25f);
                             }
                             else if (crossbow && IsWeaponPrimaryProjectile(prefabName, WeaponType.Crossbow))
                             {
