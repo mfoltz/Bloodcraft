@@ -4,6 +4,10 @@
 ## Why
 - 
 
+## Release/versioning note
+- If this PR is workflow-only, process-only, docs-only, or otherwise does not change shipped plugin behavior, do **not** describe it as a version bump in the PR title or summary.
+- Only describe a version bump when `Bloodcraft.csproj`, `thunderstore.toml`, and `CHANGELOG.md` are updated together for an intentional release-facing change.
+
 ## `minor-feature` label guidance
 Use the `minor-feature` label for PRs that are intentionally narrow in scope. These PRs should usually:
 - Touch only a few focused files.

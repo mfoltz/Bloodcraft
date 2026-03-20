@@ -18,4 +18,6 @@ Expected scope:
 
 Workflow, configuration, and release churn should usually be deliberate rather than incidental. If a feature change needs workflow updates, config surface changes, migration steps, or release-note churn, include them only when they are directly required by the feature and call them out explicitly in **What changed** or **Why**.
 
+For workflow-only, process-only, and docs-only PRs, keep commit titles and PR descriptions aligned with what actually shipped. Do not claim a version bump unless `Bloodcraft.csproj`, `thunderstore.toml`, and `CHANGELOG.md` are all being updated together as part of a deliberate release-facing change.
+
 Use `minor-feature` as the final label name in contributor docs, reviews, and PR discussions. Do not switch between `minor-feature` and earlier draft terms such as `small-feature`; keeping the terminology consistent helps reviewers match labels, automation, and the PR template guidance.
