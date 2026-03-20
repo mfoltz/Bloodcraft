@@ -24,14 +24,14 @@ jobs:
           cache: true
           cache-dependency-path: Bloodcraft.csproj
 
-      - name: Extract latest tag
+      - name: Extract latest stable tag
         id: extract_tag
         shell: bash
         run: |
-          latest_tag=$(git tag -l 'v*' --sort=-v:refname | head -n 1)
+          latest_tag=$(git tag -l 'v*' --sort=-v:refname | grep -Ev '-' | head -n 1)
 
           if [ -z "$latest_tag" ]; then
-            echo "Unable to locate a release tag." >&2
+            echo "Unable to locate a stable release tag." >&2
             exit 1
           fi
 

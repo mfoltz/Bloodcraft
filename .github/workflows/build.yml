@@ -13,13 +13,19 @@ on:
 env:
   DOTNET_SDK_VERSION: 8.0.x
   TARGET_FRAMEWORK: net6.0
+  RELEASE_ASSET_NAME: prerelease-package
 
 jobs:
   build:
     name: build-validation
     permissions:
-      contents: write
+      contents: read
     runs-on: ubuntu-latest
+    outputs:
+      csproj_file: ${{ steps.discover_csproj.outputs.csproj_file }}
+      dll_name: ${{ steps.get_dll_name.outputs.dll_name }}
+      version: ${{ steps.extract_version.outputs.version }}
+      should_publish: ${{ steps.version_guard.outputs.should_build }}
 
     steps:
       - name: Checkout
@@ -67,12 +73,13 @@ jobs:
         run: |
           version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" "${{ steps.discover_csproj.outputs.csproj_file }}")
           echo "version=$version" >> "$GITHUB_ENV"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Determine build eligibility
         if: github.event_name != 'pull_request'
         id: version_guard
         run: |
-          if [ -z "${{ env.version }}" ]; then
+          if [ -z "${{ steps.extract_version.outputs.version }}" ]; then
             echo "Unable to determine current version; continuing build to avoid false negative."
             echo "should_build=true" >> "$GITHUB_OUTPUT"
             exit 0
@@ -85,9 +92,9 @@ jobs:
           fi
 
           git fetch --force --tags
-          latest_tag=$(git tag -l 'v*' --sort=-v:refname | head -n 1)
+          latest_tag=$(git tag -l 'v*' --sort=-v:refname | grep -Ev '-' | head -n 1)
           latest_version=${latest_tag#v}
-          current_version="${{ env.version }}"
+          current_version="${{ steps.extract_version.outputs.version }}"
 
           if [ -z "$latest_version" ]; then
             echo "No previous tagged release detected; proceeding with build."
@@ -127,26 +134,50 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             dotnet build "${{ steps.discover_csproj.outputs.csproj_file }}" --configuration Release --no-restore -p:RunGenerateREADME=false
-          elif [ -n "${{ env.version }}" ]; then
-            dotnet build "${{ steps.discover_csproj.outputs.csproj_file }}" --configuration Release --no-restore -p:Version=${{ env.version }} -p:RunGenerateREADME=false
+          elif [ -n "${{ steps.extract_version.outputs.version }}" ]; then
+            dotnet build "${{ steps.discover_csproj.outputs.csproj_file }}" --configuration Release --no-restore -p:Version=${{ steps.extract_version.outputs.version }} -p:RunGenerateREADME=false
           else
             dotnet build "${{ steps.discover_csproj.outputs.csproj_file }}" --configuration Release --no-restore -p:RunGenerateREADME=false
           fi
 
+      - name: Upload pre-release assets
+        if: github.event_name != 'pull_request' && (steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch') && steps.extract_version.outputs.version != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.RELEASE_ASSET_NAME }}
+          if-no-files-found: error
+          path: |
+            ./bin/Release/${{ env.TARGET_FRAMEWORK }}/${{ steps.get_dll_name.outputs.dll_name }}.dll
+            ./CHANGELOG.md
+
+  publish_prerelease:
+    name: publish-prerelease
+    if: github.event_name != 'pull_request' && (needs.build.outputs.should_publish == 'true' || github.event_name == 'workflow_dispatch') && needs.build.outputs.version != ''
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download pre-release assets
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.RELEASE_ASSET_NAME }}
+          path: ./release-assets
+
       - name: GH Release (pre-release)
         uses: softprops/action-gh-release@v2
-        if: github.event_name != 'pull_request' && (steps.version_guard.outputs.should_build == 'true' || github.event_name == 'workflow_dispatch') && env.version != ''
         with:
           body: |
-            Automated pre-release for version ${{ env.version }} generated from this GitHub Actions build.
+            Automated pre-release for version ${{ needs.build.outputs.version }} generated from this GitHub Actions build.
             - Commit: ${{ github.sha }}
             - Run: ${{ github.run_id }}
-          name: Pre-release v${{ env.version }}
+          name: Pre-release v${{ needs.build.outputs.version }}
           fail_on_unmatched_files: true
           prerelease: true
-          tag_name: v${{ env.version }}-pre
+          tag_name: v${{ needs.build.outputs.version }}-pre
           files: |
-            ./bin/Release/${{ env.TARGET_FRAMEWORK }}/${{ steps.get_dll_name.outputs.dll_name }}.dll
-            CHANGELOG.md
+            ./release-assets/${{ needs.build.outputs.dll_name }}.dll
+            ./release-assets/CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
