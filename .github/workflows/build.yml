@@ -161,7 +161,8 @@ jobs:
         shell: bash
         run: |
           csproj='${{ needs.validate_build_inputs.outputs.csproj_file }}'
-          git diff --exit-code -- "$csproj" thunderstore.toml
+          # Canonical repo-owned version files must remain unchanged throughout CI.
+          git diff --exit-code -- "$csproj" thunderstore.toml CHANGELOG.md
 
       - name: Restore dependencies
         run: dotnet restore -p:CheckEolTargetFramework=false
@@ -264,7 +265,8 @@ jobs:
         shell: bash
         run: |
           csproj='${{ needs.validate_build_inputs.outputs.csproj_file }}'
-          git diff --exit-code -- "$csproj" thunderstore.toml
+          # Canonical repo-owned version files must remain unchanged throughout CI.
+          git diff --exit-code -- "$csproj" thunderstore.toml CHANGELOG.md
 
       - name: Restore dependencies
         run: dotnet restore -p:CheckEolTargetFramework=false
@@ -377,7 +379,8 @@ jobs:
         shell: bash
         run: |
           csproj='${{ needs.validate_build_inputs.outputs.csproj_file }}'
-          git diff --exit-code -- "$csproj" thunderstore.toml
+          # Canonical repo-owned version files must remain unchanged throughout CI.
+          git diff --exit-code -- "$csproj" thunderstore.toml CHANGELOG.md
 
       - name: Restore dependencies
         run: dotnet restore -p:CheckEolTargetFramework=false
