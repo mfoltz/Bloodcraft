@@ -164,10 +164,50 @@ jobs:
             dotnet build . --configuration Release -p:RunGenerateREADME=false -p:CheckEolTargetFramework=false
           fi
 
+  prepare_prerelease:
+    needs:
+      - validate_build_inputs
+      - build_verification
+    if: >-
+      github.event_name == 'push' &&
+      needs.validate_build_inputs.outputs.should_build == 'true' &&
+      github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      prerelease_version: ${{ steps.prepare_version.outputs.prerelease_version }}
+      prerelease_tag: ${{ steps.prepare_version.outputs.prerelease_tag }}
+      prerelease_name: ${{ steps.prepare_version.outputs.prerelease_name }}
+
+    steps:
+      - name: Log validation decision
+        run: |
+          echo "Validation decision: ${{ needs.validate_build_inputs.outputs.should_build }}"
+          echo "Reason: ${{ needs.validate_build_inputs.outputs.reason }}"
+          echo "Canonical version: ${{ needs.validate_build_inputs.outputs.canonical_version }}"
+          echo "Matched release tag: ${{ needs.validate_build_inputs.outputs.matched_tag || 'none' }}"
+
+      - name: Prepare prerelease metadata
+        id: prepare_version
+        shell: bash
+        run: |
+          canonical_version='${{ needs.validate_build_inputs.outputs.canonical_version }}'
+
+          if [ -z "$canonical_version" ]; then
+            echo "Canonical version is empty; cannot prepare prerelease metadata." >&2
+            exit 1
+          fi
+
+          echo "prerelease_version=$canonical_version" >> "$GITHUB_OUTPUT"
+          echo "prerelease_tag=v${canonical_version}-pre" >> "$GITHUB_OUTPUT"
+          echo "prerelease_name=Pre-release v${canonical_version}" >> "$GITHUB_OUTPUT"
+
   publish_prerelease:
     needs:
       - validate_build_inputs
       - build_verification
+      - prepare_prerelease
     if: >-
       github.event_name == 'push' &&
       needs.validate_build_inputs.outputs.should_build == 'true' &&
@@ -182,7 +222,8 @@ jobs:
           echo "Validation decision: ${{ needs.validate_build_inputs.outputs.should_build }}"
           echo "Reason: ${{ needs.validate_build_inputs.outputs.reason }}"
           echo "Canonical version: ${{ needs.validate_build_inputs.outputs.canonical_version }}"
-          echo "Matched release tag: ${{ needs.validate_build_inputs.outputs.matched_tag || 'none' }}"
+          echo "Prerelease version: ${{ needs.prepare_prerelease.outputs.prerelease_version }}"
+          echo "Prerelease tag: ${{ needs.prepare_prerelease.outputs.prerelease_tag }}"
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -207,7 +248,7 @@ jobs:
 
       - name: Build prerelease artifact
         run: |
-          version='${{ needs.validate_build_inputs.outputs.canonical_version }}'
+          version='${{ needs.prepare_prerelease.outputs.prerelease_version }}'
 
           if [ -n "$version" ]; then
             dotnet build . --configuration Release -p:Version=$version -p:RunGenerateREADME=false -p:CheckEolTargetFramework=false
@@ -217,16 +258,17 @@ jobs:
 
       - name: GH Release (pre-release)
         uses: softprops/action-gh-release@v1
-        if: needs.validate_build_inputs.outputs.canonical_version != ''
+        if: needs.prepare_prerelease.outputs.prerelease_version != ''
         with:
           body: |
-            Automated pre-release for version ${{ needs.validate_build_inputs.outputs.canonical_version }} generated from this GitHub Actions build.
+            Automated pre-release for version ${{ needs.prepare_prerelease.outputs.prerelease_version }} generated from the main branch.
+            - Branch: ${{ github.ref_name }}
             - Commit: ${{ github.sha }}
             - Run: ${{ github.run_id }}
-          name: Pre-release v${{ needs.validate_build_inputs.outputs.canonical_version }}
+          name: ${{ needs.prepare_prerelease.outputs.prerelease_name }}
           fail_on_unmatched_files: true
           prerelease: true
-          tag_name: v${{ needs.validate_build_inputs.outputs.canonical_version }}-pre
+          tag_name: ${{ needs.prepare_prerelease.outputs.prerelease_tag }}
           files: |
             ./bin/Release/net6.0/${{ steps.get_dll_name.outputs.dll_name }}.dll
             CHANGELOG.md
@@ -265,7 +307,7 @@ jobs:
             exit 1
           fi
 
-          feature_testing_version="${canonical_version}-ft.${GITHUB_RUN_NUMBER}.${GITHUB_RUN_ATTEMPT}"
+          feature_testing_version="${canonical_version}-ft.${GITHUB_RUN_NUMBER}"
 
           echo "Derived feature-testing version: $feature_testing_version"
           echo "feature_testing_version=$feature_testing_version" >> "$GITHUB_OUTPUT"
@@ -321,7 +363,7 @@ jobs:
             - Branch: ${{ github.ref_name }}
             - Commit: ${{ github.sha }}
             - Run: ${{ github.run_id }}
-          name: feature-testing prerelease v${{ needs.prepare_feature_testing_prerelease.outputs.feature_testing_version }}
+          name: Feature-testing branch prerelease v${{ needs.prepare_feature_testing_prerelease.outputs.feature_testing_version }}
           fail_on_unmatched_files: true
           prerelease: true
           tag_name: v${{ needs.prepare_feature_testing_prerelease.outputs.feature_testing_version }}
