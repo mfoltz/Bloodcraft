@@ -6,6 +6,7 @@ REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 
 SHELL_SCRIPTS=(
     "$REPO_ROOT/.codex/install.sh"
+    "$REPO_ROOT/.codex/scripts/version-metadata.sh"
     "$REPO_ROOT/.codex/shellcheck.sh"
 )
 
