@@ -12,14 +12,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  preflight:
+  validation:
     permissions:
       contents: read
     runs-on: ubuntu-latest
     outputs:
       should_build: ${{ steps.check_release.outputs.should_build }}
       reason: ${{ steps.check_release.outputs.reason }}
-      version: ${{ steps.read_version.outputs.version }}
+      canonical_version: ${{ steps.read_version.outputs.version }}
       matched_tag: ${{ steps.check_release.outputs.matched_tag }}
       csproj_file: ${{ steps.discover_csproj.outputs.csproj_file }}
 
@@ -45,7 +45,7 @@ jobs:
 
           echo "csproj_file=$csproj_file" >> "$GITHUB_OUTPUT"
 
-      - name: Read version from .csproj
+      - name: Read canonical version from .csproj
         id: read_version
         shell: bash
         run: |
@@ -74,8 +74,10 @@ jobs:
               return;
             }
 
-            if (context.eventName === 'workflow_dispatch') {
-              const reason = `Manual dispatch for version ${currentVersion}; allowing build.`;
+            if (context.eventName === 'workflow_dispatch' || context.ref === 'refs/heads/codex/feature-testing') {
+              const reason = context.eventName === 'workflow_dispatch'
+                ? `Manual dispatch for version ${currentVersion}; allowing build.`
+                : `Feature-testing branch snapshot for canonical version ${currentVersion}; allowing build.`;
               core.info(reason);
               core.setOutput('should_build', 'true');
               core.setOutput('reason', reason);
@@ -113,20 +115,23 @@ jobs:
             core.setOutput('reason', reason);
             core.setOutput('matched_tag', '');
 
-  build:
-    needs: preflight
-    if: needs.preflight.outputs.should_build == 'true'
+  prepare_prerelease:
+    needs: validation
+    if: needs.validation.outputs.should_build == 'true' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
     runs-on: ubuntu-latest
+    outputs:
+      canonical_version: ${{ needs.validation.outputs.canonical_version }}
+      csproj_file: ${{ needs.validation.outputs.csproj_file }}
 
     steps:
-      - name: Log preflight decision
+      - name: Log validation decision
         run: |
-          echo "Preflight decision: ${{ needs.preflight.outputs.should_build }}"
-          echo "Reason: ${{ needs.preflight.outputs.reason }}"
-          echo "Version: ${{ needs.preflight.outputs.version }}"
-          echo "Matched release tag: ${{ needs.preflight.outputs.matched_tag || 'none' }}"
+          echo "Validation decision: ${{ needs.validation.outputs.should_build }}"
+          echo "Reason: ${{ needs.validation.outputs.reason }}"
+          echo "Canonical version: ${{ needs.validation.outputs.canonical_version }}"
+          echo "Matched release tag: ${{ needs.validation.outputs.matched_tag || 'none' }}"
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -134,29 +139,9 @@ jobs:
           fetch-depth: 1
           fetch-tags: false
 
-      - name: Discover .csproj
-        id: discover_csproj
-        run: |
-          echo "csproj_file=${{ needs.preflight.outputs.csproj_file }}" >> "$GITHUB_OUTPUT"
-
-      - name: Get DLL name
-        id: get_dll_name
-        run: |
-          csproj="${{ steps.discover_csproj.outputs.csproj_file }}"
-          dll_name=$(basename "$csproj" .csproj)
-          echo "dll_name=$dll_name" >> "$GITHUB_OUTPUT"
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 7.0.x
-
-      - name: Restore dependencies
-        run: dotnet restore
-
       - name: Update thunderstore.toml
         run: |
-          version='${{ needs.preflight.outputs.version }}'
+          version='${{ needs.validation.outputs.canonical_version }}'
 
           if [ -z "$version" ]; then
             echo "Version is empty; skipping thunderstore.toml update."
@@ -176,9 +161,40 @@ jobs:
             echo "No changes to commit in thunderstore.toml"
           fi
 
-      - name: Build (Release)
+  publish_prerelease:
+    needs:
+      - validation
+      - prepare_prerelease
+    if: needs.validation.outputs.should_build == 'true' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          fetch-tags: false
+
+      - name: Get DLL name
+        id: get_dll_name
         run: |
-          version='${{ needs.preflight.outputs.version }}'
+          csproj="${{ needs.validation.outputs.csproj_file }}"
+          dll_name=$(basename "$csproj" .csproj)
+          echo "dll_name=$dll_name" >> "$GITHUB_OUTPUT"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build prerelease artifact
+        run: |
+          version='${{ needs.validation.outputs.canonical_version }}'
 
           if [ -n "$version" ]; then
             dotnet build . --configuration Release -p:Version=$version -p:RunGenerateREADME=false
@@ -188,16 +204,105 @@ jobs:
 
       - name: GH Release (pre-release)
         uses: softprops/action-gh-release@v1
-        if: needs.preflight.outputs.version != ''
+        if: needs.validation.outputs.canonical_version != ''
         with:
           body: |
-            Automated pre-release for version ${{ needs.preflight.outputs.version }} generated from this GitHub Actions build.
+            Automated pre-release for version ${{ needs.validation.outputs.canonical_version }} generated from this GitHub Actions build.
             - Commit: ${{ github.sha }}
             - Run: ${{ github.run_id }}
-          name: Pre-release v${{ needs.preflight.outputs.version }}
+          name: Pre-release v${{ needs.validation.outputs.canonical_version }}
           fail_on_unmatched_files: true
           prerelease: true
-          tag_name: v${{ needs.preflight.outputs.version }}-pre
+          tag_name: v${{ needs.validation.outputs.canonical_version }}-pre
+          files: |
+            ./bin/Release/net6.0/${{ steps.get_dll_name.outputs.dll_name }}.dll
+            CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  prepare_feature_testing_prerelease:
+    needs: validation
+    if: needs.validation.outputs.should_build == 'true' && github.ref == 'refs/heads/codex/feature-testing'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      feature_testing_version: ${{ steps.derive_version.outputs.feature_testing_version }}
+
+    steps:
+      - name: Log validation decision
+        run: |
+          echo "Validation decision: ${{ needs.validation.outputs.should_build }}"
+          echo "Reason: ${{ needs.validation.outputs.reason }}"
+          echo "Canonical version: ${{ needs.validation.outputs.canonical_version }}"
+
+      - name: Derive feature-testing version
+        id: derive_version
+        shell: bash
+        run: |
+          canonical_version='${{ needs.validation.outputs.canonical_version }}'
+
+          if [ -z "$canonical_version" ]; then
+            echo "Canonical version is empty; cannot derive feature-testing version." >&2
+            exit 1
+          fi
+
+          feature_testing_version="${canonical_version}-ft.${GITHUB_RUN_NUMBER}.${GITHUB_RUN_ATTEMPT}"
+
+          echo "Derived feature-testing version: $feature_testing_version"
+          echo "feature_testing_version=$feature_testing_version" >> "$GITHUB_OUTPUT"
+
+  publish_feature_testing_prerelease:
+    needs:
+      - validation
+      - prepare_feature_testing_prerelease
+    if: needs.validation.outputs.should_build == 'true' && github.ref == 'refs/heads/codex/feature-testing'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          fetch-tags: false
+
+      - name: Get DLL name
+        id: get_dll_name
+        run: |
+          csproj="${{ needs.validation.outputs.csproj_file }}"
+          dll_name=$(basename "$csproj" .csproj)
+          echo "dll_name=$dll_name" >> "$GITHUB_OUTPUT"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build feature-testing snapshot artifact
+        run: |
+          feature_testing_version='${{ needs.prepare_feature_testing_prerelease.outputs.feature_testing_version }}'
+          dotnet build . --configuration Release -p:Version=$feature_testing_version -p:RunGenerateREADME=false
+
+      - name: GH Release (feature-testing snapshot)
+        uses: softprops/action-gh-release@v1
+        if: needs.prepare_feature_testing_prerelease.outputs.feature_testing_version != ''
+        with:
+          body: |
+            Disposable feature-testing branch snapshot for validation and smoke testing only.
+            - Snapshot version: ${{ needs.prepare_feature_testing_prerelease.outputs.feature_testing_version }}
+            - Canonical version: ${{ needs.validation.outputs.canonical_version }}
+            - Branch: ${{ github.ref_name }}
+            - Commit: ${{ github.sha }}
+            - Run: ${{ github.run_id }}
+          name: feature-testing prerelease v${{ needs.prepare_feature_testing_prerelease.outputs.feature_testing_version }}
+          fail_on_unmatched_files: true
+          prerelease: true
+          tag_name: v${{ needs.prepare_feature_testing_prerelease.outputs.feature_testing_version }}
           files: |
             ./bin/Release/net6.0/${{ steps.get_dll_name.outputs.dll_name }}.dll
             CHANGELOG.md

@@ -10,6 +10,25 @@ BEPINEX_PLUGIN_DIR="${BEPINEX_PLUGIN_DIR:-}"
 DOTNET_INSTALLED=0
 REQUIRED_RUNTIME="Microsoft.NETCore.App 6.0"
 
+ensure_python_yaml() {
+    if ! command -v python3 >/dev/null 2>&1; then
+        echo "python3 not found; skipping PyYAML installation." >&2
+        return
+    fi
+
+    if python3 - <<'PY' >/dev/null 2>&1
+import yaml
+PY
+    then
+        echo "PyYAML already installed for python3"
+        return
+    fi
+
+    echo "Installing PyYAML for python3 user site-packages..."
+    python3 -m ensurepip --upgrade >/dev/null 2>&1 || true
+    python3 -m pip install --user PyYAML
+}
+
 install_dotnet() {
     mkdir -p "$INSTALL_DIR"
     local install_script
@@ -48,6 +67,8 @@ if command -v dotnet >/dev/null 2>&1; then
 else
     install_dotnet
 fi
+
+ensure_python_yaml
 
 if [ ! -f "$PROJECT_PATH" ]; then
     echo "Project file not found at $PROJECT_PATH" >&2
