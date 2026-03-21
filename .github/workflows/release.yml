@@ -45,6 +45,10 @@ jobs:
           echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
           echo "RELEASE_TAG=$latest_tag" >> "$GITHUB_ENV"
 
+      - name: Validate version metadata against release tag
+        id: version_metadata
+        run: ./.codex/scripts/version-metadata.sh --check-tag "${{ steps.extract_tag.outputs.latest_tag }}"
+
       - name: Download release assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
