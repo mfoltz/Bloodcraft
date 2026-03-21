@@ -7,20 +7,27 @@ jobs:
   release_on_thunderstore:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate canonical version metadata
+        id: version_metadata
+        shell: bash
+        run: ./.codex/scripts/version-metadata.sh
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
           dotnet-quality: 'preview'
 
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Select eligible release tag
         id: select_tag
         run: |
+          canonical_version='${{ steps.version_metadata.outputs.canonical_version }}'
+
           # Feature-testing prereleases (v*-ft.*) are disposable CI artifacts and must never drive Thunderstore publication.
           tag_pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-pre)?$'
           excluded_pattern='^v.*-ft\..*$'
@@ -38,6 +45,11 @@ jobs:
 
           selected_tag="${eligible_tags[0]}"
           package_version="${selected_tag#v}"
+
+          if [[ "$package_version" != "$canonical_version" && "$package_version" != "$canonical_version-pre" ]]; then
+            echo "Error: Selected release tag '$selected_tag' does not align with canonical version '$canonical_version'." >&2
+            exit 1
+          fi
 
           echo "Eligible Thunderstore tags: ${eligible_tags[*]}"
           echo "Selected Thunderstore tag: $selected_tag"

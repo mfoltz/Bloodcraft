@@ -151,6 +151,10 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Validate canonical version metadata
+        shell: bash
+        run: ./.codex/scripts/version-metadata.sh
+
       - name: Restore dependencies
         run: dotnet restore -p:CheckEolTargetFramework=false
 
@@ -242,6 +246,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
+      - name: Validate canonical version metadata
+        shell: bash
+        run: ./.codex/scripts/version-metadata.sh
 
       - name: Restore dependencies
         run: dotnet restore -p:CheckEolTargetFramework=false
@@ -343,6 +351,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
+      - name: Validate canonical version metadata
+        shell: bash
+        run: ./.codex/scripts/version-metadata.sh
 
       - name: Restore dependencies
         run: dotnet restore -p:CheckEolTargetFramework=false
