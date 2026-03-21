@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build_validation:
+  validate_build_inputs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -76,6 +76,15 @@ jobs:
               return;
             }
 
+            if (context.eventName !== 'push') {
+              const reason = `Running validation-only workflow for ${context.eventName}; allowing build verification for canonical version ${currentVersion}.`;
+              core.info(reason);
+              core.setOutput('should_build', 'true');
+              core.setOutput('reason', reason);
+              core.setOutput('matched_tag', '');
+              return;
+            }
+
             if (context.ref === 'refs/heads/codex/feature-testing') {
               const reason = `Feature-testing branch snapshot derived from canonical version ${currentVersion}; allowing build.`;
               core.info(reason);
@@ -115,12 +124,53 @@ jobs:
             core.setOutput('reason', reason);
             core.setOutput('matched_tag', '');
 
+  build_verification:
+    needs:
+      - validate_build_inputs
+    if: needs.validate_build_inputs.outputs.should_build == 'true'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Log validation decision
+        run: |
+          echo "Validation decision: ${{ needs.validate_build_inputs.outputs.should_build }}"
+          echo "Reason: ${{ needs.validate_build_inputs.outputs.reason }}"
+          echo "Canonical version: ${{ needs.validate_build_inputs.outputs.canonical_version }}"
+          echo "Matched release tag: ${{ needs.validate_build_inputs.outputs.matched_tag || 'none' }}"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          fetch-tags: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build validation artifact
+        run: |
+          version='${{ needs.validate_build_inputs.outputs.canonical_version }}'
+
+          if [ -n "$version" ]; then
+            dotnet build . --configuration Release -p:Version=$version -p:RunGenerateREADME=false
+          else
+            dotnet build . --configuration Release -p:RunGenerateREADME=false
+          fi
+
   publish_prerelease:
     needs:
-      - build_validation
+      - validate_build_inputs
+      - build_verification
     if: >-
       github.event_name == 'push' &&
-      needs.build_validation.outputs.should_build == 'true' &&
+      needs.validate_build_inputs.outputs.should_build == 'true' &&
       github.ref == 'refs/heads/main'
     permissions:
       contents: write
@@ -129,10 +179,10 @@ jobs:
     steps:
       - name: Log validation decision
         run: |
-          echo "Validation decision: ${{ needs.build_validation.outputs.should_build }}"
-          echo "Reason: ${{ needs.build_validation.outputs.reason }}"
-          echo "Canonical version: ${{ needs.build_validation.outputs.canonical_version }}"
-          echo "Matched release tag: ${{ needs.build_validation.outputs.matched_tag || 'none' }}"
+          echo "Validation decision: ${{ needs.validate_build_inputs.outputs.should_build }}"
+          echo "Reason: ${{ needs.validate_build_inputs.outputs.reason }}"
+          echo "Canonical version: ${{ needs.validate_build_inputs.outputs.canonical_version }}"
+          echo "Matched release tag: ${{ needs.validate_build_inputs.outputs.matched_tag || 'none' }}"
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -143,7 +193,7 @@ jobs:
       - name: Get DLL name
         id: get_dll_name
         run: |
-          csproj="${{ needs.build_validation.outputs.csproj_file }}"
+          csproj="${{ needs.validate_build_inputs.outputs.csproj_file }}"
           dll_name=$(basename "$csproj" .csproj)
           echo "dll_name=$dll_name" >> "$GITHUB_OUTPUT"
 
@@ -157,7 +207,7 @@ jobs:
 
       - name: Build prerelease artifact
         run: |
-          version='${{ needs.build_validation.outputs.canonical_version }}'
+          version='${{ needs.validate_build_inputs.outputs.canonical_version }}'
 
           if [ -n "$version" ]; then
             dotnet build . --configuration Release -p:Version=$version -p:RunGenerateREADME=false
@@ -167,16 +217,16 @@ jobs:
 
       - name: GH Release (pre-release)
         uses: softprops/action-gh-release@v1
-        if: needs.build_validation.outputs.canonical_version != ''
+        if: needs.validate_build_inputs.outputs.canonical_version != ''
         with:
           body: |
-            Automated pre-release for version ${{ needs.build_validation.outputs.canonical_version }} generated from this GitHub Actions build.
+            Automated pre-release for version ${{ needs.validate_build_inputs.outputs.canonical_version }} generated from this GitHub Actions build.
             - Commit: ${{ github.sha }}
             - Run: ${{ github.run_id }}
-          name: Pre-release v${{ needs.build_validation.outputs.canonical_version }}
+          name: Pre-release v${{ needs.validate_build_inputs.outputs.canonical_version }}
           fail_on_unmatched_files: true
           prerelease: true
-          tag_name: v${{ needs.build_validation.outputs.canonical_version }}-pre
+          tag_name: v${{ needs.validate_build_inputs.outputs.canonical_version }}-pre
           files: |
             ./bin/Release/net6.0/${{ steps.get_dll_name.outputs.dll_name }}.dll
             CHANGELOG.md
@@ -184,10 +234,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   prepare_feature_testing_prerelease:
-    needs: build_validation
+    needs:
+      - validate_build_inputs
+      - build_verification
     if: >-
       github.event_name == 'push' &&
-      needs.build_validation.outputs.should_build == 'true' &&
+      needs.validate_build_inputs.outputs.should_build == 'true' &&
       github.ref == 'refs/heads/codex/feature-testing'
     permissions:
       contents: read
@@ -198,15 +250,15 @@ jobs:
     steps:
       - name: Log validation decision
         run: |
-          echo "Validation decision: ${{ needs.build_validation.outputs.should_build }}"
-          echo "Reason: ${{ needs.build_validation.outputs.reason }}"
-          echo "Canonical version: ${{ needs.build_validation.outputs.canonical_version }}"
+          echo "Validation decision: ${{ needs.validate_build_inputs.outputs.should_build }}"
+          echo "Reason: ${{ needs.validate_build_inputs.outputs.reason }}"
+          echo "Canonical version: ${{ needs.validate_build_inputs.outputs.canonical_version }}"
 
       - name: Derive feature-testing version
         id: derive_version
         shell: bash
         run: |
-          canonical_version='${{ needs.build_validation.outputs.canonical_version }}'
+          canonical_version='${{ needs.validate_build_inputs.outputs.canonical_version }}'
 
           if [ -z "$canonical_version" ]; then
             echo "Canonical version is empty; cannot derive feature-testing version." >&2
@@ -220,11 +272,12 @@ jobs:
 
   publish_feature_testing_prerelease:
     needs:
-      - build_validation
+      - validate_build_inputs
+      - build_verification
       - prepare_feature_testing_prerelease
     if: >-
       github.event_name == 'push' &&
-      needs.build_validation.outputs.should_build == 'true' &&
+      needs.validate_build_inputs.outputs.should_build == 'true' &&
       github.ref == 'refs/heads/codex/feature-testing'
     permissions:
       contents: write
@@ -240,7 +293,7 @@ jobs:
       - name: Get DLL name
         id: get_dll_name
         run: |
-          csproj="${{ needs.build_validation.outputs.csproj_file }}"
+          csproj="${{ needs.validate_build_inputs.outputs.csproj_file }}"
           dll_name=$(basename "$csproj" .csproj)
           echo "dll_name=$dll_name" >> "$GITHUB_OUTPUT"
 
@@ -264,7 +317,7 @@ jobs:
           body: |
             Disposable feature-testing branch snapshot for validation and smoke testing only.
             - Snapshot version: ${{ needs.prepare_feature_testing_prerelease.outputs.feature_testing_version }}
-            - Canonical version: ${{ needs.build_validation.outputs.canonical_version }}
+            - Canonical version: ${{ needs.validate_build_inputs.outputs.canonical_version }}
             - Branch: ${{ github.ref_name }}
             - Commit: ${{ github.sha }}
             - Run: ${{ github.run_id }}
