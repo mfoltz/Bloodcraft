@@ -35,7 +35,7 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-mapfile -t version_lines < <(python3 - <<'PY' "$REPO_ROOT" "$CHECK_TAG"
+version_output="$(python3 - <<'PY' "$REPO_ROOT" "$CHECK_TAG"
 import pathlib
 import re
 import sys
@@ -129,7 +129,19 @@ if check_tag:
     print(f"tag={check_tag}")
     print(f"tag_version={normalized_tag}")
 PY
-)
+)"
+
+if [ -z "$version_output" ]; then
+  echo "Error: Version metadata helper produced no output." >&2
+  exit 1
+fi
+
+mapfile -t version_lines <<< "$version_output"
+
+if ! printf '%s\n' "${version_lines[@]}" | grep -q '^version='; then
+  echo "Error: Version metadata helper did not emit a version= entry." >&2
+  exit 1
+fi
 
 printf '%s\n' "${version_lines[@]}"
 
