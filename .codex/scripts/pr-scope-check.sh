@@ -55,6 +55,16 @@ emit_notice() {
     echo "::notice title=$title::$message"
 }
 
+resolve_repo_root() {
+    git rev-parse --show-toplevel 2>/dev/null || pwd
+}
+
+release_file_path() {
+    local relative_path="$1"
+
+    printf '%s/%s\n' "$REPO_ROOT" "$relative_path"
+}
+
 matches_prefixes() {
     local path="$1"
     shift
@@ -145,24 +155,46 @@ is_production_code_file() {
 }
 
 extract_csproj_version() {
-    sed -nE 's|.*<Version>([^<]+)</Version>.*|\1|p' Bloodcraft.csproj | head -n 1
+    local file_path
+    file_path="$(release_file_path 'Bloodcraft.csproj')"
+
+    if [[ ! -f "$file_path" ]]; then
+        return 0
+    fi
+
+    sed -nE 's|.*<Version>([^<]+)</Version>.*|\1|p' "$file_path" | head -n 1 || true
 }
 
 extract_thunderstore_version() {
-    sed -nE 's|^versionNumber[[:space:]]*=[[:space:]]*"([^"]+)".*|\1|p' thunderstore.toml | head -n 1
+    local file_path
+    file_path="$(release_file_path 'thunderstore.toml')"
+
+    if [[ ! -f "$file_path" ]]; then
+        return 0
+    fi
+
+    sed -nE 's|^versionNumber[[:space:]]*=[[:space:]]*"([^"]+)".*|\1|p' "$file_path" | head -n 1 || true
 }
 
 extract_changelog_version() {
-    awk 'match($0, /[0-9]+(\.[0-9]+){1,3}([-+][^] ]+)?/) { print substr($0, RSTART, RLENGTH); exit }' CHANGELOG.md
+    local file_path
+    file_path="$(release_file_path 'CHANGELOG.md')"
+
+    if [[ ! -f "$file_path" ]]; then
+        return 0
+    fi
+
+    awk 'match($0, /[0-9]+(\.[0-9]+){1,3}([-+][^] ]+)?/) { print substr($0, RSTART, RLENGTH); exit }' "$file_path" || true
 }
 
+REPO_ROOT="$(resolve_repo_root)"
 RANGE="${1:-}"
 if [[ -z "$RANGE" ]]; then
     echo "Usage: $0 <git-diff-range>" >&2
     exit 1
 fi
 
-if ! changed_output="$(git diff --name-only --diff-filter=ACMRDT "$RANGE")"; then
+if ! changed_output="$(git -C "$REPO_ROOT" diff --name-only --diff-filter=ACMRDT "$RANGE")"; then
     echo "Unable to inspect changed files for range: $RANGE" >&2
     exit 1
 fi
