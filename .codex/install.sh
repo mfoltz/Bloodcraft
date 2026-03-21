@@ -5,10 +5,39 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 PROJECT_PATH="$REPO_ROOT/Bloodcraft.csproj"
 INSTALL_DIR="${DOTNET_INSTALL_DIR:-$HOME/.dotnet}"
-CHANNEL="${DOTNET_INSTALL_CHANNEL:-8.0}"
+REQUIRED_SDK_CHANNEL="${DOTNET_INSTALL_CHANNEL:-8.0}"
 BEPINEX_PLUGIN_DIR="${BEPINEX_PLUGIN_DIR:-}"
-DOTNET_INSTALLED=0
-REQUIRED_RUNTIME="Microsoft.NETCore.App 6.0"
+REQUIRED_TARGET_RUNTIME="Microsoft.NETCore.App 6.0"
+REQUIRED_SDK_VERSION="$(awk -F '"' '/"version"/ { print $4; exit }' "$REPO_ROOT/global.json")"
+REQUIRED_SDK_MAJOR="${REQUIRED_SDK_VERSION%%.*}"
+SDK_BOOTSTRAPPED=0
+
+if [ -z "$REQUIRED_SDK_VERSION" ]; then
+    echo "Unable to determine the required .NET SDK version from $REPO_ROOT/global.json" >&2
+    exit 1
+fi
+
+get_dotnet_sdk_version() {
+    local dotnet_cmd="${1:-dotnet}"
+
+    if ! command -v "$dotnet_cmd" >/dev/null 2>&1; then
+        return 1
+    fi
+
+    "$dotnet_cmd" --version 2>/dev/null
+}
+
+is_sdk_version_adequate() {
+    local sdk_version="$1"
+    local sdk_major="${sdk_version%%.*}"
+
+    [[ -n "$sdk_version" && "$sdk_major" =~ ^[0-9]+$ && "$sdk_major" -ge "$REQUIRED_SDK_MAJOR" ]]
+}
+
+log_sdk_requirement() {
+    local detected_sdk_version="${1:-not detected}"
+    echo "Detected .NET SDK version: $detected_sdk_version | Required SDK channel: $REQUIRED_SDK_CHANNEL | Required SDK version: >= $REQUIRED_SDK_VERSION | Target runtime: $REQUIRED_TARGET_RUNTIME"
+}
 
 ensure_python_yaml() {
     if ! command -v python3 >/dev/null 2>&1; then
@@ -36,7 +65,7 @@ install_dotnet() {
 
     curl -sSL https://dot.net/v1/dotnet-install.sh -o "$install_script"
 
-    bash "$install_script" --install-dir "$INSTALL_DIR" --channel "$CHANNEL"
+    bash "$install_script" --install-dir "$INSTALL_DIR" --channel "$REQUIRED_SDK_CHANNEL" --version "$REQUIRED_SDK_VERSION"
 
     rm -f "$install_script"
 
@@ -44,28 +73,36 @@ install_dotnet() {
     export PATH="$INSTALL_DIR:$INSTALL_DIR/tools:$PATH"
     hash -r
 
-    if command -v dotnet >/dev/null 2>&1; then
-        echo "Installed .NET SDK $(dotnet --version) to $INSTALL_DIR"
+    local installed_sdk_version
+    installed_sdk_version="$(get_dotnet_sdk_version dotnet || true)"
+
+    if is_sdk_version_adequate "$installed_sdk_version"; then
+        echo "Installed .NET SDK $installed_sdk_version to $INSTALL_DIR"
         echo "Add the following to your shell profile to use it outside this script:"
         echo "export DOTNET_ROOT=\"$INSTALL_DIR\""
         echo "export PATH=\"$INSTALL_DIR:$INSTALL_DIR/tools:\$PATH\""
     else
-        echo "Installation completed but dotnet is not on PATH. Add $INSTALL_DIR to PATH manually." >&2
+        echo "Installation completed but an adequate dotnet SDK is not on PATH. Expected >= $REQUIRED_SDK_VERSION, found ${installed_sdk_version:-none}." >&2
         exit 1
     fi
 }
 
-if command -v dotnet >/dev/null 2>&1; then
-    echo ".NET SDK already installed: $(dotnet --version)"
-    # Inspect the installed runtimes to ensure the required Microsoft.NETCore.App 6.0 runtime is available.
-    if dotnet --list-runtimes 2>/dev/null | grep -q "^Microsoft.NETCore.App 6\\.0"; then
-        DOTNET_INSTALLED=1
-    else
-        echo "Microsoft.NETCore.App 6.0 runtime not found; installing local runtime into $INSTALL_DIR"
-        install_dotnet
-    fi
+DETECTED_SDK_VERSION="$(get_dotnet_sdk_version dotnet || true)"
+log_sdk_requirement "${DETECTED_SDK_VERSION:-not detected}"
+
+if is_sdk_version_adequate "$DETECTED_SDK_VERSION"; then
+    echo ".NET SDK already installed and meets repository requirements: $DETECTED_SDK_VERSION"
+    SDK_BOOTSTRAPPED=1
 else
+    if [ -n "$DETECTED_SDK_VERSION" ]; then
+        echo "Installed .NET SDK $DETECTED_SDK_VERSION does not meet repository requirements; installing repo-managed SDK into $INSTALL_DIR"
+    else
+        echo "dotnet SDK not found; installing repo-managed SDK into $INSTALL_DIR"
+    fi
+
     install_dotnet
+    DETECTED_SDK_VERSION="$(get_dotnet_sdk_version dotnet || true)"
+    log_sdk_requirement "${DETECTED_SDK_VERSION:-not detected}"
 fi
 
 ensure_python_yaml
@@ -101,6 +138,6 @@ else
     echo "Set BEPINEX_PLUGIN_DIR to copy the built DLL into your BepInEx plugins directory."
 fi
 
-if [ "$DOTNET_INSTALLED" -eq 1 ]; then
+if [ "$SDK_BOOTSTRAPPED" -eq 1 ]; then
     exit 0
 fi
