@@ -38,6 +38,8 @@ read_thunderstore_version() {
 
 read_latest_changelog_entry() {
     local entry
+    # shellcheck disable=SC2016
+    # sed needs literal backticks to match the repo's changelog header format.
     entry=$(sed -n '/^`[^`][^`]*`$/ { s/^`//; s/`$//; p; q; }' "$CHANGELOG_PATH" | tr -d '\r')
 
     if [ -z "$entry" ]; then
