@@ -58,6 +58,37 @@ PY
     python3 -m pip install --user PyYAML
 }
 
+ensure_shellcheck() {
+    if command -v shellcheck >/dev/null 2>&1; then
+        echo "shellcheck already installed"
+        return
+    fi
+
+    echo "shellcheck not found; attempting to install shell lint tooling..."
+
+    if command -v apt-get >/dev/null 2>&1; then
+        apt-get update && apt-get install -y shellcheck
+        return
+    fi
+
+    if command -v brew >/dev/null 2>&1; then
+        brew install shellcheck
+        return
+    fi
+
+    if command -v dnf >/dev/null 2>&1; then
+        dnf install -y shellcheck
+        return
+    fi
+
+    if command -v yum >/dev/null 2>&1; then
+        yum install -y shellcheck
+        return
+    fi
+
+    echo "shellcheck could not be installed automatically because no supported package manager was found. Shell linting is unavailable in this environment." >&2
+}
+
 install_dotnet() {
     mkdir -p "$INSTALL_DIR"
     local install_script
@@ -106,6 +137,7 @@ else
 fi
 
 ensure_python_yaml
+ensure_shellcheck
 
 if [ ! -f "$PROJECT_PATH" ]; then
     echo "Project file not found at $PROJECT_PATH" >&2
