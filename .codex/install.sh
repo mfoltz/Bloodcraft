@@ -6,7 +6,7 @@ REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 cd "$REPO_ROOT"
 PROJECT_PATH="$REPO_ROOT/Bloodcraft.csproj"
 INSTALL_DIR="${DOTNET_INSTALL_DIR:-$HOME/.dotnet}"
-SDK_CHANNEL="${DOTNET_INSTALL_CHANNEL:-8.0}"
+SDK_VERSION="${DOTNET_SDK_VERSION:-8.0.100}"
 TARGET_FRAMEWORK="net6.0"
 BEPINEX_PLUGIN_DIR="${BEPINEX_PLUGIN_DIR:-}"
 DOTNET_INSTALLED=0
@@ -46,7 +46,7 @@ install_dotnet() {
     install_script="$(mktemp)"
 
     curl -sSL https://dot.net/v1/dotnet-install.sh -o "$install_script"
-    bash "$install_script" --install-dir "$INSTALL_DIR" --channel "$SDK_CHANNEL"
+    bash "$install_script" --install-dir "$INSTALL_DIR" --version "$SDK_VERSION"
     rm -f "$install_script"
 
     export DOTNET_ROOT="$INSTALL_DIR"
