@@ -18,35 +18,64 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Extract Latest Tag
-        id: extract_tag
+      - name: Select eligible release tag
+        id: select_tag
         run: |
-          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
-        shell: bash
+          # Feature-testing prereleases (v*-ft.*) are disposable CI artifacts and must never drive Thunderstore publication.
+          tag_pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-pre)?$'
+          excluded_pattern='^v.*-ft\..*$'
 
-      - name: Set Release Tag
-        run: echo "RELEASE_TAG=${{ env.latest_tag }}" >> $GITHUB_ENV
+          mapfile -t eligible_tags < <(
+            git tag --sort=-v:refname \
+              | grep -E "$tag_pattern" \
+              | grep -Ev "$excluded_pattern"
+          )
+
+          if [[ ${#eligible_tags[@]} -eq 0 ]]; then
+            echo "Error: No eligible Thunderstore release tag found. Expected a stable tag (vX.Y.Z) or shared prerelease tag (vX.Y.Z-pre), excluding feature-testing tags (v*-ft.*)." >&2
+            exit 1
+          fi
+
+          selected_tag="${eligible_tags[0]}"
+          package_version="${selected_tag#v}"
+
+          echo "Eligible Thunderstore tags: ${eligible_tags[*]}"
+          echo "Selected Thunderstore tag: $selected_tag"
+          echo "Thunderstore package version: $package_version"
+
+          echo "RELEASE_TAG=$selected_tag" >> "$GITHUB_ENV"
+          echo "PACKAGE_VERSION=$package_version" >> "$GITHUB_ENV"
+        shell: bash
 
       - name: Download Release
         run: |
-          gh release download ${{ env.RELEASE_TAG }} -D ./dist
+          gh release download "$RELEASE_TAG" -D ./dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
 
       - name: Install Thunderstore CLI (tcli)
         run: dotnet tool install --global tcli
 
       - name: Publish build to Thunderstore
         run: |
-          sanitized_tag=${RELEASE_TAG#v}
-          sanitized_tag=${sanitized_tag%%-*}
-
-          if [[ ! $sanitized_tag =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Error: Release tag '$RELEASE_TAG' does not conform to Major.Minor.Patch after sanitization ('$sanitized_tag')." >&2
+          if [[ ! $RELEASE_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-pre)?$ ]]; then
+            echo "Error: Release tag '$RELEASE_TAG' is not an allowed Thunderstore source tag." >&2
             exit 1
           fi
 
-          tcli publish --token ${{ secrets.THUNDERSTORE_KEY }} --package-version "$sanitized_tag"
+          if [[ $RELEASE_TAG =~ ^v.*-ft\..*$ ]]; then
+            echo "Error: Feature-testing tag '$RELEASE_TAG' is excluded from Thunderstore publication." >&2
+            exit 1
+          fi
+
+          if [[ ! $PACKAGE_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-pre)?$ ]]; then
+            echo "Error: Package version '$PACKAGE_VERSION' derived from '$RELEASE_TAG' is not an allowed Thunderstore package version." >&2
+            exit 1
+          fi
+
+          echo "Publishing Thunderstore package version: $PACKAGE_VERSION"
+          tcli publish --token ${{ secrets.THUNDERSTORE_KEY }} --package-version "$PACKAGE_VERSION"
         env:
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
