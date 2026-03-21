@@ -1,5 +1,13 @@
 # Contributing
 
+## Release versioning
+
+Treat version updates as an intentional release activity, not default PR housekeeping.
+
+- Process-only, docs-only, workflow-only, and other non-release-facing changes should not claim, imply, or advertise version bumps in commit messages, PR titles, PR summaries, or checklists.
+- Release-facing changes should update `Bloodcraft.csproj`, `CHANGELOG.md`, and `thunderstore.toml` together so shipped version metadata stays synchronized.
+- Keep release metadata churn minimal. If a PR does not intentionally ship a release-facing change, leave version numbers and changelog entries alone.
+
 ## `minor-feature` label
 
 Use the `minor-feature` label for pull requests that add or adjust a small, contributor-contained feature without widening into a broader release-sized change.
@@ -18,6 +26,6 @@ Expected scope:
 
 Workflow, configuration, and release churn should usually be deliberate rather than incidental. If a feature change needs workflow updates, config surface changes, migration steps, or release-note churn, include them only when they are directly required by the feature and call them out explicitly in **What changed** or **Why**.
 
-For workflow-only, process-only, and docs-only PRs, keep commit titles and PR descriptions aligned with what actually shipped. Do not claim a version bump unless `Bloodcraft.csproj`, `thunderstore.toml`, and `CHANGELOG.md` are all being updated together as part of a deliberate release-facing change.
+For workflow-only, process-only, and docs-only PRs, keep commit titles and PR descriptions aligned with what actually shipped. Do not claim or imply a version bump unless `Bloodcraft.csproj`, `CHANGELOG.md`, and `thunderstore.toml` are all being updated together as part of a deliberate release-facing change.
 
 Use `minor-feature` as the final label name in contributor docs, reviews, and PR discussions. Do not switch between `minor-feature` and earlier draft terms such as `small-feature`; keeping the terminology consistent helps reviewers match labels, automation, and the PR template guidance.
