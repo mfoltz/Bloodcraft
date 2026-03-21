@@ -20,8 +20,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '6.0.x'
-          dotnet-quality: 'preview'
+          # Keep release publishing on the same repo-managed SDK line as global.json,
+          # .codex/install.sh, and the main build workflow.
+          dotnet-version: '8.0.x'
 
       - name: Select eligible release tag
         id: select_tag
