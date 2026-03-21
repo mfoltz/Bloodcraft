@@ -28,18 +28,19 @@ jobs:
         run: |
           canonical_version='${{ steps.version_metadata.outputs.canonical_version }}'
 
-          # Feature-testing prereleases (v*-ft.*) are disposable CI artifacts and must never drive Thunderstore publication.
-          tag_pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-pre)?$'
-          excluded_pattern='^v.*-ft\..*$'
+          # Thunderstore accepts canonical stable releases (vX.Y.Z) and shared prereleases (vX.Y.Z-pre).
+          # Feature-testing snapshots (v*-ft.*) are disposable CI artifacts and must never drive publication.
+          allowed_tag_pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-pre)?$'
+          allowed_package_version_pattern='^[0-9]+\.[0-9]+\.[0-9]+(-pre)?$'
 
           mapfile -t eligible_tags < <(
             git tag --sort=-v:refname \
-              | grep -E "$tag_pattern" \
-              | grep -Ev "$excluded_pattern"
+              | grep -E "$allowed_tag_pattern"
           )
 
           if [[ ${#eligible_tags[@]} -eq 0 ]]; then
-            echo "Error: No eligible Thunderstore release tag found. Expected a stable tag (vX.Y.Z) or shared prerelease tag (vX.Y.Z-pre), excluding feature-testing tags (v*-ft.*)." >&2
+            echo "Error: No eligible Thunderstore release tag found." >&2
+            echo "Expected one of: vX.Y.Z or vX.Y.Z-pre. Feature-testing tags such as v*-ft.* are intentionally excluded." >&2
             exit 1
           fi
 
@@ -57,6 +58,8 @@ jobs:
 
           echo "RELEASE_TAG=$selected_tag" >> "$GITHUB_ENV"
           echo "PACKAGE_VERSION=$package_version" >> "$GITHUB_ENV"
+          echo "ALLOWED_TAG_PATTERN=$allowed_tag_pattern" >> "$GITHUB_ENV"
+          echo "ALLOWED_PACKAGE_VERSION_PATTERN=$allowed_package_version_pattern" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Download Release
@@ -71,17 +74,12 @@ jobs:
 
       - name: Publish build to Thunderstore
         run: |
-          if [[ ! $RELEASE_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-pre)?$ ]]; then
+          if [[ ! $RELEASE_TAG =~ $ALLOWED_TAG_PATTERN ]]; then
             echo "Error: Release tag '$RELEASE_TAG' is not an allowed Thunderstore source tag." >&2
             exit 1
           fi
 
-          if [[ $RELEASE_TAG =~ ^v.*-ft\..*$ ]]; then
-            echo "Error: Feature-testing tag '$RELEASE_TAG' is excluded from Thunderstore publication." >&2
-            exit 1
-          fi
-
-          if [[ ! $PACKAGE_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-pre)?$ ]]; then
+          if [[ ! $PACKAGE_VERSION =~ $ALLOWED_PACKAGE_VERSION_PATTERN ]]; then
             echo "Error: Package version '$PACKAGE_VERSION' derived from '$RELEASE_TAG' is not an allowed Thunderstore package version." >&2
             exit 1
           fi
@@ -91,3 +89,5 @@ jobs:
         env:
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
           PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+          ALLOWED_TAG_PATTERN: ${{ env.ALLOWED_TAG_PATTERN }}
+          ALLOWED_PACKAGE_VERSION_PATTERN: ${{ env.ALLOWED_PACKAGE_VERSION_PATTERN }}
