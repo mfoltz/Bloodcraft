@@ -114,15 +114,13 @@ jobs:
             core.setOutput('reason', reason);
             core.setOutput('matched_tag', '');
 
-  prepare_prerelease:
-    needs: validation
+  publish_prerelease:
+    needs:
+      - validation
     if: needs.validation.outputs.should_build == 'true' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
     runs-on: ubuntu-latest
-    outputs:
-      canonical_version: ${{ needs.validation.outputs.canonical_version }}
-      csproj_file: ${{ needs.validation.outputs.csproj_file }}
 
     steps:
       - name: Log validation decision
@@ -132,44 +130,6 @@ jobs:
           echo "Canonical version: ${{ needs.validation.outputs.canonical_version }}"
           echo "Matched release tag: ${{ needs.validation.outputs.matched_tag || 'none' }}"
 
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          fetch-tags: false
-
-      - name: Update thunderstore.toml
-        run: |
-          version='${{ needs.validation.outputs.canonical_version }}'
-
-          if [ -z "$version" ]; then
-            echo "Version is empty; skipping thunderstore.toml update."
-            exit 0
-          fi
-
-          sed -i "s/versionNumber = \".*\"/versionNumber = \"$version\"/" thunderstore.toml
-
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-          if [ -n "$(git status --porcelain thunderstore.toml)" ]; then
-            git add thunderstore.toml
-            git commit -m "chore: Update thunderstore.toml version to $version"
-            git push origin HEAD:${{ github.ref }}
-          else
-            echo "No changes to commit in thunderstore.toml"
-          fi
-
-  publish_prerelease:
-    needs:
-      - validation
-      - prepare_prerelease
-    if: needs.validation.outputs.should_build == 'true' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-
-    steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
