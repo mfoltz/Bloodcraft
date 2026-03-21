@@ -7,7 +7,7 @@
 ## Release/versioning note
 - If this PR is workflow-only, process-only, docs-only, or otherwise does not change shipped plugin behavior, do **not** claim, imply, or headline a version bump in the PR title, summary, or checklist.
 - Release-facing changes should update `Bloodcraft.csproj`, `CHANGELOG.md`, and `thunderstore.toml` together as one intentional versioning action.
-- Keep release metadata churn minimal: if no release-facing change is intended, leave version numbers and release notes untouched.
+- Keep release metadata churn minimal: if no release-facing change is intended, leave version numbers and release notes (`CHANGELOG.md`) untouched.
 
 ## `minor-feature` label guidance
 Use the `minor-feature` label for PRs that are intentionally narrow in scope. These PRs should usually:
