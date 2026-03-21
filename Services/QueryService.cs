@@ -111,7 +111,7 @@ internal static class QueryService
             }
         }
 
-        return merged.ToArray();
+        return [..merged];
     }
 
     static ComponentType[] CloneDistinct(IReadOnlyList<ComponentType> source)
@@ -132,16 +132,16 @@ internal static class QueryService
             }
         }
 
-        return components.ToArray();
+        return [..components];
     }
 
     static QueryDescriptorData ExtractDescriptorData(EntityQueryDesc descriptor)
     {
-        ComponentType[] all = CloneDistinct(descriptor.All);
-        ComponentType[] any = CloneDistinct(descriptor.Any);
-        ComponentType[] none = CloneDistinct(descriptor.None);
-        ComponentType[] disabled = CloneDistinct(descriptor.Disabled);
-        ComponentType[] absent = CloneDistinct(descriptor.Absent);
+        ComponentType[] all = CloneDistinct([..descriptor.All]);
+        ComponentType[] any = CloneDistinct([..descriptor.Any]);
+        ComponentType[] none = CloneDistinct([..descriptor.None]);
+        ComponentType[] disabled = CloneDistinct([..descriptor.Disabled]);
+        ComponentType[] absent = CloneDistinct([..descriptor.Absent]);
 
         return new QueryDescriptorData(all, any, none, disabled, absent, descriptor.Options);
     }

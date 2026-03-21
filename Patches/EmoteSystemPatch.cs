@@ -109,7 +109,7 @@ internal static class EmoteSystemPatch
                     {
                         LocalizationService.HandleServerReply(EntityManager, user, "You can't use emote actions when using bat form!");
                     }
-                    else if (useEmoteEvent.Action.Equals(_beckonAbilityGroup) && playerCharacter.PlayerInCombat())
+                    else if (useEmoteEvent.Action.Equals(_beckonAbilityGroup) && playerCharacter.IsFighting())
                     {
                         LocalizationService.HandleServerReply(EntityManager, user, "You can't interact with your familiar during combat!");
                     }
@@ -203,7 +203,7 @@ internal static class EmoteSystemPatch
             return;
         }
 
-        if (playerCharacter.PlayerInCombat())
+        if (playerCharacter.IsFighting())
         {
             LocalizationService.HandleServerReply(EntityManager, user, "You can't toggle familiar combat mode during PvE/PvP combat!");
             return;

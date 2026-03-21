@@ -150,7 +150,7 @@ internal static class FamiliarBindingSystem
         bool battle = false, int teamIndex = -1, float3 position = default, bool allies = false)
     {
         ulong steamId = user.PlatformId;
-        Bloodcraft.Utilities.Familiars.ActiveFamiliarManager.UpdateActiveFamiliarBinding(steamId, true);
+        Utilities.Familiars.ActiveFamiliarManager.UpdateActiveFamiliarBinding(steamId, true);
 
         PrefabGUID familiarId = new(famKey);
         Entity familiar = ServerGameManager.InstantiateEntityImmediate(playerCharacter, familiarId);
@@ -773,6 +773,9 @@ internal static class FamiliarBindingSystem
                 buffResistanceElement.BuffCategory = 536871313;
                 buffer[0] = buffResistanceElement;
             }
+
+            if (familiar.Has<Script_EmeryVeinBuildupData>())
+                familiar.With((ref Script_EmeryVeinBuildupData emeryVein) => emeryVein.SpawnPrefab = PrefabGUID.Empty);
         }
     }
     static void HandleMapIcon(Entity playerCharacter, Entity familiar)

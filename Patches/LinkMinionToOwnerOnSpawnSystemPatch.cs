@@ -3,6 +3,7 @@ using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Scripting;
+using Stunlock.Core;
 using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
@@ -41,11 +42,15 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
                 else if (entityOwner.Owner.TryGetFollowedPlayer(out Entity player))
                 {
                     Entity familiar = Familiars.GetActiveFamiliar(player);
+                    bool isDangerZone = IsDangerZone(player);
 
-                    if (familiar.Exists())
+                    if (isDangerZone)
+                    {
+                        entity.Destroy(player.IsFighting());
+                    }
+                    else if (familiar.Exists())
                     {
                         HandleFamiliarMinionSpawn(familiar, entity);
-
                         entity.Write(new EntityOwner { Owner = player });
                     }
                 }
@@ -61,9 +66,21 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
         }
         finally
         {
-            entities.Dispose();
+            if (entities.IsCreated)
+                entities.Dispose();
         }
     }
+
+    static bool IsDangerZone(Entity player)
+    {
+        Entity userEntity = player.GetUserEntity();
+        if (!userEntity.TryGetComponent(out CurrentMapZone currentMapZone))
+            return false;
+
+        return currentMapZone.TerrainChunk.X == 8
+            && (currentMapZone.TerrainChunk.Y == 21 || currentMapZone.TerrainChunk.Y == 22);
+    }
+
     static void HandleFamiliarMinionSpawn(Entity familiar, Entity minion)
     {
         if (!FamiliarMinions.ContainsKey(familiar))
@@ -75,6 +92,6 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
             FamiliarMinions[familiar].Add(minion);
         }
 
-        Familiars.NothingLivesForever(minion, MINION_LIFETIME);
+        minion.NothingLivesForever(MINION_LIFETIME);
     }
 }

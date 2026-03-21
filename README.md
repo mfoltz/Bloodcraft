@@ -280,6 +280,12 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - `.familiar movebox [BoxName]`
   - Moves active familiar to specified box.
   - Shortcut: *.fam mb [BoxName]*
+- `.familiar overflow`
+  - Lists familiars stored in overflow.
+  - Shortcut: *.fam of*
+- `.familiar overflowmove [#] [BoxName]`
+  - Moves familiar from overflow to specified box.
+  - Shortcut: *.fam om [#] [BoxName]*
 - `.familiar prestige`
   - Prestiges familiar if conditions are met, raising base stats by configured multiplier.
   - Shortcut: *.fam pr*
@@ -351,7 +357,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Resets stuck combat music if needed.
   - Shortcut: *.misc silence*
 - `.miscellaneous starterkit`
-  - Provides starting kit (also auto-granted during Eclipse registration when enabled).
+  - Provides starting kit.
   - Shortcut: *.misc kitme*
 - `.miscellaneous userstats`
   - Shows neat information about the player.
@@ -458,10 +464,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).
   - Shortcut: *.wep spell [Name] [Slot] [PrefabGuid] [Radius]*
 
-</details>
-
-<details>
-<summary><strong>Configuration</strong></summary>
 
 ## Configuration
 
@@ -475,7 +477,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Rift Frequency**: `RiftFrequency` (int, default: 6)
   Number of primal rifts to start per day when they are enabled (24 max).
 - **Nightmare Mode**: `NightmareMode` (bool, default: False)
-  Apply elite-style stat tuning to combat units globally; can be enabled with or without EliteShardBearers.
+  Enable or disable global elite-style stat tuning for enemy units.
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
   Enable or disable elite shard bearers.
 - **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)
@@ -493,7 +495,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 ### StarterKit
 - **Starter Kit**: `StarterKit` (bool, default: False)
-  Enable or disable the starter kit (auto-granted at Eclipse registration, can still be claimed with `.misc kitme`).
+  Enable or disable the starter kit.
 - **Kit Prefabs**: `KitPrefabs` (string, default: "862477668,-1531666018,-1593377811,1821405450")
   Item prefabGuids for starting kit.
 - **Kit Quantities**: `KitQuantities` (string, default: "500,1000,1000,250")
@@ -786,8 +788,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Arcane Sorcerer shift spells, granted at levels of prestige.
 - **Death Mage Spells**: `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
   Death Mage shift spells, granted at levels of prestige.
-
-</details>
 
 ## Recommended Mods
 

@@ -304,14 +304,12 @@ internal static class Buffs
             UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Add(new PrefabGUID(buff));
         }
     }
-    public static bool PlayerInCombat(this Entity entity)
+    public static bool IsFighting(this Entity entity)
     {
         if (entity.IsPlayer())
-        {
             return entity.HasBuff(PvECombatBuff) || entity.HasBuff(PvPCombatBuff);
-        }
 
-        return false;
+        return entity.HasBuff<InCombatBuff>();
     }
     public static void GetStackableBuffs()
     {
