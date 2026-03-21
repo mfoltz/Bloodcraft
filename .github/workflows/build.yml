@@ -19,7 +19,7 @@ jobs:
     outputs:
       should_build: ${{ steps.check_release.outputs.should_build }}
       reason: ${{ steps.check_release.outputs.reason }}
-      canonical_version: ${{ steps.read_version.outputs.version }}
+      canonical_version: ${{ steps.version_metadata.outputs.canonical_version }}
       matched_tag: ${{ steps.check_release.outputs.matched_tag }}
       csproj_file: ${{ steps.discover_csproj.outputs.csproj_file }}
 
@@ -51,26 +51,19 @@ jobs:
 
           echo "csproj_file=$csproj_file" >> "$GITHUB_OUTPUT"
 
-      - name: Read canonical version from .csproj
-        id: read_version
+      - name: Validate canonical version metadata
+        id: version_metadata
         shell: bash
         run: |
-          csproj='${{ steps.discover_csproj.outputs.csproj_file }}'
-          version=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' "$csproj" | head -n 1 | tr -d '[:space:]')
-
-          if [ -z "$version" ]; then
-            echo "Unable to determine current version from $csproj." >&2
-            exit 1
-          fi
-
-          echo "Current .csproj version: $version"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          # Branch-specific prerelease versions are derived after canonical validation
+          # and are not stored in repository metadata files.
+          ./.codex/scripts/version-metadata.sh
 
       - name: Check release tags for current version
         id: check_release
         uses: actions/github-script@v7
         env:
-          CURRENT_VERSION: ${{ steps.read_version.outputs.version }}
+          CURRENT_VERSION: ${{ steps.version_metadata.outputs.canonical_version }}
         with:
           script: |
             const currentVersion = process.env.CURRENT_VERSION;
@@ -83,7 +76,7 @@ jobs:
             if (context.eventName === 'workflow_dispatch' || context.ref === 'refs/heads/codex/feature-testing') {
               const reason = context.eventName === 'workflow_dispatch'
                 ? `Manual dispatch for version ${currentVersion}; allowing build.`
-                : `Feature-testing branch snapshot for canonical version ${currentVersion}; allowing build.`;
+                : `Feature-testing branch snapshot derived from canonical version ${currentVersion}; allowing build.`;
               core.info(reason);
               core.setOutput('should_build', 'true');
               core.setOutput('reason', reason);
