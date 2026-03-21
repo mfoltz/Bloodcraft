@@ -241,12 +241,13 @@ jobs:
         shell: bash
         run: |
           canonical_version='${{ needs.validation.outputs.canonical_version }}'
-          feature_testing_version="${canonical_version}-ft.${GITHUB_RUN_NUMBER}"
 
           if [ -z "$canonical_version" ]; then
             echo "Canonical version is empty; cannot derive feature-testing version." >&2
             exit 1
           fi
+
+          feature_testing_version="${canonical_version}-ft.${GITHUB_RUN_NUMBER}.${GITHUB_RUN_ATTEMPT}"
 
           echo "Derived feature-testing version: $feature_testing_version"
           echo "feature_testing_version=$feature_testing_version" >> "$GITHUB_OUTPUT"
