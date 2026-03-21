@@ -12,8 +12,7 @@
 		</RestoreSources>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<BepInExPluginGuid>io.zfolmt.Bloodcraft</BepInExPluginGuid>
-		<LangVersion>preview</LangVersion>
-		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+		<LangVersion>12.0</LangVersion>
 		<OutputType>Exe</OutputType>
 		<UseAppHost>false</UseAppHost>
 		<NuGetAudit>False</NuGetAudit>
