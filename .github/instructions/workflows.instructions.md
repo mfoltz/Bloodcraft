@@ -10,3 +10,7 @@ When reviewing GitHub Actions workflows in this repository:
 - Prefer simple, explicit Bash over clever one-liners when reliability is at stake.
 - For new sanity or guard workflows, verify that initial branch pushes, pull_request events, and shallow clones are handled intentionally.
 - Suggest minimal fixes rather than broad workflow rewrites unless the current approach is likely to fail.
+- For local workflow-review parsing checks in the repo-managed environment, run `bash .codex/install.sh` first so the expected tooling is available.
+- If review notes include a Python YAML parse example such as `python3 - <<'PY'` with `import yaml`, call out that it depends on PyYAML being installed.
+- Prefer a guarded check like `python3 -c 'import yaml'` before YAML parsing when you want to separate dependency/setup issues from workflow content validation.
+- Be explicit in review comments that a missing YAML parser dependency is a local tooling problem, not a GitHub Actions workflow syntax defect.
