@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$REPO_ROOT"
 PROJECT_PATH="$REPO_ROOT/Bloodcraft.csproj"
 INSTALL_DIR="${DOTNET_INSTALL_DIR:-$HOME/.dotnet}"
 SDK_CHANNEL="${DOTNET_INSTALL_CHANNEL:-8.0}"
