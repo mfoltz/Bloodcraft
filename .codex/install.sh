@@ -5,21 +5,21 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 PROJECT_PATH="$REPO_ROOT/Bloodcraft.csproj"
 INSTALL_DIR="${DOTNET_INSTALL_DIR:-$HOME/.dotnet}"
-SDK_CHANNEL="${DOTNET_INSTALL_CHANNEL:-8.0}"
+SDK_VERSION="${DOTNET_SDK_VERSION:-8.0.100}"
 TARGET_FRAMEWORK="net6.0"
 BEPINEX_PLUGIN_DIR="${BEPINEX_PLUGIN_DIR:-}"
 DOTNET_INSTALLED=0
-MINIMUM_SDK_MAJOR="${SDK_CHANNEL%%.*}"
+REQUIRED_SDK_MAJOR="${SDK_VERSION%%.*}"
 PYTHON_COMMANDS=(python3 python)
 PYTHON_DEPENDENCY="PyYAML"
 PYTHON_DEPENDENCY_IMPORT="yaml"
 
 print_sdk_policy() {
-    echo "Using .NET SDK channel $SDK_CHANNEL or newer to build target framework $TARGET_FRAMEWORK."
-    echo "This repository targets $TARGET_FRAMEWORK for BepInEx compatibility, but requires SDK major $MINIMUM_SDK_MAJOR+ because it uses modern preview C# features."
+    echo "Using .NET SDK $SDK_VERSION (with 8.0 feature-band roll-forward) to build target framework $TARGET_FRAMEWORK."
+    echo "Target framework and SDK are different settings: the mod ships for $TARGET_FRAMEWORK, while the build tooling requires the .NET 8 SDK because the project enables preview C# features."
 }
 
-sdk_meets_minimum_version() {
+sdk_meets_required_version() {
     if ! command -v dotnet >/dev/null 2>&1; then
         return 1
     fi
@@ -34,7 +34,7 @@ sdk_meets_minimum_version() {
     local sdk_major
     sdk_major="${sdk_version%%.*}"
 
-    [ "$sdk_major" -ge "$MINIMUM_SDK_MAJOR" ]
+    [ "$sdk_major" -ge "$REQUIRED_SDK_MAJOR" ]
 }
 
 install_dotnet() {
@@ -43,7 +43,7 @@ install_dotnet() {
     install_script="$(mktemp)"
 
     curl -sSL https://dot.net/v1/dotnet-install.sh -o "$install_script"
-    bash "$install_script" --install-dir "$INSTALL_DIR" --channel "$SDK_CHANNEL"
+    bash "$install_script" --install-dir "$INSTALL_DIR" --version "$SDK_VERSION"
     rm -f "$install_script"
 
     export DOTNET_ROOT="$INSTALL_DIR"
@@ -128,10 +128,10 @@ print_sdk_policy
 
 if command -v dotnet >/dev/null 2>&1; then
     echo ".NET SDK already installed: $(dotnet --version)"
-    if sdk_meets_minimum_version; then
+    if sdk_meets_required_version; then
         DOTNET_INSTALLED=1
     else
-        echo ".NET SDK $(dotnet --version) is older than the required major version $MINIMUM_SDK_MAJOR; installing channel $SDK_CHANNEL into $INSTALL_DIR"
+        echo ".NET SDK $(dotnet --version) does not satisfy the required SDK policy ($SDK_VERSION with .NET 8 tooling); installing SDK $SDK_VERSION into $INSTALL_DIR"
         install_dotnet
     fi
 else

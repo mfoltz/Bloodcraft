@@ -15,8 +15,9 @@ concurrency:
   cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 
 env:
-  DOTNET_SDK_VERSION: 8.0.x
+  DOTNET_SDK_VERSION: 8.0.100
   TARGET_FRAMEWORK: net6.0
+  DOTNET_SDK_POLICY_NOTE: Build tooling uses the .NET 8 SDK while the project output still targets net6.0.
   RELEASE_ASSET_NAME: prerelease-package
 
 jobs:
@@ -65,6 +66,11 @@ jobs:
           dll_name=$(basename "$csproj" .csproj)
           echo "dll_name=$dll_name" >> "$GITHUB_OUTPUT"
 
+      - name: Log SDK policy
+        run: |
+          echo "${{ env.DOTNET_SDK_POLICY_NOTE }}"
+          echo "Pinned SDK version: ${{ env.DOTNET_SDK_VERSION }}"
+
       - name: Restore dependencies
         run: dotnet restore "${{ steps.discover_csproj.outputs.csproj_file }}"
 
@@ -95,6 +101,11 @@ jobs:
           dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
           cache: true
           cache-dependency-path: Bloodcraft.csproj
+
+      - name: Log SDK policy
+        run: |
+          echo "${{ env.DOTNET_SDK_POLICY_NOTE }}"
+          echo "Pinned SDK version: ${{ env.DOTNET_SDK_VERSION }}"
 
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install --yes libxml2-utils
