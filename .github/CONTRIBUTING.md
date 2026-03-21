@@ -15,28 +15,28 @@
 - Direct parser check used during review/testing:
 
   ```bash
-  python3 - <<'PY'
-  import yaml
-  PY
+python3 - <<'PY'
+import yaml
+PY
   ```
 
   This check depends on PyYAML being installed. If `import yaml` raises `ModuleNotFoundError: No module named 'yaml'`, treat that as a missing parser dependency in the local environment, not as evidence that `.github/workflows/release.yml` is invalid YAML.
 - Guarded variant that separates dependency availability from YAML content validation:
 
   ```bash
-  if ! python3 -c 'import yaml' >/dev/null 2>&1; then
-    echo "Warning: PyYAML is not installed; skipping YAML parsing check."
-  else
-    python3 - <<'PY'
-  import pathlib
-  import yaml
+if ! python3 -c 'import yaml' >/dev/null 2>&1; then
+  echo "Warning: PyYAML is not installed; skipping YAML parsing check."
+else
+  python3 - <<'PY'
+import pathlib
+import yaml
 
-  workflowPath = pathlib.Path('.github/workflows/release.yml')
-  with workflowPath.open('r', encoding='utf-8') as workflowFile:
-      yaml.safe_load(workflowFile)
-  print(f'Parsed {workflowPath} successfully.')
-  PY
-  fi
+workflowPath = pathlib.Path('.github/workflows/release.yml')
+with workflowPath.open('r', encoding='utf-8') as workflowFile:
+    yaml.safe_load(workflowFile)
+print(f'Parsed {workflowPath} successfully.')
+PY
+fi
   ```
 
   A missing parser dependency is a tooling/setup warning that should be reported separately from workflow syntax or YAML content defects.
