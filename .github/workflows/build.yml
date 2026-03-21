@@ -399,7 +399,7 @@ jobs:
             - Branch: ${{ github.ref_name }}
             - Commit: ${{ github.sha }}
             - Run: ${{ github.run_id }}
-          name: Feature-testing branch prerelease v${{ needs.prepare_feature_testing_prerelease.outputs.feature_testing_version }}
+          name: feature-testing prerelease v${{ needs.prepare_feature_testing_prerelease.outputs.feature_testing_version }}
           fail_on_unmatched_files: true
           prerelease: true
           tag_name: v${{ needs.prepare_feature_testing_prerelease.outputs.feature_testing_version }}
