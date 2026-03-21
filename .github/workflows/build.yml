@@ -85,7 +85,7 @@ jobs:
     permissions:
       contents: read
     outputs:
-      version: ${{ steps.extract_version.outputs.version }}
+      version: ${{ steps.version_metadata.outputs.version }}
       should_publish: ${{ steps.version_guard.outputs.should_publish }}
 
     steps:
@@ -107,27 +107,16 @@ jobs:
           echo "${{ env.DOTNET_SDK_POLICY_NOTE }}"
           echo "Pinned SDK version: ${{ env.DOTNET_SDK_VERSION }}"
 
-      - name: Install xmllint
-        run: sudo apt-get update && sudo apt-get install --yes libxml2-utils
-
-      - name: Extract version from .csproj
-        id: extract_version
-        run: |
-          version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" "${{ needs.build_validation.outputs.csproj_file }}")
-
-          if [ -z "$version" ]; then
-            echo "Unable to determine current version from ${{ needs.build_validation.outputs.csproj_file }}." >&2
-            exit 1
-          fi
-
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Extract and validate version metadata
+        id: version_metadata
+        run: ./.codex/scripts/version-metadata.sh
 
       - name: Determine publish eligibility
         id: version_guard
         run: |
           latest_tag=$(git tag -l 'v*' --sort=-v:refname | grep -Ev '-' | head -n 1)
           latest_version=${latest_tag#v}
-          current_version="${{ steps.extract_version.outputs.version }}"
+          current_version="${{ steps.version_metadata.outputs.version }}"
 
           if [ -z "$latest_version" ]; then
             echo "No previous tagged release detected; proceeding with prerelease publication."
@@ -169,7 +158,7 @@ jobs:
           dotnet build "${{ needs.build_validation.outputs.csproj_file }}" \
             --configuration Release \
             --no-restore \
-            -p:Version=${{ steps.extract_version.outputs.version }} \
+            -p:Version=${{ steps.version_metadata.outputs.version }} \
             -p:RunGenerateREADME=false
 
       - name: Stage pre-release assets
