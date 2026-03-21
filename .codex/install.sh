@@ -130,11 +130,23 @@ ensure_python_dependency() {
 print_sdk_policy
 
 if command -v dotnet >/dev/null 2>&1; then
-    echo ".NET SDK already installed: $(dotnet --version)"
+    existing_dotnet_version="$(dotnet --version 2>/dev/null || true)"
+
+    if [ -n "$existing_dotnet_version" ]; then
+        echo ".NET SDK already installed: $existing_dotnet_version"
+    else
+        echo ".NET SDK detected on PATH, but version probing failed; treating it as incompatible with repository SDK policy."
+    fi
+
     if sdk_meets_required_version; then
         DOTNET_INSTALLED=1
     else
-        echo ".NET SDKs on PATH do not satisfy the repository compatibility policy ($PINNED_SDK_VERSION with $SDK_ROLL_FORWARD_POLICY); installing channel $SDK_CHANNEL into $INSTALL_DIR"
+        if [ -n "$existing_dotnet_version" ]; then
+            echo ".NET SDKs on PATH do not satisfy the repository compatibility policy ($PINNED_SDK_VERSION with $SDK_ROLL_FORWARD_POLICY); detected version $existing_dotnet_version. Installing channel $SDK_CHANNEL into $INSTALL_DIR"
+        else
+            echo ".NET SDKs on PATH do not satisfy the repository compatibility policy ($PINNED_SDK_VERSION with $SDK_ROLL_FORWARD_POLICY); detected version could not be determined. Installing channel $SDK_CHANNEL into $INSTALL_DIR"
+        fi
+
         install_dotnet
     fi
 else
