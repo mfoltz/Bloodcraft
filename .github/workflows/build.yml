@@ -32,6 +32,7 @@ jobs:
         with:
           fetch-depth: 1
           fetch-tags: false
+          persist-credentials: false
 
       - name: Install shellcheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
@@ -145,6 +146,7 @@ jobs:
         with:
           fetch-depth: 1
           fetch-tags: false
+          persist-credentials: false
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -154,6 +156,12 @@ jobs:
       - name: Validate canonical version metadata
         shell: bash
         run: ./.codex/scripts/version-metadata.sh
+
+      - name: Verify canonical version files remain unchanged
+        shell: bash
+        run: |
+          csproj='${{ needs.validate_build_inputs.outputs.csproj_file }}'
+          git diff --exit-code -- "$csproj" thunderstore.toml
 
       - name: Restore dependencies
         run: dotnet restore -p:CheckEolTargetFramework=false
@@ -234,6 +242,7 @@ jobs:
         with:
           fetch-depth: 1
           fetch-tags: false
+          persist-credentials: false
 
       - name: Get DLL name
         id: get_dll_name
@@ -251,6 +260,12 @@ jobs:
         shell: bash
         run: ./.codex/scripts/version-metadata.sh
 
+      - name: Verify canonical version files remain unchanged
+        shell: bash
+        run: |
+          csproj='${{ needs.validate_build_inputs.outputs.csproj_file }}'
+          git diff --exit-code -- "$csproj" thunderstore.toml
+
       - name: Restore dependencies
         run: dotnet restore -p:CheckEolTargetFramework=false
 
@@ -259,6 +274,7 @@ jobs:
           version='${{ needs.prepare_prerelease.outputs.prerelease_version }}'
 
           if [ -n "$version" ]; then
+            # Canonical tracked version files must already be correct; CI-only versions flow through MSBuild properties.
             dotnet build . --configuration Release -p:Version=$version -p:RunGenerateREADME=false -p:CheckEolTargetFramework=false
           else
             dotnet build . --configuration Release -p:RunGenerateREADME=false -p:CheckEolTargetFramework=false
@@ -339,6 +355,7 @@ jobs:
         with:
           fetch-depth: 1
           fetch-tags: false
+          persist-credentials: false
 
       - name: Get DLL name
         id: get_dll_name
@@ -356,12 +373,19 @@ jobs:
         shell: bash
         run: ./.codex/scripts/version-metadata.sh
 
+      - name: Verify canonical version files remain unchanged
+        shell: bash
+        run: |
+          csproj='${{ needs.validate_build_inputs.outputs.csproj_file }}'
+          git diff --exit-code -- "$csproj" thunderstore.toml
+
       - name: Restore dependencies
         run: dotnet restore -p:CheckEolTargetFramework=false
 
       - name: Build feature-testing snapshot artifact
         run: |
           feature_testing_version='${{ needs.prepare_feature_testing_prerelease.outputs.feature_testing_version }}'
+          # Canonical tracked version files must already be correct; CI-only versions flow through MSBuild properties.
           dotnet build . --configuration Release -p:Version=$feature_testing_version -p:RunGenerateREADME=false -p:CheckEolTargetFramework=false
 
       - name: GH Release (feature-testing snapshot)
