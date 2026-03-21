@@ -152,16 +152,16 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore -p:CheckEolTargetFramework=false
 
       - name: Build validation artifact
         run: |
           version='${{ needs.validate_build_inputs.outputs.canonical_version }}'
 
           if [ -n "$version" ]; then
-            dotnet build . --configuration Release -p:Version=$version -p:RunGenerateREADME=false
+            dotnet build . --configuration Release -p:Version=$version -p:RunGenerateREADME=false -p:CheckEolTargetFramework=false
           else
-            dotnet build . --configuration Release -p:RunGenerateREADME=false
+            dotnet build . --configuration Release -p:RunGenerateREADME=false -p:CheckEolTargetFramework=false
           fi
 
   publish_prerelease:
@@ -203,16 +203,16 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore -p:CheckEolTargetFramework=false
 
       - name: Build prerelease artifact
         run: |
           version='${{ needs.validate_build_inputs.outputs.canonical_version }}'
 
           if [ -n "$version" ]; then
-            dotnet build . --configuration Release -p:Version=$version -p:RunGenerateREADME=false
+            dotnet build . --configuration Release -p:Version=$version -p:RunGenerateREADME=false -p:CheckEolTargetFramework=false
           else
-            dotnet build . --configuration Release -p:RunGenerateREADME=false
+            dotnet build . --configuration Release -p:RunGenerateREADME=false -p:CheckEolTargetFramework=false
           fi
 
       - name: GH Release (pre-release)
@@ -303,12 +303,12 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore -p:CheckEolTargetFramework=false
 
       - name: Build feature-testing snapshot artifact
         run: |
           feature_testing_version='${{ needs.prepare_feature_testing_prerelease.outputs.feature_testing_version }}'
-          dotnet build . --configuration Release -p:Version=$feature_testing_version -p:RunGenerateREADME=false
+          dotnet build . --configuration Release -p:Version=$feature_testing_version -p:RunGenerateREADME=false -p:CheckEolTargetFramework=false
 
       - name: GH Release (feature-testing snapshot)
         uses: softprops/action-gh-release@v1
