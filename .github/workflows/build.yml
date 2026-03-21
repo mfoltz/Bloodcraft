@@ -30,6 +30,12 @@ jobs:
           fetch-depth: 1
           fetch-tags: false
 
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Shell lint
+        run: bash .codex/shellcheck.sh
+
       - name: Discover .csproj
         id: discover_csproj
         run: |

@@ -9,6 +9,19 @@
 - [Configuration](#configuration)
 - [Recommended Mods](#recommended-mods)
 
+## Development
+
+### Tooling bootstrap
+- Run `bash .codex/install.sh` from the repository root before any `dotnet` command. This provisions the expected .NET SDK, builds the project once, and installs `shellcheck` when a supported package manager is available.
+
+### Shell linting
+- Canonical shell lint command: `bash .codex/shellcheck.sh`
+- Current explicit lint scope:
+  - `.codex/install.sh`
+  - `.codex/shellcheck.sh`
+- This command fails fast when `shellcheck` is unavailable and tells contributors to bootstrap the repository with `bash .codex/install.sh` first.
+- Keep `.codex/` as the default lint target for repository tooling. Expand the explicit file list in `.codex/shellcheck.sh` as new tracked shell scripts are added.
+
 ## Support Development
 
 [![patreon](https://i.imgur.com/u6aAqeL.png)](https://www.patreon.com/join/4865914)  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfolmt)
