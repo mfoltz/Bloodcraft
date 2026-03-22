@@ -11,6 +11,8 @@
 ## Review/testing note
 
 - When using the repo-managed environment for local workflow checks, run `bash .codex/install.sh` first so the expected tooling is available before running YAML parsing checks.
+- Bash syntax checks such as `bash -n` are not applicable to `.github/workflows/*.yml` files because GitHub Actions workflows are YAML, not shell scripts.
+- If shell validation is needed, run `bash .codex/shellcheck.sh` or `bash -n` only against actual `.sh` files or extracted shell snippets, not the workflow YAML itself.
 - Local YAML validation warnings against `.github/workflows/release.yml` should be interpreted carefully.
 - Direct parser check used during review/testing:
 
