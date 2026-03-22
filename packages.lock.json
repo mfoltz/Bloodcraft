@@ -10,7 +10,7 @@
       },
       "BepInEx.Unity.IL2CPP": {
         "type": "Direct",
-        "requested": "[6.0.0-be.733, )",
+        "requested": "[6.0.0-be.733, 6.0.0-be.733]",
         "resolved": "6.0.0-be.733",
         "contentHash": "lnoGaPHjIdGfEiKtf89knaTdLXe4IUqVLdoYqW8NYhhNqgxa3oNwScjTmuYQpa4Leew3937+slq2WIjvX/DUwQ==",
         "dependencies": {
@@ -33,9 +33,13 @@
       },
       "VampireReferenceAssemblies": {
         "type": "Direct",
-        "requested": "[1.1.11-r96495-b8, )",
-        "resolved": "1.1.11-r96495-b8",
-        "contentHash": "3+R9+yq8R3BUhnmiT/bhrN5BftDDLDZ4gPadOrPQ6EFqhuLSM/nIdQmSK96yauoRVpoLtkza0OhU0L7Rp/8zRw=="
+        "requested": "[1.1.11-r96495-b8.meta.2, 1.1.11-r96495-b8.meta.2]",
+        "resolved": "1.1.11-r96495-b8.meta.2",
+        "contentHash": "j+RlrY4SPr6iPGW06JusBxxxiCuF1unOSbqzfiR/14HZwZ1bKfylwtY7X5+dX+FEFUAvjU7tPeZ5IV63LLVa1w==",
+        "dependencies": {
+          "Il2CppInterop.Common": "[1.4.6-ci.426]",
+          "Il2CppInterop.Runtime": "[1.4.6-ci.426]"
+        }
       },
       "VRising.VampireCommandFramework": {
         "type": "Direct",

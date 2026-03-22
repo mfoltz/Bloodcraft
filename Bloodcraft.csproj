@@ -5,7 +5,9 @@
 		<AssemblyName>Bloodcraft</AssemblyName>
 		<Version>1.13.17</Version>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		<RestoreSources>
+        <RestoreSources>
+			$(MSBuildProjectDirectory)\..\LocalNugetPackageFeed;
+			$(RestoreSources);
 			https://api.nuget.org/v3/index.json;
 			https://nuget.bepinex.dev/v3/index.json;
 		</RestoreSources>
@@ -41,12 +43,19 @@
 	
 	<ItemGroup>
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
-		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.733" IncludeAssets="compile" />
+      <PackageReference Include="BepInEx.Unity.IL2CPP" Version="[6.0.0-be.733]" />
+
         <PackageReference Include="ScarletRCON.SourceSupport" Version="1.2.2" />
-        <PackageReference Include="VampireReferenceAssemblies" Version="1.1.11-r96495-b8" />
-		<PackageReference Include="VRising.VampireCommandFramework" Version="0.10.4" />
+        <PackageReference Include="VampireReferenceAssemblies" Version="[1.1.11-r96495-b8.meta.2]" />
+        <PackageReference Include="VRising.VampireCommandFramework" Version="0.10.4" />
 	</ItemGroup>
-	
+
+
+
+
+
+
+
 	<Target Name="BuildToServer" AfterTargets="Build">
 		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRisingDedicatedServer\BepInEx\plugins" />
 	</Target>

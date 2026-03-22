@@ -86,8 +86,8 @@ public static class RconCommands
             return false.ToString();
         }
 
-        Buffs.HandleShinyBuff(playerCharacter, buffGuid);
-        return $"Applied shiny buff {buffGuid.GetPrefabName()} for {playerName}!";
+        Buffs.HandleSparkleBuff(playerCharacter, buffGuid);
+        return $"Applied shiny {buffGuid.GetPrefabName()} for {playerName}!";
     }
 
     [RconCommand("servant.upgrade", "Admin upgrade servant RCON command; returns string true if receipt w/ params found & has valid refund (resend RCON command with same params to ping upgrade status), otherwise returns string false for player not found or on dispatch.", "<playerName> <servantName>")]

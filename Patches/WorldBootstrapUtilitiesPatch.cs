@@ -38,7 +38,7 @@ public static class WorldBootstrapPatch
         }
         catch (Exception e)
         {
-            Plugin.LogInstance.LogError($"[WorldBootstrap_Server.AddSystemsToWorld] Exception: {e}");
+            Plugin.MiniBehaviour.LogSource.LogError($"[WorldBootstrap_Server.AddSystemsToWorld] Exception: {e}");
         }
     }
 

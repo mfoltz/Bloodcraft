@@ -295,6 +295,33 @@ internal static class Buffs
             buffEntity.Remove<AmplifyBuff>();
         }
     }
+    public static void HandleSparkleBuff(Entity entity, PrefabGUID buffPrefabGuid)
+    {
+        if (entity.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity))
+        {
+            buffEntity.With((ref LifeTime lifeTime) =>
+            {
+                lifeTime.Duration = 0f;
+                lifeTime.EndAction = LifeTimeEndAction.None;
+            });
+
+            buffEntity.Remove<CreateGameplayEventsOnSpawn>();
+            buffEntity.Remove<GameplayEventListeners>();
+            buffEntity.Remove<RemoveBuffOnGameplayEvent>();
+            buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
+            buffEntity.Remove<DealDamageOnGameplayEvent>();
+            buffEntity.Remove<HealOnGameplayEvent>();
+            buffEntity.Remove<BloodBuffScript_ChanceToResetCooldown>();
+            buffEntity.Remove<ModifyMovementSpeedBuff>();
+            buffEntity.Remove<ApplyBuffOnGameplayEvent>();
+            buffEntity.Remove<DestroyOnGameplayEvent>();
+            buffEntity.Remove<WeakenBuff>();
+            buffEntity.Remove<ReplaceAbilityOnSlotBuff>();
+            buffEntity.Remove<AmplifyBuff>();
+
+            // buffEntity.Add<Buff_Persists_Through_Death>();
+        }
+    }
     public static void GetPrestigeBuffs()
     {
         List<int> prestigeBuffs = Configuration.ParseIntegersFromString(ConfigService.PrestigeBuffs);

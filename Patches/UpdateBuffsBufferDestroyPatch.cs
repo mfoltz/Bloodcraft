@@ -22,6 +22,7 @@ internal static class UpdateBuffsBufferDestroyPatch
     static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _prestige = ConfigService.PrestigeSystem;
     static readonly bool _exoForm = ConfigService.ExoPrestiging;
+    static readonly bool _trueImmortal = ConfigService.TrueImmortal;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
     static readonly bool _shouldHandleStats = _legacies || _expertise || _classes || _leveling || _familiars;
 
@@ -128,6 +129,11 @@ internal static class UpdateBuffsBufferDestroyPatch
                     case 1 when _exoForm && isPlayerTarget: // ExoForm Buff
                         ulong steamId = buffTarget.GetSteamId();
                         buffTarget.TryApplyBuff(_gateBossFeedCompleteBuff);
+                        if (_trueImmortal)
+                        {
+                            bool restored = Shapeshifts.RestoreStoredTrueImmortalBlood(buffTarget);
+                            Core.Log.LogWarning($"[TrueImmortal] EXO_DESTROY steamId:{steamId} restored:{restored}");
+                        }
                         Shapeshifts.UpdatePartialExoFormChargeUsed(entity, steamId);
                         break;
                     case 2:

@@ -34,7 +34,7 @@ internal static class InitializationPatch
     {
         try
         {
-            Core.Initialize();
+            Core.OnInitialize();
 
             if (Core.IsReady)
             {

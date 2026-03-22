@@ -217,59 +217,60 @@ internal static class Shapeshifts
     }
     public static void TrueImmortal(Entity buffEntity, Entity playerCharacter)
     {
-        Blood blood = playerCharacter.Read<Blood>();
+        if (!buffEntity.Has<ChangeBloodOnGameplayEvent>()) return;
+
+        var buffer = buffEntity.ReadBuffer<ChangeBloodOnGameplayEvent>();
+        if (buffer.IsEmpty) return;
+
         ulong steamId = playerCharacter.GetSteamId();
-        var shapeshiftBuff = ShapeshiftBuffs.FirstOrDefault(buff => playerCharacter.HasBuff(buff.Value));
-        bool hasValue = !shapeshiftBuff.Equals(default);
+        bool isShapeshifted = ShapeshiftBuffs.Any(buff => playerCharacter.HasBuff(buff.Value));
 
-        if (_storedPlayerBloods.TryRemove(steamId, out Blood storedBlood))
+        if (isShapeshifted)
         {
-            if (buffEntity.Has<ChangeBloodOnGameplayEvent>())
-            {
-                var buffer = buffEntity.ReadBuffer<ChangeBloodOnGameplayEvent>();
-
-                ChangeBloodOnGameplayEvent changeBloodOnGameplayEvent = buffer[0];
-
-                changeBloodOnGameplayEvent.BloodValue = storedBlood.Value;
-                changeBloodOnGameplayEvent.BloodQuality = storedBlood.Quality;
-                changeBloodOnGameplayEvent.BloodType = storedBlood.BloodType;
-                changeBloodOnGameplayEvent.GainBloodType = GainBloodType.Consumable;
-
-                buffer[0] = changeBloodOnGameplayEvent;
-            }
+            bool stored = _storedPlayerBloods.TryAdd(steamId, playerCharacter.Read<Blood>());
+            SetChangeBloodOnGameplayEvent(buffer, 100f, 100f, _immortalBlood);
+            Core.Log.LogWarning($"[TrueImmortal] APPLY steamId:{steamId} stored:{stored}");
         }
-        else if (hasValue && _storedPlayerBloods.TryAdd(steamId, blood))
+        else if (_storedPlayerBloods.TryRemove(steamId, out Blood storedBlood))
         {
-            if (buffEntity.Has<ChangeBloodOnGameplayEvent>())
-            {
-                var buffer = buffEntity.ReadBuffer<ChangeBloodOnGameplayEvent>();
-
-                ChangeBloodOnGameplayEvent changeBloodOnGameplayEvent = buffer[0];
-
-                changeBloodOnGameplayEvent.BloodValue = 100f;
-                changeBloodOnGameplayEvent.BloodQuality = 100f;
-                changeBloodOnGameplayEvent.BloodType = _immortalBlood;
-                changeBloodOnGameplayEvent.GainBloodType = GainBloodType.Consumable;
-
-                buffer[0] = changeBloodOnGameplayEvent;
-            }
+            SetChangeBloodOnGameplayEvent(buffer, storedBlood.Value, storedBlood.Quality, storedBlood.BloodType);
+            Core.Log.LogWarning($"[TrueImmortal] RESTORE_EVENT steamId:{steamId} blood:{storedBlood.BloodType.GetPrefabName()} value:{storedBlood.Value:F1} quality:{storedBlood.Quality:F1}");
         }
         else // 100% frailed as backup for server crashes or otherwise losing stored blood cache? good enough for devs good enough for me :p might not need this if checking for exoform buff in else if above but will see
         {
-            if (buffEntity.Has<ChangeBloodOnGameplayEvent>())
-            {
-                var buffer = buffEntity.ReadBuffer<ChangeBloodOnGameplayEvent>();
-
-                ChangeBloodOnGameplayEvent changeBloodOnGameplayEvent = buffer[0];
-
-                changeBloodOnGameplayEvent.BloodValue = 100f;
-                changeBloodOnGameplayEvent.BloodQuality = 100f;
-                changeBloodOnGameplayEvent.BloodType = _frailedBlood;
-                changeBloodOnGameplayEvent.GainBloodType = GainBloodType.Consumable;
-
-                buffer[0] = changeBloodOnGameplayEvent;
-            }
+            SetChangeBloodOnGameplayEvent(buffer, 100f, 100f, _frailedBlood);
+            Core.Log.LogWarning($"[TrueImmortal] FALLBACK_FRAILED steamId:{steamId}");
         }
+    }
+    public static bool RestoreStoredTrueImmortalBlood(Entity playerCharacter)
+    {
+        ulong steamId = playerCharacter.GetSteamId();
+
+        if (_storedPlayerBloods.TryRemove(steamId, out Blood storedBlood))
+        {
+            playerCharacter.With((ref Blood blood) =>
+            {
+                blood.Value = storedBlood.Value;
+                blood.Quality = storedBlood.Quality;
+                blood.BloodType = storedBlood.BloodType;
+            });
+
+            Core.Log.LogWarning($"[TrueImmortal] RESTORE_DIRECT steamId:{steamId} blood:{storedBlood.BloodType.GetPrefabName()} value:{storedBlood.Value:F1} quality:{storedBlood.Quality:F1}");
+            return true;
+        }
+
+        return false;
+    }
+    static void SetChangeBloodOnGameplayEvent(DynamicBuffer<ChangeBloodOnGameplayEvent> buffer, float value, float quality, PrefabGUID bloodType)
+    {
+        ChangeBloodOnGameplayEvent changeBloodOnGameplayEvent = buffer[0];
+
+        changeBloodOnGameplayEvent.BloodValue = value;
+        changeBloodOnGameplayEvent.BloodQuality = quality;
+        changeBloodOnGameplayEvent.BloodType = bloodType;
+        changeBloodOnGameplayEvent.GainBloodType = GainBloodType.Consumable;
+
+        buffer[0] = changeBloodOnGameplayEvent;
     }
     public static void ModifyShapeshiftBuff(Entity buffEntity, Entity playerCharacter, PrefabGUID buffPrefabGuid)
     {

@@ -603,9 +603,11 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Max Expertise Prestiges**: `MaxExpertisePrestiges` (int, default: 10)
   The maximum number of prestiges a player can reach in expertise.
 - **Unarmed Slots**: `UnarmedSlots` (bool, default: False)
-  Enable or disable the ability to use extra unarmed spell slots.
+  Enable or disable extra spells while unarmed.
+- **Fishing Slots**: `FishingSlots` (bool, default: False)
+  Enable or disable extra spells while fishing.
 - **Duality**: `Duality` (bool, default: True)
-  True for both unarmed slots, false for one unarmed slot. Does nothing without UnarmedSlots enabled.
+  True for both unarmed slots, false for one unarmed slot. Does nothing without UnarmedSlots enabled (doesn't apply to fishing pole).
 - **Shift Slot**: `ShiftSlot` (bool, default: False)
   Enable or disable using class spell on shift.
 - **Max Expertise Level**: `MaxExpertiseLevel` (int, default: 100)
