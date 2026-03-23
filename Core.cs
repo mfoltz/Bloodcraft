@@ -95,7 +95,6 @@ internal static class Core
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
-    static readonly bool _nightmareMode = ConfigService.NightmareMode;
     static readonly bool _resetShardBearers = ConfigService.EliteShardBearers;
     static readonly bool _shouldApplyBonusStats = _legacies || _expertise || _classes || _familiars;
     public static bool Eclipsed { get; } = _leveling || _legacies || _expertise || _classes || _familiars;
@@ -343,12 +342,6 @@ internal static class Core
             }
         }
 
-        if (_nightmareMode && !IsPvP)
-        {
-            _nightmareUnitQueryDesc = EntityManager.CreateQueryDesc(_nightmareUnitAllComponents, typeIndices: [0], options: EntityQueryOptions.IncludeAll);
-            ApplyNightmareMode();
-        }
-
         if (BleedingEdge.Any())
         {
             if (BleedingEdge.Contains(WeaponType.Slashers))
@@ -421,76 +414,6 @@ internal static class Core
         }
     }
 
-    static void ApplyNightmareMode()
-    {
-        NightmareModeRoutine().Run();
-    }
-    static IEnumerator NightmareModeRoutine()
-    {
-        yield return QueryResultStreamAsync(
-            _nightmareUnitQueryDesc,
-            stream =>
-            {
-                try
-                {
-                    using (stream)
-                    {
-                        foreach (QueryResult result in stream.GetResults())
-                        {
-                            PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
-                            string prefabName = prefabGuid.GetPrefabName();
-
-                            if (ShouldSkipNightmareTarget(prefabGuid, prefabName)) continue;
-
-                            ApplyNightmareStats(result.Entity);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.LogWarning($"[NightmareMode] error: {ex}");
-                }
-            }
-        );
-    }
-    static bool ShouldSkipNightmareTarget(PrefabGUID prefabGuid, string prefabName)
-    {
-        if (!prefabGuid.HasValue()) return true;
-        else if (QuestService.FilteredTargetUnits.Any(filter => prefabName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))) return true;
-        else if (prefabName.Contains("Servant", StringComparison.CurrentCultureIgnoreCase)) return true;
-        else if (prefabName.Contains("Player", StringComparison.CurrentCultureIgnoreCase)) return true;
-
-        return false;
-    }
-    static void ApplyNightmareStats(Entity entity)
-    {
-        entity.Remove<DynamicallyWeakenAttackers>();
-
-        entity.HasWith((ref AbilityBar_Shared abilityBarShared) =>
-        {
-            abilityBarShared.AbilityAttackSpeed._Value *= NIGHTMARE_ATTACK_SPEED_MULTIPLIER;
-            abilityBarShared.PrimaryAttackSpeed._Value *= NIGHTMARE_ATTACK_SPEED_MULTIPLIER;
-        });
-
-        entity.With((ref Health health) =>
-        {
-            health.MaxHealth._Value *= NIGHTMARE_HEALTH_MULTIPLIER;
-            health.Value = health.MaxHealth._Value;
-        });
-
-        entity.With((ref UnitStats unitStats) =>
-        {
-            unitStats.PhysicalPower._Value *= NIGHTMARE_POWER_MULTIPLIER;
-            unitStats.SpellPower._Value *= NIGHTMARE_POWER_MULTIPLIER;
-        });
-
-        entity.HasWith((ref AiMoveSpeeds aiMoveSpeeds) =>
-        {
-            aiMoveSpeeds.Walk._Value *= NIGHTMARE_MOVE_SPEED_MULTIPLIER;
-            aiMoveSpeeds.Run._Value *= NIGHTMARE_MOVE_SPEED_MULTIPLIER;
-        });
-    }
-
     static readonly HashSet<PrefabGUID> _shardBearers =
     [
         PrefabGUIDs.CHAR_Manticore_VBlood,
@@ -499,6 +422,7 @@ internal static class Core
         PrefabGUIDs.CHAR_Vampire_Dracula_VBlood,
         PrefabGUIDs.CHAR_Blackfang_Morgana_VBlood
     ];
+
     static void ResetShardBearers()
     {
         ComponentType[] vBloodAllComponents =
