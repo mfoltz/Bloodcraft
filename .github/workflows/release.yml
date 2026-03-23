@@ -4,7 +4,9 @@ on:
   workflow_dispatch:
 
 env:
-  DOTNET_SDK_VERSION: 8.0.x
+  DOTNET_SDK_VERSION: 8.0.100
+  TARGET_FRAMEWORK: net6.0
+  DOTNET_SDK_POLICY_NOTE: Release tooling uses the .NET 8 SDK while packaged binaries continue to target net6.0.
 
 jobs:
   release_on_thunderstore:
@@ -24,6 +26,11 @@ jobs:
           cache: true
           cache-dependency-path: Bloodcraft.csproj
 
+      - name: Log SDK policy
+        run: |
+          echo "${{ env.DOTNET_SDK_POLICY_NOTE }}"
+          echo "Pinned SDK version: ${{ env.DOTNET_SDK_VERSION }}"
+
       - name: Extract latest stable tag
         id: extract_tag
         shell: bash
@@ -37,6 +44,10 @@ jobs:
 
           echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
           echo "RELEASE_TAG=$latest_tag" >> "$GITHUB_ENV"
+
+      - name: Validate version metadata against release tag
+        id: version_metadata
+        run: ./.codex/scripts/version-metadata.sh --check-tag "${{ steps.extract_tag.outputs.latest_tag }}"
 
       - name: Download release assets
         env:

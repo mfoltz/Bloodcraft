@@ -3,38 +3,41 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$REPO_ROOT"
 PROJECT_PATH="$REPO_ROOT/Bloodcraft.csproj"
 INSTALL_DIR="${DOTNET_INSTALL_DIR:-$HOME/.dotnet}"
-SDK_CHANNEL="${DOTNET_INSTALL_CHANNEL:-8.0}"
+SDK_VERSION="${DOTNET_SDK_VERSION:-8.0.100}"
 TARGET_FRAMEWORK="net6.0"
 BEPINEX_PLUGIN_DIR="${BEPINEX_PLUGIN_DIR:-}"
 DOTNET_INSTALLED=0
-MINIMUM_SDK_MAJOR="${SDK_CHANNEL%%.*}"
+PINNED_SDK_VERSION="8.0.100"
+SDK_ROLL_FORWARD_POLICY="latestFeature"
+REQUIRED_SDK_MAJOR="${PINNED_SDK_VERSION%%.*}"
 PYTHON_COMMANDS=(python3 python)
 PYTHON_DEPENDENCY="PyYAML"
 PYTHON_DEPENDENCY_IMPORT="yaml"
 
 print_sdk_policy() {
-    echo "Using .NET SDK channel $SDK_CHANNEL or newer to build target framework $TARGET_FRAMEWORK."
-    echo "This repository targets $TARGET_FRAMEWORK for BepInEx compatibility, but requires SDK major $MINIMUM_SDK_MAJOR+ because it uses modern preview C# features."
+    echo "Using .NET SDK compatibility policy $PINNED_SDK_VERSION with roll-forward $SDK_ROLL_FORWARD_POLICY to build target framework $TARGET_FRAMEWORK."
+    echo "This repository targets $TARGET_FRAMEWORK for BepInEx compatibility and requires a compatible $REQUIRED_SDK_MAJOR.0 feature band SDK because it uses modern preview C# features."
 }
 
-sdk_meets_minimum_version() {
+sdk_meets_required_version() {
     if ! command -v dotnet >/dev/null 2>&1; then
         return 1
     fi
 
-    local sdk_version
-    sdk_version="$(dotnet --version 2>/dev/null || true)"
+    local sdk_line sdk_version sdk_major
+    while IFS= read -r sdk_line; do
+        sdk_version="${sdk_line%% *}"
+        sdk_major="${sdk_version%%.*}"
 
-    if [ -z "$sdk_version" ]; then
-        return 1
-    fi
+        if [ "$sdk_major" = "$REQUIRED_SDK_MAJOR" ]; then
+            return 0
+        fi
+    done < <(dotnet --list-sdks 2>/dev/null || true)
 
-    local sdk_major
-    sdk_major="${sdk_version%%.*}"
-
-    [ "$sdk_major" -ge "$MINIMUM_SDK_MAJOR" ]
+    return 1
 }
 
 install_dotnet() {
@@ -43,7 +46,7 @@ install_dotnet() {
     install_script="$(mktemp)"
 
     curl -sSL https://dot.net/v1/dotnet-install.sh -o "$install_script"
-    bash "$install_script" --install-dir "$INSTALL_DIR" --channel "$SDK_CHANNEL"
+    bash "$install_script" --install-dir "$INSTALL_DIR" --version "$SDK_VERSION"
     rm -f "$install_script"
 
     export DOTNET_ROOT="$INSTALL_DIR"
@@ -127,11 +130,23 @@ ensure_python_dependency() {
 print_sdk_policy
 
 if command -v dotnet >/dev/null 2>&1; then
-    echo ".NET SDK already installed: $(dotnet --version)"
-    if sdk_meets_minimum_version; then
+    existing_dotnet_version="$(dotnet --version 2>/dev/null || true)"
+
+    if [ -n "$existing_dotnet_version" ]; then
+        echo ".NET SDK already installed: $existing_dotnet_version"
+    else
+        echo ".NET SDK detected on PATH, but version probing failed; treating it as incompatible with repository SDK policy."
+    fi
+
+    if sdk_meets_required_version; then
         DOTNET_INSTALLED=1
     else
-        echo ".NET SDK $(dotnet --version) is older than the required major version $MINIMUM_SDK_MAJOR; installing channel $SDK_CHANNEL into $INSTALL_DIR"
+        if [ -n "$existing_dotnet_version" ]; then
+            echo ".NET SDKs on PATH do not satisfy the repository compatibility policy ($PINNED_SDK_VERSION with $SDK_ROLL_FORWARD_POLICY); detected version $existing_dotnet_version. Installing channel $SDK_CHANNEL into $INSTALL_DIR"
+        else
+            echo ".NET SDKs on PATH do not satisfy the repository compatibility policy ($PINNED_SDK_VERSION with $SDK_ROLL_FORWARD_POLICY); detected version could not be determined. Installing channel $SDK_CHANNEL into $INSTALL_DIR"
+        fi
+
         install_dotnet
     fi
 else
