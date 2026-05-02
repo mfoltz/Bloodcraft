@@ -8,6 +8,7 @@ using static Bloodcraft.VExtensions;
 
 namespace Bloodcraft.Systems;
 
+// 'https://github.com/Odjit/KindredCommands/blob/d956d65a3f05322c4430130b272d2d64cc906265/Commands/ServantCommands.cs#L76' - Helpful reference material <3
 public sealed class ServantUpgradeSystem : SystemBase
 {
     EntityQuery _servantQuery;
