@@ -307,3 +307,5 @@ Debugging.cs
 Notepad.cs
 VSystem.cs
 Bridges.cs
+/.codex/persistent-data
+/.codex/runs

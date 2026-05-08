@@ -46,7 +46,7 @@
       <PackageReference Include="BepInEx.Unity.IL2CPP" Version="[6.0.0-be.733]" />
 
         <PackageReference Include="ScarletRCON.SourceSupport" Version="1.2.2" />
-        <PackageReference Include="VampireReferenceAssemblies" Version="[1.1.11-r96495-b8.meta.2]" />
+        <PackageReference Include="VampireReferenceAssemblies" Version="[1.1.12-r99041-b2]" />
         <PackageReference Include="VRising.VampireCommandFramework" Version="0.10.4" />
 	</ItemGroup>
 

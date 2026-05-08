@@ -33,9 +33,9 @@
       },
       "VampireReferenceAssemblies": {
         "type": "Direct",
-        "requested": "[1.1.11-r96495-b8.meta.2, 1.1.11-r96495-b8.meta.2]",
-        "resolved": "1.1.11-r96495-b8.meta.2",
-        "contentHash": "j+RlrY4SPr6iPGW06JusBxxxiCuF1unOSbqzfiR/14HZwZ1bKfylwtY7X5+dX+FEFUAvjU7tPeZ5IV63LLVa1w==",
+        "requested": "[1.1.12-r99041-b2, 1.1.12-r99041-b2]",
+        "resolved": "1.1.12-r99041-b2",
+        "contentHash": "oGF6Yohq6sqEe0AnfL9FAcB7YJt0fdHEZhCusxfT7Doncs5fIuvXv08g6ZIqPtZ3PcqTz+g2RGQL5z6wIrutWA==",
         "dependencies": {
           "Il2CppInterop.Common": "[1.4.6-ci.426]",
           "Il2CppInterop.Runtime": "[1.4.6-ci.426]"
