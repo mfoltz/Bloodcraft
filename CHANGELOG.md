@@ -1,3 +1,6 @@
+`1.12.18`
+- restored `NightmareMode` config to globally amp non-player combat units with PvE-only health, power, and movement tuning.
+
 `1.12.17`
 - removed `ConsumeBloodDebugEvent` from component registry for compatability with V Rising `v1.1.10.1-r94466-b2` update.
 - let's all join hands and pray the ill-timed `Recipes.cs` refactor is fine >_>. (`#yolo`)

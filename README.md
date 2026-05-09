@@ -120,6 +120,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 ### Endgame Extras (section WIP)
 - Elite Primal Rifts automatically start Primal War events at the rate/interval set by `PrimalRiftFrequency` when `ElitePrimalRifts` are enabled.
+- Nightmare Mode globally amps non-player combat units with PvE-only health, power, and movement tuning when `NightmareMode` is enabled.
 - Elite Shard Bearers increases the challenge of shard bearers significantly when `EliteShardBearers` is enabled, and their levels can be uniformly set via `ShardBearerLevel`.
 
 ## Bleeding Edge
@@ -488,6 +489,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Enable or disable elite primal rifts.
 - **Rift Frequency**: `RiftFrequency` (int, default: 0)
   Number of primal rifts to start per day when they are enabled (24 max).
+- **Nightmare Mode**: `NightmareMode` (bool, default: False)
+  Enable or disable PvE-only health, power, and movement tuning for enemy units.
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
   Enable or disable elite shard bearers.
 - **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)
