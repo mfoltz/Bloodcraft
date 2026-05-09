@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>	
+	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AssemblyName>Bloodcraft</AssemblyName>
-		<Version>1.13.17</Version>
+		<Version>1.13.21</Version>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <RestoreSources>
 			$(MSBuildProjectDirectory)\..\LocalNugetPackageFeed;
@@ -19,7 +19,6 @@
 		<NuGetAudit>false</NuGetAudit>
 		<RunGenerateREADME>true</RunGenerateREADME>
 	</PropertyGroup>
-	
 	<ItemGroup>
 		<EmbeddedResource Include="Resources\Localization\English.json" />
 		<EmbeddedResource Include="Resources\Localization\Brazilian.json" />
@@ -40,7 +39,6 @@
 		<EmbeddedResource Include="Resources\Localization\Vietnamese.json" />
 		<EmbeddedResource Include="Resources\secrets.json" />
 	</ItemGroup>
-	
 	<ItemGroup>
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
       <PackageReference Include="BepInEx.Unity.IL2CPP" Version="[6.0.0-be.733]" />

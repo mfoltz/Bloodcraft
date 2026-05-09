@@ -82,7 +82,7 @@
         "generic and can't be used in il2cpp"
       ],
       "expectedPluginVersions": {
-        "Bloodcraft": "1.13.17"
+        "Bloodcraft": "1.13.21"
       },
       "expectedVraVersion": "1.1.12-r99041-b2",
       "buildEnvironment": {

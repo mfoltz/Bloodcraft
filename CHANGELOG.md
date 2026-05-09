@@ -1,5 +1,10 @@
-`1.12.18`
-- restored `NightmareMode` config to globally amp non-player combat units with PvE-only health, power, and movement tuning.
+`1.13.21`
+- added Primal Arsenal experimental weapon support for Shadow Matter weapons, including replacement ability loadouts and cooldown tuning
+- updated V Rising references for `1.1.12-r99041-b2` and hardened startup readiness around server-world availability
+- added RCON/admin support for familiar management, shiny buffs, servant upgrade dispatch/status, and startup health summaries
+- restored `NightmareMode` with PvE-only health, power, and movement tuning, without attack-speed scaling
+- added Bloodcraft smoke harness support and repo-specific agent guidance for safer validation
+- adjusted related config defaults and docs for `PrimalArsenal`, `FishingSlots`, `RiftFrequency`, and `KitFamiliar`
 
 `1.12.17`
 - removed `ConsumeBloodDebugEvent` from component registry for compatability with V Rising `v1.1.10.1-r94466-b2` update.
