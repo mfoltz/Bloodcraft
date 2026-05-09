@@ -1,78 +1,58 @@
-# AGENTS.md: Universal Principles for CSharp and General Programming
+# Bloodcraft Agent Guide
 
-This guide provides universal, consistent principles and patterns to master C# coding effectively, applicable across any project or repository (within reason).
+This file is for Codex and other coding agents working in this repository. Keep changes narrow, evidence-led, and specific to Bloodcraft's V Rising mod runtime.
 
-## 🧪 Build & Test Workflow
+## Start Here
 
-* Use the repository's provisioning script at `.codex/install.sh` for any build or test run. This script installs the required .NET SDK (if necessary) and builds the `Bloodcraft` project in Release mode. Invoke it from the repository root:
+- Before acting, restate the exact problem, main non-goals, and the condition that should make you stop instead of pushing forward.
+- Check the current branch and worktree before editing. Do not rebase, push, merge, delete, retarget, or rewrite branches unless explicitly asked.
+- Prefer small, local changes that follow the existing Bloodcraft patterns. Avoid broad rewrites, style-only churn, or generic architecture cleanups.
+- Treat logs and runtime failures as evidence to classify, not as an invitation to provide open-ended Discord tech support.
+
+## Build And Verification
+
+- Run the repository bootstrap before any `dotnet` build or test work:
 
   ```bash
   bash .codex/install.sh
   ```
 
-* After the SDK is available, execute tests (for example, within `.codex/tests`) with the `dotnet` CLI that the script installs/exposes.
+- On this Windows machine, default `bash` may resolve to WSL without a distro. If that happens, use Git Bash:
 
-## 🗂️ Codex Tooling Structure
+  ```powershell
+  & 'C:\Program Files\Git\bin\bash.exe' .codex/install.sh
+  ```
 
-* Place all Codex tooling and new tests under the `.codex/` directory (e.g., `.codex/tests/...`).
-* Ensure future Codex-related assets respect this directory structure, and reference or inherit this guidance in any additional `AGENTS.md` files that may be introduced.
+- Use this verification ladder unless the task is explicitly docs-only:
+  - `git diff --check`
+  - `.codex/install.sh`
+  - `./.codex/run-harness.ps1 -Profile bloodcraft-smoke -Action run` when runtime confidence is needed
+- The smoke harness is configured in `.codex/harness.settings.json` and targets `VRisingDedicatedServerCodex`. Treat the harness receipt and server logs as the source of truth for startup classification.
+- Keep Codex tooling, probes, harness settings, and agent-only tests under `.codex/`.
 
-## 🧠 Structured Reasoning
+## V Rising Modding Constraints
 
-* **Single Responsibility Principle (SRP)**: Every class and method should have one clearly defined responsibility.
-* **Explicit Intent**: Write self-descriptive methods and classes, avoiding ambiguous or overly general names.
-* **Readability First**: Prioritize readability over cleverness. The intent of your code should be immediately clear to others.
+- Preserve BepInEx, Harmony, VampireCommandFramework, VampireReferenceAssemblies, and V Rising lifecycle assumptions unless the task is specifically to change them.
+- Be careful around static initialization, world access, IL2CPP registration, and server readiness. Do not move runtime lookups earlier without proving the startup path still works.
+- For startup/log issues, identify the first meaningful failure chain and separate Bloodcraft-owned failures from stale installs, dependency mismatches, server-world readiness, or adjacent mod failures.
+- Avoid importing patterns from other mods wholesale. Use adjacent repos as evidence or precedent only when the Bloodcraft code and harness support the change.
 
-## 🎯 Clarity & Explicitness
+## Release And Metadata Boundaries
 
-* Clearly specify the purpose, parameters, and return values of each method using XML documentation comments.
-* Choose names that explicitly describe intent (e.g., `CalculateTotalPrice()` instead of `Calculate()` or `CalcTP()`).
-* Favor descriptive variable names (`customerAge` rather than `ca`).
+- Follow `.github/CONTRIBUTING.md` for release policy.
+- Keep the canonical version plain `X.Y.Z` in `Bloodcraft.csproj`, `thunderstore.toml`, and `CHANGELOG.md`.
+- Do not commit branch-derived `-pre` or `-ft.*` versions. Those are CI outputs only.
+- Defer final README, changelog, and Thunderstore wording until after build and harness validation when a feature branch is still being stabilized.
 
-## 🔄 Iterative Improvement
+## Workflow And Review Guidance
 
-* Implement incremental changes and continuously validate with unit tests.
-* Regularly refactor code to simplify complexity and improve maintainability.
-* Conduct periodic peer reviews to integrate diverse perspectives and catch overlooked issues.
+- Workflow-specific review rules live under `.github/instructions/*.instructions.md`; consult them instead of duplicating policy here.
+- For GitHub Actions changes, prefer minimal reliability fixes and use YAML-aware validation. Do not run `bash -n` against workflow YAML.
+- For shell installer changes, verify through `.codex/install.sh` and limit shell linting to real shell scripts.
 
-## 🛡️ Robustness & Safety Nets
+## Stop Conditions
 
-* Write unit tests covering critical paths and edge cases to ensure code stability and correctness.
-* Leverage static code analysis tools like Roslyn analyzers and StyleCop to maintain high-quality standards.
-* Use assertions liberally to document and enforce assumptions in code logic.
-
-## 🏗️ Universal Design Patterns
-
-* **Factory & Abstract Factory**: For managing object creation and reducing direct dependencies.
-* **Strategy Pattern**: To encapsulate varying algorithms and make behaviors interchangeable.
-* **Repository Pattern**: For abstracting data layer logic and enhancing testability.
-* **Dependency Injection**: Use constructor injection to clearly define dependencies and improve modularity.
-
-## ♻️ Maintainable Code Habits
-
-* Avoid magic numbers; define constants or configuration settings instead.
-* Keep methods short (ideally fewer than 30 lines) to enhance readability and testability.
-* Organize methods logically within classes (constructors first, public methods next, followed by private methods).
-
-## 🚦 Consistent Coding Style
-
-* Adhere to established naming conventions:
-
-  * Methods & Variables: `PascalCase`
-  * Private fields & parameters: `camelCase`
-  * Constants: `UPPERCASE_WITH_UNDERSCORES`
-* Consistently format your code using tools like `.editorconfig`.
-
-## 📈 Performance Awareness
-
-* Understand the performance implications of collections (prefer using `Dictionary` for key-value lookups over lists).
-* Minimize object allocations, especially within loops or performance-critical paths.
-* Favor efficient data structures and algorithms suited to the task at hand (e.g., HashSets for uniqueness checks).
-
-## 🛠️ Continuous Learning & Reflection
-
-* Periodically review code written previously to identify opportunities for improvement.
-* Stay updated on language features and industry best practices.
-* Learn from established open-source C# projects and communities.
-
-By internalizing these universal principles, you build a solid foundation to become a proficient and thoughtful C# developer.
+- Stop if remote or GitHub state cannot be verified for a branch/merge-train task.
+- Stop if the available evidence cannot distinguish Bloodcraft-owned behavior from environment, dependency, or adjacent-mod behavior.
+- Stop if verification fails in a way that would require broadening beyond the requested scope.
+- Stop before advising public release, Thunderstore publication, or support messaging when the harness or logs do not support the claim.
