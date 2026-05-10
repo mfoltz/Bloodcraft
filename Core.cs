@@ -23,6 +23,7 @@ using ComponentType = Unity.Entities.ComponentType;
 using WeaponType = Bloodcraft.Interfaces.WeaponType;
 
 namespace Bloodcraft;
+
 internal static class Core
 {
     static World _server;
@@ -31,12 +32,12 @@ internal static class Core
     {
         get
         {
-            if (_server != null && _server.IsCreated)
+            if (_server?.IsCreated == true)
                 return _server;
 
             _server = WorldUtility.FindServerWorld();
 
-            if (_server == null || !_server.IsCreated)
+            if (_server?.IsCreated != true)
             {
                 if (!_serverNotReadyLogged)
                 {
@@ -51,20 +52,26 @@ internal static class Core
             return _server;
         }
     }
+
     public static EntityManager EntityManager
         => Server.EntityManager;
+
     public static ServerGameManager ServerGameManager
         => SystemService.ServerScriptMapper.GetServerGameManager();
 
-    //public static SystemService SystemService { get; } = new(Server);
     public static SystemService SystemService { get; set; }
+
     public static ServerGameBalanceSettings ServerGameBalanceSettings { get; set; }
+
     public static bool IsPvP
         => ServerGameBalanceSettings.GameModeType == GameModeType.PvP;
+
     public static double ServerTime
         => ServerGameManager.ServerTime;
+
     public static double DeltaTime
         => ServerGameManager.DeltaTime;
+
     public static ManualLogSource Log
         => Plugin.MiniBehaviour.LogSource;
 
@@ -101,6 +108,7 @@ internal static class Core
         PrefabGUIDs.DT_Unit_Relic_Dracula_Unique,
         PrefabGUIDs.DT_Unit_Relic_Morgana_Unique
     ];
+
     static readonly ComponentType[] _nightmareUnitAllComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
@@ -110,14 +118,21 @@ internal static class Core
         ComponentType.ReadOnly(Il2CppType.Of<UnitLevel>()),
         ComponentType.ReadOnly(Il2CppType.Of<AggroConsumer>())
     ];
+
     static QueryDesc _nightmareUnitQueryDesc;
 
     static bool ShouldResetShardBearers => ConfigService.EliteShardBearers;
+
     static bool ShouldApplyBonusStats => ConfigService.LegacySystem || ConfigService.ExpertiseSystem || ConfigService.ClassSystem || ConfigService.FamiliarSystem;
+
     public static bool Eclipsed => ConfigService.LevelingSystem || ConfigService.LegacySystem || ConfigService.ExpertiseSystem || ConfigService.ClassSystem || ConfigService.FamiliarSystem;
-    public static IReadOnlySet<WeaponType> BleedingEdge => _bleedingEdge;
+
+    public static IReadOnlySet<WeaponType> BleedingEdge
+        => _bleedingEdge;
     static HashSet<WeaponType> _bleedingEdge = [];
-    public static IReadOnlySet<Profession> DisabledProfessions => _disabledProfessions;
+
+    public static IReadOnlySet<Profession> DisabledProfessions
+        => _disabledProfessions;
     static HashSet<Profession> _disabledProfessions = [];
 
     const int SECONDARY_SKILL_SLOT = 4;
@@ -125,11 +140,14 @@ internal static class Core
     const float NIGHTMARE_HEALTH_MULTIPLIER = 5f;
     const float NIGHTMARE_POWER_MULTIPLIER = 1.5f;
     const float NIGHTMARE_MOVE_SPEED_MULTIPLIER = 1.25f;
+
     public static byte[] NEW_SHARED_KEY { get; set; }
+
     public static bool IsReady
         => _initialized;
 
     static bool _initialized;
+
     internal static void OnInitialize()
     {
         if (_initialized)
@@ -211,16 +229,19 @@ internal static class Core
         _initialized = true;
         StartupStateService.Mark(StartupState.CoreInitialized);
     }
+
     static MonoBehaviour GetOrCreateMonoBehaviour()
     {
         return _monoBehaviour ??= CreateMonoBehaviour();
     }
+
     static MonoBehaviour CreateMonoBehaviour()
     {
         MonoBehaviour monoBehaviour = new GameObject(MyPluginInfo.PLUGIN_NAME).AddComponent<IgnorePhysicsDebugSystem>();
         UnityEngine.Object.DontDestroyOnLoad(monoBehaviour.gameObject);
         return monoBehaviour;
     }
+
     public static Coroutine StartCoroutine(IEnumerator routine)
     {
         return GetOrCreateMonoBehaviour().StartCoroutine(routine.WrapToIl2Cpp());
@@ -229,15 +250,18 @@ internal static class Core
     {
         GetOrCreateMonoBehaviour().StopCoroutine(routine);
     }
+
     public static void Delayed(Action action, float delay = 0.25f)
     {
         RunDelayed(delay, action).Run();
     }
+
     static IEnumerator RunDelayed(float delay, Action action)
     {
         yield return new WaitForSeconds(delay);
         action?.Invoke();
     }
+
     public static AddItemSettings GetAddItemSettings()
     {
         AddItemSettings addItemSettings = new()
@@ -250,14 +274,17 @@ internal static class Core
 
         return addItemSettings;
     }
+
     static void GetBleedingEdgeWeapons()
     {
         _bleedingEdge = [..Configuration.ParseEnumsFromString<WeaponType>(ConfigService.BleedingEdge)];
     }
+
     public static void GetDisabledProfessions()
     {
         _disabledProfessions = [..Configuration.ParseEnumsFromString<Profession>(ConfigService.DisabledProfessions)];
     }
+
     static void ModifyPrefabs()
     {
         if (ConfigService.LevelingSystem)
@@ -301,8 +328,6 @@ internal static class Core
                 {
                     buffer.Clear();
                 }
-
-                // Buff_ApplyBuffOnDamageTypeDealt_DataShared
             }
         }
 
@@ -315,7 +340,6 @@ internal static class Core
                 {
                     ReplaceAbilityOnSlotBuff abilityOnSlotBuff = buffer[4];
                     abilityOnSlotBuff.NewGroupId = PrefabGUIDs.AB_Shapeshift_Bear_Dash_Group;
-
                     buffer[SECONDARY_SKILL_SLOT] = abilityOnSlotBuff;
                 }
             }
@@ -400,32 +424,6 @@ internal static class Core
             {
                 Log.LogWarning($"{ex}");
             }
-
-            /*
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(PrefabGUIDs.Item_Weapon_Reaper_T09_ShadowMatter, out prefabEntity))
-            {
-                prefabEntity.With((ref EquippableData equippableData) =>
-                {
-                    equippableData.BuffGuid = PrefabGUIDs.EquipBuff_Weapon_Pollaxe_Ability03;
-                });
-            }
-
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(PrefabGUIDs.Item_Weapon_TwinBlades_T09_ShadowMatter, out prefabEntity))
-            {
-                prefabEntity.With((ref EquippableData equippableData) =>
-                {
-                    equippableData.BuffGuid = PrefabGUIDs.EquipBuff_Weapon_Pollaxe_Ability03;
-                });
-            }
-
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(PrefabGUIDs.Item_Weapon_GreatSword_T09_ShadowMatter, out prefabEntity))
-            {
-                prefabEntity.With((ref EquippableData equippableData) =>
-                {
-                    equippableData.BuffGuid = PrefabGUIDs.EquipBuff_Weapon_Pollaxe_Ability03;
-                });
-            }
-            */
         }
     }
 
@@ -433,6 +431,7 @@ internal static class Core
     {
         NightmareModeRoutine().Run();
     }
+
     static IEnumerator NightmareModeRoutine()
     {
         yield return QueryResultStreamAsync(
@@ -461,6 +460,7 @@ internal static class Core
             }
         );
     }
+
     static bool ShouldSkipNightmareTarget(PrefabGUID prefabGuid, string prefabName)
     {
         if (!prefabGuid.HasValue()) return true;
@@ -470,6 +470,7 @@ internal static class Core
 
         return false;
     }
+
     static void ApplyNightmareStats(Entity entity)
     {
         entity.With((ref Health health) =>
@@ -499,6 +500,7 @@ internal static class Core
         PrefabGUIDs.CHAR_Vampire_Dracula_VBlood,
         PrefabGUIDs.CHAR_Blackfang_Morgana_VBlood
     ];
+
     static void ResetShardBearers()
     {
         ComponentType[] vBloodAllComponents =
@@ -518,7 +520,6 @@ internal static class Core
                 if (!entity.TryGetComponent(out PrefabGUID prefabGuid)) continue;
                 else if (_shardBearers.Contains(prefabGuid))
                 {
-                    // Log.LogWarning($"[ResetShardBearers] ({prefabGuid.GetPrefabName()})");
                     entity.Destroy();
                 }
             }
@@ -528,6 +529,7 @@ internal static class Core
             Log.LogWarning($"[ResetShardBearers] error: {ex}");
         }
     }
+
     static IEnumerator BleedingEdgePrimaryProjectileRoutine(QueryDesc projectileQueryDesc)
     {
         bool pistols = BleedingEdge.Contains(WeaponType.Pistols);
@@ -549,18 +551,12 @@ internal static class Core
 
                             if (pistols && IsWeaponPrimaryProjectile(prefabName, WeaponType.Pistols))
                             {
-                                // Log.LogWarning($"[BleedingEdgePrimaryProjectileRoutine] - editing {prefabName}");
                                 entity.With((ref Projectile projectile) => projectile.Range *= 1.25f);
                                 entity.With((ref LifeTime lifeTime) => lifeTime.Duration *= 1.25f);
                             }
                             else if (crossbow && IsWeaponPrimaryProjectile(prefabName, WeaponType.Crossbow))
                             {
-                                // Log.LogWarning($"[BleedingEdgePrimaryProjectileRoutine] - editing {prefabName}");
                                 entity.With((ref Projectile projectile) => projectile.Speed = 100f);
-                            }
-                            else
-                            {
-                                // Log.LogWarning($"[BleedingEdgePrimaryProjectileRoutine] - {prefabName}");
                             }
                         }
                     }
@@ -572,10 +568,12 @@ internal static class Core
             }
         );
     }
+
     static bool IsWeaponPrimaryProjectile(string prefabName, WeaponType weaponType)
     {
         return prefabName.ContainsAll([weaponType.ToString(), "Primary", "Projectile"]);
     }
+
     public static void DumpEntity(this Entity entity, World world)
     {
         Il2CppSystem.Text.StringBuilder sb = new();
@@ -591,15 +589,23 @@ internal static class Core
         }
     }
 }
+
 public struct NativeAccessor<T>(NativeArray<T> array) : IDisposable where T : unmanaged
 {
     NativeArray<T> _array = array;
+
     public T this[int index]
     {
         get => _array[index];
         set => _array[index] = value;
     }
-    public int Length => _array.Length;
-    public NativeArray<T>.Enumerator GetEnumerator() => _array.GetEnumerator();
-    public void Dispose() => _array.Dispose();
+
+    public int Length
+        => _array.Length;
+
+    public NativeArray<T>.Enumerator GetEnumerator()
+        => _array.GetEnumerator();
+
+    public void Dispose()
+        => _array.Dispose();
 }
