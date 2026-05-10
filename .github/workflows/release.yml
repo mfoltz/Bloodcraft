@@ -2,15 +2,23 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing GitHub Release tag to publish to Thunderstore, such as v1.13.21 or v1.13.21-pre.
+        required: true
+        type: string
 
 jobs:
   release_on_thunderstore:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Validate canonical version metadata
         id: version_metadata
@@ -28,36 +36,40 @@ jobs:
         id: select_tag
         run: |
           canonical_version='${{ steps.version_metadata.outputs.canonical_version }}'
+          requested_tag='${{ inputs.release_tag }}'
 
           # Thunderstore accepts canonical stable releases (vX.Y.Z) and shared prereleases (vX.Y.Z-pre).
           # Feature-testing snapshots (v*-ft.*) are disposable CI artifacts and must never drive publication.
           allowed_tag_pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-pre)?$'
           allowed_package_version_pattern='^[0-9]+\.[0-9]+\.[0-9]+(-pre)?$'
 
-          mapfile -t eligible_tags < <(
-            git tag --sort=-v:refname \
-              | grep -E "$allowed_tag_pattern"
-          )
+          if [[ -z "$requested_tag" ]]; then
+            echo "Error: release_tag input is required." >&2
+            exit 1
+          fi
 
-          if [[ ${#eligible_tags[@]} -eq 0 ]]; then
-            echo "Error: No eligible Thunderstore release tag found." >&2
+          if [[ ! "$requested_tag" =~ $allowed_tag_pattern ]]; then
+            echo "Error: Release tag '$requested_tag' is not an allowed Thunderstore source tag." >&2
             echo "Expected one of: vX.Y.Z or vX.Y.Z-pre. Feature-testing tags such as v*-ft.* are intentionally excluded." >&2
             exit 1
           fi
 
-          selected_tag="${eligible_tags[0]}"
-          package_version="${selected_tag#v}"
-
-          if [[ "$package_version" != "$canonical_version" && "$package_version" != "$canonical_version-pre" ]]; then
-            echo "Error: Selected release tag '$selected_tag' does not align with canonical version '$canonical_version'." >&2
+          if ! git rev-parse -q --verify "refs/tags/$requested_tag" >/dev/null; then
+            echo "Error: Release tag '$requested_tag' was not found in this checkout." >&2
             exit 1
           fi
 
-          echo "Eligible Thunderstore tags: ${eligible_tags[*]}"
-          echo "Selected Thunderstore tag: $selected_tag"
+          package_version="${requested_tag#v}"
+
+          if [[ "$package_version" != "$canonical_version" && "$package_version" != "$canonical_version-pre" ]]; then
+            echo "Error: Release tag '$requested_tag' does not align with canonical version '$canonical_version'." >&2
+            exit 1
+          fi
+
+          echo "Selected Thunderstore tag: $requested_tag"
           echo "Thunderstore package version: $package_version"
 
-          echo "RELEASE_TAG=$selected_tag" >> "$GITHUB_ENV"
+          echo "RELEASE_TAG=$requested_tag" >> "$GITHUB_ENV"
           echo "PACKAGE_VERSION=$package_version" >> "$GITHUB_ENV"
           echo "ALLOWED_TAG_PATTERN=$allowed_tag_pattern" >> "$GITHUB_ENV"
           echo "ALLOWED_PACKAGE_VERSION_PATTERN=$allowed_package_version_pattern" >> "$GITHUB_ENV"
@@ -86,9 +98,10 @@ jobs:
           fi
 
           echo "Publishing Thunderstore package version: $PACKAGE_VERSION"
-          tcli publish --token ${{ secrets.THUNDERSTORE_KEY }} --package-version "$PACKAGE_VERSION"
+          tcli publish --token "$THUNDERSTORE_KEY" --package-version "$PACKAGE_VERSION"
         env:
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
           PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
           ALLOWED_TAG_PATTERN: ${{ env.ALLOWED_TAG_PATTERN }}
           ALLOWED_PACKAGE_VERSION_PATTERN: ${{ env.ALLOWED_PACKAGE_VERSION_PATTERN }}
+          THUNDERSTORE_KEY: ${{ secrets.THUNDERSTORE_KEY }}

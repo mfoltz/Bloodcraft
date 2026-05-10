@@ -283,7 +283,7 @@ jobs:
           fi
 
       - name: GH Release (pre-release)
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2.6.2
         if: needs.prepare_prerelease.outputs.prerelease_version != ''
         with:
           body: |
@@ -392,7 +392,7 @@ jobs:
           dotnet build . --configuration Release -p:Version=$feature_testing_version -p:RunGenerateREADME=false -p:CheckEolTargetFramework=false
 
       - name: GH Release (feature-testing snapshot)
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2.6.2
         if: needs.prepare_feature_testing_prerelease.outputs.feature_testing_version != ''
         with:
           body: |
