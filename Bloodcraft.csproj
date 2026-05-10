@@ -5,11 +5,16 @@
 		<AssemblyName>Bloodcraft</AssemblyName>
 		<Version>1.13.21</Version>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-        <RestoreSources>
-			$(MSBuildProjectDirectory)\..\LocalNugetPackageFeed;
+		<LocalNugetPackageFeed>$(MSBuildProjectDirectory)/../LocalNugetPackageFeed</LocalNugetPackageFeed>
+		<RestoreSources>
 			$(RestoreSources);
 			https://api.nuget.org/v3/index.json;
 			https://nuget.bepinex.dev/v3/index.json;
+		</RestoreSources>
+		<UseLocalNugetPackageFeed Condition="'$(UseLocalNugetPackageFeed)' == ''">false</UseLocalNugetPackageFeed>
+		<RestoreSources Condition="'$(UseLocalNugetPackageFeed)' == 'true' and Exists('$(LocalNugetPackageFeed)')">
+			$(RestoreSources);
+			$(LocalNugetPackageFeed);
 		</RestoreSources>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<BepInExPluginGuid>io.zfolmt.Bloodcraft</BepInExPluginGuid>

@@ -35,7 +35,7 @@
         "type": "Direct",
         "requested": "[1.1.12-r99041-b2, 1.1.12-r99041-b2]",
         "resolved": "1.1.12-r99041-b2",
-        "contentHash": "oGF6Yohq6sqEe0AnfL9FAcB7YJt0fdHEZhCusxfT7Doncs5fIuvXv08g6ZIqPtZ3PcqTz+g2RGQL5z6wIrutWA==",
+        "contentHash": "BPWzE4nVwvWkA8k3C58NkAOdlmZGW6VBcQhZwx8Y0FKY/aoPy61jcYCUUP+QC5GegAZYLnNLp2DHDLd45wlAXQ==",
         "dependencies": {
           "Il2CppInterop.Common": "[1.4.6-ci.426]",
           "Il2CppInterop.Runtime": "[1.4.6-ci.426]"
