@@ -16,6 +16,9 @@ internal static class ConfigService
     static readonly Lazy<bool> _eclipsed = new(() => GetConfigValue<bool>("Eclipsed"));
     public static bool Eclipsed => _eclipsed.Value;
 
+    static readonly Lazy<bool> _useEmberglassEclipseBridge = new(() => GetConfigValue<bool>("UseEmberglassEclipseBridge"));
+    public static bool UseEmberglassEclipseBridge => _useEmberglassEclipseBridge.Value;
+
     static readonly Lazy<bool> _elitePrimalRifts = new(() => GetConfigValue<bool>("ElitePrimalRifts"));
     public static bool ElitePrimalRifts => _elitePrimalRifts.Value;
 
@@ -527,6 +530,7 @@ internal static class ConfigService
         [
             new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
             new ConfigEntryDefinition("General", "Eclipsed", false, "Eclipse will be active if any features that sync with the client are enabled. Instead, this now controls the frequency; true for faster (0.1s), false for slower (2.5s)."),
+            new ConfigEntryDefinition("General", "UseEmberglassEclipseBridge", false, "Use Emberglass for the Bloodcraft/Eclipse bridge when Emberglass is installed. Falls back to the legacy chat bridge when disabled or unavailable."),
             new ConfigEntryDefinition("General", "ElitePrimalRifts", false, "Enable or disable elite primal rifts."),
             new ConfigEntryDefinition("General", "RiftFrequency", 0, "Number of primal rifts to start per day when they are enabled (24 max)."),
             new ConfigEntryDefinition("General", "NightmareMode", false, "Enable or disable PvE-only health, power, and movement tuning for enemy units."),

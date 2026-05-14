@@ -298,3 +298,5 @@ secrets.json
 DevCommands.cs
 /.codex/persistent-data
 /.codex/runs
+/.codex/state
+/.codex/emberglass-bridge-proof.harness.settings.json

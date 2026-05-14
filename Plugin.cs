@@ -14,6 +14,7 @@ namespace Bloodcraft;
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 [BepInDependency("gg.deca.VampireCommandFramework")]
 [BepInDependency("markvaaz.ScarletRCON", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("io.zfolmt.Emberglass", BepInDependency.DependencyFlags.SoftDependency)]
 internal class Plugin : BasePlugin
 {
     internal static Harmony Harmony { get; set; }

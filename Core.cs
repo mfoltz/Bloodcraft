@@ -163,7 +163,10 @@ internal static class Core
         _ = new LocalizationService();
 
         if (Eclipsed)
+        {
+            EmberglassEclipseBridge.Initialize();
             _ = new EclipseService();
+        }
 
         if (ConfigService.ExtraRecipes)
             Recipes.ModifyRecipes();

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: Existing GitHub Release tag to publish to Thunderstore, such as v1.13.21 or v1.13.21-pre.
+        description: Existing GitHub Release tag to publish to Thunderstore, such as v1.13.22 or v1.13.22-pre.
         required: true
         type: string
 
