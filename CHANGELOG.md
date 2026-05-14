@@ -1,3 +1,8 @@
+`1.13.22`
+- added opt-in Emberglass transport support for the Bloodcraft/Eclipse bridge while keeping the legacy ChatMessage bridge as the default fallback
+- added config and compatibility plumbing so Bloodcraft can start cleanly with or without Emberglass installed
+- hardened build/release workflow checks and release-tag selection for smoother prerelease validation
+
 `1.13.21`
 - added Primal Arsenal experimental weapon support for Shadow Matter weapons, including replacement ability loadouts and cooldown tuning
 - updated V Rising references for `1.1.12-r99041-b2` and hardened startup readiness around server-world availability
