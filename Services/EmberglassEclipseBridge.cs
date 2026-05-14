@@ -81,13 +81,10 @@ internal static class EmberglassEclipseBridge
 
         try
         {
-            Core.Log.LogInfo($"[EclipseBridge:Emberglass] sending {messageKind}");
-
             _sendToClient
                 .MakeGenericMethod(typeof(EclipseServerMessagePacket))
                 .Invoke(null, [user, new EclipseServerMessagePacket(message)]);
 
-            Core.Log.LogInfo($"[EclipseBridge:Emberglass] {messageKind} sent");
             return true;
         }
         catch (Exception ex)
