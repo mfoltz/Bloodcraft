@@ -18,6 +18,7 @@ internal static class EmberglassEclipseBridge
     static PropertyInfo _isReady;
     static EventInfo _onReady;
     static EventInfo _onClientReady;
+    static readonly HashSet<string> _loggedSendFailures = [];
 
     public static void Initialize()
     {
@@ -89,7 +90,7 @@ internal static class EmberglassEclipseBridge
         }
         catch (Exception ex)
         {
-            DisableForSession($"failed to send {messageKind} ({FormatExceptionForLog(ex)})");
+            LogSendFailure(messageKind, ex);
             return false;
         }
     }
@@ -153,6 +154,19 @@ internal static class EmberglassEclipseBridge
         _available = false;
         _disabledForSession = true;
         Core.Log.LogWarning($"[EclipseBridge:Emberglass] disabled for this session; using ChatMessage bridge ({reason})");
+    }
+
+    static void LogSendFailure(string messageKind, Exception exception)
+    {
+        string formattedException = FormatExceptionForLog(exception);
+        string failureKey = $"{messageKind}:{formattedException}";
+
+        if (!_loggedSendFailures.Add(failureKey))
+        {
+            return;
+        }
+
+        Core.Log.LogWarning($"[EclipseBridge:Emberglass] failed to send {messageKind}; using ChatMessage fallback for this message ({formattedException})");
     }
 
     static string FormatExceptionForLog(Exception exception)
