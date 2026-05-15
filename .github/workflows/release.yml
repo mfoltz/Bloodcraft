@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: Existing GitHub Release tag to publish to Thunderstore, such as v1.13.22 or v1.13.22-pre.
+        description: Existing GitHub Release tag to publish to Thunderstore, such as v1.13.22-pre. Thunderstore receives X.Y.Z.
         required: true
         type: string
 
@@ -38,10 +38,10 @@ jobs:
           canonical_version='${{ steps.version_metadata.outputs.canonical_version }}'
           requested_tag='${{ inputs.release_tag }}'
 
-          # Thunderstore accepts canonical stable releases (vX.Y.Z) and shared prereleases (vX.Y.Z-pre).
+          # GitHub prerelease tags (vX.Y.Z-pre) can publish canonical Thunderstore package versions (X.Y.Z).
           # Feature-testing snapshots (v*-ft.*) are disposable CI artifacts and must never drive publication.
           allowed_tag_pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-pre)?$'
-          allowed_package_version_pattern='^[0-9]+\.[0-9]+\.[0-9]+(-pre)?$'
+          allowed_package_version_pattern='^[0-9]+\.[0-9]+\.[0-9]+$'
 
           if [[ -z "$requested_tag" ]]; then
             echo "Error: release_tag input is required." >&2
@@ -59,17 +59,20 @@ jobs:
             exit 1
           fi
 
-          package_version="${requested_tag#v}"
+          release_version="${requested_tag#v}"
+          package_version="${release_version%-pre}"
 
-          if [[ "$package_version" != "$canonical_version" && "$package_version" != "$canonical_version-pre" ]]; then
+          if [[ "$release_version" != "$canonical_version" && "$release_version" != "$canonical_version-pre" ]]; then
             echo "Error: Release tag '$requested_tag' does not align with canonical version '$canonical_version'." >&2
             exit 1
           fi
 
           echo "Selected Thunderstore tag: $requested_tag"
+          echo "GitHub release version: $release_version"
           echo "Thunderstore package version: $package_version"
 
           echo "RELEASE_TAG=$requested_tag" >> "$GITHUB_ENV"
+          echo "RELEASE_VERSION=$release_version" >> "$GITHUB_ENV"
           echo "PACKAGE_VERSION=$package_version" >> "$GITHUB_ENV"
           echo "ALLOWED_TAG_PATTERN=$allowed_tag_pattern" >> "$GITHUB_ENV"
           echo "ALLOWED_PACKAGE_VERSION_PATTERN=$allowed_package_version_pattern" >> "$GITHUB_ENV"
