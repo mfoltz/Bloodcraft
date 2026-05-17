@@ -1,3 +1,9 @@
+## Unreleased
+
+`1.13.23`
+- added release hygiene helper scripts for changelog/version bump review and metadata updates
+- added CI coverage for the release hygiene nudge before build verification
+
 `1.13.22`
 - added opt-in Emberglass transport support for the Bloodcraft/Eclipse bridge while keeping the legacy ChatMessage bridge as the default fallback
 - added config and compatibility plumbing so Bloodcraft can start cleanly with or without Emberglass installed
