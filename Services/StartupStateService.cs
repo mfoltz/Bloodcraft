@@ -44,6 +44,10 @@ internal static class StartupStateService
         | StartupState.CommandsRegistered
         | StartupState.RconRegistered;
 
+    internal const StartupState BootstrapReadyStates =
+        StartupState.BootstrapFired
+        | StartupState.CoreInitialized;
+
     internal static StartupState Current
         => (StartupState)Volatile.Read(ref _current);
 
@@ -68,6 +72,12 @@ internal static class StartupStateService
 
     internal static bool IsReady()
         => MissingRequired() == StartupState.None;
+
+    internal static bool IsWaitingForBootstrap()
+    {
+        StartupState missing = MissingRequired();
+        return missing != StartupState.None && (missing & ~BootstrapReadyStates) == StartupState.None;
+    }
 
     static string[] GetOrderedStateNames(StartupState states)
     {

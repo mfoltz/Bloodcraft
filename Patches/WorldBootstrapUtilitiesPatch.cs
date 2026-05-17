@@ -24,6 +24,7 @@ public static class WorldBootstrapPatch
 
     const string QuestTargetSystemTypeName = "Bloodcraft.Systems.Quests.QuestTargetSystem, Bloodcraft";
     const string PrimalWarEventSystemTypeName = "Bloodcraft.Systems.PrimalWarEventSystem, Bloodcraft";
+    const string ServantUpgradeSystemTypeName = "Bloodcraft.Systems.ServantUpgradeSystem, Bloodcraft";
 
     [HarmonyPatch(typeof(WorldBootstrapUtilities), nameof(WorldBootstrapUtilities.AddSystemsToWorld))]
     [HarmonyPrefix]
@@ -102,6 +103,7 @@ public static class WorldBootstrapPatch
     {
         yield return ResolveType(QuestTargetSystemTypeName);
         yield return ResolveType(PrimalWarEventSystemTypeName);
+        yield return ResolveType(ServantUpgradeSystemTypeName);
     }
 
     static Type ResolvePrimalSystemType()

@@ -1,3 +1,4 @@
+using Il2CppInterop.Runtime.Attributes;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Collections;
@@ -31,6 +32,7 @@ public sealed class ServantUpgradeSystem : SystemBase
         OnCreateInternal();
     }
 
+    [HideFromIl2Cpp]
     void OnCreateInternal()
     {
         _entityHandle = GetEntityTypeHandle();
@@ -50,6 +52,7 @@ public sealed class ServantUpgradeSystem : SystemBase
         RequireForUpdate(_servantQuery);
     }
 
+    [HideFromIl2Cpp]
     void OnBeforeUpdate()
     {
         _entityHandle.Update(this);
@@ -67,7 +70,7 @@ public sealed class ServantUpgradeSystem : SystemBase
             return;
 
         OnBeforeUpdate();
-        OnReceive(ref servantUpgradeEvent);
+        OnReceive(servantUpgradeEvent);
 
         /*
         ServantUpgradeJob servantUpgradeJob = new()
@@ -84,7 +87,8 @@ public sealed class ServantUpgradeSystem : SystemBase
         */
     }
 
-    void OnReceive(ref ServantUpgradeEvent servantUpgradeEvent)
+    [HideFromIl2Cpp]
+    void OnReceive(ServantUpgradeEvent servantUpgradeEvent)
     {
         var chunks = _servantQuery.ToArchetypeChunkArray(Allocator.Temp);
         bool wasUpgraded = false;
@@ -137,7 +141,7 @@ public sealed class ServantUpgradeSystem : SystemBase
                         SetComponent(servant, servantPower);
 
                         wasUpgraded = true;
-                        KeepReceipt(ref servantUpgradeEvent, wasUpgraded);
+                        KeepReceipt(servantUpgradeEvent, wasUpgraded);
                         Log.LogInfo($"Upgraded {servantUpgradeEvent.Servant} for {servantUpgradeEvent.Player}!");
                     }
                 }
@@ -154,7 +158,7 @@ public sealed class ServantUpgradeSystem : SystemBase
         }
 
         if (!wasUpgraded)
-            KeepReceipt(ref servantUpgradeEvent, wasUpgraded);
+            KeepReceipt(servantUpgradeEvent, wasUpgraded);
     }
 
     /*

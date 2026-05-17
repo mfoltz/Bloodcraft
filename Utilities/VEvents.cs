@@ -56,13 +56,13 @@ internal static class VEvents
     static readonly Queue<ServantUpgradeEvent> _servantUpgradeQueue = [];
     static readonly ConcurrentDictionary<(string, string), bool> _servantUpgradeReceipts = [];
 
-    public static void Dispatch(ref ServantUpgradeEvent servantUpgradeEvent)
+    public static void Dispatch(ServantUpgradeEvent servantUpgradeEvent)
         => _servantUpgradeQueue.Enqueue(servantUpgradeEvent);
 
     public static bool TryReceive(out ServantUpgradeEvent servantUpgradeEvent)
         => _servantUpgradeQueue.TryDequeue(out servantUpgradeEvent);
 
-    public static void KeepReceipt(ref ServantUpgradeEvent servantUpgradeEvent, bool wasUpgraded = false)
+    public static void KeepReceipt(ServantUpgradeEvent servantUpgradeEvent, bool wasUpgraded = false)
         => _servantUpgradeReceipts.TryAdd(new(servantUpgradeEvent.Player, servantUpgradeEvent.Servant), wasUpgraded);
 
     public static bool HasRefund((string Player, string Servant) tupleKey)

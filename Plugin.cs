@@ -42,9 +42,17 @@ internal class Plugin : BasePlugin
             OnLoadInternal();                                   // configs, command registration, mod-specific player data, etc.
 
             if (StartupStateService.IsReady())
+            {
                 LogSource.LogInfo($"Startup checks passed. {StartupStateService.BuildSummary()}");
+            }
+            else if (StartupStateService.IsWaitingForBootstrap())
+            {
+                LogSource.LogInfo($"Startup checks pending server bootstrap. {StartupStateService.BuildSummary()}");
+            }
             else
+            {
                 LogSource.LogWarning($"Startup checks failed. {StartupStateService.BuildSummary()}");
+            }
         }
 
         static void OnLoadInternal()

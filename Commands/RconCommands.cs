@@ -108,7 +108,7 @@ public static class RconCommands
         }
 
         ServantUpgradeEvent servantUpgradeEvent = new(playerName, servantName);
-        Dispatch(ref servantUpgradeEvent);
+        Dispatch(servantUpgradeEvent);
 
         return false.ToString();
     }

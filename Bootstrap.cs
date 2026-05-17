@@ -29,6 +29,15 @@ internal static class Bootstrap
         {
             Core.OnInitialize();
             StartupStateService.Mark(StartupState.BootstrapFired);
+            if (StartupStateService.IsReady())
+            {
+                _logSource.LogInfo($"Startup checks passed. {StartupStateService.BuildSummary()}");
+            }
+            else
+            {
+                _logSource.LogWarning($"Startup checks failed after bootstrap. {StartupStateService.BuildSummary()}");
+            }
+
             _logSource.LogInfo($"Initialized [{MyPluginInfo.PLUGIN_VERSION}]");
         }
         catch (Exception ex)
