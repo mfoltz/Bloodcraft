@@ -144,7 +144,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
           fetch-tags: false
           persist-credentials: false
 
@@ -156,6 +156,10 @@ jobs:
       - name: Validate canonical version metadata
         shell: bash
         run: ./.codex/scripts/version-metadata.sh
+
+      - name: Run release hygiene gate
+        shell: pwsh
+        run: ./.codex/scripts/release-nudge.ps1
 
       - name: Verify canonical version files remain unchanged
         shell: bash
