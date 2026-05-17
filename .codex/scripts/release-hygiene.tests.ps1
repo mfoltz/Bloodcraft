@@ -151,8 +151,47 @@ function Test-ReleaseNudgeBlocksWithoutWarnOnly {
     }
 }
 
+function Test-ReleaseNudgeUsesPushBeforeShaWhenBaseRefIsEmpty {
+    $FixtureRoot = New-FixtureRepo
+    try {
+        $BeforeSha = (Invoke-Git -WorkingDirectory $FixtureRoot -Arguments @("rev-parse", "HEAD")).Trim()
+        Set-Content -Path (Join-Path $FixtureRoot "Systems/QuestTargetSystem.cs") -Value "class QuestTargetSystem { void ChangedOnPush() {} }" -NoNewline
+        Invoke-Git -WorkingDirectory $FixtureRoot -Arguments @("add", "Systems/QuestTargetSystem.cs") | Out-Null
+        Invoke-Git -WorkingDirectory $FixtureRoot -Arguments @("commit", "-m", "change system") | Out-Null
+        $HeadSha = (Invoke-Git -WorkingDirectory $FixtureRoot -Arguments @("rev-parse", "HEAD")).Trim()
+        Invoke-Git -WorkingDirectory $FixtureRoot -Arguments @("update-ref", "refs/remotes/origin/main", $HeadSha) | Out-Null
+
+        $EventPath = Join-Path $FixtureRoot "push-event.json"
+        Set-Content -Path $EventPath -Value (@{
+            before = $BeforeSha
+            after = $HeadSha
+        } | ConvertTo-Json -Compress) -NoNewline
+
+        $PreviousEventName = $env:GITHUB_EVENT_NAME
+        $PreviousEventPath = $env:GITHUB_EVENT_PATH
+        try {
+            $env:GITHUB_EVENT_NAME = "push"
+            $env:GITHUB_EVENT_PATH = $EventPath
+            $Output = & pwsh -NoProfile -File (Join-Path $FixtureRoot ".codex/scripts/release-nudge.ps1") -WarnOnly 2>&1 | Out-String
+            if ($LASTEXITCODE -ne 0) {
+                throw "release-nudge.ps1 push fallback exited with $LASTEXITCODE"
+            }
+        }
+        finally {
+            $env:GITHUB_EVENT_NAME = $PreviousEventName
+            $env:GITHUB_EVENT_PATH = $PreviousEventPath
+        }
+
+        Assert-Match -Text $Output -Pattern 'Bloodcraft CHANGELOG\.md has Unreleased notes' -Message "Release nudge did not use the push before SHA as its diff base."
+    }
+    finally {
+        Remove-Item -LiteralPath $FixtureRoot -Recurse -Force
+    }
+}
+
 Test-BumpVersionUpdatesBloodcraftMetadata
 Test-ReleaseNudgeWarnOnlyFlagsUnreleasedNotes
 Test-ReleaseNudgeBlocksWithoutWarnOnly
+Test-ReleaseNudgeUsesPushBeforeShaWhenBaseRefIsEmpty
 
 Write-Host "release-hygiene tests passed"

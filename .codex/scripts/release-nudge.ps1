@@ -70,8 +70,40 @@ function Test-MeaningfulPath {
         -or $NormalizedPath -match '^[^/]+\.(cs|csproj)$'
 }
 
+function Get-PushBeforeSha {
+    if ($env:GITHUB_EVENT_NAME -ne "push") {
+        return $null
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_EVENT_BEFORE)) {
+        return $env:GITHUB_EVENT_BEFORE
+    }
+
+    if ([string]::IsNullOrWhiteSpace($env:GITHUB_EVENT_PATH) -or -not (Test-Path -LiteralPath $env:GITHUB_EVENT_PATH)) {
+        return $null
+    }
+
+    $Event = Get-Content -Raw -Path $env:GITHUB_EVENT_PATH | ConvertFrom-Json
+    return $Event.before
+}
+
+function Test-UsableCommitRef {
+    param(
+        [AllowNull()]
+        [string]$Ref
+    )
+
+    return -not [string]::IsNullOrWhiteSpace($Ref) `
+        -and $Ref -match '^[0-9a-fA-F]{40}$' `
+        -and $Ref -notmatch '^0{40}$'
+}
+
 if ([string]::IsNullOrWhiteSpace($BaseRef)) {
-    $BaseRef = if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_BASE_REF)) {
+    $PushBeforeSha = Get-PushBeforeSha
+    $BaseRef = if (Test-UsableCommitRef $PushBeforeSha) {
+        $PushBeforeSha
+    }
+    elseif (-not [string]::IsNullOrWhiteSpace($env:GITHUB_BASE_REF)) {
         "origin/$($env:GITHUB_BASE_REF)"
     }
     else {
