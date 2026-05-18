@@ -90,6 +90,10 @@ if [ ! -f "$CHANGELOG_PATH" ]; then
     fail "Unable to locate changelog at '$CHANGELOG_PATH'."
 fi
 
+if ! grep -Eq '^##[[:space:]]*Unreleased[[:space:]]*$' "$CHANGELOG_PATH"; then
+    fail "CHANGELOG.md must contain a ## Unreleased section before creating or publishing a prerelease."
+fi
+
 unreleased_body=$(
     awk '
         /^##[[:space:]]*Unreleased[[:space:]]*$/ { in_unreleased = 1; next }

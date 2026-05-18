@@ -116,6 +116,30 @@ function Test-PrereleaseNotesRejectsUnreleasedContent {
     }
 }
 
+function Test-PrereleaseNotesRejectsMissingUnreleasedHeader {
+    $FixtureRoot = New-Fixture
+    try {
+        $ChangelogPath = Join-Path $FixtureRoot "CHANGELOG.md"
+        Set-Content -Path $ChangelogPath -Value @"
+`1.2.3`
+- added staged Thunderstore packaging
+"@
+
+        $Output = Invoke-PrereleaseNotes -Arguments @(
+            "--changelog", $ChangelogPath,
+            "--version", "1.2.3",
+            "--check-only")
+        if ($LASTEXITCODE -eq 0) {
+            throw "prerelease-notes.sh unexpectedly accepted a missing Unreleased header."
+        }
+
+        Assert-Match -Text $Output -Pattern 'must contain a ## Unreleased section' -Message "Missing Unreleased rejection message was not specific."
+    }
+    finally {
+        Remove-Item -Recurse -Force -LiteralPath $FixtureRoot
+    }
+}
+
 function Test-PrereleaseNotesRejectsMissingVersionEntry {
     $FixtureRoot = New-Fixture
     try {
@@ -195,6 +219,7 @@ function Test-ReleaseWorkflowStagesAndChecksReleaseChangelog {
 
 Test-PrereleaseNotesIncludesChangelogAndDetailsCard
 Test-PrereleaseNotesRejectsUnreleasedContent
+Test-PrereleaseNotesRejectsMissingUnreleasedHeader
 Test-PrereleaseNotesRejectsMissingVersionEntry
 Test-ReleaseWorkflowStagesAndChecksReleaseChangelog
 
