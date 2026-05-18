@@ -67,6 +67,12 @@ jobs:
           echo "ALLOWED_PACKAGE_VERSION_PATTERN=$allowed_package_version_pattern" >> "$GITHUB_ENV"
         shell: bash
 
+      - name: Preserve release helper scripts
+        shell: bash
+        run: |
+          cp .codex/scripts/prerelease-notes.sh "$RUNNER_TEMP/prerelease-notes.sh"
+          chmod +x "$RUNNER_TEMP/prerelease-notes.sh"
+
       - name: Checkout selected release tag
         shell: bash
         run: git checkout --detach "refs/tags/$RELEASE_TAG"
@@ -133,7 +139,7 @@ jobs:
       - name: Validate staged release changelog
         shell: bash
         run: |
-          bash .codex/scripts/prerelease-notes.sh \
+          bash "$RUNNER_TEMP/prerelease-notes.sh" \
             --changelog ./dist/thunderstore-publish/CHANGELOG.md \
             --version "$PACKAGE_VERSION" \
             --tag "$RELEASE_TAG" \
