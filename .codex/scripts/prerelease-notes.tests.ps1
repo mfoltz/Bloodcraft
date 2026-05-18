@@ -47,13 +47,17 @@ function Test-PrereleaseNotesIncludesChangelogAndDetailsCard {
         $ChangelogPath = Join-Path $FixtureRoot "CHANGELOG.md"
         $OutputPath = Join-Path $FixtureRoot "prerelease-notes.md"
         Set-Content -Path $ChangelogPath -Value @'
+# Changelog
+
 ## Unreleased
 
-`1.2.3`
+## v1.2.3
+
 - added staged Thunderstore packaging
 - tightened prerelease receipts
 
-`1.2.2`
+## v1.2.2
+
 - previous release
 '@
 
@@ -102,10 +106,13 @@ function Test-PrereleaseNotesRejectsUnreleasedContent {
         $env:GITHUB_REPOSITORY = "mfoltz/Bloodcraft"
         $ChangelogPath = Join-Path $FixtureRoot "CHANGELOG.md"
         Set-Content -Path $ChangelogPath -Value @'
+# Changelog
+
 ## Unreleased
 - still parked for the next release
 
-`1.2.3`
+## v1.2.3
+
 - added staged Thunderstore packaging
 '@
 
@@ -130,7 +137,10 @@ function Test-PrereleaseNotesRejectsMissingUnreleasedHeader {
         $env:GITHUB_REPOSITORY = "mfoltz/Bloodcraft"
         $ChangelogPath = Join-Path $FixtureRoot "CHANGELOG.md"
         Set-Content -Path $ChangelogPath -Value @"
-`1.2.3`
+# Changelog
+
+## v1.2.3
+
 - added staged Thunderstore packaging
 "@
 
@@ -155,9 +165,12 @@ function Test-PrereleaseNotesRejectsMissingVersionEntry {
         $env:GITHUB_REPOSITORY = "mfoltz/Bloodcraft"
         $ChangelogPath = Join-Path $FixtureRoot "CHANGELOG.md"
         Set-Content -Path $ChangelogPath -Value @'
+# Changelog
+
 ## Unreleased
 
-`1.2.2`
+## v1.2.2
+
 - previous release
 '@
 

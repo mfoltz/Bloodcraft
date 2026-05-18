@@ -80,11 +80,14 @@ versionNumber = "1.2.3"
 "@ -NoNewline
 
     Set-Content -Path (Join-Path $FixtureRoot "CHANGELOG.md") -Value @"
+# Changelog
+
 ## Unreleased
 
 - planned fix
 
-`1.2.3`
+## v1.2.3
+
 - previous release
 "@ -NoNewline
 
@@ -113,7 +116,7 @@ function Test-BumpVersionUpdatesBloodcraftMetadata {
 
         Assert-Match -Text $ProjectText -Pattern '<Version>1\.2\.4</Version>' -Message "Project version was not updated."
         Assert-Match -Text $ThunderstoreText -Pattern 'versionNumber = "1\.2\.4"' -Message "Thunderstore version was not updated."
-        Assert-Match -Text $ChangelogText -Pattern '(?m)^## Unreleased\s+`1\.2\.4`\s+- planned fix' -Message "Changelog release entry was not created."
+        Assert-Match -Text $ChangelogText -Pattern '(?m)^## Unreleased\s+## v1\.2\.4\s+- planned fix' -Message "Changelog release entry was not created."
     }
     finally {
         Remove-Item -LiteralPath $FixtureRoot -Recurse -Force
