@@ -286,15 +286,22 @@ jobs:
             dotnet build . --configuration Release -p:RunGenerateREADME=false -p:CheckEolTargetFramework=false
           fi
 
+      - name: Prepare prerelease notes
+        shell: bash
+        run: |
+          bash .codex/scripts/prerelease-notes.sh \
+            --version '${{ needs.prepare_prerelease.outputs.prerelease_version }}' \
+            --tag '${{ needs.prepare_prerelease.outputs.prerelease_tag }}' \
+            --branch '${{ github.ref_name }}' \
+            --commit '${{ github.sha }}' \
+            --run-id '${{ github.run_id }}' \
+            --output ./dist/prerelease-notes.md
+
       - name: GH Release (pre-release)
         uses: softprops/action-gh-release@v2.6.2
         if: needs.prepare_prerelease.outputs.prerelease_version != ''
         with:
-          body: |
-            Automated pre-release for version ${{ needs.prepare_prerelease.outputs.prerelease_version }} generated from the main branch.
-            - Branch: ${{ github.ref_name }}
-            - Commit: ${{ github.sha }}
-            - Run: ${{ github.run_id }}
+          body_path: ./dist/prerelease-notes.md
           name: ${{ needs.prepare_prerelease.outputs.prerelease_name }}
           fail_on_unmatched_files: true
           prerelease: true

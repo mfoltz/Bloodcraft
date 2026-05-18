@@ -20,11 +20,6 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Validate canonical version metadata
-        id: version_metadata
-        shell: bash
-        run: ./.codex/scripts/version-metadata.sh
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -35,7 +30,6 @@ jobs:
       - name: Select eligible release tag
         id: select_tag
         run: |
-          canonical_version='${{ steps.version_metadata.outputs.canonical_version }}'
           requested_tag='${{ inputs.release_tag }}'
 
           # GitHub prerelease tags (vX.Y.Z-pre) can publish canonical Thunderstore package versions (X.Y.Z).
@@ -62,11 +56,6 @@ jobs:
           release_version="${requested_tag#v}"
           package_version="${release_version%-pre}"
 
-          if [[ "$release_version" != "$canonical_version" && "$release_version" != "$canonical_version-pre" ]]; then
-            echo "Error: Release tag '$requested_tag' does not align with canonical version '$canonical_version'." >&2
-            exit 1
-          fi
-
           echo "Selected Thunderstore tag: $requested_tag"
           echo "GitHub release version: $release_version"
           echo "Thunderstore package version: $package_version"
@@ -78,17 +67,92 @@ jobs:
           echo "ALLOWED_PACKAGE_VERSION_PATTERN=$allowed_package_version_pattern" >> "$GITHUB_ENV"
         shell: bash
 
-      - name: Download Release
+      - name: Preserve release helper scripts
+        shell: bash
         run: |
+          cp .codex/scripts/prerelease-notes.sh "$RUNNER_TEMP/prerelease-notes.sh"
+          chmod +x "$RUNNER_TEMP/prerelease-notes.sh"
+
+      - name: Checkout selected release tag
+        shell: bash
+        run: git checkout --detach "refs/tags/$RELEASE_TAG"
+
+      - name: Validate selected release metadata
+        id: version_metadata
+        shell: bash
+        run: ./.codex/scripts/version-metadata.sh
+
+      - name: Confirm selected release version
+        shell: bash
+        run: |
+          canonical_version='${{ steps.version_metadata.outputs.canonical_version }}'
+
+          if [[ "$RELEASE_VERSION" != "$canonical_version" && "$RELEASE_VERSION" != "$canonical_version-pre" ]]; then
+            echo "Error: Release tag '$RELEASE_TAG' does not align with canonical version '$canonical_version'." >&2
+            exit 1
+          fi
+
+      - name: Download Release
+        shell: bash
+        run: |
+          rm -rf ./dist
           gh release download "$RELEASE_TAG" -D ./dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
 
+      - name: Stage selected release contents
+        shell: bash
+        run: |
+          publish_root="./dist/thunderstore-publish"
+          required_release_assets=(
+            "Bloodcraft.dll"
+            "CHANGELOG.md"
+          )
+          required_checkout_assets=(
+            "README.md"
+            "icon.png"
+            "thunderstore.toml"
+          )
+
+          rm -rf "$publish_root"
+          mkdir -p "$publish_root"
+
+          for asset in "${required_release_assets[@]}"; do
+            if [[ ! -f "./dist/$asset" ]]; then
+              echo "Error: GitHub Release asset './dist/$asset' is missing." >&2
+              exit 1
+            fi
+
+            cp "./dist/$asset" "$publish_root/$asset"
+          done
+
+          for asset in "${required_checkout_assets[@]}"; do
+            if [[ ! -f "$asset" ]]; then
+              echo "Error: selected release checkout asset '$asset' is missing." >&2
+              exit 1
+            fi
+
+            cp "$asset" "$publish_root/$asset"
+          done
+
+      - name: Validate staged release changelog
+        shell: bash
+        run: |
+          bash "$RUNNER_TEMP/prerelease-notes.sh" \
+            --changelog ./dist/thunderstore-publish/CHANGELOG.md \
+            --version "$PACKAGE_VERSION" \
+            --tag "$RELEASE_TAG" \
+            --check-only
+        env:
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+
       - name: Install Thunderstore CLI (tcli)
         run: dotnet tool install --global tcli
 
       - name: Publish build to Thunderstore
+        shell: bash
         run: |
           if [[ ! $RELEASE_TAG =~ $ALLOWED_TAG_PATTERN ]]; then
             echo "Error: Release tag '$RELEASE_TAG' is not an allowed Thunderstore source tag." >&2
@@ -101,6 +165,7 @@ jobs:
           fi
 
           echo "Publishing Thunderstore package version: $PACKAGE_VERSION"
+          cd ./dist/thunderstore-publish
           tcli publish --token "$THUNDERSTORE_KEY" --package-version "$PACKAGE_VERSION"
         env:
           RELEASE_TAG: ${{ env.RELEASE_TAG }}

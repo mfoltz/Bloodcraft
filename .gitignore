@@ -299,4 +299,6 @@ DevCommands.cs
 /.codex/persistent-data
 /.codex/runs
 /.codex/state
+/.codex/tmp
+/.codex/*.harness.settings.json
 /.codex/emberglass-bridge-proof.harness.settings.json

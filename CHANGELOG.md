@@ -1,5 +1,8 @@
 ## Unreleased
 
+`1.13.24`
+- added generated GitHub prerelease notes, staged Thunderstore changelog validation, and staged publish-root release handoff
+
 `1.13.23`
 - added release hygiene helper scripts for changelog/version bump review and metadata updates
 - added CI coverage for the release hygiene nudge before build verification
