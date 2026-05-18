@@ -68,10 +68,19 @@ function Test-PrereleaseNotesIncludesChangelogAndDetailsCard {
         }
 
         $Notes = Get-Content -Raw -Path $OutputPath
-        Assert-Match -Text $Notes -Pattern '<details open>' -Message "Release notes did not include the details card."
-        Assert-Match -Text $Notes -Pattern 'Good to know before Thunderstore' -Message "Release notes did not include the card summary."
+        if ($Notes -match '<details') {
+            throw "Release notes should keep the Thunderstore handoff card visible without a dropdown."
+        }
+
+        Assert-Match -Text $Notes -Pattern '### 📦 Thunderstore handoff' -Message "Release notes did not include the handoff card heading."
+        Assert-Match -Text $Notes -Pattern '📝 Changelog' -Message "Release notes did not include the changelog cue."
+        Assert-Match -Text $Notes -Pattern '🌿 Branch' -Message "Release notes did not include the branch cue."
+        Assert-Match -Text $Notes -Pattern '🔖 Commit' -Message "Release notes did not include the commit cue."
+        Assert-Match -Text $Notes -Pattern '▶️ Run' -Message "Release notes did not include the workflow run cue."
+        Assert-Match -Text $Notes -Pattern '🏷️ Tag' -Message "Release notes did not include the tag cue."
+        Assert-Match -Text $Notes -Pattern '📦 Package' -Message "Release notes did not include the package cue."
         Assert-Match -Text $Notes -Pattern '## Unreleased.*empty' -Message "Release notes did not describe changelog turnover."
-        Assert-Match -Text $Notes -Pattern 'Thunderstore version.*1\.2\.3' -Message "Release notes did not include the Thunderstore package version."
+        Assert-Match -Text $Notes -Pattern 'Package.*1\.2\.3' -Message "Release notes did not include the Thunderstore package version."
         Assert-Match -Text $Notes -Pattern 'staged Thunderstore packaging' -Message "Release notes did not include current version changelog notes."
         Assert-Match -Text $Notes -Pattern '1234567890ab' -Message "Release notes did not include the short commit."
     }

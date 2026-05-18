@@ -143,21 +143,18 @@ cat > "$OUTPUT_PATH" <<EOF
 > [!NOTE]
 > This GitHub pre-release is the source artifact for the matching Thunderstore publish. Thunderstore receives package version \`${VERSION}\` from tag \`${TAG}\`.
 
-<details open>
-<summary>Good to know before Thunderstore</summary>
+### 📦 Thunderstore handoff
 
-| Item | Detail |
+| Signal | Detail |
 | --- | --- |
-| Changelog turnover | \`## Unreleased\` is empty; notes below come from \`${VERSION}\`. |
-| Source branch | \`${BRANCH}\` |
-| Source commit | \`${short_commit}\` |
-| Workflow run | ${run_detail} |
-| GitHub tag | \`${TAG}\` |
-| Thunderstore version | \`${VERSION}\` |
+| 📝 Changelog | \`## Unreleased\` is empty; notes below come from \`${VERSION}\`. |
+| 🌿 Branch | \`${BRANCH}\` |
+| 🔖 Commit | \`${short_commit}\` |
+| ▶️ Run | ${run_detail} |
+| 🏷️ Tag | \`${TAG}\` |
+| 📦 Package | \`${VERSION}\` |
 
-</details>
-
-### Changes
+### ✨ Changes
 
 ${version_body}
 EOF
