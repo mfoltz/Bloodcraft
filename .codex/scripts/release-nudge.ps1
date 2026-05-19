@@ -46,7 +46,7 @@ function Write-Nudge {
 
 function Get-UnreleasedBody {
     $Text = Get-Content -Raw -Path $ChangelogPath
-    $Match = [regex]::Match($Text, '(?ms)^## Unreleased\s*(?<body>.*?)(?=^`[^`]+`\s*$|^## |\z)')
+    $Match = [regex]::Match($Text, '(?ms)^## Unreleased\s*(?<body>.*?)(?=^## |\z)')
 
     if (-not $Match.Success) {
         return $null

@@ -65,12 +65,12 @@ function Update-Changelog {
 
     $Text = Get-Content -Raw -Path $Path
 
-    $VersionHeadingPattern = '(?m)^`' + [regex]::Escape($Version) + '`$'
+    $VersionHeadingPattern = '(?m)^## v' + [regex]::Escape($Version) + '$'
     if ($Text -match $VersionHeadingPattern) {
-        throw "CHANGELOG.md already contains a $Version entry."
+        throw "CHANGELOG.md already contains a v$Version entry."
     }
 
-    $UnreleasedPattern = '(?ms)^## Unreleased\s*(?<body>.*?)(?=^`[^`]+`\s*$|^## |\z)'
+    $UnreleasedPattern = '(?ms)^## Unreleased\s*(?<body>.*?)(?=^## |\z)'
     $Match = [regex]::Match($Text, $UnreleasedPattern)
     if (-not $Match.Success) {
         throw "CHANGELOG.md must contain an '## Unreleased' section before bumping."
@@ -82,8 +82,7 @@ function Update-Changelog {
     }
 
     $ReleasedBody = if ([string]::IsNullOrWhiteSpace($Body)) { "- No user-facing changes recorded." } else { $Body }
-    $VersionHeading = '`' + $Version + '`'
-    $Replacement = "## Unreleased`r`n`r`n$VersionHeading`r`n$ReleasedBody`r`n`r`n"
+    $Replacement = "## Unreleased`r`n`r`n## v$Version`r`n`r`n$ReleasedBody`r`n`r`n"
     $Updated = $Text.Substring(0, $Match.Index) + $Replacement + $Text.Substring($Match.Index + $Match.Length)
     Set-TextPreservingUtf8Bom -Path $Path -Value $Updated
 }

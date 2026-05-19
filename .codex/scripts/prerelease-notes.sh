@@ -97,7 +97,7 @@ fi
 unreleased_body=$(
     awk '
         /^##[[:space:]]*Unreleased[[:space:]]*$/ { in_unreleased = 1; next }
-        in_unreleased && (/^`[^`]+`[[:space:]]*$/ || /^## /) { exit }
+        in_unreleased && /^## / { exit }
         in_unreleased { print }
     ' "$CHANGELOG_PATH"
 )
@@ -108,8 +108,8 @@ fi
 
 version_body=$(
     awk -v version="$VERSION" '
-        $0 == "`" version "`" { in_version = 1; next }
-        in_version && (/^`[^`]+`[[:space:]]*$/ || /^## /) { exit }
+        $0 == "## v" version { in_version = 1; next }
+        in_version && /^## / { exit }
         in_version { print }
     ' "$CHANGELOG_PATH"
 )
@@ -155,7 +155,7 @@ ${handoff_heading}
 
 | Signal | Detail |
 | --- | --- |
-| 📝 Changelog | \`## Unreleased\` is empty; notes below come from \`${VERSION}\`. |
+| 📝 Changelog | \`## Unreleased\` is empty; notes below come from \`v${VERSION}\`. |
 | 🌿 Branch | \`${BRANCH}\` |
 | 🔖 Commit | \`${short_commit}\` |
 | ▶️ Run | ${run_detail} |
