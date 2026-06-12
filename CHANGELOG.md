@@ -1,21 +1,28 @@
+# Changelog
+
 ## Unreleased
 
-`1.13.25`
+## v1.13.25
+
 - fixed entity cleanup so entities already queued for destruction are not re-enabled before destroy handling
 
-`1.13.24`
+## v1.13.24
+
 - added generated GitHub prerelease notes, staged Thunderstore changelog validation, and staged publish-root release handoff
 
-`1.13.23`
+## v1.13.23
+
 - added release hygiene helper scripts for changelog/version bump review and metadata updates
 - added CI coverage for the release hygiene nudge before build verification
 
-`1.13.22`
+## v1.13.22
+
 - added opt-in Emberglass transport support for the Bloodcraft/Eclipse bridge while keeping the legacy ChatMessage bridge as the default fallback
 - added config and compatibility plumbing so Bloodcraft can start cleanly with or without Emberglass installed
 - hardened build/release workflow checks and release-tag selection for smoother prerelease validation
 
-`1.13.21`
+## v1.13.21
+
 - added Primal Arsenal experimental weapon support for Shadow Matter weapons, including replacement ability loadouts and cooldown tuning
 - updated V Rising references for `1.1.12-r99041-b2` and hardened startup readiness around server-world availability
 - added RCON/admin support for familiar management, shiny buffs, servant upgrade dispatch/status, and startup health summaries
@@ -23,27 +30,32 @@
 - added Bloodcraft smoke harness support and repo-specific agent guidance for safer validation
 - adjusted related config defaults and docs for `PrimalArsenal`, `FishingSlots`, `RiftFrequency`, and `KitFamiliar`
 
-`1.12.17`
+## v1.12.17
+
 - removed `ConsumeBloodDebugEvent` from component registry for compatability with V Rising `v1.1.10.1-r94466-b2` update.
 - let's all join hands and pray the ill-timed `Recipes.cs` refactor is fine >_>. (`#yolo`)
 
-`1.12.16`
+## v1.12.16
+
 - minor hotfix to restore emote actions, forgot to remove some debug stuff; sorry about that!
 
-`1.12.15`
+## v1.12.15
+
 - primal rifts are slightly more deadly (and fun!) but dreadhorns are no longer quite as instant of a death either so it might balance out
 - added config option for  of primal rift events per day
 - added config option for KitFamiliar, unlocks when using starter kit
 - various minor bug fixes
 
-`1.11.14`
+## v1.11.14
+
 - added config option for ElitePrimalRifts (units/gateBosses are amped similarly to EliteShardBearers with some surprises ;D WIP feature, use admin console command to spawn primal war events for now)
 - added config option for DisabledProfessions, valid options: Enchanting,Alchemy,Harvesting,Blacksmithing,Tailoring,Woodcutting,Mining,Fishing
 - added config option for EquipmentOnly (true for equipment slots without inventory, false for both)
 - modified config option for Eclipse; will be active by default if any features that can sync with the client are enabled, true for near-realtime client updates (requires Eclipse 1.3.11 to take advantage of this, will be pushed when this is) and false for old behavior.
 - PvP prevents calling/enabling familiar for the duration if dismissed during combat or not already present
 
-`1.10.13`
+## v1.10.13
+
 - if shiny chance for familiars is 0 they will no longer be guaranteed on second unlock
 - can restrict unarmed to one slot (set Duality in config to false, leave at true for two slots)
 - touched up spell mod table for primal jewels (you may roll synergistic effects missing their synergy, I think this is okay given the fusion forge and how rare some modifers would otherwise be)
@@ -53,21 +65,26 @@
 - new visual effect for prestiging stuff, may stick with one for all or change it up later
 - fixed autocall for bat landing
 
-`1.9.12`
+## v1.9.12
+
 - prestige properly affects blood legacy rates again
 - new spells added to primal jewels from gemcutter, should only consume one perfect gem at a time now as well
 
-`1.9.11`
+## v1.9.11
+
 - previous fix only worked for arenas, added check for the duel buff equivalent (didn't realize there was one buff for each)
 
-`1.9.10`
+## v1.9.10
+
 - corrected base profession experience for woodcutting/mining
 - anti-griefing measures skipped for players in active duels/arenas
 
-`1.9.9`
+## v1.9.9
+
 - small hotfix preventing initialization on server hosts, was trying out unicode characters in console oops >_>_
 
-`1.9.8`
+## v1.9.8
+
 - better entity existence checks for quest tracking command
 - familiars should retain equipment stats after leveling up
 - can no longer equip ancestral weapons/legendaries on familiars as was intended
@@ -78,7 +95,8 @@
 - replacing invalid familiar equipment that snuck in when a filter wasn't working as it used to with rough equivalents that don't cause issues
 - shards will need to be acquired once more for normal behaviour to return, sorry >_>
 
-`1.9.7`
+## v1.9.7
+
 - CHAR_Treant_Corrupted PrefabGuid(1496810447), this will attach mantraps to your character I am not changing it or autobanning it at this time but you may feel free to do so if you're not a fan
 - two exoforms to switch between if both unlocked, will use same duration cooldown ('.prestige sf [EvolvedVampire|CorruptedSerpent]'; these are probably unbalanced and should be considered experimental, variety of jank to smooth out after 1.1 but appear generally functional)
 - fixed exoform application after taunt if unlocked and enabled and a few other parts that were unintentionally moved around while refactoring
@@ -88,7 +106,8 @@
 - banned gold golems as familiars internally
 - tuned kill quest generation for players at max or above
 
-`1.8.6`
+## v1.8.6
+
 - changed stats buff application, hoping will reduce/eliminate the occasional recursive group errors
 - fixed some recipe/item modifications that require slightly different handling after 1.1 to work as before, added serpent shard related things to places it was missing from
 - corrected name for oakveil fishing stuff (should fix drops issue)
@@ -96,16 +115,19 @@
 - fixed scaling for unarmed gearscore with expertise no leveling
 - familiar stat buff applied at slight delay when first binding to make sure equipment is ready for processing
 
-`1.8.5`
+## v1.8.5
+
 - touched up README commands/config option autogeneration, should be accurate now
 - added bleeding edge details to README
 - small change to data creation for new players
 
-`1.8.4`
+## v1.8.4
+
 - minor change after hotfix
 - snipped bloodkey gearscore when leveling enabled
 
-`1.8.3`
+## v1.8.3
+
 - removed obsolete check on class changing
 - removed class requirement for choosing stats
 - fixed synergies reply command
@@ -123,21 +145,25 @@
 - continuing cleanup of old commands not relevant to current feature set
 - will update descriptions and such soon now that I've secured a tiny box's worth of breathing room :p
 
-`1.8.2`
+## v1.8.2
+
 - fixed a few issue with default config generation for class weapon blood stats types caused by mismatched string->enum and using wrong parsing method
 - fixed fam unlock buff not having lifetime as it used to
 
-`1.8.1`
+## v1.8.1
+
 - minor versioning to fix workflow snafu
 
-`1.8.0`
+## v1.8.0
+
 - various changes to features and implementations for VRising 1.1 compatibility
 - units only possess basic core stats (many stats are now 'VampireSpecificAttributes'); additional stats for prestiging familiars are not currently an option and their existing stats (except health) will continue to scale with prestiges (REWORKING)
 - viable options for class and prestige buffs are significantly lessened; replacing class passive buffs with various stat equivalents or some such and reorienting player prestiges, leaving prestige buff config for now but default is empty except for shroud of the forest (REWORKING)
 - most attribute bonuses from Expertise, Legacy and other sources require Eclipse to be reflected on the character sheet post 1.1
 - WIP >_>
 
-`1.7.7`
+## v1.7.7
+
 - quest progress command replies with time remaining till reset if already completed
 - Simon familiar holy rain lasts for 30s again, Dracula should no longer try to return/hide
 - changed buff bonus stats hitch a ride on, should prevent stats from being able to stack as was sometimes the case for various reasons
@@ -161,7 +187,8 @@
 - if leveling system is inactive with quests enabled players get a simulated level based on number of vBloods killed for quest goal generation instead of using gear score
 - various bug fixes and optimizations
 
-`1.6.6`
+## v1.6.6
+
 - shinies for golems and robots working again
 - reverted changes to familiar collision and should no longer sometimes prevent batform/waygate usage in weird disable loop
 - removed some recipes from small grinder that were not supposed to be there
@@ -175,7 +202,8 @@
 - fixed alchemy experience from blood potions and merlots, scales with quality of prisoner
 - familar and player experience scrolling text staggered to prevent overlap and improved origination
 
-`1.6.5`
+## v1.6.5
+
 - tired, check commands list if anything doesn't do what you expect as that's autogenerated and will match whatever is in build
 - reduced chances for random seeds per 20 harvesting levels to [2, 4, 6, 8, 10] from [4, 8, 12, 16, 20]
 - config option for echoes cost, haven't double checked this yet #testingandtired
@@ -185,7 +213,8 @@
 - can use number or class name from '.class l' for '.class s [Class]', no spaces
 - battles no longer affected by lifetime error
 
-`1.6.4`
+## v1.6.4
+
 - lockspells moved to wep group ('.wep locksp'), lockshift moved to class group ('.class shift'), choose class changed to select class ('.class s [Class]'), change class adjusted shorthand ('.class c [Class]')
 - added config option to allow minion unlocks as familiars, do so at own risk
 - command to enable/disable class buffs for players ('.class passives') and global class buff purge for admins when planning on changing configured class buffs which should only be used when players are offline like, launch server with password->run command, wait for autosave->make config changes and save them->boot server without password ('.class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen')
@@ -221,7 +250,8 @@
 - Adjusted familiar collision
 - Any issues related to player bools (kits, weird familiar binding bugs, etc) should be fixed
 
-`1.5.3`
+## v1.5.3
+
 - deprecating '.cleanupfams' and '.wep restore', latter no longer needed former less useful than it used to be and prone to causing crashes
 - quest experience rewards overflow to expertise/legacy/familiar depending on which ones are maxed and active when player is at max level (expertise/legacy if both under max, expertise or legacy if one of the two is maxed, then familiar if both are maxed; gains split between expertise/legacy when awarded to both)
 - when at max level for experience, expertise and legacy will no longer receive notifications for gains
@@ -263,13 +293,15 @@
 - Added logging and handling when configurations for item prefabs/quantities are not as expected instead of failing to initialize entirely
 - Changed playerBools data to ConcurrentDictionary instead of Dictionary (hoping this resolves .kitme and other potential playerBool-related issues, also remembered to change the inner dictionary this time <_<)
 
-`1.4.2`
+## v1.4.2
+
 - fixed gathering/crafting quests unintentionally checking for professions/class on hit effects being enabled
 - added check for full inventory before letting players enable or swap class spells to facilitate safe handling of jewels
 - filtered out t01 bone weapons for crafting quests since can't be crafted at bench
 - fixed erroneous temporary exp gain for legacies when blood system is disabled
 
-`1.4.1`
+## v1.4.1
+
 - config entries are now in sections (please save a backup of your config just incase but seems to be handling migration well now)
 - .cleanupfams does a bit more cleaning but will take a few seconds at least, tried having that run on restarts but game wasn't a fan so leaving it on the command for now
 - normal spells on shift by default again (should leave existing configs untouched if you'd rather use NPC spells), fixed bug with legendary weapons + equipping jewels sometimes cloning the weapon and eating the jewel 
@@ -280,12 +312,14 @@
 - required for Eclipse 1.0.0
 - annnnd anything else since 1.2.4, it's been a minute. would recommend reviewing but if you read even this far I'm surprised :p
 
-`1.3.3`
+## v1.3.3
+
 - slight changes to communication with Eclipse that will need version 0.2.0 of that to work correctly
 - more filtering for quest targets
 - cleaning up from experimenting with a variety of things that I really need to stop messing with if I ever want to publish this again >_>
 
-`1.3.2`
+## v1.3.2
+
 - legacy stat bonuses will update when applied and when leveling up
 - prestige buff automatically reapplied if one of them is found being destroyed
 - skeletons from graves are now left untouched
@@ -293,13 +327,15 @@
 - fixed spell cooldowns for classes
 - fixed null reference in craftingPatch that was interfering with profession experience
 
-`1.3.1`
+## v1.3.1
+
 - changed UI updates to work via coroutine, more reliable and less prone to error so far
 - fixed bug where wrong BloodType enum was sent to client when frailed
 - no restedXP message if at max level when logging in while in coffin and restedXP is enabled
 - added max level for player, legacy, and expertise to config data sent to client when registering to properly make bars full at max levels
 
-`1.3.0`
+## v1.3.0
+
 - added config option for potion stacking
 - added configurable item cost for choosing familiar visual if already shiny via '.fam v [SpellSchool]', will override current visual (freebie still works as before, cost will take precedence if familiar already has a visual unlocked)
 - rested XP (solid idea from Odjit), if enabled earn bonus experience as configured for logging out in your coffin!
@@ -312,7 +348,8 @@
 - config options are in sections now! should carry over existing values but make a backup of your config just in case
 - added command to show userStats ('.userstats', usually only seen after credits)
 
-`1.2.4`
+## v1.2.4
+
 - special thanks to Odjit for tracking down the party bug and discovering the reroll issue <3
 - fixed bug where parties would prevent players from taking silver burn damage and garlic stacks being applied
 - added check to prevent quests from being rerolled if target was previously found in the world but all are dead and waiting on respawns
@@ -322,7 +359,8 @@
 - removed divine and fallen angels from quest target pool
 - fixed bug granting double quest credit on feed executes
 
-`1.2.3`
+## v1.2.3
+
 - note: changed a key in the player prestige file from Sanguimancy to UnarmedExpertise and UnarmedExpertise will no longer be stored in the player_sanguimancy file, tested handling old data to new formats and seems to be fine but please make a backup of these files just incase_
 - added command to search for familiars in boxes (.fam s [Name])
 - added command to find nearest quest target, if none are found will reroll the quest
@@ -340,7 +378,8 @@
 - fixed leaderboard for prestige not displaying correctly
 - eliteShardBearers added as config option (experimental, WIP. significantly increases health, damage, attack speed, cast speed, and movement speed of shardbearers but removes scaling for multiple players fighting them at once and gives them minor visual effects)
 
-`1.0.0`
+## v1.0.0
+
 - command groups added for organizational purposes (thanks Odjit <3)
 - familiar prestige limit should be working as intended now
 - familiar CC effects and other debuffs seem to be neutered effectively for PvE and other scenarios where they should be
@@ -354,50 +393,58 @@
 - can now use clap to summon your most recently summoned familiar instead of having to do .fam bind # again
 - mod is more or less feature complete now, future updates will focus on refining what's already here
 
-`0.9.16`
+## v0.9.16
+
 - familiar prestiging added (familiar prestiges, max familiar prestiges, familiar prestige stat multiplier added to config), choose extra stat per prestige (use .prfam and it will show stats if none have been entered and familiar is at max level)
 - familiars that use holy damage no longer hurt players when relevant
 - imprisoning a familiar will destroy the familiar
 - added extra recipe toggle under professions; technically no relation to professions yet and no uses atm unless configured as costs in BloodyMerchants or something similar
 - ancestral forge crafts now receive extra durability from blacksmithing
 
-`0.9.15`
+## v0.9.15
+
 - changed initialization patch, single player didn't like it (credit to Odjit for the hook~)
 - class onHit debuff effects should behave more consistently now (chain lightning from static won't hit the player, skeleton spawned from condemn-afflicted kills now allied, etc)
 - classBuffs useable via .scb if gearscore is sufficient and leveling is turned off
 - .gbl can be used without entering a blood type and will default to equipped blood type
 
-`0.9.14`
+## v0.9.14
+
 - fixed bug with applying buffs when changing classes
 - corrected harvesting bonus for plants
 - added class spell school effects on hit, can enable with new config option named as such and accompanying % to proc config. 10% chance per hit to apply class spell school debuff by default, if debuff already present and this is proc'd will do the T08 magic source amulet buff instead (leech -> lesser blood rage for BloodKnight, for reference)
 - BloodKnight leech, DemonHunter static, Shadowblade ignite, VampireLord chill, ArcaneSorcerer weaken, DeathMage condemn and the corresponding T08 amulet effects if debuff is already proc'd on target and roll on hit is succesful (except for deathmage, made that an the undead guardian absorb buff since the amulet effect from that one is a spawn instead of a buff and didn't really fit in the code here)
 - note that these will not proc on other players for pvp
 
-`0.9.13`
+## v0.9.13
+
 - movement speed correctly applies as a flat stat to all weapons now instead of multiplying the stat if it already existed on the weapon
 - RaidMonitor removed and made into standalone mod, alliances are now parties. options/commands have changed accordingly and will need to be configured again. same function of exp share/preventing damage.
 - familiar health scaling modified to be more viable in harder difficulty settings (health boost for brutal, will expand on in future updates)
 - extended familiar get level command to show stats as well (maxhealth, physical power, spell power)
 - buffed resource bonus for wood & minerals from professions
 
-`0.9.12`
+## v0.9.12
+
 - removed .tbc
 - list prestige buffs command takes shorter text batches and should no longer get cutoff in chat log
 - stat bonuses in .get e correctly formatted based on bonus
 - minor bug fixes/optimizations
 
-`0.9.11`
+## v0.9.11
+
 - (hotfix) can view class specific spells/buffs without being the class by entering the class name in command
 
-`0.9.10`
+## v0.9.10
+
 - added command to list stats from classes for synergies
 - familiar summon handling improved for more consistent yeeting with death timer
 - dominating presence no longer summons familiar when form entered and only dismiss if familiar is present
 - can view class specific spells/buffs without being the class by entering the class name in command
 - fixed initialization errors on new worlds
 
-`0.9.9`
+## v0.9.9
+
 - added damage config for damage dealt to players by familiars
 - familiar summons now properly being yeeted after combat
 - various issues related to initialization should be tempered if not resolved
@@ -409,30 +456,35 @@
 - alliances no longer make player immune to various unintended damage types
 - gatebosses give rate gains
 
-`0.9.8`
+## v0.9.8
+
 - trimmed message size for .lcb to prevent exceeding chat limit when translating replies
 - added option to control damage familiars deal to VBloods (leave at 1 for no change, set to 0.2 for 20% damage, etc)
 - adjusted default values to be somewhat more balanced, added default costs for resetting class/expertise/legacy, won't change existing config settings if you already have them set
 - unit category bans for familiars should be more consistently applying if they were not before
 - removed synthetic/isolating languages from word replacement translation (Japanese, Koreana, SChinese, TChinese, Thai, Vietnamese)
 
-`0.9.7`
+## v0.9.7
+
 - familiars can't be bound or called when dominating presence is active and will be automatically dismissed if present when activated
 - added PreventFriendlyFire option for alliances, enable to prevent friendly fire between alliance members (only affects direct damage, does not prevent debuffs or enable buffs)
 - familiars will not do damage to players on PvE servers and will not do damage to alliance members on PvP servers if PreventFriendlyFire is enabled
 
-`0.9.6`
+## v0.9.6
+
 - if leveling is not active, unarmed weapon level will match the highest weapon level you've equipped (cache only, will need to equip a weapon at least once after restarts)
 - added handling for removing lingering weapon level on player gearscore if leveling was on and then turned off
 - scaffolding for clan-based alliances in and seems to be working but locking that to 'false' in config until I have a bit more time to test it
 - PlayerCache now clears before updating, should fix any errors that previously popped up in console
 - duration for raid debuff increased to 10 seconds
 
-`0.9.5`
+## v0.9.5
+
 - teleporting now correctly summons familiar again upon second attempt of waygate use so it is with you after traveling
 - familiar actives data cleared on server start to prevent issues with being unable to bind/unbind again until using .resetfams
 
-`0.9.4`
+## v0.9.4
+
 - applied localization to all messages in mod as was meant to be done in 0.9.3
 - added config option for exp share distance
 - groups rebranded to alliances, exp sharing unchanged if leveling is active, for raid monitor the raid instigator's alliance members will be allowed in the territory as will the alliance members of the castle owner (clans of both still included by default)
@@ -440,23 +492,27 @@
 - added cooldown for VBloodConsumed processing that should take care of multiple gains if more than 1 player is participating in the feed
 - Shadow VBloods obtainable
 
-`0.9.3`
+## v0.9.3
+
 - changed handling of VBloodConsumed events to prevent feeds with multiple players providing gains equal to the number of players per player (this one is difficult to test alone, fingers crossed :P)
 - messages to players now localized if the base game supports the language (thanks ChatGPT <3 if any of the translations are wrong or offensive it is not intentional, probably missed a word or two here and there as well but pretty happy with this for first pass)
 - added command to list prestige buff names
 - Anti-raid interference debuff should block healing now to prevent countering with heal pots. If that seems spotty I'll just light people on fire instead~
 
-`0.9.2`
+## v0.9.2
+
 - made sure familiars won't get exp if not in combat or not out and active
 - 'binding' key will get added to player_bools file without needing to regenerate_
 
-`0.9.1`
+## v0.9.1
+
 - fixed harvesting bonus
 - fixed class spells not all having cooldowns
 - vblood unlocks moved from death event hook to vblood hook, should give all players involved in feed a chance at unlocking and prevent random unlocks from VBlood familiars
 - added RaidMonitor, see readme for details. Need guinea pigs for this one since it's hard to test raids alone :P
 
-`0.9.0`
+## v0.9.0
+
 - Started keeping changelog
 - removed weapon visual expertise tracking thing, was proving too difficult to manage and avoid buggy behavior. added command for players to restore weapon levels to what they should be
 - VBloods, summoners and units that transform (not werewolves quite yet but Terah seemed okay) added to unlock pool and should mostly be behaving (including Cassius and his dumb sword). added configurable ban list

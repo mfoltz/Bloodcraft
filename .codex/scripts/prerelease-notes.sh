@@ -97,7 +97,7 @@ fi
 unreleased_body=$(
     awk '
         /^##[[:space:]]*Unreleased[[:space:]]*$/ { in_unreleased = 1; next }
-        in_unreleased && (/^`[^`]+`[[:space:]]*$/ || /^## /) { exit }
+        in_unreleased && /^## / { exit }
         in_unreleased { print }
     ' "$CHANGELOG_PATH"
 )
@@ -108,8 +108,8 @@ fi
 
 version_body=$(
     awk -v version="$VERSION" '
-        $0 == "`" version "`" { in_version = 1; next }
-        in_version && (/^`[^`]+`[[:space:]]*$/ || /^## /) { exit }
+        $0 == "## v" version { in_version = 1; next }
+        in_version && /^## / { exit }
         in_version { print }
     ' "$CHANGELOG_PATH"
 )
@@ -140,6 +140,10 @@ if [ -n "${GITHUB_REPOSITORY:-}" ] && [ "$RUN_ID" != "unknown" ]; then
     run_detail="[${RUN_ID}](https://github.com/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID})"
 fi
 
+handoff_heading="### Thunderstore handoff"
+if [ -n "${GITHUB_REPOSITORY:-}" ] && [ "$COMMIT" != "unknown" ]; then
+    handoff_heading="<p><img src=\"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${COMMIT}/.github/assets/ts_badge.png\" alt=\"Thunderstore handoff\" width=\"96\" /></p>"
+fi
 mkdir -p "$(dirname "$OUTPUT_PATH")"
 cat > "$OUTPUT_PATH" <<EOF
 ## Bloodcraft ${VERSION} pre-release
@@ -147,11 +151,11 @@ cat > "$OUTPUT_PATH" <<EOF
 > [!NOTE]
 > This GitHub pre-release is the source artifact for the matching Thunderstore publish. Thunderstore receives package version \`${VERSION}\` from tag \`${TAG}\`.
 
-### 📦 Thunderstore handoff
+${handoff_heading}
 
 | Signal | Detail |
 | --- | --- |
-| 📝 Changelog | \`## Unreleased\` is empty; notes below come from \`${VERSION}\`. |
+| 📝 Changelog | \`## Unreleased\` is empty; notes below come from \`v${VERSION}\`. |
 | 🌿 Branch | \`${BRANCH}\` |
 | 🔖 Commit | \`${short_commit}\` |
 | ▶️ Run | ${run_detail} |
