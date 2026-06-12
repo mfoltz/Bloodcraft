@@ -1,5 +1,8 @@
 ## Unreleased
 
+`1.13.25`
+- fixed entity cleanup so entities already queued for destruction are not re-enabled before destroy handling
+
 `1.13.24`
 - added generated GitHub prerelease notes, staged Thunderstore changelog validation, and staged publish-root release handoff
 
