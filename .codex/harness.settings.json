@@ -88,6 +88,247 @@
       "buildEnvironment": {
         "BEPINEX_PLUGIN_DIR": ""
       }
+    },
+    "bloodcraft-rcon-smoke": {
+      "modId": "bloodcraft",
+      "pluginName": "Bloodcraft",
+      "buildScript": ".codex\\install.sh",
+      "builtDllPath": "bin\\Release\\net6.0\\Bloodcraft.dll",
+      "preBuildScripts": [
+        ".codex\\scripts\\Install-ScarletRconHarnessDependency.ps1",
+        ".codex\\scripts\\Configure-BloodcraftScenario.ps1"
+      ],
+      "requiredPlugins": [
+        {
+          "source": "{PrimaryInstallPath}\\BepInEx\\plugins\\VampireCommandFramework.dll"
+        },
+        {
+          "source": "{PrimaryInstallPath}\\BepInEx\\plugins\\NetTopologySuite.dll"
+        },
+        {
+          "source": "{CodexRoot}\\tmp\\scarlet-rcon\\plugins\\ScarletCore.dll"
+        },
+        {
+          "source": "{CodexRoot}\\tmp\\scarlet-rcon\\plugins\\ScarletRCON.dll"
+        }
+      ],
+      "cleanupPlugins": [
+        "Bloodcraft.dll",
+        "Bloodstone.dll",
+        "Emberglass.dll",
+        "FinishZone.dll",
+        "HookDOTS.API.dll",
+        "KindredCommands.dll",
+        "KindredExtract.dll",
+        "KindredInnkeeper.dll",
+        "KindredLogistics.dll",
+        "KindredPortals.dll",
+        "KinImmortal.dll",
+        "KinLootBGone.dll",
+        "KinPonds.dll",
+        "KinPoolParty.dll",
+        "KinThrone.dll",
+        "Penumbra.dll",
+        "ScarletCore.dll",
+        "ScarletRCON.dll",
+        "VRising.DataExtractor.dll",
+        "VRoles.dll"
+      ],
+      "snapshotPaths": [
+        "{PersistentDataPath}\\Settings",
+        "{ServerInstallPath}\\BepInEx\\config\\Bloodcraft"
+      ],
+      "arguments": [
+        "-persistentDataPath",
+        "{PersistentDataPath}",
+        "-saveName",
+        "{SaveName}",
+        "-serverName",
+        "Codex Bloodcraft RCON Smoke",
+        "-gamePort",
+        "28015",
+        "-queryPort",
+        "28016",
+        "-rconEnabled",
+        "true",
+        "-rconPort",
+        "25575",
+        "-rconPassword",
+        "codex-rcon",
+        "-listOnSteam",
+        "false",
+        "-listOnEOS",
+        "false",
+        "-lanMode",
+        "true",
+        "-logFile",
+        "{ServerLogPath}"
+      ],
+      "successMarkers": [
+        "(Bloodcraft\\[[^\\]]+\\] loaded!|\\[Info\\s+:Bloodcraft\\]\\s+Loaded \\[[^\\]]+\\])",
+        "(Bloodcraft\\[[^\\]]+\\] initialized!|\\[Info\\s+:Bloodcraft\\]\\s+Initialized \\[[^\\]]+\\])"
+      ],
+      "failureMarkers": [
+        "Bloodcraft\\[[^\\]]+\\] fatal init failure",
+        "There is no Server world!",
+        "Server world is not ready yet",
+        "generic and can't be used in il2cpp"
+      ],
+      "expectedPluginVersions": {
+        "Bloodcraft": "1.13.24"
+      },
+      "expectedVraVersion": "1.1.12-r99041-b2",
+      "buildEnvironment": {
+        "BEPINEX_PLUGIN_DIR": "",
+        "VRISING_HARNESS_SERVER_INSTALL": "{ServerInstallPath}",
+        "VRISING_HARNESS_PERSISTENT_DATA": "{PersistentDataPath}",
+        "VRISING_HARNESS_ADMIN_STEAM_IDS": "76561198004949073",
+        "VRISING_HARNESS_RCON_PORT": "25575",
+        "VRISING_HARNESS_RCON_PASSWORD": "codex-rcon"
+      },
+      "scenario": {
+        "settleSecondsAfterReady": 2,
+        "timeoutSeconds": 30,
+        "rcon": {
+          "host": "127.0.0.1",
+          "port": 25575,
+          "password": "codex-rcon"
+        },
+        "commands": [
+          {
+            "name": "health",
+            "type": "rcon",
+            "command": "bloodcraft.status.health",
+            "expectRegex": "\\\"Ready\\\"\\s*:\\s*true"
+          }
+        ]
+      }
+    },
+    "bloodcraft-nightmare-primal-idempotency": {
+      "modId": "bloodcraft",
+      "pluginName": "Bloodcraft",
+      "buildScript": ".codex\\install.sh",
+      "builtDllPath": "bin\\Release\\net6.0\\Bloodcraft.dll",
+      "preBuildScripts": [
+        ".codex\\scripts\\Install-ScarletRconHarnessDependency.ps1",
+        ".codex\\scripts\\Configure-BloodcraftScenario.ps1"
+      ],
+      "requiredPlugins": [
+        {
+          "source": "{PrimaryInstallPath}\\BepInEx\\plugins\\VampireCommandFramework.dll"
+        },
+        {
+          "source": "{PrimaryInstallPath}\\BepInEx\\plugins\\NetTopologySuite.dll"
+        },
+        {
+          "source": "{CodexRoot}\\tmp\\scarlet-rcon\\plugins\\ScarletCore.dll"
+        },
+        {
+          "source": "{CodexRoot}\\tmp\\scarlet-rcon\\plugins\\ScarletRCON.dll"
+        }
+      ],
+      "cleanupPlugins": [
+        "Bloodcraft.dll",
+        "Bloodstone.dll",
+        "Emberglass.dll",
+        "FinishZone.dll",
+        "HookDOTS.API.dll",
+        "KindredCommands.dll",
+        "KindredExtract.dll",
+        "KindredInnkeeper.dll",
+        "KindredLogistics.dll",
+        "KindredPortals.dll",
+        "KinImmortal.dll",
+        "KinLootBGone.dll",
+        "KinPonds.dll",
+        "KinPoolParty.dll",
+        "KinThrone.dll",
+        "Penumbra.dll",
+        "ScarletCore.dll",
+        "ScarletRCON.dll",
+        "VRising.DataExtractor.dll",
+        "VRoles.dll"
+      ],
+      "snapshotPaths": [
+        "{PersistentDataPath}\\Settings",
+        "{ServerInstallPath}\\BepInEx\\config\\Bloodcraft"
+      ],
+      "arguments": [
+        "-persistentDataPath",
+        "{PersistentDataPath}",
+        "-saveName",
+        "{SaveName}",
+        "-serverName",
+        "Codex Bloodcraft Idempotency",
+        "-gamePort",
+        "28025",
+        "-queryPort",
+        "28026",
+        "-rconEnabled",
+        "true",
+        "-rconPort",
+        "25576",
+        "-rconPassword",
+        "codex-rcon",
+        "-listOnSteam",
+        "false",
+        "-listOnEOS",
+        "false",
+        "-lanMode",
+        "true",
+        "-logFile",
+        "{ServerLogPath}"
+      ],
+      "successMarkers": [
+        "(Bloodcraft\\[[^\\]]+\\] loaded!|\\[Info\\s+:Bloodcraft\\]\\s+Loaded \\[[^\\]]+\\])",
+        "(Bloodcraft\\[[^\\]]+\\] initialized!|\\[Info\\s+:Bloodcraft\\]\\s+Initialized \\[[^\\]]+\\])"
+      ],
+      "failureMarkers": [
+        "Bloodcraft\\[[^\\]]+\\] fatal init failure",
+        "There is no Server world!",
+        "Server world is not ready yet",
+        "generic and can't be used in il2cpp"
+      ],
+      "expectedPluginVersions": {
+        "Bloodcraft": "1.13.24"
+      },
+      "expectedVraVersion": "1.1.12-r99041-b2",
+      "buildEnvironment": {
+        "BEPINEX_PLUGIN_DIR": "",
+        "VRISING_HARNESS_SERVER_INSTALL": "{ServerInstallPath}",
+        "VRISING_HARNESS_PERSISTENT_DATA": "{PersistentDataPath}",
+        "VRISING_HARNESS_ADMIN_STEAM_IDS": "76561198004949073",
+        "VRISING_HARNESS_RCON_PORT": "25576",
+        "VRISING_HARNESS_RCON_PASSWORD": "codex-rcon"
+      },
+      "scenario": {
+        "settleSecondsAfterReady": 5,
+        "timeoutSeconds": 180,
+        "restartCycles": 2,
+        "rcon": {
+          "host": "127.0.0.1",
+          "port": 25576,
+          "password": "codex-rcon"
+        },
+        "commands": [
+          {
+            "name": "health",
+            "type": "rcon",
+            "command": "bloodcraft.status.health",
+            "expectRegex": "\\\"Ready\\\"\\s*:\\s*true"
+          },
+          {
+            "name": "primal-start",
+            "type": "rcon",
+            "command": "bloodcraft.diagnostics.primal.start",
+            "expectRegex": "^(true:queued|false:no-online-player)$"
+          }
+        ],
+        "waitLogMarkers": [
+          "\\[NightmareMode\\] Applied scaling to [0-9]+ prefab\\(s\\) and [0-9]+ unit\\(s\\); skipped [0-9]+ nonstandard unit\\(s\\); skipped [0-9]+ missing-baseline unit\\(s\\)\\."
+        ],
+        "waitSaveGlob": "{PersistentDataPath}\\Saves\\v4\\{SaveName}\\AutoSave_*.save.gz"
+      }
     }
   }
 }

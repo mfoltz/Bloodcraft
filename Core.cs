@@ -140,6 +140,7 @@ internal static class Core
     const float NIGHTMARE_HEALTH_MULTIPLIER = 5f;
     const float NIGHTMARE_POWER_MULTIPLIER = 1.5f;
     const float NIGHTMARE_MOVE_SPEED_MULTIPLIER = 1.25f;
+    const float NIGHTMARE_BASELINE_TOLERANCE = 0.001f;
 
     public static byte[] NEW_SHARED_KEY { get; set; }
 
@@ -445,6 +446,11 @@ internal static class Core
                 {
                     using (stream)
                     {
+                        int appliedPrefabs = 0;
+                        int appliedUnits = 0;
+                        int skippedNonStandard = 0;
+                        int missingBaseline = 0;
+
                         foreach (QueryResult result in stream.GetResults())
                         {
                             PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
@@ -452,7 +458,26 @@ internal static class Core
 
                             if (ShouldSkipNightmareTarget(prefabGuid, prefabName)) continue;
 
-                            ApplyNightmareStats(result.Entity);
+                            switch (TryApplyNightmareStats(result.Entity, prefabGuid))
+                            {
+                                case NightmareScalingResult.AppliedPrefab:
+                                    appliedPrefabs++;
+                                    break;
+                                case NightmareScalingResult.AppliedUnit:
+                                    appliedUnits++;
+                                    break;
+                                case NightmareScalingResult.AlreadyNonStandard:
+                                    skippedNonStandard++;
+                                    break;
+                                case NightmareScalingResult.MissingBaseline:
+                                    missingBaseline++;
+                                    break;
+                            }
+                        }
+
+                        if (appliedPrefabs > 0 || appliedUnits > 0 || skippedNonStandard > 0 || missingBaseline > 0)
+                        {
+                            Log.LogInfo($"[NightmareMode] Applied scaling to {appliedPrefabs} prefab(s) and {appliedUnits} unit(s); skipped {skippedNonStandard} nonstandard unit(s); skipped {missingBaseline} missing-baseline unit(s).");
                         }
                     }
                 }
@@ -474,7 +499,41 @@ internal static class Core
         return false;
     }
 
-    static void ApplyNightmareStats(Entity entity)
+    enum NightmareScalingResult
+    {
+        AppliedPrefab,
+        AppliedUnit,
+        AlreadyNonStandard,
+        MissingBaseline
+    }
+
+    static NightmareScalingResult TryApplyNightmareStats(Entity entity, PrefabGUID prefabGuid)
+    {
+        if (!SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGuid, out Entity prefabEntity)
+            || !TryReadNightmareStats(prefabEntity, out Health baselineHealth, out UnitStats baselineUnitStats, out AiMoveSpeeds baselineAiMoveSpeeds)
+            || !TryReadNightmareStats(entity, out Health health, out UnitStats unitStats, out AiMoveSpeeds aiMoveSpeeds))
+            return NightmareScalingResult.MissingBaseline;
+
+        if (IsNightmarePrefabEntity(entity, prefabEntity))
+        {
+            ApplyNightmareStatMultipliers(entity);
+            return NightmareScalingResult.AppliedPrefab;
+        }
+
+        if (!MatchesNightmareBaseline(health, unitStats, aiMoveSpeeds, baselineHealth, baselineUnitStats, baselineAiMoveSpeeds))
+            return NightmareScalingResult.AlreadyNonStandard;
+
+        ApplyNightmareStatMultipliers(entity);
+        return NightmareScalingResult.AppliedUnit;
+    }
+
+    static bool IsNightmarePrefabEntity(Entity entity, Entity prefabEntity)
+    {
+        return entity.Equals(prefabEntity)
+            || entity.Has<Unity.Entities.Prefab>();
+    }
+
+    static void ApplyNightmareStatMultipliers(Entity entity)
     {
         entity.With((ref Health health) =>
         {
@@ -493,6 +552,32 @@ internal static class Core
             aiMoveSpeeds.Walk._Value *= NIGHTMARE_MOVE_SPEED_MULTIPLIER;
             aiMoveSpeeds.Run._Value *= NIGHTMARE_MOVE_SPEED_MULTIPLIER;
         });
+    }
+
+    static bool TryReadNightmareStats(Entity entity, out Health health, out UnitStats unitStats, out AiMoveSpeeds aiMoveSpeeds)
+    {
+        health = default;
+        unitStats = default;
+        aiMoveSpeeds = default;
+
+        return entity.Exists()
+            && entity.TryGetComponent(out health)
+            && entity.TryGetComponent(out unitStats)
+            && entity.TryGetComponent(out aiMoveSpeeds);
+    }
+
+    static bool MatchesNightmareBaseline(Health health, UnitStats unitStats, AiMoveSpeeds aiMoveSpeeds, Health baselineHealth, UnitStats baselineUnitStats, AiMoveSpeeds baselineAiMoveSpeeds)
+    {
+        return NearlyEqual(health.MaxHealth._Value, baselineHealth.MaxHealth._Value)
+            && NearlyEqual(unitStats.PhysicalPower._Value, baselineUnitStats.PhysicalPower._Value)
+            && NearlyEqual(unitStats.SpellPower._Value, baselineUnitStats.SpellPower._Value)
+            && NearlyEqual(aiMoveSpeeds.Walk._Value, baselineAiMoveSpeeds.Walk._Value)
+            && NearlyEqual(aiMoveSpeeds.Run._Value, baselineAiMoveSpeeds.Run._Value);
+    }
+
+    static bool NearlyEqual(float left, float right)
+    {
+        return MathF.Abs(left - right) <= NIGHTMARE_BASELINE_TOLERANCE;
     }
 
     static readonly HashSet<PrefabGUID> _shardBearers =
