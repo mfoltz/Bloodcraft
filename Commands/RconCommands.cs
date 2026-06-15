@@ -1,4 +1,5 @@
 using Bloodcraft.Services;
+using Bloodcraft.Systems;
 using Bloodcraft.Utilities;
 using ScarletRCON.Shared;
 using Stunlock.Core;
@@ -117,5 +118,23 @@ public static class RconCommands
     public static string HealthStatus()
     {
         return StartupStateService.BuildJsonSummary();
+    }
+
+    [RconCommand("diagnostics.primal.start", "Attempts to queue a Primal Rift start event for harness diagnostics.", "Returns true:queued or a false:<reason> diagnostic result.")]
+    public static string StartPrimalRifts()
+    {
+        if (!StartupStateService.IsReady())
+        {
+            return "false:server-not-ready";
+        }
+
+        if (!ConfigService.ElitePrimalRifts)
+        {
+            return "false:elite-primal-rifts-disabled";
+        }
+
+        return PrimalWarEventSystem.TryStartPrimalRiftsForDiagnostics(out string reason)
+            ? $"true:{reason}"
+            : $"false:{reason}";
     }
 }
