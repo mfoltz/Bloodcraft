@@ -5,6 +5,10 @@
 - fixed Nightmare Mode and Primal Rift scaling so persisted units are guarded against duplicate stat scaling across server restarts
 - added reusable V Rising harness scenario/RCON support for restart diagnostics, including ScarletRCON setup and local admin-list seeding
 
+## v1.13.25
+
+- fixed entity cleanup so entities already queued for destruction are not re-enabled before destroy handling
+
 ## v1.13.24
 
 - added generated GitHub prerelease notes, staged Thunderstore changelog validation, and staged publish-root release handoff

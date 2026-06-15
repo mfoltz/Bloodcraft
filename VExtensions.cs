@@ -672,6 +672,9 @@ internal static class VExtensions
         if (!entity.Exists())
             return;
 
+        if (entity.Has<DestroyTag>())
+            return;
+
         bool isBuff = entity.IsBuff();  // Buffs are dramatic.
         entity.Enable();                // Disabled entities moreso.
 
