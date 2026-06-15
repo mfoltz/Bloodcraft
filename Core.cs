@@ -450,6 +450,7 @@ internal static class Core
                         int appliedUnits = 0;
                         int skippedNonStandard = 0;
                         int missingBaseline = 0;
+                        HashSet<Entity> prefabsToScale = [];
 
                         foreach (QueryResult result in stream.GetResults())
                         {
@@ -458,10 +459,9 @@ internal static class Core
 
                             if (ShouldSkipNightmareTarget(prefabGuid, prefabName)) continue;
 
-                            switch (TryApplyNightmareStats(result.Entity, prefabGuid))
+                            switch (TryApplyNightmareStats(result.Entity, prefabGuid, prefabsToScale))
                             {
-                                case NightmareScalingResult.AppliedPrefab:
-                                    appliedPrefabs++;
+                                case NightmareScalingResult.QueuedPrefab:
                                     break;
                                 case NightmareScalingResult.AppliedUnit:
                                     appliedUnits++;
@@ -473,6 +473,12 @@ internal static class Core
                                     missingBaseline++;
                                     break;
                             }
+                        }
+
+                        foreach (Entity prefabEntity in prefabsToScale)
+                        {
+                            ApplyNightmareStatMultipliers(prefabEntity);
+                            appliedPrefabs++;
                         }
 
                         if (appliedPrefabs > 0 || appliedUnits > 0 || skippedNonStandard > 0 || missingBaseline > 0)
@@ -501,24 +507,26 @@ internal static class Core
 
     enum NightmareScalingResult
     {
-        AppliedPrefab,
+        QueuedPrefab,
         AppliedUnit,
         AlreadyNonStandard,
         MissingBaseline
     }
 
-    static NightmareScalingResult TryApplyNightmareStats(Entity entity, PrefabGUID prefabGuid)
+    static NightmareScalingResult TryApplyNightmareStats(Entity entity, PrefabGUID prefabGuid, HashSet<Entity> prefabsToScale)
     {
         if (!SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGuid, out Entity prefabEntity)
-            || !TryReadNightmareStats(prefabEntity, out Health baselineHealth, out UnitStats baselineUnitStats, out AiMoveSpeeds baselineAiMoveSpeeds)
             || !TryReadNightmareStats(entity, out Health health, out UnitStats unitStats, out AiMoveSpeeds aiMoveSpeeds))
             return NightmareScalingResult.MissingBaseline;
 
         if (IsNightmarePrefabEntity(entity, prefabEntity))
         {
-            ApplyNightmareStatMultipliers(entity);
-            return NightmareScalingResult.AppliedPrefab;
+            prefabsToScale.Add(entity);
+            return NightmareScalingResult.QueuedPrefab;
         }
+
+        if (!TryReadNightmareStats(prefabEntity, out Health baselineHealth, out UnitStats baselineUnitStats, out AiMoveSpeeds baselineAiMoveSpeeds))
+            return NightmareScalingResult.MissingBaseline;
 
         if (!MatchesNightmareBaseline(health, unitStats, aiMoveSpeeds, baselineHealth, baselineUnitStats, baselineAiMoveSpeeds))
             return NightmareScalingResult.AlreadyNonStandard;
