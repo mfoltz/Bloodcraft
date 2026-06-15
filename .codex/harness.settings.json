@@ -82,7 +82,7 @@
         "generic and can't be used in il2cpp"
       ],
       "expectedPluginVersions": {
-        "Bloodcraft": "1.13.25"
+        "Bloodcraft": "1.13.26"
       },
       "expectedVraVersion": "1.1.12-r99041-b2",
       "buildEnvironment": {
@@ -175,7 +175,7 @@
         "generic and can't be used in il2cpp"
       ],
       "expectedPluginVersions": {
-        "Bloodcraft": "1.13.25"
+        "Bloodcraft": "1.13.26"
       },
       "expectedVraVersion": "1.1.12-r99041-b2",
       "buildEnvironment": {
@@ -290,7 +290,7 @@
         "generic and can't be used in il2cpp"
       ],
       "expectedPluginVersions": {
-        "Bloodcraft": "1.13.25"
+        "Bloodcraft": "1.13.26"
       },
       "expectedVraVersion": "1.1.12-r99041-b2",
       "buildEnvironment": {
