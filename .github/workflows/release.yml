@@ -116,7 +116,7 @@ jobs:
           )
 
           rm -rf "$publish_root"
-          mkdir -p "$publish_root"
+          mkdir -p "$publish_root/dist"
 
           for asset in "${required_release_assets[@]}"; do
             if [[ ! -f "./dist/$asset" ]]; then
@@ -124,7 +124,7 @@ jobs:
               exit 1
             fi
 
-            cp "./dist/$asset" "$publish_root/$asset"
+            cp "./dist/$asset" "$publish_root/dist/$asset"
           done
 
           for asset in "${required_checkout_assets[@]}"; do
@@ -140,7 +140,7 @@ jobs:
         shell: bash
         run: |
           bash "$RUNNER_TEMP/prerelease-notes.sh" \
-            --changelog ./dist/thunderstore-publish/CHANGELOG.md \
+            --changelog ./dist/thunderstore-publish/dist/CHANGELOG.md \
             --version "$PACKAGE_VERSION" \
             --tag "$RELEASE_TAG" \
             --check-only
@@ -149,7 +149,44 @@ jobs:
           PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
 
       - name: Install Thunderstore CLI (tcli)
-        run: dotnet tool install --global tcli
+        run: dotnet tool install --global tcli --version 0.2.4
+
+      - name: Build and verify Thunderstore package
+        shell: bash
+        run: |
+          cd ./dist/thunderstore-publish
+          tcli build --package-version "$PACKAGE_VERSION"
+
+          package_file="$PWD/build/zfolmt-Bloodcraft-$PACKAGE_VERSION.zip"
+          python3 - "$package_file" "$PACKAGE_VERSION" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          expected_files = {
+              "Bloodcraft.dll": Path("dist/Bloodcraft.dll"),
+              "CHANGELOG.md": Path("dist/CHANGELOG.md"),
+              "README.md": Path("README.md"),
+              "icon.png": Path("icon.png"),
+          }
+          with ZipFile(sys.argv[1]) as package:
+              entries = package.namelist()
+              expected_entries = set(expected_files) | {"manifest.json"}
+              if len(entries) != len(expected_entries) or set(entries) != expected_entries:
+                  raise SystemExit(f"Unexpected package contents: {entries}")
+              manifest = json.loads(package.read("manifest.json"))
+              if manifest.get("name") != "Bloodcraft" or manifest.get("version_number") != sys.argv[2]:
+                  raise SystemExit(f"Unexpected package name or version: {manifest}")
+              for name, source in expected_files.items():
+                  contents = package.read(name)
+                  if not contents or contents != source.read_bytes():
+                      raise SystemExit(f"Package file is empty or differs from staged release: {name}")
+              print(f"Verified package version {sys.argv[2]}: {', '.join(sorted(entries))}")
+          PY
+          echo "PACKAGE_FILE=$package_file" >> "$GITHUB_ENV"
+        env:
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
 
       - name: Publish build to Thunderstore
         shell: bash
@@ -166,7 +203,7 @@ jobs:
 
           echo "Publishing Thunderstore package version: $PACKAGE_VERSION"
           cd ./dist/thunderstore-publish
-          tcli publish --token "$THUNDERSTORE_KEY" --package-version "$PACKAGE_VERSION"
+          tcli publish --token "$THUNDERSTORE_KEY" --package-version "$PACKAGE_VERSION" --file "$PACKAGE_FILE"
         env:
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
           PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
