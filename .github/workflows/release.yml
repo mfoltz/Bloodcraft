@@ -203,7 +203,7 @@ jobs:
 
           echo "Publishing Thunderstore package version: $PACKAGE_VERSION"
           cd ./dist/thunderstore-publish
-          tcli publish --token "$THUNDERSTORE_KEY" --package-version "$PACKAGE_VERSION" --file "$PACKAGE_FILE"
+          tcli publish --token "$THUNDERSTORE_KEY" --file "$PACKAGE_FILE"
         env:
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
           PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
